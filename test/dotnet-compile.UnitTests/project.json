@@ -5,8 +5,7 @@
     "NETStandard.Library": "1.0.0-rc2-23811",
 
     "Microsoft.DotNet.Cli.Utils": {
-      "target": "project",
-      "type": "build"
+      "target": "project"
     },
 
     "dotnet": { "target": "project" },

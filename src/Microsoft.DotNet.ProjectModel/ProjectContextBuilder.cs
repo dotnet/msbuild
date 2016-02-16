@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.ProjectModel
             var libraries = new Dictionary<LibraryKey, LibraryDescription>();
             var projectResolver = new ProjectDependencyProvider(ProjectResolver);
 
-            var mainProject = projectResolver.GetDescription(TargetFramework, Project);
+            var mainProject = projectResolver.GetDescription(TargetFramework, Project, targetLibrary: null);
 
             // Add the main project
             libraries.Add(new LibraryKey(mainProject.Identity.Name), mainProject);
