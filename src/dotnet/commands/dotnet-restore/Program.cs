@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel;
@@ -36,15 +35,6 @@ namespace Microsoft.DotNet.Tools.Restore
             // "--verbosity" switch that goes BEFORE the command
             var quiet = args.Any(s => s.Equals("--quiet", StringComparison.OrdinalIgnoreCase));
             args = args.Where(s => !s.Equals("--quiet", StringComparison.OrdinalIgnoreCase)).ToArray();
-
-            // Until NuGet/Home#1941 is fixed, if no RIDs are specified, add our own.
-            if (!args.Any(s => s.Equals("--runtime", StringComparison.OrdinalIgnoreCase)))
-            {
-                args = Enumerable.Concat(
-                    args,
-                    PlatformServices.Default.Runtime.GetOverrideRestoreRuntimeIdentifiers().SelectMany(r => new [] { "--runtime", r })
-                    ).ToArray();
-            }
 
             app.OnExecute(() =>
             {
