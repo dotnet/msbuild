@@ -51,13 +51,18 @@ function CheckRequiredVariables
 
 function UploadFile($Blob, $Uploadfile)
 {
-    Write-Host "Uploading $Uploadfile to dotnet feed to.."
+    Write-Host "Uploading $Uploadfile to dotnet feed."
+
+    if([string]::IsNullOrEmpty($env:HOME))
+    {
+        $env:HOME=Get-Location
+    }
 
     # use azure cli to upload to blob storage. We cannot use Invoke-WebRequest to do this becuase azure has a max limit of 64mb that can be uploaded using REST
     #$statusCode = (Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $Uploadfile).StatusCode
     azure storage blob upload --quiet --container $env:STORAGE_CONTAINER --blob $Blob --blobtype block --connection-string "$env:CONNECTION_STRING" --file $Uploadfile | Out-Host
 
-    if($LastExitCode -eq 0)
+    if($?)
     {
         Write-Host "Successfully uploaded $Uploadfile to dotnet feed."
         return $true
@@ -140,10 +145,10 @@ function UploadVersionBadge($badgeFile)
     $fileName = "windows_$Configuration_$([System.IO.Path]::GetFileName($badgeFile))"
     
     Write-Host "Uploading the version badge to Latest"
-    UploadFile "$env:CHANNEL/Binaries/Latest/$filename" $badgeFile
+    UploadFile "$env:CHANNEL/Binaries/Latest/$fileName" $badgeFile
     
     Write-Host "Uploading the version badge to $env:DOTNET_CLI_VERSION"
-    UploadFile "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$filename" $badgeFile
+    UploadFile "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$fileName" $badgeFile
 
     return 0
 }
