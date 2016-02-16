@@ -75,6 +75,12 @@ fi
 [ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
 [ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
 
+# Make container names CI-specific if we're running in CI
+#  Jenkins
+[ ! -z "$BUILD_TAG" ] && DOTNET_BUILD_CONTAINER_NAME="$BUILD_TAG"
+#  VSO
+[ ! -z "$BUILD_BUILDID" ] && DOTNET_BUILD_CONTAINER_NAME="$BUILD_BUILDID"
+
 # Build the docker container (will be fast if it is already built)
 echo "Building Docker Container using Dockerfile: $DOCKERFILE"
 docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG $DOCKERFILE

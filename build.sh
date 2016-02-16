@@ -16,6 +16,14 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+# Some things depend on HOME and it may not be set. We should fix those things, but until then, we just patch a value in
+if [ -z "$HOME" ]; then
+    export HOME=$DIR/artifacts/home
+
+    [ ! -d "$HOME" ] || rm -Rf $HOME
+    mkdir -p $HOME
+fi
+
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
     case $lowerI in
