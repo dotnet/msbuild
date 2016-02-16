@@ -88,6 +88,13 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             return true;
         }
 
-        private string RenderDependency(LibraryRange arg) => $"{arg.Name} {VersionUtility.RenderVersion(arg.VersionRange)}";
+        private string RenderDependency(LibraryRange arg)
+        {
+            if (arg.Target == LibraryType.Project && arg.VersionRange == null)
+            {
+                return arg.Name;
+            }
+            return $"{arg.Name} {VersionUtility.RenderVersion(arg.VersionRange)}";
+        }
     }
 }

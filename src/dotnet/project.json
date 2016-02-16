@@ -24,7 +24,7 @@
         "Microsoft.CodeAnalysis.CSharp":  "1.2.0-beta1-20160202-02",
         "Microsoft.DiaSymReader.Native": "1.3.3",
 
-        "NuGet.CommandLine.XPlat": "3.4.0-beta-583",
+        "NuGet.CommandLine.XPlat": "3.4.0-beta-625",
         "System.CommandLine": "0.1.0-e160119-1",
 
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
@@ -47,10 +47,7 @@
             "version": "1.0.0-rc2-16453",
             "type": "build"
         },
-        "Microsoft.Extensions.Testing.Abstractions": {
-            "version": "1.0.0-*",
-            "type": "build"
-        },
+        "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
         "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23811",
         "Microsoft.NETCore.TestHost": "1.0.0-rc2-23811",
         "NETStandard.Library": "1.0.0-rc2-23811",
