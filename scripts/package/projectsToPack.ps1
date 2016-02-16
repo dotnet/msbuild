@@ -6,6 +6,7 @@ $ProjectsToPack = @(
     "Microsoft.DotNet.ProjectModel",
     "Microsoft.DotNet.ProjectModel.Loader",
     "Microsoft.DotNet.ProjectModel.Workspaces",
+    "Microsoft.DotNet.InternalAbstractions",
     "Microsoft.Extensions.DependencyModel",
     "Microsoft.Extensions.Testing.Abstractions"
 )
