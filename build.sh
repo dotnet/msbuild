@@ -16,6 +16,33 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+while [[ $# > 0 ]]; do
+    lowerI="$(echo $1 | awk '{print tolower($0)}')"
+    case $lowerI in
+        -c|--configuration)
+            export CONFIGURATION=$2
+            shift
+            ;;
+        --nopackage)
+            export DOTNET_BUILD_SKIP_PACKAGING=1
+            ;;
+        --docker)
+            export BUILD_IN_DOCKER=1
+            export DOCKER_IMAGENAME=$2
+            shift
+            ;;
+        "--buildindocker-centos")
+            export BUILD_IN_DOCKER=1
+            export DOCKER_IMAGENAME=centos
+            ;;
+        *)
+            break
+            ;;
+    esac
+
+    shift
+done
+
 # Check if we need to build in docker
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
     $DIR/scripts/dockerbuild.sh "$@"

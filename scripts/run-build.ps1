@@ -4,9 +4,19 @@
 #
 
 param(
-    [string]$Configuration="Debug")
+    [string]$Configuration="Debug",
+    [switch]$NoPackage)
 
 $env:CONFIGURATION = $Configuration;
+
+if($NoPackage)
+{
+    $env:DOTNET_BUILD_SKIP_PACKAGING=1
+}
+else
+{
+    $env:DOTNET_BUILD_SKIP_PACKAGING=0
+}
 
 # Load Branch Info
 cat "$PSScriptRoot\..\branchinfo.txt" | ForEach-Object {
@@ -50,6 +60,7 @@ if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
 
 # Run the builder
 Write-Host "Invoking Build Scripts..."
+Write-Host " Configuration: $env:CONFIGURATION"
 $env:DOTNET_HOME="$env:DOTNET_INSTALL_DIR\cli"
 & "$PSScriptRoot\dotnet-cli-build\bin\dotnet-cli-build.exe" @args
 if($LASTEXITCODE -ne 0) { throw "Build failed" }
