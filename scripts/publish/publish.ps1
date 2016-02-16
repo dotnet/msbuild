@@ -140,10 +140,10 @@ function UploadVersionBadge($badgeFile)
     $fileName = "windows_$Configuration_$([System.IO.Path]::GetFileName($badgeFile))"
     
     Write-Host "Uploading the version badge to Latest"
-    UploadFile "dev/Binaries/Latest/$filename" $badgeFile
+    UploadFile "$env:CHANNEL/Binaries/Latest/$filename" $badgeFile
     
     Write-Host "Uploading the version badge to $env:DOTNET_CLI_VERSION"
-    UploadFile "dev/Binaries/$env:DOTNET_CLI_VERSION/$filename" $badgeFile
+    UploadFile "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$filename" $badgeFile
 
     return 0
 }
