@@ -164,7 +164,12 @@ namespace Microsoft.DotNet.Cli.Build
             // Test the apps
             foreach (var dir in Directory.EnumerateDirectories(consumers))
             {
-                var result = dotnet.Exec("hello").WorkingDirectory(dir).CaptureStdOut().CaptureStdErr().Execute();
+                var result = dotnet.Exec("hello").WorkingDirectory(dir)
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute();
                 result.EnsureSuccessful();
                 if (!string.Equals("Hello", result.StdOut.Trim(), StringComparison.Ordinal))
                 {
