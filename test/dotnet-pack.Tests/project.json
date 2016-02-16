@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "NETStandard.Library": "1.0.0-rc2-23811",
+    
+    "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+
+    "xunit": "2.1.0",
+    "dotnet-test-xunit": "1.0.0-dev-48273-16"
+  },
+
+  "frameworks": {
+    "dnxcore50": {
+      "imports": "portable-net451+win8"
+    }
+  },
+
+  "content": [
+    "../../TestAssets/TestProjects/TestLibraryWithConfiguration/*"
+  ],
+
+  "testRunner": "xunit"
+}

@@ -36,7 +36,8 @@ namespace Microsoft.DotNet.Tools.Pack
 
                 var outputPath = Path.Combine(
                     _project.ProjectDirectory,
-                    Constants.BinDirectoryName);
+                    Constants.BinDirectoryName,
+                    _configuration);
 
                 return outputPath;
             }
