@@ -62,11 +62,13 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void TestNoDependencyFlag()
         {
-            var dependencies = new[] { "L11", "L12", "L21", "L22" };
+            var testInstance = TestAssetsManager.CreateTestInstance("TestProjectToProjectDependencies")
+                                                .WithLockFiles()
+                                                .WithBuildArtifacts();
+
+            TestProjectRoot = testInstance.TestRoot;
             
-            // first clean build; all projects required compilation
-            var result1 = BuildProject();
-            AssertRebuilt(result1, _projects);
+            var dependencies = new[] { "L11", "L12", "L21", "L22" };
 
             // modify the source code of a leaf dependency
             TouchSourcesOfProject("L22");

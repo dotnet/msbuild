@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         protected CommandResult BuildProject(bool noDependencies = false, bool noIncremental = false, bool expectBuildFailure = false)
         {
             var mainProjectFile = GetProjectFile(MainProject);
-            return BuildProject(mainProjectFile, noIncremental, expectBuildFailure);
+            return BuildProject(mainProjectFile, noDependencies, noIncremental, expectBuildFailure);
         }
 
         protected CommandResult BuildProject(string projectFile, bool noDependencies = false, bool noIncremental = false, bool expectBuildFailure = false)

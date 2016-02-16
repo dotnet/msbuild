@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         public GivenACompilationDriverController()
         {
             _projectJson =
-                Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestApp", "project.json");
+                Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestAppWithLibrary", "TestApp", "project.json");
             _managedCompilerMock = new Mock<ICompiler>();
             _managedCompilerMock.Setup(c => c
                 .Compile(It.IsAny<ProjectContext>(), It.IsAny<CompilerCommandApp>()))

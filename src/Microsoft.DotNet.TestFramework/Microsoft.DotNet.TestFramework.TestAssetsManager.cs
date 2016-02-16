@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.TestFramework
             get; private set;
         }
 
-        public TestAssetsManager(string assetsRoot, bool skipRestore = true, bool skipBuild = true)
+        public TestAssetsManager(string assetsRoot, bool doRestore = false, bool doBuild = false)
         {
             if (!Directory.Exists(assetsRoot))
             {
@@ -27,12 +27,12 @@ namespace Microsoft.DotNet.TestFramework
 
             AssetsRoot = assetsRoot;
 
-            if (!skipRestore)
+            if (doRestore)
             {
                 Restore();
             }
 
-            if (!skipBuild)
+            if (doBuild)
             {
                 Build();
             }
