@@ -1019,8 +1019,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(directory);
                 Directory.CreateDirectory(exeDirectory);
 
-                File.Copy(RunnerUtilities.PathToMsBuildExe, exePath);
-
+                CopyMSBuildExeToPath(exeDirectory);
                 File.WriteAllText(mainRspPath, "/p:A=0");
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
@@ -1042,9 +1041,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(rspPath);
                 FileUtilities.DeleteWithoutTrailingBackslash(directory);
 
-                File.Delete(exePath);
-                File.Delete(mainRspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(exeDirectory);
+                FileUtilities.DeleteDirectoryNoThrow(exeDirectory, recursive:false);
             }
         }
 
@@ -1064,7 +1061,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(directory);
 
-                File.Copy(RunnerUtilities.PathToMsBuildExe, exePath);
+                CopyMSBuildExeToPath(directory);
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);
@@ -1081,10 +1078,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                File.Delete(exePath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
+                FileUtilities.DeleteDirectoryNoThrow(directory, recursive:false);
             }
         }
 
@@ -1848,5 +1842,23 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(0, string.Compare(distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters, "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
         }
         #endregion
+
+        private void CopyMSBuildExeToPath(string destPath)
+        {
+            File.Copy(RunnerUtilities.PathToMsBuildExe, Path.Combine(destPath, "MSBuild.exe"));
+
+            var msbuildExeDir = Path.GetDirectoryName(RunnerUtilities.PathToMsBuildExe);
+            var deps = new string[] {
+                    "Microsoft.Build.dll",
+                    "Microsoft.Build.Framework.dll",
+                    "Microsoft.Build.Tasks.Core.dll",
+                    "Microsoft.Build.Utilities.Core.dll",
+                    "System.Threading.Tasks.Dataflow.dll",
+                    "Microsoft.Common.tasks"
+            };
+
+            foreach (var dep in deps)
+                File.Copy(Path.Combine(msbuildExeDir, dep), Path.Combine(destPath, dep));
+        }
     }
 }
