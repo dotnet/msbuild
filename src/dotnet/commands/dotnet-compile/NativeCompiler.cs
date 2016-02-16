@@ -25,9 +25,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             // Create the library exporter
             var exporter = context.CreateExporter(args.ConfigValue);
- 
-            // Gather exports for the project
-            var exports = exporter.GetAllExports();
+            var exports = exporter.GetDependencies();
  
             // Runtime assemblies.
             // TODO: native assets/resources.
