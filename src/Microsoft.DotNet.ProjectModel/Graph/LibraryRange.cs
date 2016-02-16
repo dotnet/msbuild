@@ -104,6 +104,48 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             return sb.ToString();
         }
 
+        public string ToLockFileDependencyGroupString()
+        {
+            var sb = new StringBuilder();
+            sb.Append(Name);
+
+            if (VersionRange != null)
+            {
+                if (VersionRange.HasLowerBound)
+                {
+                    sb.Append(" ");
+
+                    if (VersionRange.IsMinInclusive)
+                    {
+                        sb.Append(">= ");
+                    }
+                    else
+                    {
+                        sb.Append("> ");
+                    }
+
+                    if (VersionRange.IsFloating)
+                    {
+                        sb.Append(VersionRange.Float.ToString());
+                    }
+                    else
+                    {
+                        sb.Append(VersionRange.MinVersion.ToNormalizedString());
+                    }
+                }
+
+                if (VersionRange.HasUpperBound)
+                {
+                    sb.Append(" ");
+
+                    sb.Append(VersionRange.IsMaxInclusive ? "<= " : "< ");
+                    sb.Append(VersionRange.MaxVersion.ToNormalizedString());
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public bool HasFlag(LibraryDependencyTypeFlag flag)
         {
             return Type.HasFlag(flag);
