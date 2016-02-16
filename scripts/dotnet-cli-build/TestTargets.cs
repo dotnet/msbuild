@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             // Need to load up the VS Vars
             var dotnet = DotNetCli.Stage2;
-            var vsvars = LoadVsVars();
+            var vsvars = LoadVsVars(c);
 
             // Copy the test projects
             var testProjectsDir = Path.Combine(Dirs.TestOutput, "TestProjects");
@@ -197,12 +197,14 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        private static Dictionary<string, string> LoadVsVars()
+        private static Dictionary<string, string> LoadVsVars(BuildTargetContext c)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return new Dictionary<string, string>();
             }
+            
+            c.Info("Start Collecting Visual Studio Environment Variables");
 
             var vsvarsPath = Path.GetFullPath(Path.Combine(Environment.GetEnvironmentVariable("VS140COMNTOOLS"), "..", "..", "VC"));
 
@@ -228,13 +230,20 @@ set");
                     File.Delete(temp);
                 }
             }
+            
             result.EnsureSuccessful();
+            
             var vars = new Dictionary<string, string>();
             foreach (var line in result.StdOut.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
             {
+                c.Info($"Adding variable '{line}'");
+                
                 var splat = line.Split(new[] { '=' }, 2);
                 vars[splat[0]] = splat[1];
             }
+            
+            c.Info("Finish Collecting Visual Studio Environment Variables");
+            
             return vars;
         }
     }
