@@ -169,6 +169,20 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             TestExecutable(OutputDirectory, publishCommand.GetOutputExecutable(), s_expectedOutput);    
         }
 
+        [Fact]
+        public void TestDotnetHelp()
+        {
+            var helpCommand = new HelpCommand();
+            helpCommand.Execute().Should().Pass();
+        }
+
+        [Fact]
+        public void TestDotnetHelpBuild()
+        {
+            var helpCommand = new HelpCommand();
+            helpCommand.Execute("build").Should().Pass();
+        }
+
         private void TestInstanceSetup()
         {
             var root = Temp.CreateDirectory();
