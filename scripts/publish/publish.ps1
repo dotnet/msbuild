@@ -108,7 +108,7 @@ function UploadBinaries($zipFile)
     }
 
     # update the version file
-    $versionFile = Convert-Path $PSScriptRoot\..\..\artifacts\win7-x64\stage2\.version
+    $versionFile = Convert-Path $PSScriptRoot\..\..\artifacts\$env:RID\stage2\.version
     $versionBlob = "$env:CHANNEL/dnvm/latest.win.version"
 
     if(-Not (UploadFile $versionBlob $versionFile))
