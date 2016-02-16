@@ -192,7 +192,7 @@ upload_installers_to_blob_storage(){
 
 upload_version_badge(){
     local badgefile=$1
-    local filename="$OSNAME_$CONFIGURATION_$(basename $badgefile)"
+    local filename="${OSNAME}_${CONFIGURATION}_$(basename $badgefile)"
     echo "Uploading the version badge to Latest"
     upload_file_to_blob_storage_azure_cli "$CHANNEL/Binaries/Latest/$filename" $badgefile
     
