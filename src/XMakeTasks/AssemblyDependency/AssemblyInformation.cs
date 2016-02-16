@@ -260,7 +260,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private FrameworkName GetFrameworkName()
         {
-#if FEATURE_ASSEMBLY_LOADFROM
+// Disabling use of System.Reflection in case of MONO, because
+// Assembly.GetCustomAttributes* for an attribute which belongs
+// to an assembly that mono cannot find, causes a crash!
+// Instead, opt for using PEReader and friends to get that info
+#if FEATURE_ASSEMBLY_LOADFROM && !MONO
             if (!NativeMethodsShared.IsWindows)
             {
                 if (String.Equals(Environment.GetEnvironmentVariable("MONO29679"), "1", StringComparison.OrdinalIgnoreCase))
@@ -365,7 +369,9 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-#if !FEATURE_ASSEMBLY_LOADFROM
+// Enabling this for MONO, because it's required by GetFrameworkName.
+// More details are in the comment for that method
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
         //  This method copied from DNX source: https://github.com/aspnet/dnx/blob/e0726f769aead073af2d8cd9db47b89e1745d574/src/Microsoft.Dnx.Tooling/Utils/LockFileUtils.cs#L385
         //  System.Reflection.Metadata 1.1 is expected to have an API that helps with this.
         /// <summary>
