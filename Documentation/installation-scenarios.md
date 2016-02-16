@@ -1,4 +1,5 @@
 # General principles that apply to the installs
+- This doc is represnting ideal state and not the current state
 - Only HTTPS links are allowed in any online property 
 - All installers are signed properly 
 - All user facing materials point to the getting started page
@@ -13,21 +14,21 @@ The page can be found on https://aka.ms/dotnetcoregs.
 
 * Installation targets: native installers (bits) & "curl&run"
 * Source branch: rel/1.0.0
-* Links to builds: LKG ?? latest green build of rel/1.0.0 (build status)
-* Debian feed: Development
+* Debian feed: (now: Development; future: Production)
 * Installation script links: Latest from rel/1.0.0
+* Getting started page can never point to unstable builds
+* URLs point to: latest green build of rel/1.0.0;
 
-This is the main curated first-run experience for the dotnet CLI. The intent of the page is to help users "kick the tires" quickly and become familiar with what the platform offers. This should be the most stable and curated experience we can offer. Getting started page can never point to unstable builds. 
+This is the main curated first-run experience for the dotnet CLI. The intent of the page is to help users "kick the tires" quickly and become familiar with what the platform offers. This should be the most stable and curated experience we can offer. 
 
 ## Repo Landing Page
 The repo landing page can be found on: https://github.com/dotnet/cli/readme.md
-* Installation targets: native installers & "curl&run" (should be obscured by getting started link: i.e. on the bottom of the page)
 * Source branch: rel/1.0.0
-* URLs point to: latest green build of rel/1.0.0;
-
-Download links on the landing page should be decreased in importance. First thing for "you want to get started" section should link to the getting started page on the marketing site. 
-
-The Repo Landing Page should be used primarily by contributors to the CLI. There should be a separate page that has instructions on how to install both the latest stable as well as latest development with proper warnings around it. The separate page is to really avoid the situation from people accidentally installing unstable bits (since SEO can drop them in the repo first). 
+* Links to builds: LKG ?? latest green build of rel/1.0.0 (build status)
+* The Repo Landing Page should be used primarily by contributors to the CLI
+* Only links to "how to install" but no instructions
+* First thing for "you want to get started" section should link to the getting started page on the marketing site
+* Separate page that has instructions on how to install both the latest stable as well as latest development with proper warnings around it. The separate page is to really avoid the situation from people accidentally installing unstable bits (since SEO can drop them in the repo first). 
 
 # Installation modes
 
@@ -59,8 +60,11 @@ This approach will be used for the below scenarios:
 
 **TODO:** add actual commands for both Unix and Windows. 
 
-## Docker 
-Docker images are used either as a base or as small development envs for trying out the bits. We should have a Docker image with stable bits done. 
+## Docker
+* Link to docker hub page
+* Docker images are used either as a base or as small development envs for trying out the bits
+* Docker image should have stable bits
+* Should point to the "stable" tag
 
 ## Acquiring through other products (VS, VS Code)
 Visual Studio will chain the native installer. The version we give them is from the rel/1.0.0 branch. 
