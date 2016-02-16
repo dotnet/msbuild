@@ -116,22 +116,12 @@ namespace Microsoft.DotNet.Tools.Compiler
                 IsCppModeValue = _cppModeOption.HasValue();
                 CppCompilerFlagsValue = _cppCompilerFlagsOption.Value();
 
-                var rids = new List<string>();
-                if (string.IsNullOrEmpty(RuntimeValue))
-                {
-                    rids.AddRange(PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
-                }
-                else
-                {
-                    rids.Add(RuntimeValue);
-                }
-
                 IEnumerable<ProjectContext> contexts;
 
                 if (_frameworkOption.HasValue())
                 {
                     contexts = _frameworkOption.Values
-                        .Select(f => ProjectContext.Create(ProjectPathValue, NuGetFramework.Parse(f), rids));
+                        .Select(f => ProjectContext.Create(ProjectPathValue, NuGetFramework.Parse(f)));
                 }
                 else
                 {
@@ -141,7 +131,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     }
                     else
                     {
-                        contexts = ProjectContext.CreateContextForEachFramework(ProjectPathValue, settings: null, runtimeIdentifiers: rids);
+                        contexts = ProjectContext.CreateContextForEachFramework(ProjectPathValue, settings: null);
                     }
                 }
 
@@ -168,6 +158,19 @@ namespace Microsoft.DotNet.Tools.Compiler
             CommandOption option;
 
             return baseClassOptions.TryGetValue(optionTemplate, out option) && option.HasValue();
+        }
+
+        public IEnumerable<string> GetRuntimes()
+        {
+            var rids = new List<string>();
+            if (string.IsNullOrEmpty(RuntimeValue))
+            {
+                return PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
+            }
+            else
+            {
+                return new [] { RuntimeValue };
+            }
         }
     }
 }

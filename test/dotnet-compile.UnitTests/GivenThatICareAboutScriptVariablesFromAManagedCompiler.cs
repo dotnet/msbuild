@@ -68,12 +68,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         }
 
         [Fact]
-        public void It_does_not_pass_a_RuntimeOutputDir_variable_to_the_pre_compile_scripts_if_rid_is_not_set_in()
-        {
-            _fixture.PreCompileScriptVariables.Should().NotContainKey("compile:RuntimeOutputDir");
-        }
-
-        [Fact]
         public void It_passes_a_RuntimeOutputDir_variable_to_the_pre_compile_scripts_if_rid_is_set_in_the_ProjectContext()
         {
             var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
@@ -130,12 +124,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         {
             _fixture.PostCompileScriptVariables.Should().ContainKey("compile:CompilerExitCode");
             _fixture.PostCompileScriptVariables["compile:CompilerExitCode"].Should().Be("0");
-        }
-
-        [Fact]
-        public void It_does_not_pass_a_RuntimeOutputDir_variable_to_the_post_compile_scripts_if_rid_is_not_set_in_the_ProjectContext()
-        {
-            _fixture.PostCompileScriptVariables.Should().NotContainKey("compile:RuntimeOutputDir");
         }
 
         [Fact]

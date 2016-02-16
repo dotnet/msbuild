@@ -143,11 +143,14 @@ namespace Microsoft.DotNet.Tools.Compiler
                 { "compile:ResponseFile", rsp }
             };
 
-            if (!string.IsNullOrEmpty(context.RuntimeIdentifier))
+            if (context.ProjectFile.HasRuntimeOutput(args.ConfigValue))
             {
+                var runtimeContext = context.CreateRuntimeContext(args.GetRuntimes());
+                var runtimeOutputPath = runtimeContext.GetOutputPaths(args.ConfigValue, args.BuildBasePathValue, args.OutputValue);
+
                 contextVariables.Add(
                     "compile:RuntimeOutputDir",
-                    outputPaths.RuntimeOutputPath.TrimEnd('\\', '/'));
+                    runtimeOutputPath.RuntimeOutputPath.TrimEnd('\\', '/'));
             }
 
             _scriptRunner.RunScripts(context, ScriptNames.PreCompile, contextVariables);
