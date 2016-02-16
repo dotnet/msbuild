@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-compile.Tests",
             "dotnet-compile.UnitTests",
             "dotnet-build.Tests",
+            "dotnet-pack.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "ArgumentForwardingTests"
