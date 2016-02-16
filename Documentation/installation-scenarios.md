@@ -2,7 +2,7 @@
 - Only HTTPS links are allowed in any online property 
 - All installers are signed properly 
 - All user facing materials point to the getting started page
-- The user needs extra effort to install the "bleeding edge" bits
+- The user needs extra effort to install the "bleeding edge" bits (nightly build)
 
 # Landing Pages
 [Getting Started Page](https://aka.ms/dotnetcoregs) - for customers
@@ -11,9 +11,9 @@
 ## Getting Started Page
 The page can be found on https://aka.ms/dotnetcoregs. 
 
-* Installation targets: native installers & "curl&run"
+* Installation targets: native installers (bits) & "curl&run"
 * Source branch: rel/1.0.0
-* Linked builds: LKG ?? latest green build of rel/1.0.0
+* Links to builds: LKG ?? latest green build of rel/1.0.0 (build status)
 * Debian feed: Development
 * Installation script links: Latest from rel/1.0.0
 
