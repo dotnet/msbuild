@@ -7,8 +7,7 @@
     "Microsoft.DotNet.TestFramework": "1.0.0-*",
     "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
     "Microsoft.DotNet.Cli.Utils": {
-      "target": "project",
-      "type": "build"
+      "target": "project"
     },
 
     "xunit": "2.1.0",

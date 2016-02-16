@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         private readonly string[] appdeplibs = 
             {
-                "libSystem.Native.a"
+                "System.Native.a"
             };
 
         public MacRyuJitCompileStep(NativeCompileSettings config)

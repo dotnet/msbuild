@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 if (group.FrameworkName == null)
                 {
                     actualDependencies = project.Dependencies
-                        .Select(RenderDependency)
+                        .Select(d => d.ToLockFileDependencyGroupString())
                         .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
                 }
                 else
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                     }
 
                     actualDependencies = framework.Dependencies
-                        .Select(RenderDependency)
+                        .Select(d => d.ToLockFileDependencyGroupString())
                         .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
                 }
 
@@ -87,7 +87,5 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             message = null;
             return true;
         }
-
-        private string RenderDependency(LibraryRange arg) => $"{arg.Name} {VersionUtility.RenderVersion(arg.VersionRange)}";
     }
 }

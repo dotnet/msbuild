@@ -51,12 +51,19 @@ namespace Microsoft.DotNet.Cli.Utils
     
             Console.ForegroundColor = (ConsoleColor)((int)Console.ForegroundColor ^ 0x08);
         }
-    
+
         public void WriteLine(string message)
+        {
+            Write(message);
+            Writer.WriteLine();
+        }
+
+
+        public void Write(string message)
         {
             if (!_useConsoleColor)
             {
-                Writer.WriteLine(message);
+                Writer.Write(message);
                 return;
             }
     
@@ -137,7 +144,6 @@ namespace Microsoft.DotNet.Cli.Utils
                     escapeScan = endIndex + 1;
                 }
             }
-            Writer.WriteLine();
         }
     }
 }

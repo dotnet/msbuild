@@ -24,7 +24,8 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string DynamicLibSuffix = CurrentPlatform == Platform.Windows ? ".dll" :
                                                          CurrentPlatform == Platform.Darwin ? ".dylib" : ".so";
 
-        public static readonly string LibCoreClrName = (CurrentPlatform == Platform.Windows ? "coreclr" : "libcoreclr") + DynamicLibSuffix;
+        public static readonly string LibCoreClrFileName = (CurrentPlatform == Platform.Windows ? "coreclr" : "libcoreclr");
+        public static readonly string LibCoreClrName = LibCoreClrFileName + DynamicLibSuffix;
 
         public static readonly string RuntimeIdentifier = CurrentPlatform == Platform.Windows ? "win7-x64" :
                                                           CurrentPlatform == Platform.Darwin ? "osx.10.10-x64" : "ubuntu.14.04-x64";

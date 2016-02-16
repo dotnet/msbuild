@@ -1,13 +1,13 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Build.Framework;
 
 using static Microsoft.DotNet.Cli.Build.FS;
-using static Microsoft.DotNet.Cli.Build.Utils;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using static Microsoft.DotNet.Cli.Build.Utils;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var relativePath in TestPackageProjects)
             {
                 var fullPath = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages", relativePath.Replace('/', Path.DirectorySeparatorChar));
-                c.Info("Packing: {fullPath}");
+                c.Info($"Packing: {fullPath}");
                 dotnet.Pack("--output", Dirs.TestPackages)
                     .WorkingDirectory(fullPath)
                     .Execute()
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Cli.Build
             var dotnet = DotNetCli.Stage2;
             foreach (var testProject in TestProjects)
             {
-                c.Info("Building tests: {project}");
+                c.Info($"Building tests: {testProject}");
                 dotnet.Build()
                     .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test", testProject))
                     .Execute()
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             // Need to load up the VS Vars
             var dotnet = DotNetCli.Stage2;
-            var vsvars = LoadVsVars();
+            var vsvars = LoadVsVars(c);
 
             // Copy the test projects
             var testProjectsDir = Path.Combine(Dirs.TestOutput, "TestProjects");
@@ -155,17 +155,17 @@ namespace Microsoft.DotNet.Cli.Build
             var consumers = Path.Combine(c.BuildContext.BuildDirectory, "test", "PackagedCommands", "Consumers");
 
             // Compile the consumer apps
-            foreach(var dir in Directory.EnumerateDirectories(consumers))
+            foreach (var dir in Directory.EnumerateDirectories(consumers))
             {
                 dotnet.Build().WorkingDirectory(dir).Execute().EnsureSuccessful();
             }
 
             // Test the apps
-            foreach(var dir in Directory.EnumerateDirectories(consumers))
+            foreach (var dir in Directory.EnumerateDirectories(consumers))
             {
                 var result = dotnet.Exec("hello").WorkingDirectory(dir).CaptureStdOut().CaptureStdErr().Execute();
                 result.EnsureSuccessful();
-                if(!string.Equals("Hello", result.StdOut.Trim(), StringComparison.Ordinal))
+                if (!string.Equals("Hello", result.StdOut.Trim(), StringComparison.Ordinal))
                 {
                     var testName = Path.GetFileName(dir);
                     c.Error($"Packaged Commands Test '{testName}' failed");
@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult ValidateDependencies(BuildTargetContext c)
         {
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
             var dotnet = DotNetCli.Stage2;
 
             c.Info("Publishing MultiProjectValidator");
@@ -197,12 +197,14 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        private static Dictionary<string, string> LoadVsVars()
+        private static Dictionary<string, string> LoadVsVars(BuildTargetContext c)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return new Dictionary<string, string>();
             }
+            
+            c.Verbose("Start Collecting Visual Studio Environment Variables");
 
             var vsvarsPath = Path.GetFullPath(Path.Combine(Environment.GetEnvironmentVariable("VS140COMNTOOLS"), "..", "..", "VC"));
 
@@ -228,13 +230,27 @@ set");
                     File.Delete(temp);
                 }
             }
+            
             result.EnsureSuccessful();
+            
             var vars = new Dictionary<string, string>();
             foreach (var line in result.StdOut.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var splat = line.Split(new[] { '=' }, 2);
-                vars[splat[0]] = splat[1];
+                
+                if (splat.Length == 2)
+                {
+                    c.Verbose($"Adding variable '{line}'");
+                    vars[splat[0]] = splat[1];
+                }
+                else
+                {
+                    c.Info($"Skipping VS Env Variable. Unknown format: '{line}'");
+                }
             }
+            
+            c.Verbose("Finish Collecting Visual Studio Environment Variables");
+            
             return vars;
         }
     }

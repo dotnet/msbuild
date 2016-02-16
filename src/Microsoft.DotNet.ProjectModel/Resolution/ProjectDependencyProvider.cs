@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var project = _resolveProject(Path.GetDirectoryName(path));
             if (project != null)
             {
-                return GetDescription(targetLibrary.TargetFramework, project);
+                return GetDescription(targetLibrary.TargetFramework, project, targetLibrary);
             }
             else
             {
@@ -40,30 +40,40 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             return GetDescription(name, path, targetLibrary, projectCacheResolver: null);
         }
 
-        public ProjectDescription GetDescription(NuGetFramework targetFramework, Project project)
+        public ProjectDescription GetDescription(NuGetFramework targetFramework, Project project, LockFileTargetLibrary targetLibrary)
         {
             // This never returns null
             var targetFrameworkInfo = project.GetTargetFramework(targetFramework);
-            var targetFrameworkDependencies = new List<LibraryRange>(targetFrameworkInfo.Dependencies);
+            var dependencies = new List<LibraryRange>(targetFrameworkInfo.Dependencies);
 
             if (targetFramework != null && targetFramework.IsDesktop())
             {
-                targetFrameworkDependencies.Add(new LibraryRange("mscorlib", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                dependencies.Add(new LibraryRange("mscorlib", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
 
-                targetFrameworkDependencies.Add(new LibraryRange("System", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                dependencies.Add(new LibraryRange("System", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
 
                 if (targetFramework.Version >= new Version(3, 5))
                 {
-                    targetFrameworkDependencies.Add(new LibraryRange("System.Core", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                    dependencies.Add(new LibraryRange("System.Core", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
 
                     if (targetFramework.Version >= new Version(4, 0))
                     {
-                        targetFrameworkDependencies.Add(new LibraryRange("Microsoft.CSharp", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                        dependencies.Add(new LibraryRange("Microsoft.CSharp", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
                     }
                 }
             }
 
-            var dependencies = project.Dependencies.Concat(targetFrameworkDependencies).ToList();
+            // Add all of the project's dependencies
+            dependencies.AddRange(project.Dependencies);
+            
+            if (targetLibrary != null)
+            {
+                // The lock file entry might have a filtered set of dependencies
+                var lockFileDependencies = targetLibrary.Dependencies.ToDictionary(d => d.Id);
+
+                // Remove all non-framework dependencies that don't appear in the lock file entry
+                dependencies.RemoveAll(m => !lockFileDependencies.ContainsKey(m.Name) && m.Target != LibraryType.ReferenceAssembly);
+            }
 
             // Mark the library as unresolved if there were specified frameworks
             // and none of them resolved

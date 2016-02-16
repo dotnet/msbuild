@@ -81,7 +81,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         }
 
         [Fact]
-        [ActiveIssue(712, PlatformID.Windows | PlatformID.OSX | PlatformID.Linux)]
         public void TestDotnetBuildNativeRyuJit()
         {
             if(IsCentOS())
@@ -168,6 +167,20 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             publishCommand.Execute().Should().Pass();
 
             TestExecutable(OutputDirectory, publishCommand.GetOutputExecutable(), s_expectedOutput);    
+        }
+
+        [Fact]
+        public void TestDotnetHelp()
+        {
+            var helpCommand = new HelpCommand();
+            helpCommand.Execute().Should().Pass();
+        }
+
+        [Fact]
+        public void TestDotnetHelpBuild()
+        {
+            var helpCommand = new HelpCommand();
+            helpCommand.Execute("build").Should().Pass();
         }
 
         private void TestInstanceSetup()

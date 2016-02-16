@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return this;
         }
 
-        public ICommand ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false)
+        public ICommand ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false, bool ansiPassThrough = true)
         {
             ThrowIfRunning();
             if (!onlyIfVerbose || CommandContext.IsVerbose())
@@ -168,6 +168,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (to == null)
                 {
                     _stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
+                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {
@@ -177,7 +178,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return this;
         }
 
-        public ICommand ForwardStdErr(TextWriter to = null, bool onlyIfVerbose = false)
+        public ICommand ForwardStdErr(TextWriter to = null, bool onlyIfVerbose = false, bool ansiPassThrough = true)
         {
             ThrowIfRunning();
             if (!onlyIfVerbose || CommandContext.IsVerbose())
@@ -185,6 +186,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (to == null)
                 {
                     _stdErr.ForwardTo(writeLine: Reporter.Error.WriteLine);
+                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {

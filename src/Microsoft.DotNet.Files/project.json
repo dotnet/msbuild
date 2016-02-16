@@ -1,31 +1,20 @@
 {
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "keyFile": "../../tools/Key.snk"
-  },
-  "description": "Abstraction to interact with the file system and file paths.",
-  "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23811",
-    "System.Linq.Expressions": "4.0.11-rc2-23811",
-
-    "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15996",
-
-    "Microsoft.DotNet.Cli.Utils": {
-      "type": "build",
-      "version": "1.0.0-*"
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "keyFile": "../../tools/Key.snk"
     },
-
-    "Microsoft.DotNet.ProjectModel": {
-      "type": "build",
-      "version": "1.0.0-*"
-    }
-  },
-
-  "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net45+win8"
-    }
-  },
-  "scripts": {
-  }
+    "description": "Abstraction to interact with the file system and file paths.",
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23811",
+        "System.Linq.Expressions": "4.0.11-rc2-23811",
+        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15996",
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*"
+    },
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net45+win8"
+        }
+    },
+    "scripts": {}
 }

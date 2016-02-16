@@ -1,9 +1,9 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.Extensions.PlatformAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Set up the environment variables previously defined by common.sh/ps1
             // This is overkill, but I want to cover all the variables used in all OSes (including where some have the same names)
-            var buildVersion = (BuildVersion)c.BuildContext["BuildVersion"];
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             var env = new Dictionary<string, string>()
             {
                 { "RID", PlatformServices.Default.Runtime.GetRuntimeIdentifier() },

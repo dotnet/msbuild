@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         private readonly string[] _appdeplibs = 
             {
-                "libSystem.Native.a"
+                "System.Native.a"
             };
 
         
