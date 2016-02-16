@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             allArgs.AddRange(analyzers.Select(a => $"-a:\"{a.Trim('"')}\""));
             allArgs.AddRange(references.Select(r => $"-r:\"{r.Trim('"')}\""));
-            allArgs.AddRange(resources.Select(resource => $"-resource:{resource.Trim('"')}"));
+            allArgs.AddRange(resources.Select(resource => $"-resource:{resource}"));
             allArgs.AddRange(sources.Select(s => $"\"{s.Trim('"')}\""));
 
             var rsp = Path.Combine(tempOutputStrippedSpaces, "dotnet-compile-csc.rsp");

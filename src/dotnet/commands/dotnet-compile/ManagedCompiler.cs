@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     writer.Write(dependencyContext, fileStream);
                 }
 
-                compilerArgs.Add($"--resource:\"{depsJsonFile},{context.ProjectFile.Name}.deps.json\"");
+                compilerArgs.Add($"--resource:\"{depsJsonFile}\",{context.ProjectFile.Name}.deps.json");
             }
 
             if (!AddNonCultureResources(context.ProjectFile, compilerArgs, intermediateOutputPath))

@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Resgen.Tests
         }
 
         [Fact]
-        public void Test_Build_Project_with_Resources_with_Space_in_Path()
+        public void Test_Build_Project_with_Resources_with_Space_in_Path_Should_Succeed()
         {
             var spaceBufferDirectory = _root.CreateDirectory("space directory");
             var testAppDir = spaceBufferDirectory.CreateDirectory("TestProjectWithResource");
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Resgen.Tests
             var testProject = GetProjectPath(testAppDir);
             var buildCommand = new BuildCommand(testProject);
 
-            var result = buildCommand.Execute().Should().Pass();
+            buildCommand.Execute().Should().Pass();
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
