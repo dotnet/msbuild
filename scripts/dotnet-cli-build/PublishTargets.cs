@@ -14,6 +14,12 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init))]
         public static BuildTargetResult Publish(BuildTargetContext c)
         {
+            if (string.Equals(Environment.GetEnvironmentVariable("DOTNET_BUILD_SKIP_PACKAGING"), "1", StringComparison.Ordinal))
+            {
+                c.Info("Skipping packaging because DOTNET_BUILD_SKIP_PACKAGING is set");
+                return c.Success();
+            }
+
             // NOTE(anurse): Currently, this just invokes the remaining build scripts as-is. We should port those to C# as well, but
             // I want to get the merged in.
 
