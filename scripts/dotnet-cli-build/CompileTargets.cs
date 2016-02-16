@@ -31,11 +31,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static readonly string[] FilesToClean = new[]
         {
-            "README.md",
-            "Microsoft.DotNet.Runtime.exe",
-            "Microsoft.DotNet.Runtime.dll",
-            "Microsoft.DotNet.Runtime.deps",
-            "Microsoft.DotNet.Runtime.pdb"
+            "README.md"
         };
 
         public static readonly string[] ProjectsToPack = new[]
@@ -161,10 +157,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             var configuration = c.BuildContext.Get<string>("Configuration");
             var binDir = Path.Combine(outputDir, "bin");
-            var runtimeOutputDir = Path.Combine(outputDir, "runtime", "coreclr");
 
             Mkdirp(binDir);
-            Mkdirp(runtimeOutputDir);
 
             foreach (var project in ProjectsToPublish)
             {
@@ -179,30 +173,7 @@ namespace Microsoft.DotNet.Cli.Build
                     .EnsureSuccessful();
             }
 
-            // Publish the runtime
-            dotnet.Publish(
-                "--output",
-                runtimeOutputDir,
-                "--configuration",
-                configuration,
-                Path.Combine(c.BuildContext.BuildDirectory, "src", "Microsoft.DotNet.Runtime"))
-                .Execute()
-                .EnsureSuccessful();
-
-            // Clean bogus files
-            foreach (var fileToClean in FilesToClean)
-            {
-                var pathToClean = Path.Combine(runtimeOutputDir, fileToClean);
-                if (File.Exists(pathToClean))
-                {
-                    File.Delete(pathToClean);
-                }
-            }
-
             FixModeFlags(outputDir);
-
-            // Copy the whole runtime local to the tools
-            CopyRecursive(runtimeOutputDir, binDir);
 
             // Copy corehost
             File.Copy(Path.Combine(Dirs.Corehost, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), overwrite: true);
