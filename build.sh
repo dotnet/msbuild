@@ -31,10 +31,6 @@ while [[ $# > 0 ]]; do
             export DOCKER_IMAGENAME=$2
             shift
             ;;
-        "--buildindocker-centos")
-            export BUILD_IN_DOCKER=1
-            export DOCKER_IMAGENAME=centos
-            ;;
         *)
             break
             ;;
