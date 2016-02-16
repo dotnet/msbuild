@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Microsoft.DotNet.Cli.Build
+﻿namespace Microsoft.DotNet.Cli.Build
 {
     public class BuildVersion
     {
@@ -14,8 +9,8 @@ namespace Microsoft.DotNet.Cli.Build
         public string CommitCountString => CommitCount.ToString("000000");
         public string ReleaseSuffix { get; set; }
 
-        public string SimpleVersion => $"{Major}.{Minor}.{Patch}.{CommitCount}";
-        public string VersionSuffix => $"{ReleaseSuffix}-{CommitCount}";
+        public string SimpleVersion => $"{Major}.{Minor}.{Patch}.{CommitCountString}";
+        public string VersionSuffix => $"{ReleaseSuffix}-{CommitCountString}";
         public string NuGetVersion => $"{Major}.{Minor}.{Patch}-{VersionSuffix}";
 
         public string GenerateMsiVersion()
