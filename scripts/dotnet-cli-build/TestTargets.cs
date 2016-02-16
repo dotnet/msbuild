@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Cli.Build
                 return new Dictionary<string, string>();
             }
             
-            c.Info("Start Collecting Visual Studio Environment Variables");
+            c.Verbose("Start Collecting Visual Studio Environment Variables");
 
             var vsvarsPath = Path.GetFullPath(Path.Combine(Environment.GetEnvironmentVariable("VS140COMNTOOLS"), "..", "..", "VC"));
 
@@ -236,13 +236,20 @@ set");
             var vars = new Dictionary<string, string>();
             foreach (var line in result.StdOut.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
             {
-                c.Info($"Adding variable '{line}'");
-                
                 var splat = line.Split(new[] { '=' }, 2);
-                vars[splat[0]] = splat[1];
+                
+                if (splat.Length == 2)
+                {
+                    c.Verbose($"Adding variable '{line}'");
+                    vars[splat[0]] = splat[1];
+                }
+                else
+                {
+                    c.Info($"Skipping VS Env Variable. Unknown format: '{line}'");
+                }
             }
             
-            c.Info("Finish Collecting Visual Studio Environment Variables");
+            c.Verbose("Finish Collecting Visual Studio Environment Variables");
             
             return vars;
         }
