@@ -21,7 +21,7 @@
 
   "content": [
     "../../TestAssets/TestProjects/TestLibraryWithAnalyzer/*",
-    "../../TestAssets/TestProjects/TestLibrary/*",
+    "../../TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/*",
     "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/*",
     "../../TestAssets/TestProjects/global.json"
   ],

@@ -156,6 +156,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             AppContext.BaseDirectory,
             "TestAssets",
             "TestProjects",
+            "TestAppWithLibrary",
             "TestApp");
 
         public static string OutputPath = Path.Combine(

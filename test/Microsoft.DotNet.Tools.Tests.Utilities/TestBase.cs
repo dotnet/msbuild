@@ -7,10 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.TestFramework;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    
+
     /// <summary>
     /// Base class for all unit test classes.
     /// </summary>
@@ -18,6 +19,48 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         protected const string DefaultFramework = "dnxcore50";
         private TempRoot _temp;
+        private static TestAssetsManager s_testsAssetsMgr;
+        private static string s_repoRoot;
+
+        protected static string RepoRoot
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(s_repoRoot))
+                {
+                    return s_repoRoot;
+                }
+
+                string directory = AppContext.BaseDirectory;
+
+                while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
+                {
+                    directory = Directory.GetParent(directory).FullName;
+                }
+
+                if (directory == null)
+                {
+                    throw new Exception("Cannot find the git repository root");
+                }
+
+                s_repoRoot = directory;
+                return s_repoRoot;
+            }
+        }
+
+        protected static TestAssetsManager TestAssetsManager
+        {
+            get
+            {
+                if (s_testsAssetsMgr == null)
+                {
+                    string assetsRoot = Path.Combine(RepoRoot, "TestAssets", "TestProjects");
+                    s_testsAssetsMgr = new TestAssetsManager(assetsRoot);
+                }
+
+                return s_testsAssetsMgr;
+            }
+        }
 
         protected TestBase()
         {
@@ -71,9 +114,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             result.Should().HaveStdOut(expectedOutput);
             result.Should().NotHaveStdErr();
-            result.Should().Pass();            
+            result.Should().Pass();
         }
-        
+
         protected void TestOutputExecutable(
             string outputDir,
             string executableName,

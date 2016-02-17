@@ -4,6 +4,7 @@
   "dependencies": {
     "NETStandard.Library": "1.0.0-rc2-23811",
 
+    "Microsoft.DotNet.TestFramework": "1.0.0-*",
     "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
@@ -19,16 +20,6 @@
       "imports": "portable-net45+win8"
     }
   },
-
-  "content": [
-    "../../TestAssets/TestProjects/TestApp/**/*",
-    "../../TestAssets/TestProjects/TestAppWithScripts/**/*",
-    "../../TestAssets/TestProjects/TestLibrary/**/*",
-    "../../TestAssets/TestProjects/CompileFail/**/*",
-    "../../TestAssets/TestProjects/TestBindingRedirectGeneration/**/*",
-    "../../TestAssets/TestProjects/TestAppCompilationContext/**/*",
-    "../../TestAssets/TestProjects/TestAppWithContents/**/*"
-  ],
 
   "testRunner": "xunit"
 }

@@ -59,6 +59,13 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult BuildTestPrerequisites(BuildTargetContext c)
         {
+            BuildTestAssetPackages(c);
+            BuildTestAssetProjects(c);
+            return c.Success();
+        }
+
+        public static void BuildTestAssetPackages(BuildTargetContext c)
+        {
             var dotnet = DotNetCli.Stage2;
 
             Rmdir(Dirs.TestPackages);
@@ -73,8 +80,24 @@ namespace Microsoft.DotNet.Cli.Build
                     .Execute()
                     .EnsureSuccessful();
             }
+        }
 
-            return c.Success();
+        public static void BuildTestAssetProjects(BuildTargetContext c)
+        {
+            var dotnet = DotNetCli.Stage2;
+            string testProjectsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
+            List<string> exclusionList = new List<string> { Path.Combine(testProjectsRoot, "CompileFail", "project.json") };
+            var projects = Directory.GetFiles(testProjectsRoot, "project.json", SearchOption.AllDirectories)
+                                    .Where(p => !exclusionList.Any(e => e.Contains(p)));
+
+            foreach (var project in projects)
+            {
+                c.Info($"Building: {project}");
+                dotnet.Build("--framework", "dnxcore50")
+                    .WorkingDirectory(Path.GetDirectoryName(project))
+                    .Execute()
+                    .EnsureSuccessful();
+            }
         }
 
         [Target]

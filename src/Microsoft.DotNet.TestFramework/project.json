@@ -1,0 +1,21 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Microsoft.DotNet.TestFramework Class Library",
+  "authors": [
+    "sridhper"
+  ],
+  "tags": [
+    ""
+  ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "dependencies": {
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "NETStandard.Library": "1.0.0-rc2-23811"
+  },
+  "frameworks": {
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
+    }
+  }
+}

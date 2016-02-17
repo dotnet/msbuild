@@ -16,7 +16,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class BuildOutputTests : TestBase
     {
-        private readonly string _testProjectsRoot;
+        private string _testProjectsRoot;
+        private string _runtime;
+        private DirectoryInfo _rootDirInfo;
+        private DirectoryInfo _testAppDirDirInfo;
+        private DirectoryInfo _testLibDirInfo;
+
         private readonly string[] _runtimeFiles =
         {
             "TestApp" + FileNameSuffixes.DotNet.DynamicLib,
@@ -37,28 +42,18 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             "TestLibrary" + FileNameSuffixes.DotNet.ProgramDatabase,
         };
 
-        public BuildOutputTests()
+        private void GetProjectInfo(string testRoot)
         {
-            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
-        }
-
-        private void PrepareProject(out TempDirectory root, out TempDirectory testAppDir, out TempDirectory testLibDir, out string runtime)
-        {
-            root = Temp.CreateDirectory();
-            var src = root.CreateDirectory("src");
-
-            testAppDir = src.CreateDirectory("TestApp");
-            testLibDir = src.CreateDirectory("TestLibrary");
-
-            // copy projects to the temp dir
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestApp"), testAppDir);
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
+            _testProjectsRoot = testRoot;
+            _rootDirInfo = new DirectoryInfo(_testProjectsRoot);
+            _testAppDirDirInfo = new DirectoryInfo(Path.Combine(_testProjectsRoot, "TestApp"));
+            _testLibDirInfo = new DirectoryInfo(Path.Combine(_testProjectsRoot, "TestLibrary"));
 
             var contexts = ProjectContext.CreateContextForEachFramework(
-                testLibDir.Path,
+                _testAppDirDirInfo.FullName,
                 null,
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
-            runtime = contexts.FirstOrDefault(c => !string.IsNullOrEmpty(c.RuntimeIdentifier))?.RuntimeIdentifier;
+            _runtime = contexts.FirstOrDefault(c => !string.IsNullOrEmpty(c.RuntimeIdentifier))?.RuntimeIdentifier;
         }
 
         private string FormatPath(string input, string framework, string runtime)
@@ -68,37 +63,30 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         [Theory]
         // global.json exists
-        [InlineData(true, null, null, "src/TestLibrary/bin/Debug/{fw}", "src/TestApp/bin/Debug/{fw}", "src/TestApp/bin/Debug/{fw}/{rid}")]
-        [InlineData(true, "out", null, "src/TestLibrary/bin/Debug/{fw}", "src/TestApp/bin/Debug/{fw}", "out")]
-        [InlineData(true, null, "build", "build/src/TestLibrary/bin/Debug/{fw}", "build/src/TestApp/bin/Debug/{fw}", "build/src/TestApp/bin/Debug/{fw}/{rid}")]
-        [InlineData(true, "out", "build", "build/src/TestLibrary/bin/Debug/{fw}", "build/src/TestApp/bin/Debug/{fw}", "out")]
+        [InlineData("1", true, null, null, "TestLibrary/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}/{rid}")]
+        [InlineData("2", true, "out", null, "TestLibrary/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}", "out")]
+        [InlineData("3", true, null, "build", "build/TestLibrary/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}/{rid}")]
+        [InlineData("4", true, "out", "build", "build/TestLibrary/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}", "out")]
         //no global.json
-        //[InlineData(false, null, null, "src/TestLibrary/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}/{rid}")]
-        //[InlineData(false, "out", null, "src/TestLibrary/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}", "out")]
+        //[InlineData(false, null, null, "TestLibrary/bin/debug/{fw}", "TestApp/bin/debug/{fw}", "TestApp/bin/debug/{fw}/{rid}")]
+        //[InlineData(false, "out", null, "TestLibrary/bin/debug/{fw}", "TestApp/bin/debug/{fw}", "out")]
         //[InlineData(false, null, "build", "build/TestLibrary/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}/{rid}")]
         //[InlineData(false, "out", "build", "build/TestLibrary/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}", "out")]
-        public void DefaultPaths(bool global, string outputValue, string baseValue, string expectedLibCompile, string expectedAppCompile, string expectedAppRuntime)
+        public void DefaultPaths(string testIdentifer, bool global, string outputValue, string baseValue, string expectedLibCompile, string expectedAppCompile, string expectedAppRuntime)
         {
-            TempDirectory root;
-            TempDirectory testAppDir;
-            TempDirectory testLibDir;
-            string runtime;
+            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary", identifier: testIdentifer)
+                                                .WithLockFiles();
+            GetProjectInfo(testInstance.TestRoot);
 
-            PrepareProject(out root, out testAppDir, out testLibDir, out runtime);
-            if (global)
-            {
-                root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
-            }
-
-            new BuildCommand(GetProjectPath(testAppDir),
-                output: outputValue != null ?  Path.Combine(root.Path, outputValue) : string.Empty,
-                buidBasePath: baseValue != null ? Path.Combine(root.Path, baseValue) : string.Empty,
+            new BuildCommand(GetProjectPath(_testAppDirDirInfo),
+                output: outputValue != null ? Path.Combine(_testProjectsRoot, outputValue) : string.Empty,
+                buidBasePath: baseValue != null ? Path.Combine(_testProjectsRoot, baseValue) : string.Empty,
                 framework: DefaultFramework)
                 .ExecuteWithCapturedOutput().Should().Pass();
 
-            var libdebug = root.DirectoryInfo.Sub(FormatPath(expectedLibCompile, DefaultFramework, runtime));
-            var appdebug = root.DirectoryInfo.Sub(FormatPath(expectedAppCompile, DefaultFramework, runtime));
-            var appruntime = root.DirectoryInfo.Sub(FormatPath(expectedAppRuntime, DefaultFramework, runtime));
+            var libdebug = _rootDirInfo.Sub(FormatPath(expectedLibCompile, DefaultFramework, _runtime));
+            var appdebug = _rootDirInfo.Sub(FormatPath(expectedAppCompile, DefaultFramework, _runtime));
+            var appruntime = _rootDirInfo.Sub(FormatPath(expectedAppRuntime, DefaultFramework, _runtime));
 
             libdebug.Should().Exist().And.HaveFiles(_libCompileFiles);
             appdebug.Should().Exist().And.HaveFiles(_appCompileFiles);
@@ -108,38 +96,37 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void ResourceTest()
         {
-            TempDirectory root;
-            TempDirectory testAppDir;
-            TempDirectory testLibDir;
-            string runtime;
+            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary")
+                                                .WithLockFiles();
+            GetProjectInfo(testInstance.TestRoot);
 
-            PrepareProject(out root, out testAppDir, out testLibDir, out runtime);
             var names = new[]
             {
                 "uk-UA",
                 "en",
                 "en-US"
             };
-            foreach (var folder in new [] { testAppDir, testLibDir })
+            foreach (var folder in new[] { _testAppDirDirInfo, _testLibDirInfo })
             {
                 foreach (var name in names)
                 {
-                    folder.CreateFile($"Resource.{name}.resx").WriteAllText("<root></root>");
+                    var resourceFile = Path.Combine(folder.FullName, $"Resource.{name}.resx");
+                    File.WriteAllText(resourceFile, "<root></root>");
                 }
             }
 
-            new BuildCommand(GetProjectPath(testAppDir), framework: DefaultFramework)
+            new BuildCommand(GetProjectPath(_testAppDirDirInfo), framework: DefaultFramework)
                 .ExecuteWithCapturedOutput().Should().Pass();
 
-            var libdebug = testLibDir.DirectoryInfo.Sub("bin/Debug").Sub(DefaultFramework);
-            var appdebug = testAppDir.DirectoryInfo.Sub("bin/Debug").Sub(DefaultFramework);
-            var appruntime = appdebug.Sub(runtime);
+            var libdebug = _testLibDirInfo.Sub("bin/Debug").Sub(DefaultFramework);
+            var appdebug = _testAppDirDirInfo.Sub("bin/Debug").Sub(DefaultFramework);
+            var appruntime = appdebug.Sub(_runtime);
 
             foreach (var name in names)
             {
                 libdebug.Sub(name).Should().Exist().And.HaveFile("TestLibrary.resources.dll");
                 appdebug.Sub(name).Should().Exist().And.HaveFile("TestApp.resources.dll");
-                appruntime.Sub(name).Should().Exist().And.HaveFiles(new [] { "TestLibrary.resources.dll", "TestApp.resources.dll" });
+                appruntime.Sub(name).Should().Exist().And.HaveFiles(new[] { "TestLibrary.resources.dll", "TestApp.resources.dll" });
             }
 
         }
@@ -152,9 +139,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             }
         }
 
-        private string GetProjectPath(TempDirectory projectDir)
+        private string GetProjectPath(DirectoryInfo projectDir)
         {
-            return Path.Combine(projectDir.Path, "project.json");
+            return Path.Combine(projectDir.FullName, "project.json");
         }
     }
 }

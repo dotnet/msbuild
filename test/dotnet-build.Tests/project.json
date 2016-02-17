@@ -19,17 +19,5 @@
     }
   },
 
-  "content": [
-    "../../TestAssets/TestProjects/TestApp/**/*",
-    "../../TestAssets/TestProjects/TestLibrary/**/*",
-    "../../TestAssets/TestProjects/TestSimpleIncrementalApp/*",
-    "../../TestAssets/TestProjects/TestProjectToProjectDependencies/**/*",
-    "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/**/*",
-    "../../TestAssets/TestProjects/TestProjectWithResource/**/*",
-    "../../TestAssets/TestProjects/TestLibraryWithAppDependency/**/*",
-    "../../TestAssets/TestProjects/TestAppWithTransitiveAppDependency/**/*",
-    "../../TestAssets/TestProjects/global.json"
-  ],
-
   "testRunner": "xunit"
 }

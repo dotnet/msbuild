@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
 {
@@ -16,26 +17,35 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
     {
         private readonly string[] _projects = new[] { "L0", "L11", "L12", "L21", "L22" };
 
-        public ProjectToProjectDependenciesIncrementalTest() : base(
-            Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestProjectToProjectDependencies"),
-            "L0",
-            "L0 L11 L12 L22 L21 L12 L22 " + Environment.NewLine)
+        private string MainProjectExe
         {
+            get
+            {
+                return MainProject + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "");
+            }
+        }
+
+        public ProjectToProjectDependenciesIncrementalTest()
+        {
+            MainProject = "L0";
+            ExpectedOutput = "L0 L11 L12 L22 L21 L12 L22 " + Environment.NewLine;
+
         }
 
         [Theory,
-        InlineData("L0", new[] { "L0" }),
-        InlineData("L11", new[] { "L0", "L11" }),
-        InlineData("L12", new[] { "L0", "L11", "L12" }),
-        InlineData("L22", new[] { "L0", "L11", "L12", "L22" }),
-        InlineData("L21", new[] { "L0", "L11", "L21" })
+        InlineData("1", "L0", new[] { "L0" }),
+        InlineData("2", "L11", new[] { "L0", "L11" }),
+        InlineData("3", "L12", new[] { "L0", "L11", "L12" }),
+        InlineData("4", "L22", new[] { "L0", "L11", "L12", "L22" }),
+        InlineData("5", "L21", new[] { "L0", "L11", "L21" })
         ]
-        public void TestIncrementalBuildOfDependencyGraph(string projectToTouch, string[] expectedRebuiltProjects)
+        public void TestIncrementalBuildOfDependencyGraph(string testIdentifer, string projectToTouch, string[] expectedRebuiltProjects)
         {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestProjectToProjectDependencies", identifier: testIdentifer)
+                                                .WithLockFiles()
+                                                .WithBuildArtifacts();
 
-            // first clean build; all projects required compilation
-            var result1 = BuildProject();
-            AssertRebuilt(result1, _projects);
+            TestProjectRoot = testInstance.TestRoot;
 
             // second build; nothing changed; no project required compilation
             var result2 = BuildProject();
@@ -52,11 +62,13 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void TestNoDependencyFlag()
         {
-            var dependencies = new[] { "L11", "L12", "L21", "L22" };
+            var testInstance = TestAssetsManager.CreateTestInstance("TestProjectToProjectDependencies")
+                                                .WithLockFiles()
+                                                .WithBuildArtifacts();
+
+            TestProjectRoot = testInstance.TestRoot;
             
-            // first clean build; all projects required compilation
-            var result1 = BuildProject();
-            AssertRebuilt(result1, _projects);
+            var dependencies = new[] { "L11", "L12", "L21", "L22" };
 
             // modify the source code of a leaf dependency
             TouchSourcesOfProject("L22");
@@ -104,7 +116,25 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         protected override string GetProjectDirectory(string projectName)
         {
-            return Path.Combine(TempProjectRoot.Path, "src", projectName);
+            return Path.Combine(TestProjectRoot, "src", projectName);
+        }
+
+        protected override string GetOutputDir()
+        {
+            return "";
+        }
+
+        protected override string GetOutputExePath()
+        {
+            var outputExe = Directory.GetFiles(TestProjectRoot, MainProjectExe, SearchOption.AllDirectories)
+                                     .FirstOrDefault();
+
+            if (string.IsNullOrEmpty(outputExe))
+            {
+                throw new FileNotFoundException($"Unable to find {outputExe} in {TestProjectRoot} or its subdirectories");
+            }
+
+            return Path.GetDirectoryName(outputExe);
         }
     }
 }

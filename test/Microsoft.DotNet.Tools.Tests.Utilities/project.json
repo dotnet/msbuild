@@ -11,6 +11,7 @@
         "xunit": "2.1.0",
         "dotnet-test-xunit": "1.0.0-dev-48273-16",
 
+        "Microsoft.DotNet.TestFramework": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
         "Microsoft.DotNet.InternalAbstractions": {
