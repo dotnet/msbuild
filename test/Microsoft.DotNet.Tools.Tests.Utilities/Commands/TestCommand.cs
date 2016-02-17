@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public class TestCommand

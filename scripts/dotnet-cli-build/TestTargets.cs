@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string[] TestProjects = new[]
         {
             "EndToEnd",
+            "dotnet.Tests",
             "dotnet-publish.Tests",
             "dotnet-compile.Tests",
             "dotnet-compile.UnitTests",
