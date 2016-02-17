@@ -255,7 +255,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         private void CollectCompilerNamePreconditions(ProjectContext project, IncrementalPreconditions preconditions)
         {
-            var projectCompiler = CompilerUtil.ResolveCompilerName(project);
+            var projectCompiler = project.ProjectFile.CompilerName;
 
             if (!KnownCompilers.Any(knownCompiler => knownCompiler.Equals(projectCompiler, StringComparison.Ordinal)))
             {

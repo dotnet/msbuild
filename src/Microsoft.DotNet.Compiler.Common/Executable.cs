@@ -20,14 +20,20 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
     {
         private readonly ProjectContext _context;
 
+        private readonly LibraryExporter _exporter;
+
         private readonly OutputPaths _outputPaths;
 
-        private readonly LibraryExporter _exporter;
+        private readonly string _runtimeOutputPath;
+
+        private readonly string _intermediateOutputPath;
 
         public Executable(ProjectContext context, OutputPaths outputPaths, LibraryExporter exporter)
         {
             _context = context;
             _outputPaths = outputPaths;
+            _runtimeOutputPath = outputPaths.RuntimeOutputPath;
+            _intermediateOutputPath = outputPaths.IntermediateOutputDirectoryPath;
             _exporter = exporter;
         }
 
@@ -38,68 +44,75 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 throw new InvalidOperationException($"Can not make output runnable for framework {_context.TargetFramework}, because it doesn't have runtime target");
             }
 
-            var outputPath = _outputPaths.RuntimeOutputPath;
-
-            CopyContentFiles(outputPath);
-
-            ExportRuntimeAssets(outputPath);
+            CopyContentFiles();
+            ExportRuntimeAssets();
         }
 
-        private void ExportRuntimeAssets(string outputPath)
+        private void ExportRuntimeAssets()
         {
             if (_context.TargetFramework.IsDesktop())
             {
-                MakeCompilationOutputRunnableForFullFramework(outputPath);
+                MakeCompilationOutputRunnableForFullFramework();
             }
             else
             {
-                MakeCompilationOutputRunnableForCoreCLR(outputPath);
+                MakeCompilationOutputRunnableForCoreCLR();
             }
         }
 
-        private void MakeCompilationOutputRunnableForFullFramework(
-            string outputPath)
+        private void MakeCompilationOutputRunnableForFullFramework()
         {
-            CopyAllDependencies(outputPath, _exporter.GetDependencies());
+            var dependencies = _exporter.GetDependencies();
+            CopyAssemblies(dependencies);
+            CopyAssets(dependencies);
             GenerateBindingRedirects(_exporter);
         }
 
-        private void MakeCompilationOutputRunnableForCoreCLR(string outputPath)
+        private void MakeCompilationOutputRunnableForCoreCLR()
         {
-            WriteDepsFileAndCopyProjectDependencies(_exporter, _context.ProjectFile.Name, outputPath);
+            WriteDepsFileAndCopyProjectDependencies(_exporter);
 
             // TODO: Pick a host based on the RID
-            CoreHost.CopyTo(outputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
+            CoreHost.CopyTo(_runtimeOutputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
         }
 
-        private void CopyContentFiles(string outputPath)
+        private void CopyContentFiles()
         {
             var contentFiles = new ContentFiles(_context);
-            contentFiles.StructuredCopyTo(outputPath);
+            contentFiles.StructuredCopyTo(_runtimeOutputPath);
         }
 
-        private static void CopyAllDependencies(string outputPath, IEnumerable<LibraryExport> libraryExports)
+        private void CopyAssemblies(IEnumerable<LibraryExport> libraryExports)
         {
             foreach (var libraryExport in libraryExports)
             {
-                libraryExport.RuntimeAssemblies.CopyTo(outputPath);
-                libraryExport.NativeLibraries.CopyTo(outputPath);
-                libraryExport.RuntimeAssets.StructuredCopyTo(outputPath);
+                libraryExport.RuntimeAssemblies.CopyTo(_runtimeOutputPath);
+                libraryExport.NativeLibraries.CopyTo(_runtimeOutputPath);
             }
         }
 
-        private static void WriteDepsFileAndCopyProjectDependencies(
-            LibraryExporter exporter,
-            string projectFileName,
-            string outputPath)
+        private void CopyAssets(IEnumerable<LibraryExport> libraryExports)
+        {
+            foreach (var libraryExport in libraryExports)
+            {
+                libraryExport.RuntimeAssets.StructuredCopyTo(
+                    _runtimeOutputPath,
+                    _intermediateOutputPath);
+            }
+        }
+
+        private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
         {
             exporter
                 .GetDependencies(LibraryType.Package)
-                .WriteDepsTo(Path.Combine(outputPath, projectFileName + FileNameSuffixes.Deps));
+                .WriteDepsTo(Path.Combine(_runtimeOutputPath, _context.ProjectFile.Name + FileNameSuffixes.Deps));
 
             var projectExports = exporter.GetDependencies(LibraryType.Project);
+            CopyAssemblies(projectExports);
+            CopyAssets(projectExports);
 
-            CopyAllDependencies(outputPath, projectExports);
+            var packageExports = exporter.GetDependencies(LibraryType.Package);
+            CopyAssets(packageExports);
         }
 
         public void GenerateBindingRedirects(LibraryExporter exporter)

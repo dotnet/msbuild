@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel.Compilation;
@@ -20,34 +19,12 @@ namespace Microsoft.DotNet.Tools.Compiler
 {
     public static class CompilerUtil
     {
-        public static string ResolveCompilerName(ProjectContext context)
-        {
-            var compilerName = context.ProjectFile.CompilerName;
-            compilerName = compilerName ?? "csc";
-
-            return compilerName;
-        }
-
-        private static readonly KeyValuePair<string, string>[] s_compilerNameToLanguageId =
-        {
-            new KeyValuePair<string, string>("csc", "cs"),
-            new KeyValuePair<string, string>("vbc", "vb"),
-            new KeyValuePair<string, string>("fsc", "fs")
-        };
-
         public static string ResolveLanguageId(ProjectContext context)
         {
             var languageId = context.ProjectFile.AnalyzerOptions?.LanguageId;
             if (languageId == null)
             {
-                var compilerName = ResolveCompilerName(context);
-                foreach (var kvp in s_compilerNameToLanguageId)
-                {
-                    if (kvp.Key == compilerName)
-                    {
-                        languageId = kvp.Value;
-                    }
-                }
+                languageId = context.ProjectFile.GetSourceCodeLanguage();
             }
 
             return languageId;
@@ -166,7 +143,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         //used in incremental precondition checks
         public static IEnumerable<string> GetCommandsInvokedByCompile(ProjectContext project)
         {
-            return new List<string> {ResolveCompilerName(project), "compile"};
+            return new List<string> {project.ProjectFile.CompilerName, "compile"};
         }
     }
 }

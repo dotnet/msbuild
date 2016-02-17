@@ -30,5 +30,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
         public IList<LockFileItem> ResourceAssemblies { get; set; } = new List<LockFileItem>();
 
         public IList<LockFileItem> NativeLibraries { get; set; } = new List<LockFileItem>();
+
+        public IList<LockFileContentFile> ContentFiles { get; set; } = new List<LockFileContentFile>();
     }
 }

@@ -35,9 +35,14 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public IEnumerable<LibraryAsset> CompilationAssemblies { get; }
 
         /// <summary>
+        /// Get a list of embedded resource files provided by this export.
+        /// </summary>
+        public IEnumerable<LibraryAsset> EmbeddedResources { get; }
+
+        /// <summary>
         /// Gets a list of fully-qualified paths to source code file references
         /// </summary>
-        public IEnumerable<string> SourceReferences { get; }
+        public IEnumerable<LibraryAsset> SourceReferences { get; }
 
         /// <summary>
         /// Get a list of analyzers provided by this export.
@@ -46,10 +51,11 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         public LibraryExport(LibraryDescription library,
                              IEnumerable<LibraryAsset> compileAssemblies,
-                             IEnumerable<string> sourceReferences,
+                             IEnumerable<LibraryAsset> sourceReferences,
                              IEnumerable<LibraryAsset> runtimeAssemblies,
                              IEnumerable<LibraryAsset> runtimeAssets,
                              IEnumerable<LibraryAsset> nativeLibraries,
+                             IEnumerable<LibraryAsset> embeddedResources,
                              IEnumerable<AnalyzerReference> analyzers)
         {
             Library = library;
@@ -58,6 +64,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             RuntimeAssemblies = runtimeAssemblies;
             RuntimeAssets = runtimeAssets;
             NativeLibraries = nativeLibraries;
+            EmbeddedResources = embeddedResources;
             AnalyzerReferences = analyzers;
         }
 

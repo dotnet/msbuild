@@ -42,6 +42,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IEnumerable<LockFileItem> NativeLibraries => Target.NativeLibraries;
 
+        public IEnumerable<LockFileContentFile> ContentFiles => Target.ContentFiles;
+
         private IEnumerable<LockFileItem> FilterPlaceholders(IList<LockFileItem> items)
         {
             return items.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a));

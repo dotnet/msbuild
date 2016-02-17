@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        public static void StructuredCopyTo(this IEnumerable<LibraryAsset> assets, string destinationPath)
+        public static void StructuredCopyTo(this IEnumerable<LibraryAsset> assets, string destinationPath, string tempLocation)
         {
             if (!Directory.Exists(destinationPath))
             {
@@ -63,8 +63,9 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             foreach (var asset in assets)
             {
                 var targetName = ResolveTargetName(destinationPath, asset);
+                var transformedFile = asset.GetTransformedFile(tempLocation);
 
-                File.Copy(asset.ResolvedPath, targetName, overwrite: true);
+                File.Copy(transformedFile, targetName, overwrite: true);
             }
         }
 

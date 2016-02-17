@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.DependencyModel;
 
@@ -90,7 +91,15 @@ namespace Microsoft.DotNet.Tools.Compiler
             foreach (var dependency in dependencies)
             {
                 references.AddRange(dependency.CompilationAssemblies.Select(r => r.ResolvedPath));
-                compilerArgs.AddRange(dependency.SourceReferences.Select(s => $"{s}"));
+
+                compilerArgs.AddRange(dependency.SourceReferences.Select(s => s.GetTransformedFile(intermediateOutputPath)));
+
+                foreach (var resourceFile in dependency.EmbeddedResources)
+                {
+                    var transformedResource = resourceFile.GetTransformedFile(intermediateOutputPath);
+                    var resourceName = ResourceManifestName.CreateManifestName(Path.GetFileName(resourceFile.ResolvedPath), context.ProjectFile.Name);
+                    compilerArgs.Add($"--resource:\"{transformedResource}\",{resourceName}");
+                }
 
                 // Add analyzer references
                 compilerArgs.AddRange(dependency.AnalyzerReferences
@@ -126,7 +135,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var sourceFiles = CompilerUtil.GetCompilationSources(context);
             compilerArgs.AddRange(sourceFiles);
 
-            var compilerName = CompilerUtil.ResolveCompilerName(context);
+            var compilerName = context.ProjectFile.CompilerName;
 
             // Write RSP file
             var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.rsp");
