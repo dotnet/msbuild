@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(RunXUnitTests), nameof(RunPackageCommandTests))]
+        [Target(nameof(RunXUnitTests))]
         public static BuildTargetResult RunTests(BuildTargetContext c) => c.Success();
 
         [Target]
@@ -169,40 +169,6 @@ namespace Microsoft.DotNet.Cli.Build
                     c.Error($"{project} failed");
                 }
                 return c.Failed("Tests failed!");
-            }
-
-            return c.Success();
-        }
-
-        [Target]
-        public static BuildTargetResult RunPackageCommandTests(BuildTargetContext c)
-        {
-            var dotnet = DotNetCli.Stage2;
-            var consumers = Path.Combine(c.BuildContext.BuildDirectory, "test", "PackagedCommands", "Consumers");
-
-            // Compile the consumer apps
-            foreach (var dir in Directory.EnumerateDirectories(consumers))
-            {
-                dotnet.Build().WorkingDirectory(dir).Execute().EnsureSuccessful();
-            }
-
-            // Test the apps
-            foreach (var dir in Directory.EnumerateDirectories(consumers))
-            {
-                var result = dotnet.Exec("hello").WorkingDirectory(dir)
-                    .ForwardStdErr()
-                    .ForwardStdOut()
-                    .CaptureStdOut()
-                    .CaptureStdErr()
-                    .Execute();
-                result.EnsureSuccessful();
-                if (!string.Equals("Hello", result.StdOut.Trim(), StringComparison.Ordinal))
-                {
-                    var testName = Path.GetFileName(dir);
-                    c.Error($"Packaged Commands Test '{testName}' failed");
-                    c.Error($"  Expected 'Hello', but got: '{result.StdOut.Trim()}'");
-                    return c.Failed($"Packaged Commands Test failed '{testName}'");
-                }
             }
 
             return c.Success();
