@@ -57,7 +57,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+//        [Trait("Category", "nonosxtests")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void GetApiContractReferencesFindsWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
