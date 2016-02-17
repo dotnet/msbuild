@@ -16,12 +16,6 @@
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
   </PropertyGroup>
 
-   <!-- Compiler config -->
-   <PropertyGroup>
-     <UseRoslynCompilers>true</UseRoslynCompilers>
-     <DebugSymbols Condition="'$(UseRoslynCompilers)' == 'true'">false</DebugSymbols>
-  </PropertyGroup>
-
    <!-- Common repo directories -->
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00120</BuildToolsVersion>
