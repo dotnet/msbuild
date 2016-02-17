@@ -69,7 +69,9 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects")).Execute().EnsureSuccessful();
+            dotnet.Restore("--fallbacksource", Dirs.TestPackages)
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
+                .Execute().EnsureSuccessful();
 
             // The 'testapp' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
             dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "testapp")).CaptureStdErr().CaptureStdOut().Execute();
