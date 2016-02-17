@@ -24,6 +24,7 @@ if [ "$OSNAME" != "ubuntu" ]; then
 fi
 
 PACKAGING_ROOT="$REPOROOT/packaging/debian"
+PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
 
 OUTPUT_DIR="$REPOROOT/artifacts"
 PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
@@ -90,7 +91,7 @@ create_debian_package(){
 
     mkdir -p "$PACKAGE_OUTPUT_DIR"
     
-    "$PACKAGING_ROOT/package_tool/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION -n $DOTNET_DEB_PACKAGE_NAME
+    "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION -n $DOTNET_DEB_PACKAGE_NAME
 }
 
 test_debian_package(){
