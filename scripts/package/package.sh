@@ -14,6 +14,8 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 export REPOROOT="$(cd -P "$DIR/../.." && pwd)"
 
+set -e
+
 source "$DIR/../common/_common.sh"
 
 if [ -z "$DOTNET_CLI_VERSION" ]; then
