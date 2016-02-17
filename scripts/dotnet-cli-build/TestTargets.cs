@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-compile.UnitTests",
             "dotnet-build.Tests",
             "dotnet-pack.Tests",
+            "dotnet-resgen.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.Extensions.DependencyModel.Tests",

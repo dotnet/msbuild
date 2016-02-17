@@ -56,8 +56,8 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     var arguments = new[]
                     {
-                        resgenFile.InputFile,
-                        $"-o:{resgenFile.OutputFile}",
+                        $"\"{resgenFile.InputFile}\"",
+                        $"-o:\"{resgenFile.OutputFile}\"",
                         $"-v:{project.Version.Version}"
                     };
 
@@ -71,11 +71,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                         return false;
                     }
 
-                    compilerArgs.Add($"--resource:\"{resgenFile.OutputFile},{Path.GetFileName(resgenFile.MetadataName)}\"");
+                    compilerArgs.Add($"--resource:\"{resgenFile.OutputFile}\",{Path.GetFileName(resgenFile.MetadataName)}");
                 }
                 else
                 {
-                    compilerArgs.Add($"--resource:\"{resgenFile.InputFile},{Path.GetFileName(resgenFile.MetadataName)}\"");
+                    compilerArgs.Add($"--resource:\"{resgenFile.InputFile}\",{Path.GetFileName(resgenFile.MetadataName)}");
                 }
             }
 
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             string outputPath)
         {
             var referencePaths = CompilerUtil.GetReferencePathsForCultureResgen(dependencies);
-            var resgenReferenceArgs = referencePaths.Select(path => $"-r:{path}").ToList();
+            var resgenReferenceArgs = referencePaths.Select(path => $"-r:\"{path}\"").ToList();
             var cultureResgenFiles = CompilerUtil.GetCultureResources(project, outputPath);
 
             foreach (var resgenFile in cultureResgenFiles)
@@ -104,10 +104,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var arguments = new List<string>();
 
                 arguments.AddRange(resgenReferenceArgs);
-                arguments.Add($"-o:{resgenFile.OutputFile}");
+                arguments.Add($"-o:\"{resgenFile.OutputFile}\"");
                 arguments.Add($"-c:{resgenFile.Culture}");
                 arguments.Add($"-v:{project.Version.Version}");
-                arguments.AddRange(resgenFile.InputFileToMetadata.Select(fileToMetadata => $"{fileToMetadata.Key},{fileToMetadata.Value}"));
+                arguments.AddRange(resgenFile.InputFileToMetadata.Select(fileToMetadata => $"\"{fileToMetadata.Key}\",{fileToMetadata.Value}"));
                 var rsp = Path.Combine(intermediateOutputPath, $"dotnet-resgen.rsp");
                 File.WriteAllLines(rsp, arguments);
 
