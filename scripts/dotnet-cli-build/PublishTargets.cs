@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Cli.Build
             // Set up the environment variables previously defined by common.sh/ps1
             // This is overkill, but I want to cover all the variables used in all OSes (including where some have the same names)
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            var configuration = c.BuildContext.Get<string>("Configuration");
             var env = new Dictionary<string, string>()
             {
                 { "RID", PlatformServices.Default.Runtime.GetRuntimeIdentifier() },
@@ -48,7 +49,8 @@ namespace Microsoft.DotNet.Cli.Build
                 { "COMMIT_COUNT_VERSION", buildVersion.CommitCountString },
                 { "DOTNET_CLI_VERSION", buildVersion.SimpleVersion },
                 { "DOTNET_MSI_VERSION", buildVersion.GenerateMsiVersion() },
-                { "VersionSuffix", buildVersion.VersionSuffix }
+                { "VersionSuffix", buildVersion.VersionSuffix },
+                { "CONFIGURATION", configuration }
             };
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
