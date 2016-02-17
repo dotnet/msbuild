@@ -896,6 +896,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void LogBuildStartedCriticalOnly()
         {
             ProcessBuildEventHelper service =

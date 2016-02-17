@@ -1081,6 +1081,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/276")]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void DefaultToolsVersion2()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) != null)

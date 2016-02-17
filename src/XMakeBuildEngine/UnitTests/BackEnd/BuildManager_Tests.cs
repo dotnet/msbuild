@@ -1355,6 +1355,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A cancelled build
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1386,6 +1387,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1456,6 +1458,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2159,6 +2162,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void CacheLifetime()
         {
             const string ForceCaching = "MSBUILDDEBUGFORCECACHING";

@@ -1149,6 +1149,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void StopOnFirstFailureandBuildInParallelMultipleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"

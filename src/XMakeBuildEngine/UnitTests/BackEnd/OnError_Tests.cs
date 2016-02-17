@@ -55,6 +55,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Then these items and properties should be visible to the onerror targets.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void FailingTaskStillPublishesOutputs()
         {
             MockLogger l = new MockLogger();
