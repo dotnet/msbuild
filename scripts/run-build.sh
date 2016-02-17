@@ -69,6 +69,7 @@ dotnet publish "$DIR/dotnet-cli-build" -o "$DIR/dotnet-cli-build/bin" --framewor
 
 # Run the builder
 echo "Invoking Build Scripts..."
+echo "Configuration: $CONFIGURATION"
 
 if [ -f "$DIR/dotnet-cli-build/bin/dotnet-cli-build" ]; then
     DOTNET_HOME="$DOTNET_INSTALL_DIR/share/dotnet/cli" $DIR/dotnet-cli-build/bin/dotnet-cli-build "$@"
