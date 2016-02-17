@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void BadTooLongLastWriteTime()
         {
             Helpers.VerifyAssertThrowsSameWay(
@@ -339,7 +339,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void LengthReset()
         {
             string file = null;
@@ -419,7 +419,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void DoesNotExistLastWriteTime()
         {
             string file = Guid.NewGuid().ToString("N");
@@ -428,7 +428,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void DoesNotExistLastWriteTimeUtc()
         {
             string file = Guid.NewGuid().ToString("N");

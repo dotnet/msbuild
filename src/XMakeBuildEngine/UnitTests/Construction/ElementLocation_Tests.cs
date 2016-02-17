@@ -288,7 +288,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test many of the getters
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void LocationStringsMedleyReadOnlyLoad()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -354,7 +354,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Save read only fails
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SaveReadOnly2()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Save read only fails
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SaveReadOnly3()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Save read only fails
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SaveReadOnly4()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);

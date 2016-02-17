@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         * The item has something that looks like an embedded culture, but isn't.
         */
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void BogusEmbeddedCulture()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.notalocale.resx", null);

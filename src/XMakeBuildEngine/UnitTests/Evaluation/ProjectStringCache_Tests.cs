@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// to store read values.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ContentIsSameAcrossInstances()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Test that modifying one instance of a file does not affect the other file.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ContentCanBeModified()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// the string cache.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void RemovingFilesRemovesEntries()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

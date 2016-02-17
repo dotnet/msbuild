@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the source only
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ForceOutOfDate()
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ForceOutOfDateLinked()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Force partially out-of-date: should build only the out of date inputs
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ForceSomeOutOfDate()
         {
             string resxFile = null;

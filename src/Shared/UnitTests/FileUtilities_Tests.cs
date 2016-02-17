@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetItemSpecModifier()
         {
             TestGetItemSpecModifier(Directory.GetCurrentDirectory());
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void MakeRelativeTests()
         {
             if (NativeMethodsShared.IsWindows)
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetItemSpecModifierOnBadPath()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetItemSpecModifierOnBadPath2()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.EndsWithSlash
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void EndsWithSlash()
         {
             Assert.True(FileUtilities.EndsWithSlash(@"C:\foo\"));
@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.GetDirectory
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetDirectoryWithTrailingSlash()
         {
             Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:\" : "/"));
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -385,7 +385,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetItemSpecModifierRootDirThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -464,14 +464,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void NormalizePathGoodUNC()
         {
             Assert.Equal(@"\\localhost\share", FileUtilities.NormalizePath(@"\\localhost\share"));
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void NormalizePathTooLongWithDots()
         {
             string longPart = new string('x', 300);
@@ -503,7 +503,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void NormalizePathInvalid()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -515,7 +515,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void FileOrDirectoryExistsNoThrow()
         {
             Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow("||"));
@@ -821,7 +821,7 @@ namespace Microsoft.Build.UnitTests
         /// Extension is invalid
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GenerateTempBatchFileWithBadExtension()
         {
             Assert.Throws<IOException>(() =>
@@ -846,7 +846,7 @@ namespace Microsoft.Build.UnitTests
         /// Directory is invalid
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GenerateTempBatchFileWithBadDirectory()
         {
             Assert.Throws<IOException>(() =>

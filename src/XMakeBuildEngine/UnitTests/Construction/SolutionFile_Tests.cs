@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ParseFirstProjectLine_VC()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -454,7 +454,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test ParseEtpProject function.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");

@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple successful build.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SimpleBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -339,7 +339,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// get all of the initial properties.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void InProcForwardPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -391,7 +391,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// get all of the initial properties.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void InProcMsBuildForwardAllPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -824,7 +824,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple failing build.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SimpleBuildWithFailure()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -845,7 +845,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we only get errors, warnings, and project started and finished when OnlyLogCriticalEvents is true
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsTrue()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -880,7 +880,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we only get errors, warnings, messages, task and target messages OnlyLogCriticalEvents is false
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsFalse()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1080,7 +1080,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A sequential build.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void EndBuildBlocks()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1150,7 +1150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A sequential build.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SequentialBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1187,7 +1187,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A sequential build.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void OverlappingBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1230,7 +1230,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// (retrieved from the cache). 
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void OverlappingIdenticalBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1265,7 +1265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// as 'skipped', ensure that we retry execution in case conditions have changed.)
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void OverlappingBuildSubmissions_OnlyOneSucceeds()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1519,7 +1519,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that builds of the same project instance in sequence are permitted.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void SequentialBuildsOfTheSameProjectAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1549,7 +1549,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that overlapping builds of the same project are allowed.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void OverlappingBuildsOfTheSameProjectDifferentTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1590,7 +1590,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that overlapping builds of the same project are allowed.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void OverlappingBuildsOfTheSameProjectSameTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1685,7 +1685,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Retrieving a ProjectInstance from the BuildManager after a build.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ProjectInstanceRetrievedAfterBuildMatchesSourceProject()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1712,7 +1712,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Retrieving a ProjectInstance after resetting the cache clears the instances.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ResetCacheClearsInstances()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1745,7 +1745,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Retrieving a ProjectInstance after another build without resetting the cache keeps the existing instance
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void DisablingCacheResetKeepsInstance()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1785,7 +1785,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Retrieving a ProjectInstance after another build without resetting the cache keeps the existing instance
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void GhostProjectRootElementCache()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -1940,7 +1940,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that using a second BuildManager doesn't cause the system to crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void Regress251333()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2158,7 +2158,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests that cache files are created as expected and their lifetime is controlled appropriately.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void CacheLifetime()
         {
             const string ForceCaching = "MSBUILDDEBUGFORCECACHING";
@@ -2273,7 +2273,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// AfterTargets, only one of which fails. 
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
         {
             string projA = null;
@@ -2423,7 +2423,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// should not inherit that failure if all the targets it calls succeed. 
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void NonOverlappingEntrypointTargetsShouldNotInfluenceEachOthersResults()
         {
             string projA = null;
@@ -3055,7 +3055,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// way as if the target had actually errored. 
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void VerifyMultipleRequestForSameProjectWithErrors_DifferentEntrypoints()
         {
             string projA = null;
@@ -3217,7 +3217,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// submissions can P2P to the other.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P()
         {
             string projectPath1 = null;

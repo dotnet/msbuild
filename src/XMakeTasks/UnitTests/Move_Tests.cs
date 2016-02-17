@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
         /// Moving a locked file will fail
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void MoveLockedFile()
         {
             string file = null;

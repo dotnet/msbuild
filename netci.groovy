@@ -35,7 +35,7 @@ def project = GithubProject
             case 'OSX':
                 newJob.with{
                     steps{
-                        shell("./cibuild.sh --scope Compile")
+                        shell("./cibuild.sh --scope Test")
                     }
                 }
                 break;

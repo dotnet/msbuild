@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// on the Solution File Format Version.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject9()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// on the Solution File Format Version.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject10()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -910,7 +910,7 @@ EndGlobal
         /// The repro below has one of each case. WebProjects can't build so they are set as SkipNonexistentProjects='Build'
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void Regress751742_SkipNonexistentProjects()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1327,7 +1327,7 @@ EndGlobal
         /// Tests the algorithm for choosing default Venus configuration values for solutions
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void TestVenusConfigurationDefaults()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1356,7 +1356,7 @@ EndGlobal
         /// Tests that the correct value for TargetFrameworkVersion gets set when creating Venus solutions
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void VenusSolutionDefaultTargetFrameworkVersion()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1394,7 +1394,7 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void TestTargetFrameworkPaths0()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkSdkV20 != null)
@@ -1418,7 +1418,7 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void TestTargetFrameworkPaths1()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1443,7 +1443,7 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void TestTargetFrameworkPaths2()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1638,7 +1638,7 @@ EndGlobal
         /// solution configuration and SkipInvalidConfigurations is set to true.
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void TestSkipInvalidConfigurationsCase()
         {
             string tmpFileName = FileUtilities.GetTemporaryFile();

@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// subdir\test.proj
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void VerifyConditionsInsideOutsideTargets()
         {
             string testtargets = @"
@@ -2319,7 +2319,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Test standard reserved properties
         /// </summary>
         [Fact]
-        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "netcore-osx-failing")]
         public void ReservedProjectProperties()
         {
             string file = NativeMethodsShared.IsWindows ? @"c:\foo\bar.csproj" : "/foo/bar.csproj";
