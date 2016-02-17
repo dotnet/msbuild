@@ -161,7 +161,7 @@
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true' and '$(MonoBuild)' != 'true'">.NETFramework,Version=v4.6</NuGetTargetMoniker>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT' and '$(MonoBuild)' != 'true'">
     <DebugType/>
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
