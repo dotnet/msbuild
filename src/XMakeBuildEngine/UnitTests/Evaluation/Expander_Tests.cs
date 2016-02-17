@@ -34,6 +34,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
     public class Expander_Tests
     {
         private string _dateToParse = new DateTime(2010, 12, 25).ToString(CultureInfo.CurrentCulture);
+        private static readonly string s_rootPathPrefix = NativeMethodsShared.IsWindows ? "C:\\" : Path.VolumeSeparatorChar.ToString();
 
         [Fact]
         public void ExpandAllIntoTaskItems0()
@@ -235,7 +236,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal(1, itemsTrue.Count);
             Assert.Equal("i", itemsTrue[0].ItemType);
-            Assert.Equal(@"c:\firstdirectory\seconddirectory", itemsTrue[0].EvaluatedInclude);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "firstdirectory", "seconddirectory"), itemsTrue[0].EvaluatedInclude);
 
             IList<ProjectItemInstance> itemsDir = expander.ExpandIntoItemsLeaveEscaped("@(i->Metadata('Meta9')->DirectoryName()->Distinct())", itemFactory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
 
@@ -313,7 +314,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             string result = expander.ExpandIntoStringLeaveEscaped("@(i->'%(Meta0)'->'%(Directory)'->Distinct())", ExpanderOptions.ExpandItems, MockElementLocation.Instance);
 
-            Assert.Equal(@"firstdirectory\seconddirectory\", result);
+            Assert.Equal(Path.Combine("firstdirectory", "seconddirectory") + Path.DirectorySeparatorChar, result);
         }
 
         /// <summary>
@@ -666,7 +667,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal(10, itemsTrue.Count);
             Assert.Equal("i", itemsTrue[5].ItemType);
-            Assert.Equal(@"c:\firstdirectory\seconddirectory", itemsTrue[5].EvaluatedInclude);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "firstdirectory", "seconddirectory"), itemsTrue[5].EvaluatedInclude);
         }
 
         /// <summary>
@@ -727,10 +728,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ProjectItemInstance pi = new ProjectItemInstance(project, "i", "i" + n.ToString(), project.FullPath);
                 for (int m = 0; m < 5; m++)
                 {
-                    pi.SetMetadata("Meta" + m.ToString(), @"c:\firstdirectory\seconddirectory\file" + m.ToString() + ".ext");
+                    pi.SetMetadata("Meta" + m.ToString(), Path.Combine(s_rootPathPrefix, "firstdirectory", "seconddirectory", "file") + m.ToString() + ".ext");
                 }
-                pi.SetMetadata("Meta9", @"seconddirectory\file.ext");
-                pi.SetMetadata("Meta10", @";someo%3bherplace\foo.txt;secondd%3brectory\file.ext;");
+                pi.SetMetadata("Meta9", Path.Combine("seconddirectory", "file.ext"));
+                pi.SetMetadata("Meta10", String.Format(";{0};{1};", Path.Combine("someo%3bherplace", "foo.txt"), Path.Combine("secondd%3brectory", "file.ext")));
                 pi.SetMetadata("MetaBlank", @"");
 
                 if (n % 2 > 0)
@@ -1794,14 +1795,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionPropertyPathRootSubtraction()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("RootPath", @"c:\this\is\the\root"));
-            pg.Set(ProjectPropertyInstance.Create("MyPath", @"c:\this\is\the\root\my\project\is\here.proj"));
+            pg.Set(ProjectPropertyInstance.Create("RootPath", Path.Combine(s_rootPathPrefix, "this", "is", "the", "root")));
+            pg.Set(ProjectPropertyInstance.Create("MyPath", Path.Combine(s_rootPathPrefix, "this", "is", "the", "root", "my", "project", "is", "here.proj")));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
             string result = expander.ExpandIntoStringLeaveEscaped("$(MyPath.SubString($(RootPath.Length)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(@"\my\project\is\here.proj", result);
+            Assert.Equal(Path.Combine(Path.DirectorySeparatorChar.ToString(), "my", "project", "is", "here.proj"), result);
         }
 
         /// <summary>
@@ -1828,14 +1829,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionPropertyWithArgumentBooleanReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("PathRoot", @"c:\goo"));
-            pg.Set(ProjectPropertyInstance.Create("PathRoot2", @"c:\goop\"));
+            pg.Set(ProjectPropertyInstance.Create("PathRoot", Path.Combine(s_rootPathPrefix, "goo")));
+            pg.Set(ProjectPropertyInstance.Create("PathRoot2", Path.Combine(s_rootPathPrefix, "goop") + Path.DirectorySeparatorChar));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            string result = expander.ExpandIntoStringLeaveEscaped(@"$(PathRoot2.Endswith(\))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            string result = expander.ExpandIntoStringLeaveEscaped(@"$(PathRoot2.Endswith(" + Path.DirectorySeparatorChar + "))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("True", result);
-            result = expander.ExpandIntoStringLeaveEscaped(@"$(PathRoot.Endswith(\))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            result = expander.ExpandIntoStringLeaveEscaped(@"$(PathRoot.Endswith(" + Path.DirectorySeparatorChar + "))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("False", result);
         }
 
@@ -1961,13 +1962,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionInCondition()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("PathRoot", @"c:\goo"));
-            pg.Set(ProjectPropertyInstance.Create("PathRoot2", @"c:\goop\"));
+            pg.Set(ProjectPropertyInstance.Create("PathRoot", Path.Combine(s_rootPathPrefix, "goo")));
+            pg.Set(ProjectPropertyInstance.Create("PathRoot2", Path.Combine(s_rootPathPrefix, "goop") + Path.DirectorySeparatorChar));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            Assert.True(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot2.Endswith(`\`))' == 'true'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
-            Assert.True(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot.Endswith(\))' == 'false'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+            Assert.True(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot2.Endswith(`" + Path.DirectorySeparatorChar + "`))' == 'true'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+            Assert.True(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot.EndsWith(" + Path.DirectorySeparatorChar + "))' == 'false'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
         }
 
         /// <summary>
@@ -2149,8 +2150,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionStaticMethodMakeRelative()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("ParentPath", @"c:\abc\def"));
-            pg.Set(ProjectPropertyInstance.Create("FilePath", @"c:\abc\def\foo.cpp"));
+            pg.Set(ProjectPropertyInstance.Create("ParentPath", Path.Combine(s_rootPathPrefix, "abc", "def")));
+            pg.Set(ProjectPropertyInstance.Create("FilePath", Path.Combine(s_rootPathPrefix, "abc", "def", "foo.cpp")));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
@@ -2166,14 +2167,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionStaticMethod1()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("Drive", NativeMethodsShared.IsWindows ? @"c:\" : "/"));
-            pg.Set(ProjectPropertyInstance.Create("File", NativeMethodsShared.IsWindows ? @"foo\file.txt" : "foobar/file.txt"));
+            pg.Set(ProjectPropertyInstance.Create("Drive", s_rootPathPrefix));
+            pg.Set(ProjectPropertyInstance.Create("File", Path.Combine("foo", "file.txt")));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine($(Drive), `$(File)`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\foo\file.txt" : "/foobar/file.txt", result);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "foo", "file.txt"), result);
         }
 
         /// <summary>
@@ -2281,13 +2282,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionStaticMethodQuoted1()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("File", @"foo\file.txt"));
+            pg.Set(ProjectPropertyInstance.Create("File", Path.Combine("foo", "file.txt")));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine(`c:\`, `$(File)`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine(`" + s_rootPathPrefix + "`, `$(File)`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(@"c:\foo\file.txt", result);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "foo", "file.txt"), result);
         }
 
         /// <summary>
@@ -2302,10 +2303,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine(`" +
-                (NativeMethodsShared.IsWindows ? @"c:\foo goo\" : "/foo goo/") + "`, `$(File)`))",
+                Path.Combine(s_rootPathPrefix, "foo goo")  + "`, `$(File)`))",
                 ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\foo goo\foo goo\file.txt" : "/foo goo/foo goo/file.txt", result);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "foo goo", "foo goo", "file.txt"), result);
         }
 
         /// <summary>
@@ -2320,10 +2321,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine(`" +
-                (NativeMethodsShared.IsWindows ? @"c:\foo baz\" : "/foo baz/") + @"`, `$(File)`))",
+                Path.Combine(s_rootPathPrefix, "foo baz") + @"`, `$(File)`))",
                 ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\foo baz\foo bar\baz.txt" : "/foo baz/foo bar/baz.txt", result);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "foo baz", "foo bar", "baz.txt"), result);
         }
 
         /// <summary>
@@ -2338,9 +2339,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine(`" +
-                (NativeMethodsShared.IsWindows ? @"c:\foo baz" : "/foo baz") + @" `, `$(File)`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                Path.Combine(s_rootPathPrefix, "foo baz") + @" `, `$(File)`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\foo baz \foo bar\baz.txt" : "/foo baz /foo bar/baz.txt", result);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "foo baz ", "foo bar", "baz.txt"), result);
         }
 
         /// <summary>
@@ -2401,10 +2402,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine(`" +
-                (NativeMethodsShared.IsWindows ? @"c:\" : "/") +
+                s_rootPathPrefix +
                 @"`, $([System.IO.Path]::Combine(`foo`,`file.txt`))))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\foo\file.txt" : "/foo/file.txt", result);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "foo", "file.txt"), result);
         }
 
         /// <summary>
@@ -2918,7 +2919,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             StringMetadataTable itemMetadata = new StringMetadataTable(itemMetadataTable);
 
             List<ProjectItemInstance> ig = new List<ProjectItemInstance>();
-            pg.Set(ProjectPropertyInstance.Create("SomePath", NativeMethodsShared.IsWindows ? @"c:\some\path" : "/some/path"));
+            pg.Set(ProjectPropertyInstance.Create("SomePath", Path.Combine(s_rootPathPrefix, "some", "path")));
             ig.Add(new ProjectItemInstance(project, "Compile", "fOo.Cs", project.FullPath));
 
             ItemDictionary<ProjectItemInstance> itemsByType = new ItemDictionary<ProjectItemInstance>();
@@ -2928,7 +2929,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine($(SomePath),%(Compile.Identity)))", ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\some\path\fOo.Cs" : "/some/path/fOo.Cs", result);
+            Assert.Equal(Path.Combine(s_rootPathPrefix, "some", "path", "fOo.Cs"), result);
         }
 
         /// <summary>
