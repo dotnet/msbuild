@@ -25,6 +25,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     /// The text fixture to unit test the task generator.
     /// Creates a new TaskGenerator object and tests the various methods
     /// </summary>
+    [Trait("Category", "mono-osx-failing")]
     public sealed class LoadAndParseTests
     {
         /// <summary>
@@ -430,6 +431,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// Code must be compilable on its own.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TestGenerateCodeToStream()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -482,6 +484,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// Tests to make sure the file generated compiles
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TestGenerateToFile()
         {
             string xml = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -543,6 +546,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     #endregion
 
     #region Tests Generated code based on one xml file
+    [Trait("Category", "mono-osx-failing")]
     public sealed class GeneratedTaskTests
     {
         private Assembly _fakeTaskDll;

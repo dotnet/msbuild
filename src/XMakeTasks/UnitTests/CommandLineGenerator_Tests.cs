@@ -96,6 +96,7 @@ namespace Microsoft.Build.UnitTests
         /// Tests a command line generated from all of the specified switch values.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void BasicCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -107,6 +108,7 @@ namespace Microsoft.Build.UnitTests
         /// Tests a command line generated from a specific template
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TemplatedCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -119,6 +121,7 @@ namespace Microsoft.Build.UnitTests
         /// Tests a command line generated from a specific template is not case sensitive on the parameter names.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TemplateParametersAreCaseInsensitive()
         {
             CommandLineGenerator generator = CreateGenerator();

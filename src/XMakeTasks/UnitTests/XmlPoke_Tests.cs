@@ -78,6 +78,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void PokeNoNamespace()
         {
             MockEngine engine = new MockEngine(true);
@@ -282,6 +283,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void PokeElement()
         {
             MockEngine engine = new MockEngine(true);

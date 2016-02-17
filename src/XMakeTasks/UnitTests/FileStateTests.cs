@@ -51,6 +51,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void BadTooLongLastWriteTime()
         {
             Helpers.VerifyAssertThrowsSameWay(
@@ -340,6 +341,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void LengthReset()
         {
             string file = null;
@@ -395,6 +397,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void ReadOnlyOnDirectory()
         {
             Assert.Equal(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);
