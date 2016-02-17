@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies)
         {
-            var compilerIO = GetCompileIO(project, _args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue, dependencies, project == _rootProject);
+            var compilerIO = GetCompileIO(project, dependencies);
 
             // rebuild if empty inputs / outputs
             if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
@@ -290,6 +290,12 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add(_args.ConfigValue);
             args.Add(projectDependency.Project.ProjectDirectory);
 
+            if (!string.IsNullOrWhiteSpace(_args.RuntimeValue))
+            {
+                args.Add("--runtime");
+                args.Add(_args.RuntimeValue);
+            }
+
             if (!string.IsNullOrWhiteSpace(_args.BuildBasePathValue))
             {
                 args.Add("--build-base-path");
@@ -309,6 +315,12 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add(_rootProject.TargetFramework.ToString());            
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
+
+            if (!string.IsNullOrWhiteSpace(_args.RuntimeValue))
+            {
+                args.Add("--runtime");
+                args.Add(_args.RuntimeValue);
+            }
 
             if (!string.IsNullOrEmpty(_args.OutputValue))
             {
@@ -400,12 +412,13 @@ namespace Microsoft.DotNet.Tools.Build
 
         private void MakeRunnable()
         {
-            var outputPaths = _rootProject.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
-            var libraryExporter = _rootProject.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
-            var executable = new Executable(_rootProject, outputPaths, libraryExporter);
+            var runtimeContext = _rootProject.CreateRuntimeContext(_args.GetRuntimes());
+            var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
+            var libraryExporter = runtimeContext.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
+            var executable = new Executable(runtimeContext, outputPaths, libraryExporter);
             executable.MakeCompilationOutputRunnable();
-            
-            PatchMscorlibNextToCoreClr(_rootProject, _args.ConfigValue);
+
+            PatchMscorlibNextToCoreClr(runtimeContext, _args.ConfigValue);
         }
 
         // Workaround: CoreCLR packaging doesn't include side by side mscorlib, so copy it at build
@@ -475,8 +488,13 @@ namespace Microsoft.DotNet.Tools.Build
         // computes all the inputs and outputs that would be used in the compilation of a project
         // ensures that all paths are files
         // ensures no missing inputs
-        public static CompilerIO GetCompileIO(ProjectContext project, string buildConfiguration, string buildBasePath, string outputPath, ProjectDependenciesFacade dependencies, bool isRootProject)
+        public CompilerIO GetCompileIO(ProjectContext project, ProjectDependenciesFacade dependencies)
         {
+            var buildConfiguration = _args.ConfigValue;
+            var buildBasePath = _args.BuildBasePathValue;
+            var outputPath = _args.OutputValue;
+            var isRootProject = project == _rootProject;
+
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
             var calculator = project.GetOutputPaths(buildConfiguration, buildBasePath, outputPath);
             var binariesOutputPath = calculator.CompilationOutputPath;
@@ -497,7 +515,8 @@ namespace Microsoft.DotNet.Tools.Build
             var allOutputPath = new List<string>(calculator.CompilationFiles.All());
             if (isRootProject && project.ProjectFile.HasRuntimeOutput(buildConfiguration))
             {
-                allOutputPath.AddRange(calculator.RuntimeFiles.All());
+                var runtimeContext = project.CreateRuntimeContext(_args.GetRuntimes());
+                allOutputPath.AddRange(runtimeContext.GetOutputPaths(buildConfiguration, buildBasePath, outputPath).RuntimeFiles.All());
             }
             // output: compiler outputs
             foreach (var path in allOutputPath)

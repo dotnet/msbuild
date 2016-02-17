@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.ProjectModel
                         .WithRuntimeIdentifiers(runtimeIdentifiers)
                         .Build();
         }
-
+        
         /// <summary>
         /// Creates a project context for each framework located in the project at <paramref name="projectPath"/>
         /// </summary>
@@ -120,6 +120,19 @@ namespace Microsoft.DotNet.ProjectModel
             return new ProjectContextBuilder()
                         .WithProject(project)
                         .BuildAllTargets();
+        }
+
+
+        /// <summary>
+        /// Creates a project context based on existing context but using runtime target
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="runtimeIdentifiers"></param>
+        /// <returns></returns>
+
+        public ProjectContext CreateRuntimeContext(IEnumerable<string> runtimeIdentifiers)
+        {
+            return Create(ProjectFile.ProjectFilePath, TargetFramework, runtimeIdentifiers);
         }
 
         public OutputPaths GetOutputPaths(string configuration, string buidBasePath = null, string outputPath = null)
