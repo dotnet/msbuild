@@ -37,11 +37,17 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init), nameof(SetupTests), nameof(RestoreTests), nameof(BuildTests), nameof(RunTests), nameof(ValidateDependencies))]
         public static BuildTargetResult Test(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(RestoreTestPrerequisites), nameof(BuildTestPrerequisites))]
+        [Target(nameof(SetupTestPackages), nameof(SetupTestProjects))]
         public static BuildTargetResult SetupTests(BuildTargetContext c) => c.Success();
+        
+        [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
+        public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(RestoreTestAssetProjects), nameof(BuildTestAssetProjects))]
+        public static BuildTargetResult SetupTestProjects(BuildTargetContext c) => c.Success();
 
         [Target]
-        public static BuildTargetResult RestoreTestPrerequisites(BuildTargetContext c)
+        public static BuildTargetResult RestoreTestAssetPackages(BuildTargetContext c)
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
@@ -49,7 +55,21 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets")).Execute().EnsureSuccessful();
+            dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages")).Execute().EnsureSuccessful();
+
+            return c.Success();
+        }
+        
+        [Target]
+        public static BuildTargetResult RestoreTestAssetProjects(BuildTargetContext c)
+        {
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
+
+            CleanNuGetTempCache();
+
+            var dotnet = DotNetCli.Stage2;
+            dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects")).Execute().EnsureSuccessful();
 
             // The 'testapp' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
             dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "testapp")).CaptureStdErr().CaptureStdOut().Execute();
@@ -58,14 +78,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        public static BuildTargetResult BuildTestPrerequisites(BuildTargetContext c)
-        {
-            BuildTestAssetPackages(c);
-            BuildTestAssetProjects(c);
-            return c.Success();
-        }
-
-        public static void BuildTestAssetPackages(BuildTargetContext c)
+        public static BuildTargetResult BuildTestAssetPackages(BuildTargetContext c)
         {
             var dotnet = DotNetCli.Stage2;
 
@@ -81,9 +94,12 @@ namespace Microsoft.DotNet.Cli.Build
                     .Execute()
                     .EnsureSuccessful();
             }
+            
+            return c.Success();
         }
 
-        public static void BuildTestAssetProjects(BuildTargetContext c)
+        [Target]
+        public static BuildTargetResult BuildTestAssetProjects(BuildTargetContext c)
         {
             var dotnet = DotNetCli.Stage2;
             string testProjectsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
@@ -99,6 +115,8 @@ namespace Microsoft.DotNet.Cli.Build
                     .Execute()
                     .EnsureSuccessful();
             }
+            
+            return c.Success();
         }
 
         [Target]
