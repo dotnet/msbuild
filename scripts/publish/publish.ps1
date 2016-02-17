@@ -142,7 +142,7 @@ function UploadInstallers($installerFile)
 
 function UploadVersionBadge($badgeFile)
 {
-    $fileName = "windows_$($Configuration)_$([System.IO.Path]::GetFileName($badgeFile))"
+    $fileName = "windows_$($env:CONFIGURATION)_$([System.IO.Path]::GetFileName($badgeFile))"
     
     Write-Host "Uploading the version badge to Latest"
     UploadFile "$env:CHANNEL/Binaries/Latest/$fileName" $badgeFile
