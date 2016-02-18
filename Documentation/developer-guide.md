@@ -41,7 +41,7 @@ In order to build .NET Command Line Interface, you need the following installed 
 
 The dotnet CLI considers any executable on the path named `dotnet-{commandName}` to be a command it can call out to. `dotnet publish`, for example, is added to the path as an executable called `dotnet-publish`. To add a new command we must create the executable and then add it to the distribution packages for installation.
 
-0. Create an issue on https://github.com/dotnet/cli and get consensus on the need for and behavior of the command.
+0. Create an issue on https://github.com/dotnet/cli and get consensus on the need for and behaviour of the command.
 1. Add a new project for the command. 
 2. Add the project to Microsoft.DotNet.Cli.sln
 3. Create a Readme.md for the command.
@@ -51,7 +51,7 @@ The dotnet CLI considers any executable on the path named `dotnet-{commandName}`
 #### Add a new command project
 Start by copying an existing command, like /src/dotnet-new.  
 Update the Name property in project.json as well, and use the `dotnet-{command}` syntax here.
-Make sure to use the System.CommandLine parser so behavior is consistant across commands.
+Make sure to use the System.CommandLine parser so behaviour is consistent across commands.
 
 #### Add a Readme.md
 Each command's project root should contain a manpage-style Readme.md that describes the usage of the command. See other commands for reference.

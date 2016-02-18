@@ -27,10 +27,10 @@ These scenarios are focused on console applications and libraries.
 All of the scenarios below assume that the CLI tools have been acquired in some way. The acquisition of the CLI tools is explained in detail in a [separate specification](cli-install-experience.md). This document only contains a very short summary of that document.
 
 There are two main ways to acquire the CLI toolset:
-1. Using targeted platform's native installers - this approach is used by developers who want to get stable bits on their development machines and don't mind the system-wide installation and need for elevated priviliges. 
+1. Using targeted platform's native installers - this approach is used by developers who want to get stable bits on their development machines and don't mind the system-wide installation and need for elevated privileges. 
 2. Using a local install (a zip/tarball) - this approach is used by developers who want to enable their build servers to use CLI toolset or who want to have multiple, side-by-side installs.
 
-The bits that are gotten are same modulo potential differences in stability of the bits, however, the smoothness of the experience is not. With native installers the installers themselves do as much as possible to set up a working environment (installing dependencies where possible, setting needed envioronment variables etc.). Local installs require all of the work to be done by developers after dropping bits on the machine.
+The bits that are gotten are same modulo potential differences in stability of the bits, however, the smoothness of the experience is not. With native installers the installers themselves do as much as possible to set up a working environment (installing dependencies where possible, setting needed environment variables etc.). Local installs require all of the work to be done by developers after dropping bits on the machine.
 
 The below scenarios must work regardless of the way used to acquire the tools. 
 
@@ -38,7 +38,7 @@ The below scenarios must work regardless of the way used to acquire the tools.
 
 # Starting a new console application
 
-## Narative
+## Narrative
 The developer would like to kick the tires on .NET Core by writing a console application. She would like to use the new .NET Core CLI tooling to help her get started, manage dependencies and quickly test out the console application by running it from source. She would then like to try building the code and running it using the shared host that is installed with the CLI toolset. 
 
 ## Steps
@@ -110,7 +110,7 @@ Hello World!
 # Starting a new class library
 
 ## Narrative 
-Once started, the developer wants to also include a class library in order to have a place to share common code. She wants to use the CLI toolset to boostrap this effort as well. 
+Once started, the developer wants to also include a class library in order to have a place to share common code. She wants to use the CLI toolset to bootstrap this effort as well. 
 
 ## Steps
 
@@ -170,7 +170,7 @@ Creating a "mylib" class library in "mylib"
 # Adding 3rd party dependencies to the projects
 
 ## Narrative
-Working towards a complete application, the developer realizes she needs to add good JSON parsing support. Searching across the internet, she finds JSON.NET to be the most reccomended choice. She now uses the CLI tooling to install a dependency off of NuGet. 
+Working towards a complete application, the developer realizes she needs to add good JSON parsing support. Searching across the internet, she finds JSON.NET to be the most recommended choice. She now uses the CLI tooling to install a dependency off of NuGet. 
 
 >**NOTE:** the shape of the commands used in this scenario is still being discussed. 
 
@@ -308,9 +308,9 @@ Coding away on the application has proven worthwhile and our developer wants to 
 # Publishing a self-contained console application for all platforms
 
 ## Narrative
-After getting feedback from her collegaue developer, our developer decides to test on another machine. However, this machine doesn't have the shared host installed and she cannot get it installed. Luckily, she realizes that .NET Core has support for self-contained applications 
+After getting feedback from her colleague developer, our developer decides to test on another machine. However, this machine doesn't have the shared host installed and she cannot get it installed. Luckily, she realizes that .NET Core has support for self-contained applications 
 
-**NOTE**: some of the behaviors in this scenario are still being discussed with the relevant stakeholders. 
+**NOTE**: some of the behaviours in this scenario are still being discussed with the relevant stakeholders. 
 
 ## Steps
 
@@ -327,7 +327,7 @@ After getting feedback from her collegaue developer, our developer decides to te
   }
   ```
 
-2. Restore the project's dependencies again to ensure the platform-specific depdendencies for the specified runtimes are acquired:
+2. Restore the project's dependencies again to ensure the platform-specific dependencies for the specified runtimes are acquired:
   ```
   /myapp> dotnet restore
   
@@ -382,7 +382,7 @@ After getting feedback from her collegaue developer, our developer decides to te
 
 # Packaging a class library 
 
-## Narative 
+## Narrative 
 The developer wants to take the library she built and package it up as a NuGet package in order to share it with the rest of the ecosystem. Again, she would like to use the CLI toolset to achieve this. Since she wants to be sure that all her code is in a pristine condition, she will also build it one more time, run tests and then package it. 
 
 ## Steps 
@@ -405,7 +405,7 @@ The developer wants to take the library she built and package it up as a NuGet p
 2. Switch to the test project and run unit tests
 
 ```console
-[switch to the directory containg unit tests]
+[switch to the directory containing unit tests]
 /mytests> dotnet test
 
 [info about tests flies around]

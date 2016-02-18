@@ -194,7 +194,7 @@ Only dependencies with a `type` value of `package` will have asset lists (`compi
 
 ### `libraries` Section (`.deps.json`)
 
-This section contains a union of all the dependencies found in the various targets, and contains common metadata for them. Specifically, it contains the `type`, as well as a boolean indicating if the library can be serviced (`servicable`, only for `package`-typed libraries) and a SHA-512 hash of the package file (`sha512`, only for `package`-typed libraries.
+This section contains a union of all the dependencies found in the various targets, and contains common metadata for them. Specifically, it contains the `type`, as well as a boolean indicating if the library can be serviced (`serviceable`, only for `package`-typed libraries) and a SHA-512 hash of the package file (`sha512`, only for `package`-typed libraries.
 
 **Open Question**: We could probably exclude projects from this set in order to reduce duplication. The main reason this is a separate section is because that's how the lock file is formatted and we want to try an keep this format the same if possible.
 
