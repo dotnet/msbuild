@@ -601,7 +601,7 @@ namespace Microsoft.Build.Shared
             {
                 return s_frameworkPathRegex
                        ?? (s_frameworkPathRegex =
-                           new Regex(FrameworkBasePath + @"/(?:xbuild/)?v?(\d+)\.(\d+)(?:[.\d]*/?)?(.*)?"));
+                           new Regex(FrameworkBasePath + @"/(?:xbuild/)?v?(\d+)\.(\d+)([^/]*)?/?(.*)?"));
             }
         }
 
@@ -635,18 +635,26 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
+            string versionDir = m.Groups[1].Value + '.' + m.Groups[2].Value;
+            if (!String.IsNullOrEmpty(m.Groups[3].Value)) {
+                // add the remainder of the version directory name
+                // Eg. /xbuild/4.5-api/foo
+                // "-api" is the remainder
+                versionDir += m.Groups[3].Value;
+            }
+
             // Based on the version directory, find the correct path.
             string root = majorVersion > 4 ?
                 Path.Combine(
                               FrameworkBasePath,
                               "xbuild",
-                              m.Groups[1].Value + '.' + m.Groups[2].Value,
+                              versionDir,
                               "bin") :
                 Path.Combine(
                               FrameworkBasePath,
-                              m.Groups[1].Value + '.' + m.Groups[2].Value);
+                              versionDir);
             string lastChar = path.EndsWith("/") ? "/" : "";
-            return string.IsNullOrEmpty(m.Groups[3].Value) ? root + lastChar : Path.Combine(root, m.Groups[3].Value);
+            return string.IsNullOrEmpty(m.Groups[4].Value) ? root + lastChar : Path.Combine(root, m.Groups[4].Value);
         }
 
         /// <summary>
