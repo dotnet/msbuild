@@ -97,7 +97,7 @@ namespace Microsoft.Build.Evaluation
 
             if (!String.IsNullOrEmpty(_project.FullPath)) // Ignore in-memory projects
             {
-                destinationDocument.AppendChild(destinationDocument.CreateComment("\r\n" + new String('=', 140) + "\r\n" + _project.FullPath + "\r\n" + new String('=', 140) + "\r\n"));
+                destinationDocument.AppendChild(destinationDocument.CreateComment("\r\n" + new String('=', 140) + "\r\n" + _project.FullPath.Replace("--", "__") + "\r\n" + new String('=', 140) + "\r\n"));
             }
 
             CloneChildrenResolvingImports(outerDocument, destinationDocument);
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Evaluation
                         XmlDocument innerDocument = resolved.XmlDocument;
 
                         string importTag = "  <Import Project=\"" + importProject + "\"" + ((importCondition.Length > 0) ? " Condition=\"" + importCondition + "\"" : String.Empty) + ">";
-                        destination.AppendChild(destination.OwnerDocument.CreateComment("\r\n" + new String('=', 140) + "\r\n" + importTag + "\r\n\r\n" + resolved.FullPath + "\r\n" + new String('=', 140) + "\r\n"));
+                        destination.AppendChild(destination.OwnerDocument.CreateComment("\r\n" + new String('=', 140) + "\r\n" + importTag + "\r\n\r\n" + resolved.FullPath.Replace("--", "__") + "\r\n" + new String('=', 140) + "\r\n"));
 
                         _filePaths.Push(resolved.FullPath);
                         CloneChildrenResolvingImports(innerDocument, destination);
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
-                            destination.AppendChild(destination.OwnerDocument.CreateComment("\r\n" + new String('=', 140) + "\r\n  </Import>\r\n\r\n" + _filePaths.Peek() + "\r\n" + new String('=', 140) + "\r\n"));
+                            destination.AppendChild(destination.OwnerDocument.CreateComment("\r\n" + new String('=', 140) + "\r\n  </Import>\r\n\r\n" + _filePaths.Peek()?.Replace("--", "__") + "\r\n" + new String('=', 140) + "\r\n"));
                         }
                     }
 
