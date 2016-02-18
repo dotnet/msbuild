@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public sealed class PublishCommand : TestCommand
     {
+        private const string PublishSubfolderName = "publish";
+
         private Project _project;
         private string _path;
         private string _framework;
@@ -61,8 +63,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string framework = string.IsNullOrEmpty(_framework) ?
                 _project.GetTargetFrameworks().First().FrameworkName.GetShortFolderName() : _framework;
             string runtime = string.IsNullOrEmpty(_runtime) ? PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier() : _runtime;
-            
-            string output = Path.Combine(config, framework, runtime);
+            string output = Path.Combine(config, framework, runtime, PublishSubfolderName);
 
             return output;
         }

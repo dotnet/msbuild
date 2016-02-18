@@ -19,6 +19,8 @@ namespace Microsoft.DotNet.Tools.Publish
 {
     public partial class PublishCommand
     {
+        private const string PublishSubfolderName = "publish";
+
         public string ProjectPath { get; set; }
         public string Configuration { get; set; }
         public string BuildBasePath { get; set; }
@@ -88,7 +90,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             if (string.IsNullOrEmpty(outputPath))
             {
-                outputPath = context.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeOutputPath;
+                outputPath = Path.Combine(context.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeOutputPath, PublishSubfolderName);
             }
 
             var contextVariables = new Dictionary<string, string>

@@ -60,7 +60,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         private void MakeCompilationOutputRunnableForFullFramework(
             string outputPath)
         {
-            CopyAllDependencies(outputPath, _exporter.GetAllExports());
+            CopyAllDependencies(outputPath, _exporter.GetDependencies());
             GenerateBindingRedirects(_exporter);
         }
 
@@ -97,9 +97,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 .GetDependencies(LibraryType.Package)
                 .WriteDepsTo(Path.Combine(outputPath, projectFileName + FileNameSuffixes.Deps));
 
-            var projectExports = exporter.GetAllExports()
-                .Where(e => e.Library.Identity.Type == LibraryType.Project)
-                .ToArray();
+            var projectExports = exporter.GetDependencies(LibraryType.Project);
 
             CopyAllDependencies(outputPath, projectExports);
         }
