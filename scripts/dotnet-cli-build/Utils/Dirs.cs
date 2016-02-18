@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string Stage2Compilation = Path.Combine(Output, "stage2compilation");
         public static readonly string Corehost = Path.Combine(Output, "corehost");
         public static readonly string TestOutput = Path.Combine(Output, "tests");
+        public static readonly string TestArtifacts = Path.Combine(TestOutput, "artifacts");
         public static readonly string TestPackages = Path.Combine(TestOutput, "packages");
 
         public static readonly string OSXReferenceAssembliesPath = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/xbuild-frameworks";

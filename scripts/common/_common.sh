@@ -14,9 +14,6 @@ COMMONDIR="$( cd -P "$( dirname "$COMMONSOURCE" )" && pwd )"
 source "$COMMONDIR/_prettyprint.sh"
 
 # Other variables are set by the outer build script
-export TEST_ROOT="$OUTPUT_ROOT/tests"  
-export TEST_ARTIFACTS="$TEST_ROOT/artifacts"  
-
 export CHANNEL=$RELEASE_SUFFIX
 
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$RID

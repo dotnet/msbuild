@@ -190,6 +190,7 @@ namespace Microsoft.DotNet.Cli.Build
                     .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test", project))
                     .Environment(vsvars)
                     .EnvironmentVariable("PATH", $"{DotNetCli.Stage2.BinPath}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}")
+                    .EnvironmentVariable("TEST_ARTIFACTS", Dirs.TestArtifacts)
                     .Execute();
                 if (result.ExitCode != 0)
                 {
