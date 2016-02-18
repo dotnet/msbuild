@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Fact]
-        public void SettingVersionInEnvironment_ShouldStampedAssemblyInfoInOutputAssembly()
+        public void SettingVersionInEnvironment_ShouldStampAssemblyInfoInOutputAssembly()
         {
             var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithConfiguration")
                                                 .WithLockFiles();
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
         
         [Fact]
-        public void SettingVersionSuffixFlag_ShouldStampedAssemblyInfoInOutputAssembly()
+        public void SettingVersionSuffixFlag_ShouldStampAssemblyInfoInOutputAssembly()
         {
             var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithConfiguration")
                                                 .WithLockFiles();
