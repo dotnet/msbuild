@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Tools.Publish
             var runtime = app.Option("-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to publish for", CommandOptionType.SingleValue);
             var buildBasePath = app.Option("-b|--build-base-path <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
             var output = app.Option("-o|--output <OUTPUT_PATH>", "Path in which to publish the app", CommandOptionType.SingleValue);
+            var versionSuffix = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var projectPath = app.Argument("<PROJECT>", "The project to publish, defaults to the current directory. Can be a path to a project.json or a project directory");
             var nativeSubdirectories = app.Option("--native-subdirectory", "Temporary mechanism to include subdirectories from native assets of dependency packages in output", CommandOptionType.NoValue);
@@ -39,6 +40,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 publish.Configuration = configuration.Value() ?? Constants.DefaultConfiguration;
                 publish.NativeSubdirectories = nativeSubdirectories.HasValue();
                 publish.ProjectPath = projectPath.Value;
+                publish.VersionSuffix = versionSuffix.Value();
 
                 if (string.IsNullOrEmpty(publish.ProjectPath))
                 {

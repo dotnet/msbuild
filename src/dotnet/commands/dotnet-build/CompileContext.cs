@@ -284,8 +284,8 @@ namespace Microsoft.DotNet.Tools.Build
             var args = new List<string>();
 
             args.Add("--framework");
-            args.Add($"{projectDependency.Framework}");                       
-            
+            args.Add($"{projectDependency.Framework}");
+
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
             args.Add(projectDependency.Project.ProjectDirectory);
@@ -294,6 +294,12 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 args.Add("--runtime");
                 args.Add(_args.RuntimeValue);
+            }
+
+            if (!string.IsNullOrEmpty(_args.VersionSuffixValue))
+            {
+                args.Add("--version-suffix");
+                args.Add(_args.VersionSuffixValue);
             }
 
             if (!string.IsNullOrWhiteSpace(_args.BuildBasePathValue))
@@ -312,7 +318,7 @@ namespace Microsoft.DotNet.Tools.Build
             // todo: add methods to CompilerCommandApp to generate the arg string?
             var args = new List<string>();
             args.Add("--framework");
-            args.Add(_rootProject.TargetFramework.ToString());            
+            args.Add(_rootProject.TargetFramework.ToString());
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
 
@@ -326,6 +332,12 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 args.Add("--output");
                 args.Add(_args.OutputValue);
+            }
+
+            if (!string.IsNullOrEmpty(_args.VersionSuffixValue))
+            {
+                args.Add("--version-suffix");
+                args.Add(_args.VersionSuffixValue);
             }
 
             if (!string.IsNullOrEmpty(_args.BuildBasePathValue))

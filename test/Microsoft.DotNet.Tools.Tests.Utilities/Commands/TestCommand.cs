@@ -5,13 +5,16 @@ using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public class TestCommand
     {
         protected string _command;
-        
+
+        public Dictionary<string, string> Environment { get; } = new Dictionary<string, string>();
+
         public TestCommand(string command)
         {
             _command = command;
@@ -63,9 +66,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 RedirectStandardOutput = true
             };
 
+            foreach (var item in Environment)
+            {
+                psi.Environment[item.Key] = item.Value;
+            }
+
             var process = new Process
             {
-                StartInfo = psi
+                StartInfo = psi,
             };
 
             process.EnableRaisingEvents = true;

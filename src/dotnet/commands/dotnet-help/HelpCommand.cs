@@ -27,7 +27,7 @@ Common Commands:
   run           Compiles and immediately executes a .NET project
   repl          Launch an interactive session (read, eval, print, loop)
   pack          Creates a NuGet package";
-        private static readonly string ProductVersion = GetProductVersion();
+        public static readonly string ProductVersion = GetProductVersion();
 
         private static string GetProductVersion()
         {

@@ -39,33 +39,31 @@ namespace Microsoft.DotNet.Tools.Compiler
                     pathValue = Directory.GetCurrentDirectory();
                 }
 
-                if(!pathValue.EndsWith(Project.FileName))
+                if (!pathValue.EndsWith(Project.FileName))
                 {
                     pathValue = Path.Combine(pathValue, Project.FileName);
                 }
 
-                if(!File.Exists(pathValue))
+                if (!File.Exists(pathValue))
                 {
                     Reporter.Error.WriteLine($"Unable to find a project.json in {pathValue}");
                     return 1;
                 }
 
                 // Set defaults based on the environment
-                var settings = new ProjectReaderSettings();
-                settings.VersionSuffix = Environment.GetEnvironmentVariable("DOTNET_BUILD_VERSION");
-                settings.AssemblyFileVersion = Environment.GetEnvironmentVariable("DOTNET_ASSEMBLY_FILE_VERSION");
+                var settings = ProjectReaderSettings.ReadFromEnvironment();
+                var versionSuffixValue = versionSuffix.Value();
 
-                if (versionSuffix.HasValue())
+                if (!string.IsNullOrEmpty(versionSuffixValue))
                 {
-                    settings.VersionSuffix = versionSuffix.Value();
+                    settings.VersionSuffix = versionSuffixValue;
                 }
-
-                var contexts = ProjectContext.CreateContextForEachFramework(pathValue, settings);
 
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
                 var outputValue = output.Value();
                 var buildBasePathValue = buildBasePath.Value();
 
+                var contexts = ProjectContext.CreateContextForEachFramework(pathValue, settings);
                 var project = contexts.First().ProjectFile;
 
                 var artifactPathsCalculator = new ArtifactPathsCalculator(project, buildBasePathValue, outputValue, configValue);
@@ -74,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 int buildResult = 0;
                 if (!noBuild.HasValue())
                 {
-                    var buildProjectCommand = new BuildProjectCommand(project, artifactPathsCalculator, buildBasePathValue, configValue);
+                    var buildProjectCommand = new BuildProjectCommand(project, artifactPathsCalculator, buildBasePathValue, configValue, versionSuffixValue);
                     buildResult = buildProjectCommand.Execute();
                 }
 
@@ -94,6 +92,6 @@ namespace Microsoft.DotNet.Tools.Compiler
 #endif
                 return 1;
             }
-        }                
+        }
     }
 }

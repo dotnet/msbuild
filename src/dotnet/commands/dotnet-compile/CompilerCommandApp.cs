@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         private CommandOption _buildBasePath;
         private CommandOption _frameworkOption;
         private CommandOption _runtimeOption;
+        private CommandOption _versionSuffixOption;
         private CommandOption _configurationOption;
         private CommandArgument _projectArgument;
         private CommandOption _nativeOption;
@@ -41,7 +42,8 @@ namespace Microsoft.DotNet.Tools.Compiler
         public string ProjectPathValue { get; set; }
         public string BuildBasePathValue { get; set; }
         public string OutputValue { get; set; }
-        public string RuntimeValue{ get; set; }
+        public string RuntimeValue { get; set; }
+        public string VersionSuffixValue { get; set; }
         public string ConfigValue { get; set; }
         public bool IsNativeValue { get; set; }
         public string ArchValue { get; set; }
@@ -53,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         public string CppCompilerFlagsValue { get; set; }
 
         // workaround: CommandLineApplication is internal therefore I cannot make _app protected so baseclasses can add their own params
-        private readonly Dictionary<string, CommandOption> baseClassOptions; 
+        private readonly Dictionary<string, CommandOption> baseClassOptions;
 
         public CompilerCommandApp(string name, string fullName, string description)
         {
@@ -78,6 +80,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             _frameworkOption = _app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             _configurationOption = _app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             _runtimeOption = _app.Option("-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to publish for", CommandOptionType.SingleValue);
+            _versionSuffixOption = _app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
             _projectArgument = _app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             // Native Args
@@ -106,6 +109,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 BuildBasePathValue = _buildBasePath.Value();
                 ConfigValue = _configurationOption.Value() ?? Constants.DefaultConfiguration;
                 RuntimeValue = _runtimeOption.Value();
+                VersionSuffixValue = _versionSuffixOption.Value();
 
                 IsNativeValue = _nativeOption.HasValue();
                 ArchValue = _archOption.Value();
@@ -117,11 +121,24 @@ namespace Microsoft.DotNet.Tools.Compiler
                 CppCompilerFlagsValue = _cppCompilerFlagsOption.Value();
 
                 IEnumerable<ProjectContext> contexts;
+                
+                // Set defaults based on the environment
+                var settings = ProjectReaderSettings.ReadFromEnvironment();
+
+                if (!string.IsNullOrEmpty(VersionSuffixValue))
+                {
+                    settings.VersionSuffix = VersionSuffixValue;
+                }
 
                 if (_frameworkOption.HasValue())
                 {
                     contexts = _frameworkOption.Values
-                        .Select(f => ProjectContext.Create(ProjectPathValue, NuGetFramework.Parse(f)));
+                        .Select(f =>
+                        {
+                            return ProjectContext.CreateBuilder(ProjectPathValue, NuGetFramework.Parse(f))
+                                                 .WithReaderSettings(settings)
+                                                 .Build();
+                        });
                 }
                 else
                 {
@@ -131,7 +148,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     }
                     else
                     {
-                        contexts = ProjectContext.CreateContextForEachFramework(ProjectPathValue, settings: null);
+                        contexts = ProjectContext.CreateContextForEachFramework(ProjectPathValue, settings);
                     }
                 }
 
@@ -145,11 +162,12 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         public CompilerCommandApp ShallowCopy()
         {
-            return (CompilerCommandApp) MemberwiseClone();
+            return (CompilerCommandApp)MemberwiseClone();
         }
 
         // CommandOptionType is internal. Cannot pass it as argument. Therefore the method name encodes the option type.
-        protected void AddNoValueOption(string optionTemplate, string descriptino){
+        protected void AddNoValueOption(string optionTemplate, string descriptino)
+        {
             baseClassOptions[optionTemplate] = _app.Option(optionTemplate, descriptino, CommandOptionType.NoValue);
         }
 
@@ -169,7 +187,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
             else
             {
-                return new [] { RuntimeValue };
+                return new[] { RuntimeValue };
             }
         }
     }

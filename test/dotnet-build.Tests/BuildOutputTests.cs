@@ -1,15 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using FluentAssertions.Common;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.PlatformAbstractions;
-using NuGet.Frameworks;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
@@ -91,6 +88,44 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             libdebug.Should().Exist().And.HaveFiles(_libCompileFiles);
             appdebug.Should().Exist().And.HaveFiles(_appCompileFiles);
             appruntime.Should().Exist().And.HaveFiles(_runtimeFiles);
+        }
+
+        [Fact]
+        public void SettingVersionInEnvironment_ShouldStampAssemblyInfoInOutputAssembly()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithConfiguration")
+                                                .WithLockFiles();
+
+            var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: DefaultFramework);
+            cmd.Environment["DOTNET_BUILD_VERSION"] = "85";
+            cmd.Environment["DOTNET_ASSEMBLY_FILE_VERSION"] = "345";
+            cmd.ExecuteWithCapturedOutput().Should().Pass();
+
+            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, "TestLibraryWithConfiguration.dll");
+            var informationalVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyInformationalVersionAttribute");
+            var fileVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyFileVersionAttribute");
+
+            informationalVersion.Should().NotBeNull();
+            informationalVersion.Should().BeEquivalentTo("1.0.0-85");
+
+            fileVersion.Should().NotBeNull();
+            fileVersion.Should().BeEquivalentTo("1.0.0.345");
+        }
+        
+        [Fact]
+        public void SettingVersionSuffixFlag_ShouldStampAssemblyInfoInOutputAssembly()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithConfiguration")
+                                                .WithLockFiles();
+
+            var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: DefaultFramework, versionSuffix: "85");
+            cmd.ExecuteWithCapturedOutput().Should().Pass();
+
+            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, "TestLibraryWithConfiguration.dll");
+            var informationalVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyInformationalVersionAttribute");
+
+            informationalVersion.Should().NotBeNull();
+            informationalVersion.Should().BeEquivalentTo("1.0.0-85");
         }
 
         [Fact]

@@ -3,8 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Test;
+using Microsoft.Extensions.PlatformAbstractions;
+using NuGet.Frameworks;
 using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Compiler;
@@ -14,13 +18,10 @@ using Microsoft.DotNet.Tools.Compiler.Native;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.Publish;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.DotNet.Tools.Restore;
-using NuGet.Frameworks;
-using Microsoft.DotNet.Tools.Resgen;
-using Microsoft.DotNet.Tools.Run;
-using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.Repl;
+using Microsoft.DotNet.Tools.Resgen;
+using Microsoft.DotNet.Tools.Restore;
+using Microsoft.DotNet.Tools.Run;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -134,6 +135,12 @@ namespace Microsoft.DotNet.Cli
         {
             HelpCommand.PrintVersionHeader();
 
+            var commitSha = GetCommitSha();
+            Reporter.Output.WriteLine();
+            Reporter.Output.WriteLine("Product Information:");
+            Reporter.Output.WriteLine($" Version:     {HelpCommand.ProductVersion}");
+            Reporter.Output.WriteLine($" Commit Sha:  {commitSha.Substring(0, 10)}");
+            Reporter.Output.WriteLine();
             var runtimeEnvironment = PlatformServices.Default.Runtime;
             Reporter.Output.WriteLine("Runtime Environment:");
             Reporter.Output.WriteLine($" OS Name:     {runtimeEnvironment.OperatingSystem}");
@@ -150,6 +157,19 @@ namespace Microsoft.DotNet.Cli
         private static bool IsArg(string candidate, string shortName, string longName)
         {
             return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
+        }
+        
+        private static string GetCommitSha()
+        {
+            // The CLI ships with a .version file that stores the commit information
+            var versionFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", ".version"));
+            
+            if (File.Exists(versionFile))
+            {
+                return File.ReadLines(versionFile).FirstOrDefault();
+            }
+            
+            return null;
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private Func<string, LockFile> LockFileResolver { get; set; }
 
-        private ProjectReaderSettings Settings { get; set; }
+        private ProjectReaderSettings Settings { get; set; } = ProjectReaderSettings.ReadFromEnvironment();
 
         public ProjectContextBuilder()
         {

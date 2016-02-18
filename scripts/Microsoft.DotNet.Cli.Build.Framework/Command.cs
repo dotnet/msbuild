@@ -135,10 +135,16 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         public Command Environment(IDictionary<string, string> env)
         {
-            foreach(var item in env)
+            foreach (var item in env)
             {
                 _process.StartInfo.Environment[item.Key] = item.Value;
             }
+            return this;
+        }
+        
+        public Command Environment(string key, string value)
+        {
+            _process.StartInfo.Environment[key] = value;
             return this;
         }
 

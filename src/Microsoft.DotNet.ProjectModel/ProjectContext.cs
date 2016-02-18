@@ -84,6 +84,17 @@ namespace Microsoft.DotNet.ProjectModel
                         .Build();
         }
         
+        public static ProjectContextBuilder CreateBuilder(string projectPath, NuGetFramework framework)
+        {
+            if (projectPath.EndsWith(Project.FileName))
+            {
+                projectPath = Path.GetDirectoryName(projectPath);
+            }
+            return new ProjectContextBuilder()
+                        .WithProjectDirectory(projectPath)
+                        .WithTargetFramework(framework);
+        }
+        
         /// <summary>
         /// Creates a project context for each framework located in the project at <paramref name="projectPath"/>
         /// </summary>

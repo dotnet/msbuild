@@ -17,18 +17,22 @@ namespace Microsoft.DotNet.Tools.Pack
         private readonly string _buildBasePath;
         private readonly string _configuration;
 
+        private readonly string _versionSuffix;
+
         private bool SkipBuild => _artifactPathsCalculator.CompiledArtifactsPathSet;
-        
+
         public BuildProjectCommand(
-            Project project, 
-            ArtifactPathsCalculator artifactPathsCalculator, 
-            string buildBasePath, 
-            string configuration)
+            Project project,
+            ArtifactPathsCalculator artifactPathsCalculator,
+            string buildBasePath,
+            string configuration,
+            string versionSuffix)
         {
             _project = project;
             _artifactPathsCalculator = artifactPathsCalculator;
             _buildBasePath = buildBasePath;
             _configuration = configuration;
+            _versionSuffix = versionSuffix;
         }
 
         public int Execute()
@@ -43,6 +47,12 @@ namespace Microsoft.DotNet.Tools.Pack
                 var argsBuilder = new List<string>();
                 argsBuilder.Add("--configuration");
                 argsBuilder.Add($"{_configuration}");
+
+                if (!string.IsNullOrEmpty(_versionSuffix))
+                {
+                    argsBuilder.Add("--version-suffix");
+                    argsBuilder.Add(_versionSuffix);
+                }
 
                 if (!string.IsNullOrEmpty(_buildBasePath))
                 {
