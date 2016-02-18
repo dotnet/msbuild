@@ -126,7 +126,7 @@ esac
 
 MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS"' "'"/fileloggerparameters:Verbosity=diag;LogFile=$LOG_PATH_ARG"'"'
 
-MONO_COMMAND="${MONO_BIN_DIR}mono $MSBUILD_EXE $MSBUILD_ARGS"
+MONO_COMMAND="${MONO_BIN_DIR}mono --debug $MSBUILD_EXE $MSBUILD_ARGS"
 
 #home is not defined on CI machines
 setHome
