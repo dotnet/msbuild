@@ -93,12 +93,19 @@ validate_env_variables(){
 upload_file_to_blob_storage_azure_cli(){
     local blob=$1
     local file=$2
+    local preventCaching=${3:false}
 
     header "Uploading $file to blob storage"
 
+    local properties=""
+    
+    if $preventCaching ; then
+        $properties="--properties cacheControl=no-cache"
+    fi
+
     # use azure cli to upload to blob storage. We cannot use curl to do this becuase azure has a max limit of 64mb that can be uploaded using REST
     # statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $upload_URL -T $file)
-    azure storage blob upload --quiet --container $STORAGE_CONTAINER --blob $blob --blobtype block --connection-string "$CONNECTION_STRING" --file $file
+    azure storage blob upload --quiet $properties --container $STORAGE_CONTAINER --blob $blob --blobtype block --connection-string "$CONNECTION_STRING" --file $file
     result=$?
 
     if [ "$result" -eq "0" ]; then
@@ -141,7 +148,7 @@ upload_binaries_to_blob_storage(){
     echo "Updating the latest dotnet binaries.."
     local latestblob="$CHANNEL/Binaries/Latest/dotnet-$OSNAME-x64.latest.tar.gz"
 
-    if ! upload_file_to_blob_storage_azure_cli $latestblob $tarfile; then
+    if ! upload_file_to_blob_storage_azure_cli $latestblob $tarfile true; then
         return 1
     fi
 
@@ -149,14 +156,14 @@ upload_binaries_to_blob_storage(){
     local indexContent="Binaries/$DOTNET_CLI_VERSION/$filename"
     local indexfile="latest.$OSNAME.index"
     local index_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
-    update_file_in_blob_storage $index_URL $indexfile $indexContent
+    update_file_in_blob_storage $index_URL $indexfile $indexContent true
 
     # update the version file
     # the "@" prefix tells curl to upload the content of the file
     local versionContent="@$REPOROOT/artifacts/$RID/stage2/.version"
     local versionfile="latest.$OSNAME.version"
     local version_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$versionfile$SASTOKEN"
-    update_file_in_blob_storage $version_URL $versionfile $versionContent
+    update_file_in_blob_storage $version_URL $versionfile $versionContent true
 
     return $?
 }
@@ -175,7 +182,7 @@ upload_installers_to_blob_storage(){
     local extension="${filename##*.}"
     local latestblob="$CHANNEL/Installers/Latest/dotnet-$OSNAME-x64.latest.$extension"
 
-    if ! upload_file_to_blob_storage_azure_cli $latestblob $installfile; then
+    if ! upload_file_to_blob_storage_azure_cli $latestblob $installfile true; then
         return 1
     fi
 
@@ -194,7 +201,7 @@ upload_version_badge(){
     local badgefile=$1
     local filename="${OSNAME}_${CONFIGURATION}_$(basename $badgefile)"
     echo "Uploading the version badge to Latest"
-    upload_file_to_blob_storage_azure_cli "$CHANNEL/Binaries/Latest/$filename" $badgefile
+    upload_file_to_blob_storage_azure_cli "$CHANNEL/Binaries/Latest/$filename" $badgefile true
     
     echo "Uploading the version badge to $DOTNET_CLI_VERSION"
     upload_file_to_blob_storage_azure_cli "$CHANNEL/Binaries/$DOTNET_CLI_VERSION/$filename" $badgefile

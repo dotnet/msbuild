@@ -49,7 +49,7 @@ function CheckRequiredVariables
     return $true
 }
 
-function UploadFile($Blob, $Uploadfile)
+function UploadFile($Blob, $Uploadfile, $PreventCaching = $false)
 {
     Write-Host "Uploading $Uploadfile to dotnet feed."
 
@@ -57,10 +57,17 @@ function UploadFile($Blob, $Uploadfile)
     {
         $env:HOME=Get-Location
     }
-
+    
+    $properties = ""
+    
+    if($PreventCaching)
+    {
+        $properties = "--properties cacheControl=no-cache"
+    }
+    
     # use azure cli to upload to blob storage. We cannot use Invoke-WebRequest to do this becuase azure has a max limit of 64mb that can be uploaded using REST
     #$statusCode = (Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $Uploadfile).StatusCode
-    azure storage blob upload --quiet --container $env:STORAGE_CONTAINER --blob $Blob --blobtype block --connection-string "$env:CONNECTION_STRING" --file $Uploadfile | Out-Host
+    azure storage blob upload --quiet $properties --container $env:STORAGE_CONTAINER --blob $Blob --blobtype block --connection-string "$env:CONNECTION_STRING" --file $Uploadfile | Out-Host
 
     if($?)
     {
@@ -88,7 +95,7 @@ function UploadBinaries($zipFile)
     Write-Host "Updating the latest dotnet binaries for windows.."
     $zipBlobLatest = "$env:CHANNEL/Binaries/Latest/dotnet-win-x64.latest.zip"
 
-    if(-Not (UploadFile $zipBlobLatest $zipFile))
+    if(-Not (UploadFile $zipBlobLatest $zipFile $true))
     {
         return -1
     }
@@ -102,7 +109,7 @@ function UploadBinaries($zipFile)
     # upload the index file
     $indexBlob = "$env:CHANNEL/dnvm/latest.win.index"
 
-    if(-Not (UploadFile $indexBlob $indexFile))
+    if(-Not (UploadFile $indexBlob $indexFile $true))
     {
         return -1
     }
@@ -111,7 +118,7 @@ function UploadBinaries($zipFile)
     $versionFile = Convert-Path $PSScriptRoot\..\..\artifacts\$env:RID\stage2\.version
     $versionBlob = "$env:CHANNEL/dnvm/latest.win.version"
 
-    if(-Not (UploadFile $versionBlob $versionFile))
+    if(-Not (UploadFile $versionBlob $versionFile $true))
     {
         return -1
     }
@@ -132,7 +139,7 @@ function UploadInstallers($installerFile)
     Write-Host "Updating the latest dotnet installer for windows.."
     $installerBlobLatest = "$env:CHANNEL/Installers/Latest/dotnet-win-x64.latest.exe"
 
-    if(-Not (UploadFile $installerBlobLatest $installerFile))
+    if(-Not (UploadFile $installerBlobLatest $installerFile $true))
     {
         return -1
     }
@@ -145,10 +152,16 @@ function UploadVersionBadge($badgeFile)
     $fileName = "windows_$($env:CONFIGURATION)_$([System.IO.Path]::GetFileName($badgeFile))"
     
     Write-Host "Uploading the version badge to Latest"
-    UploadFile "$env:CHANNEL/Binaries/Latest/$fileName" $badgeFile
+    if(-Not (UploadFile "$env:CHANNEL/Binaries/Latest/$fileName" $badgeFile $true))
+    {
+        return -1
+    }
     
     Write-Host "Uploading the version badge to $env:DOTNET_CLI_VERSION"
-    UploadFile "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$fileName" $badgeFile
+    if(-Not (UploadFile "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$fileName" $badgeFile)
+    {
+        return -1
+    }
 
     return 0
 }
