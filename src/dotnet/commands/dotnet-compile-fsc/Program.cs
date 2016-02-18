@@ -80,9 +80,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 return returnCode;
             }
 
-            outputName = outputName.Trim('"');
-            tempOutDir = tempOutDir.Trim('"');
-
             var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
@@ -115,9 +112,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 allArgs.Add("--targetprofile:netcore");
             }
 
-            allArgs.AddRange(references.Select(r => $"-r:{r.Trim('"')}"));
-            allArgs.AddRange(resources.Select(resource => $"--resource:{resource.Trim('"')}"));
-            allArgs.AddRange(sources.Select(s => $"{s.Trim('"')}"));
+            allArgs.AddRange(references.Select(r => $"-r:{r}"));
+            allArgs.AddRange(resources.Select(resource => $"--resource:{resource}"));
+            allArgs.AddRange(sources.Select(s => $"{s}"));
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-fsc.rsp");
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);

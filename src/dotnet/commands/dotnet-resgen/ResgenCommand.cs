@@ -20,13 +20,7 @@ namespace Microsoft.DotNet.Tools.Resgen
         public int Execute()
         {
             var inputResourceFiles = Args.Select(ParseInputFile).ToArray();
-            var outputResourceFile = ResourceFile.Create(OutputFileName.Trim('"'));
-
-            var trimmedCompilationReferences = default(string[]);
-            if (CompilationReferences != null)
-            {
-                trimmedCompilationReferences = CompilationReferences.Select(r => r.Trim('"')).ToArray();
-            }
+            var outputResourceFile = ResourceFile.Create(OutputFileName);
 
             switch (outputResourceFile.Type)
             {
@@ -43,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Resgen
                             outputStream,
                             metadata,
                             Path.GetFileNameWithoutExtension(outputResourceFile.File.Name),
-                            trimmedCompilationReferences
+                            CompilationReferences.ToArray()
                             );
                     }
                     break;
@@ -81,10 +75,6 @@ namespace Microsoft.DotNet.Tools.Resgen
                 name = arg;
                 metadataName = arg;
             }
-
-            // Remove surrounding quotes
-            name = name.Trim('"');
-            metadataName = metadataName.Trim('"');
 
             return new ResourceSource(ResourceFile.Create(name), metadataName);
         }

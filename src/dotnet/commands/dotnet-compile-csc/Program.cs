@@ -82,29 +82,33 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 return returnCode;
             }
 
-            var translated = TranslateCommonOptions(commonOptions, outputName.Trim('"'));
+            var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
             allArgs.AddRange(GetDefaultOptions());
 
             // Generate assembly info
-            var tempOutputStrippedSpaces = tempOutDir.Trim('"');
-            var assemblyInfo = Path.Combine(tempOutputStrippedSpaces, $"dotnet-compile.assemblyinfo.cs");
+            var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.cs");
             
             File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.Generate(assemblyInfoOptions, sources));
             allArgs.Add($"\"{assemblyInfo}\"");
 
             if (outputName != null)
             {
-                allArgs.Add($"-out:\"{outputName.Trim('"')}\"");
+                allArgs.Add($"-out:\"{outputName}\"");
             }
 
-            allArgs.AddRange(analyzers.Select(a => $"-a:\"{a.Trim('"')}\""));
-            allArgs.AddRange(references.Select(r => $"-r:\"{r.Trim('"')}\""));
-            allArgs.AddRange(resources.Select(resource => $"-resource:{resource}"));
-            allArgs.AddRange(sources.Select(s => $"\"{s.Trim('"')}\""));
+            allArgs.AddRange(analyzers.Select(a => $"-a:\"{a}\""));
+            allArgs.AddRange(references.Select(r => $"-r:\"{r}\""));
 
-            var rsp = Path.Combine(tempOutputStrippedSpaces, "dotnet-compile-csc.rsp");
+            // Resource has two parts separated by a comma
+            // Only the first should be quoted. This is handled
+            // in dotnet-compile where the information is present.
+            allArgs.AddRange(resources.Select(resource => $"-resource:{resource}"));
+            
+            allArgs.AddRange(sources.Select(s => $"\"{s}\""));
+
+            var rsp = Path.Combine(tempOutDir, "dotnet-compile-csc.rsp");
 
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 
@@ -204,7 +208,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             if (options.GenerateXmlDocumentation == true)
             {
-                commonArgs.Add($"-doc:\"{Path.ChangeExtension(outputName.Trim('"'), "xml")}\"");
+                commonArgs.Add($"-doc:{Path.ChangeExtension(outputName, "xml")}");
             }
 
             if (options.EmitEntryPoint != true)

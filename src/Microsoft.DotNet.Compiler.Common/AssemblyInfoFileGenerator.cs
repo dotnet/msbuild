@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var existingAttributes = new List<Type>();
             foreach (var sourceFile in sourceFiles)
             {
-                var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourceFile.Trim('"')));
+                var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourceFile));
                 var root = tree.GetRoot();
 
                 // assembly attributes can be only on first level
