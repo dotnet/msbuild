@@ -20,6 +20,7 @@ Installers
 
 |         |Ubuntu 14.04 |Windows |Mac OS X |CentOS 7.1 |
 |---------|:------:|:------:|:------:|:------:|
+|**Version**|![](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/ubuntu_Release_version_badge.svg)|![](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/windows_Release_version_badge.svg)|![](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/osx_Release_version_badge.svg)|![](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/centos_Release_version_badge.svg)|
 |**Installers**|[Download Debian Package](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-ubuntu-x64.latest.deb)|[Download Msi](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-win-x64.latest.exe)|[Download Pkg](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-osx-x64.latest.pkg) |N/A |
 |**Binaries**|[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-ubuntu-x64.latest.tar.gz)|[Download zip file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-win-x64.latest.zip)|[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-osx-x64.latest.tar.gz) |[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-centos-x64.latest.tar.gz) |
 
