@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Utils;
@@ -16,6 +17,9 @@ namespace Microsoft.DotNet.Cli.Build
     {
         [Target(nameof(Init), nameof(RestorePackages))]
         public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPrereqDebianPackageBuildComponents), nameof(CheckPrereqCoreclrDependencyPackages))]
+        public static BuildTargetResult CheckPrereqs(BuildTargetContext c) => c.Success();
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
         [Target(nameof(GenerateVersions), nameof(CheckPrereqs), nameof(LocateStage0))]
@@ -87,38 +91,6 @@ namespace Microsoft.DotNet.Cli.Build
             // Identify the version
             var version = File.ReadAllLines(Path.Combine(stage0, "..", ".version"));
             c.Info($"Using Stage 0 Version: {version[1]}");
-
-            return c.Success();
-        }
-
-        [Target]
-        public static BuildTargetResult CheckPrereqs(BuildTargetContext c)
-        {
-            try
-            {
-                Command.Create("cmake", "--version")
-                    .CaptureStdOut()
-                    .CaptureStdErr()
-                    .Execute();
-            }
-            catch (Exception ex)
-            {
-                string message = $@"Error running cmake: {ex.Message}
-cmake is required to build the native host 'corehost'";
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    message += Environment.NewLine + "Download it from https://www.cmake.org";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    message += Environment.NewLine + "Ubuntu: 'sudo apt-get install cmake'";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    message += Environment.NewLine + "OS X w/Homebrew: 'brew install cmake'";
-                }
-                return c.Failed(message);
-            }
 
             return c.Success();
         }
@@ -198,6 +170,162 @@ cmake is required to build the native host 'corehost'";
             dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools")).Execute().EnsureSuccessful();
 
             return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult CheckPrereqDebianPackageBuildComponents(BuildTargetContext c)
+        {
+            if (!CurrentPlatform.IsUbuntu)
+            {
+                return c.Success();
+            }
+
+            var debianPackageBuildDependencies = new string[]
+            {
+                "devscripts", 
+                "debhelper",
+                "build-essential"
+            };
+
+            var messageBuilder = new StringBuilder();
+
+            foreach (var package in debianPackageBuildDependencies)
+            {
+                if (!AptPackageIsInstalled(package))
+                {
+                    messageBuilder.Append($"Error: Debian package build dependency {package} missing.");
+                    messageBuilder.Append(Environment.NewLine);
+                    messageBuilder.Append($"-> install with apt-get install {package}");
+                    messageBuilder.Append(Environment.NewLine);
+                }
+            }
+
+            if (messageBuilder.Length == 0)
+            {
+                return c.Success();
+            }
+            else
+            {
+                return c.Failed(messageBuilder.ToString());
+            }
+        }
+
+        [Target]
+        public static BuildTargetResult CheckPrereqCoreclrDependencyPackages(BuildTargetContext c)
+        {
+            if (!CurrentPlatform.IsUbuntu && !CurrentPlatform.IsCentOS)
+            {
+                return c.Success();
+            }
+
+            var errorMessageBuilder = new StringBuilder();
+            var platformPackageCheckAction = default(Func<string, bool>);
+            var platformCoreclrDependencies = default(string[]);
+
+            if (CurrentPlatform.IsUbuntu)
+            {
+                platformCoreclrDependencies = new string[]
+                {
+                    "unzip",
+                    "curl",
+                    "libicu-dev",
+                    "libunwind8",
+                    "gettext",
+                    "libssl-dev",
+                    "libcurl3-gnutls",
+                    "zlib1g",
+                    "liblttng-ust-dev",
+                    "lldb-3.6-dev",
+                    "lldb-3.6"
+                };
+
+                platformPackageCheckAction = AptPackageIsInstalled;
+            }
+            else if (CurrentPlatform.IsCentOS)
+            {
+                platformCoreclrDependencies = new string[]
+                {
+                    "unzip",
+                    "libunwind",
+                    "gettext",
+                    "libcurl-devel",
+                    "openssl-devel",
+                    "zlib",
+                    "libicu-devel"
+                };
+
+                platformPackageCheckAction = YumPackageIsInstalled;
+            }
+
+            foreach (var package in platformCoreclrDependencies)
+            {
+                if (!platformPackageCheckAction(package))
+                {
+                    errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                }
+            }
+
+            if (errorMessageBuilder.Length == 0)
+            {
+                return c.Success();
+            }
+            else
+            {
+                return c.Failed(errorMessageBuilder.ToString());
+            }
+        }
+
+        [Target]
+        public static BuildTargetResult CheckPrereqCmakePresent(BuildTargetContext c)
+        {
+            try
+            {
+                Command.Create("cmake", "--version")
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute();
+            }
+            catch (Exception ex)
+            {
+                string message = $@"Error running cmake: {ex.Message}
+cmake is required to build the native host 'corehost'";
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    message += Environment.NewLine + "Download it from https://www.cmake.org";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    message += Environment.NewLine + "Ubuntu: 'sudo apt-get install cmake'";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    message += Environment.NewLine + "OS X w/Homebrew: 'brew install cmake'";
+                }
+                return c.Failed(message);
+            }
+
+            return c.Success();
+        }
+
+        private static bool AptPackageIsInstalled(string packageName)
+        {
+            var result = Command.Create("dpkg", "-s", packageName)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute();
+
+            return result.ExitCode == 0;
+        }
+
+        private static bool YumPackageIsInstalled(string packageName)
+        {
+            var result = Command.Create("yum", "list", "installed", packageName)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute();
+
+            return result.ExitCode == 0;
         }
 
         private static IDictionary<string, string> ReadBranchInfo(BuildTargetContext c, string path)

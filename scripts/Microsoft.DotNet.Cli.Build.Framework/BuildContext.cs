@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             BuildTarget target;
             if (!Targets.TryGetValue(name, out target))
             {
-                Reporter.Verbose.WriteLine($"Skipping undefined target: {name}");
+                throw new Exception($"Undefined target: {name}");
             }
 
             // Check if it's been completed
@@ -82,6 +82,11 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         private BuildTargetResult ExecTarget(BuildTarget target)
         {
+            if (target == null)
+            {
+                throw new ArgumentNullException("target");
+            }
+
             var sectionName = $"{target.Name.PadRight(_maxTargetLen + 2).Yellow()} ({target.Source.White()})";
             BuildReporter.BeginSection("TARGET", sectionName);
 
