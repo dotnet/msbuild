@@ -28,12 +28,13 @@ In order to build .NET Command Line Interface, you need the following installed 
 ## Building/Running
 
 1. Run `build.cmd` or `build.sh` from the root depending on your OS.
-2. Use `artifacts/{os}-{arch}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to run `dotnet` from anywhere.
+2. Use `artifacts/{os}-{arch}/stage2/bin/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2/bin` to the PATH if you want to run `dotnet` from anywhere.
 
 ## A simple test
 
-1. `cd test\TestApp`
-2. `dotnet run`
+1. `cd TestAssets\TestProjects\TestSimpleIncrementalApp`
+2. `dotnet restore`
+3. `dotnet run`
 
 
 ##Adding a Command
