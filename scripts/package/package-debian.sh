@@ -97,28 +97,43 @@ create_debian_package(){
 test_debian_package(){
     header "Testing debian package"
     
+    install_bats
+    run_package_integrity_tests
+
+    install_debian_package
+    run_e2e_test
+    remove_debian_package
+}
+
+install_bats() {
+    rm -rf $TEST_STAGE_DIR
+    git clone https://github.com/sstephenson/bats.git $TEST_STAGE_DIR
+}
+
+install_debian_package() {
+    sudo dpkg -i $DEBIAN_FILE
+}
+
+remove_debian_package() {
+    sudo dpkg -r $DOTNET_DEB_PACKAGE_NAME
+}
+
+run_package_integrity_tests() {
     # Set LAST_VERSION_URL to enable upgrade tests
     export LAST_VERSION_URL="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Installers/Latest/dotnet-ubuntu-x64.latest.deb"
 
-    rm -rf $TEST_STAGE_DIR
-    git clone https://github.com/sstephenson/bats.git $TEST_STAGE_DIR
-    
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
-
-    # E2E Testing of package surface area
-    # Disabled: https://github.com/dotnet/cli/issues/381
-    # run_e2e_test
 }
 
 run_e2e_test(){
-    set +e    
-    sudo dpkg -i $DEBIAN_FILE
-    $REPOROOT/scripts/test/e2e-test.sh
-    result=$?
-    sudo dpkg -r dotnet
-    set -e
+    local dotnet_path="/usr/bin/dotnet"
+
+    header "Running EndToEnd Tests against debian package using ${dotnet_path}"
     
-    return result
+    # Won't affect outer functions
+    cd $REPOROOT/test/EndToEnd
+    $dotnet_path build
+    $dotnet_path test -xml $TEST_STAGE_DIR/debian-endtoend-testResults.xml
 }
 
 execute_build
