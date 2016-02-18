@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-resgen.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
+            "Microsoft.DotNet.ProjectModel.Tests",
             "Microsoft.Extensions.DependencyModel.Tests",
             "ArgumentForwardingTests"
         };

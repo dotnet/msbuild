@@ -1,16 +1,15 @@
 {
     "dependencies": {
-        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "dotnet": "1.0.0-*",
-        "Newtonsoft.Json": "7.0.1",
-        "xunit.runner.aspnet": "2.0.0-aspnet-rc2-16068"
+        "dotnet": { "target": "project" },
+        "Microsoft.DotNet.ProjectModel": { "target": "project" },
+        "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
+        "xunit": "2.1.0",
+        "dotnet-test-xunit": "1.0.0-dev-48273-16"
     },
     "frameworks": {
         "dnxcore50": {
             "imports": "portable-net45+win8"
         }
     },
-    "commands": {
-        "test": "xunit.runner.aspnet"
-    }
+    "testRunner": "xunit"
 }
