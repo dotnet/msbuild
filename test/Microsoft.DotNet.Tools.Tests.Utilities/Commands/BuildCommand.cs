@@ -16,6 +16,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _buidBasePathDirectory;
         private string _configuration;
         private string _framework;
+        private string _versionSuffix;
         private bool _noHost;
         private bool _native;
         private string _architecture;
@@ -64,6 +65,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return _framework == string.Empty ?
                                            "" :
                                            $"--framework {_framework}";
+            }
+        }
+        
+        private string VersionSuffixOption
+        {
+            get
+            {
+                return _versionSuffix == string.Empty ?
+                                    "" :
+                                    $"--version-suffix {_versionSuffix}";
             }
         }
 
@@ -183,6 +194,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string buidBasePath="",
             string configuration="",
             string framework="",
+            string versionSuffix="",
             bool noHost=false,
             bool native=false,
             string architecture="",
@@ -203,6 +215,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _outputDirectory = output;
             _buidBasePathDirectory = buidBasePath;
             _configuration = configuration;
+            _versionSuffix = versionSuffix;
             _framework = framework;
             _noHost = noHost;
             _native = native;
@@ -238,7 +251,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string BuildArgs()
         {
-            return $"{BuildProfile} {NoDependencies} {NoIncremental} \"{_projectPath}\" {OutputOption} {BuildBasePathOption} {ConfigurationOption} {FrameworkOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
+            return $"{BuildProfile} {NoDependencies} {NoIncremental} \"{_projectPath}\" {OutputOption} {BuildBasePathOption} {ConfigurationOption} {FrameworkOption} {VersionSuffixOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
         }
     }
 }

@@ -51,9 +51,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 }
 
                 // Set defaults based on the environment
-                var settings = new ProjectReaderSettings();
-                settings.VersionSuffix = Environment.GetEnvironmentVariable("DOTNET_BUILD_VERSION");
-                settings.AssemblyFileVersion = Environment.GetEnvironmentVariable("DOTNET_ASSEMBLY_FILE_VERSION");
+                var settings = ProjectReaderSettings.ReadFromEnvironment();
 
                 if (versionSuffix.HasValue())
                 {

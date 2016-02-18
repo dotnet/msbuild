@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tools.Publish
         public bool NativeSubdirectories { get; set; }
         public NuGetFramework NugetFramework { get; set; }
         public IEnumerable<ProjectContext> ProjectContexts { get; set; }
-
+        public string VersionSuffix { get; set; }
         public int NumberOfProjects { get; private set; }
         public int NumberOfPublishedProjects { get; private set; }
 
@@ -80,12 +80,12 @@ namespace Microsoft.DotNet.Tools.Publish
         /// <param name="configuration">Debug or Release</param>
         /// <param name="nativeSubdirectories"></param>
         /// <returns>Return 0 if successful else return non-zero</returns>
-        private static bool PublishProjectContext(ProjectContext context, string buildBasePath, string outputPath, string configuration, bool nativeSubdirectories)
+        private bool PublishProjectContext(ProjectContext context, string buildBasePath, string outputPath, string configuration, bool nativeSubdirectories)
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
 
             var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
-            
+
             if (string.IsNullOrEmpty(outputPath))
             {
                 outputPath = context.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeOutputPath;
@@ -118,6 +118,13 @@ namespace Microsoft.DotNet.Tools.Publish
                 configuration,
                 context.ProjectFile.ProjectDirectory
             };
+
+            if (!string.IsNullOrEmpty(VersionSuffix))
+            {
+                args.Add("--version-suffix");
+                args.Add(VersionSuffix);
+            }
+
             if (!string.IsNullOrEmpty(buildBasePath))
             {
                 args.Add("--build-base-path");
@@ -228,7 +235,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 {
                     Directory.CreateDirectory(destinationDirectory);
                 }
-                
+
                 File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
         }
