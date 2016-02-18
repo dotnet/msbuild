@@ -1956,7 +1956,7 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFolder should work.
         /// </summary>
         [Fact(Skip = "Ignored in MSTest")]
-
+        [Trait("Category", "nonosxtests")]
         // Ignore: Flaky test
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {

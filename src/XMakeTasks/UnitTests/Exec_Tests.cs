@@ -345,6 +345,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void InvalidWorkingDirectorySet()
         {
             Exec exec = PrepareExec("echo [%cd%]");
