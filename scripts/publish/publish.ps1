@@ -158,7 +158,7 @@ function UploadVersionBadge($badgeFile)
     }
     
     Write-Host "Uploading the version badge to $env:DOTNET_CLI_VERSION"
-    if(-Not (UploadFile "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$fileName" $badgeFile)
+    if(-Not (UploadFile "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$fileName" $badgeFile))
     {
         return -1
     }

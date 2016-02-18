@@ -100,7 +100,7 @@ upload_file_to_blob_storage_azure_cli(){
     local properties=""
     
     if $preventCaching ; then
-        $properties="--properties cacheControl=no-cache"
+        properties="--properties cacheControl=no-cache"
     fi
 
     # use azure cli to upload to blob storage. We cannot use curl to do this becuase azure has a max limit of 64mb that can be uploaded using REST
