@@ -18,9 +18,6 @@ $PackageDir = $env:PackageDir
 $TestBinRoot = $env:TestBinRoot
 $TestPackageDir = $env:TestPackageDir
 
-$env:TEST_ROOT = "$OutputDir\tests"
-$env:TEST_ARTIFACTS = "$env:TEST_ROOT\artifacts"
-
 $env:Channel = "$env:RELEASE_SUFFIX"
 
 # Set reasonable defaults for unset variables
