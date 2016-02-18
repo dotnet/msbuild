@@ -8,7 +8,6 @@ For more information on MSBuild, see the [MSDN documentation](https://msdn.micro
 |:------|:------:|:------:|:------:|
 | **Full Framework (master)** | [![Build Status](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_master_Windows_NT/badge/icon)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_master_Windows_NT/) | N/A | N/A |
 |**.NET Core (xplat)**|[![Build Status](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Windows_NT/badge/icon)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Windows_NT/)|[![Build Status](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Ubuntu/badge/icon)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Ubuntu/)|[![Build Status](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_OSX/badge/icon)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_OSX/)|
-|**Mono Compat (xplat)**|Coming Soon|Coming Soon|Coming Soon|
 
 ### Source code
 
