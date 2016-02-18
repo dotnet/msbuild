@@ -36,7 +36,7 @@ function setVarIfDefault([string]$varName, [string]$value)
 
 function setPathAndHomeIfDefault([string]$rootPath)
 {
-    If ($env:DOTNET_HOME -eq $null)
+    If ($env:DOTNET_ON_PATH -eq $null)
     {
         setPathAndHome $rootPath
     }
@@ -44,7 +44,7 @@ function setPathAndHomeIfDefault([string]$rootPath)
 
 function setPathAndHome([string]$rootPath)
 {
-        $env:DOTNET_HOME=$rootPath
+        $env:DOTNET_ON_PATH=$rootPath
         $env:PATH="$rootPath\bin;$env:PATH"
 }
 

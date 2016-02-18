@@ -73,10 +73,6 @@ The following commands exist for dotnet.
 
 # ENVIRONMENT 
 
-`DOTNET_HOME`
-
-    Points to the base directory that contains the runtime and the binaries directories. The runtime will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
-
 `DOTNET_PACKAGES`
 
     The primary package cache. If not set, defaults to $HOME/.nuget/packages on Unix or %LOCALAPPDATA%\NuGet\Packages (TBD) on Windows.

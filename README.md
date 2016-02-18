@@ -72,9 +72,7 @@ For more details, please refer to the [documentation](https://github.com/dotnet/
 Building from source
 --------------------
 
-If you are building from source, take note that the build depends on NuGet packages hosted on Myget, so if it is down, the build may fail. If that happens, you can always see the [Myget status page](http://status.myget.org/) for more info.  
-
-Also, when building from source, you need to set up the `DOTNET_HOME` environment variable. It needs to point to the parent directory of where `bin` and `runtime` directories are. 
+If you are building from source, take note that the build depends on NuGet packages hosted on Myget, so if it is down, the build may fail. If that happens, you can always see the [Myget status page](http://status.myget.org/) for more info. 
 
 Known issues
 ------------

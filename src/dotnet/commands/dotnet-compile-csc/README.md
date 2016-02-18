@@ -61,10 +61,5 @@ Prints verbose logging information, to follow the flow of execution of the comma
 `-h, --help`
 Show short help. 
 
-# ENVIRONMENT 
-
-`DOTNET_HOME`
-Points to the runtime that will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
-
 # SEE ALSO
 dotnet-restore(1), dotnet-publish(1), dotnet(1)

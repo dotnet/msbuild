@@ -25,7 +25,6 @@
         </RegistryKey>
 
         <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]bin" Part="last" Action="set" System="yes" />
-        <Environment Id="E_DOTNET_HOME" Name="DOTNET_HOME" Value="[DOTNETHOME]" Part="all" Action="set" System="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
