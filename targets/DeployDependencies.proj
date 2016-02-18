@@ -33,7 +33,7 @@
           />
   </Target>
 
-  <UsingTask TaskName="Microsoft.NuGet.Build.Tasks.ResolveNuGetPackageAssets" AssemblyFile="$(MSBuildExtensionsPath32)\Microsoft\NuGet\Microsoft.NuGet.Build.Tasks.dll" />
+  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
   <PropertyGroup>
     <RuntimeProjectJson>$(MSBuildThisFileDirectory)\runtime.project.json</RuntimeProjectJson>
@@ -61,9 +61,9 @@
   <Target Name="DeployRuntime"
           DependsOnTargets="RestoreRuntimePackages"
           >
-    <ResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
+    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
                                IncludeFrameworkReferences="false"
-                               NuGetPackagesDirectory=""
+                               NuGetPackagesDirectory="$(PackagesDir)"
                                RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
                                ProjectLanguage="C#"
                                ProjectLockFile="$(RuntimeProjectLockJson)"
@@ -73,7 +73,7 @@
       <Output TaskParameter="ResolvedCopyLocalItems" ItemName="ResolvedRuntimeFiles" />
       <!--<Output TaskParameter="ResolvedReferences" ItemName="_ReferencesFromNuGetPackages" />
       <Output TaskParameter="ReferencedPackages" ItemName="ReferencedNuGetPackages" />-->
-    </ResolveNuGetPackageAssets>
+    </PrereleaseResolveNuGetPackageAssets>
 
     <!-- Copy the dependencies to both the deployment and the test directories -->
 

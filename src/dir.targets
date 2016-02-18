@@ -13,6 +13,15 @@
   <!-- OSS sign assemblies after compile runs. -->
   <Import Condition="Exists('$(ToolsDir)\sign.targets')" Project="$(ToolsDir)\sign.targets" />
 
+  <!-- msbuild restores project.json on its own; do not let build tools restore it again -->
+  <PropertyGroup>
+    <RestorePackages>false</RestorePackages>
+  </PropertyGroup>
+  
+  <!-- nuget targets -->
+  <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
+
+
   <!-- Use NuSpec.ReferenceGenerator to create / update the .NET Core dependencies of the packages -->
   <Import Condition="'$(NetCoreBuild)'=='true' and Exists('$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets')"  Project="$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets"/>
 

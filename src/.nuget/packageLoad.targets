@@ -21,8 +21,6 @@
 
   <!-- These properties are related to NuGet -->
   <PropertyGroup>
-    <PackagesCache Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</PackagesCache>
-    <PackagesCache Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(HOME), '.nuget', 'packages'))</PackagesCache>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
     <NuGetConfigFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"NuGet.Config"))</NuGetConfigFile>
     <NuGetPackagesFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.config"))</NuGetPackagesFile>
@@ -33,7 +31,7 @@
     <NuGetPackageInstallOptions>-OutputDirectory &quot;$(NuGetDir.TrimEnd('\').TrimEnd('\'))&quot; -ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageInstallOptions>
     <NuGetPackageRestoreOptions>-ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageRestoreOptions>
     <!-- UNDO: When fixed https://github.com/NuGet/Home/issues/1517 -->
-    <NuGetPackageRestoreOptions Condition="'$(OsEnvironment)'!='Windows_NT'">$(NuGetPackageRestoreOptions) -PackagesDirectory "$(PackagesCache)"</NuGetPackageRestoreOptions>
+    <NuGetPackageRestoreOptions Condition="'$(OsEnvironment)'!='Windows_NT'">$(NuGetPackageRestoreOptions) -PackagesDirectory "$(PackagesDir)"</NuGetPackageRestoreOptions>
     <NuGetRestoreCommand>&quot;$(NuGetToolPath)&quot; restore $(NuGetCommonOptions)</NuGetRestoreCommand>
     <NuGetRestoreCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetRestoreCommand)</NuGetRestoreCommand>
     <NuGetInstallCommand>&quot;$(NuGetToolPath)&quot; install $(NuGetCommonOptions)</NuGetInstallCommand>
@@ -48,8 +46,8 @@
 
   <!-- These are properties for the dnu -->
   <PropertyGroup>
-    <SetDnxPackages Condition="'$(OsEnvironment)'=='Windows_NT'">set DNX_PACKAGES=$(PackagesCache) &amp;</SetDnxPackages>
-    <SetDnxPackages Condition="'$(OsEnvironment)'!='Windows_NT'">export DNX_PACKAGES=$(PackagesCache) ;</SetDnxPackages>
+    <SetDnxPackages Condition="'$(OsEnvironment)'=='Windows_NT'">set DNX_PACKAGES=$(PackagesDir) &amp;</SetDnxPackages>
+    <SetDnxPackages Condition="'$(OsEnvironment)'!='Windows_NT'">export DNX_PACKAGES=$(PackagesDir) ;</SetDnxPackages>
     <DnuRestoreCommand Condition="'$(OS)'!='OSX'">$(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(OS)'=='OSX'">ulimit -n 2500 ; $(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
   </PropertyGroup>

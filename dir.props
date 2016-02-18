@@ -37,21 +37,25 @@
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
 
     <!-- Input Directories -->
-    <PackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
+    <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
+
+    <!-- nuget cache location. Used by packageresolve.targets and packageLoad.targets -->
+    <PackagesDir Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</PackagesDir>
+    <PackagesDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(HOME), '.nuget', 'packages'))</PackagesDir>
 
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
 
-    <DnuToolDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(PackagesDir), "$(DnxDir).$(DnxVersion)"))</DnuToolDir>
+    <DnuToolDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(ToolPackagesDir), "$(DnxDir).$(DnxVersion)"))</DnuToolDir>
     <DnuToolPath Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu.cmd"))</DnuToolPath>
     <DnuToolPath Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu"))</DnuToolPath>
 
   </PropertyGroup>
 
   <PropertyGroup>
-    <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
-    <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
-    <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(PackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
+    <ToolsDir>$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
+    <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+    <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(ToolPackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
 
     <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
   </PropertyGroup>
@@ -63,7 +67,7 @@
 
   <!-- Common nuget properties -->
   <PropertyGroup>
-    <NuGetDir>$(PackagesDir)</NuGetDir>
+    <NuGetDir>$(ToolPackagesDir)</NuGetDir>
     <NuGetConfigDir>$([System.IO.Path]::Combine($(SourceDir),".nuget"))</NuGetConfigDir>
     <GlobalPropertiesFile>$(MSBuildThisFileFullPath)</GlobalPropertiesFile>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
