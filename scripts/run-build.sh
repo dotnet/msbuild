@@ -14,6 +14,40 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+while [[ $# > 0 ]]; do
+    lowerI="$(echo $1 | awk '{print tolower($0)}')"
+    case $lowerI in
+        -c|--configuration)
+            export CONFIGURATION=$2
+            shift
+            ;;
+        --nopackage)
+            export DOTNET_BUILD_SKIP_PACKAGING=1
+            ;;
+        --skip-prereqs)
+            # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
+            export DOTNET_INSTALL_SKIP_PREREQS=1
+            ;;
+        --help)
+            echo "Usage: $0 [--configuration <CONFIGURATION>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help] <TARGETS...>"
+            echo ""
+            echo "Options:"
+            echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
+            echo "  --nopackage                         Skip packaging targets"
+            echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
+            echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
+            echo "  --help                              Display this help message"
+            echo "  <TARGETS...>                        The build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
+            exit 0
+            ;;
+        *)
+            break
+            ;;
+    esac
+
+    shift
+done
+
 # Set up the environment to be used for building with clang.
 if which "clang-3.5" > /dev/null 2>&1; then
     export CC="$(which clang-3.5)"
