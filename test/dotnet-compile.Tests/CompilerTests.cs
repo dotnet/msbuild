@@ -88,6 +88,24 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             Assert.Contains("CA1018", result.StdErr);
         }
 
+        [Fact]
+        public void CompilingAppWithPreserveCompilationContextWithSpaceInThePathShouldSucceed()
+        {
+            var root = Temp.CreateDirectory();
+
+            var spaceBufferDirectory = root.CreateDirectory("space directory");
+            var testAppDir = spaceBufferDirectory.CreateDirectory("TestAppCompilationContext");
+
+            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestAppCompilationContext"), testAppDir);
+
+            var testProjectDir = Path.Combine(_testProjectsRoot, "TestAppCompilationContext", "TestApp");
+            var testProject = Path.Combine(testProjectDir, "project.json");
+            
+            var buildCommand = new BuildCommand(testProject);
+
+            buildCommand.Execute().Should().Pass();
+        }
+
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {
             // copy all the files to temp dir
