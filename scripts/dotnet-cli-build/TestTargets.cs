@@ -149,10 +149,13 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult BuildTests(BuildTargetContext c)
         {
             var dotnet = DotNetCli.Stage2;
+
+            var configuration = c.BuildContext.Get<string>("Configuration");
+
             foreach (var testProject in TestProjects)
             {
                 c.Info($"Building tests: {testProject}");
-                dotnet.Build()
+                dotnet.Build("--configuration", configuration)
                     .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test", testProject))
                     .Execute()
                     .EnsureSuccessful();
@@ -170,6 +173,8 @@ namespace Microsoft.DotNet.Cli.Build
             var dotnet = DotNetCli.Stage2;
             var vsvars = LoadVsVars(c);
 
+            var configuration = c.BuildContext.Get<string>("Configuration");
+
             // Copy the test projects
             var testProjectsDir = Path.Combine(Dirs.TestOutput, "TestProjects");
             Rmdir(testProjectsDir);
@@ -181,7 +186,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var project in TestProjects)
             {
                 c.Info($"Running tests in: {project}");
-                var result = dotnet.Test("-xml", $"{project}-testResults.xml", "-notrait", "category=failing")
+                var result = dotnet.Test("--configuration", configuration, "-xml", $"{project}-testResults.xml", "-notrait", "category=failing")
                     .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test", project))
                     .Environment(vsvars)
                     .EnvironmentVariable("PATH", $"{DotNetCli.Stage2.BinPath}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}")

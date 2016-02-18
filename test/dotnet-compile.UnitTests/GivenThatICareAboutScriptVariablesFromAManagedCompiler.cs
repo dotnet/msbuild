@@ -183,7 +183,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                 .Create(
                     It.IsAny<string>(),
                     It.IsAny<IEnumerable<string>>(),
-                    It.IsAny<NuGetFramework>()))
+                    It.IsAny<NuGetFramework>(),
+                    It.IsAny<string>()))
                 .Returns(command.Object);
 
             var _args = new CompilerCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");

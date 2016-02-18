@@ -41,9 +41,16 @@ namespace Microsoft.DotNet.Cli.Utils
             ResolutionStrategy = commandSpec.ResolutionStrategy;
         }
 
-        public static Command CreateDotNet(string commandName, IEnumerable<string> args, NuGetFramework framework = null)
+        public static Command CreateDotNet(
+            string commandName, 
+            IEnumerable<string> args, 
+            NuGetFramework framework = null,  
+            string configuration = Constants.DefaultConfiguration)
         {
-            return Create("dotnet", new[] { commandName }.Concat(args), framework);
+            return Create("dotnet", 
+                new[] { commandName }.Concat(args), 
+                framework, 
+                configuration: configuration);
         }
 
         /// <summary>
@@ -56,9 +63,16 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <param name="args"></param>
         /// <param name="framework"></param>
         /// <returns></returns>
-        public static Command Create(string commandName, IEnumerable<string> args, NuGetFramework framework = null)
+        public static Command Create(
+            string commandName, 
+            IEnumerable<string> args, 
+            NuGetFramework framework = null, 
+            string configuration = Constants.DefaultConfiguration)
         {
-            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, args, framework);
+            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, 
+                args, 
+                framework, 
+                configuration: configuration);
 
             if (commandSpec == null)
             {
@@ -70,9 +84,16 @@ namespace Microsoft.DotNet.Cli.Utils
             return command;
         }
         
-        public static Command CreateForScript(string commandName, IEnumerable<string> args, Project project, string[] inferredExtensionList)
+        public static Command CreateForScript(
+            string commandName, 
+            IEnumerable<string> args, 
+            Project project, 
+            string[] inferredExtensionList)
         {
-            var commandSpec = CommandResolver.TryResolveScriptCommandSpec(commandName, args, project, inferredExtensionList);
+            var commandSpec = CommandResolver.TryResolveScriptCommandSpec(commandName, 
+                args, 
+                project, 
+                inferredExtensionList);
 
             if (commandSpec == null)
             {
