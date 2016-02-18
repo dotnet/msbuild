@@ -13,12 +13,13 @@ setHome()
 {
     if [ -z ${HOME+x} ]
     then
-        MONO_COMMAND="( export HOME=$HOME_DEFAULT ; $MONO_COMMAND )"
+        BUILD_COMMAND="( export HOME=$HOME_DEFAULT ; $BUILD_COMMAND )"
         mkdir -p $HOME_DEFAULT
     fi
 }
 
-downloadMSBuild(){
+downloadMSBuildForMono()
+{
     if [ ! -e "$MSBUILD_EXE" ]
     then
         mkdir -p $PACKAGES_DIR # Create packages dir if it doesn't exist.
@@ -34,28 +35,28 @@ downloadMSBuild(){
 
 build()
 {
-	echo Build Command: "$MONO_COMMAND"
+	echo Build Command: "$BUILD_COMMAND"
 
-  eval "$MONO_COMMAND"
+    eval "$BUILD_COMMAND"
 
 	echo Build completed. Exit code: $?
 	egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$LOG_PATH_ARG"
 	echo "Log: $LOG_PATH_ARG"
 }
 
+# Paths
 THIS_SCRIPT_PATH="`dirname \"$0\"`"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
-MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
+TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.1/mono-msbuild.zip"
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="/tmp/msbuild-CI-home"
 
-
-#Default build arguments
-TARGET_ARG="Build"
 LOG_PATH_ARG="$THIS_SCRIPT_PATH"/"msbuild.log"
 PROJECT_FILE_ARG="$THIS_SCRIPT_PATH"/"build.proj"
 
+# Default build arguments
+TARGET_ARG="Build"
 
 #parse command line args
 while [[ $# > 0 ]]
@@ -84,7 +85,7 @@ do
     esac
 done
 
-#determine OS
+# determine OS
 OS_NAME=$(uname -s)
 case $OS_NAME in
     Darwin)
@@ -107,6 +108,7 @@ elif [[ "$SCOPE" = "Test" ]]; then
 	TARGET_ARG="BuildAndTest"
 fi
 
+# Determine configuration
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-Netcore
@@ -120,18 +122,36 @@ case $target in
         EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
         ;;
     *)
-        echo "Unsupported target $target detected, configuring as if for CoreCLR"
+        echo "Unsupported target detected: $target. Configuring as if for CoreCLR"
         CONFIGURATION=Debug-Netcore
         ;;
 esac
 
-MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS"' "'"/fileloggerparameters:Verbosity=diag;LogFile=$LOG_PATH_ARG"'"'
+# Setup host and msbuild according to configuration
+case $CONFIGURATION in
+    Debug-Netcore)
+        echo "Building for CoreCLR"
+        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
+        RUNTIME_HOST="$TOOLS_DIR/corerun"
+	RUNTIME_HOST_ARGS=""
+        ;;
+    Debug-MONO)
+        echo "Building for Mono"
+        MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
+        downloadMSBuildForMono
+        RUNTIME_HOST="${MONO_BIN_DIR}mono"
+	RUNTIME_HOST_ARGS="--debug"
+        ;;
+esac
 
-MONO_COMMAND="${MONO_BIN_DIR}mono --debug $MSBUILD_EXE $MSBUILD_ARGS"
+MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS /fl "' "'"/flp:v=diag;logfile=$LOG_PATH_ARG"'"'
+
+BUILD_COMMAND="$RUNTIME_HOST $RUNTIME_HOST_ARGS $MSBUILD_EXE $MSBUILD_ARGS"
 
 #home is not defined on CI machines
 setHome
 
-downloadMSBuild
+#restore build tools
+$THIS_SCRIPT_PATH/init-tools.sh
 
 build

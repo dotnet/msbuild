@@ -2,7 +2,6 @@
 <Project DefaultTargets="ProcessJsonFiles" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="DeployDependencies.proj" />
   <Import Project="$(NuGetConfigDir)/packageLoad.targets" />
-  <Import Project="../override.targets" />
 
   <PropertyGroup>
     <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
@@ -85,28 +84,25 @@
           DependsOnTargets="RestoreRuntimePackagesDnu"
   />
 
+  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll"/>
+
   <Target Name="DeployRuntime"
           DependsOnTargets="RestoreRuntimePackages"
           >
-
-    <PropertyGroup>
-      <_OmitTransitiveReferences Condition="'$(NetCoreBuild)'=='true'">false</_OmitTransitiveReferences>
-      <_OmitTransitiveReferences Condition="'$(NetCoreBuild)'!='true'">true</_OmitTransitiveReferences>
-    </PropertyGroup>
 
     <Error
             Text="'%(RuntimeProjectJsonLockFile.FullPath)' does not exist"
             Condition="!Exists('%(RuntimeProjectJsonLockFile.FullPath)')" />
 
 
-    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="true"
+    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
                                          IncludeFrameworkReferences="false"
-                                         RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
-                                         NuGetPackagesDirectory="$(PackagesCache)"
+                                         NuGetPackagesDirectory="$(PackagesDir)"
+                                         RuntimeIdentifier="$(RuntimeProjectJsonLockFile)"
                                          ProjectLanguage="C#"
-                                         ProjectLockFile="%(RuntimeProjectJsonLockFile.FullPath)"
-                                         TargetMonikers="$(NuGetTargetMoniker)"
-                                         OmitTransitiveCompileReferences="$(_OmitTransitiveReferences)">
+                                         ProjectLockFile="$(RuntimeProjectLockJson)"
+                                         TargetMonikers="$(NuGetTargetMoniker)">
+
       <Output TaskParameter="ResolvedCopyLocalItems" ItemName="ResolvedRuntimeFiles" />
 
     </PrereleaseResolveNuGetPackageAssets>
