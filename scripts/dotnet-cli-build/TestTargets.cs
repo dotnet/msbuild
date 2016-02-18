@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
+        [Target(nameof(CleanTestPackages))]
         public static BuildTargetResult BuildTestAssetPackages(BuildTargetContext c)
         {
             var dotnet = DotNetCli.Stage2;
@@ -97,6 +97,14 @@ namespace Microsoft.DotNet.Cli.Build
                     .Execute()
                     .EnsureSuccessful();
             }
+            
+            return c.Success();
+        }
+        
+        [Target]
+        public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
+        {
+            Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-hello"));
             
             return c.Success();
         }
