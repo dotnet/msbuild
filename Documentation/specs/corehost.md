@@ -76,16 +76,18 @@ Satellite Assemblies (assemblies containing only embedded resources used in plac
 
 ## Runtime Resolution
 
-Runtime resolution is controlled by two environment variables:
+Runtime resolution is controlled by these environment variables:
 
 * `DOTNET_RUNTIME_SERVICING` -> Global override for runtime
-* `DOTNET_HOME` -> Default location for runtime
+* `DOTNET_PACKAGES_CACHE` -> Secondary cache
+* `DOTNET_PACKAGES` -> Package restore location
 
 The runtime is located by searching the following paths in order, where `APP_BASE` refers to the directory containing the managed application assembly and `LIBCORECLR` refers to the platform-specific name for the CoreCLR library (`libcoreclr.so` on Unix, `libcoreclr.dylib` on Mac OS X, `coreclr.dll` on Windows). The first path that matches is used as the path to load the CoreCLR from.
 
 * `$DOTNET_RUNTIME_SERVICING/runtime/coreclr/LIBCORECLR`
+* `$DOTNET_PACKAGES_CACHE/<Package Id>/<Package Version>/runtimes/<RID>/native/LICORECLR`
 * `APP_BASE/LIBCORECLR`
-* `$DOTNET_HOME/runtime/coreclr/LIBCORECLR`
+* `$DOTNET_PACKAGES/<Package Id>/<Package Version>/runtimes/<RID>/native/LIBCORECLR`
 * On Unix:
     * `/usr/local/share/dotnet/runtime/coreclr/LIBCORECLR` [1]
     * `/usr/share/dotnet/runtime/coreclr/LIBCORECLR`
