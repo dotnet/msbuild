@@ -8,6 +8,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
     public class TestHelper
     {
         private readonly string _tempPath;
+        private readonly string _testProjectsDir;
 
         public TestHelper()
         {
@@ -28,8 +29,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
             }
 
             _tempPath = CreateTempFolder();
-            var dthTestProjectsFolder = Path.Combine(FindRoot(), "testapp", "DthTestProjects");
-            CopyFiles(dthTestProjectsFolder, _tempPath);
+            _testProjectsDir = Path.Combine(AppContext.BaseDirectory, "TestAssets", "ProjectModelServer");
+            CopyFiles(_testProjectsDir, _tempPath);
 
             var logger = LoggerFactory.CreateLogger<TestHelper>();
             logger.LogInformation($"Test projects are copied to {_tempPath}");
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
 
         public string FindSampleProject(string name)
         {
-            var result = Path.Combine(_tempPath, "src", name);
+            var result = Path.Combine(_tempPath, "DthTestProjects", "src", name);
             if (Directory.Exists(result))
             {
                 return result;
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
 
         public string CreateSampleProject(string name)
         {
-            var source = Path.Combine(FindRoot(), "test", name);
+            var source = Path.Combine(AppContext.BaseDirectory, "TestAssets", "ProjectModelServer");
             if (!Directory.Exists(source))
             {
                 return null;
@@ -79,26 +80,6 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
             if (File.Exists(lockFilePath))
             {
                 File.Delete(lockFilePath);
-            }
-        }
-
-        private static string FindRoot()
-        {
-            var solutionName = "Microsoft.DotNet.Cli.sln";
-            var root = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-            while (root != null && root.GetFiles(solutionName).Length == 0)
-            {
-                root = Directory.GetParent(root.FullName);
-            }
-
-            if (root != null)
-            {
-                return root.FullName;
-            }
-            else
-            {
-                return null;
             }
         }
 

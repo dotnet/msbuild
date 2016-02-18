@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Server.Tests.Helpers;
+using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -92,6 +94,12 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                                    string expectedUnresolvedDependency,
                                                                    string expectedUnresolvedType)
         {
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Linux)
+            {
+                Console.WriteLine("Test is skipped on Linux");
+                return;
+            }
+            
             var projectPath = _testHelper.FindSampleProject(testProjectName);
             Assert.NotNull(projectPath);
 
