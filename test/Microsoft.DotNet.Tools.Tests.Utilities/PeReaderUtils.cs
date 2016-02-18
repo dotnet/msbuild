@@ -7,11 +7,11 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
-namespace Microsoft.DotNet.Tools.Builder.Tests
+namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public static class PeReaderUtils
     {
-        internal static string GetAssemblyAttributeValue(string assemblyPath, string attributeName)
+        public static string GetAssemblyAttributeValue(string assemblyPath, string attributeName)
         {
             if (!File.Exists(assemblyPath))
             {
