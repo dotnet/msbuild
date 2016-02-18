@@ -23,6 +23,7 @@
     "../../TestAssets/TestProjects/TestLibraryWithAnalyzer/*",
     "../../TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/*",
     "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/*",
+    "../../TestAssets/TestProjects/TestAppCompilationContext/**/*",
     "../../TestAssets/TestProjects/global.json"
   ],
 
