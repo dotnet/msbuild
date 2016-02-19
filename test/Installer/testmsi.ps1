@@ -7,23 +7,36 @@ param(
 
 . "$PSScriptRoot\..\..\scripts\common\_common.ps1"
 
-function Test-Administrator  
-{  
-    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
-    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
+$RepoRoot = Convert-Path "$PSScriptRoot\..\.."
+
+function CopyInstaller([string]$destination)
+{
+    # Copy both the .msi and the .exe to the testBin directory so
+    # the tests running in the docker container have access to them.
+    Copy-Item $inputMsi -Destination:$destination
+    
+    $BundlePath = [System.IO.Path]::ChangeExtension($inputMsi, "exe")
+    Copy-Item $BundlePath -Destination:$destination
 }
 
-Write-Host "Running tests for MSI installer at $inputMsi.."
+function CopyTestXUnitRunner([string]$destination)
+{
+    $XUnitRunnerDir = Join-Path $env:NUGET_PACKAGES xunit.runner.console\2.1.0\tools
+    
+    Copy-Item $XUnitRunnerDir\xunit.console.exe -Destination:$destination
+    Copy-Item $XUnitRunnerDir\xunit.runner.utility.desktop.dll -Destination:$destination
+}
+
+Write-Host "Running tests for MSI installer at $inputMsi."
 
 if(!(Test-Path $inputMsi))
 {
     throw "$inputMsi not found" 
 }
 
-$env:CLI_MSI=$inputMsi
-$testDir="$PSScriptRoot\Dotnet.Cli.Msi.Tests"
-$testBin="$RepoRoot\artifacts\tests\Dotnet.Cli.Msi.Tests"
-$xunitRunner="$env:USERPROFILE\.dnx\packages\xunit.runner.console\2.1.0\tools\xunit.console.exe"
+$testName = "Microsoft.DotNet.Cli.Msi.Tests"
+$testDir="$PSScriptRoot\$testName"
+$testBin="$RepoRoot\artifacts\tests\$testName"
 
 pushd "$Stage2Dir\bin"
 
@@ -48,22 +61,26 @@ try {
     {
         throw "dotnet publish failed with exit code $LastExitCode."     
     }
-<#
-    if(-Not (Test-Administrator))
-    {
-        Write-Host -ForegroundColor Yellow "Current script testmsi.ps1 is not run as admin."
-        Write-Host -ForegroundColor Yellow "Executing MSI tests require admin privileges."
-        Write-Host -ForegroundColor Yellow "Failing silently."
-        Exit 0
-    }
-    
-    & $xunitRunner $testBin\Dotnet.Cli.Msi.Tests.exe | Out-Host
 
-    if($LastExitCode -ne 0)
+    if($env:RunInstallerTestsInDocker)
     {
-        throw "xunit runner failed with exit code $LastExitCode."       
+        CopyInstaller $testBin
+        CopyTestXUnitRunner $testBin
+
+        Write-Host "Running installer tests in Windows Container"
+        
+        $MsiFileName = [System.IO.Path]::GetFileName($inputMsi)
+        docker run `
+            -v "$testBin\:D:" `
+            -e "CLI_MSI=D:\$MsiFileName" `
+            windowsservercore `
+            D:\xunit.console.exe D:\$testName.dll | Out-Host
+
+        if($LastExitCode -ne 0)
+        {
+            throw "xunit runner failed with exit code $LastExitCode."       
+        }
     }
-#>
 }
 finally {
     popd
