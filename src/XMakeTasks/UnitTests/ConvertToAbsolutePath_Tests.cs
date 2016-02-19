@@ -17,6 +17,7 @@ namespace Microsoft.Build.UnitTests
         /// Passing in a relative path (expecting an absolute back)
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void RelativePath()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file.temp", "foo");
@@ -47,6 +48,7 @@ namespace Microsoft.Build.UnitTests
         /// Passing in a relative path (expecting an absolute back)
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void RelativePathWithEscaping()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file%3A.temp", "foo");

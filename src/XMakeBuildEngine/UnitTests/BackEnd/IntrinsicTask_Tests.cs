@@ -2920,6 +2920,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// 
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void IncludeCheckOnMetadata_3()
         {
             MockLogger logger = new MockLogger();

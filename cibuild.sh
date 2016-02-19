@@ -9,7 +9,8 @@ usage()
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
 }
 
-setHome(){
+setHome()
+{
     if [ -z ${HOME+x} ]
     then
         MONO_COMMAND="( export HOME=$HOME_DEFAULT ; $MONO_COMMAND )"

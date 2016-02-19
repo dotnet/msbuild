@@ -390,6 +390,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Verify that opening project using XmlTextReader does not add it to the Xml cache
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void ValidXmlXmlTextReaderNotCache()
         {
             string content = @"
@@ -674,6 +675,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/301")]
 #endif
+        [Trait("Category", "netcore-osx-failing")]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
             string projectFullPath = FileUtilities.GetTemporaryFile();

@@ -138,6 +138,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetResolvedRuleSetPath_SimpleNameAndProjectDirectory_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -187,6 +188,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetResolvedRuleSetPath_SimpleNameAndDirectories_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -208,6 +210,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -230,6 +233,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -259,6 +263,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void GetResolvedRuleSetPath_RelativePath_NoProject()
         {
             MockEngine mockEngine = new MockEngine();

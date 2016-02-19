@@ -895,6 +895,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void LogBuildStartedCriticalOnly()
         {
             ProcessBuildEventHelper service =

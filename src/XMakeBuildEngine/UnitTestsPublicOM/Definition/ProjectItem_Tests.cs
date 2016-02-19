@@ -1293,6 +1293,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// the MSBuild evaluation data.
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void RenameItemInProjectWithWildcards()
         {
             string projectDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
