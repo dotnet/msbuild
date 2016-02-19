@@ -74,6 +74,5 @@ if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
 # Run the builder
 Write-Host "Invoking Build Scripts..."
 Write-Host " Configuration: $env:CONFIGURATION"
-$env:DOTNET_HOME="$env:DOTNET_INSTALL_DIR\cli"
 & "$PSScriptRoot\dotnet-cli-build\bin\dotnet-cli-build.exe" @args
 if($LASTEXITCODE -ne 0) { throw "Build failed" }

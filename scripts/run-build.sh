@@ -106,10 +106,10 @@ echo "Invoking Build Scripts..."
 echo "Configuration: $CONFIGURATION"
 
 if [ -f "$DIR/dotnet-cli-build/bin/dotnet-cli-build" ]; then
-    DOTNET_HOME="$DOTNET_INSTALL_DIR/share/dotnet/cli" $DIR/dotnet-cli-build/bin/dotnet-cli-build "$@"
+    $DIR/dotnet-cli-build/bin/dotnet-cli-build "$@"
     exit $?
 else
     # We're on an older CLI. This is temporary while Ubuntu and CentOS VSO builds are stalled.
-    DOTNET_HOME="$DOTNET_INSTALL_DIR/share/dotnet/cli" $DIR/dotnet-cli-build/bin/Debug/dnxcore50/dotnet-cli-build "$@"
+    $DIR/dotnet-cli-build/bin/Debug/dnxcore50/dotnet-cli-build "$@"
     exit $?
 fi

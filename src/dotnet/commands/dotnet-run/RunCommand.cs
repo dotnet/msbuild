@@ -133,23 +133,9 @@ namespace Microsoft.DotNet.Tools.Run
                 }
             }
 
-            // Locate the runtime
-            string dotnetHome = Environment.GetEnvironmentVariable("DOTNET_HOME");
-            if (string.IsNullOrEmpty(dotnetHome))
-            {
-                // Use the runtime deployed with the tools, if present
-                var candidateBase = Path.Combine(AppContext.BaseDirectory, "..");
-                var candidate = Path.Combine(candidateBase, "runtime/coreclr");
-                if (File.Exists(Path.Combine(candidate, Constants.LibCoreClrName)))
-                {
-                    dotnetHome = Path.GetFullPath(candidateBase);
-                }
-            }
-
             result = Command.Create(outputName, _args)
                 .ForwardStdOut()
                 .ForwardStdErr()
-                .EnvironmentVariable("DOTNET_HOME", dotnetHome)
                 .Execute()
                 .ExitCode;
 

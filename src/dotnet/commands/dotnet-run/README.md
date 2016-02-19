@@ -20,12 +20,6 @@ Output files, are written to the child `bin` folder, which will be created if it
 -v, --verbose
 
     Prints verbose logging information, to follow the flow of execution of the command.
-    
-# ENVIRONMENT 
-
-`DOTNET_HOME`
-
-    Points to the base directory that contains the runtime and the binaries directories. The runtime will be used to run the executable file that is dropped after compiling. Not needed for native compilation.   
 
 # SEE ALSO
 
