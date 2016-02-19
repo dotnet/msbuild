@@ -199,6 +199,10 @@ namespace Microsoft.DotNet.Cli.Build
                 }
             }
 
+            // dotnet.exe is from stage0. But we must be using the newly built corehost in stage1
+            File.Delete(Path.Combine(binDir, $"dotnet{Constants.ExeSuffix}"));
+            File.Copy(Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, $"dotnet{Constants.ExeSuffix}"));
+
             // Crossgen Roslyn
             var result = Crossgen(c, binDir);
             if (!result.Success)
