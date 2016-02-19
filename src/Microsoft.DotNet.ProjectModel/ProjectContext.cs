@@ -143,7 +143,13 @@ namespace Microsoft.DotNet.ProjectModel
 
         public ProjectContext CreateRuntimeContext(IEnumerable<string> runtimeIdentifiers)
         {
-            return Create(ProjectFile.ProjectFilePath, TargetFramework, runtimeIdentifiers);
+            var context = Create(ProjectFile.ProjectFilePath, TargetFramework, runtimeIdentifiers);
+            if (context.RuntimeIdentifier == null)
+            {
+                var rids = string.Join(",", runtimeIdentifiers);
+                throw new InvalidOperationException($"Can not find runtime target for framework '{TargetFramework}' and RID's {rids}.");
+            }
+            return context;
         }
 
         public OutputPaths GetOutputPaths(string configuration, string buidBasePath = null, string outputPath = null)
