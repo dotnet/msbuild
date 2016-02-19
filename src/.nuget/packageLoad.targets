@@ -15,27 +15,13 @@
           InstallationDependency - list of files that, when changed, need to cause reinstall
           BuildToolsSemaphore    - Created when build tools are restored
         1. Downloads NuGet.exe
-        2. Use NuGet.exe to process packages.*.config and download packages it specifies into $(NuGetDir)
-        3. Handle project.json installation. This allows loading specific runtime
   -->
 
   <!-- These properties are related to NuGet -->
   <PropertyGroup>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
-    <NuGetConfigFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"NuGet.Config"))</NuGetConfigFile>
     <NuGetPackagesFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.config"))</NuGetPackagesFile>
-    <NuGetPackagesFileTargetSpecific>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.$(OS).config"))</NuGetPackagesFileTargetSpecific>
     <NuGetProjectJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.json"))</NuGetProjectJsonFile>
-    <NuGetProjectLockJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.lock.json"))</NuGetProjectLockJsonFile>
-    <NuGetCommonOptions></NuGetCommonOptions>
-    <NuGetPackageInstallOptions>-OutputDirectory &quot;$(NuGetDir.TrimEnd('\').TrimEnd('\'))&quot; -ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageInstallOptions>
-    <NuGetPackageRestoreOptions>-ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageRestoreOptions>
-    <!-- UNDO: When fixed https://github.com/NuGet/Home/issues/1517 -->
-    <NuGetPackageRestoreOptions Condition="'$(OsEnvironment)'!='Windows_NT'">$(NuGetPackageRestoreOptions) -PackagesDirectory "$(PackagesDir)"</NuGetPackageRestoreOptions>
-    <NuGetRestoreCommand>&quot;$(NuGetToolPath)&quot; restore $(NuGetCommonOptions)</NuGetRestoreCommand>
-    <NuGetRestoreCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetRestoreCommand)</NuGetRestoreCommand>
-    <NuGetInstallCommand>&quot;$(NuGetToolPath)&quot; install $(NuGetCommonOptions)</NuGetInstallCommand>
-    <NuGetInstallCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetInstallCommand)</NuGetInstallCommand>
     <NugetVersion>v3.3.0</NugetVersion>
     <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/$(NugetVersion)/nuget.exe</NugetDownloadURL>
     <NugetExeSemaphore>$(NuGetDir)NuGet.$(NugetVersion).semaphore</NugetExeSemaphore>
@@ -44,34 +30,15 @@
     <BuildToolsSemaphore>$(NuGetDir)BuildTools.semaphore</BuildToolsSemaphore>
   </PropertyGroup>
 
-  <!-- These are properties for the dnu -->
   <PropertyGroup>
-    <SetDnxPackages Condition="'$(OsEnvironment)'=='Windows_NT'">set DNX_PACKAGES=$(PackagesDir) &amp;</SetDnxPackages>
-    <SetDnxPackages Condition="'$(OsEnvironment)'!='Windows_NT'">export DNX_PACKAGES=$(PackagesDir) ;</SetDnxPackages>
-    
-    <DnuRestoreCommand Condition="'$(OsEnvironment)'=='Windows_NT'">$(NuGetRestoreCommand)</DnuRestoreCommand>
-    <DnuRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">$(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
-    <DnuRestoreCommand Condition="'$(OsEnvironment)'=='OSX'">ulimit -n 2500 ; $(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
-  </PropertyGroup>
-
-  <ItemGroup>
-     <ProjectJsonFile Include="$(SolutionRoot)**\project.json" Exclude="$(NuGetConfigDir)\project.json" />
-     <!--
-     <ProjectJsonFile Include="$(SolutionRoot)**\project.json" />
-     -->
-  </ItemGroup>
-
-  <PropertyGroup>
-    <RestoreBuildToolsPackagesConfigInputs>$(GlobalPropertiesFile);$(NuGetPackagesFile)</RestoreBuildToolsPackagesConfigInputs>
-    <!-- Make sure we don't use a file that doesn't exist as one of our inputs, otherwise the target will always be built even if it's up-to-date -->
-    <RestoreBuildToolsPackagesConfigInputs Condition="Exists('$(NuGetPackagesFileTargetSpecific)')">$(RestoreBuildToolsPackagesConfigInputs);$(NuGetPackagesFileTargetSpecific)</RestoreBuildToolsPackagesConfigInputs>
+    <RestoreBuildToolsPackagesConfigInputs>$(GlobalPropertiesFile);$(NuGetPackagesFile);$(NuGetProjectJsonFile)</RestoreBuildToolsPackagesConfigInputs>
   </PropertyGroup>
 
   <!-- Restore NuGet.exe and use it to process Nuget.config. -->
   <Target Name="_RestoreBuildToolsPackagesConfig"
           Inputs="$(RestoreBuildToolsPackagesConfigInputs)"
           Outputs="$(BuildToolsSemaphore);$(NugetExeSemaphore);$(NuGetToolPath)"
-          Condition="Exists('$(NuGetPackagesFile)') or Exists('$(NuGetPackagesFileTargetSpecific)')">
+          Condition="Exists('$(NuGetPackagesFile)')">
     <Message Importance="High" Text="Restoring build tools..." />
 
     <MakeDir Directories="$(NuGetDir)"
@@ -87,10 +54,14 @@
            AlwaysCreate="true"
            ForceTouch="true" />
 
+    <!-- Restore tools from packages/project.json -->
+    <Exec Condition="Exists('$(NuGetProjectJsonFile)')" 
+          Command="$(DnuCoreRestoreCommand) --packages $(ToolPackagesDir) &quot;$(NuGetProjectJsonFile)&quot;"/>
 
-    <!-- Restore build tools using packages.config if it exists -->
-    <Exec Condition="Exists('$(NuGetPackagesFile)')" Command="$(NugetInstallCommand) $(NuGetPackageInstallOptions) &quot;$(NuGetPackagesFile)&quot;" />
-    <Exec Condition="Exists('$(NuGetPackagesFileTargetSpecific)')" Command="$(NugetInstallCommand) $(NuGetPackageInstallOptions) &quot;$(NuGetPackagesFileTargetSpecific)&quot;" />
+<!--     <Exec Condition="Exists('$(NuGetProjectJsonFile)')" 
+          Command="$(DotnetToolCommand) publish -f dnxcore50 -r $(NuGetRuntimeIdentifier) -o $(ToolPackagesDir) &quot;$(NuGetProjectJsonFile)&quot;"
+          WorkingDirectory="$(NuGetConfigDir)" /> -->
+
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
 
@@ -113,24 +84,4 @@
     <Exec Command="find &quot;$(DnuToolDir)&quot; -type f -a -name &quot;*&quot; -a \! -iname &quot;*.dll&quot; -a \! -iname &quot;*.xml&quot; -a \! -iname &quot;*.nupkg&quot; -a \! -iname &quot;*.so&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
 
   </Target>
-
-<!--
-  <Target Name="_RestoreDnuProjectJsonReferences"
-          Inputs="@(ProjectJsonFile)"
-          Outputs="%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)project.lock.json">
-
-    <PropertyGroup>
-      <ProjectDirectory>%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)</ProjectDirectory>
-    </PropertyGroup>
-
-    <Message Importance="High" Text="Restoring in $(ProjectDirectory)" />
-
-    <Exec Condition="'$(OsEnvironment)'=='Windows_NT'"
-        Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) &quot;@(ProjectJsonFile)&quot;" />
-
-    
-    <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
-  </Target>
--->
-
 </Project>
