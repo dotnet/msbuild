@@ -98,7 +98,7 @@
     <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
                                          IncludeFrameworkReferences="false"
                                          NuGetPackagesDirectory="$(PackagesDir)"
-                                         RuntimeIdentifier="$(RuntimeProjectJsonLockFile)"
+                                         RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
                                          ProjectLanguage="C#"
                                          ProjectLockFile="$(RuntimeProjectLockJson)"
                                          TargetMonikers="$(NuGetTargetMoniker)">

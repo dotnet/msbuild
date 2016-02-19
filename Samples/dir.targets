@@ -8,10 +8,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="('$(NetCoreBuild)' != 'true') and Exists('$(MSBuildToolsPath)\Microsoft.CSharp.targets')"/>  
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" Condition="'$(NetCoreBuild)' == 'true'"/>
 
-  <!-- msbuild restores project.json on its own; do not let build tools restore it again -->
-  <PropertyGroup>
-    <RestorePackages>false</RestorePackages>
-  </PropertyGroup>
+ 
   
   <!-- nuget targets -->
   <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />

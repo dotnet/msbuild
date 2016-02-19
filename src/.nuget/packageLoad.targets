@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" InitialTargets="_RestoreBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!--
     Contains targets to do NuGet packages. The following tasks need to be performed:
@@ -48,8 +48,10 @@
   <PropertyGroup>
     <SetDnxPackages Condition="'$(OsEnvironment)'=='Windows_NT'">set DNX_PACKAGES=$(PackagesDir) &amp;</SetDnxPackages>
     <SetDnxPackages Condition="'$(OsEnvironment)'!='Windows_NT'">export DNX_PACKAGES=$(PackagesDir) ;</SetDnxPackages>
-    <DnuRestoreCommand Condition="'$(OS)'!='OSX'">$(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
-    <DnuRestoreCommand Condition="'$(OS)'=='OSX'">ulimit -n 2500 ; $(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
+    
+    <DnuRestoreCommand Condition="'$(OsEnvironment)'=='Windows_NT'">$(NuGetRestoreCommand)</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">$(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(OsEnvironment)'=='OSX'">ulimit -n 2500 ; $(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
   </PropertyGroup>
 
   <ItemGroup>
@@ -103,46 +105,32 @@
 
   </Target>
 
-  <!-- All work is done in the dependent targets -->
-  <Target Name="_RestoreGlobalReferences" DependsOnTargets="_RestoreBuildToolsPackagesConfig">
-
-  </Target>
-
   <!-- Make all files readable and everything, except *.dll, *.xml, and *.nupkg, executable -->
   <Target Name="_UpdateExecPermissions"
-          AfterTargets="_RestoreGlobalReferences"
-          BeforeTargets="_RestoreDnuProjectJsonReferences"
+          AfterTargets="_RestoreBuildToolsPackagesConfig"
           Condition="'$(OsEnvironment)'!='Windows_NT'">
 
     <Exec Command="find &quot;$(DnuToolDir)&quot; -type f -a -name &quot;*&quot; -a \! -iname &quot;*.dll&quot; -a \! -iname &quot;*.xml&quot; -a \! -iname &quot;*.nupkg&quot; -a \! -iname &quot;*.so&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
 
   </Target>
 
+<!--
   <Target Name="_RestoreDnuProjectJsonReferences"
           Inputs="@(ProjectJsonFile)"
-          Outputs="%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)project.lock.json"
-          AfterTargets="_RestoreGlobalReferences" >
+          Outputs="%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)project.lock.json">
+
     <PropertyGroup>
       <ProjectDirectory>%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)</ProjectDirectory>
     </PropertyGroup>
 
     <Message Importance="High" Text="Restoring in $(ProjectDirectory)" />
 
-    <!-- TODO: Restore back to Nuget once Nuget works -->
-    <!-- Restore packages for this directory using Nuget-->
-     <Exec Condition="'$(OsEnvironment)'=='Windows_NT'"
+    <Exec Condition="'$(OsEnvironment)'=='Windows_NT'"
         Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) &quot;@(ProjectJsonFile)&quot;" />
 
-    <!-- Restore packages for this directory using DNU-->
+    
     <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
   </Target>
-
-  <!--
-     Call all targets:
-       _RestoreBuildToolsNugetConfig - download NuGet.exe and restore packages via packages.config
-       _RestoreSolution - If solution file is provided, use it to restore all packages of projects
-       _RestoreDnuProjectJsonReferences - Without solution, use dnu and process all project.json files
-  -->
-  <Target Name="_RestoreBuildTools" DependsOnTargets="_RestoreGlobalReferences" />
+-->
 
 </Project>

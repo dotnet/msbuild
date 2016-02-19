@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" InitialTargets="_RestoreBuildToolsWrapper" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <!--
-    Needed to avoid the IntialTargets from having an Output which ends up getting
-    added to the output references when you have a project to project reference.
-  -->
-  <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_DisplayBuildInfo; _RestoreBuildTools" />
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Target Name="_DisplayBuildInfo">
       <!-- Cannot do both MonoBuild and NetCoreBuild -->
@@ -14,16 +8,6 @@
       />
 
     <Message Importance="High" Text="Build '$(MSBuildProjectFile)' into binary directory '$(BaseOutputPathWithConfig)'" />
-  </Target>
-
-  <Target Name="_PrepareNonWindowsRuntime"
-          AfterTargets="_RestoreBuildToolsWrapper1"
-          Condition="'$(OsEnvironment)'!='Windows_NT' and Exists($(OutputPath))"
-  >
-
-    <Exec Command="find '$(OutputPath)' -name &quot;*.exe&quot; -exec chmod &quot;+x&quot; '{}' ';'" />
-    <Exec Command="find '$(OutputPath)' -name &quot;*&quot; -exec chmod &quot;+r&quot; '{}' ';'" />
-
   </Target>
 
   <!-- Provide default targets which can be hooked onto or overridden as necessary -->
