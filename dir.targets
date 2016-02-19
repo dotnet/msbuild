@@ -16,27 +16,8 @@
     <Message Importance="High" Text="Build '$(MSBuildProjectFile)' into binary directory '$(BaseOutputPathWithConfig)'" />
   </Target>
 
-  <!--
-    TODO: The compilers are copied in DeployDependencies based on the
-          runtime.project.json. Use non-existent AfterTargets to disable
-          this target. It should be removed when we are 100% sure.
-  -->
-  <Target Name="_CopyCompilers"
-          AfterTargets="_RestoreBuildToolsWrapper1"
-          Condition="Exists($(BuildToolsSemaphore)) and '$(NetCoreBuild)' != 'true'">
-    <ItemGroup>
-      <CompilerToolsFiles Include="$(CompilerToolsDir)\*" />
-    </ItemGroup>
-
-    <Copy
-      SourceFiles="@(CompilerToolsFiles)"
-      DestinationFolder="$(OutputPath)"
-      SkipUnchangedFiles="true"
-    />
-  </Target>
-
   <Target Name="_PrepareNonWindowsRuntime"
-          AfterTargets="_CopyCompilers"
+          AfterTargets="_RestoreBuildToolsWrapper1"
           Condition="'$(OsEnvironment)'!='Windows_NT' and Exists($(OutputPath))"
   >
 

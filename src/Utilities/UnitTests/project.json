@@ -22,6 +22,7 @@
         "System.Console": "4.0.0-rc2-23712",
         "System.Diagnostics.Process": "4.1.0-rc2-23712",
         "Microsoft.Win32.Primitives":  "4.0.1-rc2-23712",
+        "Microsoft.Net.Compilers.Targets.NetCore": "0.1.4-dev",
         "Microsoft.NETCore.Runtime": "1.0.1-rc2-23712",
         "Microsoft.NETCore.TestHost": "1.0.0-rc2-23712",
         "System.Xml.XmlDocument": "4.0.1-rc2-23712",

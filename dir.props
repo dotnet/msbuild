@@ -18,7 +18,6 @@
 
    <!-- Common repo directories -->
   <PropertyGroup>
-    <CompilerToolsVersion>1.2.0-beta1-20160108-01</CompilerToolsVersion>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
@@ -53,7 +52,7 @@
 
   <PropertyGroup>
     <ToolsDir>$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
-    <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+    <CompilerToolsDir>$ToolsDir</CompilerToolsDir>
     <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(ToolPackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
 
     <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
