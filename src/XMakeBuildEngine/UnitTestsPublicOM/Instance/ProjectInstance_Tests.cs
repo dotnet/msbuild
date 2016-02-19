@@ -840,6 +840,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Cloning inherits unless otherwise specified
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void ImmutableProjectInstance_CloneImmutableFromMutable()
         {
             var protoInstance = GetSampleProjectInstance(false /* mutable */);
@@ -860,6 +861,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Cloning inherits unless otherwise specified
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void ImmutableProjectInstance_CloneImmutableFromImmutable()
         {
             var protoInstance = GetSampleProjectInstance(true /* immutable */);
@@ -883,6 +885,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Cloning inherits unless otherwise specified
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void ImmutableProjectInstance_CloneImmutableFromImmutable2()
         {
             var protoInstance = GetSampleProjectInstance(true /* immutable */);
@@ -903,6 +906,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Cloning inherits unless otherwise specified
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void ImmutableProjectInstance_CloneMutableFromMutable()
         {
             var protoInstance = GetSampleProjectInstance(false /* mutable */);

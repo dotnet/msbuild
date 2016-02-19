@@ -642,6 +642,7 @@ namespace Microsoft.Build.UnitTests
         /// Not set should not wipe out other env vars
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             MyTool task = new MyTool();
