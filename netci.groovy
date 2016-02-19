@@ -39,11 +39,12 @@ def project = GithubProject
             case 'OSX':
                 newJob.with{
                     steps{
-                        shell("./cibuild.sh --scope Compile")
+                        shell("./cibuild.sh --scope Test")
                     }
                 }
 
-                //no test archiving yet
+                // Add xunit result archiving
+                Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml')
 
                 break;
             case 'Ubuntu':
