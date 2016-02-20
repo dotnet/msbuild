@@ -14,6 +14,7 @@ setHome()
     if [ -z ${HOME+x} ]
     then
         BUILD_COMMAND="( export HOME=$HOME_DEFAULT ; $BUILD_COMMAND )"
+        INIT_BUILD_TOOLS_COMMAND="( export HOME=$HOME_DEFAULT ; $INIT_BUILD_TOOLS_COMMAND )"
         mkdir -p $HOME_DEFAULT
     fi
 }
@@ -148,10 +149,12 @@ MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$C
 
 BUILD_COMMAND="$RUNTIME_HOST $RUNTIME_HOST_ARGS $MSBUILD_EXE $MSBUILD_ARGS"
 
+INIT_BUILD_TOOLS_COMMAND="$THIS_SCRIPT_PATH/init-tools.sh"
+
 #home is not defined on CI machines
 setHome
 
 #restore build tools
-$THIS_SCRIPT_PATH/init-tools.sh
+eval "$INIT_BUILD_TOOLS_COMMAND"
 
 build
