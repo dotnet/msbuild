@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -162,7 +163,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             // Libraries in which lib==ref should be deduped
             refsDirectory.Should().NotHaveFile("TestLibrary.dll");
         }
-
 
         [Fact]
         public void CompilationFailedTest()
