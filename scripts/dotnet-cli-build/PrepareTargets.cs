@@ -18,8 +18,17 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(Init), nameof(RestorePackages))]
         public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPrereqDebianPackageBuildComponents), nameof(CheckPrereqCoreclrDependencyPackages))]
+        [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
         public static BuildTargetResult CheckPrereqs(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckCoreclrPlatformDependencies),  nameof(CheckInstallerBuildPlatformDependencies))]
+        public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckUbuntuCoreclrDependencies),  nameof(CheckCentOSCoreclrDependencies))]
+        public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckUbuntuDebianPackageBuildDependencies))]
+        public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c) => c.Success();
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
         [Target(nameof(GenerateVersions), nameof(CheckPrereqs), nameof(LocateStage0))]
@@ -173,13 +182,9 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        public static BuildTargetResult CheckPrereqDebianPackageBuildComponents(BuildTargetContext c)
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult CheckUbuntuDebianPackageBuildDependencies(BuildTargetContext c)
         {
-            if (!CurrentPlatform.IsUbuntu)
-            {
-                return c.Success();
-            }
-
             var debianPackageBuildDependencies = new string[]
             {
                 "devscripts", 
@@ -211,57 +216,71 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        public static BuildTargetResult CheckPrereqCoreclrDependencyPackages(BuildTargetContext c)
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult CheckUbuntuCoreclrDependencies(BuildTargetContext c)
         {
-            if (!CurrentPlatform.IsUbuntu && !CurrentPlatform.IsCentOS)
+            var errorMessageBuilder = new StringBuilder();
+
+            var ubuntuCoreclrDependencies = new string[]
+            {
+                "unzip",
+                "curl",
+                "libicu-dev",
+                "libunwind8",
+                "gettext",
+                "libssl-dev",
+                "libcurl4-openssl-dev",
+                "zlib1g",
+                "liblttng-ust-dev",
+                "lldb-3.6-dev",
+                "lldb-3.6"
+            };
+
+            foreach (var package in ubuntuCoreclrDependencies)
+            {
+                if (!AptPackageIsInstalled(package))
+                {
+                    errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                    errorMessageBuilder.Append($"-> install with apt-get install {package}");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                }
+            }
+
+            if (errorMessageBuilder.Length == 0)
             {
                 return c.Success();
             }
+            else
+            {
+                return c.Failed(errorMessageBuilder.ToString());
+            }
+        }
 
+        [Target]
+        [BuildPlatforms(BuildPlatform.CentOS)]
+        public static BuildTargetResult CheckCentOSCoreclrDependencies(BuildTargetContext c)
+        {
             var errorMessageBuilder = new StringBuilder();
-            var platformPackageCheckAction = default(Func<string, bool>);
-            var platformCoreclrDependencies = default(string[]);
 
-            if (CurrentPlatform.IsUbuntu)
+            var centOSCoreclrDependencies = new string[]
             {
-                platformCoreclrDependencies = new string[]
-                {
-                    "unzip",
-                    "curl",
-                    "libicu-dev",
-                    "libunwind8",
-                    "gettext",
-                    "libssl-dev",
-                    "libcurl3-gnutls",
-                    "zlib1g",
-                    "liblttng-ust-dev",
-                    "lldb-3.6-dev",
-                    "lldb-3.6"
-                };
+                "unzip",
+                "libunwind",
+                "gettext",
+                "libcurl-devel",
+                "openssl-devel",
+                "zlib",
+                "libicu-devel"
+            };
 
-                platformPackageCheckAction = AptPackageIsInstalled;
-            }
-            else if (CurrentPlatform.IsCentOS)
+            foreach (var package in centOSCoreclrDependencies)
             {
-                platformCoreclrDependencies = new string[]
-                {
-                    "unzip",
-                    "libunwind",
-                    "gettext",
-                    "libcurl-devel",
-                    "openssl-devel",
-                    "zlib",
-                    "libicu-devel"
-                };
-
-                platformPackageCheckAction = YumPackageIsInstalled;
-            }
-
-            foreach (var package in platformCoreclrDependencies)
-            {
-                if (!platformPackageCheckAction(package))
+                if (!YumPackageIsInstalled(package))
                 {
                     errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                    errorMessageBuilder.Append($"-> install with yum install {package}");
                     errorMessageBuilder.Append(Environment.NewLine);
                 }
             }
@@ -313,6 +332,7 @@ cmake is required to build the native host 'corehost'";
             var result = Command.Create("dpkg", "-s", packageName)
                 .CaptureStdOut()
                 .CaptureStdErr()
+                .QuietBuildReporter()
                 .Execute();
 
             return result.ExitCode == 0;
@@ -323,6 +343,7 @@ cmake is required to build the native host 'corehost'";
             var result = Command.Create("yum", "list", "installed", packageName)
                 .CaptureStdOut()
                 .CaptureStdErr()
+                .QuietBuildReporter()
                 .Execute();
 
             return result.ExitCode == 0;

@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         private Action<string> _stdErrHandler;
 
         private bool _running = false;
+        private bool _quietBuildReporter = false;
 
         private Command(string executable, string args)
         {
@@ -148,6 +149,12 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             return this;
         }
 
+        public Command QuietBuildReporter()
+        {
+            _quietBuildReporter = true;
+            return this;
+        }
+
         public CommandResult Execute()
         {
             ThrowIfRunning();
@@ -172,7 +179,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             _process.EnableRaisingEvents = true;
 
             var sw = Stopwatch.StartNew();
-            BuildReporter.BeginSection("EXEC", FormatProcessInfo(_process.StartInfo));
+            ReportExecBegin();
 
             _process.Start();
 
@@ -190,15 +197,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
             var exitCode = _process.ExitCode;
 
-            var message = $"{FormatProcessInfo(_process.StartInfo)} exited with {exitCode}";
-            if (exitCode == 0)
-            {
-                BuildReporter.EndSection("EXEC", message.Green(), success: true);
-            }
-            else
-            {
-                BuildReporter.EndSection("EXEC", message.Red().Bold(), success: false);
-            }
+            ReportExecEnd(exitCode);
 
             return new CommandResult(
                 _process.StartInfo,
@@ -297,6 +296,30 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
 
             return info.FileName + " " + info.Arguments;
+        }
+
+        private void ReportExecBegin()
+        {
+            if (!_quietBuildReporter)
+            {
+                BuildReporter.BeginSection("EXEC", FormatProcessInfo(_process.StartInfo));
+            }
+        }
+
+        private void ReportExecEnd(int exitCode)
+        {
+            if (!_quietBuildReporter)
+            {
+                var message = $"{FormatProcessInfo(_process.StartInfo)} exited with {exitCode}";
+                if (exitCode == 0)
+                {
+                    BuildReporter.EndSection("EXEC", message.Green(), success: true);
+                }
+                else
+                {
+                    BuildReporter.EndSection("EXEC", message.Red().Bold(), success: false);
+                }
+            }
         }
 
         private void ThrowIfRunning([CallerMemberName] string memberName = null)

@@ -9,7 +9,7 @@ FROM ubuntu:14.04
 # This could become a "microsoft/coreclr" image, since it just installs the dependencies for CoreCLR (and stdlib)
 # Install CoreCLR and CoreFx dependencies
 RUN apt-get update && \
-    apt-get -qqy install unzip curl libicu-dev libunwind8 gettext libssl-dev libcurl3-gnutls zlib1g liblttng-ust-dev lldb-3.6-dev lldb-3.6 
+    apt-get -qqy install unzip curl libicu-dev libunwind8 gettext libssl-dev libcurl4-openssl-dev zlib1g liblttng-ust-dev lldb-3.6-dev lldb-3.6 
 
 # Install Dotnet CLI dependencies.
 # clang is required for dotnet-compile-native
