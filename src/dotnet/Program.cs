@@ -135,11 +135,11 @@ namespace Microsoft.DotNet.Cli
         {
             HelpCommand.PrintVersionHeader();
 
-            var commitSha = GetCommitSha();
+            var commitSha = GetCommitSha() ?? "N/A";
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Product Information:");
             Reporter.Output.WriteLine($" Version:     {HelpCommand.ProductVersion}");
-            Reporter.Output.WriteLine($" Commit Sha:  {commitSha.Substring(0, 10)}");
+            Reporter.Output.WriteLine($" Commit Sha:  {commitSha}");
             Reporter.Output.WriteLine();
             var runtimeEnvironment = PlatformServices.Default.Runtime;
             Reporter.Output.WriteLine("Runtime Environment:");
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Cli
             
             if (File.Exists(versionFile))
             {
-                return File.ReadLines(versionFile).FirstOrDefault();
+                return File.ReadLines(versionFile).FirstOrDefault()?.Substring(0, 10);
             }
             
             return null;
