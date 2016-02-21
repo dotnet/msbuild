@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Microsoft.DotNet.ProjectModel;
 using System.Collections.Generic;
 using System.CommandLine;
@@ -28,6 +29,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private const string TargetFrameworkOptionName = "target-framework";
 
+        private const string TargetFrameworkVersionOptionName = "target-framework-version";
+
         public string Title { get; set; }
 
         public string Description { get; set; }
@@ -45,6 +48,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         public string NeutralLanguage { get; set; }
 
         public string TargetFramework { get; set; }
+
+        public Version TargetFrameworkVersion { get; set; }
 
         public static AssemblyInfoOptions CreateForProject(ProjectContext context)
         {
@@ -69,7 +74,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 Description = project.Description,
                 Title = project.Title,
                 NeutralLanguage = project.Language,
-                TargetFramework = targetFramework.DotNetFrameworkName
+                TargetFramework = targetFramework.DotNetFrameworkName,
+                TargetFrameworkVersion = targetFramework.Version
             };
         }
 
@@ -84,6 +90,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             string culture = null;
             string neutralCulture = null;
             string targetFramework = null;
+            string targetFrameworkVersion = null;
 
             syntax.DefineOption(AssemblyVersionOptionName, ref version, UnescapeNewlines, "Assembly version");
 
@@ -103,6 +110,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             syntax.DefineOption(TargetFrameworkOptionName, ref targetFramework, UnescapeNewlines, "Assembly target framework");
 
+            syntax.DefineOption(TargetFrameworkVersionOptionName, ref targetFrameworkVersion, UnescapeNewlines, "Assembly target framework version");
+
             return new AssemblyInfoOptions()
             {
                 AssemblyFileVersion = fileVersion,
@@ -112,7 +121,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 Description = description,
                 InformationalVersion = informationalVersion,
                 Title = title,
-                TargetFramework = targetFramework
+                TargetFramework = targetFramework,
+                TargetFrameworkVersion = new Version(targetFrameworkVersion)
             };
         }
 
@@ -155,6 +165,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             if (!string.IsNullOrWhiteSpace(assemblyInfoOptions.TargetFramework))
             {
                 options.Add(FormatOption(TargetFrameworkOptionName, assemblyInfoOptions.TargetFramework));
+            }
+            if (assemblyInfoOptions.TargetFrameworkVersion != null)
+            {
+                options.Add(FormatOption(TargetFrameworkVersionOptionName, assemblyInfoOptions.TargetFrameworkVersion.ToString()));
             }
 
             return options;
