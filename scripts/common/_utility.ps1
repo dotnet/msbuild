@@ -44,8 +44,8 @@ function setPathAndHomeIfDefault([string]$rootPath)
 
 function setPathAndHome([string]$rootPath)
 {
-        $env:DOTNET_ON_PATH=$rootPath
-        $env:PATH="$rootPath\bin;$env:PATH"
+    $env:DOTNET_ON_PATH=$rootPath
+    $env:PATH="$rootPath\bin;$env:PATH"
 }
 
 function _([string]$command)
