@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
@@ -59,7 +60,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private static Dictionary<Type, string> GetProjectAttributes(AssemblyInfoOptions metadata)
         {
-            var attributes = new Dictionary<Type, string>() {
+            NuGetFramework targetFramework = NuGetFramework.Parse(metadata.TargetFramework);
+
+            var attributes = new Dictionary<Type, string>()
+            {
                 [typeof(AssemblyTitleAttribute)] = EscapeCharacters(metadata.Title),
                 [typeof(AssemblyDescriptionAttribute)] = EscapeCharacters(metadata.Description),
                 [typeof(AssemblyCopyrightAttribute)] = EscapeCharacters(metadata.Copyright),
@@ -71,7 +75,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             };
             
             // only .net 4.0+ compatible
-            if (metadata.TargetFrameworkVersion == null || metadata.TargetFrameworkVersion >= new Version(4, 0)) {
+            if (targetFramework.Version >= new Version(4, 0))
+            {
                 attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework);
             };
             return attributes;

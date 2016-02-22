@@ -49,8 +49,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         public string TargetFramework { get; set; }
 
-        public Version TargetFrameworkVersion { get; set; }
-
         public static AssemblyInfoOptions CreateForProject(ProjectContext context)
         {
             var project = context.ProjectFile;
@@ -74,8 +72,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 Description = project.Description,
                 Title = project.Title,
                 NeutralLanguage = project.Language,
-                TargetFramework = targetFramework.DotNetFrameworkName,
-                TargetFrameworkVersion = targetFramework.Version
+                TargetFramework = targetFramework.DotNetFrameworkName
             };
         }
 
@@ -110,8 +107,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             syntax.DefineOption(TargetFrameworkOptionName, ref targetFramework, UnescapeNewlines, "Assembly target framework");
 
-            syntax.DefineOption(TargetFrameworkVersionOptionName, ref targetFrameworkVersion, UnescapeNewlines, "Assembly target framework version");
-
             return new AssemblyInfoOptions()
             {
                 AssemblyFileVersion = fileVersion,
@@ -121,8 +116,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 Description = description,
                 InformationalVersion = informationalVersion,
                 Title = title,
-                TargetFramework = targetFramework,
-                TargetFrameworkVersion = new Version(targetFrameworkVersion)
+                TargetFramework = targetFramework
             };
         }
 
@@ -165,10 +159,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             if (!string.IsNullOrWhiteSpace(assemblyInfoOptions.TargetFramework))
             {
                 options.Add(FormatOption(TargetFrameworkOptionName, assemblyInfoOptions.TargetFramework));
-            }
-            if (assemblyInfoOptions.TargetFrameworkVersion != null)
-            {
-                options.Add(FormatOption(TargetFrameworkVersionOptionName, assemblyInfoOptions.TargetFrameworkVersion.ToString()));
             }
 
             return options;
