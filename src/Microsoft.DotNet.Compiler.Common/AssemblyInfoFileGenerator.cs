@@ -60,8 +60,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private static Dictionary<Type, string> GetProjectAttributes(AssemblyInfoOptions metadata)
         {
-            NuGetFramework targetFramework = NuGetFramework.Parse(metadata.TargetFramework);
-
             var attributes = new Dictionary<Type, string>()
             {
                 [typeof(AssemblyTitleAttribute)] = EscapeCharacters(metadata.Title),
@@ -74,10 +72,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage)
             };
             
-            // only .net 4.0+ compatible
-            if (targetFramework.Version >= new Version(4, 0))
+            NuGetFramework targetFramework = string.IsNullOrEmpty(metadata.TargetFramework) ? null : NuGetFramework.Parse(metadata.TargetFramework);
+            if (targetFramework != null && !(targetFramework.IsDesktop() && targetFramework.Version < new Version(4, 0)))
             {
-                attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework);
+                attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework); // TargetFrameworkAttribute only exists since .NET 4.0
             };
             return attributes;
         }
