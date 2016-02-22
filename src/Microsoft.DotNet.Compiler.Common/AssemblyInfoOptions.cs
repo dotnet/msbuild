@@ -29,8 +29,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private const string TargetFrameworkOptionName = "target-framework";
 
-        private const string TargetFrameworkVersionOptionName = "target-framework-version";
-
         public string Title { get; set; }
 
         public string Description { get; set; }
@@ -87,7 +85,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             string culture = null;
             string neutralCulture = null;
             string targetFramework = null;
-            string targetFrameworkVersion = null;
 
             syntax.DefineOption(AssemblyVersionOptionName, ref version, UnescapeNewlines, "Assembly version");
 
