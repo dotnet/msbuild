@@ -6,6 +6,7 @@
 param(
     [string]$Configuration="Debug",
     [switch]$NoPackage,
+    [switch]$RunInstallerTestsInDocker,
     [switch]$Help)
 
 if($Help)
@@ -15,6 +16,7 @@ if($Help)
     Write-Host "Options:"
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
     Write-Host "  -NoPackage                         Skip packaging targets"
+    Write-Host "  -RunInstallerTestsInDocker         Runs the .msi installer tests in a Docker container. Requires Windows 2016 TP4 or higher"
     Write-Host "  -Help                              Display this help message"
     Write-Host "  <TARGETS...>                       The build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
     exit 0
@@ -29,6 +31,11 @@ if($NoPackage)
 else
 {
     $env:DOTNET_BUILD_SKIP_PACKAGING=0
+}
+
+if ($RunInstallerTestsInDocker)
+{
+    $env:RunInstallerTestsInDocker=1
 }
 
 # Load Branch Info
