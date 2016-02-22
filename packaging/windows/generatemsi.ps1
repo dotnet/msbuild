@@ -15,27 +15,24 @@ $InstallFilesWixobj = "install-files.wixobj"
 
 function AcquireWixTools
 {
-    Write-Host Downloading Wixtools..
-
     $result = Join-Path $OutputDir WiXTools
 
-    if(Test-Path "$result\tools\candle.exe")
+    if(Test-Path "$result\candle.exe")
     {
-        return Join-Path $result tools
+        return $result
     }
 
+    Write-Host Downloading Wixtools..
     New-Item $result -type directory -force | Out-Null
-    Invoke-WebRequest -Uri https://api.nuget.org/packages/wix.3.10.1.nupkg -Method Get -OutFile $result\WixTools.zip
-    Expand-Archive $result\WixTools.zip -dest $result\
+    # Download Wix version 3.10.2 - https://wix.codeplex.com/releases/view/619491
+    Invoke-WebRequest -Uri https://wix.codeplex.com/downloads/get/1540241 -Method Get -OutFile $result\WixTools.zip
+
+    Write-Host Extracting Wixtools..
+    [System.IO.Compression.ZipFile]::ExtractToDirectory("$result\WixTools.zip", $result)
 
     if($LastExitCode -ne 0)
     {
-        $result = ""
-        Write-Host "Unable to download and extract the WixTools."
-    }
-    else
-    {
-        $result = Join-Path $result tools
+        throw "Unable to download and extract the WixTools."
     }
 
     return $result
