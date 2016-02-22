@@ -15,25 +15,29 @@ $InstallFilesWixobj = "install-files.wixobj"
 
 function AcquireWixTools
 {
-    pushd "$Stage2Dir\bin"
+    Write-Host Downloading Wixtools..
 
-    Write-Host Restoring Wixtools..
+    $result = Join-Path $OutputDir WiXTools
 
-    $result = $env:TEMP
+    if(Test-Path "$result\tools\candle.exe")
+    {
+        return Join-Path $result tools
+    }
 
-    .\dotnet restore $RepoRoot\packaging\windows\WiXTools --packages $result | Out-Null
+    New-Item $result -type directory -force | Out-Null
+    Invoke-WebRequest -Uri https://api.nuget.org/packages/wix.3.10.1.nupkg -Method Get -OutFile $result\WixTools.zip
+    Expand-Archive $result\WixTools.zip -dest $result\
 
     if($LastExitCode -ne 0)
     {
         $result = ""
-        Write-Host "dotnet restore failed with exit code $LastExitCode."
+        Write-Host "Unable to download and extract the WixTools."
     }
     else
     {
-        $result = Join-Path $result WiX\3.10.0.2103-pre1\tools
+        $result = Join-Path $result tools
     }
 
-    popd
     return $result
 }
 
