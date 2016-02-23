@@ -53,6 +53,7 @@ namespace Microsoft.Build.UnitTests
         /// Test basic function of the AssignLinkMetadata task
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void Basic()
         {
             ITaskItem item = GetParentedTaskItem();
@@ -77,6 +78,7 @@ namespace Microsoft.Build.UnitTests
         /// output any items that aren't problematic.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void InvalidItemPathWithOtherValidItem()
         {
             ITaskItem item1 = GetParentedTaskItem(itemSpec: "|||");

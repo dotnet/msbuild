@@ -221,6 +221,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using (MyTool t = new MyTool())
@@ -357,6 +358,7 @@ namespace Microsoft.Build.UnitTests
         /// of the regular tool name
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void ToolExeIsFoundOnToolPath()
         {
             string shellName = NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
@@ -410,6 +412,7 @@ namespace Microsoft.Build.UnitTests
         /// Task is found on path.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TaskFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -532,6 +535,7 @@ namespace Microsoft.Build.UnitTests
         /// Passing env vars through the tooltask public property
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTask()
         {
             MyTool task = new MyTool();
@@ -578,6 +582,7 @@ namespace Microsoft.Build.UnitTests
         /// Equals sign in value
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
             MyTool task = new MyTool();
@@ -643,6 +648,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             MyTool task = new MyTool();

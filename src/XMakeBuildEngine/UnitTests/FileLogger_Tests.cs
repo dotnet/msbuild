@@ -86,6 +86,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void InvalidFile()
         {
             Assert.Throws<LoggerException>(() =>

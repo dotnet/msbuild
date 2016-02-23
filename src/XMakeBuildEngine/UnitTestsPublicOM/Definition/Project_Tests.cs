@@ -1006,6 +1006,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/276")]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void ChangeGlobalPropertiesInitiallyFromProjectCollection()
         {
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1273,6 +1274,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// environment 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");

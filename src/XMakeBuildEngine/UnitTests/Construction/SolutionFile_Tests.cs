@@ -44,6 +44,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         public void ParseFirstProjectLine_VC()
         {
@@ -454,6 +455,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test ParseEtpProject function.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
         {

@@ -321,6 +321,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void GetGoodSDKs()
         {
             try
@@ -401,6 +402,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void GetGoodSDKs2()
         {
             try

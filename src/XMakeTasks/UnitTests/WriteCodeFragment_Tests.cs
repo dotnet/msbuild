@@ -25,6 +25,7 @@ namespace Microsoft.Build.UnitTests
         /// Need an available language
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void InvalidLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();

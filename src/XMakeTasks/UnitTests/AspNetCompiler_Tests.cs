@@ -248,6 +248,7 @@ namespace Microsoft.Build.UnitTests
         /// the project files don't exist, but we only care about the events anyway.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TestExternalProjectEvents()
         {
             string projectFileContents = @"

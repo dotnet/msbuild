@@ -109,6 +109,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TestResolve()
         {
             // empty pre-generated string
@@ -192,6 +193,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TestManagedCheck()
         {
             Hashtable unresolvedOutputs = null;
@@ -223,6 +225,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that the UnresolvedProjectReferences output parameter is populated correctly.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void TestUnresolvedReferences()
         {
             Hashtable unresolvedOutputs = null;
