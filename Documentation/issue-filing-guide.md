@@ -7,15 +7,15 @@ get a lot of issues. This, in turn, may mean that some issues get
 lost in the noise and/or are not reacted on with the needed speed. 
 
 In order to help with the above situation, we need to have a certain way to file 
-issues in order for the core team of maintainers can react as fast as (humanly)
-possible.
+issues so that the core team of maintainers can react as fast as 
+possible and can triage effectively. 
 
 The below steps are something that we believe is not a huge increase in process, 
 but would help us react much faster to any issues that are filed. 
 
 1. Check if the [known issues](known-issues.md) cover the issue you are running 
 into. We are collecting issues that are known and that have workarounds, so it 
-could be that you can get unblocked pretty easy. 
+could be that you can get unblocked pretty easily. 
 
 2. Add a label to determine which type of issue it is. If it is a defect, use 
 the "bug" label, if it is a suggestion for a feature, use the "enhancement" 
@@ -27,7 +27,8 @@ label. This helps the team get to defects more effectively.
 first to @blackdwarf and he will triage it from there. 
 
 5. /cc the person that the issue is assigned to (or @blackdwarf) so that person 
-would get notified. In this way
+would get notified. In this way the correct person can immediately jump on the 
+issue and triage it.
 
 6. For bugs, please be as concrete as possible on what is working, what 
 is not working. Things like operating system, the version of the tools, the 
