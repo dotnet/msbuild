@@ -19,14 +19,11 @@ namespace Microsoft.DotNet.Cli.Utils
             _console = console;
         }
 
-        public static Reporter Output { get; } = Create(AnsiConsole.GetOutput);
-        public static Reporter Error { get; } = Create(AnsiConsole.GetError);
-        public static Reporter Verbose { get; } = CommandContext.IsVerbose() ? Create(AnsiConsole.GetOutput) : NullReporter;
-
-        public static Reporter Create(Func<bool, AnsiConsole> getter)
-        {
-            return new Reporter(getter(PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows));
-        }
+        public static Reporter Output { get; } = new Reporter(AnsiConsole.GetOutput());
+        public static Reporter Error { get; } = new Reporter(AnsiConsole.GetError());
+        public static Reporter Verbose { get; } = CommandContext.IsVerbose() ? 
+            new Reporter(AnsiConsole.GetOutput()) : 
+            NullReporter;
 
         public void WriteLine(string message)
         {
