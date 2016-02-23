@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
+using Microsoft.DotNet.ProjectModel.Compilation;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Workspaces
@@ -78,7 +79,10 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
 
             foreach (var file in project.ProjectFile.Files.SourceFiles)
             {
-                AddSourceFile(projectInfo, file);
+                using (var stream = File.OpenRead(file))
+                {
+                    AddSourceFile(projectInfo, file, stream);
+                }
             }
 
             var exporter = project.CreateExporter(configuration);
@@ -104,24 +108,24 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
 
                 foreach (var file in dependency.SourceReferences)
                 {
-                    AddSourceFile(projectInfo, file);
+                    using (var stream = file.GetTransformedStream())
+                    {
+                        AddSourceFile(projectInfo, file.ResolvedPath, stream);
+                    }
                 }
             }
 
             return projectInfo.Id;
         }
 
-        private void AddSourceFile(ProjectInfo projectInfo, string file)
+        private void AddSourceFile(ProjectInfo projectInfo, string file, Stream stream)
         {
-            using (var stream = File.OpenRead(file))
-            {
-                var sourceText = SourceText.From(stream, encoding: Encoding.UTF8);
-                var id = DocumentId.CreateNewId(projectInfo.Id);
-                var version = VersionStamp.Create();
+            var sourceText = SourceText.From(stream, encoding: Encoding.UTF8);
+            var id = DocumentId.CreateNewId(projectInfo.Id);
+            var version = VersionStamp.Create();
 
-                var loader = TextLoader.From(TextAndVersion.Create(sourceText, version));
-                OnDocumentAdded(DocumentInfo.Create(id, file, filePath: file, loader: loader));
-            }
+            var loader = TextLoader.From(TextAndVersion.Create(sourceText, version));
+            OnDocumentAdded(DocumentInfo.Create(id, file, filePath: file, loader: loader));
         }
 
         private MetadataReference GetMetadataReference(string path)

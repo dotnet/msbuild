@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Server.Helpers;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 using Microsoft.DotNet.Cli.Compiler.Common;
@@ -45,7 +46,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             // both will be listed as dependencies. Prefix "fx/" will be added to ReferenceAssembly type dependency.
             foreach (var export in allExports.Values)
             {
-                allSourceFiles.AddRange(export.SourceReferences);
+                allSourceFiles.AddRange(export.SourceReferences.Select(f => f.ResolvedPath));
                 allFileReferences.AddRange(export.CompilationAssemblies.Select(asset => asset.ResolvedPath));
 
                 var diagnostics = diagnosticsLookup[export.Library].ToList();

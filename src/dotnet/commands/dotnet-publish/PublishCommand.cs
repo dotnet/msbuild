@@ -87,10 +87,11 @@ namespace Microsoft.DotNet.Tools.Publish
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
 
             var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+            var outputPaths = context.GetOutputPaths(configuration, buildBasePath, outputPath);
 
             if (string.IsNullOrEmpty(outputPath))
             {
-                outputPath = Path.Combine(context.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeOutputPath, PublishSubfolderName);
+                outputPath = Path.Combine(outputPaths.RuntimeOutputPath, PublishSubfolderName);
             }
 
             var contextVariables = new Dictionary<string, string>
@@ -148,7 +149,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 PublishFiles(export.RuntimeAssemblies, outputPath, nativeSubdirectories: false);
                 PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
-                export.RuntimeAssets.StructuredCopyTo(outputPath);
+                export.RuntimeAssets.StructuredCopyTo(outputPath, outputPaths.IntermediateOutputDirectoryPath);
 
                 if (options.PreserveCompilationContext.GetValueOrDefault())
                 {

@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.ProjectModel
             project.ProjectUrl = rawProject.ValueAsString("projectUrl");
             project.LicenseUrl = rawProject.ValueAsString("licenseUrl");
             project.IconUrl = rawProject.ValueAsString("iconUrl");
-            project.CompilerName = rawProject.ValueAsString("compilerName");
+            project.CompilerName = rawProject.ValueAsString("compilerName") ?? "csc";
             project.TestRunner = rawProject.ValueAsString("testRunner");
 
             project.Authors = rawProject.ValueAsStringArray("authors") ?? EmptyArray<string>.Value;
