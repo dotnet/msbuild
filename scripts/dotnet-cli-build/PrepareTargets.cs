@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(CheckCoreclrPlatformDependencies),  nameof(CheckInstallerBuildPlatformDependencies))]
         public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(CheckUbuntuCoreclrDependencies),  nameof(CheckCentOSCoreclrDependencies))]
+        [Target(nameof(CheckUbuntuCoreclrAndCoreFxDependencies),  nameof(CheckCentOSCoreclrAndCoreFxDependencies))]
         public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c) => c.Success();
 
         [Target(nameof(CheckUbuntuDebianPackageBuildDependencies))]
@@ -185,18 +185,14 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult CheckUbuntuDebianPackageBuildDependencies(BuildTargetContext c)
         {
-            var debianPackageBuildDependencies = new string[]
-            {
-                "devscripts", 
-                "debhelper",
-                "build-essential"
-            };
 
             var messageBuilder = new StringBuilder();
+            var aptDependencyUtility = new AptDependencyUtility();
 
-            foreach (var package in debianPackageBuildDependencies)
+
+            foreach (var package in PackageDependencies.DebianPackageBuildDependencies)
             {
-                if (!AptPackageIsInstalled(package))
+                if (!AptDependencyUtility.PackageIsInstalled(package))
                 {
                     messageBuilder.Append($"Error: Debian package build dependency {package} missing.");
                     messageBuilder.Append(Environment.NewLine);
@@ -217,28 +213,14 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
-        public static BuildTargetResult CheckUbuntuCoreclrDependencies(BuildTargetContext c)
+        public static BuildTargetResult CheckUbuntuCoreclrAndCoreFxDependencies(BuildTargetContext c)
         {
             var errorMessageBuilder = new StringBuilder();
+            var stage0 = DotNetCli.Stage0.BinPath;
 
-            var ubuntuCoreclrDependencies = new string[]
+            foreach (var package in PackageDependencies.UbuntuCoreclrAndCoreFxDependencies)
             {
-                "unzip",
-                "curl",
-                "libicu-dev",
-                "libunwind8",
-                "gettext",
-                "libssl-dev",
-                "libcurl4-openssl-dev",
-                "zlib1g",
-                "liblttng-ust-dev",
-                "lldb-3.6-dev",
-                "lldb-3.6"
-            };
-
-            foreach (var package in ubuntuCoreclrDependencies)
-            {
-                if (!AptPackageIsInstalled(package))
+                if (!AptDependencyUtility.PackageIsInstalled(package))
                 {
                     errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
                     errorMessageBuilder.Append(Environment.NewLine);
@@ -259,24 +241,13 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target]
         [BuildPlatforms(BuildPlatform.CentOS)]
-        public static BuildTargetResult CheckCentOSCoreclrDependencies(BuildTargetContext c)
+        public static BuildTargetResult CheckCentOSCoreclrAndCoreFxDependencies(BuildTargetContext c)
         {
             var errorMessageBuilder = new StringBuilder();
-
-            var centOSCoreclrDependencies = new string[]
+            
+            foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
             {
-                "unzip",
-                "libunwind",
-                "gettext",
-                "libcurl-devel",
-                "openssl-devel",
-                "zlib",
-                "libicu-devel"
-            };
-
-            foreach (var package in centOSCoreclrDependencies)
-            {
-                if (!YumPackageIsInstalled(package))
+                if (!YumDependencyUtility.PackageIsInstalled(package))
                 {
                     errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
                     errorMessageBuilder.Append(Environment.NewLine);
@@ -330,17 +301,6 @@ cmake is required to build the native host 'corehost'";
         private static bool AptPackageIsInstalled(string packageName)
         {
             var result = Command.Create("dpkg", "-s", packageName)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .QuietBuildReporter()
-                .Execute();
-
-            return result.ExitCode == 0;
-        }
-
-        private static bool YumPackageIsInstalled(string packageName)
-        {
-            var result = Command.Create("yum", "list", "installed", packageName)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .QuietBuildReporter()
