@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage)
             };
 
-            if (IsAllowV4Attributes(metadata))
+            if (SupportsTargetFrameworkAttribute(metadata))
             {
                 attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework); // TargetFrameworkAttribute only exists since .NET 4.0
             };
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return attributes;
         }
 
-        private static bool IsAllowV4Attributes(AssemblyInfoOptions metadata)
+        private static bool SupportsTargetFrameworkAttribute(AssemblyInfoOptions metadata)
         {
             if (string.IsNullOrEmpty(metadata.TargetFramework))
             {
