@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -130,12 +131,17 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Theory]
-        [InlineData("net20", false)]
-        [InlineData("net40", true)]
-        [InlineData("net461", true)]
-        [InlineData("dnxcore50", true)]
-        public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute)
+        [InlineData("net20", false, true)]
+        [InlineData("net40", true, true)]
+        [InlineData("net461", true, true)]
+        [InlineData("dnxcore50", true, false)]
+        public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute, bool windowsOnly)
         {
+            if (windowsOnly && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return; // don't run test for desktop framework on non-windows
+            }
+
             var framework = NuGetFramework.Parse(frameworkName);
 
             var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithMultipleFrameworks")
