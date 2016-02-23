@@ -1,8 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Resolution;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -27,7 +30,21 @@ namespace Microsoft.DotNet.ProjectModel
             Target = lockFileLibrary;
         }
 
-        public LockFileTargetLibrary Target { get; set; }
-        public LockFilePackageLibrary Library { get; set; }
+        private LockFileTargetLibrary Target { get; }
+        
+        public LockFilePackageLibrary Library { get; }
+
+        public IEnumerable<LockFileItem> RuntimeAssemblies => FilterPlaceholders(Target.RuntimeAssemblies);
+
+        public IEnumerable<LockFileItem> CompileTimeAssemblies => FilterPlaceholders(Target.CompileTimeAssemblies);
+
+        public IEnumerable<LockFileItem> ResourceAssemblies => Target.ResourceAssemblies;
+
+        public IEnumerable<LockFileItem> NativeLibraries => Target.NativeLibraries;
+
+        private IEnumerable<LockFileItem> FilterPlaceholders(IList<LockFileItem> items)
+        {
+            return items.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a));
+        }
     }
 }

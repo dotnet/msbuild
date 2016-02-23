@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Tools.Restore
 
             var depsPath = Path.Combine(
                 toolDescription.Path,
-                Path.GetDirectoryName(toolDescription.Target.RuntimeAssemblies.First().Path),
+                Path.GetDirectoryName(toolDescription.RuntimeAssemblies.First().Path),
                 toolDescription.Identity.Name + FileNameSuffixes.Deps);
 
             var calculator = context.GetOutputPaths(Constants.DefaultConfiguration, buidBasePath: null, outputPath: context.ProjectDirectory);
