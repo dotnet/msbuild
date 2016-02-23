@@ -7,6 +7,7 @@ using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.PlatformAbstractions;
+using NuGet.Frameworks;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
@@ -126,6 +127,35 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             informationalVersion.Should().NotBeNull();
             informationalVersion.Should().BeEquivalentTo("1.0.0-85");
+        }
+
+        [Theory]
+        [InlineData("net20", false)]
+        [InlineData("net40", true)]
+        [InlineData("net461", true)]
+        [InlineData("dnxcore50", true)]
+        public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute)
+        {
+            var framework = NuGetFramework.Parse(frameworkName);
+
+            var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithMultipleFrameworks")
+                                                .WithLockFiles();
+
+            var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: framework.GetShortFolderName());
+            cmd.ExecuteWithCapturedOutput().Should().Pass();
+
+            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", framework.GetShortFolderName(), "TestLibraryWithMultipleFrameworks.dll");
+            var targetFramework = PeReaderUtils.GetAssemblyAttributeValue(output, "TargetFrameworkAttribute");
+
+            if (shouldHaveTargetFrameworkAttribute)
+            {
+                targetFramework.Should().NotBeNull();
+                targetFramework.Should().BeEquivalentTo(framework.DotNetFrameworkName);
+            }
+            else
+            {
+                targetFramework.Should().BeNull();
+            }
         }
 
         [Fact]

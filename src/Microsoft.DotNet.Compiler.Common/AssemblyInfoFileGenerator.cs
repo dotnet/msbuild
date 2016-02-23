@@ -71,13 +71,31 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 [typeof(AssemblyCultureAttribute)] = EscapeCharacters(metadata.Culture),
                 [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage)
             };
-            
-            NuGetFramework targetFramework = string.IsNullOrEmpty(metadata.TargetFramework) ? null : NuGetFramework.Parse(metadata.TargetFramework);
-            if (targetFramework != null && !(targetFramework.IsDesktop() && targetFramework.Version < new Version(4, 0)))
+
+            if (IsAllowV4Attributes(metadata))
             {
                 attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework); // TargetFrameworkAttribute only exists since .NET 4.0
             };
+
             return attributes;
+        }
+
+        private static bool IsAllowV4Attributes(AssemblyInfoOptions metadata)
+        {
+            if (string.IsNullOrEmpty(metadata.TargetFramework))
+            {
+                // target framework is unknown. to be on the safe side, return false.
+                return false;
+            }
+
+            NuGetFramework targetFramework = NuGetFramework.Parse(metadata.TargetFramework);
+            if (!targetFramework.IsDesktop())
+            {
+                // assuming .NET Core, which should support .NET 4.0 attributes
+                return true;
+            }
+
+            return targetFramework.Version >= new Version(4, 0);
         }
 
         private static bool IsSameAttribute(Type attributeType, AttributeSyntax attributeSyntax)
