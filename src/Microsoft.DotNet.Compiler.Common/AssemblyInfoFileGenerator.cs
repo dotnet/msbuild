@@ -74,7 +74,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             if (SupportsTargetFrameworkAttribute(metadata))
             {
-                attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework); // TargetFrameworkAttribute only exists since .NET 4.0
+                // TargetFrameworkAttribute only exists since .NET 4.0
+                attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework);
             };
 
             return attributes;
@@ -88,7 +89,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 return false;
             }
 
-            NuGetFramework targetFramework = NuGetFramework.Parse(metadata.TargetFramework);
+            var targetFramework = NuGetFramework.Parse(metadata.TargetFramework);
             if (!targetFramework.IsDesktop())
             {
                 // assuming .NET Core, which should support .NET 4.0 attributes
