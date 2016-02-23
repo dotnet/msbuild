@@ -285,7 +285,7 @@ namespace Microsoft.DotNet.ProjectModel
                 // To make them work seamlessly on those platforms, we fill the gap with a reference
                 // assembly (if available)
                 var package = library as PackageDescription;
-                if (package != null && package.Resolved && !package.Target.CompileTimeAssemblies.Any())
+                if (package != null && package.Resolved && !package.CompileTimeAssemblies.Any())
                 {
                     var replacement = referenceAssemblyDependencyResolver.GetDescription(new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly), TargetFramework);
                     if (replacement?.Resolved == true)

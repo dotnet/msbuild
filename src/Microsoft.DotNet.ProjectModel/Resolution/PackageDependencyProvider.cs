@@ -42,10 +42,6 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
             var path = _packagePathResolver.GetInstallPath(package.Name, package.Version);
 
-            // Remove place holders
-            targetLibrary.CompileTimeAssemblies = targetLibrary.CompileTimeAssemblies.Where(item => !IsPlaceholderFile(item.Path)).ToList();
-            targetLibrary.RuntimeAssemblies = targetLibrary.RuntimeAssemblies.Where(item => !IsPlaceholderFile(item.Path)).ToList();
-
             // If the package's compile time assemblies is for a portable profile then, read the assembly metadata
             // and turn System.* references into reference assembly dependencies
             PopulateLegacyPortableDependencies(targetFramework, dependencies, path, targetLibrary);
@@ -66,6 +62,11 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
             foreach (var assembly in targetLibrary.CompileTimeAssemblies)
             {
+                if (IsPlaceholderFile(assembly))
+                {
+                    continue;
+                }
+
                 // (ref/lib)/{tfm}/{assembly}
                 var pathParts = assembly.Path.Split(Path.DirectorySeparatorChar);
 

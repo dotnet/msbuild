@@ -157,13 +157,13 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         private LibraryExport ExportPackage(PackageDescription package)
         {
             var nativeLibraries = new List<LibraryAsset>();
-            PopulateAssets(package, package.Target.NativeLibraries, nativeLibraries);
+            PopulateAssets(package, package.NativeLibraries, nativeLibraries);
 
             var runtimeAssemblies = new List<LibraryAsset>();
-            PopulateAssets(package, package.Target.RuntimeAssemblies, runtimeAssemblies);
+            PopulateAssets(package, package.RuntimeAssemblies, runtimeAssemblies);
 
             var compileAssemblies = new List<LibraryAsset>();
-            PopulateAssets(package, package.Target.CompileTimeAssemblies, compileAssemblies);
+            PopulateAssets(package, package.CompileTimeAssemblies, compileAssemblies);
 
             var sourceReferences = new List<string>();
             foreach (var sharedSource in GetSharedSources(package))
