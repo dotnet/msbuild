@@ -8,28 +8,22 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 {
     public class AnsiConsole
     {
-        private AnsiConsole(TextWriter writer, bool useConsoleColor)
+        private AnsiConsole(TextWriter writer)
         {
             Writer = writer;
-
-            _useConsoleColor = useConsoleColor;
-            if (_useConsoleColor)
-            {
-                OriginalForegroundColor = Console.ForegroundColor;
-            }
+            OriginalForegroundColor = Console.ForegroundColor;
         }
 
         private int _boldRecursion;
-        private bool _useConsoleColor;
 
-        public static AnsiConsole GetOutput(bool useConsoleColor)
+        public static AnsiConsole GetOutput()
         {
-            return new AnsiConsole(Console.Out, useConsoleColor);
+            return new AnsiConsole(Console.Out);
         }
 
-        public static AnsiConsole GetError(bool useConsoleColor)
+        public static AnsiConsole GetError()
         {
-            return new AnsiConsole(Console.Error, useConsoleColor);
+            return new AnsiConsole(Console.Error);
         }
 
         public TextWriter Writer { get; }
@@ -54,12 +48,6 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         public void WriteLine(string message)
         {
-            if (!_useConsoleColor)
-            {
-                Writer.WriteLine(message);
-                return;
-            }
-
             var escapeScan = 0;
             for (;;)
             {

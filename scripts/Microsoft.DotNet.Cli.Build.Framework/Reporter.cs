@@ -19,16 +19,9 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             _console = console;
         }
 
-        public static Reporter Output { get; } = Create(AnsiConsole.GetOutput);
-        public static Reporter Error { get; } = Create(AnsiConsole.GetOutput);
-        public static Reporter Verbose { get; } = Create(AnsiConsole.GetOutput);
-
-        public static Reporter Create(Func<bool, AnsiConsole> getter)
-        {
-            var stripColors = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-                string.Equals(Environment.GetEnvironmentVariable("NO_COLOR"), "1");
-            return new Reporter(getter(stripColors));
-        }
+        public static Reporter Output { get; } = new Reporter(AnsiConsole.GetOutput());
+        public static Reporter Error { get; } = new Reporter(AnsiConsole.GetOutput());
+        public static Reporter Verbose { get; } = new Reporter(AnsiConsole.GetOutput());
 
         public void WriteLine(string message)
         {
