@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -5,18 +8,15 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Extensions.Testing.Abstractions
 {
-    public class StreamingTestExecutionSink : ITestExecutionSink
+    public class StreamingTestExecutionSink : StreamingTestSink, ITestExecutionSink
     {
-        private readonly LineDelimitedJsonStream _stream;
         private readonly ConcurrentDictionary<string, TestState> _runningTests;
 
-
-        public StreamingTestExecutionSink(Stream stream)
+        public StreamingTestExecutionSink(Stream stream) : base(stream)
         {
-            _stream = new LineDelimitedJsonStream(stream);
             _runningTests = new ConcurrentDictionary<string, TestState>();
         }
-        
+
         public void SendTestStarted(Test test)
         {
             if (test == null)
@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.Testing.Abstractions
                 _runningTests.TryAdd(test.FullyQualifiedName, state);
             }
 
-            _stream.Send(new Message
+            Stream.Send(new Message
             {
                 MessageType = "TestExecution.TestStarted",
                 Payload = JToken.FromObject(test),
@@ -57,7 +57,7 @@ namespace Microsoft.Extensions.Testing.Abstractions
                 testResult.EndTime = DateTimeOffset.Now;
             }
 
-            _stream.Send(new Message
+            Stream.Send(new Message
             {
                 MessageType = "TestExecution.TestResult",
                 Payload = JToken.FromObject(testResult),

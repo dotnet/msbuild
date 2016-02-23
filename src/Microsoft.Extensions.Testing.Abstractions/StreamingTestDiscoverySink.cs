@@ -4,13 +4,10 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Extensions.Testing.Abstractions
 {
-    public class StreamingTestDiscoverySink : ITestDiscoverySink
+    public class StreamingTestDiscoverySink : StreamingTestSink, ITestDiscoverySink
     {
-        private readonly LineDelimitedJsonStream _stream;
-
-        public StreamingTestDiscoverySink(Stream stream)
+        public StreamingTestDiscoverySink(Stream stream) : base(stream)
         {
-            _stream = new LineDelimitedJsonStream(stream);
         }
 
         public void SendTestFound(Test test)
@@ -20,7 +17,7 @@ namespace Microsoft.Extensions.Testing.Abstractions
                 throw new ArgumentNullException(nameof(test));
             }
 
-            _stream.Send(new Message
+            Stream.Send(new Message
             {
                 MessageType = "TestDiscovery.TestFound",
                 Payload = JToken.FromObject(test),

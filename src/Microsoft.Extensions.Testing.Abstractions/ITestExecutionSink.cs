@@ -3,7 +3,7 @@
 
 namespace Microsoft.Extensions.Testing.Abstractions
 {
-    public interface ITestExecutionSink
+    public interface ITestExecutionSink : ITestSink
     {
         void SendTestStarted(Test test);
 

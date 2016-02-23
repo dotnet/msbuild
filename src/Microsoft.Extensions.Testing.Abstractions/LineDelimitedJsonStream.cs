@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.Testing.Abstractions
 {
-    class LineDelimitedJsonStream
+    public class LineDelimitedJsonStream
     {
         private readonly StreamWriter _stream;
 
