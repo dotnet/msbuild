@@ -60,11 +60,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     null,
-#if FEATURE_ASSEMBLY_LOADFROM
                     @"c:\my tasks\mytask.dll",
-#else
-                    new AssemblyName("mytask"),
-#endif
                     null);
             }
            );
@@ -96,11 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     String.Empty,
-#if FEATURE_ASSEMBLY_LOADFROM
                     @"c:\my tasks\mytask.dll",
-#else
-                    new AssemblyName("mytask"),
-#endif
                     null);
             }
            );
@@ -198,11 +190,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 null);
             TaskHostConfiguration config2 = new TaskHostConfiguration(
                 1,
@@ -223,11 +211,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 null);
 
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -250,11 +234,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 parameters);
 
             IDictionary<string, object> parameters2 = new Dictionary<string, object>();
@@ -282,11 +262,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 parameters2);
         }
 
@@ -315,11 +291,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 null);
 
             ((INodePacketTranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -359,11 +331,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 new Dictionary<string, object>());
 
             ((INodePacketTranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -458,11 +426,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 parameters);
 
             ((INodePacketTranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -506,11 +470,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 parameters);
 
             ((INodePacketTranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());

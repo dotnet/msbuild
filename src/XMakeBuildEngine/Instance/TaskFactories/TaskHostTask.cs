@@ -282,11 +282,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
-#if FEATURE_ASSEMBLY_LOADFROM
                         _taskType.Type.GetTypeInfo().Assembly.Location,
-#else
-                        _taskType.Type.GetTypeInfo().Assembly.GetName(),
-#endif
                         _setParameters
                     );
 
@@ -500,11 +496,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     exceptionMessage = "TaskInstantiationFailureError";
                     exceptionMessageArgs = new string[] { _taskType.Type.Name,
-#if FEATURE_ASSEMBLY_LOADFROM
                         _taskType.Type.GetTypeInfo().Assembly.Location,
-#else
-                        _taskType.Type.GetTypeInfo().Assembly.FullName,
-#endif
                         String.Empty };
                 }
 
