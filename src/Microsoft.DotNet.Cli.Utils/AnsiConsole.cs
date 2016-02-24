@@ -33,7 +33,13 @@ namespace Microsoft.DotNet.Cli.Utils
     
         private void SetColor(ConsoleColor color)
         {
-            Console.ForegroundColor = (ConsoleColor)(((int)Console.ForegroundColor & 0x08) | ((int)color & 0x07));
+            const int Light = 0x08;
+            int c = (int)color;
+
+            Console.ForegroundColor = 
+                c < 0 ? color :                                   // unknown, just use it
+                _boldRecursion > 0 ? (ConsoleColor)(c & ~Light) : // ensure color is dark
+                (ConsoleColor)(c | Light);                        // ensure color is light
         }
     
         private void SetBold(bool bold)
@@ -43,8 +49,9 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 return;
             }
-    
-            Console.ForegroundColor = (ConsoleColor)((int)Console.ForegroundColor ^ 0x08);
+            
+            // switches on _boldRecursion to handle boldness
+            SetColor(Console.ForegroundColor);        
         }
 
         public void WriteLine(string message)
