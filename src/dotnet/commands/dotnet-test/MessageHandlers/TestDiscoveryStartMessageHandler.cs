@@ -68,8 +68,13 @@ namespace Microsoft.DotNet.Cli.Tools.Test
 
         private static bool CanHandleMessage(IDotnetTest dotnetTest, Message message)
         {
-            return dotnetTest.State == DotnetTestState.VersionCheckCompleted &&
-                message.MessageType == TestMessageTypes.TestDiscoveryStart;
+            return IsAtAnAcceptableState(dotnetTest) && message.MessageType == TestMessageTypes.TestDiscoveryStart;
+        }
+
+        private static bool IsAtAnAcceptableState(IDotnetTest dotnetTest)
+        {
+            return (dotnetTest.State == DotnetTestState.VersionCheckCompleted ||
+                dotnetTest.State == DotnetTestState.InitialState);
         }
     }
 }

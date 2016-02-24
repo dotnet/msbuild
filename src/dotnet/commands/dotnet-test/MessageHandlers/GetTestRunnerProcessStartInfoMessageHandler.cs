@@ -55,8 +55,14 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static bool CanHandleMessage(IDotnetTest dotnetTest, Message message)
         {
-            return dotnetTest.State == DotnetTestState.VersionCheckCompleted &&
+            return IsAtAnAcceptableState(dotnetTest) &&
                 message.MessageType == TestMessageTypes.TestExecutionGetTestRunnerProcessStartInfo;
+        }
+
+        private static bool IsAtAnAcceptableState(IDotnetTest dotnetTest)
+        {
+            return dotnetTest.State == DotnetTestState.VersionCheckCompleted ||
+                dotnetTest.State == DotnetTestState.InitialState;
         }
     }
 }

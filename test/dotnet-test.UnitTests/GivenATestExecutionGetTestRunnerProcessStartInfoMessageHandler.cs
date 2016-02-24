@@ -68,7 +68,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
-        public void It_returns_NoOp_if_the_dotnet_test_state_is_not_VersionCheckCompleted()
+        public void It_returns_NoOp_if_the_dotnet_test_state_is_not_VersionCheckCompleted_or_InitialState()
         {
             var dotnetTestMock = new Mock<IDotnetTest>();
             dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.Terminated);
@@ -91,7 +91,20 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
-        public void It_returns_TestExecutionSentTestRunnerProcessStartInfo_when_it_handles_the_message()
+        public void It_returns_TestExecutionSentTestRunnerProcessStartInfo_when_it_handles_the_message_and_current_state_is_InitialState()
+        {
+            var dotnetTestMock = new Mock<IDotnetTest>();
+            dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.InitialState);
+
+            var nextState = _testGetTestRunnerProcessStartInfoMessageHandler.HandleMessage(
+                    dotnetTestMock.Object,
+                    _validMessage);
+
+            nextState.Should().Be(DotnetTestState.TestExecutionSentTestRunnerProcessStartInfo);
+        }
+
+        [Fact]
+        public void It_returns_TestExecutionSentTestRunnerProcessStartInfo_when_it_handles_the_message_and_current_state_is_VersionCheckCompleted()
         {
             var nextState = _testGetTestRunnerProcessStartInfoMessageHandler.HandleMessage(
                     _dotnetTestMock.Object,
