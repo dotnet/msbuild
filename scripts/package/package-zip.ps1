@@ -26,7 +26,7 @@ $PackageVersion
 
 $VersionContent | Out-File -Encoding UTF8 "$Stage2Dir\.version"
 
-$PackageName = Join-Path $PackageDir "dotnet-win-x64.$PackageVersion.zip"
+$PackageName = Join-Path $PackageDir "dotnet-win-$env:ARCHITECTURE.$PackageVersion.zip"
 
 if (Test-Path $PackageName)
 {

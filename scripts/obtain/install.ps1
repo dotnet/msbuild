@@ -5,7 +5,8 @@
 
 param(
    [string]$Channel="dev",
-   [string]$version="Latest"
+   [string]$version="Latest",
+   [string]$Architecture="x64"
 )
 
 $ErrorActionPreference="Stop"
@@ -16,7 +17,7 @@ if ($fileVersion -eq "Latest") {
     $fileVersion = "latest"
 }
 $Feed="https://dotnetcli.blob.core.windows.net/dotnet"
-$DotNetFileName="dotnet-win-x64.$fileVersion.zip"
+$DotNetFileName="dotnet-win-$Architecture.$fileVersion.zip"
 $DotNetUrl="$Feed/$Channel/Binaries/$Version"
 
 function say($str)
@@ -42,7 +43,7 @@ if (Test-Path $LocalFile)
     {
         if ($Version -eq "Latest")
         {
-            $RemoteResponse = Invoke-WebRequest -UseBasicParsing "$Feed/$Channel/dnvm/latest.win.version"
+            $RemoteResponse = Invoke-WebRequest -UseBasicParsing "$Feed/$Channel/dnvm/latest.win.$Architecture.version"
             $RemoteData = @([Text.Encoding]::UTF8.GetString($RemoteResponse.Content).Split([char[]]@(), [StringSplitOptions]::RemoveEmptyEntries));
             $RemoteHash = $RemoteData[0].Trim()
             $RemoteVersion = $RemoteData[1].Trim()

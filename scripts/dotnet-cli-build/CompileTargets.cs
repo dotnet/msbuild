@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static readonly string CoreCLRVersion = "1.0.1-rc2-23811";
         public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
+        public static readonly bool IsWinx86 = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                                               RuntimeInformation.ProcessArchitecture == Architecture.X86;
 
         public static readonly List<string> AssembliesToCrossGen = GetAssembliesToCrossGen();
 
@@ -60,16 +62,18 @@ namespace Microsoft.DotNet.Cli.Build
             Mkdirp(cmakeOut);
 
             var configuration = c.BuildContext.Get<string>("Configuration");
+            var architecture = PlatformServices.Default.Runtime.RuntimeArchitecture;
 
             // Run the build
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
                 // See the comment in "src/corehost/build.sh" for details. It doesn't work for some reason.
+                var visualStudio = IsWinx86 ? "Visual Studio 14 2015" : "Visual Studio 14 2015 Win64";
                 ExecIn(cmakeOut, "cmake",
                     Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost"),
                     "-G",
-                    "Visual Studio 14 2015 Win64");
+                    visualStudio);
 
                 var pf32 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
                     Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
@@ -203,6 +207,25 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(Path.Combine(binDir, $"dotnet{Constants.ExeSuffix}"));
             File.Copy(Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, $"dotnet{Constants.ExeSuffix}"));
 
+            // HACK
+            // bootstrapping for Windows x86. Copy csc/vbc from stage0.
+            // This is a temporary hack for https://github.com/dotnet/roslyn/issues/8951
+            if (IsWinx86)
+            {
+                List<string> x86compilerBins = new List<string> {
+                    "csc.dll",
+                    "Microsoft.CodeAnalysis.CSharp.dll",
+                    "Microsoft.CodeAnalysis.dll",
+                    "Microsoft.CodeAnalysis.VisualBasic.dll",
+                    "vbc.dll"
+                };
+
+                foreach (var binary in x86compilerBins)
+                {
+                    File.Copy(Path.Combine(DotNetCli.Stage0.BinPath, binary), Path.Combine(binDir, binary), true);
+                }
+            }
+
             // Crossgen Roslyn
             var result = Crossgen(c, binDir);
             if (!result.Success)
@@ -233,8 +256,16 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Find toolchain package
             string packageId;
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                if (IsWinx86)
+                {
+                    // https://github.com/dotnet/cli/issues/1550
+                    c.Warn("Native compilation is not yet working on Windows x86");
+                    return c.Success();
+                }
+
                 packageId = "toolchain.win7-x64.Microsoft.DotNet.AppDep";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -282,10 +313,11 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             // Find crossgen
+            string arch = PlatformServices.Default.Runtime.RuntimeArchitecture;
             string packageId;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                packageId = "runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR";
+                packageId = $"runtime.win7-{arch}.Microsoft.NETCore.Runtime.CoreCLR";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {

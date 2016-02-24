@@ -71,7 +71,7 @@ function RunCandle
         -dBuildVersion="$env:DOTNET_MSI_VERSION" `
         -dDisplayVersion="$env:DOTNET_CLI_VERSION" `
         -dReleaseSuffix="$env:ReleaseSuffix" `
-        -arch x64 `
+        -arch "$env:ARCHITECTURE" `
         -ext WixDependencyExtension.dll `
         "$AuthWsxRoot\dotnet.wxs" `
         "$AuthWsxRoot\provider.wxs" `
@@ -136,7 +136,7 @@ function RunCandleForBundle
         -dDisplayVersion="$env:DOTNET_CLI_VERSION" `
         -dReleaseSuffix="$env:ReleaseSuffix" `
         -dMsiSourcePath="$DotnetMSIOutput" `
-        -arch x64 `
+        -arch "$env:ARCHITECTURE" `
         -ext WixBalExtension.dll `
         -ext WixUtilExtension.dll `
         -ext WixTagExtension.dll `
@@ -190,8 +190,8 @@ if(!(Test-Path $PackageDir))
     mkdir $PackageDir | Out-Null
 }
 
-$DotnetMSIOutput = Join-Path $PackageDir "dotnet-win-x64.$env:DOTNET_CLI_VERSION.msi"
-$DotnetBundleOutput = Join-Path $PackageDir "dotnet-win-x64.$env:DOTNET_CLI_VERSION.exe"
+$DotnetMSIOutput = Join-Path $PackageDir "dotnet-win-$env:ARCHITECTURE.$env:DOTNET_CLI_VERSION.msi"
+$DotnetBundleOutput = Join-Path $PackageDir "dotnet-win-$env:ARCHITECTURE.$env:DOTNET_CLI_VERSION.exe"
 
 Write-Host "Creating dotnet MSI at $DotnetMSIOutput"
 Write-Host "Creating dotnet Bundle at $DotnetBundleOutput"

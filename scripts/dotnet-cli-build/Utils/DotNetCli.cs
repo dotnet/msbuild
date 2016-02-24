@@ -35,7 +35,9 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(), "cli", "bin");
+                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0",
+                    PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(),
+                    PlatformServices.Default.Runtime.RuntimeArchitecture, "cli", "bin");
             }
             else
             {

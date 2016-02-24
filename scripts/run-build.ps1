@@ -5,6 +5,7 @@
 
 param(
     [string]$Configuration="Debug",
+    [string]$Architecture="x64",
     [switch]$NoPackage,
     [switch]$Help)
 
@@ -14,6 +15,7 @@ if($Help)
     Write-Host ""
     Write-Host "Options:"
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
+    Write-Host "  -Architecture  <ARCHITECTURE>      Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
     Write-Host "  -NoPackage                         Skip packaging targets"
     Write-Host "  -Help                              Display this help message"
     Write-Host "  <TARGETS...>                       The build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
@@ -44,7 +46,7 @@ $env:CHANNEL=$env:RELEASE_SUFFIX
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 if (!$env:DOTNET_INSTALL_DIR)
 {
-    $env:DOTNET_INSTALL_DIR="$PSScriptRoot\..\.dotnet_stage0\Windows"
+    $env:DOTNET_INSTALL_DIR="$PSScriptRoot\..\.dotnet_stage0\Windows\$Architecture"
 }
 
 if (!(Test-Path $env:DOTNET_INSTALL_DIR))
@@ -54,7 +56,7 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
 
 # Install a stage 0
 Write-Host "Installing .NET Core CLI Stage 0 from beta channel"
-& "$PSScriptRoot\obtain\install.ps1" -Channel $env:CHANNEL
+& "$PSScriptRoot\obtain\install.ps1" -Channel $env:CHANNEL -Architecture $Architecture
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
