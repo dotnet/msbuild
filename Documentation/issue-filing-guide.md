@@ -23,19 +23,16 @@ label. This helps the team get to defects more effectively.
 
 3. Unless you are sure in which milestone the issue falls into, leave it blank.
 
-4. If you don't know who is on point to fix it or should be on point, assign it 
-first to @blackdwarf and he will triage it from there. 
-
-5. /cc the person that the issue is assigned to (or @blackdwarf) so that person 
+4. /cc the person that the issue should be assigned to (or @blackdwarf) so that person 
 would get notified. In this way the correct person can immediately jump on the 
 issue and triage it.
 
-6. For bugs, please be as concrete as possible on what is working, what 
+5. For bugs, please be as concrete as possible on what is working, what 
 is not working. Things like operating system, the version of the tools, the 
 version of the installer and when you installed all help us determine the 
 potential problem and allows us to easily reproduce the problem at hand.
 
-7. For enhancements please be as concrete as possible on what is the addition 
+6. For enhancements please be as concrete as possible on what is the addition 
 you would like to see, what scenario it covers and especially why the current 
 tools cannot satisfy that scenario. 
 
