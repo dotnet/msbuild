@@ -10,6 +10,7 @@ namespace TestApp
     {
         public static void Main(string[] args)
         {
+            Microsoft.Extensions.DependencyModel.DependencyContextValidator.Validate(true);
         }
     }
 }
