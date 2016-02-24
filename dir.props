@@ -20,6 +20,7 @@
   <PropertyGroup>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
     <XunitVersion>2.1.0</XunitVersion>
+    <CompilerToolsVersion>1.2.0-beta1-20160108-01</CompilerToolsVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
@@ -268,6 +269,13 @@
     <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+
+    <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
+    <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
 
     <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.

@@ -2,6 +2,25 @@
 <Project DefaultTargets="DeployDependencies" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
 
+  <!-- Copy Roslyn Compiler tools to the output path (so we have csc.exe, etc) -->
+  <!-- Don't copy compilers for .NET Core, as the compilers will be brought in via DeployDependencies and runtime.project.json -->
+  <Target Name="CopyCompilerTools" 
+          Condition="'$(NetCoreBuild)' != 'true'">
+    <ItemGroup>
+      <CompilerToolsFiles Include="$(CompilerToolsDir)\*.*" />
+    </ItemGroup>
+    
+    <Copy SourceFiles="@(CompilerToolsFiles)"
+          DestinationFolder="$(DeploymentDir)"
+          SkipUnchangedFiles="true"           
+          />
+
+    <Copy SourceFiles="@(CompilerToolsFiles)"
+          DestinationFolder="$(TestDeploymentDir)"
+          SkipUnchangedFiles="true"           
+          />
+  </Target>
+
   <Target Name="CopyPackageContent">
     <ItemGroup>
       <!-- We want the list of files *after* restore, which happens
@@ -96,6 +115,6 @@
   </Target>
 
   <Target Name="DeployDependencies"
-          DependsOnTargets="CopyPackageContent;DeployRuntime" />
+          DependsOnTargets="CopyPackageContent;CopyCompilerTools;DeployRuntime" />
 
 </Project>
