@@ -3,7 +3,8 @@
 
   "dependencies": {
     "NETStandard.Library": "1.0.0-rc2-23811",
-    
+    "System.IO.Compression.ZipFile": "4.0.1-rc2-23811",
+
     "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"

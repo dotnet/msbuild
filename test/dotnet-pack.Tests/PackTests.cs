@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.IO.Compression;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -76,6 +77,22 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             
             var outputPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "TestLibraryWithConfiguration.1.0.0-85.nupkg");
             File.Exists(outputPackage).Should().BeTrue(outputPackage);
+        }
+
+        [Fact]
+        public void HasBuildOutputWhenUsingBuildBasePath()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithConfiguration")
+                                                   .WithLockFiles();
+
+            var cmd = new PackCommand(Path.Combine(testInstance.TestRoot, Project.FileName), buildBasePath: "buildBase");
+            cmd.Execute().Should().Pass();
+
+            var outputPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "TestLibraryWithConfiguration.1.0.0.nupkg");
+            File.Exists(outputPackage).Should().BeTrue(outputPackage);
+
+            var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
+            zip.Entries.Should().Contain(e => e.FullName == "lib/dnxcore50/TestLibraryWithConfiguration.dll");
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

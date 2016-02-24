@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 int buildResult = 0;
                 if (!noBuild.HasValue())
                 {
-                    var buildProjectCommand = new BuildProjectCommand(project, artifactPathsCalculator, buildBasePathValue, configValue, versionSuffixValue);
+                    var buildProjectCommand = new BuildProjectCommand(project, buildBasePathValue, configValue, versionSuffixValue);
                     buildResult = buildProjectCommand.Execute();
                 }
 
