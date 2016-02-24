@@ -1,0 +1,10 @@
+{
+  "frameworks": {
+    "dnxcore50": {
+      "bin": {
+        "assembly": "bin\\{configuration}\\dnxcore50\\TestLibrary.dll",
+        "pdb": "bin\\{configuration}\\dnxcore50\\TestLibrary.pdb"
+      }
+    }
+  }
+}
