@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "Newtonsoft.Json": "7.0.1",
+    "NETStandard.Library": "1.0.0-rc2-23811",
+
+    "dotnet": { "target": "project" },
+
+    "xunit": "2.1.0",
+    "dotnet-test-xunit": "1.0.0-dev-48273-16",
+    "moq.netcore": "4.4.0-beta8",
+    "FluentAssertions": "4.2.2"
+  },
+
+  "frameworks": {
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
+    }
+  },
+
+  "testRunner": "xunit"
+}

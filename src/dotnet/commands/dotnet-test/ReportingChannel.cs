@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -14,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ReportingChannel : IDisposable
+    public class ReportingChannel : IReportingChannel
     {
         public static ReportingChannel ListenOn(int port)
         {
@@ -32,7 +31,6 @@ namespace Microsoft.DotNet.Tools.Test
 
         private readonly BinaryWriter _writer;
         private readonly BinaryReader _reader;
-        private readonly ManualResetEventSlim _ackWaitHandle;
 
         private ReportingChannel(Socket socket)
         {
@@ -41,17 +39,16 @@ namespace Microsoft.DotNet.Tools.Test
             var stream = new NetworkStream(Socket);
             _writer = new BinaryWriter(stream);
             _reader = new BinaryReader(stream);
-            _ackWaitHandle = new ManualResetEventSlim();
-
-            ReadQueue = new BlockingCollection<Message>(boundedCapacity: 1);
 
             // Read incoming messages on the background thread
             new Thread(ReadMessages) { IsBackground = true }.Start();
         }
 
-        public BlockingCollection<Message> ReadQueue { get; }
+        public event EventHandler<Message> MessageReceived;
 
         public Socket Socket { get; private set; }
+
+        public int Port => ((IPEndPoint) Socket.LocalEndPoint).Port;
 
         public void Send(Message message)
         {
@@ -62,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Test
                     TestHostTracing.Source.TraceEvent(
                         TraceEventType.Verbose,
                         0,
-                        "[ReportingChannel]: Send({0})", 
+                        "[ReportingChannel]: Send({0})",
                         message);
 
                     _writer.Write(JsonConvert.SerializeObject(message));
@@ -103,14 +100,8 @@ namespace Microsoft.DotNet.Tools.Test
                 try
                 {
                     var message = JsonConvert.DeserializeObject<Message>(_reader.ReadString());
-                    ReadQueue.Add(message);
 
-                    if (string.Equals(message.MessageType, "TestHost.Acknowledge"))
-                    {
-                        _ackWaitHandle.Set();
-                        ReadQueue.CompleteAdding();
-                        break;
-                    }
+                    MessageReceived?.Invoke(this, message);
                 }
                 catch (Exception ex)
                 {
@@ -126,24 +117,6 @@ namespace Microsoft.DotNet.Tools.Test
 
         public void Dispose()
         {
-            // Wait for a graceful disconnect - drain the queue until we get an 'ACK'
-            Message message;
-            while (ReadQueue.TryTake(out message, millisecondsTimeout: 1))
-            {
-            }
-
-            if (_ackWaitHandle.Wait(TimeSpan.FromSeconds(10)))
-            {
-                TestHostTracing.Source.TraceInformation("[ReportingChannel]: Received for ack from test host");
-            }
-            else
-            {
-                TestHostTracing.Source.TraceEvent(
-                    TraceEventType.Error,
-                    0, 
-                    "[ReportingChannel]: Timed out waiting for ack from test host");
-            }
-
             Socket.Dispose();
         }
     }
