@@ -137,30 +137,34 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [InlineData("dnxcore50", true, false)]
         public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute, bool windowsOnly)
         {
-            if (windowsOnly && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return; // don't run test for desktop framework on non-windows
-            }
-
             var framework = NuGetFramework.Parse(frameworkName);
 
             var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithMultipleFrameworks")
                                                 .WithLockFiles();
 
             var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: framework.GetShortFolderName());
-            cmd.ExecuteWithCapturedOutput().Should().Pass();
 
-            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", framework.GetShortFolderName(), "TestLibraryWithMultipleFrameworks.dll");
-            var targetFramework = PeReaderUtils.GetAssemblyAttributeValue(output, "TargetFrameworkAttribute");
-
-            if (shouldHaveTargetFrameworkAttribute)
+            if (windowsOnly && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                targetFramework.Should().NotBeNull();
-                targetFramework.Should().BeEquivalentTo(framework.DotNetFrameworkName);
+                // on non-windows platforms, desktop frameworks will not build
+                cmd.ExecuteWithCapturedOutput().Should().Fail();
             }
             else
             {
-                targetFramework.Should().BeNull();
+                cmd.ExecuteWithCapturedOutput().Should().Pass();
+
+                var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", framework.GetShortFolderName(), "TestLibraryWithMultipleFrameworks.dll");
+                var targetFramework = PeReaderUtils.GetAssemblyAttributeValue(output, "TargetFrameworkAttribute");
+
+                if (shouldHaveTargetFrameworkAttribute)
+                {
+                    targetFramework.Should().NotBeNull();
+                    targetFramework.Should().BeEquivalentTo(framework.DotNetFrameworkName);
+                }
+                else
+                {
+                    targetFramework.Should().BeNull();
+                }
             }
         }
 
