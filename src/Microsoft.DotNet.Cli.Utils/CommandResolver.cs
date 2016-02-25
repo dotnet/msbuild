@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class CommandResolver
     {
+<<<<<<< HEAD
         public static CommandSpec TryResolveCommandSpec(
             string commandName,
             IEnumerable<string> args,
@@ -130,148 +131,55 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var commandLibrary = context.ProjectFile.Tools
                 .FirstOrDefault(l => l.Name == commandName);
+=======
+        private static DefaultCommandResolver _defaultCommandResolver;
+        private static ScriptCommandResolver _scriptCommandResolver;
+>>>>>>> 9c4329a... Refactor CommandResolver into individual CommandResolver Implementation
 
-            if (commandLibrary == default(LibraryRange))
-            {
-                return null;
-            }
-
-            var lockPath = Path.Combine(context.ProjectDirectory, "artifacts", "Tools", commandName,
-                "project.lock.json");
-
-            if (!File.Exists(lockPath))
-            {
-                return null;
-            }
-
-            var lockFile = LockFileReader.Read(lockPath);
-
-            var lib = lockFile.PackageLibraries.FirstOrDefault(l => l.Name == commandName);
-            var packageDir = new VersionFolderPathResolver(context.PackagesDirectory)
-                .GetInstallPath(lib.Name, lib.Version);
-
-            return Directory.Exists(packageDir)
-                ? ConfigureCommandFromPackage(commandName, args, lib.Files, packageDir)
-                : null;
-        }
-
-        private static CommandSpec ConfigureCommandFromPackage(string commandName, IEnumerable<string> args, string packageDir)
+        public static CommandSpec TryResolveCommandSpec(
+            string commandName, 
+            IEnumerable<string> args, 
+            NuGetFramework framework = null, 
+            string configuration=Constants.DefaultConfiguration, 
+            string outputPath=null)
         {
-            var commandPackage = new PackageFolderReader(packageDir);
+            var commandResolverArgs = new CommandResolverArguments
+            {
+                CommandName = commandName,
+                CommandArguments = args,
+                Framework = framework,
+                ProjectDirectory = Directory.GetCurrentDirectory(),
+                Configuration = configuration
+            };
 
-            var files = commandPackage.GetFiles();
+            if (_defaultCommandResolver == null)
+            {
+                _defaultCommandResolver = DefaultCommandResolver.Create();
+            }
 
-            return ConfigureCommandFromPackage(commandName, args, files, packageDir);
+            return _defaultCommandResolver.Resolve(commandResolverArgs);
         }
-
-        private static CommandSpec ConfigureCommandFromPackage(string commandName, IEnumerable<string> args,
-            PackageDescription commandPackage, ProjectContext projectContext, string depsPath = null)
+        
+        public static CommandSpec TryResolveScriptCommandSpec(
+            string commandName, 
+            IEnumerable<string> args, 
+            Project project, 
+            string[] inferredExtensionList)
         {
-            var files = commandPackage.Library.Files;
-
-            var packageRoot = projectContext.PackagesDirectory;
-
-            var packagePath = commandPackage.Path;
-
-            var packageDir = Path.Combine(packageRoot, packagePath);
-
-            return ConfigureCommandFromPackage(commandName, args, files, packageDir, depsPath);
-        }
-
-        private static CommandSpec ConfigureCommandFromPackage(string commandName, IEnumerable<string> args,
-            IEnumerable<string> files, string packageDir, string depsPath = null)
-        {
-            var fileName = string.Empty;
-
-            var commandPath = files
-                .FirstOrDefault(f => Env.ExecutableExtensions.Contains(Path.GetExtension(f)));
-
-            if (commandPath == null)
+            var commandResolverArgs = new CommandResolverArguments
             {
-                var dllPath = files
-                    .Where(f => Path.GetFileName(f) == commandName + FileNameSuffixes.DotNet.DynamicLib)
-                    .Select(f => Path.Combine(packageDir, f))
-                    .FirstOrDefault();
+                CommandName = commandName,
+                CommandArguments = args,
+                ProjectDirectory = project.ProjectDirectory,
+                InferredExtensions = inferredExtensionList
+            };
 
-                fileName = CoreHost.HostExePath;
-
-                var additionalArgs = new List<string>();
-                additionalArgs.Add(dllPath);
-
-                if (depsPath != null)
-                {
-                    additionalArgs.Add($"--depsfile:{depsPath}");
-                }
-
-                args = additionalArgs.Concat(args);
-            }
-            else
+            if (_scriptCommandResolver == null)
             {
-                fileName = Path.Combine(packageDir, commandPath);
+                _scriptCommandResolver = ScriptCommandResolver.Create();
             }
 
-            var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
-            return new CommandSpec(fileName, escapedArgs, CommandResolutionStrategy.NugetPackage);
-        }
-
-        private static CommandSpec CreateCommandSpecPreferringExe(
-            string commandName,
-            IEnumerable<string> args,
-            string commandPath,
-            CommandResolutionStrategy resolutionStrategy)
-        {
-            var useComSpec = false;
-            
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows &&
-                Path.GetExtension(commandPath).Equals(".cmd", StringComparison.OrdinalIgnoreCase))
-            {
-                var preferredCommandPath = Env.GetCommandPath(commandName, ".exe");
-
-                // Use cmd if we can't find an exe
-                if (preferredCommandPath == null)
-                {
-                    useComSpec = true;
-                }
-                else
-                {
-                    commandPath = preferredCommandPath;
-                }
-            }
-
-            if (useComSpec)
-            {
-                return CreateCmdCommandSpec(commandPath, args, resolutionStrategy);
-            }
-            else
-            {
-                var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
-                return new CommandSpec(commandPath, escapedArgs, resolutionStrategy);
-            }
-        }
-
-        private static CommandSpec CreateCmdCommandSpec(
-            string command,
-            IEnumerable<string> args,
-            CommandResolutionStrategy resolutionStrategy)
-        {
-            var comSpec = Environment.GetEnvironmentVariable("ComSpec");
-            
-            // Handle the case where ComSpec is already the command
-            if (command.Equals(comSpec, StringComparison.OrdinalIgnoreCase))
-            {
-                command = args.FirstOrDefault();
-                args = args.Skip(1);
-            }
-            var cmdEscapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForCmdProcessStart(args);
-
-            if (ArgumentEscaper.ShouldSurroundWithQuotes(command))
-            {
-                command = $"\"{command}\"";
-            }
-
-            var escapedArgString = $"/s /c \"{command} {cmdEscapedArgs}\"";
-
-            return new CommandSpec(comSpec, escapedArgString, resolutionStrategy);
+            return _scriptCommandResolver.Resolve(commandResolverArgs);
         }
     }
 }
