@@ -69,10 +69,14 @@ try {
 
         Write-Host "Running installer tests in Windows Container"
         
+        # --net="none" works around a networking issue on the containers on the CI machines.
+        # Since our installer tests don't require the network, it is fine to shut it off.
         $MsiFileName = [System.IO.Path]::GetFileName($inputMsi)
         docker run `
+            --rm `
             -v "$testBin\:D:" `
             -e "CLI_MSI=D:\$MsiFileName" `
+            --net="none" `
             windowsservercore `
             D:\xunit.console.exe D:\$testName.dll | Out-Host
 
