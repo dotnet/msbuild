@@ -141,6 +141,8 @@ namespace Microsoft.DotNet.Tools.Test
 
                     dotnetTest.StartListeningTo(adapterChannel);
 
+                    adapterChannel.Accept();
+
                     dotnetTest.StartHandlingMessages();
                 }
             }

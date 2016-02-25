@@ -41,6 +41,8 @@ namespace Microsoft.DotNet.Tools.Test
 
             dotnetTest.StartListeningTo(testRunnerChannel);
 
+            testRunnerChannel.Accept();
+
             var testRunner = _testRunnerFactory.CreateTestRunner(
                 new RunTestsArgumentsBuilder(dotnetTest.PathToAssemblyUnderTest, testRunnerChannel.Port, message));
 
@@ -55,8 +57,14 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static bool CanHandleMessage(IDotnetTest dotnetTest, Message message)
         {
-            return dotnetTest.State == DotnetTestState.VersionCheckCompleted &&
+            return IsAtAnAcceptableState(dotnetTest) &&
                 message.MessageType == TestMessageTypes.TestExecutionGetTestRunnerProcessStartInfo;
+        }
+
+        private static bool IsAtAnAcceptableState(IDotnetTest dotnetTest)
+        {
+            return dotnetTest.State == DotnetTestState.VersionCheckCompleted ||
+                dotnetTest.State == DotnetTestState.InitialState;
         }
     }
 }
