@@ -135,6 +135,16 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
+        public void It_calls_accept_on_the_test_runner_channel()
+        {
+            _testDiscoveryStartMessageHandler.HandleMessage(
+                    _dotnetTestMock.Object,
+                    _validMessage);
+
+            _testRunnerChannelMock.Verify(t => t.Accept(), Times.Once);
+        }
+
+        [Fact]
         public void It_makes_dotnet_test_listen_on_the_test_runner_port_for_messages_when_it_handles_the_message()
         {
             _testDiscoveryStartMessageHandler.HandleMessage(

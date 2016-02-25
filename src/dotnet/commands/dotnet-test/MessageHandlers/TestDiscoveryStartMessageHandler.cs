@@ -55,6 +55,8 @@ namespace Microsoft.DotNet.Cli.Tools.Test
 
                 dotnetTest.StartListeningTo(testRunnerChannel);
 
+                testRunnerChannel.Accept();
+
                 var testRunner = _testRunnerFactory.CreateTestRunner(
                     new DiscoverTestsArgumentsBuilder(dotnetTest.PathToAssemblyUnderTest, testRunnerChannel.Port));
 
