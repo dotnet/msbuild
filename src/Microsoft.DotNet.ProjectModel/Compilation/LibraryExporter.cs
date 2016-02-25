@@ -216,10 +216,14 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 var compileAsset = new LibraryAsset(
                     project.Project.Name,
                     null,
-                    Path.GetFullPath(Path.Combine(project.Project.ProjectDirectory, assemblyPath)));
+                    assemblyPath);
 
                 builder.AddCompilationAssembly(compileAsset);
-                builder.AddRuntimeAsset(new LibraryAsset(Path.GetFileName(pdbPath), Path.GetFileName(pdbPath), pdbPath));
+                builder.AddRuntimeAssembly(compileAsset);
+                if (File.Exists(pdbPath))
+                {
+                    builder.AddRuntimeAsset(new LibraryAsset(Path.GetFileName(pdbPath), Path.GetFileName(pdbPath), pdbPath));
+                }
             }
             else if (project.Project.Files.SourceFiles.Any())
             {
@@ -286,7 +290,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
             path = path.Replace("{configuration}", configuration);
 
-            return path;
+            return Path.Combine(project.ProjectDirectory, path);
         }
 
         private LibraryExport ExportFrameworkLibrary(LibraryDescription library)
