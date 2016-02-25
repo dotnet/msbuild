@@ -131,8 +131,6 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Theory]
-        [InlineData("net20", false, true)]
-        [InlineData("net40", true, true)]
         [InlineData("net461", true, true)]
         [InlineData("dnxcore50", true, false)]
         public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute, bool windowsOnly)
