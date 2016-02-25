@@ -8,39 +8,40 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 {
     public class AnsiConsole
     {
-        private AnsiConsole(TextWriter writer, bool useConsoleColor)
+        private AnsiConsole(TextWriter writer)
         {
             Writer = writer;
-
-            _useConsoleColor = useConsoleColor;
-            if (_useConsoleColor)
-            {
-                OriginalForegroundColor = Console.ForegroundColor;
-            }
+    
+            OriginalForegroundColor = Console.ForegroundColor;
         }
-
+    
         private int _boldRecursion;
-        private bool _useConsoleColor;
-
-        public static AnsiConsole GetOutput(bool useConsoleColor)
+    
+        public static AnsiConsole GetOutput()
         {
-            return new AnsiConsole(Console.Out, useConsoleColor);
+            return new AnsiConsole(Console.Out);
         }
-
-        public static AnsiConsole GetError(bool useConsoleColor)
+    
+        public static AnsiConsole GetError()
         {
-            return new AnsiConsole(Console.Error, useConsoleColor);
+            return new AnsiConsole(Console.Error);
         }
-
+    
         public TextWriter Writer { get; }
-
+    
         public ConsoleColor OriginalForegroundColor { get; }
-
+    
         private void SetColor(ConsoleColor color)
         {
-            Console.ForegroundColor = (ConsoleColor)(((int)Console.ForegroundColor & 0x08) | ((int)color & 0x07));
-        }
+            const int Light = 0x08;
+            int c = (int)color;
 
+            Console.ForegroundColor = 
+                c < 0 ? color :                                   // unknown, just use it
+                _boldRecursion > 0 ? (ConsoleColor)(c & ~Light) : // ensure color is dark
+                (ConsoleColor)(c | Light);                        // ensure color is light
+        }
+    
         private void SetBold(bool bold)
         {
             _boldRecursion += bold ? 1 : -1;
@@ -48,18 +49,20 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             {
                 return;
             }
-
-            Console.ForegroundColor = (ConsoleColor)((int)Console.ForegroundColor ^ 0x08);
+            
+            // switches on _boldRecursion to handle boldness
+            SetColor(Console.ForegroundColor);        
         }
 
         public void WriteLine(string message)
         {
-            if (!_useConsoleColor)
-            {
-                Writer.WriteLine(message);
-                return;
-            }
+            Write(message);
+            Writer.WriteLine();
+        }
 
+
+        public void Write(string message)
+        {
             var escapeScan = 0;
             for (;;)
             {
@@ -80,14 +83,14 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                     {
                         endIndex += 1;
                     }
-
+    
                     var text = message.Substring(escapeScan, escapeIndex - escapeScan);
                     Writer.Write(text);
                     if (endIndex == message.Length)
                     {
                         break;
                     }
-
+    
                     switch (message[endIndex])
                     {
                         case 'm':
@@ -133,11 +136,10 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                             }
                             break;
                     }
-
+    
                     escapeScan = endIndex + 1;
                 }
             }
-            Writer.WriteLine();
         }
     }
 }

@@ -8,28 +8,23 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class AnsiConsole
     {
-        private AnsiConsole(TextWriter writer, bool useConsoleColor)
+        private AnsiConsole(TextWriter writer)
         {
             Writer = writer;
     
-            _useConsoleColor = useConsoleColor;
-            if (_useConsoleColor)
-            {
-                OriginalForegroundColor = Console.ForegroundColor;
-            }
+            OriginalForegroundColor = Console.ForegroundColor;
         }
     
         private int _boldRecursion;
-        private bool _useConsoleColor;
     
-        public static AnsiConsole GetOutput(bool useConsoleColor)
+        public static AnsiConsole GetOutput()
         {
-            return new AnsiConsole(Console.Out, useConsoleColor);
+            return new AnsiConsole(Console.Out);
         }
     
-        public static AnsiConsole GetError(bool useConsoleColor)
+        public static AnsiConsole GetError()
         {
-            return new AnsiConsole(Console.Error, useConsoleColor);
+            return new AnsiConsole(Console.Error);
         }
     
         public TextWriter Writer { get; }
@@ -38,7 +33,13 @@ namespace Microsoft.DotNet.Cli.Utils
     
         private void SetColor(ConsoleColor color)
         {
-            Console.ForegroundColor = (ConsoleColor)(((int)Console.ForegroundColor & 0x08) | ((int)color & 0x07));
+            const int Light = 0x08;
+            int c = (int)color;
+
+            Console.ForegroundColor = 
+                c < 0 ? color :                                   // unknown, just use it
+                _boldRecursion > 0 ? (ConsoleColor)(c & ~Light) : // ensure color is dark
+                (ConsoleColor)(c | Light);                        // ensure color is light
         }
     
         private void SetBold(bool bold)
@@ -48,8 +49,9 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 return;
             }
-    
-            Console.ForegroundColor = (ConsoleColor)((int)Console.ForegroundColor ^ 0x08);
+            
+            // switches on _boldRecursion to handle boldness
+            SetColor(Console.ForegroundColor);        
         }
 
         public void WriteLine(string message)
@@ -61,12 +63,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public void Write(string message)
         {
-            if (!_useConsoleColor)
-            {
-                Writer.Write(message);
-                return;
-            }
-    
             var escapeScan = 0;
             for (;;)
             {
