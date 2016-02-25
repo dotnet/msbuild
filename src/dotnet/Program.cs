@@ -102,7 +102,6 @@ namespace Microsoft.DotNet.Cli
             var builtIns = new Dictionary<string, Func<string[], int>>
             {
                 ["build"] = BuildCommand.Run,
-                ["compile"] = CommpileCommand.Run,
                 ["compile-csc"] = CompileCscCommand.Run,
                 ["compile-fsc"] = CompileFscCommand.Run,
                 ["compile-native"] = CompileNativeCommand.Run,
