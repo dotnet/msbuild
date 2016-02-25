@@ -52,8 +52,6 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         public int Run(string[] args)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
             var targets = new[] { BuildContext.DefaultTarget };
             if(args.Length > 0)
             {
@@ -104,18 +102,40 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         private static IEnumerable<BuildTarget> CollectTargets(Type typ)
         {
             return from m in typ.GetMethods()
-                   let attr = m.GetCustomAttribute<TargetAttribute>()
-                   where attr != null
-                   select CreateTarget(m, attr);
+                   let targetAttribute = m.GetCustomAttribute<TargetAttribute>()
+                   let conditionalAttributes = m.GetCustomAttributes<TargetConditionAttribute>(false)
+                   where targetAttribute != null
+                   select CreateTarget(m, targetAttribute, conditionalAttributes);
         }
 
-        private static BuildTarget CreateTarget(MethodInfo m, TargetAttribute attr)
+        private static BuildTarget CreateTarget(
+            MethodInfo methodInfo, 
+            TargetAttribute targetAttribute, 
+            IEnumerable<TargetConditionAttribute> targetConditionAttributes)
         {
+            var name = targetAttribute.Name ?? methodInfo.Name;
+
+            var conditions = ExtractTargetConditionsFromAttributes(targetConditionAttributes);
+
             return new BuildTarget(
-                attr.Name ?? m.Name,
-                $"{m.DeclaringType.FullName}.{m.Name}",
-                attr.Dependencies,
-                (Func<BuildTargetContext, BuildTargetResult>)m.CreateDelegate(typeof(Func<BuildTargetContext, BuildTargetResult>)));
+                name,
+                $"{methodInfo.DeclaringType.FullName}.{methodInfo.Name}",
+                targetAttribute.Dependencies,
+                conditions,
+                (Func<BuildTargetContext, BuildTargetResult>)methodInfo.CreateDelegate(typeof(Func<BuildTargetContext, BuildTargetResult>)));
+        }
+
+        private static IEnumerable<Func<bool>> ExtractTargetConditionsFromAttributes(
+            IEnumerable<TargetConditionAttribute> targetConditionAttributes)
+        {
+            if (targetConditionAttributes == null || targetConditionAttributes.Count() == 0)
+            {
+                return Enumerable.Empty<Func<bool>>();
+            }
+
+            return targetConditionAttributes
+                    .Select<TargetConditionAttribute, Func<bool>>(c => c.EvaluateCondition)
+                    .ToArray();
         }
 
         private string GenerateSourceString(string file, int? line, string member)
