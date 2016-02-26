@@ -568,7 +568,6 @@ namespace Microsoft.Build.CommandLine
                         recursing: false
                         ))
                 {
-#if FEATURE_APPDOMAIN
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
                     // However we want to give a hint to anyone who is building single proc without realizing it that there
                     // is a better way.
@@ -576,7 +575,6 @@ namespace Microsoft.Build.CommandLine
                     {
                         Console.WriteLine(ResourceUtilities.FormatResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
-#endif
                     if (preprocessWriter != null || debugger)
                     {
                         // Indicate to the engine that it can NOT toss extraneous file content: we want to 
@@ -1805,12 +1803,10 @@ namespace Microsoft.Build.CommandLine
             {
                 ShowHelpMessage();
             }
-#if FEATURE_APPDOMAIN
             else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
                 StartLocalNode(commandLineSwitches);
             }
-#endif
             else
             {
                 // if help switch is not set, and errors were found, abort (don't process the remaining switches)
@@ -1879,13 +1875,13 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out which properties have been set on the command line
                     globalProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property]);
-#if FEATURE_APPDOMAIN
+
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
                     // figure out if we shold reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-#endif
+
                     // determine what if any writer to preprocess to
                     preprocessWriter = null;
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
@@ -2005,7 +2001,7 @@ namespace Microsoft.Build.CommandLine
 
             return writer;
         }
-#if FEATURE_APPDOMAIN
+
         /// <summary>
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
@@ -2096,7 +2092,6 @@ namespace Microsoft.Build.CommandLine
         {
             Microsoft.Build.BuildEngine.LocalNode.StartLocalNodeServer(nodeNumber);
         }
-#endif
 #endif
 
         /// <summary>
@@ -3067,9 +3062,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_3_SwitchesHeader"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_9_TargetSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_10_PropertySwitch"));
-#if FEATURE_APPDOMAIN
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_17_MaximumCPUSwitch"));
-#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_23_ToolsVersionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_12_VerbositySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_13_ConsoleLoggerParametersSwitch"));
@@ -3081,9 +3074,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
-#if FEATURE_APPDOMAIN
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
-#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));

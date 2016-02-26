@@ -17,7 +17,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Security;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
+#endif
 using System.Security.Principal;
 using System.Threading.Tasks;
 #if FEATURE_SECURITY_PERMISSIONS
@@ -189,6 +191,7 @@ namespace Microsoft.Build.BackEnd
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
+#if FEATURE_SECURITY_PERMISSIONS
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
@@ -200,6 +203,7 @@ namespace Microsoft.Build.BackEnd
             PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
             security.AddAccessRule(rule);
             security.SetOwner(identifier);
+#endif
 
             _pipeServer = new NamedPipeServerStream
                 (
@@ -209,9 +213,11 @@ namespace Microsoft.Build.BackEnd
                 PipeTransmissionMode.Byte,
                 PipeOptions.Asynchronous | PipeOptions.WriteThrough,
                 PipeBufferSize, // Default input buffer
-                PipeBufferSize, // Default output buffer
-                security,
+                PipeBufferSize  // Default output buffer
+#if FEATURE_SECURITY_PERMISSIONS
+                , security,
                 HandleInheritability.None
+#endif
                 );
         }
 
@@ -376,8 +382,11 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         long handshake = localPipeServer.ReadLongForHandshake(/* reject these leads */ new byte[] { 0x5F, 0x60 }, 0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */);
+
+#if FEATURE_SECURITY_PERMISSIONS
                         WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
                         string remoteUserName = localPipeServer.GetImpersonationUserName();
+#endif
 
                         if (handshake != GetHostHandshake())
                         {
@@ -386,6 +395,7 @@ namespace Microsoft.Build.BackEnd
                             continue;
                         }
 
+#if FEATURE_SECURITY_PERMISSIONS
                         // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
                         // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
                         // user we were started by.
@@ -398,6 +408,7 @@ namespace Microsoft.Build.BackEnd
                             localPipeServer.Disconnect();
                             continue;
                         }
+#endif
                     }
                     catch (IOException e)
                     {

@@ -9,6 +9,7 @@ using System.Globalization;
 
 using Microsoft.Build.Shared;
 
+#if FEATURE_APPDOMAIN
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -130,3 +131,4 @@ namespace Microsoft.Build.BackEnd.Logging
         private ResolveEventHandler _eventHandler = null;
     }
 }
+#endif

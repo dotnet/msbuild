@@ -134,9 +134,7 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateEnum(ref _resultCode, (int)_resultCode);
             translator.TranslateEnum(ref _actionCode, (int)_actionCode);
-#if FEATURE_BINARY_SERIALIZATION
-            translator.TranslateDotNet(ref _exception);
-#endif
+            translator.TranslateException(ref _exception);
         }
 
         #endregion

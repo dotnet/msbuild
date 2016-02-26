@@ -36,7 +36,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("c=d", parameters[1]);
         }
 
-#if FEATURE_APPDOMAIN
         [Fact]
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
@@ -89,7 +88,6 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(switches.HaveErrors());
         }
-#endif
 
         /*
          * Quoting Rules:

@@ -240,13 +240,11 @@ namespace Microsoft.Build.BackEnd
                 case TaskParameterType.ITaskItemArray:
                     TranslateITaskItemArray(translator);
                     break;
-#if FEATURE_BINARY_SERIALIZATION
                 case TaskParameterType.Invalid:
                     Exception exceptionParam = (Exception)_wrappedParameter;
-                    translator.TranslateDotNet(ref exceptionParam);
+                    translator.TranslateException(ref exceptionParam);
                     _wrappedParameter = exceptionParam;
                     break;
-#endif
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;

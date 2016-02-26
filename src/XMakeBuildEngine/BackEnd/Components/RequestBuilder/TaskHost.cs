@@ -763,7 +763,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool IsEventSerializable(BuildEventArgs e)
         {
+#if FEATURE_BINARY_SERIALIZATION
             if (!e.GetType().GetTypeInfo().IsSerializable)
+#else
+            if (!NodePacketTranslator.IsSerializable(e))
+#endif
             {
                 _taskLoggingContext.LogWarning(new BuildEventFileInfo(string.Empty), null, "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;

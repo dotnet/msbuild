@@ -737,8 +737,10 @@ namespace Microsoft.Build.Execution
             _buildParameters.NodeId = configuration.NodeId;
             _buildParameters.IsOutOfProc = true;
 
+#if FEATURE_APPDOMAIN
             // And the AppDomainSetup
             _buildParameters.AppDomainSetup = configuration.AppDomainSetup;
+#endif
 
             // Set up the logging service.
             LoggingServiceFactory loggingServiceFactory = new LoggingServiceFactory(LoggerMode.Asynchronous, configuration.NodeId);

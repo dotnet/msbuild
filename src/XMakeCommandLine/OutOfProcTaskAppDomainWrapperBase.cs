@@ -23,7 +23,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+#endif
 
 namespace Microsoft.Build.CommandLine
 {
@@ -31,13 +33,17 @@ namespace Microsoft.Build.CommandLine
     /// Class for executing a task in an AppDomain
     /// </summary>
     [Serializable]
-    internal class OutOfProcTaskAppDomainWrapperBase : MarshalByRefObject
+    internal class OutOfProcTaskAppDomainWrapperBase
+#if FEATURE_APPDOMAIN
+        : MarshalByRefObject
+#endif
     {
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
         /// </summary>
         private ITask wrappedTask;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// This is an appDomain instance if any is created for running this task
         /// </summary>
@@ -48,6 +54,7 @@ namespace Microsoft.Build.CommandLine
         /// </comments>
         [NonSerialized]
         private AppDomain _taskAppDomain;
+#endif
 
         /// <summary>
         /// Need to keep the build engine around in order to log from the task loader. 
@@ -103,14 +110,18 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
+#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
+#endif
                 IDictionary<string, TaskParameter> taskParams
             )
         {
             buildEngine = oopTaskHostNode;
             this.taskName = taskName;
 
+#if FEATURE_APPDOMAIN
             _taskAppDomain = null;
+#endif
             wrappedTask = null;
 
             LoadedType taskType = null;
@@ -147,11 +158,29 @@ namespace Microsoft.Build.CommandLine
             OutOfProcTaskHostTaskResult taskResult;
             if (taskType.HasSTAThreadAttribute())
             {
-                taskResult = InstantiateAndExecuteTaskInSTAThread(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn, appDomainSetup, taskParams);
+#if FEATURE_APARTMENT_STATE
+                taskResult = InstantiateAndExecuteTaskInSTAThread(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,
+#if FEATURE_APPDOMAIN
+                    appDomainSetup,
+#endif
+                    taskParams);
+#else
+                return new OutOfProcTaskHostTaskResult
+                                                (
+                                                    TaskCompleteType.CrashedDuringInitialization,
+                                                    null,
+                                                    "TaskInstantiationFailureNotSupported",
+                                                    new string[] { taskName, taskLocation, typeof(RunInSTAAttribute).FullName }
+                                                );
+#endif
             }
             else
             {
-                taskResult = InstantiateAndExecuteTask(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn, appDomainSetup, taskParams);
+                taskResult = InstantiateAndExecuteTask(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,
+#if FEATURE_APPDOMAIN
+                    appDomainSetup,
+#endif
+                    taskParams);
             }
 
             return taskResult;
@@ -164,15 +193,18 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal void CleanupTask()
         {
+#if FEATURE_APPDOMAIN
             if (_taskAppDomain != null)
             {
                 AppDomain.Unload(_taskAppDomain);
             }
 
             TaskLoader.RemoveAssemblyResolver();
+#endif
             wrappedTask = null;
         }
 
+#if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Execute a task on the STA thread. 
         /// </summary>
@@ -189,7 +221,9 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
+#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
+#endif
                 IDictionary<string, TaskParameter> taskParams
             )
         {
@@ -212,7 +246,9 @@ namespace Microsoft.Build.CommandLine
                                                 taskFile,
                                                 taskLine,
                                                 taskColumn,
+#if FEATURE_APPDOMAIN
                                                 appDomainSetup,
+#endif
                                                 taskParams
                                             );
                     }
@@ -230,7 +266,7 @@ namespace Microsoft.Build.CommandLine
                         taskRunnerFinished.Set();
                     }
                 };
-
+                
                 Thread staThread = new Thread(taskRunnerDelegate);
                 staThread.SetApartmentState(ApartmentState.STA);
                 staThread.Name = "MSBuild STA task runner thread";
@@ -243,7 +279,7 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                taskRunnerFinished.Close();
+                taskRunnerFinished.Dispose();
                 taskRunnerFinished = null;
             }
 
@@ -255,6 +291,7 @@ namespace Microsoft.Build.CommandLine
 
             return taskResult;
         }
+#endif
 
         /// <summary>
         /// Do the work of actually instantiating and running the task. 
@@ -268,16 +305,28 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
+#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
+#endif
                 IDictionary<string, TaskParameter> taskParams
             )
         {
+#if FEATURE_APPDOMAIN
             _taskAppDomain = null;
+#endif
             wrappedTask = null;
 
             try
             {
-                wrappedTask = TaskLoader.CreateTask(taskType, taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate), appDomainSetup, true /* always out of proc */, out _taskAppDomain);
+                wrappedTask = TaskLoader.CreateTask(taskType, taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate),
+#if FEATURE_APPDOMAIN
+                    appDomainSetup,
+#endif
+                    true /* always out of proc */
+#if FEATURE_APPDOMAIN
+                    , out _taskAppDomain
+#endif
+                    );
                 Type wrappedTaskType = wrappedTask.GetType();
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
@@ -367,7 +416,7 @@ namespace Microsoft.Build.CommandLine
             foreach (PropertyInfo value in finalPropertyValues)
             {
                 // only record outputs
-                if (value.GetCustomAttributes(typeof(OutputAttribute), true).Length > 0)
+                if (value.GetCustomAttributes(typeof(OutputAttribute), true).Count() > 0)
                 {
                     try
                     {

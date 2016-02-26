@@ -24,6 +24,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+using System.Threading.Tasks;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -291,6 +292,7 @@ namespace Microsoft.Build.BackEnd
             {
                 nodeStream.Connect(timeout);
 
+#if FEATURE_SECURITY_PERMISSIONS
                 // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
                 // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
                 // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
@@ -305,6 +307,7 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
                     throw new UnauthorizedAccessException();
                 }
+#endif
 
                 CommunicationsUtilities.Trace("Writing handshake to pipe {0}", pipeName);
                 nodeStream.WriteLongForHandshake(hostHandshake);
@@ -390,12 +393,19 @@ namespace Microsoft.Build.BackEnd
 
             BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
 
-            string appName = msbuildLocation;
+
+#if RUNTIME_TYPE_NETCORE
+            string coreRunName = NativeMethodsShared.IsUnixLike ? "CoreRun" : "CoreRun.exe";
+            string exeName = Path.Combine(Path.GetDirectoryName(msbuildLocation), coreRunName);
+            commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+#else
+            string exeName = msbuildLocation;
+#endif
 
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
             bool result = BackendNativeMethods.CreateProcess
                 (
-                    msbuildLocation,
+                    exeName,
                     commandLineArgs,
                     ref processSecurityAttributes,
                     ref threadSecurityAttributes,
@@ -505,7 +515,79 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void BeginAsyncPacketRead()
             {
+#if FEATURE_APM
                 _nodePipe.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
+#else
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    var ignored = RunPacketReadLoopAsync();
+                });
+#endif
+            }
+
+
+            public async Task RunPacketReadLoopAsync()
+            {
+                while (true)
+                {
+                    try
+                    {
+                        int bytesRead = await _nodePipe.ReadAsync(_headerByte, 0, _headerByte.Length);
+                        if (!ProcessHeaderBytesRead(bytesRead))
+                        {
+                            return;
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync: {0}", e);
+                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                        Close();
+                        return;
+                    }
+
+                    NodePacketType packetType = (NodePacketType)_headerByte[0];
+                    int packetLength = BitConverter.ToInt32(_headerByte, 1);
+
+                    byte[] packetData;
+                    if (packetLength < _smallReadBuffer.Length)
+                    {
+                        packetData = _smallReadBuffer;
+                    }
+                    else
+                    {
+                        // Preallocated buffer is not large enough to hold the body. Allocate now, but don't hold it forever.
+                        packetData = new byte[packetLength];
+                    }
+
+                    try
+                    {
+                        int bytesRead = await _nodePipe.ReadAsync(packetData, 0, packetLength);
+                        if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
+                        {
+                            return;
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync (Reading): {0}", e);
+                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                        Close();
+                        return;
+                    }
+
+                    // Read and route the packet.
+                    if (!ReadAndRoutePacket(packetType, packetData, packetLength))
+                    {
+                        return;
+                    }
+
+                    if (packetType == NodePacketType.NodeShutdown)
+                    {
+                        Close();
+                        return;
+                    }
+                }
             }
 
             /// <summary>
@@ -535,6 +617,12 @@ namespace Microsoft.Build.BackEnd
                     }
 #endif
 
+#if FEATURE_MEMORYSTREAM_GETBUFFER
+                    byte[] writeStreamBuffer = writeStream.GetBuffer();
+#else
+                    byte[] writeStreamBuffer = writeStream.ToArray();
+#endif
+
                     for (int i = 0; i < writeStream.Length; i += MaxPacketWriteSize)
                     {
                         int lengthToWrite = Math.Min((int)writeStream.Length - i, MaxPacketWriteSize);
@@ -542,7 +630,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             // We are done, write the last bit asynchronously.  This is actually the general case for
                             // most packets in the build, and the asynchronous behavior here is desirable.
-                            _nodePipe.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, PacketWriteComplete, null);
+#if FEATURE_APM
+                            _nodePipe.BeginWrite(writeStreamBuffer, i, lengthToWrite, PacketWriteComplete, null);
+#else
+                            _nodePipe.WriteAsync(writeStreamBuffer, i, lengthToWrite);
+#endif
                             return;
                         }
                         else
@@ -551,8 +643,12 @@ namespace Microsoft.Build.BackEnd
                             // return out of this function and let the rest of the system continue because another operation
                             // might want to send data immediately afterward, and that could result in overlapping writes
                             // to the pipe on different threads.
+#if FEATURE_APM
                             IAsyncResult result = _nodePipe.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, null, null);
                             _nodePipe.EndWrite(result);
+#else
+                            _nodePipe.Write(writeStreamBuffer, i, lengthToWrite);
+#endif
                         }
                     }
                 }
@@ -572,10 +668,11 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void Close()
             {
-                _nodePipe.Close();
+                _nodePipe.Dispose();
                 _terminateDelegate(_nodeId);
             }
 
+#if FEATURE_APM
             /// <summary>
             /// Completes the asynchronous packet write to the node.
             /// </summary>
@@ -590,7 +687,44 @@ namespace Microsoft.Build.BackEnd
                     // Do nothing here because any exception will be caught by the async read handler
                 }
             }
+#endif
 
+            private bool ProcessHeaderBytesRead(int bytesRead)
+            {
+                if (bytesRead != _headerByte.Length)
+                {
+                    CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _processId, bytesRead, _headerByte.Length);
+                    try
+                    {
+                        Process childProcess = Process.GetProcessById(_processId);
+                        if (childProcess == null || childProcess.HasExited)
+                        {
+                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
+                        }
+                        else
+                        {
+                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _processId);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (ExceptionHandling.IsCriticalException(e))
+                        {
+                            throw;
+                        }
+
+                        CommunicationsUtilities.Trace(_nodeId, "Unable to retrieve remote process information. {0}", e);
+                    }
+
+                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                    Close();
+                    return false;
+                }
+
+                return true;
+            }
+
+#if FEATURE_APM
             /// <summary>
             /// Callback invoked by the completion of a read of a header byte on one of the named pipes.
             /// </summary>
@@ -612,33 +746,8 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (bytesRead != _headerByte.Length)
+                    if (!ProcessHeaderBytesRead(bytesRead))
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _processId, bytesRead, _headerByte.Length);
-                        try
-                        {
-                            Process childProcess = Process.GetProcessById(_processId);
-                            if (childProcess == null || childProcess.HasExited)
-                            {
-                                CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
-                            }
-                            else
-                            {
-                                CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _processId);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            if (ExceptionHandling.IsCriticalException(e))
-                            {
-                                throw;
-                            }
-
-                            CommunicationsUtilities.Trace(_nodeId, "Unable to retrieve remote process information. {0}", e);
-                        }
-
-                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                        Close();
                         return;
                     }
                 }
@@ -666,7 +775,43 @@ namespace Microsoft.Build.BackEnd
 
                 _nodePipe.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
             }
+#endif
 
+            private bool ProcessBodyBytesRead(int bytesRead, int packetLength, NodePacketType packetType)
+            {
+                if (bytesRead != packetLength)
+                {
+                    CommunicationsUtilities.Trace(_nodeId, "Bad packet read for packet {0} - Expected {1} bytes, got {2}", packetType, packetLength, bytesRead);
+                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                    Close();
+                    return false;
+                }
+                return true;
+            }
+
+            private bool ReadAndRoutePacket(NodePacketType packetType, byte [] packetData, int packetLength)
+            {
+                try
+                {
+                    // The buffer is publicly visible so that InterningBinaryReader doesn't have to copy to an intermediate buffer.
+                    // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
+                    using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
+                    {
+                        INodePacketTranslator readTranslator = NodePacketTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
+                        _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
+                    }
+                }
+                catch (IOException e)
+                {
+                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in ReadAndRoutPacket: {0}", e);
+                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                    Close();
+                    return false;
+                }
+                return true;
+            }
+
+#if FEATURE_APM
             /// <summary>
             /// Method called when the body of a packet has been read.
             /// </summary>
@@ -693,11 +838,8 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (bytesRead != packetLength)
+                    if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "Bad packet read for packet {0} - Expected {1} bytes, got {2}", packetType, packetLength, bytesRead);
-                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                        Close();
                         return;
                     }
                 }
@@ -709,22 +851,9 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // Read and route the packet.            
-                try
+                // Read and route the packet.
+                if (!ReadAndRoutePacket(packetType, packetData, packetLength))
                 {
-                    // The buffer is publicly visible so that InterningBinaryReader doesn't have to copy to an intermediate buffer.
-                    // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
-                    using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
-                    {
-                        INodePacketTranslator readTranslator = NodePacketTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
-                        _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
-                    }
-                }
-                catch (IOException e)
-                {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in BodyReadComplete (Routing): {0}", e);
-                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                    Close();
                     return;
                 }
 
@@ -738,6 +867,7 @@ namespace Microsoft.Build.BackEnd
                     Close();
                 }
             }
+#endif
         }
     }
 }

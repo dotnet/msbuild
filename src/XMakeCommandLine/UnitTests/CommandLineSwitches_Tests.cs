@@ -280,7 +280,6 @@ namespace Microsoft.Build.UnitTests
             Assert.True(unquoteParameters);
         }
 
-#if FEATURE_APPDOMAIN
         [Fact]
         public void NodeReuseParametersIdentificationTests()
         {
@@ -318,7 +317,6 @@ namespace Microsoft.Build.UnitTests
             Assert.NotNull(missingParametersErrorMessage);
             Assert.True(unquoteParameters);
         }
-#endif
 
         [Fact]
         public void ProjectSwitchIdentificationTests()
@@ -600,7 +598,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Null(duplicateSwitchErrorMessage);
         }
 
-#if FEATURE_APPDOMAIN
         [Fact]
         public void MaxCPUCountSwitchIdentificationTests()
         {
@@ -638,7 +635,6 @@ namespace Microsoft.Build.UnitTests
             Assert.NotNull(missingParametersErrorMessage);
             Assert.True(unquoteParameters);
         }
-#endif
 
 #if FEATURE_XML_SCHEMA_VALIDATION
         [Fact]

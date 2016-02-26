@@ -75,10 +75,8 @@ namespace Microsoft.Build.CommandLine
             Validate,
 #endif
             ConsoleLoggerParameters,
-#if FEATURE_APPDOMAIN
             NodeMode,
             MaxCPUCount,
-#endif
             IgnoreProjectExtensions,
             ToolsVersion,
             FileLoggerParameters,
@@ -91,9 +89,7 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters7,
             FileLoggerParameters8,
             FileLoggerParameters9,
-#if FEATURE_APPDOMAIN
             NodeReuse,
-#endif
             Preprocess,
             NumberOfParameterizedSwitches
         }
@@ -242,10 +238,8 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true    ),
 #endif
             new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true    ),
-#if FEATURE_APPDOMAIN
             new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false   ),
             new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true    ),
-#endif
             new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true    ),
             new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters", "flp" },       ParameterizedSwitch.FileLoggerParameters,       null,                           false,          "MissingFileLoggerParameterError",     true    ),
@@ -258,9 +252,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-#if FEATURE_APPDOMAIN
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true    ),
-#endif
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true    )
         };
 

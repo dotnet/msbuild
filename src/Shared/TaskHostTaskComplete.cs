@@ -215,9 +215,7 @@ namespace Microsoft.Build.BackEnd
         public void Translate(INodePacketTranslator translator)
         {
             translator.TranslateEnum(ref _taskResult, (int)_taskResult);
-#if FEATURE_BINARY_SERIALIZATION
-            translator.TranslateDotNet(ref _taskException);
-#endif
+            translator.TranslateException(ref _taskException);
             translator.Translate(ref _taskExceptionMessage);
             translator.Translate(ref _taskExceptionMessageArgs);
             translator.TranslateDictionary(ref _taskOutputParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
