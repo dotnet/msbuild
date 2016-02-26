@@ -14,8 +14,14 @@ namespace Microsoft.DotNet.Tools.Test
 
         protected override bool CanHandleMessage(IDotnetTest dotnetTest, Message message)
         {
-            return dotnetTest.State == DotnetTestState.TestExecutionSentTestRunnerProcessStartInfo &&
+            return IsAtAnAcceptableState(dotnetTest) &&
                    message.MessageType == TestMessageTypes.TestRunnerTestStarted;
+        }
+
+        private static bool IsAtAnAcceptableState(IDotnetTest dotnetTest)
+        {
+            return dotnetTest.State == DotnetTestState.TestExecutionSentTestRunnerProcessStartInfo ||
+                dotnetTest.State == DotnetTestState.TestExecutionStarted;
         }
     }
 }

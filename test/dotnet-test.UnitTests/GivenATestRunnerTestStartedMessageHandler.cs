@@ -36,7 +36,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
-        public void It_returns_NoOp_if_the_dotnet_test_state_is_not_TestExecutionSentTestRunnerProcessStartInfo()
+        public void It_returns_NoOp_if_the_dotnet_test_state_is_not_TestExecutionSentTestRunnerProcessStartInfo_or_TestExecutionTestStarted()
         {
             var dotnetTestMock = new Mock<IDotnetTest>();
             dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.Terminated);
@@ -59,10 +59,23 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
-        public void It_returns_TestExecutionStarted_when_it_handles_the_message()
+        public void It_returns_TestExecutionStarted_when_it_handles_the_message_and_current_state_is_TestExecutionSentTestRunnerProcessStartInfo()
         {
             var nextState = _testRunnerTestStartedMessageHandler.HandleMessage(
                     _dotnetTestMock.Object,
+                    _validMessage);
+
+            nextState.Should().Be(DotnetTestState.TestExecutionStarted);
+        }
+
+        [Fact]
+        public void It_returns_TestExecutionStarted_when_it_handles_the_message_and_current_state_is_TestExecutionTestStarted()
+        {
+            var dotnetTestMock = new Mock<IDotnetTest>();
+            dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.TestExecutionStarted);
+
+            var nextState = _testRunnerTestStartedMessageHandler.HandleMessage(
+                    dotnetTestMock.Object,
                     _validMessage);
 
             nextState.Should().Be(DotnetTestState.TestExecutionStarted);
