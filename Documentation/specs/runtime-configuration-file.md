@@ -13,6 +13,8 @@ There are two runtime configuration files for a particular application. Given a 
 * `MyApp.config.json` - An **optional** configuration file containing runtime configuration settings.
 * `MyApp.deps.json` - A list of dependencies, as well as compilation context data and compilation dependencies. Not technically required, but required to use the servicing or package cache/shared package install features.
 
+**IMPORTANT**: Portable Applications, i.e. those published without a specific RID, have some adjustments to this spec which is covered at the end.
+
 ## File format
 
 The files are both JSON files stored in UTF-8 encoding. Below are sample files. Note that not all sections are required and some will be opt-in only (see below for more details). The `.config.json` file is completely optional, and in the `.deps.json` file, only the `runtimeTarget`, `targets` and `libraries` sections are required (and within the `targets` section, only the runtime-specific target is required).
@@ -30,12 +32,15 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
 ### [appname].deps.json
 ```json
 {
-    "runtimeTarget": "DNXCore,Version=v5.0/osx.10.10-x64",
+    "runtimeTarget": {
+        "name": ".NETStandardApp,Version=v1.5/osx.10.10-x64",
+        "portable": false
+    },
     "compilationOptions": {
         "defines": [ "DEBUG" ]
     },
     "targets": {
-        "DNXCore,Version=v5.0": {
+        ".NETStandardApp,Version=v1.5": {
             "MyApp/1.0": {
                 "type": "project",
                 "dependencies": {
@@ -55,7 +60,7 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
                 }
             }
         },
-        "DNXCore,Version=v5.0/osx.10.10-x64": {
+        ".NETStandardApp,Version=v1.5/osx.10.10-x64": {
             "MyApp/1.0": {
                 "type": "project",
                 "dependencies": {
@@ -97,7 +102,16 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
         "System.Banana/1.0": {
             "type": "package",
             "sha512": "[base64 string]"
-        }  
+        }
+    },
+    "runtimes": {
+        ".NETStandardApp,Version=v1.5": {
+            "win7-x64": [ ],
+            "win7-x86": [ ],
+            "win8-x64": [ "win7-x64" ],
+            "win8-x86": [ "win7-x64" ],
+            "etc...": [ "etc..." ]
+        }
     }
 }
 ```
@@ -127,7 +141,6 @@ As an example, here is a possible `project.json` file:
     "compilationOptions": {
         "allowUnsafe": true
     },
-    
     "frameworks": {
         "net451": {
             "compilationOptions": {
@@ -140,7 +153,6 @@ As an example, here is a possible `project.json` file:
             }
         }
     },
-    
     "configurations": {
         "Debug": {
             "compilationOptions": {
@@ -162,17 +174,17 @@ When this project is built for `dnxcore50` in the `Debug` configuration, the out
 }
 ```
 
-### `runtimeTarget` property (`.deps.json`)
+### `runtimeTarget` Section (`.deps.json`)
 
-This property contains the name of the target from `targets` that should be used by the runtime. This is present to simplify `corehost` so that it does not have to parse or understand target names.
+This property contains the name of the target from `targets` that should be used by the runtime as well as a boolean indicating if this is a "portable" deployment, meaning there are runtime-specific assets within "subtargets" (see description of portable apps below) or if it is a "standalone" deployment meaning that all the assets are in a single target and published for a single RID. This is present to simplify `corehost` so that it does not have to parse or understand target names and the meaning thereof.
 
 ### `targets` Section (`.deps.json`)
 
 This section contains subsetted data from the input `project.lock.json`.
 
-Each property under `targets` describes a "target", which is a collection of libraries required by the application when run or compiled in a certain framework and platform context. A target **must** specify a Framework name, and **may** specify a Runtime Identifier. Targets without Runtime Identifiers represent the dependencies and assets used for compiling the application for a particular framework. Targets with Runtime Identifiers represent the dependencies and assets used for running the application under a particular framework and on the platform defined by the Runtime Identifier. In the example above, the `DNXCore,Version=v5.0` target lists the dependencies and assets used to compile the application for `dnxcore50`, and the `DNXCore,Version=v5.0/osx.10.10-x64` target lists the dependencies and assets used to run the application on `dnxcore50` on a 64-bit Mac OS X 10.10 machine.
+Each property under `targets` describes a "target", which is a collection of libraries required by the application when run or compiled in a certain framework and platform context. A target **must** specify a Framework name, and **may** specify a Runtime Identifier. Targets without Runtime Identifiers represent the dependencies and assets used for compiling the application for a particular framework. Targets with Runtime Identifiers represent the dependencies and assets used for running the application under a particular framework and on the platform defined by the Runtime Identifier. In the example above, the `.NETStandardApp,Version=v1.5` target lists the dependencies and assets used to compile the application for `dnxcore50`, and the `.NETStandardApp,Version=v1.5/osx.10.10-x64` target lists the dependencies and assets used to run the application on `dnxcore50` on a 64-bit Mac OS X 10.10 machine.
 
-There will always be two targets in the `runtime.config.json` file: A compilation target, and a runtime target. The compilation target will be named with the framework name used for the compilation (`DNXCore,Version=v5.0` in the example above). The runtime target will be named with the framework name and runtime identifier used to execute the application (`DNXCore,Version=v5.0/osx.10.10-x64` in the example above). However, the runtime target will also be identified by name in the `runtimeOptions` section, so that `corehost` need not parse and understand target names.
+There will always be two targets in the `runtime.config.json` file: A compilation target, and a runtime target. The compilation target will be named with the framework name used for the compilation (`.NETStandardApp,Version=v1.5` in the example above). The runtime target will be named with the framework name and runtime identifier used to execute the application (`.NETStandardApp,Version=v1.5/osx.10.10-x64` in the example above). However, the runtime target will also be identified by name in the `runtimeOptions` section, so that `corehost` need not parse and understand target names.
 
 The content of each target property in the JSON is a JSON object. Each property of that JSON object represents a single dependency required by the application when compiled for/run on that target. The name of the property contains the ID and Version of the dependency in the form `[Id]/[Version]`. The content of the property is another JSON object containing metadata about the dependency.
 
@@ -198,6 +210,10 @@ This section contains a union of all the dependencies found in the various targe
 
 **Open Question**: We could probably exclude projects from this set in order to reduce duplication. The main reason this is a separate section is because that's how the lock file is formatted and we want to try an keep this format the same if possible.
 
+## `runtimes` Section
+
+This section contains data gathered from the `runtime.json` files in packages during the restore process. It is used by the "portable" deployment model to encode the fallbacks through various RIDs. For example, `corehost` may detect that the current RID is `win8-x64`, due to running on Windows 8 in a 64-bit process. However, packages in the portable deployment model may provide assets for the `win7-x64` RID. In this case, `corehost` needs to know that `win8-x64` can load `win7-x64` assets. This data is encoded in the `runtimes` section of the deps file. The data is stored separately per Target Framework Moniker (though in practice, a `.deps.json` file will only ever have one entry; this is done simply to mirror the `project.lock.json` format). When running a particular target (as defined by `runtimeTarget`), where `portable` is set to `true`, only the `runtimes` entry matching that target name should be used.
+
 ## How the file is used
 
 The file is read by two different components:
@@ -215,7 +231,7 @@ Some of the sections in the `.deps.json` file contain data used for runtime comp
 ```json
 {
     "targets": {
-        "DNXCore,Version=v5.0/osx.10.10-x64": {
+        ".NETStandardApp,Version=v1.5/osx.10.10-x64": {
             "MyApp/1.0": {
                 "type": "project",
                 "dependencies": {
@@ -261,3 +277,76 @@ Some of the sections in the `.deps.json` file contain data used for runtime comp
     }
 }
 ```
+
+## Portable Deployment Model
+
+An application can be deployed in a "portable" deployment model. In this case, the RID-specific assets of packages are published within a folder structure that preserves the RID metadata. However, `corehost` does not use this folder structure, rather it reads data from the `.deps.json` file. Also, during deployment, the `.exe` file (`corehost` renamed) is not deployed.
+
+In a `portable` target, the package entries may have an additional `subtargets` section detailing RID-specific assets. The `corehost` application should use this data, along with the current RID and the fallback data defined in the `runtimes` section to select one **and only one** "subtarget" out of each package individually. The most specific subtarget should always be selected. In practice, this means selecting the first RID shown on the appropriate line in `runtimes`. For example, given a package containing the following subtargets:
+
+```json
+{
+    "targets": {
+        ".NETStandardApp,Version=v1.5": {
+            "System.Data.SqlClient/4.0.0": {
+                "compile": {
+                    "ref/netstandard1.5/System.Data.SqlClient.dll": {}
+                },
+                "subtargets": {
+                    "runtime": {
+                        "runtimes/unix/lib/netstandard1.5/System.Data.SqlClient.dll": { "rid": "unix" },
+                        "runtimes/win7-x64/lib/netstandard1.5/System.Data.SqlClient.dll": { "rid": "win7-x64" },
+                        "runtimes/win7-x86/lib/netstandard1.5/System.Data.SqlClient.dll": { "rid": "win7-x86" }
+                    },
+                    "native": {
+                        "runtimes/win7-x64/native/sni.dll": { "rid": "win7-x64" },
+                        "runtimes/win7-x86/native/sni.dll": { "rid": "win7-x86" }
+                    }
+                }
+            }
+        }
+    },
+    "runtimes": {
+        ".NETStandardApp,Version=v1.5": {
+            "win7-x64": [ ],
+            "win7-x86": [ ],
+            "win8-x64": [ "win7-x64" ],
+            "win8-x86": [ "win7-x86" ],
+            "win81-x64": [ "win7-x64" ],
+            "win81-x86": [ "win7-x86" ],
+            "win10-x64": [ "win7-x64" ],
+            "win10-x86": [ "win7-x86" ],
+            "osx.10.10-x64": [ "osx", "unix" ],
+            "osx.10.11-x64": [ "osx", "unix" ],
+            "rhel.7-x64": [ "linux-x64", "unix" ],
+            "rhel.7.1-x64": [ "linux-x64", "unix" ],
+            "rhel.7.2-x64": [ "linux-x64", "unix" ],
+            "rhel.7.3-x64": [ "linux-x64", "unix" ],
+            "centos.7-x64": [ "linux-x64", "unix" ],
+            "centos.7.1-x64": [ "linux-x64", "unix" ],
+            "debian.8-x64": [ "linux-x64", "unix" ],
+            "ubuntu.14.04-x64": [ "linux-x64", "unix" ],
+            "ubuntu.14.10-x64": [ "linux-x64", "unix" ],
+            "ubuntu.15.04-x64": [ "linux-x64", "unix" ],
+            "linuxmint.17-x64": [ "linux-x64", "unix" ],
+            "linuxmint.17.1-x64": [ "linux-x64", "unix" ],
+            "linuxmint.17.2-x64": [ "linux-x64", "unix" ],
+            "linuxmint.17.3-x64": [ "linux-x64", "unix" ]
+        }
+    }
+}
+```
+
+(How the data in `runtimes` was generated is beyond the scope of this document, `dotnet-publish` and NuGet will work together to ensure the appropriate data is present).
+
+Consider `corehost` running on `debian.8-x64`. When setting up the TPA and native library lists, it will do the following for `System.Data.SqlClient`:
+
+1. Add all entries from the root `runtime` and `native` sections (not present in the example). This is the current behavior
+2. Add all appropriate entries from the `subtargets.runtime` and `subtargets.native` sections, based on the `rid` property of each item:
+  1. Attempt to locate any item (in both lists) for `debian.8-x64`. If any asset is matched, take **only** the items matching that RID exactly and add them to the appropriate lists
+  2. Reattempt the previous step using the first RID in the list provided by `runtimes.".NETStandardApp,Version=v1.5"."debian.8-x64"` (in this case `linux-x64`). If any asset is matched, take **only** the items matching that RID exactly and add them to the appropriate lists
+  3. Continue to reattempt the previous search for each RID in the list, from left to right until a match is found or the list is exhausted. Exhausting the list without finding an asset, when a `subtargets` section is present is **not** an error.
+
+Note one important aspect about asset resolution: The resolution scope is **per-package**, **not per-application**, **nor per-asset**. For each individual package, the most appropriate RID is selected, and **all** assets taken from that package must match the selected RID exactly. For example, if a package provides both a `linux-x64` and a `unix` RID (in the `debian.8-x64` example above), **only** the `linux-x64` asset would be selected for that package. However, if a different package provides only a `unix` RID, then the asset from the `unix` RID would be selected.
+
+The path to subtarget assets is resolved in the same way as normal assets with **one exception**. When searching app-local, rather than just looking for the simple file name in the app-local directory, subtarget assets are expected to be located in subdirectories matching their relative path information in the lock file. So the `native` `sni.dll` asset for `win7-x64` in the above example would be located at `APPROOT/runtimes/win7-x64/native/sni.dll`, rather than the normal app-local path of `APPROOT/sni.dll`
