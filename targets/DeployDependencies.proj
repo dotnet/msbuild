@@ -52,7 +52,7 @@
           />
   </Target>
 
-  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll"/>
+  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.Tasks.dll"/>
 
   <PropertyGroup>
     <RuntimeProjectJson>$(MSBuildThisFileDirectory)runtimeDependencies\project.json</RuntimeProjectJson>

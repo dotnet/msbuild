@@ -33,6 +33,9 @@
     <CompilerToolsDir>$ToolsDir</CompilerToolsDir>
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
     
+    <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
+    <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
+
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
@@ -271,9 +274,6 @@
 
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
     <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
-
-    <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
-    <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
