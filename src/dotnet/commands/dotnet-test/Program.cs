@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Tools.Test
                 var messages = new TestMessagesCollection();
                 using (var dotnetTest = new DotnetTest(messages, assemblyUnderTest))
                 {
-                    var commandFactory = new DotNetCommandFactory();
+                    var commandFactory = new CommandFactory();
                     var testRunnerFactory = new TestRunnerFactory(GetCommandName(testRunner), commandFactory);
 
                     dotnetTest

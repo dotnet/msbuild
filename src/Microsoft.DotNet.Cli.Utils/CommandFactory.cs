@@ -6,12 +6,15 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public interface ICommandFactory
+    public class CommandFactory : ICommandFactory
     {
-        ICommand Create(
+        public ICommand Create(
             string commandName,
             IEnumerable<string> args,
             NuGetFramework framework = null,
-            string configuration = Constants.DefaultConfiguration);
+            string configuration = Constants.DefaultConfiguration)
+        {
+            return Command.Create(commandName, args, framework, configuration);
+        }
     }
 }

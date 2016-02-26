@@ -51,9 +51,10 @@ namespace Microsoft.DotNet.Tools.Test
             var commandArgs = _argumentsBuilder.BuildArguments();
 
             return _commandFactory.Create(
-                _testRunner,
+                $"dotnet-{_testRunner}",
                 commandArgs,
-                new NuGetFramework("DNXCore", Version.Parse("5.0")));
+                new NuGetFramework("DNXCore", Version.Parse("5.0")),
+                Constants.DefaultConfiguration);
         }
     }
 }

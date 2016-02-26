@@ -129,7 +129,10 @@ namespace Microsoft.DotNet.Tools.Test
 
         public void Dispose()
         {
-            Socket.Dispose();
+            if (Socket != null)
+            {
+                Socket.Dispose();
+            }
         }
     }
 }
