@@ -357,6 +357,12 @@ namespace Microsoft.DotNet.Tools.Build
                 args.Add("--cpp");
             }
 
+            if (!string.IsNullOrWhiteSpace(_args.CppCompilerFlagsValue))
+            {
+                args.Add("--cppcompilerflags");
+                args.Add(_args.CppCompilerFlagsValue);
+            }
+
             if (!string.IsNullOrWhiteSpace(_args.ArchValue))
             {
                 args.Add("--arch");
