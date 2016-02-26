@@ -10,7 +10,7 @@
     <AssemblyName>PortableTask</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <UseProductOutputPath>true</UseProductOutputPath>
-	<CopyNuGetImplementations>false</CopyNuGetImplementations>
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
@@ -30,6 +30,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShowItems.cs" />
+    <Compile Include="Sleep.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Framework\Microsoft.Build.Framework.csproj">
@@ -42,7 +43,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\dir.targets" />
-  
   <!-- OSS sign assembly after compile runs. -->
   <Import Condition="Exists('$(ToolsDir)\sign.targets')" Project="$(ToolsDir)\sign.targets" />
 </Project>
