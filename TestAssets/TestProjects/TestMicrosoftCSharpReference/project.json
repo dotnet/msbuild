@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0",
+    "dependencies": { },
+    "frameworks": {
+        "dnxcore50": {
+            "dependencies": {
+                "NETStandard.Library": "1.0.0-rc2-23811"
+            }
+        },
+        "dnx451": {
+            "dependencies": {
+                "Microsoft.CSharp": "4.0.1-*"
+            }
+        }
+    }
+}

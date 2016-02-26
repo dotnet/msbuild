@@ -1,14 +1,15 @@
-using System;
-using System.IO;
+using System.Linq;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
+using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
 
 namespace Microsoft.DotNet.ProjectModel.Tests
 {
-    public class PackageDependencyProviderTests
+    public class PackageDependencyProviderTests : TestBase
     {
         [Fact]
         public void GetDescriptionShouldNotModifyTarget()
@@ -36,9 +37,23 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             Assert.Empty(p1.CompileTimeAssemblies);
             Assert.Empty(p1.RuntimeAssemblies);
-            
+
             Assert.Empty(p2.CompileTimeAssemblies);
             Assert.Empty(p2.RuntimeAssemblies);
+        }
+
+        [Fact]
+        public void SingleMicrosoftCSharpReference()
+        {
+            // https://github.com/dotnet/cli/issues/1602
+            var instance = TestAssetsManager.CreateTestInstance("TestMicrosoftCSharpReference")
+                                            .WithLockFiles();
+
+            var context = new ProjectContextBuilder().WithProjectDirectory(instance.TestRoot)
+                                                     .WithTargetFramework("dnx451")
+                                                     .Build();
+
+            Assert.Equal(4, context.RootProject.Dependencies.Count());
         }
     }
 }

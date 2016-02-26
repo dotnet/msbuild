@@ -44,7 +44,10 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         {
             // This never returns null
             var targetFrameworkInfo = project.GetTargetFramework(targetFramework);
-            var dependencies = new List<LibraryRange>(targetFrameworkInfo.Dependencies);
+            var dependencies = new List<LibraryRange>(targetFrameworkInfo.Dependencies);            
+
+            // Add all of the project's dependencies
+            dependencies.AddRange(project.Dependencies);
 
             if (targetFramework != null && targetFramework.IsDesktop())
             {
@@ -58,13 +61,13 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
                     if (targetFramework.Version >= new Version(4, 0))
                     {
-                        dependencies.Add(new LibraryRange("Microsoft.CSharp", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                        if (!dependencies.Any(dep => string.Equals(dep.Name, "Microsoft.CSharp", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            dependencies.Add(new LibraryRange("Microsoft.CSharp", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                        }
                     }
                 }
             }
-
-            // Add all of the project's dependencies
-            dependencies.AddRange(project.Dependencies);
             
             if (targetLibrary != null)
             {
