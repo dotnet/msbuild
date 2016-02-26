@@ -146,8 +146,12 @@ namespace Microsoft.DotNet.ProjectModel
             var context = Create(ProjectFile.ProjectFilePath, TargetFramework, runtimeIdentifiers);
             if (context.RuntimeIdentifier == null)
             {
-                var rids = string.Join(",", runtimeIdentifiers);
-                throw new InvalidOperationException($"Can not find runtime target for framework '{TargetFramework}' and RID's {rids}.");
+                var rids = string.Join(", ", runtimeIdentifiers);
+                throw new InvalidOperationException($"Can not find runtime target for framework '{TargetFramework}' and RID's '{rids}'. " +
+                                                    "Possible causes:" + Environment.NewLine +
+                                                    "1. Project is not restored or restore failed - run `dotnet restore`" + Environment.NewLine +
+                                                    "2. Project is not targeting `runable` framework (`netstandardapp*` or `net*`)"
+                                                    );
             }
             return context;
         }

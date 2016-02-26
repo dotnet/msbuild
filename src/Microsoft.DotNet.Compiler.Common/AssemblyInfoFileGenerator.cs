@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
@@ -59,7 +60,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private static Dictionary<Type, string> GetProjectAttributes(AssemblyInfoOptions metadata)
         {
-            return new Dictionary<Type, string>()
+            var attributes = new Dictionary<Type, string>()
             {
                 [typeof(AssemblyTitleAttribute)] = EscapeCharacters(metadata.Title),
                 [typeof(AssemblyDescriptionAttribute)] = EscapeCharacters(metadata.Description),
@@ -68,9 +69,34 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 [typeof(AssemblyVersionAttribute)] = EscapeCharacters(metadata.AssemblyVersion?.ToString()),
                 [typeof(AssemblyInformationalVersionAttribute)] = EscapeCharacters(metadata.InformationalVersion),
                 [typeof(AssemblyCultureAttribute)] = EscapeCharacters(metadata.Culture),
-                [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage),
-                [typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework)
+                [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage)
             };
+
+            if (SupportsTargetFrameworkAttribute(metadata))
+            {
+                // TargetFrameworkAttribute only exists since .NET 4.0
+                attributes[typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework);
+            };
+
+            return attributes;
+        }
+
+        private static bool SupportsTargetFrameworkAttribute(AssemblyInfoOptions metadata)
+        {
+            if (string.IsNullOrEmpty(metadata.TargetFramework))
+            {
+                // target framework is unknown. to be on the safe side, return false.
+                return false;
+            }
+
+            var targetFramework = NuGetFramework.Parse(metadata.TargetFramework);
+            if (!targetFramework.IsDesktop())
+            {
+                // assuming .NET Core, which should support .NET 4.0 attributes
+                return true;
+            }
+
+            return targetFramework.Version >= new Version(4, 0);
         }
 
         private static bool IsSameAttribute(Type attributeType, AttributeSyntax attributeSyntax)

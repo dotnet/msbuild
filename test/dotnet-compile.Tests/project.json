@@ -20,6 +20,7 @@
   },
 
   "content": [
+    "../../TestAssets/TestProjects/DependencyContextValidator/**/*",
     "../../TestAssets/TestProjects/TestLibraryWithAnalyzer/*",
     "../../TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/*",
     "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/*",

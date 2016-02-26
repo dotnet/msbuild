@@ -2,56 +2,64 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Testing.Abstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ReportingChannel : IDisposable
+    public class ReportingChannel : IReportingChannel
     {
         public static ReportingChannel ListenOn(int port)
         {
             // This fixes the mono incompatibility but ties it to ipv4 connections
-            using (var listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            {
-                listenSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
-                listenSocket.Listen(10);
+            var listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                var socket = listenSocket.Accept();
+            listenSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
+            listenSocket.Listen(10);
 
-                return new ReportingChannel(socket);
-            }
+            return new ReportingChannel(listenSocket);
         }
 
-        private readonly BinaryWriter _writer;
-        private readonly BinaryReader _reader;
-        private readonly ManualResetEventSlim _ackWaitHandle;
+        private BinaryWriter _writer;
+        private BinaryReader _reader;
+        private Socket _listenSocket;
 
-        private ReportingChannel(Socket socket)
+        private ReportingChannel(Socket listenSocket)
         {
-            Socket = socket;
-
-            var stream = new NetworkStream(Socket);
-            _writer = new BinaryWriter(stream);
-            _reader = new BinaryReader(stream);
-            _ackWaitHandle = new ManualResetEventSlim();
-
-            ReadQueue = new BlockingCollection<Message>(boundedCapacity: 1);
-
-            // Read incoming messages on the background thread
-            new Thread(ReadMessages) { IsBackground = true }.Start();
+            _listenSocket = listenSocket;
+            Port = ((IPEndPoint)listenSocket.LocalEndPoint).Port;
         }
 
-        public BlockingCollection<Message> ReadQueue { get; }
+        public event EventHandler<Message> MessageReceived;
 
         public Socket Socket { get; private set; }
+
+        public int Port { get; }
+
+        public void Accept()
+        {
+            new Thread(() =>
+            {
+                using (_listenSocket)
+                {
+                    Socket = _listenSocket.Accept();
+
+                    var stream = new NetworkStream(Socket);
+                    _writer = new BinaryWriter(stream);
+                    _reader = new BinaryReader(stream);
+
+                    // Read incoming messages on the background thread
+                    new Thread(ReadMessages) { IsBackground = true }.Start();
+                }
+            }) { IsBackground = true }.Start();
+        }
 
         public void Send(Message message)
         {
@@ -62,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Test
                     TestHostTracing.Source.TraceEvent(
                         TraceEventType.Verbose,
                         0,
-                        "[ReportingChannel]: Send({0})", 
+                        "[ReportingChannel]: Send({0})",
                         message);
 
                     _writer.Write(JsonConvert.SerializeObject(message));
@@ -102,13 +110,13 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 try
                 {
-                    var message = JsonConvert.DeserializeObject<Message>(_reader.ReadString());
-                    ReadQueue.Add(message);
+                    var rawMessage = _reader.ReadString();
+                    var message = JsonConvert.DeserializeObject<Message>(rawMessage);
 
-                    if (string.Equals(message.MessageType, "TestHost.Acknowledge"))
+                    MessageReceived?.Invoke(this, message);
+
+                    if (ShouldStopListening(message))
                     {
-                        _ackWaitHandle.Set();
-                        ReadQueue.CompleteAdding();
                         break;
                     }
                 }
@@ -124,26 +132,14 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
+        private static bool ShouldStopListening(Message message)
+        {
+            return message.MessageType == TestMessageTypes.TestRunnerTestCompleted ||
+                message.MessageType == TestMessageTypes.TestSessionTerminate;
+        }
+
         public void Dispose()
         {
-            // Wait for a graceful disconnect - drain the queue until we get an 'ACK'
-            Message message;
-            while (ReadQueue.TryTake(out message, millisecondsTimeout: 1))
-            {
-            }
-
-            if (_ackWaitHandle.Wait(TimeSpan.FromSeconds(10)))
-            {
-                TestHostTracing.Source.TraceInformation("[ReportingChannel]: Received for ack from test host");
-            }
-            else
-            {
-                TestHostTracing.Source.TraceEvent(
-                    TraceEventType.Error,
-                    0, 
-                    "[ReportingChannel]: Timed out waiting for ack from test host");
-            }
-
             Socket.Dispose();
         }
     }

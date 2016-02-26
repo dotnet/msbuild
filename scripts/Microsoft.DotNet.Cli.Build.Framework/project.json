@@ -3,7 +3,8 @@
 
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
-        "System.Diagnostics.Process": "4.1.0-rc2-23811"
+        "System.Diagnostics.Process": "4.1.0-rc2-23811",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537"
     },
 
     "frameworks": {

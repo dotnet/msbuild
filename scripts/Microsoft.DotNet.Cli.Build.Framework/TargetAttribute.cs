@@ -5,8 +5,8 @@ using System.Linq;
 namespace Microsoft.DotNet.Cli.Build.Framework
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-	public class TargetAttribute : Attribute
-	{
+    public class TargetAttribute : Attribute
+    {
         public string Name { get; set; }
         public IEnumerable<string> Dependencies { get; }
 
@@ -20,5 +20,5 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             Dependencies = dependencies;
         }
-	}
+    }
 }

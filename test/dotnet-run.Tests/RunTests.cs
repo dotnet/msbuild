@@ -3,38 +3,41 @@
 
 using System;
 using System.IO;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Compiler.Tests
+namespace Microsoft.DotNet.Tools.Run.Tests
 {
-    public class CompilerTests : TestBase
+    public class RunTests : TestBase
     {
-        private static const string RunTestsBase = "RunTestsApps";
+        private const string RunTestsBase = "RunTestsApps";
 
         [WindowsOnlyFact]
         public void RunsSingleTarget()
         {
-            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(RunTestsBase, "TestAppDesktopClr"))
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(RunTestsBase, "TestAppFullClr"))
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
-            new RunCommand(testInstance.TestRoot).Execute().Should().Pass();
+            new RunCommand(instance.TestRoot).Execute().Should().Pass();
         }
 
+        [Fact]
         public void RunsDefaultWhenPresent()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(RunTestsBase, "TestAppMultiTarget"))
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
-            new RunCommand(testInstance.TestRoot).Execute().Should().Pass();
+            new RunCommand(instance.TestRoot).Execute().Should().Pass();
         }
 
+        [Fact]
         public void FailsWithMultipleTargetAndNoDefault()
         {
-            TestInstance instance = TestAssetsManager.CreateTestInstance(RunTestsBase, "TestAppMultiTargetNoCoreClr")
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(RunTestsBase, "TestAppMultiTargetNoCoreClr"))
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
-            new RunCommand(testInstance.TestRoot).Execute().Should().Fail();
+            new RunCommand(instance.TestRoot).Execute().Should().Fail();
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

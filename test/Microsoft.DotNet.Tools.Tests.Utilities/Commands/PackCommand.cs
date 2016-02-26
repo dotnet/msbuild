@@ -10,6 +10,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         private string _projectPath;
         private string _outputDirectory;
+        private string _buildBasePath;
         private string _tempOutputDirectory;
         private string _configuration;
         private string _versionSuffix;
@@ -21,6 +22,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return _outputDirectory == string.Empty ?
                                            "" :
                                            $"-o \"{_outputDirectory}\"";
+            }
+        }
+        private string BuildBasePathOption
+        {
+            get
+            {
+                return _buildBasePath == string.Empty ?
+                                           "" :
+                                           $"-b \"{_buildBasePath}\"";
             }
         }
 
@@ -55,8 +65,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         }
 
         public PackCommand(
-            string projectPath, 
-            string output="", 
+            string projectPath,
+            string output = "",
+            string buildBasePath = "",
             string tempOutput="", 
             string configuration="", 
             string versionSuffix="")
@@ -64,6 +75,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             _projectPath = projectPath;
             _outputDirectory = output;
+            _buildBasePath = buildBasePath;
             _tempOutputDirectory = tempOutput;
             _configuration = configuration;
             _versionSuffix = versionSuffix;
@@ -77,7 +89,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string BuildArgs()
         {
-            return $"{_projectPath} {OutputOption} {TempOutputOption} {ConfigurationOption} {VersionSuffixOption}";
+            return $"{_projectPath} {OutputOption} {BuildBasePathOption} {TempOutputOption} {ConfigurationOption} {VersionSuffixOption}";
         }
     }
 }

@@ -24,7 +24,7 @@
         "Microsoft.CodeAnalysis.CSharp":  "1.2.0-beta1-20160202-02",
         "Microsoft.DiaSymReader.Native": "1.3.3",
 
-        "NuGet.CommandLine.XPlat": "3.4.0-beta-625",
+        "NuGet.CommandLine.XPlat": "3.4.0-beta-632",
         "System.CommandLine": "0.1.0-e160119-1",
 
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",

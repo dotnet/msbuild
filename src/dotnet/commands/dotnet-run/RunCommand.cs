@@ -82,7 +82,9 @@ namespace Microsoft.DotNet.Tools.Run
                     context = contexts.FirstOrDefault(c => defaultFrameworks.Contains(c.TargetFramework.Framework));
                     if (context == null)
                     {
-                        throw new InvalidOperationException($"Couldn't find target to run. Defaults: {string.Join(", ", defaultFrameworks)}");
+                        throw new InvalidOperationException($"Couldn't find target to run. Possible causes:" + Environment.NewLine +
+                            "1. No project.lock.json file or restore failed - run `dotnet restore`" + Environment.NewLine +
+                            $"2. project.lock.json has multiple targets none of which is in default list ({string.Join(", " , defaultFrameworks)})");
                     }
                 }
 

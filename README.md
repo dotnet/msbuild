@@ -6,7 +6,14 @@ This repo contains the source code for cross-platform [.NET Core](http://github.
 
 New to .NET CLI?
 ------------
-Check out our http://dotnet.github.io/getting-started/
+Check out our http://dotnet.github.io/getting-started/ page. 
+
+Found an issue?
+---------------
+You can consult the [known issues page](Documentation/known-issues.md) to find out the current issues and 
+to see the workarounds.  
+
+If you don't find your issue, please file one! However, given that this is a very high-frequency repo, we've setup some [basic guidelines](Documentation/issue-filing-guide.md) to help you. Please consult those first.
 
 Build Status
 ------------
@@ -24,10 +31,10 @@ Installers
 |**Installers**|[Download Debian Package](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-ubuntu-x64.latest.deb)|[Download Msi](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-win-x64.latest.exe)|[Download Pkg](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-osx-x64.latest.pkg) |N/A |
 |**Binaries**|[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-ubuntu-x64.latest.tar.gz)|[Download zip file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-win-x64.latest.zip)|[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-osx-x64.latest.tar.gz) |[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-centos-x64.latest.tar.gz) |
 
-Interested in .NET Core + ASP.NET 5 RC bits?
-----------------------------------------
+Interested in .NET Core + ASP.NET Core 1.0 RC1 bits?
+----------------------------------------------------
 
-This toolchain is independent from the DNX-based .NET Core + ASP.NET 5 RC bits. If you are looking for .NET Core + ASP.NET 5 RC bits, you can find instructions on the http://get.asp.net/.  
+This toolchain is independent from the DNX-based .NET Core + ASP.NET Core 1.0 RC1 bits. If you are looking for .NET Core + ASP.NET Core 1.0 RC1 bits, you can find instructions on the http://get.asp.net/.  
 
 Docker
 ------
@@ -53,19 +60,8 @@ Then you can either run from source or compile the sample. Running from source i
 Compiling to IL is done using:
 	
 	dotnet build
-This will drop a binary in `./bin/[configuration]/[framework]/[binary name]` that you can just run.
 
-Finally, you can also try out native compilation using RyuJIT as shown below:  
-
-	dotnet build --native
-
-The following command will perform native compilation using the C++ Codegenerator:
-
-    dotnet build --native --cpp
-
-If you are in Windows, make sure that you run the above command inside the *VS 2015 x64 Native Tools* prompt, otherwise you will get errors. This command will drop a native single binary in `./bin/[configuration]/[framework]/native/[binary name]` that you can run.
-
-**Note:** At this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.
+This will drop a binary in `./bin/[configuration]/[framework]/[rid]/[binary name]` that you can just run.
 
 For more details, please refer to the [documentation](https://github.com/dotnet/corert/tree/master/Documentation).
 
@@ -74,11 +70,7 @@ Building from source
 
 If you are building from source, take note that the build depends on NuGet packages hosted on Myget, so if it is down, the build may fail. If that happens, you can always see the [Myget status page](http://status.myget.org/) for more info. 
 
-Known issues
-------------
-
-You can also consult the [known issues page](Documentation/known-issues.md) to find out the current issues and 
-to see the workarounds.  
+Read over the [contributing guidelines](https://github.com/dotnet/cli/tree/master/CONTRIBUTING.md) and [developer documentation](https://github.com/dotnet/cli/tree/master/Documentation) for prerequisites for building from source.
 
 Questions & Comments
 --------------------
