@@ -38,10 +38,10 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             _commandFactoryMock = new Mock<ICommandFactory>();
             _commandFactoryMock.Setup(c => c.Create(
-                _runner,
+                $"dotnet-{_runner}",
                 _testRunnerArguments,
                 new NuGetFramework("DNXCore", Version.Parse("5.0")),
-                null)).Returns(_commandMock.Object).Verifiable();
+                Constants.DefaultConfiguration)).Returns(_commandMock.Object).Verifiable();
         }
 
         [Fact]
