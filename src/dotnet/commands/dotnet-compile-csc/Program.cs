@@ -90,7 +90,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             // Generate assembly info
             var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.cs");
             
-            File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.Generate(assemblyInfoOptions, sources));
+            File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateCSharp(assemblyInfoOptions, sources));
+
             allArgs.Add($"\"{assemblyInfo}\"");
 
             if (outputName != null)
