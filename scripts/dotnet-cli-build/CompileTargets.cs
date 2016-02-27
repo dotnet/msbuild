@@ -14,8 +14,7 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static readonly string CoreCLRVersion = "1.0.1-rc2-23811";
         public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
-        public static readonly bool IsWinx86 = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-                                               RuntimeInformation.ProcessArchitecture == Architecture.X86;
+        public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
         public static readonly List<string> AssembliesToCrossGen = GetAssembliesToCrossGen();
 
@@ -62,7 +61,6 @@ namespace Microsoft.DotNet.Cli.Build
             Mkdirp(cmakeOut);
 
             var configuration = c.BuildContext.Get<string>("Configuration");
-            var architecture = PlatformServices.Default.Runtime.RuntimeArchitecture;
 
             // Run the build
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -70,8 +68,10 @@ namespace Microsoft.DotNet.Cli.Build
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
                 // See the comment in "src/corehost/build.sh" for details. It doesn't work for some reason.
                 var visualStudio = IsWinx86 ? "Visual Studio 14 2015" : "Visual Studio 14 2015 Win64";
+                var archMacro = IsWinx86 ? "-DCLI_CMAKE_PLATFORM_ARCH_I386=1" : "-DCLI_CMAKE_PLATFORM_ARCH_AMD64=1";
                 ExecIn(cmakeOut, "cmake",
                     Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost"),
+                    archMacro,
                     "-G",
                     visualStudio);
 
@@ -206,25 +206,6 @@ namespace Microsoft.DotNet.Cli.Build
             // dotnet.exe is from stage0. But we must be using the newly built corehost in stage1
             File.Delete(Path.Combine(binDir, $"dotnet{Constants.ExeSuffix}"));
             File.Copy(Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, $"dotnet{Constants.ExeSuffix}"));
-
-            // HACK
-            // bootstrapping for Windows x86. Copy csc/vbc from stage0.
-            // This is a temporary hack for https://github.com/dotnet/roslyn/issues/8951
-            if (IsWinx86)
-            {
-                List<string> x86compilerBins = new List<string> {
-                    "csc.dll",
-                    "Microsoft.CodeAnalysis.CSharp.dll",
-                    "Microsoft.CodeAnalysis.dll",
-                    "Microsoft.CodeAnalysis.VisualBasic.dll",
-                    "vbc.dll"
-                };
-
-                foreach (var binary in x86compilerBins)
-                {
-                    File.Copy(Path.Combine(DotNetCli.Stage0.BinPath, binary), Path.Combine(binDir, binary), true);
-                }
-            }
 
             // Crossgen Roslyn
             var result = Crossgen(c, binDir);
