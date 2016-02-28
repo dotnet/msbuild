@@ -440,6 +440,6 @@ mylib -> /mylib/bin/Debug/mylib.1.0.0.symbols.nupkg
 As our developer is going further with her usage of the CLI tools, she figures out that there is an easy way to extend the CLI tools on her machine by adding project-level tools to her `project.json`. She uses the CLI to work with the tools and she is able to extend the default toolset to further fit her needs. 
 
 ## Steps 
->**TODO:** at this point, this needs more work to figure out how it will surface; it is listed her so it is not forgotten.
+>**TODO:** at this point, this needs more work to figure out how it will surface; it is listed here so it is not forgotten.
 
 
