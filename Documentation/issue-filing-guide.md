@@ -37,3 +37,15 @@ you would like to see, what scenario it covers and especially why the current
 tools cannot satisfy that scenario. 
 
 Thanks and happy filing! :)
+
+## Providing the repro for bugs
+For bugs, what we need more than anything is a good repro of the defective 
+behavior. We would like to go towards the "clone, run, repro" model. In short:
+
+1. If you find a bug, package up a repro in a git repo somewhere (GitHub is 
+usually a good place :)). 
+2. Inside the issue, specify what needs to be done (steps) to get an accurate 
+repro of the bug. Ideally, this should be "here is how to build, these are the 
+commands you run from the dotnet tools".
+3. We use the above to get the repro, investigate and fix!
+
