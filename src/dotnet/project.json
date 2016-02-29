@@ -18,10 +18,10 @@
     "dependencies": {
         "Newtonsoft.Json": "7.0.1",
 
-        "Microsoft.Net.Compilers.netcore": "1.2.0-beta1-20160202-02",
+        "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160225-02",
         "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-151218",
-        "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta1-20160202-02",
-        "Microsoft.CodeAnalysis.CSharp":  "1.2.0-beta1-20160202-02",
+        "Microsoft.Net.CSharp.Interactive.netcore": "1.3.0-beta1-20160225-02",
+        "Microsoft.CodeAnalysis.CSharp":  "1.3.0-beta1-20160225-02",
         "Microsoft.DiaSymReader.Native": "1.3.3",
 
         "NuGet.CommandLine.XPlat": "3.4.0-beta-632",

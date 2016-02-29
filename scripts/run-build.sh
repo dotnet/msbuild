@@ -21,6 +21,10 @@ while [[ $# > 0 ]]; do
             export CONFIGURATION=$2
             shift
             ;;
+        --targets)
+            IFS=',' read -r -a targets <<< $2
+            shift
+            ;;
         --nopackage)
             export DOTNET_BUILD_SKIP_PACKAGING=1
             ;;
@@ -29,10 +33,11 @@ while [[ $# > 0 ]]; do
             export DOTNET_INSTALL_SKIP_PREREQS=1
             ;;
         --help)
-            echo "Usage: $0 [--configuration <CONFIGURATION>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help] <TARGETS...>"
+            echo "Usage: $0 [--configuration <CONFIGURATION>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help] [--targets <TARGETS...>]"
             echo ""
             echo "Options:"
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
+            echo "  --targets <TARGETS...>              Comma separated build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
             echo "  --nopackage                         Skip packaging targets"
             echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
@@ -106,10 +111,10 @@ echo "Invoking Build Scripts..."
 echo "Configuration: $CONFIGURATION"
 
 if [ -f "$DIR/dotnet-cli-build/bin/dotnet-cli-build" ]; then
-    $DIR/dotnet-cli-build/bin/dotnet-cli-build "$@"
+    $DIR/dotnet-cli-build/bin/dotnet-cli-build "${targets[@]}"
     exit $?
 else
     # We're on an older CLI. This is temporary while Ubuntu and CentOS VSO builds are stalled.
-    $DIR/dotnet-cli-build/bin/Debug/dnxcore50/dotnet-cli-build "$@"
+    $DIR/dotnet-cli-build/bin/Debug/dnxcore50/dotnet-cli-build "${targets[@]}"
     exit $?
 fi

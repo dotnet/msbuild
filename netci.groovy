@@ -26,17 +26,17 @@ def static getBuildJobName(def configuration, def os) {
 
             // Calculate the build command
             if (os == 'Windows_NT') {
-                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} Default"
+                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} -Targets Default"
             }
             else if (os == 'Windows_2016') {
-                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} -RunInstallerTestsInDocker Default"
+                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} -RunInstallerTestsInDocker -Targets Default"
             }
             else if (os == 'Ubuntu') {
-                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} --docker ubuntu Default"
+                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} --docker ubuntu --targets Default"
             }
             else {
                 // Jenkins non-Ubuntu CI machines don't have docker
-                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} Default"
+                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} --targets Default"
             }
 
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {

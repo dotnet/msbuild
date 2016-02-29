@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static readonly string CoreCLRVersion = "1.0.1-rc2-23811";
         public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
+        public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
         public static readonly List<string> AssembliesToCrossGen = GetAssembliesToCrossGen();
 
@@ -66,10 +67,13 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
                 // See the comment in "src/corehost/build.sh" for details. It doesn't work for some reason.
+                var visualStudio = IsWinx86 ? "Visual Studio 14 2015" : "Visual Studio 14 2015 Win64";
+                var archMacro = IsWinx86 ? "-DCLI_CMAKE_PLATFORM_ARCH_I386=1" : "-DCLI_CMAKE_PLATFORM_ARCH_AMD64=1";
                 ExecIn(cmakeOut, "cmake",
                     Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost"),
+                    archMacro,
                     "-G",
-                    "Visual Studio 14 2015 Win64");
+                    visualStudio);
 
                 var pf32 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
                     Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
@@ -233,8 +237,16 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Find toolchain package
             string packageId;
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                if (IsWinx86)
+                {
+                    // https://github.com/dotnet/cli/issues/1550
+                    c.Warn("Native compilation is not yet working on Windows x86");
+                    return c.Success();
+                }
+
                 packageId = "toolchain.win7-x64.Microsoft.DotNet.AppDep";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -282,10 +294,11 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             // Find crossgen
+            string arch = PlatformServices.Default.Runtime.RuntimeArchitecture;
             string packageId;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                packageId = "runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR";
+                packageId = $"runtime.win7-{arch}.Microsoft.NETCore.Runtime.CoreCLR";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
