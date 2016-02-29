@@ -9,6 +9,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.TestFramework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -284,6 +285,54 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                            .RetrievePropertyAs<JArray>("Errors")
                            .AssertJArrayContains<JObject>(error => error["ErrorCode"].Value<string>() == ErrorCodes.NU1009);
                 }
+            }
+        }
+
+        [Fact]
+        public void InvalidProjectJson()
+        {
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "EmptyLibrary"));
+                client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "BrokenProjectFileSample"));
+
+                // Error for invalid project.json
+                var messages = client.DrainAllMessages();
+                messages.Single(msg => msg.MessageType == MessageTypes.Error)
+                        .Payload.AsJObject()
+                        .AssertProperty<string>("Path", v => v.Contains("BrokenProjectFileSample"));
+
+                // Successfully initialize the other project
+                messages.Single(msg => msg.MessageType == MessageTypes.ProjectInformation)
+                        .Payload.AsJObject()
+                        .AssertProperty<string>("Name", v => string.Equals(v, "EmptyLibrary", StringComparison.Ordinal));
+
+                // Successfully initialize another project afterwards
+                client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "EmptyConsoleApp"));
+                messages = client.DrainAllMessages();
+                messages.Single(msg => msg.MessageType == MessageTypes.ProjectInformation)
+                        .Payload.AsJObject()
+                        .AssertProperty<string>("Name", v => string.Equals(v, "EmptyConsoleApp", StringComparison.Ordinal));
+            }
+        }
+
+        [Fact]
+        public void InvalidGlobalJson()
+        {
+            var testAssetsPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer");
+            var assetsManager = new TestAssetsManager(testAssetsPath);
+            var testSource = assetsManager.CreateTestInstance("IncorrectGlobalJson");
+
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                client.Initialize(Path.Combine(testSource.TestRoot, "src", "Project1"));
+
+                var messages = client.DrainAllMessages();
+                messages.ContainsMessage(MessageTypes.Error)
+                        .Single().Payload.AsJObject()
+                        .AssertProperty<string>("Path", v => v.Contains("InvalidGlobalJson"));
             }
         }
     }
