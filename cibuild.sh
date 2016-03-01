@@ -7,6 +7,7 @@ usage()
     echo "Options"
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
+    echo "  --host <host>                  CoreCLR or Mono (default: CoreCLR)"
 }
 
 setHome()
@@ -45,6 +46,13 @@ build()
 	echo "Log: $LOG_PATH_ARG"
 }
 
+setMonoDir(){
+    if [[ "$MONO_BIN_DIR" = "" ]]; then
+                MONO_BIN_DIR=`dirname \`which mono\``
+                MONO_BIN_DIR=${MONO_BIN_DIR}/
+    fi
+}
+
 # Paths
 THIS_SCRIPT_PATH="`dirname \"$0\"`"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
@@ -76,6 +84,11 @@ do
 
         --target)
         target=$2
+        shift 2
+        ;;
+
+        --host)
+        host=$2
         shift 2
         ;;
 
@@ -114,13 +127,12 @@ case $target in
     CoreCLR)
         CONFIGURATION=Debug-Netcore
         ;;
+
     Mono)
+        setMonoDir
         CONFIGURATION=Debug-MONO
-        if [[ "$MONO_BIN_DIR" = "" ]]; then
-                MONO_BIN_DIR=`dirname \`which mono\``
-        fi
-        MONO_BIN_DIR=${MONO_BIN_DIR}/
         EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
+        RUNTIME_HOST_ARGS="--debug"
         ;;
     *)
         echo "Unsupported target detected: $target. Configuring as if for CoreCLR"
@@ -128,20 +140,26 @@ case $target in
         ;;
 esac
 
-# Setup host and msbuild according to configuration
-case $CONFIGURATION in
-    Debug-Netcore)
-        echo "Building for CoreCLR"
-        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
+# Determine runtime host
+case $host in
+    CoreCLR)
         RUNTIME_HOST="$TOOLS_DIR/corerun"
-	RUNTIME_HOST_ARGS=""
+        RUNTIME_HOST_ARGS=""
+        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
         ;;
-    Debug-MONO)
-        echo "Building for Mono"
-        MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
-        downloadMSBuildForMono
+
+    Mono)
+        setMonoDir
         RUNTIME_HOST="${MONO_BIN_DIR}mono"
-	RUNTIME_HOST_ARGS="--debug"
+        MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
+
+        downloadMSBuildForMono
+        ;;
+    *)
+        echo "Unsupported host detected: $host. Configuring as if for CoreCLR"
+        RUNTIME_HOST="$TOOLS_DIR/corerun"
+        RUNTIME_HOST_ARGS=""
+        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
         ;;
 esac
 
