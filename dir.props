@@ -29,8 +29,9 @@
     <SourceDir>$(RepoRoot)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
     <SamplesDir>$(RepoRoot)Samples$([System.IO.Path]::DirectorySeparatorChar)</SamplesDir>
     <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
-    <ToolsDir>$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
-    <CompilerToolsDir>$ToolsDir</CompilerToolsDir>
+    <ToolsDir Condition="'$(MSBuildRuntimeType)'!='Core'">$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
+    <!-- When running in .NET Core, use the MSBuild bin path as the ToolsDir.  This supports the bootstrap scenario -->
+    <ToolsDir Condition="'$(MSBuildRuntimeType)'=='Core'">$(MSBuildBinPath)$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
     
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
@@ -50,7 +51,7 @@
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
 
-    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/bin/</DotnetCliPath>
+    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(RepoRoot)/Tools/dotnetcli/bin/</DotnetCliPath>
     <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'=='Windows_NT'">$(DotnetCliPath)dotnet.exe</DotnetToolCommand>
     <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'!='Windows_NT'">$(DotnetCliPath)dotnet</DotnetToolCommand>
 
