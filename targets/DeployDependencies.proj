@@ -26,11 +26,10 @@
       <!-- We want the list of files *after* restore, which happens
            early in build, so this item can't be defined outside of a
            target. -->
-      <NuspecFilesInPackagesDir Include="$(PackagesDir)\**\*.nupkg" />
-      <PackagesFoldersInPackagesDir Include="@(NuspecFilesInPackagesDir->'%(RootDir)%(Directory)')" />
+      <PackagesFoldersInPackagesDir Include="$(PackagesDir)\Microsoft.Portable.Targets\0.1.1-dev\" />
 
       <!-- For each package, get its content files. -->
-      <ContentFilesFromPackage Include="%(PackagesFoldersInPackagesDir.Identity)content\**\*.*" />
+      <ContentFilesFromPackage Include="%(PackagesFoldersInPackagesDir.Identity)contentFiles\any\any\**\*.*" />
     </ItemGroup>
 
     <!-- Copy the dependencies to both the deployment and the test directories -->
