@@ -7,8 +7,19 @@
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="('$(NetCoreBuild)' != 'true') and Exists('$(MSBuildToolsPath)\Microsoft.CSharp.targets')"/>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" Condition="'$(NetCoreBuild)' == 'true'"/>
+  <Import Project="$(CSharpTargets)" 
+          Condition="('$(NetCoreBuild)' != 'true') 
+                      and Exists('$(CSharpTargets)')"/>
+
+  <Import Project="$(CSharpPortableTargets)" 
+          Condition="'$(NetCoreBuild)' == 'true' 
+                      and Exists('$(CSharpPortableTargets)')"/>
+  
+  <!-- Fallback: If we're building Debug-NetCore with a mono host, MSBuildExtensionsPath32 resolves to a system wide Mono specific directory that does not have the portable targets. Fallback to using the BuildTools one -->
+  <Import Project="$(CSharpPortableTargetsFallback)"
+          Condition="'$(NetCoreBuild)' == 'true' 
+                      and Exists('$(CSharpPortableTargetsFallback)')
+                      and !Exists('$(CSharpPortableTargets)')"/>
 
   <!-- OSS sign assemblies after compile runs. -->
   <Import Condition="Exists('$(ToolsDir)\sign.targets')" Project="$(ToolsDir)\sign.targets" />
