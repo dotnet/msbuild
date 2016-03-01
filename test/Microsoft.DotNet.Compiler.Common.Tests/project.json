@@ -9,7 +9,7 @@
         "Microsoft.DotNet.Compiler.Common": { "target": "project" },
         
         "xunit": "2.1.0",
-        "dotnet-test-xunit": "1.0.0-dev-48273-16"
+        "dotnet-test-xunit": "1.0.0-dev-79755-47"
     },
 
     "frameworks": {
