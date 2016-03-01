@@ -5,8 +5,9 @@
         "keyFile": "../../tools/Key.snk"
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23811",
-        "System.Collections.Immutable": "1.2.0-rc2-23811",
+        "NETStandard.Library": "1.0.0-rc2-23901",
+        "System.Collections.Immutable": "1.2.0-rc2-23901",
+        "System.IO.Compression": "4.1.0-rc2-23901",
         "FluentAssertions": "4.0.0",
         "xunit": "2.1.0",
         "dotnet-test-xunit": "1.0.0-dev-79755-47",
@@ -21,9 +22,11 @@
     },
 
     "frameworks": {
-        "dnxcore50": {
-            "imports": "portable-net45+win8"
+        "netstandardapp1.5": {
+            "imports": [
+                "dnxcore50",
+                "portable-net45+win8"
+            ]
         }
-    }
+    },
 }
-

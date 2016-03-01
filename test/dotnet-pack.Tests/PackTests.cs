@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             File.Exists(outputPackage).Should().BeTrue(outputPackage);
 
             var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
-            zip.Entries.Should().Contain(e => e.FullName == "lib/dnxcore50/TestLibraryWithConfiguration.dll");
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/TestLibraryWithConfiguration.dll");
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

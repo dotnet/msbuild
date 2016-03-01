@@ -16,12 +16,12 @@
     },
     "frameworks": {
         "net451": {},
-        "dnxcore50": {
-            "imports": "portable-net45+win8",
+        "netstandard1.3": {
+            "imports": "dnxcore50",
             "dependencies": {
-                "NETStandard.Library": "1.0.0-rc2-23811",
-                "System.Resources.ResourceManager": "4.0.1-rc2-23811",
-                "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23811"
+                "NETStandard.Library": "1.0.0-rc2-23901",
+                "System.Resources.ResourceManager": "4.0.1-rc2-23901",
+                "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23901"
             }
         }
     },
