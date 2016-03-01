@@ -23,8 +23,8 @@ namespace Microsoft.DotNet.ProjectModel
         public int Column { get; private set; }
         
         public override string ToString()
-        {            
-            return string.Format("{0}({1},{2}): {3}", Path, Line, Column, base.Message);
+        {
+            return $"{Path}({Line},{Column}): Error: {base.ToString()}";
         }
 
         internal static FileFormatException Create(Exception exception, string filePath)
