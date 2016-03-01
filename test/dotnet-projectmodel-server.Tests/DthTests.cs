@@ -4,12 +4,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.DotNet.TestFramework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -291,17 +289,21 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         [Fact]
         public void InvalidProjectJson()
         {
+            var testAssetsPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer");
+            var assetsManager = new TestAssetsManager(testAssetsPath);
+            var testSource = assetsManager.CreateTestInstance("IncorrectProjectJson").TestRoot;
+            
             using (var server = new DthTestServer(_loggerFactory))
             using (var client = new DthTestClient(server))
             {
                 client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "EmptyLibrary"));
-                client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "BrokenProjectFileSample"));
+                client.Initialize(testSource);
 
                 // Error for invalid project.json
                 var messages = client.DrainAllMessages();
                 messages.Single(msg => msg.MessageType == MessageTypes.Error)
                         .Payload.AsJObject()
-                        .AssertProperty<string>("Path", v => v.Contains("BrokenProjectFileSample"));
+                        .AssertProperty<string>("Path", v => v.Contains("IncorrectProjectJson"));
 
                 // Successfully initialize the other project
                 messages.Single(msg => msg.MessageType == MessageTypes.ProjectInformation)
