@@ -11,8 +11,5 @@
             "imports": "portable-net45+win8"
         }
     },
-    "content": [
-       "../../TestAssets/ProjectModelServer/**"
-    ],
     "testRunner": "xunit"
 }
