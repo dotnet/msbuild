@@ -28,10 +28,11 @@ namespace Microsoft.Extensions.DependencyModel
                 .Select(export => new Dependency(export.Library.Identity.Name, export.Library.Identity.Version.ToString()))
                 .ToDictionary(dependency => dependency.Name);
 
-            return new DependencyContext(target.DotNetFrameworkName, runtime,
+            return new DependencyContext(target.DotNetFrameworkName, runtime, false,
                 GetCompilationOptions(compilerOptions),
                 GetLibraries(dependencies, dependencyLookup, target, configuration, runtime: false).Cast<CompilationLibrary>().ToArray(),
-                GetLibraries(dependencies, dependencyLookup, target, configuration, runtime: true).Cast<RuntimeLibrary>().ToArray());
+                GetLibraries(dependencies, dependencyLookup, target, configuration, runtime: true).Cast<RuntimeLibrary>().ToArray(),
+                new KeyValuePair<string, string[]>[0]);
         }
 
         private static CompilationOptions GetCompilationOptions(CommonCompilerOptions compilerOptions)
@@ -115,6 +116,7 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
                     assemblies,
+                    new RuntimeTarget[0], 
                     libraryDependencies.ToArray(),
                     serviceable
                     );
