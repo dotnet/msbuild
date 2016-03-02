@@ -3,10 +3,10 @@
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public interface ITestRunner
+    public class TestStartInfo
     {
-        void RunTestCommand();
+        public string FileName { get; set; }
 
-        TestStartInfo GetProcessStartInfo();
+        public string Arguments { get; set; }
     }
 }
