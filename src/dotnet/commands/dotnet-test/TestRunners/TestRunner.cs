@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Test
                 $"dotnet-{_testRunner}",
                 commandArgs,
                 new NuGetFramework("DNXCore", Version.Parse("5.0")),
-                Constants.DefaultConfiguration);
+                null);
         }
     }
 }

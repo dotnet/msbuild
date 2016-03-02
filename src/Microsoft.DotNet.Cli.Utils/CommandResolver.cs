@@ -13,10 +13,15 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class CommandResolver
     {
-        public static CommandSpec TryResolveCommandSpec(string commandName, IEnumerable<string> args, NuGetFramework framework = null, string configuration=Constants.DefaultConfiguration)
+        public static CommandSpec TryResolveCommandSpec(
+            string commandName,
+            IEnumerable<string> args,
+            NuGetFramework framework = null,
+            string configuration = Constants.DefaultConfiguration,
+            string outputPath = null)
         {
             return ResolveFromRootedCommand(commandName, args) ??
-                   ResolveFromProjectDependencies(commandName, args, framework, configuration) ??
+                   ResolveFromProjectDependencies(commandName, args, framework, configuration, outputPath) ??
                    ResolveFromProjectTools(commandName, args) ??
                    ResolveFromAppBase(commandName, args) ??
                    ResolveFromPath(commandName, args);
@@ -67,10 +72,11 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         public static CommandSpec ResolveFromProjectDependencies(
-            string commandName, 
-            IEnumerable<string> args, 
-            NuGetFramework framework, 
-            string configuration)
+            string commandName,
+            IEnumerable<string> args,
+            NuGetFramework framework,
+            string configuration,
+            string outputPath)
         {
             if (framework == null) return null;
 
@@ -82,7 +88,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (commandPackage == null) return null;
 
-            var depsPath = projectContext.GetOutputPaths(configuration).RuntimeFiles.Deps;
+            var depsPath = projectContext.GetOutputPaths(configuration, outputPath: outputPath).RuntimeFiles.Deps;
 
             return ConfigureCommandFromPackage(commandName, args, commandPackage, projectContext, depsPath);
         }

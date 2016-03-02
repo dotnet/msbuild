@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Test
             var parentProcessIdOption = app.Option("--parentProcessId", "Used by IDEs to specify their process ID. Test will exit if the parent process does.", CommandOptionType.SingleValue);
             var portOption = app.Option("--port", "Used by IDEs to specify a port number to listen for a connection.", CommandOptionType.SingleValue);
             var configurationOption = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
+            var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to find the binaries to be run", CommandOptionType.SingleValue);
             var projectPath = app.Argument("<PROJECT>", "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");
 
             app.OnExecute(() =>
@@ -57,6 +58,8 @@ namespace Microsoft.DotNet.Tools.Test
 
                     var configuration = configurationOption.Value() ?? Constants.DefaultConfiguration;
 
+                    var outputPath = output.Value();
+
                     if (portOption.HasValue())
                     {
                         int port;
@@ -66,11 +69,11 @@ namespace Microsoft.DotNet.Tools.Test
                             throw new InvalidOperationException($"{portOption.Value()} is not a valid port number.");
                         }
 
-                        return RunDesignTime(port, projectContext, testRunner, configuration);
+                        return RunDesignTime(port, projectContext, testRunner, configuration, outputPath);
                     }
                     else
                     {
-                        return RunConsole(projectContext, app, testRunner, configuration);
+                        return RunConsole(projectContext, app, testRunner, configuration, outputPath);
                     }
                 }
                 catch (InvalidOperationException ex)
@@ -89,16 +92,40 @@ namespace Microsoft.DotNet.Tools.Test
             return app.Execute(args);
         }
 
-        private static int RunConsole(ProjectContext projectContext, CommandLineApplication app, string testRunner, string configuration)
+        private static int RunConsole(
+            ProjectContext projectContext,
+            CommandLineApplication app,
+            string testRunner,
+            string configuration,
+            string outputPath)
         {
-            var commandArgs = new List<string> { projectContext.GetOutputPaths(configuration).CompilationFiles.Assembly };
+            var commandArgs = new List<string> { GetAssemblyUnderTest(projectContext, configuration, outputPath) };
             commandArgs.AddRange(app.RemainingArguments);
 
-            return Command.Create($"dotnet-{GetCommandName(testRunner)}", commandArgs, projectContext.TargetFramework, configuration: configuration)
+            return Command.Create(
+                    $"dotnet-{GetCommandName(testRunner)}",
+                    commandArgs,
+                    projectContext.TargetFramework,
+                    configuration: configuration,
+                    outputPath: outputPath)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute()
                 .ExitCode;
+        }
+
+        private static string GetAssemblyUnderTest(ProjectContext projectContext, string configuration, string outputPath)
+        {
+            var assemblyUnderTest =
+                projectContext.GetOutputPaths(configuration, outputPath: outputPath).CompilationFiles.Assembly;
+
+            if (!string.IsNullOrEmpty(outputPath))
+            {
+                assemblyUnderTest =
+                    projectContext.GetOutputPaths(configuration, outputPath: outputPath).RuntimeFiles.Assembly;
+            }
+
+            return assemblyUnderTest;
         }
 
         private static int RunDesignTime(
@@ -106,11 +133,12 @@ namespace Microsoft.DotNet.Tools.Test
             ProjectContext
             projectContext,
             string testRunner,
-            string configuration)
+            string configuration,
+            string outputPath)
         {
             Console.WriteLine("Listening on port {0}", port);
 
-            HandleDesignTimeMessages(projectContext, testRunner, port, configuration);
+            HandleDesignTimeMessages(projectContext, testRunner, port, configuration, outputPath);
 
             return 0;
         }
@@ -119,18 +147,19 @@ namespace Microsoft.DotNet.Tools.Test
             ProjectContext projectContext,
             string testRunner,
             int port,
-            string configuration)
+            string configuration,
+            string outputPath)
         {
             var reportingChannelFactory = new ReportingChannelFactory();
             var adapterChannel = reportingChannelFactory.CreateChannelWithPort(port);
 
             try
             {
-                var assemblyUnderTest = projectContext.GetOutputPaths(configuration).CompilationFiles.Assembly;
+                var assemblyUnderTest = GetAssemblyUnderTest(projectContext, configuration, outputPath);
                 var messages = new TestMessagesCollection();
                 using (var dotnetTest = new DotnetTest(messages, assemblyUnderTest))
                 {
-                    var commandFactory = new CommandFactory();
+                    var commandFactory = new FixedPathCommandFactory(configuration, outputPath);
                     var testRunnerFactory = new TestRunnerFactory(GetCommandName(testRunner), commandFactory);
 
                     dotnetTest

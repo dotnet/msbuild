@@ -67,12 +67,14 @@ namespace Microsoft.DotNet.Cli.Utils
             string commandName, 
             IEnumerable<string> args, 
             NuGetFramework framework = null, 
-            string configuration = Constants.DefaultConfiguration)
+            string configuration = Constants.DefaultConfiguration,
+            string outputPath = null)
         {
             var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, 
                 args, 
                 framework, 
-                configuration: configuration);
+                configuration: configuration,
+                outputPath: outputPath);
 
             if (commandSpec == null)
             {
