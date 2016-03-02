@@ -35,7 +35,8 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
             "Microsoft.Extensions.DependencyModel.Tests",
-            "ArgumentForwardingTests"
+            "ArgumentForwardingTests",
+            "dotnet-test.UnitTests"
         };
 
         [Target(nameof(PrepareTargets.Init), nameof(SetupTests), nameof(RestoreTests), nameof(BuildTests), nameof(RunTests), nameof(ValidateDependencies))]

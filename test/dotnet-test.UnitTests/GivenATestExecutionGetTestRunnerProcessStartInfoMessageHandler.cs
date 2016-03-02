@@ -19,7 +19,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
         private GetTestRunnerProcessStartInfoMessageHandler _testGetTestRunnerProcessStartInfoMessageHandler;
         private Message _validMessage;
-        private ProcessStartInfo _processStartInfo;
+        private TestStartInfo _testStartInfo;
 
         private Mock<ITestRunner> _testRunnerMock;
         private Mock<ITestRunnerFactory> _testRunnerFactoryMock;
@@ -42,10 +42,14 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             _dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.VersionCheckCompleted);
             _dotnetTestMock.Setup(d => d.PathToAssemblyUnderTest).Returns(AssemblyUnderTest);
 
-            _processStartInfo = new ProcessStartInfo("runner", "arguments");
+            _testStartInfo = new TestStartInfo
+            {
+                FileName = "runner",
+                Arguments = "arguments"
+            };
 
             _testRunnerMock = new Mock<ITestRunner>();
-            _testRunnerMock.Setup(t => t.GetProcessStartInfo()).Returns(_processStartInfo);
+            _testRunnerMock.Setup(t => t.GetProcessStartInfo()).Returns(_testStartInfo);
 
             _testRunnerFactoryMock = new Mock<ITestRunnerFactory>();
             _testRunnerFactoryMock
@@ -128,8 +132,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             _adapterChannelMock.Setup(r => r.Send(It.Is<Message>(m =>
                 m.MessageType == TestMessageTypes.TestExecutionTestRunnerProcessStartInfo &&
-                m.Payload.ToObject<ProcessStartInfo>().FileName == _processStartInfo.FileName &&
-                m.Payload.ToObject<ProcessStartInfo>().Arguments == _processStartInfo.Arguments))).Verifiable();
+                m.Payload.ToObject<ProcessStartInfo>().FileName == _testStartInfo.FileName &&
+                m.Payload.ToObject<ProcessStartInfo>().Arguments == _testStartInfo.Arguments))).Verifiable();
 
             _testGetTestRunnerProcessStartInfoMessageHandler.HandleMessage(
                     _dotnetTestMock.Object,

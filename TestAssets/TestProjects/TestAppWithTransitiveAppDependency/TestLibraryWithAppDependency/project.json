@@ -3,7 +3,7 @@
     "dependencies": {
         "TestApp":  { "target":"project", "version":"1.0.0-*" },
 
-        "NETStandard.Library": "1.0.0-rc2-23808",
+        "NETStandard.Library": "1.0.0-rc2-23811",
     },
 
     "frameworks": {

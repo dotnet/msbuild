@@ -19,7 +19,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             dotnetTestMessageScenario.TestRunnerMock
                 .Setup(t => t.GetProcessStartInfo())
-                .Returns(new ProcessStartInfo())
+                .Returns(new TestStartInfo())
                 .Verifiable();
 
             dotnetTestMessageScenario.AdapterChannelMock
