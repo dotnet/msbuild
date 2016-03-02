@@ -115,8 +115,8 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Identity.Name,
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
-                    assemblies,
-                    new RuntimeTarget[0], 
+                    assemblies.Select(RuntimeAssembly.Create).ToArray(),
+                    new RuntimeTarget[0],
                     libraryDependencies.ToArray(),
                     serviceable
                     );
