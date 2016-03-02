@@ -41,7 +41,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 $"dotnet-{_runner}",
                 _testRunnerArguments,
                 new NuGetFramework("DNXCore", Version.Parse("5.0")),
-                Constants.DefaultConfiguration)).Returns(_commandMock.Object).Verifiable();
+                null)).Returns(_commandMock.Object).Verifiable();
         }
 
         [Fact]
