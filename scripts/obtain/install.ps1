@@ -3,107 +3,219 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+[cmdletbinding()]
 param(
-   [string]$Channel="beta",
-   [string]$version="Latest",
-   [string]$Architecture="x64"
+   [string]$Channel="nightly",
+   [string]$Version="Latest",
+   [string]$InstallDir="<usershare>",
+   [string]$Architecture="auto",
+   [switch]$DryRun,
+   [bool]$DebugSymbols=$false, # TODO: There is no zip uploaded yet
+   [bool]$NoPath=$false
 )
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference="Stop"
 $ProgressPreference="SilentlyContinue"
 
-$fileVersion = $Version
-if ($fileVersion -eq "Latest") {
-    $fileVersion = "latest"
-}
-$Feed="https://dotnetcli.blob.core.windows.net/dotnet"
+$AzureFeed="https://dotnetcli.blob.core.windows.net/dotnet"
+$LocalVersionFileRelativePath="\.version"
+$BinFolderRelativePath="\bin"
 
-$DotNetFileName="dotnet-dev-win-$Architecture.$fileVersion.zip"
-$DotNetUrl="$Feed/$Channel/Binaries/$Version"
-
-function say($str)
-{
+function Say($str) {
     Write-Host "dotnet_install: $str"
 }
 
-$InstallDir = $env:DOTNET_INSTALL_DIR
-if (!$InstallDir) {
-    $InstallDir = "$env:LocalAppData\Microsoft\dotnet"
+function Say-Verbose($str) {
+    Write-Verbose "dotnet_install: $str"
 }
 
-say "Preparing to install .NET Tools to $InstallDir"
+function Say-Invocation($Invocation) {
+    $command = $Invocation.MyCommand;
+    $args = (($Invocation.BoundParameters.Keys | foreach { "-$_ `"$($Invocation.BoundParameters[$_])`"" }) -join " ")
+    Say-Verbose "$command $args"
+}
 
-# Check if we need to bother
-$LocalFile = "$InstallDir\cli\.version"
-if (Test-Path $LocalFile)
-{
-    $LocalData = @(cat $LocalFile)
-    $LocalHash = $LocalData[0].Trim()
-    $LocalVersion = $LocalData[1].Trim()
-    if ($LocalVersion -and $LocalHash)
-    {
-        if ($Version -eq "Latest")
-        {
-            $RemoteResponse = Invoke-WebRequest -UseBasicParsing "$Feed/$Channel/dnvm/latest.win.$Architecture.version"
-            $RemoteData = @([Text.Encoding]::UTF8.GetString($RemoteResponse.Content).Split([char[]]@(), [StringSplitOptions]::RemoveEmptyEntries));
-            $RemoteHash = $RemoteData[0].Trim()
-            $RemoteVersion = $RemoteData[1].Trim()
+function Get-Machine-Architecture() {
+    Say-Invocation $MyInvocation
 
-            if (!$RemoteVersion -or !$RemoteHash) {
-                throw "Invalid response from feed"
-            }
+    # possible values: AMD64, IA64, x86
+    return $ENV:PROCESSOR_ARCHITECTURE
+}
 
-            say "Latest version: $RemoteVersion"
-            say "Local Version: $LocalVersion"
+# TODO: Architecture and CLIArchitecture should be unified
+function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
+    Say-Invocation $MyInvocation
 
-            if($LocalHash -eq $RemoteHash)
-            {
-                say "You already have the latest version"
-                exit 0
-            }
+    switch ($Architecture.ToLower()) {
+        { $_ -eq "auto" } { return Get-CLIArchitecture-From-Architecture $(Get-Machine-Architecture) }
+        { ($_ -eq "amd64") -Or ($_ -eq "x64") } { return "x64" }
+        { $_ -eq "x86" } { return "x86" }
+        default { throw "Architecture not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues" }
+    }
+}
+
+function Get-Version-Info-From-Version-Text([string]$VersionText) {
+    Say-Invocation $MyInvocation
+
+    $Data = @($VersionText.Split([char[]]@(), [StringSplitOptions]::RemoveEmptyEntries));
+
+    $VersionInfo = @{}
+    $VersionInfo.CommitHash = $Data[0].Trim()
+    $VersionInfo.Version = $Data[1].Trim()
+    return $VersionInfo
+}
+
+function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [string]$CLIArchitecture) {
+    Say-Invocation $MyInvocation
+
+    $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.win.$CLIArchitecture.version"
+    $Response = Invoke-WebRequest -UseBasicParsing $VersionFileUrl
+    $VersionText = [Text.Encoding]::UTF8.GetString($Response.Content)
+
+    $VersionInfo = Get-Version-Info-From-Version-Text $VersionText
+
+    return $VersionInfo
+}
+
+# TODO: AzureChannel and Channel should be unified
+function Get-Azure-Channel-From-Channel([string]$Channel) {
+    Say-Invocation $MyInvocation
+
+    switch ($Channel.ToLower()) {
+        { $_ -eq "nightly" } { return "dev" }
+        { $_ -eq "preview" } { return "beta" }
+        { $_ -eq "production" } { throw "Production channel does not exist yet" }
+        default { throw "``$Channel`` is an invalid channel name. Use one of the following: ``nightly``, ``preview``, ``production``" }
+    }
+}
+
+function Get-Specific-Version-From-Version([string]$AzureFeed, [string]$AzureChannel, [string]$CLIArchitecture, [string]$Version) {
+    Say-Invocation $MyInvocation
+
+    switch ($Version.ToLower()) {
+        { $_ -eq "latest" } {
+            $LatestVersionInfo = Get-Latest-Version-Info -AzureFeed $AzureFeed -AzureChannel $AzureChannel -CLIArchitecture $CLIArchitecture
+            return $LatestVersionInfo.Version
         }
-        elseif ($LocalVersion -eq $Version)
-        {
-            say "$Version is already installed."
-            exit 0
+        { $_ -eq "lkg" } { throw "``-Version LKG`` not supported yet." }
+        default { return $Version }
+    }
+}
+
+function Construct-Download-Link([string]$AzureFeed, [string]$AzureChannel, [string]$SpecificVersion, [string]$CLIArchitecture) {
+    Say-Invocation $MyInvocation
+
+    $DownloadLink = "$AzureFeed/$AzureChannel/Binaries/$SpecificVersion/dotnet-win-$CLIArchitecture.$SpecificVersion.zip"
+    Say-Verbose "Constructed Download link: $DownloadLink"
+    return $DownloadLink
+}
+
+function Get-User-Share-Path() {
+    Say-Invocation $MyInvocation
+
+    $InstallRoot = $env:DOTNET_INSTALL_DIR
+    if (!$InstallRoot) {
+        $InstallRoot = "$env:LocalAppData\Microsoft\.dotnet"
+    }
+    return $InstallRoot
+}
+
+function Resolve-Installation-Path([string]$InstallDir) {
+    Say-Invocation $MyInvocation
+
+    if ($InstallDir -eq "<usershare>") {
+        return Get-User-Share-Path
+    }
+    return $InstallDir
+}
+
+# TODO: check for global.json
+function Get-Installed-Version-Info([string]$InstallRoot) {
+    Say-Invocation $MyInvocation
+
+    $VersionFile = $InstallRoot + $LocalVersionFileRelativePath
+    Say-Verbose "Local version file: $VersionFile"
+    
+    if (Test-Path $VersionFile) {
+        $VersionText = cat $VersionFile
+        Say-Verbose "Local version file text: $VersionText"
+        return Get-Version-Info-From-Version-Text $VersionText
+    }
+
+    Say-Verbose "Local version file not found."
+
+    return $null
+}
+
+function Get-Absolute-Path([string]$RelativeOrAbsolutePath) {
+    # Too much spam
+    # Say-Invocation $MyInvocation
+
+    return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($RelativeOrAbsolutePath)
+}
+
+function Extract-And-Override-Zip([string]$ZipPath, [string]$OutPath) {
+    Say-Invocation $MyInvocation
+
+    Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
+    Set-Variable -Name Zip
+    try {
+        $Zip = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
+        
+        foreach ($entry in $Zip.Entries) {
+            $DestinationPath = Get-Absolute-Path $(Join-Path -Path $OutPath -ChildPath $entry.FullName)
+            $DestinationDir = Split-Path -Parent $DestinationPath
+            New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
+            [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $true)
+        }
+    }
+    finally {
+        if ($Zip -ne $null) {
+            $Zip.Dispose()
         }
     }
 }
 
-# Set up the install location
-if (!(Test-Path $InstallDir)) {
-    mkdir $InstallDir | Out-Null
+$AzureChannel = Get-Azure-Channel-From-Channel -Channel $Channel
+$CLIArchitecture = Get-CLIArchitecture-From-Architecture $Architecture
+$SpecificVersion = Get-Specific-Version-From-Version -AzureFeed $AzureFeed -AzureChannel $AzureChannel -CLIArchitecture $CLIArchitecture -Version $Version
+$DownloadLink = Construct-Download-Link -AzureFeed $AzureFeed -AzureChannel $AzureChannel -SpecificVersion $SpecificVersion -CLIArchitecture $CLIArchitecture
+
+if ($DryRun) {
+    Say "Payload URL: $DownloadLink"
+    Say "Repeatable invocation: .\$($MyInvocation.MyCommand) -Version $SpecificVersion -Channel $Channel -DebugSymbols `$$DebugSymbols -Architecture $CLIArchitecture -InstallDir $InstallDir -NoPath `$$NoPath"
+    return
 }
 
-# De-powershell the path before passing to .NET APIs
-$InstallDir = Convert-Path $InstallDir
+$InstallRoot = Resolve-Installation-Path $InstallDir
+Say-Verbose "InstallRoot: $InstallRoot"
 
-say "Downloading $DotNetFileName from $DotNetUrl"
-$resp = Invoke-WebRequest -UseBasicParsing "$DotNetUrl/$DotNetFileName" -OutFile "$InstallDir\$DotNetFileName"
-
-say "Extracting zip"
-
-# Create the destination
-if (Test-Path "$InstallDir\cli_new") {
-    del -rec -for "$InstallDir\cli_new"
-}
-mkdir "$InstallDir\cli_new" | Out-Null
-
-Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
-[System.IO.Compression.ZipFile]::ExtractToDirectory("$InstallDir\$DotNetFileName", "$InstallDir\cli_new")
-
-# Replace the old installation (if any)
-if (Test-Path "$InstallDir\cli") {
-    del -rec -for "$InstallDir\cli"
-}
-mv "$InstallDir\cli_new" "$InstallDir\cli"
-
-# Clean the zip
-if (Test-Path "$InstallDir\$DotNetFileName") {
-    del -for "$InstallDir\$DotNetFileName"
+$VersionInfo = Get-Installed-Version-Info $InstallRoot
+$LocalVersionText = if ($VersionInfo -ne $null) { $VersionInfo.Version } else { "<No version installed>" }
+Say-Verbose "Local CLI version is: $LocalVersionText"
+if (($VersionInfo -ne $null) -and ($SpecificVersion -eq $VersionInfo.Version)) {
+    Say "Your version of CLI is up-to-date."
+    return
 }
 
-say "The .NET Tools have been installed to $InstallDir\cli!"
+New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
-# New layout
-say "Add '$InstallDir\cli' to your PATH to use dotnet"
+$ZipPath = [System.IO.Path]::GetTempFileName()
+
+Say "Downloading $DownloadLink"
+$resp = Invoke-WebRequest -UseBasicParsing $DownloadLink -OutFile $ZipPath
+
+Say "Extracting zip"
+Extract-And-Override-Zip -ZipPath $ZipPath -OutPath $InstallRoot
+
+Say "Removing installation artifacts"
+Remove-Item $ZipPath
+
+if (-Not $NoPath) {
+    $BinPath = Get-Absolute-Path $(Join-Path -Path $InstallRoot -ChildPath $BinFolderRelativePath)
+    Say "Adding to PATH: `"$BinPath`""
+    $env:path += ";$BinPath"
+}
+
+Say "Installation finished"
