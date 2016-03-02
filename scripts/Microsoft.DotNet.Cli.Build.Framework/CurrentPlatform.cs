@@ -48,6 +48,15 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
         }
 
+        public static bool IsRHEL
+        {
+            get
+            {
+                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                return string.Equals(osname, "rhel", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         private static BuildPlatform DetermineCurrentPlatform()
         {
             if (IsWindows)
@@ -65,6 +74,10 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             else if (IsCentOS)
             {
                 return BuildPlatform.CentOS;
+            }
+            else if (IsRHEL)
+            {
+                return BuildPlatform.RHEL;
             }
             else
             {

@@ -83,9 +83,9 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuildNativeRyuJit()
         {
-            if(IsCentOS())
+            if(IsCentOSorRHEL())
             {
-                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
+                Console.WriteLine("Skipping native compilation tests on CentOS/RHEL - https://github.com/dotnet/cli/issues/453");
                 return;
             }
 
@@ -105,9 +105,9 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuildNativeCpp()
         {
-            if(IsCentOS())
+            if(IsCentOSorRHEL())
             {
-                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
+                Console.WriteLine("Skipping native compilation tests on CentOS/RHEL - https://github.com/dotnet/cli/issues/453");
                 return;
             }
 
@@ -127,9 +127,9 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetCompileNativeCppIncremental()
         {
-            if (IsCentOS())
+            if (IsCentOSorRHEL())
             {
-                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
+                Console.WriteLine("Skipping native compilation tests on CentOS/RHEL - https://github.com/dotnet/cli/issues/453");
                 return;
             }
 
@@ -236,7 +236,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             Directory.SetCurrentDirectory(currentDirectory);
         }
 
-        private bool IsCentOS()
+        private bool IsCentOSorRHEL()
         {
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -244,7 +244,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
                 if(File.Exists(OSIDFILE))
                 {
-                    return File.ReadAllText(OSIDFILE).ToLower().Contains("centos");
+                    string osidcontent = File.ReadAllText(OSIDFILE).ToLower();
+                    return osidcontent.Contains("centos") || osidcontent.Contains("rhel");
                 }
             }
 
