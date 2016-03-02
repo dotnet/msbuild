@@ -68,7 +68,7 @@ PROJECT_FILE_ARG="$THIS_SCRIPT_PATH"/"build.proj"
 TARGET_ARG="Build"
 
 #parse command line args
-while [[ $# > 0 ]]
+while [ $# -gt 0 ]
 do
     opt="$1"
     case $opt in
@@ -116,9 +116,9 @@ case $OS_NAME in
         ;;
 esac
 
-if [[ "$SCOPE" = "Compile" ]]; then
+if [ "$SCOPE" = "Compile" ]; then
 	TARGET_ARG="Build"
-elif [[ "$SCOPE" = "Test" ]]; then
+elif [ "$SCOPE" = "Test" ]; then
 	TARGET_ARG="BuildAndTest"
 fi
 
