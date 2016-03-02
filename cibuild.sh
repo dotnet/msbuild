@@ -7,7 +7,7 @@ usage()
     echo "Options"
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
-    echo "  --host <host>                  CoreCLR or Mono (default: CoreCLR)"
+    echo "  --host <host>                  CoreCLR or Mono (default: Mono)"
 }
 
 setHome()
@@ -156,10 +156,13 @@ case $host in
         downloadMSBuildForMono
         ;;
     *)
-        echo "Unsupported host detected: $host. Configuring as if for CoreCLR"
-        RUNTIME_HOST="$TOOLS_DIR/corerun"
-        RUNTIME_HOST_ARGS=""
-        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
+        echo "Unsupported host detected: $host. Configuring as if for Mono"
+# TODO: set this back to .net core when build tools updates msbuild to new version 
+        setMonoDir
+        RUNTIME_HOST="${MONO_BIN_DIR}mono"
+        MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
+
+        downloadMSBuildForMono
         ;;
 esac
 
