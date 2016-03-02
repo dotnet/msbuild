@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             // Generate assembly info
             var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.cs");
-            
+
             File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateCSharp(assemblyInfoOptions, sources));
 
             allArgs.Add($"\"{assemblyInfo}\"");
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             // Only the first should be quoted. This is handled
             // in dotnet-compile where the information is present.
             allArgs.AddRange(resources.Select(resource => $"-resource:{resource}"));
-            
+
             allArgs.AddRange(sources.Select(s => $"\"{s}\""));
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-csc.rsp");
@@ -129,7 +129,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             {
                 "-nostdlib",
                 "-nologo",
-                "-debug:portable"
             };
 
             return args;
@@ -213,6 +212,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             {
                 commonArgs.Add("-t:library");
             }
+
+            commonArgs.Add((string.IsNullOrEmpty(options.DebugType) || options.DebugType == "portable")
+                ? "-debug:portable"
+                : "-debug:full");
 
             return commonArgs;
         }
