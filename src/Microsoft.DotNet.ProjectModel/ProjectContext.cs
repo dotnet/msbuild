@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.ProjectModel
                         .WithRuntimeIdentifiers(runtimeIdentifiers)
                         .Build();
         }
-        
+
         public static ProjectContextBuilder CreateBuilder(string projectPath, NuGetFramework framework)
         {
             if (projectPath.EndsWith(Project.FileName))
@@ -120,15 +120,12 @@ namespace Microsoft.DotNet.ProjectModel
         /// <summary>
         /// Creates a project context for each target located in the project at <paramref name="projectPath"/>
         /// </summary>
-        public static IEnumerable<ProjectContext> CreateContextForEachTarget(string projectPath)
+        public static IEnumerable<ProjectContext> CreateContextForEachTarget(string projectPath, ProjectReaderSettings settings = null)
         {
-            if (!projectPath.EndsWith(Project.FileName))
-            {
-                projectPath = Path.Combine(projectPath, Project.FileName);
-            }
             var project = ProjectReader.GetProject(projectPath);
 
             return new ProjectContextBuilder()
+                        .WithReaderSettings(settings)
                         .WithProject(project)
                         .BuildAllTargets();
         }
@@ -143,15 +140,20 @@ namespace Microsoft.DotNet.ProjectModel
 
         public ProjectContext CreateRuntimeContext(IEnumerable<string> runtimeIdentifiers)
         {
-            var context = Create(ProjectFile.ProjectFilePath, TargetFramework, runtimeIdentifiers);
-            if (context.RuntimeIdentifier == null)
+            // Check if there are any runtime targets (i.e. are we portable)
+            var standalone = LockFile.Targets
+                .Where(t => t.TargetFramework.Equals(TargetFramework))
+                .Any(t => !string.IsNullOrEmpty(t.RuntimeIdentifier));
+
+            var context = Create(ProjectFile.ProjectFilePath, TargetFramework, standalone ? runtimeIdentifiers : Enumerable.Empty<string>());
+            if (standalone && context.RuntimeIdentifier == null)
             {
+                // We are standalone, but don't support this runtime
                 var rids = string.Join(", ", runtimeIdentifiers);
-                throw new InvalidOperationException($"Can not find runtime target for framework '{TargetFramework}' and RID's '{rids}'. " +
+                throw new InvalidOperationException($"Can not find runtime target for framework '{TargetFramework}' compatible with one of the target runtimes: '{rids}'. " +
                                                     "Possible causes:" + Environment.NewLine +
-                                                    "1. Project is not restored or restore failed - run `dotnet restore`" + Environment.NewLine +
-                                                    "2. Project is not targeting `runable` framework (`netstandardapp*` or `net*`)"
-                                                    );
+                                                    "1. The project has not been restored or restore failed - run `dotnet restore`" + Environment.NewLine +
+                                                    $"2. The project does not list one of '{rids}' in the 'runtimes' section.");
             }
             return context;
         }

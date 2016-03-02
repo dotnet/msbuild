@@ -27,5 +27,5 @@
 
     "testRunner": "xunit",
 
-    "scripts": { "precompile": "dotnet build ../ArgumentsReflector/project.json --framework netstandardapp1.5 --output %compile:RuntimeOutputDir%" }
+    "scripts": { "precompile": "dotnet build ../ArgumentsReflector/project.json --framework netstandardapp1.5 --runtime %compile:RuntimeIdentifier% --output %compile:RuntimeOutputDir%" }
 }

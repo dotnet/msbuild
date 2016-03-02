@@ -6,11 +6,16 @@
 $oldPath = $env:PATH
 try {
     # Put the stage2 output on the front of the path
-    $stage2 = "$PSScriptRoot\..\artifacts\win7-x64\stage2\bin"
+    if(!(Get-Command dotnet -ErrorAction SilentlyContinue)) {
+        throw "You need to have a version of 'dotnet' on your path so we can determine the RID"
+    }
+
+    $rid = dotnet --version | where { $_ -match "^ Runtime Id:\s*(.*)$" } | foreach { $matches[1] } 
+    $stage2 = "$PSScriptRoot\..\artifacts\$rid\stage2\bin"
     if (Test-Path $stage2) {
         $env:PATH="$stage2;$env:PATH"
     } else {
-        Write-Host "You don't have a dev build in the 'artifacts\win7-x64\stage2' folder!"
+        Write-Host "You don't have a dev build in the 'artifacts\$rid\stage2' folder!"
     }
 
     dotnet @args

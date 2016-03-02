@@ -39,11 +39,6 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         public void MakeCompilationOutputRunnable()
         {
-            if (string.IsNullOrEmpty(_context.RuntimeIdentifier))
-            {
-                throw new InvalidOperationException($"Can not make output runnable for framework {_context.TargetFramework}, because it doesn't have runtime target");
-            }
-
             CopyContentFiles();
             ExportRuntimeAssets();
         }
@@ -72,8 +67,11 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         {
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
-            // TODO: Pick a host based on the RID
-            CoreHost.CopyTo(_runtimeOutputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
+            if (!string.IsNullOrEmpty(_context.RuntimeIdentifier))
+            {
+                // TODO: Pick a host based on the RID
+                CoreHost.CopyTo(_runtimeOutputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
+            }
         }
 
         private void CopyContentFiles()

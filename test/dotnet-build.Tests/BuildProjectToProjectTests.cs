@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             // second build with no dependencies and no incremental; only the root rebuilds
             var result2 = BuildProject(noDependencies: true, noIncremental: true);
-            result2.Should().StdOutMatchPattern("Compiling.*L0.*");
+            result2.Should().HaveStdOutMatching("Compiling.*L0.*");
 
             AssertResultDoesNotContainStrings(result2, dependencies);
 

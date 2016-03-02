@@ -11,23 +11,25 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     public sealed class BuildCommand : TestCommand
     {
         private Project _project;
-        private string _projectPath;
-        private string _outputDirectory;
-        private string _buidBasePathDirectory;
-        private string _configuration;
-        private string _framework;
-        private string _versionSuffix;
-        private bool _noHost;
-        private bool _native;
-        private string _architecture;
-        private string _ilcArgs;
-        private string _ilcPath;
-        private string _appDepSDKPath;
-        private bool _nativeCppMode;
-        private string _cppCompilerFlags;
-        private bool _buildProfile;
-        private bool _noIncremental;
-        private bool _noDependencies;
+        private readonly string _projectPath;
+        private readonly string _outputDirectory;
+        private readonly string _buidBasePathDirectory;
+        private readonly string _configuration;
+        private readonly string _framework;
+        private readonly string _versionSuffix;
+        private readonly bool _noHost;
+        private readonly bool _native;
+        private readonly string _architecture;
+        private readonly string _ilcArgs;
+        private readonly string _ilcPath;
+        private readonly string _appDepSDKPath;
+        private readonly bool _nativeCppMode;
+        private readonly string _cppCompilerFlags;
+        private readonly bool _buildProfile;
+        private readonly bool _noIncremental;
+        private readonly bool _noDependencies;
+        private readonly string _runtime;
+        private readonly bool _forcePortable;
 
         private string OutputOption
         {
@@ -36,6 +38,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return _outputDirectory == string.Empty ?
                                            "" :
                                            $"-o \"{_outputDirectory}\"";
+            }
+        }
+
+        private string ForcePortableOption
+        {
+            get
+            {
+                return _forcePortable ?
+                    "--portable" :
+                    string.Empty;
             }
         }
 
@@ -67,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                                            $"--framework {_framework}";
             }
         }
-        
+
         private string VersionSuffixOption
         {
             get
@@ -95,6 +107,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return _native ?
                         "--native" :
                         "";
+            }
+        }
+
+        private string RuntimeOption
+        {
+            get
+            {
+                return _runtime == string.Empty ?
+                    "" :
+                    $"--runtime {_runtime}";
             }
         }
 
@@ -194,6 +216,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string buidBasePath="",
             string configuration="",
             string framework="",
+            string runtime="",
             string versionSuffix="",
             bool noHost=false,
             bool native=false,
@@ -205,7 +228,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string cppCompilerFlags="",
             bool buildProfile=true,
             bool noIncremental=false,
-            bool noDependencies=false
+            bool noDependencies=false,
+            bool forcePortable=false
             )
             : base("dotnet")
         {
@@ -217,6 +241,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _configuration = configuration;
             _versionSuffix = versionSuffix;
             _framework = framework;
+            _runtime = runtime;
             _noHost = noHost;
             _native = native;
             _architecture = architecture;
@@ -228,6 +253,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _buildProfile = buildProfile;
             _noIncremental = noIncremental;
             _noDependencies = noDependencies;
+            _forcePortable = forcePortable;
         }
 
         public override CommandResult Execute(string args = "")
@@ -251,7 +277,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string BuildArgs()
         {
-            return $"{BuildProfile} {NoDependencies} {NoIncremental} \"{_projectPath}\" {OutputOption} {BuildBasePathOption} {ConfigurationOption} {FrameworkOption} {VersionSuffixOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
+            return $"{BuildProfile} {ForcePortableOption} {NoDependencies} {NoIncremental} \"{_projectPath}\" {OutputOption} {BuildBasePathOption} {ConfigurationOption} {FrameworkOption} {RuntimeOption} {VersionSuffixOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
         }
     }
 }

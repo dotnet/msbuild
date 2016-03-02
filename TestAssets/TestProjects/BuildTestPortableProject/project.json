@@ -1,0 +1,16 @@
+{
+    "dependencies": {
+    },
+    "frameworks": {
+        "net45": {},
+        "netstandardapp1.5": {
+            "imports": [
+                "dnxcore50",
+                "portable-net45+win8"
+            ],
+            "dependencies": {
+                "NETStandard.Library": "1.0.0-rc2-23901"
+            }
+        }
+    }
+}

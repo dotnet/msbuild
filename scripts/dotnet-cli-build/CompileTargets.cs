@@ -45,6 +45,13 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.Extensions.Testing.Abstractions"
         };
 
+        // Updates the stage 2 with recent changes.
+        [Target(nameof(PrepareTargets.Init), nameof(CompileStage2))]
+        public static BuildTargetResult UpdateBuild(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
         [Target(nameof(PrepareTargets.Init), nameof(CompileCoreHost), nameof(CompileStage1), nameof(CompileStage2))]
         public static BuildTargetResult Compile(BuildTargetContext c)
         {
