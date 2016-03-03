@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
@@ -196,14 +195,9 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
                 platform = Platform.AnyCpu;
             }
 
-            var debugType = StringComparer.OrdinalIgnoreCase.Equals(compilerOptions.DebugType, "full")
-                ? DebugInformationFormat.pdb
-                :DebugInformationFormat.Portable;
-
             options = options
                         .WithAllowUnsafe(allowUnsafe)
                         .WithPlatform(platform)
-                        .WithDebugInformationFormat(debugType)
                         .WithGeneralDiagnosticOption(warningsAsErrors ? ReportDiagnostic.Error : ReportDiagnostic.Default)
                         .WithOptimizationLevel(optimize ? OptimizationLevel.Release : OptimizationLevel.Debug);
 
