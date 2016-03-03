@@ -2,6 +2,25 @@
 <Project DefaultTargets="DeployDependencies" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
 
+  <!-- Copy Roslyn Compiler tools to the output path (so we have csc.exe, etc) -->
+  <!-- Don't copy compilers for .NET Core, as the compilers will be brought in via DeployDependencies and runtime.project.json -->
+  <Target Name="CopyCompilerTools" 
+          Condition="'$(NetCoreBuild)' != 'true'">
+    <ItemGroup>
+      <CompilerToolsFiles Include="$(CompilerToolsDir)\*.*" />
+    </ItemGroup>
+    
+    <Copy SourceFiles="@(CompilerToolsFiles)"
+          DestinationFolder="$(DeploymentDir)"
+          SkipUnchangedFiles="true"           
+          />
+
+    <Copy SourceFiles="@(CompilerToolsFiles)"
+          DestinationFolder="$(TestDeploymentDir)"
+          SkipUnchangedFiles="true"           
+          />
+  </Target>
+
   <Target Name="CopyPackageContent">
     <ItemGroup>
       <!-- We want the list of files *after* restore, which happens
@@ -33,24 +52,21 @@
           />
   </Target>
 
-  <UsingTask TaskName="Microsoft.NuGet.Build.Tasks.ResolveNuGetPackageAssets" AssemblyFile="$(MSBuildExtensionsPath32)\Microsoft\NuGet\Microsoft.NuGet.Build.Tasks.dll" />
+  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.Tasks.dll"/>
 
   <PropertyGroup>
-    <RuntimeProjectJson>$(MSBuildThisFileDirectory)\runtime.project.json</RuntimeProjectJson>
-    <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)\runtime.project.lock.json</RuntimeProjectLockJson>
-    <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore "$(RuntimeProjectJson)" -Verbosity detailed</RestoreRuntimePackagesCommand>
-    <RestoreRuntimePackagesCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">MONO_THREADS_PER_CPU=2000 mono $(RestoreRuntimePackagesCommand)</RestoreRuntimePackagesCommand>
+    <RuntimeProjectJson>$(MSBuildThisFileDirectory)runtimeDependencies\project.json</RuntimeProjectJson>
+    <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)runtimeDependencies\project.lock.json</RuntimeProjectLockJson>
+
+    <RestoreRuntimePackagesCommand>$(DnuRestoreCommand) "$(RuntimeProjectJson)"</RestoreRuntimePackagesCommand>
+
     <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="RestoreRuntimePackages"
-          Inputs="$(NuGetToolPath);$(RuntimeProjectJson)"
+          Inputs="$(DnuToolPath);$(RuntimeProjectJson)"
           Outputs="$(RuntimeProjectLockJson)"
           >
-    <Exec Condition="'$(OsEnvironment)'=='Windows_NT'" Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
-    <!-- Work around https://github.com/Microsoft/msbuild/issues/262 by running restore
-         a second time to get the correct .lock.json file in place.  This is inefficient
-         but shouldn't take too long since the packages should all already be downloaded. -->
     <Exec Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
 
     <!-- It appears that NuGet doesn't re-write the project.lock.json file if the contents would be the same. This can mess up incremental builds
@@ -61,19 +77,19 @@
   <Target Name="DeployRuntime"
           DependsOnTargets="RestoreRuntimePackages"
           >
-    <ResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
-                               IncludeFrameworkReferences="false"
-                               NuGetPackagesDirectory=""
-                               RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
-                               ProjectLanguage="C#"
-                               ProjectLockFile="$(RuntimeProjectLockJson)"
-                               TargetMonikers="$(NuGetTargetMoniker)">
+    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
+                                         IncludeFrameworkReferences="false"
+                                         NuGetPackagesDirectory="$(PackagesDir)"
+                                         RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
+                                         ProjectLanguage="C#"
+                                         ProjectLockFile="$(RuntimeProjectLockJson)"
+                                         TargetMonikers="$(NuGetTargetMoniker)">
 
       <!--<Output TaskParameter="ResolvedAnalyzers" ItemName="Analyzer" />-->
       <Output TaskParameter="ResolvedCopyLocalItems" ItemName="ResolvedRuntimeFiles" />
       <!--<Output TaskParameter="ResolvedReferences" ItemName="_ReferencesFromNuGetPackages" />
       <Output TaskParameter="ReferencedPackages" ItemName="ReferencedNuGetPackages" />-->
-    </ResolveNuGetPackageAssets>
+    </PrereleaseResolveNuGetPackageAssets>
 
     <!-- Copy the dependencies to both the deployment and the test directories -->
 
@@ -88,7 +104,17 @@
           />
   </Target>
 
+  <Target Name="SetUnixPermissions"
+          AfterTargets="DeployRuntime"
+          BeforeTargets="DeployDependencies"
+          Condition="'$(OsEnvironment)'!='Windows_NT'">
+
+    <Exec Command="find &quot;$(DeploymentDir)&quot; -type f -a -name &quot;*&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
+
+    <Exec Command="find &quot;$(TestDeploymentDir)&quot; -type f -a -name &quot;*&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
+  </Target>
+
   <Target Name="DeployDependencies"
-          DependsOnTargets="CopyPackageContent;DeployRuntime" />
+          DependsOnTargets="CopyPackageContent;CopyCompilerTools;DeployRuntime" />
 
 </Project>

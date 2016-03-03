@@ -18,7 +18,7 @@
 
   <Target Name="BulkRestoreNugetPackages"
           BeforeTargets="Build;BuildAllProjects"
-          DependsOnTargets="_RestoreBuildTools;_RestoreDnuProjectJsonReferences"
+          DependsOnTargets="_RestoreBuildToolsPackagesConfig"
           Condition="'$(SkipBulkRestore)' != 'true'">
   </Target>
 </Project>

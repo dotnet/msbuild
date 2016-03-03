@@ -7,18 +7,21 @@ usage()
     echo "Options"
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
+    echo "  --host <host>                  CoreCLR or Mono (default: Mono)"
 }
 
 setHome()
 {
     if [ -z ${HOME+x} ]
     then
-        MONO_COMMAND="( export HOME=$HOME_DEFAULT ; $MONO_COMMAND )"
+        BUILD_COMMAND="( export HOME=$HOME_DEFAULT ; $BUILD_COMMAND )"
+        INIT_BUILD_TOOLS_COMMAND="( export HOME=$HOME_DEFAULT ; $INIT_BUILD_TOOLS_COMMAND )"
         mkdir -p $HOME_DEFAULT
     fi
 }
 
-downloadMSBuild(){
+downloadMSBuildForMono()
+{
     if [ ! -e "$MSBUILD_EXE" ]
     then
         mkdir -p $PACKAGES_DIR # Create packages dir if it doesn't exist.
@@ -34,31 +37,38 @@ downloadMSBuild(){
 
 build()
 {
-	echo Build Command: "$MONO_COMMAND"
+	echo Build Command: "$BUILD_COMMAND"
 
-  eval "$MONO_COMMAND"
+    eval "$BUILD_COMMAND"
 
 	echo Build completed. Exit code: $?
 	egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$LOG_PATH_ARG"
 	echo "Log: $LOG_PATH_ARG"
 }
 
+setMonoDir(){
+    if [[ "$MONO_BIN_DIR" = "" ]]; then
+                MONO_BIN_DIR=`dirname \`which mono\``
+                MONO_BIN_DIR=${MONO_BIN_DIR}/
+    fi
+}
+
+# Paths
 THIS_SCRIPT_PATH="`dirname \"$0\"`"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
-MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
+TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.1/mono-msbuild.zip"
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="/tmp/msbuild-CI-home"
 
-
-#Default build arguments
-TARGET_ARG="Build"
 LOG_PATH_ARG="$THIS_SCRIPT_PATH"/"msbuild.log"
 PROJECT_FILE_ARG="$THIS_SCRIPT_PATH"/"build.proj"
 
+# Default build arguments
+TARGET_ARG="Build"
 
 #parse command line args
-while [[ $# > 0 ]]
+while [ $# -gt 0 ]
 do
     opt="$1"
     case $opt in
@@ -77,6 +87,11 @@ do
         shift 2
         ;;
 
+        --host)
+        host=$2
+        shift 2
+        ;;
+
         *)
         usage
         exit 1
@@ -84,7 +99,7 @@ do
     esac
 done
 
-#determine OS
+# determine OS
 OS_NAME=$(uname -s)
 case $OS_NAME in
     Darwin)
@@ -101,37 +116,66 @@ case $OS_NAME in
         ;;
 esac
 
-if [[ "$SCOPE" = "Compile" ]]; then
+if [ "$SCOPE" = "Compile" ]; then
 	TARGET_ARG="Build"
-elif [[ "$SCOPE" = "Test" ]]; then
+elif [ "$SCOPE" = "Test" ]; then
 	TARGET_ARG="BuildAndTest"
 fi
 
+# Determine configuration
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-Netcore
         ;;
+
     Mono)
+        setMonoDir
         CONFIGURATION=Debug-MONO
-        if [[ "$MONO_BIN_DIR" = "" ]]; then
-                MONO_BIN_DIR=`dirname \`which mono\``
-        fi
-        MONO_BIN_DIR=${MONO_BIN_DIR}/
         EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
+        RUNTIME_HOST_ARGS="--debug"
         ;;
     *)
-        echo "Unsupported target $target detected, configuring as if for CoreCLR"
+        echo "Unsupported target detected: $target. Configuring as if for CoreCLR"
         CONFIGURATION=Debug-Netcore
         ;;
 esac
 
-MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS"' "'"/fileloggerparameters:Verbosity=diag;LogFile=$LOG_PATH_ARG"'"'
+# Determine runtime host
+case $host in
+    CoreCLR)
+        RUNTIME_HOST="$TOOLS_DIR/corerun"
+        RUNTIME_HOST_ARGS=""
+        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
+        ;;
 
-MONO_COMMAND="${MONO_BIN_DIR}mono --debug $MSBUILD_EXE $MSBUILD_ARGS"
+    Mono)
+        setMonoDir
+        RUNTIME_HOST="${MONO_BIN_DIR}mono"
+        MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
+
+        downloadMSBuildForMono
+        ;;
+    *)
+        echo "Unsupported host detected: $host. Configuring as if for Mono"
+# TODO: set this back to .net core when build tools updates msbuild to new version 
+        setMonoDir
+        RUNTIME_HOST="${MONO_BIN_DIR}mono"
+        MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
+
+        downloadMSBuildForMono
+        ;;
+esac
+
+MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS /fl "' "'"/flp:v=diag;logfile=$LOG_PATH_ARG"'"'
+
+BUILD_COMMAND="$RUNTIME_HOST $RUNTIME_HOST_ARGS $MSBUILD_EXE $MSBUILD_ARGS"
+
+INIT_BUILD_TOOLS_COMMAND="$THIS_SCRIPT_PATH/init-tools.sh"
 
 #home is not defined on CI machines
 setHome
 
-downloadMSBuild
+#restore build tools
+eval "$INIT_BUILD_TOOLS_COMMAND"
 
 build

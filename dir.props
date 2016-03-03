@@ -16,44 +16,51 @@
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
   </PropertyGroup>
 
-   <!-- Common repo directories -->
+  <!-- Tool versions -->
   <PropertyGroup>
-    <BuildToolsVersion>1.0.25-prerelease-00120</BuildToolsVersion>
-    <CompilerToolsVersion>1.2.0-beta1-20160108-01</CompilerToolsVersion>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
     <XunitVersion>2.1.0</XunitVersion>
+    <CompilerToolsVersion>1.2.0-beta1-20160108-01</CompilerToolsVersion>
+  </PropertyGroup>
+
+   <!-- Common repo directories -->
+  <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <SourceDir>$(RepoRoot)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
     <SamplesDir>$(RepoRoot)Samples$([System.IO.Path]::DirectorySeparatorChar)</SamplesDir>
-    <DnxDir Condition="'$(OsEnvironment)'=='Windows_NT'">dnx-coreclr-win-x86</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='Windows_NT'">1.0.0-beta8</DnxVersion>
-    <DnxDir Condition="'$(OsEnvironment)'=='Unix'">dnx-coreclr-linux-x64</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-rc2-16357</DnxVersion>
-    <DnxDir Condition="'$(OsEnvironment)'=='OSX'">dnx-coreclr-darwin-x64</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='OSX'">1.0.0-rc2-16357</DnxVersion>
+    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+    <ToolsDir>$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
+    <CompilerToolsDir>$ToolsDir</CompilerToolsDir>
+    <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
+    
+    <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
+    <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
 
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
 
-    <!-- Input Directories -->
-    <PackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
+    <!-- Tool Directories -->
+    <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(ToolPackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
+
+    <!-- nuget cache location. Used by packageresolve.targets -->
+    <PackagesDir Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</PackagesDir>
+    <PackagesDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(HOME), '.nuget', 'packages'))</PackagesDir>
 
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
 
-    <DnuToolDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(PackagesDir), "$(DnxDir).$(DnxVersion)"))</DnuToolDir>
-    <DnuToolPath Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu.cmd"))</DnuToolPath>
-    <DnuToolPath Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu"))</DnuToolPath>
+    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/bin/</DotnetCliPath>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'=='Windows_NT'">$(DotnetCliPath)dotnet.exe</DotnetToolCommand>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'!='Windows_NT'">$(DotnetCliPath)dotnet</DotnetToolCommand>
 
-  </PropertyGroup>
+    <DnuToolPath>$(DotnetToolCommand)</DnuToolPath>
+    <DnuCoreRestoreCommand>&quot;$(DnuToolPath)&quot; restore --parallel</DnuCoreRestoreCommand>
+    <DnuCoreRestoreCommand Condition="'$(OsEnvironment)'=='OSX'">ulimit -n 2500 ; $(DnuCoreRestoreCommand)</DnuCoreRestoreCommand>
 
-  <PropertyGroup>
-    <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
-    <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
-    <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(PackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
+    <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
+    <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages $(PackagesDir)</DnuRestoreCommand>
 
-    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
   </PropertyGroup>
 
   <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
@@ -63,7 +70,7 @@
 
   <!-- Common nuget properties -->
   <PropertyGroup>
-    <NuGetDir>$(PackagesDir)</NuGetDir>
+    <NuGetDir>$(ToolPackagesDir)</NuGetDir>
     <NuGetConfigDir>$([System.IO.Path]::Combine($(SourceDir),".nuget"))</NuGetConfigDir>
     <GlobalPropertiesFile>$(MSBuildThisFileFullPath)</GlobalPropertiesFile>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
@@ -188,6 +195,13 @@
 
   </PropertyGroup>
 
+  <!-- csharp targets locations -->
+  <PropertyGroup>
+    <CSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</CSharpTargets>
+    <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
+    <CSharpPortableTargetsFallback>$(ToolsDir)extensions\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
@@ -265,6 +279,10 @@
     <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
 
     <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.
