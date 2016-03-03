@@ -159,7 +159,8 @@ namespace Microsoft.DotNet.Tools.Test
                 var messages = new TestMessagesCollection();
                 using (var dotnetTest = new DotnetTest(messages, assemblyUnderTest))
                 {
-                    var commandFactory = new FixedPathCommandFactory(configuration, outputPath);
+                    var commandFactory = 
+                        new FixedPathCommandFactory(projectContext.TargetFramework, configuration, outputPath);
                     var testRunnerFactory = new TestRunnerFactory(GetCommandName(testRunner), commandFactory);
 
                     dotnetTest
