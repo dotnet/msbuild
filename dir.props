@@ -237,7 +237,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_PARALLEL_BUILD</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_PERFORMANCE_COUNTERS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_PFX_SIGNING</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
@@ -262,6 +261,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_INVOKEMEMBER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>

@@ -89,7 +89,9 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters7,
             FileLoggerParameters8,
             FileLoggerParameters9,
+#if FEATURE_NODE_REUSE
             NodeReuse,
+#endif
             Preprocess,
             NumberOfParameterizedSwitches
         }
@@ -252,7 +254,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
+#if FEATURE_NODE_REUSE
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true    ),
+#endif
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true    )
         };
 

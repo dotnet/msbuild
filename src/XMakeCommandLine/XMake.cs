@@ -537,7 +537,11 @@ namespace Microsoft.Build.CommandLine
 #endif
                 string schemaFile = null;
                 int cpuCount = 1;
+#if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
+#else
+                bool enableNodeReuse = false;
+#endif
                 TextWriter preprocessWriter = null;
                 bool debugger = false;
                 bool detailedSummary = false;
@@ -561,7 +565,9 @@ namespace Microsoft.Build.CommandLine
                         ref schemaFile,
 #endif
                         ref cpuCount,
+#if FEATURE_NODE_REUSE
                         ref enableNodeReuse,
+#endif
                         ref preprocessWriter,
                         ref debugger,
                         ref detailedSummary,
@@ -1070,7 +1076,7 @@ namespace Microsoft.Build.CommandLine
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
                     BuildResult results = null;
@@ -1773,7 +1779,9 @@ namespace Microsoft.Build.CommandLine
             ref string schemaFile,
 #endif
             ref int cpuCount,
+#if FEATURE_NODE_REUSE
             ref bool enableNodeReuse,
+#endif
             ref TextWriter preprocessWriter,
             ref bool debugger,
             ref bool detailedSummary,
@@ -1858,7 +1866,9 @@ namespace Microsoft.Build.CommandLine
                                                                ref schemaFile,
 #endif
                                                                ref cpuCount,
+#if FEATURE_NODE_REUSE
                                                                ref enableNodeReuse,
+#endif
                                                                ref preprocessWriter,
                                                                ref debugger,
                                                                ref detailedSummary,
@@ -1879,8 +1889,10 @@ namespace Microsoft.Build.CommandLine
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
+#if FEATURE_NODE_REUSE
                     // figure out if we shold reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+#endif
 
                     // determine what if any writer to preprocess to
                     preprocessWriter = null;
@@ -1940,6 +1952,7 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
+#if FEATURE_NODE_REUSE
         /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
@@ -1973,6 +1986,7 @@ namespace Microsoft.Build.CommandLine
 
             return enableNodeReuse;
         }
+#endif
 
         /// <summary>
         /// Figure out what TextWriter we should preprocess the project file to.
@@ -2042,7 +2056,12 @@ namespace Microsoft.Build.CommandLine
                     if (nodeModeNumber == 1)
                     {
                         OutOfProcNode node = new OutOfProcNode();
-                        shutdownReason = node.Run(ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]), out nodeException);
+                        bool nodeReuse = false;
+#if FEATURE_NODE_REUSE
+                        nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+#endif
+                        shutdownReason = node.Run(nodeReuse, out nodeException);
+
                         FileUtilities.ClearCacheDirectory();
                     }
                     else if (nodeModeNumber == 2)
