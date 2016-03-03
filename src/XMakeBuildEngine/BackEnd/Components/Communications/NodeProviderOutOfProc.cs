@@ -112,14 +112,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we 
-            // want to start up just a standard MSBuild out-of-proc node. 
-            string commandLineArgs = " /nologo /nodemode:1 ";
-
-            // Disable node re-use if it is not requested (because no argument means enable reuse).
-            if (!ComponentHost.BuildParameters.EnableNodeReuse)
-            {
-                commandLineArgs += "/nodeReuse:false";
-            }
+            // want to start up just a standard MSBuild out-of-proc node.
+            // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
+            // (next to msbuild.exe) is ignored.
+            string commandLineArgs = ComponentHost.BuildParameters.EnableNodeReuse ? 
+                "/nologo /nodemode:1 /nodeReuse:true" : 
+                "/nologo /nodemode:1 /nodeReuse:false";
 
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
