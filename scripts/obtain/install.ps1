@@ -28,7 +28,7 @@
 .PARAMETER Architecture
     Default: auto - this value represents currently running OS architecture
     Architecture of dotnet binaries to be installed.
-    Possible values are: auto, AMD64 and x86
+    Possible values are: auto, x64 and x86
 .PARAMETER DebugSymbols
     If set the installer will include symbols in the installation.
 .PARAMETER DryRun
