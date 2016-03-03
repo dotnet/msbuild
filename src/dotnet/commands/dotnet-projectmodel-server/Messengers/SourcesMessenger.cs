@@ -20,14 +20,14 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
                    Enumerable.SequenceEqual(local.SourceFiles, remote.SourceFiles);
         }
 
-        protected override object CreatePayload(ProjectContextSnapshot local)
+        protected override void SendPayload(ProjectContextSnapshot local, Action<object> send)
         {
-            return new SourcesMessage
+            send(new SourcesMessage
             {
                 Framework = local.TargetFramework.ToPayload(),
                 Files = local.SourceFiles,
                 GeneratedFiles = new Dictionary<string, string>()
-            };
+            });
         }
 
         protected override void SetValue(ProjectContextSnapshot local, ProjectContextSnapshot remote)

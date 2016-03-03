@@ -20,15 +20,15 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
                    string.Equals(local.Project.Name, remote.Project.Name) &&
                    string.Equals(local.GlobalJsonPath, remote.GlobalJsonPath) &&
                    Enumerable.SequenceEqual(local.Project.GetTargetFrameworks().Select(f => f.FrameworkName),
-                                           remote.Project.GetTargetFrameworks().Select(f => f.FrameworkName)) &&
+                                            remote.Project.GetTargetFrameworks().Select(f => f.FrameworkName)) &&
                    Enumerable.SequenceEqual(local.Project.GetConfigurations(), remote.Project.GetConfigurations()) &&
                    Enumerable.SequenceEqual(local.Project.Commands, remote.Project.Commands) &&
                    Enumerable.SequenceEqual(local.ProjectSearchPaths, remote.ProjectSearchPaths);
         }
 
-        protected override object CreatePayload(ProjectSnapshot local)
+        protected override void SendPayload(ProjectSnapshot local, Action<object> send)
         {
-            return new ProjectInformationMessage(local.Project, local.GlobalJsonPath, local.ProjectSearchPaths);
+            send(new ProjectInformationMessage(local.Project, local.GlobalJsonPath, local.ProjectSearchPaths));
         }
 
         protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)

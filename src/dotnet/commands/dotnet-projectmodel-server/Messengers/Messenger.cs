@@ -22,16 +22,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
         {
             if (!CheckDifference(local, remote))
             {
-                var payload = CreatePayload(local);
-
-                _transmit(MessageType, payload);
-
+                SendPayload(local, payload => _transmit(MessageType, payload));
                 SetValue(local, remote);
             }
         }
 
-        protected abstract void SetValue(T local, T remote);
-        protected abstract object CreatePayload(T local);
+        protected abstract void SetValue(T local, T remote);        
+        protected abstract void SendPayload(T local, Action<object> send);
         protected abstract bool CheckDifference(T local, T remote);
     }
 }

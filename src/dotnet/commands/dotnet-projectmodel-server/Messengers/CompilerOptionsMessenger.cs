@@ -18,13 +18,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
                    Equals(local.CompilerOptions, remote.CompilerOptions);
         }
 
-        protected override object CreatePayload(ProjectContextSnapshot local)
+        protected override void SendPayload(ProjectContextSnapshot local, Action<object> send)
         {
-            return new CompilationOptionsMessage
+            send(new CompilationOptionsMessage
             {
                 Framework = local.TargetFramework.ToPayload(),
                 Options = local.CompilerOptions
-            };
+            });
         }
 
         protected override void SetValue(ProjectContextSnapshot local, ProjectContextSnapshot remote)
