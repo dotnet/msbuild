@@ -81,7 +81,7 @@
           AfterTargets="_RestoreBuildToolsPackagesConfig"
           Condition="'$(OsEnvironment)'!='Windows_NT'">
 
-    <Exec Command="find &quot;$(DnuToolDir)&quot; -type f -a -name &quot;*&quot; -a \! -iname &quot;*.dll&quot; -a \! -iname &quot;*.xml&quot; -a \! -iname &quot;*.nupkg&quot; -a \! -iname &quot;*.so&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
+    <Exec Command="find &quot;$(DnuToolPath)&quot; -type f -a -name &quot;*&quot; -a \! -iname &quot;*.dll&quot; -a \! -iname &quot;*.xml&quot; -a \! -iname &quot;*.nupkg&quot; -a \! -iname &quot;*.so&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
 
   </Target>
 </Project>
