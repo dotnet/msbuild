@@ -15,6 +15,6 @@
     },
 
     "tools": {
-        "dotnet-hello": { "version": "1.0.0", "target": "package" }
+        "dotnet-hello": { "version": "2.0.0", "target": "package" }
     }
 }

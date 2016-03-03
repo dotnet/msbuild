@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public NuGetFramework Framework { get; set; }
 
+        public string OutputPath { get; set; }
+
         public string ProjectDirectory { get; set; }
 
         public string Configuration { get; set; }

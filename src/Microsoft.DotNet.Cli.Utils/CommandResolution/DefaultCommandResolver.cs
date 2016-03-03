@@ -37,7 +37,6 @@ namespace Microsoft.DotNet.Cli.Utils
             IPlatformCommandSpecFactory platformCommandSpecFactory) : base()
         {
             AddCommandResolver(new RootedCommandResolver());
-            AddCommandResolver(new ProjectDependenciesCommandResolver(environment, packagedCommandSpecFactory));
             AddCommandResolver(new ProjectToolsCommandResolver(packagedCommandSpecFactory));
             AddCommandResolver(new AppBaseCommandResolver(environment, platformCommandSpecFactory));
             AddCommandResolver(new PathCommandResolver(environment, platformCommandSpecFactory));

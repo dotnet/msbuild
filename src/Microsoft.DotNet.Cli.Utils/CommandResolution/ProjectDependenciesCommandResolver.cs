@@ -52,7 +52,8 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandResolverArguments.Framework,
                     commandResolverArguments.Configuration,
                     commandResolverArguments.CommandName,
-                    commandResolverArguments.CommandArguments);
+                    commandResolverArguments.CommandArguments,
+                    commandResolverArguments.OutputPath);
         }
 
         private CommandSpec ResolveFromProjectDependencies(
@@ -60,7 +61,8 @@ namespace Microsoft.DotNet.Cli.Utils
             NuGetFramework framework,
             string configuration,
             string commandName,
-            IEnumerable<string> commandArguments)
+            IEnumerable<string> commandArguments,
+            string outputPath)
         {
             var allowedExtensions = GetAllowedCommandExtensionsFromEnvironment(_environment);
 
@@ -73,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var depsFilePath = projectContext.GetOutputPaths(configuration).RuntimeFiles.Deps;
+            var depsFilePath = projectContext.GetOutputPaths(configuration, outputPath: outputPath).RuntimeFiles.Deps;
 
             var dependencyLibraries = GetAllDependencyLibraries(projectContext);
              
