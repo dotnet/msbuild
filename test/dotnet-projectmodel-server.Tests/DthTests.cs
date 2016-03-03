@@ -337,5 +337,30 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                         .AssertProperty<string>("Path", v => v.Contains("InvalidGlobalJson"));
             }
         }
+        
+        [Fact]
+        public void RecoverFromGlobalError()
+        {
+            var testProject = _testAssetsManager.CreateTestInstance("EmptyConsoleApp")
+                                                .WithLockFiles()
+                                                .TestRoot;
+                                                
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                var projectFile = Path.Combine(testProject, Project.FileName);
+                var content = File.ReadAllText(projectFile);
+                File.WriteAllText(projectFile, content + "}");
+                
+                client.Initialize(testProject);
+                var messages = client.DrainAllMessages();
+                messages.ContainsMessage(MessageTypes.Error);
+                
+                File.WriteAllText(projectFile, content);
+                client.SendPayLoad(testProject, MessageTypes.FilesChanged);
+                messages = client.DrainAllMessages();
+                messages.AssertDoesNotContain(MessageTypes.Error);
+            }
+        }
     }
 }
