@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuildNativeRyuJit()
         {
-            if(!IsNativeCompilationSupported())
+            if (!IsNativeCompilationSupported())
             {
                 return;
             }
@@ -98,8 +98,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuildNativeCpp()
         {
-            if(!IsNativeCompilationSupported())
-            {   
+            if (!IsNativeCompilationSupported())
+            {
                 return;
             }
 
@@ -113,8 +113,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetCompileNativeCppIncremental()
         {
-            if(!IsNativeCompilationSupported())
-            {   
+            if (!IsNativeCompilationSupported())
+            {
                 return;
             }
 
@@ -224,6 +224,10 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 case "centos":
                 case "rhel":
                     Console.WriteLine("Skipping native compilation tests on CentOS/RHEL - https://github.com/dotnet/cli/issues/453");
+                    isSupported = false;
+                    break;
+                case "debian":
+                    Console.WriteLine("Skipping native compilation tests on Debian - https://github.com/dotnet/cli/issues/1666");
                     isSupported = false;
                     break;
                 case "windows":

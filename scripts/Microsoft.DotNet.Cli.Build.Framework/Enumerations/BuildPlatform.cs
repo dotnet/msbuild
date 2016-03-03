@@ -8,6 +8,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         OSX = 4,
         Ubuntu = 5,
         CentOS = 6,
-        RHEL = 7
+        RHEL = 7,
+        Debian = 8
     }
 }
