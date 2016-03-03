@@ -10,21 +10,25 @@
     Installs dotnet cli. If dotnet installation already exists in the given directory
     it will update it only if the requested version differs from the one already installed.
 .PARAMETER Channel
+    Default: preview
     Channel is the way of reasoning about stability and quality of dotnet. This parameter takes one of the values:
-    - nightly - Possibly unstable, frequently changing
+    - future - Possibly unstable, frequently changing, may contain new finished and unfinished features
     - preview - Pre-release stable with known issues and feature gaps
     - production - Most stable releases
 .PARAMETER Version
+    Default: latest
     Represents a build version on specific channel. Possible values:
     - 4-part version in a format A.B.C.D - represents specific version of build
     - latest - most latest build on specific channel
     - lkg - last known good version on specific channel
+    Note: LKG work is in progress. Once the work is finished, this will become new default
 .PARAMETER InstallDir
+    Default: %LocalAppData%\Microsoft\.dotnet
     Path to where to install dotnet. Note that binaries will be placed directly in a given directory.
-    Defaults to %LocalAppData%\Microsoft\.dotnet
 .PARAMETER Architecture
-    Architecture of dotnet binaries to be installed. Defaults to the OS architecture.
-    Possible values are: AMD64 and x86
+    Default: auto - this value represents currently running OS architecture
+    Architecture of dotnet binaries to be installed.
+    Possible values are: auto, AMD64 and x86
 .PARAMETER DebugSymbols
     If set the installer will include symbols in the installation.
 .PARAMETER DryRun
@@ -38,11 +42,12 @@
 .PARAMETER Verbose
     Displays diagnostics information.
 .PARAMETER AzureFeed
+    Default: https://dotnetcli.blob.core.windows.net/dotnet
     This parameter should not be usually changed by user. It allows to change URL for the Azure feed used by this installer.
 #>
 [cmdletbinding()]
 param(
-   [string]$Channel="nightly",
+   [string]$Channel="preview",
    [string]$Version="Latest",
    [string]$InstallDir="<usershare>",
    [string]$Architecture="auto",
@@ -121,10 +126,10 @@ function Get-Azure-Channel-From-Channel([string]$Channel) {
 
     # For compatibility with build scripts accept also directly Azure channels names
     switch ($Channel.ToLower()) {
-        { ($_ -eq "nightly") -or ($_ -eq "dev") } { return "dev" }
+        { ($_ -eq "future") -or ($_ -eq "dev") } { return "dev" }
         { ($_ -eq "preview") -or ($_ -eq "beta") } { return "beta" }
         { $_ -eq "production" } { throw "Production channel does not exist yet" }
-        default { throw "``$Channel`` is an invalid channel name. Use one of the following: ``nightly``, ``preview``, ``production``" }
+        default { throw "``$Channel`` is an invalid channel name. Use one of the following: ``future``, ``preview``, ``production``" }
     }
 }
 
