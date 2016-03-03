@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             syntax.DefineOptionList(s_additionalArgumentsTemplate.LongName, ref additionalArguments, "Pass the additional argument directly to the compiler");
 
-            syntax.DefineOption(s_debugTypeTemplate, ref debugType, "The type of PDB to emit: portable or full");
+            syntax.DefineOption(s_debugTypeTemplate.LongName, ref debugType, "The type of PDB to emit: portable or full");
 
             syntax.DefineOption(s_languageVersionTemplate.LongName, ref languageVersion,
                     "The version of the language used to compile");
