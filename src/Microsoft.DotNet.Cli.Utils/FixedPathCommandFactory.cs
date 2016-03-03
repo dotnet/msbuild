@@ -8,11 +8,13 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class FixedPathCommandFactory : ICommandFactory
     {
+        private readonly NuGetFramework _nugetFramework;
         private readonly string _configuration;
         private readonly string _outputPath;
 
-        public FixedPathCommandFactory(string configuration, string outputPath)
+        public FixedPathCommandFactory(NuGetFramework nugetFramework, string configuration, string outputPath)
         {
+            _nugetFramework = nugetFramework;
             _configuration = configuration;
             _outputPath = outputPath;
         }
@@ -26,6 +28,11 @@ namespace Microsoft.DotNet.Cli.Utils
             if (string.IsNullOrEmpty(configuration))
             {
                 configuration = _configuration;
+            }
+
+            if (framework == null)
+            {
+                framework = _nugetFramework;
             }
 
             return Command.Create(commandName, args, framework, configuration, _outputPath);
