@@ -41,7 +41,7 @@
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
 
     <!-- Tool Directories -->
-    <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(ToolPackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
+    <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(ToolPackagesDir)NuSpec.ReferenceGenerator, $(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
 
     <!-- nuget cache location. Used by packageresolve.targets -->
     <PackagesDir Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</PackagesDir>
