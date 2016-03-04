@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             return new PackageDescription(PackagePath,
                 package ?? new LockFilePackageLibrary(),
                 target ?? new LockFileTargetLibrary(),
-                new List<LibraryRange>(), true);
+                new List<LibraryRange>(), compatible: true, resolved: true);
         }
 
         [Fact]

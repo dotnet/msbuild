@@ -274,13 +274,6 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 var library = pair.Value;
 
-                if (Equals(library.Identity.Type, LibraryType.Package) &&
-                    !Directory.Exists(library.Path))
-                {
-                    // If the package path doesn't exist then mark this dependency as unresolved
-                    library.Resolved = false;
-                }
-
                 // The System.* packages provide placeholders on any non netstandard platform 
                 // To make them work seamlessly on those platforms, we fill the gap with a reference
                 // assembly (if available)
@@ -468,6 +461,11 @@ namespace Microsoft.DotNet.ProjectModel
                 combiner.Add(LibraryType);
 
                 return combiner.CombinedHash;
+            }
+            
+            public override string ToString()
+            {
+                return Name + " " + LibraryType;
             }
         }
     }
