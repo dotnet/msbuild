@@ -1660,16 +1660,50 @@ namespace Microsoft.Build.Evaluation
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
+        /// <summary>
+        /// Reset the toolsets using the provided toolset reader, used by unit tests
+        /// </summary>
+        internal void ResetToolsetsForTests(ToolsetConfigurationReader configurationReaderForTestsOnly)
+        {
+            InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
+        }
+#endif
+
+#if FEATURE_WIN32_REGISTRY
+        /// <summary>
+        /// Reset the toolsets using the provided toolset reader, used by unit tests
+        /// <summary>
+        internal void ResetToolsetsForTests(ToolsetRegistryReader registryReaderForTestsOnly)
+        {
+            InitializeToolsetCollection(registryReader:registryReaderForTestsOnly);
+        }
+#endif
+
         /// <summary>
         /// Populate Toolsets with a dictionary of (toolset version, Toolset) 
         /// using information from the registry and config file, if any.  
         /// </summary>
-        private void InitializeToolsetCollection()
+        private void InitializeToolsetCollection(
+#if FEATURE_WIN32_REGISTRY
+                ToolsetRegistryReader registryReader = null,
+#endif
+#if FEATURE_SYSTEM_CONFIGURATION
+                ToolsetConfigurationReader configReader = null
+#endif
+                )
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
             // We only want our local toolset (as defined in MSBuild.exe.config) when we're operating locally...
-            _defaultToolsVersion = ToolsetReader.ReadAllToolsets(_toolsets, EnvironmentProperties, _globalProperties, _toolsetDefinitionLocations);
+            _defaultToolsVersion = ToolsetReader.ReadAllToolsets(_toolsets,
+#if FEATURE_WIN32_REGISTRY
+                    registryReader,
+#endif
+#if FEATURE_SYSTEM_CONFIGURATION
+                    configReader,
+#endif
+                    EnvironmentProperties, _globalProperties, _toolsetDefinitionLocations);
 
             _toolsetsVersion++;
         }
