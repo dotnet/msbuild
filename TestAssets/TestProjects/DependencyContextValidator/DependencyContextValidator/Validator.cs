@@ -17,13 +17,13 @@ namespace Microsoft.Extensions.DependencyModel
 
         private static void CheckMetadata(Library library)
         {
-            if (string.Equals(library.LibraryType, "package", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(library.Type, "package", StringComparison.OrdinalIgnoreCase))
             {
-                if (string.IsNullOrWhiteSpace(library.PackageName) ||
+                if (string.IsNullOrWhiteSpace(library.Name) ||
                     string.IsNullOrWhiteSpace(library.Hash) ||
                     string.IsNullOrWhiteSpace(library.Version))
                 {
-                    Error($"Empty metadata for {library.GetType().ToString()} {library.PackageName}");
+                    Error($"Empty metadata for {library.GetType().ToString()} {library.Name}");
                 }
             }
         }
