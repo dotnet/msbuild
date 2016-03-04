@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Tools.Test
             string outputPath)
         {
             var reportingChannelFactory = new ReportingChannelFactory();
-            var adapterChannel = reportingChannelFactory.CreateChannelWithPort(port);
+            var adapterChannel = reportingChannelFactory.CreateAdapterChannel(port);
 
             try
             {
@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Tools.Test
                 var messages = new TestMessagesCollection();
                 using (var dotnetTest = new DotnetTest(messages, assemblyUnderTest))
                 {
-                    var commandFactory = 
+                    var commandFactory =
                         new FixedPathCommandFactory(projectContext.TargetFramework, configuration, outputPath);
                     var testRunnerFactory = new TestRunnerFactory(GetCommandName(testRunner), commandFactory);
 
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Tools.Test
                         .AddNonSpecificMessageHandlers(messages, adapterChannel)
                         .AddTestDiscoveryMessageHandlers(adapterChannel, reportingChannelFactory, testRunnerFactory)
                         .AddTestRunMessageHandlers(adapterChannel, reportingChannelFactory, testRunnerFactory)
-                        .AddTestRunnnersMessageHandlers(adapterChannel);
+                        .AddTestRunnnersMessageHandlers(adapterChannel, reportingChannelFactory);
 
                     dotnetTest.StartListeningTo(adapterChannel);
 

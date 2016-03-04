@@ -5,6 +5,8 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public static class TestMessageTypes
     {
+        public const string TestRunnerExecute = "TestRunner.Execute";
+        public const string TestRunnerWaitingCommand = "TestRunner.WaitingCommand";
         public const string TestRunnerTestResult = "TestExecution.TestResult";
         public const string TestRunnerTestStarted = "TestExecution.TestStarted";
         public const string TestRunnerTestCompleted = "TestRunner.TestCompleted";

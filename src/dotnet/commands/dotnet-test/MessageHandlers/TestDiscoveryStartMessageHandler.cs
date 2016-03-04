@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli.Tools.Test
 
             try
             {
-                var testRunnerChannel = _reportingChannelFactory.CreateChannelWithAnyAvailablePort();
+                var testRunnerChannel = _reportingChannelFactory.CreateTestRunnerChannel();
 
                 dotnetTest.StartListeningTo(testRunnerChannel);
 

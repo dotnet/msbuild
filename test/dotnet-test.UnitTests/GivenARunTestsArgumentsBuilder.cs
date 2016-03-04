@@ -32,10 +32,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 "--designtime",
                 "--port",
                 $"{port}",
-                "--test",
-                "test1",
-                "--test",
-                "test2");
+                "--wait-command");
         }
     }
 }

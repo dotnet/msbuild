@@ -31,8 +31,11 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var reportingChannelFactoryMock = new Mock<IReportingChannelFactory>();
             reportingChannelFactoryMock
-                .Setup(r => r.CreateChannelWithAnyAvailablePort())
-                .Returns(TestRunnerChannelMock.Object);
+                .Setup(r => r.CreateTestRunnerChannel())
+                .Returns(TestRunnerChannelMock.Object)
+                .Raises(
+                    r => r.TestRunnerChannelCreated += null,
+                    reportingChannelFactoryMock.Object, TestRunnerChannelMock.Object);
 
             var commandFactoryMock = new Mock<ICommandFactory>();
 
@@ -56,7 +59,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                     .AddNonSpecificMessageHandlers(_messages, adapterChannel)
                     .AddTestDiscoveryMessageHandlers(adapterChannel, reportingChannelFactory, testRunnerFactory)
                     .AddTestRunMessageHandlers(adapterChannel, reportingChannelFactory, testRunnerFactory)
-                    .AddTestRunnnersMessageHandlers(adapterChannel);
+                    .AddTestRunnnersMessageHandlers(adapterChannel, reportingChannelFactory);
 
                 DotnetTestUnderTest.StartListeningTo(adapterChannel);
 
