@@ -88,9 +88,17 @@ namespace Microsoft.Extensions.DependencyModel
 
             var libraryAssets = runtime ? export.RuntimeAssemblies : export.CompilationAssemblies;
 
-            foreach (var libraryDependenciesGroup in export.Library.Dependencies)
+            foreach (var libraryDependency in export.Library.Dependencies)
             {
-                LibraryRange libraryDependency = libraryDependenciesGroup;
+                // skip build time dependencies
+                if (!libraryDependency.Type.HasFlag(
+                        LibraryDependencyTypeFlag.MainReference |
+                        LibraryDependencyTypeFlag.MainExport |
+                        LibraryDependencyTypeFlag.RuntimeComponent |
+                        LibraryDependencyTypeFlag.BecomesNupkgDependency))
+                {
+                    continue;
+                }
 
                 Dependency dependency;
                 if (dependencyLookup.TryGetValue(libraryDependency.Name, out dependency))
