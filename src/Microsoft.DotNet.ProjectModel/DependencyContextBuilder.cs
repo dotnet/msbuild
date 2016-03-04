@@ -45,6 +45,7 @@ namespace Microsoft.Extensions.DependencyModel
                 compilerOptions.KeyFile,
                 compilerOptions.DelaySign,
                 compilerOptions.PublicSign,
+                compilerOptions.DebugType,
                 compilerOptions.EmitEntryPoint,
                 compilerOptions.GenerateXmlDocumentation);
         }

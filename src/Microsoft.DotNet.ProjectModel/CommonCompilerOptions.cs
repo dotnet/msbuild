@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool? PublicSign { get; set; }
 
+        public string DebugType { get; set; }
+
         public bool? EmitEntryPoint { get; set; }
 
         public bool? PreserveCompilationContext { get; set; }
@@ -49,6 +51,7 @@ namespace Microsoft.DotNet.ProjectModel
                    KeyFile == other.KeyFile &&
                    DelaySign == other.DelaySign &&
                    PublicSign == other.PublicSign &&
+                   DebugType == other.DebugType &&
                    EmitEntryPoint == other.EmitEntryPoint &&
                    GenerateXmlDocumentation == other.GenerateXmlDocumentation &&
                    PreserveCompilationContext == other.PreserveCompilationContext &&
@@ -129,6 +132,11 @@ namespace Microsoft.DotNet.ProjectModel
                 if (option.PublicSign != null)
                 {
                     result.PublicSign = option.PublicSign;
+                }
+
+                if (option.DebugType != null)
+                {
+                    result.DebugType = option.DebugType;
                 }
 
                 if (option.EmitEntryPoint != null)
