@@ -402,7 +402,7 @@ namespace Microsoft.Build.BackEnd
 
 
 #if RUNTIME_TYPE_NETCORE
-            string coreRunName = NativeMethodsShared.IsUnixLike ? "CoreRun" : "CoreRun.exe";
+            string coreRunName = NativeMethodsShared.IsUnixLike ? "corerun" : "CoreRun.exe";
             string exeName = Path.Combine(Path.GetDirectoryName(msbuildLocation), coreRunName);
             commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
 #else
