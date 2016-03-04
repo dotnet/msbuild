@@ -41,17 +41,22 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             PopulateDependencies(dependencies, targetLibrary, targetFramework);
 
             var path = _packagePathResolver.GetInstallPath(package.Name, package.Version);
+            var exists = Directory.Exists(path);
 
-            // If the package's compile time assemblies is for a portable profile then, read the assembly metadata
-            // and turn System.* references into reference assembly dependencies
-            PopulateLegacyPortableDependencies(targetFramework, dependencies, path, targetLibrary);
+            if (exists)
+            {
+                // If the package's compile time assemblies is for a portable profile then, read the assembly metadata
+                // and turn System.* references into reference assembly dependencies
+                PopulateLegacyPortableDependencies(targetFramework, dependencies, path, targetLibrary);
+            }
 
             var packageDescription = new PackageDescription(
                 path,
                 package,
                 targetLibrary,
                 dependencies,
-                compatible);
+                compatible,
+                resolved: compatible && exists);
 
             return packageDescription;
         }
