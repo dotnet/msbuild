@@ -104,7 +104,7 @@ echo "Restoring Build Script projects..."
 
 # Build the builder
 echo "Compiling Build Scripts..."
-dotnet publish "$DIR/dotnet-cli-build" -o "$DIR/dotnet-cli-build/bin" --framework dnxcore50
+dotnet publish "$DIR/dotnet-cli-build" -o "$DIR/dotnet-cli-build/bin" --framework netstandardapp1.5
 
 # Run the builder
 echo "Invoking Build Scripts..."

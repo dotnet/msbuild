@@ -5,11 +5,13 @@
     },
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23811",
+        "NETStandard.Library": "1.0.0-rc2-23901",
         "System.Runtime.Analyzers": { "version": "1.1.0", "type": "build" }
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "netstandardapp1.5": {
+            "imports": "dnxcore50"
+        }
     }
 }

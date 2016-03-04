@@ -5,7 +5,8 @@
     },
 
     "dependencies": {
-        "NETStandard.Library" : "1.0.0-rc2-23811",
+        "NETStandard.Library" : "1.0.0-rc2-23901",
+        "System.IO.Compression": "4.1.0-rc2-23901",
 
         "Microsoft.DotNet.ProjectModel": { "target": "project" },
         "Microsoft.DotNet.Cli.Utils": { "target": "project" },
@@ -17,8 +18,11 @@
     },
 
     "frameworks": {
-        "dnxcore50": {
-            "imports": "portable-net45+win8"
+        "netstandardapp1.5": {
+            "imports": [
+                "dnxcore50",
+                "portable-net45+win8"
+            ]
         }
     },
 

@@ -78,7 +78,7 @@ popd
 
 # Publish the builder
 Write-Host "Compiling Build Scripts..."
-dotnet publish "$PSScriptRoot\dotnet-cli-build" -o "$PSScriptRoot/dotnet-cli-build/bin" --framework dnxcore50
+dotnet publish "$PSScriptRoot\dotnet-cli-build" -o "$PSScriptRoot/dotnet-cli-build/bin" --framework netstandardapp1.5
 if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
 
 # Run the builder

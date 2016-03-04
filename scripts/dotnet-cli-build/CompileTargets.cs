@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class CompileTargets
     {
-        public static readonly string CoreCLRVersion = "1.0.1-rc2-23811";
+        public static readonly string CoreCLRVersion = "1.0.2-rc2-23901";
         public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
         public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 

@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var project in projects)
             {
                 c.Info($"Building: {project}");
-                dotnet.Build("--framework", "dnxcore50")
+                dotnet.Build("--framework", "netstandardapp1.5")
                     .WorkingDirectory(Path.GetDirectoryName(project))
                     .Execute()
                     .EnsureSuccessful();

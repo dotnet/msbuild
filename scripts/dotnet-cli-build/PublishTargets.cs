@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 { "RID", PlatformServices.Default.Runtime.GetRuntimeIdentifier() },
                 { "OSNAME", PlatformServices.Default.Runtime.OperatingSystem },
-                { "TFM", "dnxcore50" },
+                { "TFM", "netstandardapp1.5" },
                 { "OutputDir", Dirs.Output },
                 { "Stage1Dir", Dirs.Stage1 },
                 { "Stage1CompilationDir", Dirs.Stage1Compilation },

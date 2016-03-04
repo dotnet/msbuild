@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static CommandSpec ResolveFromProjectTools(string commandName, IEnumerable<string> args)
         {
-            var context = GetProjectContext(FrameworkConstants.CommonFrameworks.DnxCore50);
+            var context = GetProjectContext(FrameworkConstants.CommonFrameworks.NetStandardApp15);
 
             if (context == null)
             {

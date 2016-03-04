@@ -30,12 +30,12 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 return new[]
                 {
                     new object[] { "1", "", "", "", "" },
-                    new object[] { "2", "dnxcore50", "", "", "" },
+                    new object[] { "2", "netstandardapp1.5", "", "", "" },
                     new object[] { "3", "", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "", "" },
                     new object[] { "4", "", "", "Release", "" },
                     new object[] { "5", "", "", "", "some/dir"},
                     new object[] { "6", "", "", "", "some/dir/with spaces" },
-                    new object[] { "7", "dnxcore50", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
+                    new object[] { "7", "netstandardapp1.5", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
                 };
             }
         }
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
             publishCommand.GetOutputDirectory().Delete(true);
 
-            publishCommand = new PublishCommand(lesserTestProject, "dnxcore50", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier());
+            publishCommand = new PublishCommand(lesserTestProject, "netstandardapp1.5", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier());
             publishCommand.Execute().Should().Pass();
 
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");

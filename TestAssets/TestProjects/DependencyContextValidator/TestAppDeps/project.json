@@ -1,15 +1,17 @@
 ﻿{
     "version": "1.0.0-*",
     "compilationOptions": {
-        "emitEntryPoint": true,
+        "emitEntryPoint": true
     },
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23811",
+        "NETStandard.Library": "1.0.0-rc2-23901",
         "DependencyContextValidator": "1.0.0-*"
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "netstandardapp1.5": {
+            "imports": "dnxcore50"
+        }
     }
 }
