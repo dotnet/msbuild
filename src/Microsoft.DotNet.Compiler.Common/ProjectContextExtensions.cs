@@ -31,6 +31,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return baseOption;
         }
 
+        public static string GetSDKVersionFile(this ProjectContext context, string configuration, string buildBasePath, string outputPath)
+        {
+            var intermediatePath = context.GetOutputPaths(configuration, buildBasePath, outputPath).IntermediateOutputDirectoryPath;
+            return Path.Combine(intermediatePath, ".SDKVersion");
+        }
 
         // used in incremental compilation for the key file
         public static CommonCompilerOptions ResolveCompilationOptions(this ProjectContext context, string configuration)
