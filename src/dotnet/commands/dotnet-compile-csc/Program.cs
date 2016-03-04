@@ -213,9 +213,18 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 commonArgs.Add("-t:library");
             }
 
-            commonArgs.Add((string.IsNullOrEmpty(options.DebugType) || options.DebugType == "portable")
-                ? "-debug:portable"
-                : "-debug:full");
+            if (string.IsNullOrEmpty(options.DebugType))
+            {
+                commonArgs.Add(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? "-debug:full"
+                    : "-debug:portable");
+            }
+            else
+            {
+                commonArgs.Add(options.DebugType == "portable"
+                    ? "-debug:portable"
+                    : "-debug:full");
+            }
 
             return commonArgs;
         }
