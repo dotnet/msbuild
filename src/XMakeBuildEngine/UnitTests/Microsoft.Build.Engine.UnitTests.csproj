@@ -142,6 +142,7 @@
     <Compile Include="Evaluation\Evaluator_Tests.cs" />
     <Compile Include="Evaluation\Expander_Tests.cs" />
     <Compile Include="Evaluation\ExpressionShredder_Tests.cs" />
+    <Compile Include="Evaluation\ImportFromMSBuildExtensionsPath_Tests.cs" />
     <Compile Include="Evaluation\Preprocessor_Tests.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache_Tests.cs" />
     <Compile Include="Evaluation\ProjectStringCache_Tests.cs" />

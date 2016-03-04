@@ -12,6 +12,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using System.Reflection;
+using System.Text;
 using Microsoft.Build.Construction;
 #if FEATURE_MSBUILD_DEBUGGER
 using Microsoft.Build.Debugging;
@@ -1884,26 +1886,21 @@ namespace Microsoft.Build.Evaluation
             }
 #endif
 
-            if (EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties, _projectRootElementCache))
+            List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement);
+
+            foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
             {
-                string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(importElement.Project, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+                _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version);
 
-                List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importExpressionEscaped, importElement);
-
-                foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
-                {
-                    _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version);
-
-                    // This key should be unique, as duplicate imports were already discarded
+                // This key should be unique, as duplicate imports were already discarded
 #if FEATURE_MSBUILD_DEBUGGER
-                    if (DebuggerManager.DebuggingEnabled)
-                    {
-                        _importRelationships.Add(importedProjectRootElement, importElement.ContainingProject);
-                    }
+                if (DebuggerManager.DebuggingEnabled)
+                {
+                    _importRelationships.Add(importedProjectRootElement, importElement.ContainingProject);
+                }
 #endif
 
-                    PerformDepthFirstPass(importedProjectRootElement);
-                }
+                PerformDepthFirstPass(importedProjectRootElement);
             }
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -2019,16 +2016,173 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// If the project import references a $(MSBuildExtensionsPath*)
+        /// then this tries to find project files corresponding to that, using various search
+        /// paths. It relies on the ExpandAndLoadImportsFromUnescapedImportExpressionConditioned
+        /// to do the actual loading and parsing.
+        /// This is explained in detail in a comment with the method code.
+        ///
+        /// If the project import does not reference the $(MSBuildExtensionsPath*) property, then
+        /// it falls back to the default behavior.
+        ///
+        /// Caches the parsed import into the provided collection, so future
+        /// requests can be satisfied without re-parsing it.
+        /// </summary>
+        private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, ProjectImportElement importElement)
+        {
+            var refKindInProject = MSBuildExtensionsPathReferenceKind.FindIn(importElement.Project);
+            var fallbackExtensionPaths = _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject);
+
+            // no reference or we need to lookup only the default path,
+            // so, use the Import path
+            if (fallbackExtensionPaths.Count == 0)
+            {
+                List<ProjectRootElement> projects;
+                var result = ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, importElement.Project, out projects);
+                return projects;
+            }
+
+            // $(MSBuildExtensionsPath*) usually resolves to a single value, single default path. This can be overridden
+            // by the usual property overriding techniques.
+            //
+            // Eg. <Import Project='$(MSBuildExtensionsPath)\foo\extn.proj' />
+            //
+            // But this feature allows that when it is used in an Import element, it will behave as a "search path", meaning
+            // that the relative project path "foo\extn.proj" will be searched for, in more than one location.
+            // Essentially, we will try to load that project file by trying multiple values (search paths) for the
+            // $(MSBuildExtensionsPath*) property.
+            //
+            // The various paths tried, in order are:
+            //
+            // 1. The value of the MSBuildExtensionsPath* property
+            //
+            // 2. Search paths available in the current toolset (via toolset.MSBuildExtensionsPathSearchPathsTable).
+            //    That may be loaded from app.config with a definition like:
+            //
+            //    <toolset .. >
+            //      <msbuildExtensionsPathSearchPaths>
+            //          <searchPaths os="osx">
+            //              <property name="MSBuildExtensionsPath" value="/Library/Frameworks/Mono.framework/External/xbuild/;/tmp/foo"/>
+            //              <property name="MSBuildExtensionsPath32" value="/Library/Frameworks/Mono.framework/External/xbuild/"/>
+            //              <property name="MSBuildExtensionsPath64" value="/Library/Frameworks/Mono.framework/External/xbuild/"/>
+            //          </searchPaths>
+            //      </msbuildExtensionsPathSearchPaths>
+            //    </toolset>
+            //
+            // This is available only when used in an Import element and it's Condition. So, the following common pattern
+            // would work:
+            //
+            //      <Import Project="$(MSBuildExtensionsPath)\foo\extn.proj" Condition="'Exists('$(MSBuildExtensionsPath)\foo\extn.proj')'" />
+            //
+            // The value of the MSBuildExtensionsPath* property, will always be "visible" with it's default value, example, when read or
+            // referenced anywhere else. This is a very limited support, so, it doesn't come in to effect if the explcit reference to
+            // the $(MSBuildExtensionsPath) property is not present in the Project attribute of the Import element. So, the following is
+            // not supported:
+            //
+            //      <PropertyGroup><ProjectPathForImport>$(MSBuildExtensionsPath)\foo\extn.proj</ProjectPathForImport></PropertyGroup>
+            //      <Import Project='$(ProjectPathForImport)' />
+            //
+
+            // Adding the value of $(MSBuildExtensionsPath*) property to the list of search paths
+            fallbackExtensionPaths.Insert(0, _data.GetProperty(refKindInProject.StringRepresentation).EvaluatedValue);
+
+            string extensionPropertyRefAsString = refKindInProject.MSBuildPropertyName;
+
+            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
+                                        extensionPropertyRefAsString,
+                                        String.Join(Path.PathSeparator.ToString(), fallbackExtensionPaths));
+
+            bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
+
+            // Try every extension search path, till we get a Hit:
+            // 1. 1 or more project files loaded
+            // 2. 1 or more project files *found* but ignored (like circular, self imports)
+            foreach (var extensionPath in fallbackExtensionPaths)
+            {
+                if (!Directory.Exists(extensionPath))
+                {
+                    continue;
+                }
+
+                var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPath);
+                if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
+                            _projectRootElementCache))
+                {
+                    continue;
+                }
+
+                var newExpandedImportPath = importElement.Project;
+                newExpandedImportPath = newExpandedImportPath.Replace(extensionPropertyRefAsString, extensionPath);
+
+                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPath);
+
+                List<ProjectRootElement> projects;
+                var result = ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, newExpandedImportPath,
+                                        false, out projects);
+
+                if (result == LoadImportsResult.ProjectsImported)
+                {
+                    return projects;
+                }
+
+                if (result == LoadImportsResult.FoundFilesToImportButIgnored)
+                {
+                    // Circular, Self import cases are usually ignored
+                    // Since we have a semi-success here, we stop looking at
+                    // other paths
+                    return projects;
+                }
+
+                if (result == LoadImportsResult.TriedToImportButFileNotFound)
+                {
+                    atleastOneExactFilePathWasLookedAtAndNotFound = true;
+                }
+                // else if (result == LoadImportsResult.ImportExpressionResolvedToNothing) {}
+            }
+
+            // Found at least one project file for the Import, but no projects were loaded
+            // atleastOneExactFilePathWasLookedAtAndNotFound would be false, eg, if the expression
+            // was a wildcard and it resolved to zero files!
+            if (atleastOneExactFilePathWasLookedAtAndNotFound && (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
+            {
+                ThrowForImportedProjectFromExtensionsPathNotFound(refKindInProject, importElement);
+            }
+
+            return new List<ProjectRootElement>();
+        }
+
+        /// <summary>
+        /// Load and parse the specified project import, which may have wildcards,
+        /// into one or more ProjectRootElements, if it's Condition evaluates to true
+        /// Caches the parsed import into the provided collection, so future
+        /// requests can be satisfied without re-parsing it.
+        /// </summary>
+        private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
+                                            out List<ProjectRootElement> projects, bool throwOnFileNotExistsError=true)
+        {
+            if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties, _projectRootElementCache))
+            {
+                projects = new List<ProjectRootElement>();
+                return LoadImportsResult.ConditionWasFalse;
+            }
+
+            return ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, importElement.Project, throwOnFileNotExistsError, out projects);
+        }
+
+        /// <summary>
         /// Load and parse the specified project import, which may have wildcards,
         /// into one or more ProjectRootElements.
         /// Caches the parsed import into the provided collection, so future 
         /// requests can be satisfied without re-parsing it.
         /// </summary>
-        private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, string importExpressionEscaped, ProjectImportElement importElement)
+        private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpression(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
+                                            bool throwOnFileNotExistsError, out List<ProjectRootElement> imports)
         {
+            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
 
-            List<ProjectRootElement> imports = new List<ProjectRootElement>();
+            bool atleastOneImportIgnored = false;
+            imports = new List<ProjectRootElement>();
             string[] importFilesEscaped = null;
 
             try
@@ -2083,6 +2237,7 @@ namespace Microsoft.Build.Evaluation
                 if (String.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
                 {
                     _loggingService.LogWarning(_buildEventContext, null, new BuildEventFileInfo(importLocationInProject), "SelfImport", importFileUnescaped);
+                    atleastOneImportIgnored = true;
 
                     continue;
                 }
@@ -2107,6 +2262,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // Ignore this import and no more further processing on it.
+                        atleastOneImportIgnored = true;
                         continue;
                     }
                 }
@@ -2162,6 +2318,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // Since we have already seen this we need to not continue on in the processing.
+                        atleastOneImportIgnored = true;
                         continue;
                     }
                     else
@@ -2180,7 +2337,7 @@ namespace Microsoft.Build.Evaluation
                         // There's a specific message for file not existing
                         if (!File.Exists(importFileUnescaped))
                         {
-                            if ((_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
+                            if (!throwOnFileNotExistsError || (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
                             {
                                 continue;
                             }
@@ -2203,7 +2360,29 @@ namespace Microsoft.Build.Evaluation
                 _importsSeen.Add(importFileUnescaped, importElement);
             }
 
-            return imports;
+            if (imports.Count > 0)
+            {
+                return LoadImportsResult.ProjectsImported;
+            }
+
+            if (atleastOneImportIgnored)
+            {
+                return LoadImportsResult.FoundFilesToImportButIgnored;
+            }
+
+            if (importFilesEscaped.Length == 0)
+            {
+                // Expression resolved to "", eg. a wildcard
+                return LoadImportsResult.ImportExpressionResolvedToNothing;
+            }
+
+            // No projects were imported, none were ignored but we did have atleast
+            // one file to process, which means that we did try to load a file but
+            // failed w/o an exception escaping from here.
+            // We ignore only the file not existing error, so, that is the case here
+            // (if @throwOnFileNotExistsError==true, then it would have thrown
+            //  and we wouldn't be here)
+            return LoadImportsResult.TriedToImportButFileNotFound;
         }
 
         /// <summary>
@@ -2249,14 +2428,19 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
         {
-            if (element.Condition.Length == 0)
+            return EvaluateCondition(element, element.Condition, expanderOptions, parserOptions);
+        }
+
+        private bool EvaluateCondition(ProjectElement element, string condition, ExpanderOptions expanderOptions, ParserOptions parserOptions)
+        {
+            if (condition.Length == 0)
             {
                 return true;
             }
 
             bool result = ConditionEvaluator.EvaluateCondition
                 (
-                element.Condition,
+                condition,
                 parserOptions,
                 _expander,
                 expanderOptions,
@@ -2269,24 +2453,29 @@ namespace Microsoft.Build.Evaluation
             return result;
         }
 
+        private bool EvaluateConditionCollectingConditionedProperties(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, ProjectRootElementCache projectRootElementCache = null)
+        {
+            return EvaluateConditionCollectingConditionedProperties(element, element.Condition, expanderOptions, parserOptions, projectRootElementCache);
+        }
+
         /// <summary>
         /// Evaluate a given condition, collecting conditioned properties.
         /// </summary>
-        private bool EvaluateConditionCollectingConditionedProperties(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, ProjectRootElementCache projectRootElementCache = null)
+        private bool EvaluateConditionCollectingConditionedProperties(ProjectElement element, string condition, ExpanderOptions expanderOptions, ParserOptions parserOptions, ProjectRootElementCache projectRootElementCache = null)
         {
-            if (element.Condition.Length == 0)
+            if (condition.Length == 0)
             {
                 return true;
             }
 
             if (!_data.ShouldEvaluateForDesignTime)
             {
-                return EvaluateCondition(element, expanderOptions, parserOptions);
+                return EvaluateCondition(element, condition, expanderOptions, parserOptions);
             }
 
             bool result = ConditionEvaluator.EvaluateConditionCollectingConditionedProperties
                 (
-                element.Condition,
+                condition,
                 parserOptions,
                 _expander,
                 expanderOptions,
@@ -2318,5 +2507,82 @@ namespace Microsoft.Build.Evaluation
                 return _data.Directory;
             }
         }
+
+        /// <summary>
+        /// Throws InvalidProjectException because we failed to import a project from $(MSBuildExtensionsPath*)
+        /// <param name="refKindInProject">MSBuildExtensionsPath reference kind found in the Project attribute of the Import element</param>
+        /// <param name="importElement">The importing element for this import</param>
+        /// </summary>
+        private void ThrowForImportedProjectFromExtensionsPathNotFound(MSBuildExtensionsPathReferenceKind refKindInProject, ProjectImportElement importElement)
+        {
+            string extensionsPathPropValue = _data.GetProperty(refKindInProject.StringRepresentation).EvaluatedValue;
+
+            string importExpandedWithDefaultPath = _expander.ExpandIntoStringLeaveEscaped(
+                                                                    importElement.Project.Replace(refKindInProject.MSBuildPropertyName, extensionsPathPropValue),
+                                                                    ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+
+            string relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
+
+            var onlyFallbackSearchPaths = _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject);
+            string stringifiedListOfSearchPaths = StringifyList(onlyFallbackSearchPaths);
+
+#if FEATURE_SYSTEM_CONFIGURATION
+            string configLocation = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+
+            ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation, "ImportedProjectFromExtensionsPathNotFoundFromAppConfig",
+                                                        importExpandedWithDefaultPath,
+                                                        relativeProjectPath,
+                                                        refKindInProject.MSBuildPropertyName,
+                                                        stringifiedListOfSearchPaths,
+                                                        configLocation);
+#else
+            ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation, "ImportedProjectFromExtensionsPathNotFound",
+                                                        importExpandedWithDefaultPath,
+                                                        relativeProjectPath,
+                                                        refKindInProject.MSBuildPropertyName,
+                                                        stringifiedListOfSearchPaths);
+#endif
+        }
+
+        /// <summary>
+        /// Stringify a list of strings, like {"abc, "def", "foo"} to "abc, def and foo"
+        /// or {"abc"} to "abc"
+        /// <param name="strings">List of strings to stringify</param>
+        /// <returns>Stringified list</returns>
+        /// </summary>
+        private static string StringifyList(IList<string> strings)
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < strings.Count - 1; i ++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                 }
+
+                sb.Append($"\"{strings[i]}\"");
+            }
+
+            if (strings.Count > 1)
+            {
+                sb.Append(" and ");
+            }
+
+            sb.Append($"\"{strings[strings.Count - 1]}\"");
+
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Represents result of attempting to load imports (ExpandAndLoadImportsFromUnescapedImportExpression*)
+    /// </summary>
+    internal enum LoadImportsResult
+    {
+        ProjectsImported,
+        FoundFilesToImportButIgnored,
+        TriedToImportButFileNotFound,
+        ImportExpressionResolvedToNothing,
+        ConditionWasFalse
     }
 }
