@@ -51,6 +51,8 @@
         <dependency id="System.Runtime.InteropServices" version="4.0.21-rc2-23712" />
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0-rc2-23712" />
         <dependency id="System.Runtime.Loader" version="4.0.0-rc2-23712" />
+        <dependency id="System.Security.AccessControl" version="4.0.0-rc2-23512" />
+        <dependency id="System.Security.Principal.Windows" version="4.0.0-rc2-23712" />
         <dependency id="System.Text.Encoding" version="4.0.11-rc2-23712" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.11-rc2-23712" />
         <dependency id="System.Text.RegularExpressions" version="4.0.11-rc2-23712" />

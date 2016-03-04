@@ -191,7 +191,7 @@ namespace Microsoft.Build.BackEnd
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
-#if FEATURE_SECURITY_PERMISSIONS
+#if FEATURE_PIPE_SECURITY
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
@@ -214,7 +214,7 @@ namespace Microsoft.Build.BackEnd
                 PipeOptions.Asynchronous | PipeOptions.WriteThrough,
                 PipeBufferSize, // Default input buffer
                 PipeBufferSize  // Default output buffer
-#if FEATURE_SECURITY_PERMISSIONS
+#if FEATURE_PIPE_SECURITY
                 , security,
                 HandleInheritability.None
 #endif

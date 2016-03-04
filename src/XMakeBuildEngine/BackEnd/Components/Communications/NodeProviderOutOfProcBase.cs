@@ -292,22 +292,29 @@ namespace Microsoft.Build.BackEnd
             {
                 nodeStream.Connect(timeout);
 
-#if FEATURE_SECURITY_PERMISSIONS
-                // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                // remote node could set the owner to something else would also let it change owners on other objects, so
-                // this would be a security flaw upstream of us.
-                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-                PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-                IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
-                if (remoteOwner != identifier)
+                if (NativeMethodsShared.IsWindows)
                 {
-                    CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
-                    throw new UnauthorizedAccessException();
-                }
+                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
+                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
+                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
+                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
+                    // remote node could set the owner to something else would also let it change owners on other objects, so
+                    // this would be a security flaw upstream of us.
+                    SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+#if FEATURE_PIPE_SECURITY
+                    PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
+#else
+                    var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
+                        System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
 #endif
+                    IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
+                    if (remoteOwner != identifier)
+                    {
+                        CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
+                        throw new UnauthorizedAccessException();
+                    }
+
+                }
 
                 CommunicationsUtilities.Trace("Writing handshake to pipe {0}", pipeName);
                 nodeStream.WriteLongForHandshake(hostHandshake);
