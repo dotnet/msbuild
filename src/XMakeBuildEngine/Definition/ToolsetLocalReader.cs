@@ -68,5 +68,10 @@ namespace Microsoft.Build.Evaluation
         {
             return Enumerable.Empty<string>();
         }
+
+        protected override Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os)
+        {
+            return new Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>();
+        }
     }
 }

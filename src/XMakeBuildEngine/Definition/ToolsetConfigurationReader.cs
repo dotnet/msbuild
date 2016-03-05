@@ -210,6 +210,11 @@ namespace Microsoft.Build.Evaluation
             yield break;
         }
 
+        protected override Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os)
+        {
+            return new Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>();
+        }
+
         /// <summary>
         /// Reads the application configuration file.
         /// NOTE: this is abstracted into a method to support unit testing GetToolsetDataFromConfiguration().
