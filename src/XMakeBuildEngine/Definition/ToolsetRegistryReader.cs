@@ -290,6 +290,14 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
+        /// </summary>
+        protected override Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os)
+        {
+            return new Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>();
+        }
+
+        /// <summary>
         /// Given a registry location containing a property name and value, create the ToolsetPropertyDefinition that maps to it
         /// </summary>
         /// <param name="toolsetWrapper">Wrapper for the key that we're getting values from</param>

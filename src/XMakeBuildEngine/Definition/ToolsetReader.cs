@@ -277,6 +277,11 @@ namespace Microsoft.Build.Evaluation
         protected abstract IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion);
 
         /// <summary>
+        /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
+        /// </summary>
+        protected abstract Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os);
+
+        /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
         /// </summary>
         private void ReadEachToolset
@@ -378,6 +383,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
                 toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion);
+                toolset.MSBuildExtensionsPathSearchPathsTable = GetMSBuildExtensionPathsSearchPathsTable(toolsVersion.Name, GetOSNameForExtensionsPath());
             }
             catch (ArgumentException e)
             {
@@ -385,6 +391,120 @@ namespace Microsoft.Build.Evaluation
             }
 
             return toolset;
+        }
+
+        /// <summary>
+        /// OS name that can be used for the msbuildExtensionsPathSearchPaths element
+        /// for a toolset
+        /// </summary>
+        private static string GetOSNameForExtensionsPath()
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return "windows";
+            }
+
+            if (NativeMethodsShared.IsOSX)
+            {
+                return "osx";
+            }
+
+            return "unix";
+        }
+
+        /// <summary>
+        /// Create a dictionary with standard properties.
+        /// </summary>
+        private static PropertyDictionary<ProjectPropertyInstance> CreateStandardProperties(
+            PropertyDictionary<ProjectPropertyInstance> globalProperties,
+            string version,
+            string root,
+            string toolsPath)
+        {
+            // Create standard properties. On Mono they are well known
+            if (!NativeMethodsShared.IsMono)
+            {
+                return null;
+            }
+
+            PropertyDictionary<ProjectPropertyInstance> buildProperties =
+                new PropertyDictionary<ProjectPropertyInstance>();
+            AppendStandardProperties(buildProperties, globalProperties, version, root, toolsPath);
+            return buildProperties;
+        }
+
+        /// <summary>
+        /// Appends standard properties to a dictionary. These properties are read from
+        /// the registry under Windows (they are a part of a toolset definition).
+        /// </summary>
+        private static void AppendStandardProperties(
+            PropertyDictionary<ProjectPropertyInstance> properties,
+            PropertyDictionary<ProjectPropertyInstance> globalProperties,
+            string version,
+            string root,
+            string toolsPath)
+        {
+            if (NativeMethodsShared.IsMono)
+            {
+                var v4Dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current)
+                            + Path.DirectorySeparatorChar;
+                var v35Dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current)
+                             + Path.DirectorySeparatorChar;
+
+                if (root == null)
+                {
+                    var libraryPath = NativeMethodsShared.FrameworkBasePath;
+                    if (toolsPath.StartsWith(libraryPath))
+                    {
+                        root = Path.GetDirectoryName(toolsPath);
+                        if (toolsPath.EndsWith("bin"))
+                        {
+                            root = Path.GetDirectoryName(root);
+                        }
+                    }
+                    else
+                    {
+                        root = libraryPath;
+                    }
+                }
+
+                root += Path.DirectorySeparatorChar;
+
+                // Global properties cannot be overwritten
+                if (globalProperties["FrameworkSDKRoot"] == null && properties["FrameworkSDKRoot"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("FrameworkSDKRoot", root, true, false));
+                }
+                if (globalProperties["MSBuildToolsRoot"] == null && properties["MSBuildToolsRoot"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("MSBuildToolsRoot", root, true, false));
+                }
+                if (globalProperties["MSBuildFrameworkToolsPath"] == null
+                    && properties["MSBuildFrameworkToolsPath"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath", toolsPath, true, false));
+                }
+                if (globalProperties["MSBuildFrameworkToolsPath32"] == null
+                    && properties["MSBuildFrameworkToolsPath32"] == null)
+                {
+                    properties.Set(
+                        ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath32", toolsPath, true, false));
+                }
+                if (globalProperties["MSBuildRuntimeVersion"] == null && properties["MSBuildRuntimeVersion"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("MSBuildRuntimeVersion", version, true, false));
+                }
+                if (!string.IsNullOrEmpty(v35Dir) && globalProperties["SDK35ToolsPath"] == null
+                    && properties["SDK35ToolsPath"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("SDK35ToolsPath", v35Dir, true, false));
+                }
+                if (!string.IsNullOrEmpty(v4Dir) && globalProperties["SDK40ToolsPath"] == null
+                    && properties["SDK40ToolsPath"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("SDK40ToolsPath", v4Dir, true, false));
+                }
+            }
         }
 
         /// <summary>
@@ -530,4 +650,69 @@ namespace Microsoft.Build.Evaluation
             return path;
         }
     }
+
+    /// <summary>
+    /// struct representing a reference to MSBuildExtensionsPath* property
+    /// </summary>
+    internal struct MSBuildExtensionsPathReferenceKind
+    {
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath"
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind Default = new MSBuildExtensionsPathReferenceKind("MSBuildExtensionsPath");
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath32"
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind Path32 = new MSBuildExtensionsPathReferenceKind("MSBuildExtensionsPath32");
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath64"
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind Path64 = new MSBuildExtensionsPathReferenceKind("MSBuildExtensionsPath64");
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance representing no MSBuildExtensionsPath* property reference
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind None = new MSBuildExtensionsPathReferenceKind(String.Empty);
+
+        private MSBuildExtensionsPathReferenceKind(string value)
+        {
+            StringRepresentation = value;
+        }
+
+        /// <summary>
+        /// String representation of the property reference - eg. "MSBuildExtensionsPath32"
+        /// </summary>
+        public string StringRepresentation { get; private set; }
+
+        /// <summary>
+        /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
+        /// </summary>
+        public string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
+
+        /// <summary>
+        /// Tries to find a reference to MSBuildExtensionsPath* property in the given string
+        /// </summary>
+        public static MSBuildExtensionsPathReferenceKind FindIn(string expression)
+        {
+            if (expression.IndexOf("$(MSBuildExtensionsPath)") >= 0)
+            {
+                return MSBuildExtensionsPathReferenceKind.Default;
+            }
+
+            if (expression.IndexOf("$(MSBuildExtensionsPath32)") >= 0)
+            {
+                return MSBuildExtensionsPathReferenceKind.Path32;
+            }
+
+            if (expression.IndexOf("$(MSBuildExtensionsPath64)") >= 0)
+            {
+                return MSBuildExtensionsPathReferenceKind.Path64;
+            }
+
+            return MSBuildExtensionsPathReferenceKind.None;
+        }
+     }
 }
