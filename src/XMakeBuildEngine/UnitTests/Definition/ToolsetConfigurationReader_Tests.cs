@@ -189,6 +189,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// name attribute is missing from toolset element 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void ToolsVersionTest_NameNotSpecified()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -247,6 +248,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// empty toolset element 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void ToolsVersionTest_EmptyElement()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -314,6 +316,7 @@ namespace Microsoft.Build.UnitTests.Definition
         ///  name attribute is missing
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void PropertyTest_NameNotSpecified()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -393,6 +396,7 @@ namespace Microsoft.Build.UnitTests.Definition
         ///  property element is an empty element
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void PropertyTest_EmptyElement()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>

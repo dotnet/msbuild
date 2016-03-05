@@ -253,8 +253,8 @@
     <FeatureSpecialFolders>true</FeatureSpecialFolders>
     <DefineConstants>$(DefineConstants);FEATURE_STRING_INTERN</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_STRONG_NAMES</DefineConstants>
-    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
-    <FeatureSystemConfiguration Condition="'$(MonoBuild)' != 'true'">true</FeatureSystemConfiguration>
+    <DefineConstants>$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
+    <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
     <DefineConstants>$(DefineConstants);FEATURE_TASK_GENERATERESOURCES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TASKHOST</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
