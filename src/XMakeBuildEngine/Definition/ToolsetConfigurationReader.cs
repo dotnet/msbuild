@@ -49,6 +49,17 @@ namespace Microsoft.Build.Evaluation
         private bool _configurationReadAttempted = false;
 
         /// <summary>
+        /// Character used to separate search paths specified for MSBuildExtensionsPath* in
+        /// the config file
+        /// </summary>
+        private char _separatorForExtensionsPathSearchPaths = ';';
+
+        /// <summary>
+        /// map of MSBuildExtensionsPath property kind to list of fallback search paths, per toolsVersion
+        /// </summary>
+        private Dictionary<string, Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>> _kindToPathsCachePerToolsVersion;
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         internal ToolsetConfigurationReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties)
@@ -64,6 +75,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration, "readApplicationConfiguration");
             _readApplicationConfiguration = readApplicationConfiguration;
+            _kindToPathsCachePerToolsVersion = new Dictionary<string, Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -210,9 +222,69 @@ namespace Microsoft.Build.Evaluation
             yield break;
         }
 
+        /// <summary>
+        /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
+        /// </summary>
         protected override Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os)
         {
-            return new Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>();
+            Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> kindToPathsCache;
+            var key = toolsVersion + ":" + os;
+            if (_kindToPathsCachePerToolsVersion.TryGetValue(key, out kindToPathsCache))
+            {
+                return kindToPathsCache;
+            }
+
+            // Read and populate the map
+            kindToPathsCache = new Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>();
+            _kindToPathsCachePerToolsVersion[key] = kindToPathsCache;
+
+            ToolsetElement toolsetElement = ConfigurationSection.Toolsets.GetElement(toolsVersion);
+            var propertyCollection = toolsetElement?.AllMSBuildExtensionPathsSearchPaths?.GetElement(os)?.PropertyElements;
+            if (propertyCollection == null || propertyCollection.Count == 0)
+            {
+                return kindToPathsCache;
+            }
+
+            var allPaths = new MSBuildExtensionsPathReferenceKind[] {
+                                MSBuildExtensionsPathReferenceKind.Default,
+                                MSBuildExtensionsPathReferenceKind.Path32,
+                                MSBuildExtensionsPathReferenceKind.Path64,
+                                MSBuildExtensionsPathReferenceKind.None
+                            };
+
+            foreach (MSBuildExtensionsPathReferenceKind kind in allPaths)
+            {
+                kindToPathsCache[kind] = ComputeDistinctListOfFallbackPathsFor(kind, propertyCollection);
+            }
+
+            return kindToPathsCache;
+        }
+
+        /// <summary>
+        /// Returns a list of the search paths for a given MSBuildExtensionsPathReferenceKind
+        /// </summary>
+        private List<string> ComputeDistinctListOfFallbackPathsFor(MSBuildExtensionsPathReferenceKind refKind, ToolsetElement.PropertyElementCollection propertyCollection)
+        {
+            var extnPaths = new List<string>();
+            var pathsFromConfig = propertyCollection.GetElement(refKind.StringRepresentation)?.Value;
+
+            //FIXME: handle ; in path on Unix
+            if (String.IsNullOrEmpty(pathsFromConfig))
+            {
+                return extnPaths;
+            }
+
+            var pathsTable = new HashSet<string>();
+            foreach (var extnPath in pathsFromConfig.Split(new char[]{_separatorForExtensionsPathSearchPaths}, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (!pathsTable.Contains(extnPath))
+                {
+                    pathsTable.Add(extnPath);
+                    extnPaths.Add(extnPath);
+                }
+            }
+
+            return extnPaths;
         }
 
         /// <summary>

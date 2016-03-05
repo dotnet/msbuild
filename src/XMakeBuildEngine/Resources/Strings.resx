@@ -612,6 +612,10 @@
     <value>MSB4144: Multiple definitions were found for the toolset "{0}". </value>
     <comment>{StrBegin="MSB4144: "}</comment>
   </data>
+  <data name="MultipleDefinitionsForSameExtensionsPathOS" UESanitized="false" Visibility="Public">
+      <value>MSB4225: Toolset contains multiple definitions of searchPaths for the OS "{0}" at "{1}".</value>
+    <comment>{StrBegin="MSB4225: "}</comment>
+  </data>
   <data name="MultipleDefinitionsForSameProperty" UESanitized="false" Visibility="Public">
     <value>MSB4145: Multiple definitions were found for the property "{0}".</value>
     <comment>{StrBegin="MSB4145: "}</comment>
@@ -1517,7 +1521,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4225.
+        Next message code should be MSB4226.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
