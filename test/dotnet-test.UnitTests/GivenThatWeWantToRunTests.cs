@@ -41,6 +41,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                     dotnetTestMessageScenario.DotnetTestUnderTest,
                     new Message
                     {
+                        MessageType = TestMessageTypes.TestRunnerWaitingCommand
+                    }))
+                .Verifiable();
+
+            dotnetTestMessageScenario.TestRunnerChannelMock
+                .Setup(a => a.Send(
+                    It.Is<Message>(m => m.MessageType == TestMessageTypes.TestRunnerExecute)))
+                .Callback(() => dotnetTestMessageScenario.TestRunnerChannelMock.Raise(
+                    t => t.MessageReceived += null,
+                    dotnetTestMessageScenario.DotnetTestUnderTest,
+                    new Message
+                    {
                         MessageType = TestMessageTypes.TestRunnerTestStarted
                     }))
                 .Verifiable();
