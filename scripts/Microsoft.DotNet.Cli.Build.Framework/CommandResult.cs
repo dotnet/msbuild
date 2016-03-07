@@ -24,20 +24,23 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             StdErr = stdErr;
         }
 
-        public void EnsureSuccessful()
+        public void EnsureSuccessful(bool suppressOutput = false)
         {
             if(ExitCode != 0)
             {
                 StringBuilder message = new StringBuilder($"Command failed with exit code {ExitCode}: {StartInfo.FileName} {StartInfo.Arguments}");
 
-                if (!string.IsNullOrEmpty(StdOut))
+                if (!suppressOutput)
                 {
-                    message.AppendLine($"{Environment.NewLine}Standard Output:{Environment.NewLine}{StdOut}");
-                }
+                    if (!string.IsNullOrEmpty(StdOut))
+                    {
+                        message.AppendLine($"{Environment.NewLine}Standard Output:{Environment.NewLine}{StdOut}");
+                    }
 
-                if (!string.IsNullOrEmpty(StdErr))
-                {
-                    message.AppendLine($"{Environment.NewLine}Standard Error:{Environment.NewLine}{StdErr}");
+                    if (!string.IsNullOrEmpty(StdErr))
+                    {
+                        message.AppendLine($"{Environment.NewLine}Standard Error:{Environment.NewLine}{StdErr}");
+                    }
                 }
 
                 throw new BuildFailureException(message.ToString());
