@@ -9,7 +9,9 @@ namespace Microsoft.Extensions.DependencyModel
 
         internal const string CompileTimeAssembliesKey = "compile";
 
-        internal const string RunTimeAssembliesKey = "runtime";
+        internal const string RuntimeAssembliesKey = "runtime";
+
+        internal const string RuntimeTargetPropertyName = "runtimeTarget";
 
         internal const string LibrariesPropertyName = "libraries";
 
@@ -48,5 +50,21 @@ namespace Microsoft.Extensions.DependencyModel
         internal const string EmitEntryPointPropertyName = "emitEntryPoint";
 
         internal const string GenerateXmlDocumentationPropertyName = "xmlDoc";
+
+        internal const string PortablePropertyName = "portable";
+
+        internal const string RuntimeTargetNamePropertyName = "name";
+
+        internal const string RuntimesPropertyName = "runtimes";
+
+        internal const string RuntimeTargetsPropertyName = "runtimeTargets";
+
+        internal const string RidPropertyName = "rid";
+
+        internal const string AssetTypePropertyName = "assetType";
+
+        internal const string RuntimeAssetType = "runtime";
+
+        internal const string NativeAssetType = "native";
     }
 }

@@ -28,23 +28,79 @@ namespace Microsoft.Extensions.DependencyModel
 
         private DependencyContext Read(JObject root)
         {
-            var libraryStubs = ReadLibraryStubs((JObject) root[DependencyContextStrings.LibrariesPropertyName]);
-            var targetsObject = (IEnumerable<KeyValuePair<string, JToken>>) root[DependencyContextStrings.TargetsPropertyName];
+            var runtime = string.Empty;
+            var target = string.Empty;
+            var isPortable = true;
 
-            var runtimeTargetProperty = targetsObject.First(target => IsRuntimeTarget(target.Key));
-            var compileTargetProperty = targetsObject.First(target => !IsRuntimeTarget(target.Key));
+            var runtimeTargetName = root[DependencyContextStrings.RuntimeTargetPropertyName]?.Value<string>();
+
+            var libraryStubs = ReadLibraryStubs((JObject) root[DependencyContextStrings.LibrariesPropertyName]);
+            var targetsObject = (JObject) root[DependencyContextStrings.TargetsPropertyName];
+
+            JObject runtimeTarget = null;
+            JObject compileTarget = null;
+            if (targetsObject != null)
+            {
+                var compileTargetProperty = targetsObject.Properties()
+                    .FirstOrDefault(p => !IsRuntimeTarget(p.Name));
+
+                compileTarget = (JObject)compileTargetProperty.Value;
+                target = compileTargetProperty.Name;
+
+                if (!string.IsNullOrEmpty(runtimeTargetName))
+                {
+                    runtimeTarget = (JObject) targetsObject[runtimeTargetName];
+                    if (runtimeTarget == null)
+                    {
+                        throw new FormatException($"Target with name {runtimeTargetName} not found");
+                    }
+
+                    var seperatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeperator);
+                    if (seperatorIndex > -1 && seperatorIndex < runtimeTargetName.Length)
+                    {
+                        runtime = runtimeTargetName.Substring(seperatorIndex + 1);
+                        isPortable = false;
+                    }
+                }
+                else
+                {
+                    runtimeTarget = compileTarget;
+                }
+            }
 
             return new DependencyContext(
-                compileTargetProperty.Key,
-                runtimeTargetProperty.Key.Substring(compileTargetProperty.Key.Length + 1),
+                target,
+                runtime,
+                isPortable,
                 ReadCompilationOptions((JObject)root[DependencyContextStrings.CompilationOptionsPropertName]),
-                ReadLibraries((JObject)compileTargetProperty.Value, false, libraryStubs).Cast<CompilationLibrary>().ToArray(),
-                ReadLibraries((JObject)runtimeTargetProperty.Value, true, libraryStubs).Cast<RuntimeLibrary>().ToArray()
+                ReadLibraries(compileTarget, false, libraryStubs).Cast<CompilationLibrary>().ToArray(),
+                ReadLibraries(runtimeTarget, true, libraryStubs).Cast<RuntimeLibrary>().ToArray(),
+                ReadRuntimeGraph((JObject)root[DependencyContextStrings.RuntimesPropertyName]).ToArray()
                 );
+        }
+
+        private IEnumerable<KeyValuePair<string, string[]>> ReadRuntimeGraph(JObject runtimes)
+        {
+            if (runtimes == null)
+            {
+                yield break;
+            }
+
+            var targets = runtimes.Children();
+            var runtime = (JProperty)targets.Single();
+            foreach (var pair in (JObject)runtime.Value)
+            {
+                yield return new KeyValuePair<string, string[]>(pair.Key, pair.Value.Values<string>().ToArray());
+            }
         }
 
         private CompilationOptions ReadCompilationOptions(JObject compilationOptionsObject)
         {
+            if (compilationOptionsObject == null)
+            {
+                return CompilationOptions.Default;
+            }
+
             return new CompilationOptions(
                 compilationOptionsObject[DependencyContextStrings.DefinesPropertyName]?.Values<string>(),
                 compilationOptionsObject[DependencyContextStrings.LanguageVersionPropertyName]?.Value<string>(),
@@ -63,6 +119,10 @@ namespace Microsoft.Extensions.DependencyModel
 
         private IEnumerable<Library> ReadLibraries(JObject librariesObject, bool runtime, Dictionary<string, LibraryStub> libraryStubs)
         {
+            if (librariesObject == null)
+            {
+                return Enumerable.Empty<Library>();
+            }
             return librariesObject.Properties().Select(property => ReadLibrary(property, runtime, libraryStubs));
         }
 
@@ -84,21 +144,65 @@ namespace Microsoft.Extensions.DependencyModel
             var libraryObject = (JObject) property.Value;
 
             var dependencies = ReadDependencies(libraryObject);
-            var assemblies = ReadAssemblies(libraryObject, runtime);
 
             if (runtime)
             {
-                return new RuntimeLibrary(stub.Type, name, version, stub.Hash, assemblies, dependencies, stub.Serviceable);
+                var runtimeTargets = new List<RuntimeTarget>();
+                var runtimeTargetsObject = (JObject)libraryObject[DependencyContextStrings.RuntimeTargetsPropertyName];
+
+                var entries = ReadRuntimeTargetEntries(runtimeTargetsObject).ToArray();
+
+                foreach (var ridGroup in entries.GroupBy(e => e.Rid))
+                {
+                    var runtimeAssets = entries.Where(e => e.Type == DependencyContextStrings.RuntimeAssetType)
+                        .Select(e => RuntimeAssembly.Create(e.Path))
+                        .ToArray();
+
+                    var nativeAssets = entries.Where(e => e.Type == DependencyContextStrings.NativeAssetType)
+                        .Select(e => e.Path)
+                        .ToArray();
+
+                    runtimeTargets.Add(new RuntimeTarget(
+                        ridGroup.Key,
+                        runtimeAssets,
+                        nativeAssets
+                        ));
+                }
+
+                var assemblies = ReadAssemblies(libraryObject, DependencyContextStrings.RuntimeAssembliesKey)
+                    .Select(RuntimeAssembly.Create)
+                    .ToArray();
+
+                return new RuntimeLibrary(stub.Type, name, version, stub.Hash, assemblies, runtimeTargets.ToArray(), dependencies, stub.Serviceable);
             }
             else
             {
+                var assemblies = ReadAssemblies(libraryObject, DependencyContextStrings.CompileTimeAssembliesKey);
                 return new CompilationLibrary(stub.Type, name, version, stub.Hash, assemblies, dependencies, stub.Serviceable);
             }
         }
 
-        private static string[] ReadAssemblies(JObject libraryObject, bool runtime)
+        private static IEnumerable<RuntimeTargetEntryStub> ReadRuntimeTargetEntries(JObject runtimeTargetObject)
         {
-            var assembliesObject = (JObject) libraryObject[runtime ? DependencyContextStrings.RunTimeAssembliesKey : DependencyContextStrings.CompileTimeAssembliesKey];
+            if (runtimeTargetObject == null)
+            {
+                yield break;
+            }
+            foreach (var libraryProperty in runtimeTargetObject)
+            {
+                var libraryObject = (JObject)libraryProperty.Value;
+                yield return new RuntimeTargetEntryStub()
+                {
+                    Path = libraryProperty.Key,
+                    Rid = libraryObject[DependencyContextStrings.RidPropertyName].Value<string>(),
+                    Type = libraryObject[DependencyContextStrings.AssetTypePropertyName].Value<string>()
+                };
+            }
+        }
+
+        private static string[] ReadAssemblies(JObject libraryObject, string name)
+        {
+            var assembliesObject = (JObject) libraryObject[name];
 
             if (assembliesObject == null)
             {
@@ -110,7 +214,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private static Dependency[] ReadDependencies(JObject libraryObject)
         {
-            var dependenciesObject = ((JObject) libraryObject[DependencyContextStrings.DependenciesPropertyName]);
+            var dependenciesObject = (JObject) libraryObject[DependencyContextStrings.DependenciesPropertyName];
 
             if (dependenciesObject == null)
             {
@@ -124,19 +228,29 @@ namespace Microsoft.Extensions.DependencyModel
         private Dictionary<string, LibraryStub> ReadLibraryStubs(JObject librariesObject)
         {
             var libraries = new Dictionary<string, LibraryStub>();
-            foreach (var libraryProperty in librariesObject)
+            if (librariesObject != null)
             {
-                var value = (JObject) libraryProperty.Value;
-                var stub = new LibraryStub
+                foreach (var libraryProperty in librariesObject)
                 {
-                    Name = libraryProperty.Key,
-                    Hash = value[DependencyContextStrings.Sha512PropertyName]?.Value<string>(),
-                    Type = value[DependencyContextStrings.TypePropertyName].Value<string>(),
-                    Serviceable = value[DependencyContextStrings.ServiceablePropertyName]?.Value<bool>() == true
-                };
-                libraries.Add(stub.Name, stub);
+                    var value = (JObject) libraryProperty.Value;
+                    var stub = new LibraryStub
+                    {
+                        Name = libraryProperty.Key,
+                        Hash = value[DependencyContextStrings.Sha512PropertyName]?.Value<string>(),
+                        Type = value[DependencyContextStrings.TypePropertyName].Value<string>(),
+                        Serviceable = value[DependencyContextStrings.ServiceablePropertyName]?.Value<bool>() == true
+                    };
+                    libraries.Add(stub.Name, stub);
+                }
             }
             return libraries;
+        }
+
+        private struct RuntimeTargetEntryStub
+        {
+            public string Type;
+            public string Path;
+            public string Rid;
         }
 
         private struct LibraryStub

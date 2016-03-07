@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Extensions.DependencyModel
 {
@@ -15,26 +16,63 @@ namespace Microsoft.Extensions.DependencyModel
 
         private static readonly Lazy<DependencyContext> _defaultContext = new Lazy<DependencyContext>(LoadDefault);
 
-        public DependencyContext(string target, string runtime, CompilationOptions compilationOptions, CompilationLibrary[] compileLibraries, RuntimeLibrary[] runtimeLibraries)
+        public DependencyContext(string targetFramework,
+            string runtime,
+            bool isPortable,
+            CompilationOptions compilationOptions,
+            IEnumerable<CompilationLibrary> compileLibraries,
+            IEnumerable<RuntimeLibrary> runtimeLibraries,
+            IEnumerable<KeyValuePair<string, string[]>> runtimeGraph)
         {
-            Target = target;
+            if (targetFramework == null)
+            {
+                throw new ArgumentNullException(nameof(targetFramework));
+            }
+            if (runtime == null)
+            {
+                throw new ArgumentNullException(nameof(runtime));
+            }
+            if (compilationOptions == null)
+            {
+                throw new ArgumentNullException(nameof(compilationOptions));
+            }
+            if (compileLibraries == null)
+            {
+                throw new ArgumentNullException(nameof(compileLibraries));
+            }
+            if (runtimeLibraries == null)
+            {
+                throw new ArgumentNullException(nameof(runtimeLibraries));
+            }
+            if (runtimeGraph == null)
+            {
+                throw new ArgumentNullException(nameof(runtimeGraph));
+            }
+
+            TargetFramework = targetFramework;
             Runtime = runtime;
+            IsPortable = isPortable;
             CompilationOptions = compilationOptions;
-            CompileLibraries = compileLibraries;
-            RuntimeLibraries = runtimeLibraries;
+            CompileLibraries = compileLibraries.ToArray();
+            RuntimeLibraries = runtimeLibraries.ToArray();
+            RuntimeGraph = runtimeGraph.ToArray();
         }
 
         public static DependencyContext Default => _defaultContext.Value;
 
-        public string Target { get; }
+        public string TargetFramework { get; }
 
         public string Runtime { get; }
+
+        public bool IsPortable { get; }
 
         public CompilationOptions CompilationOptions { get; }
 
         public IReadOnlyList<CompilationLibrary> CompileLibraries { get; }
 
         public IReadOnlyList<RuntimeLibrary> RuntimeLibraries { get; }
+
+        public IReadOnlyList<KeyValuePair<string, string[]>> RuntimeGraph { get; }
 
         private static DependencyContext LoadDefault()
         {
