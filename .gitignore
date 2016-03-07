@@ -277,3 +277,6 @@ test/PackagedCommands/Consumers/*/project.json
 # Vim swp files
 *.swp
 *.*~
+
+# VS generated files
+launchSettings.json

@@ -47,7 +47,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             _reportingChannelFactoryMock = new Mock<IReportingChannelFactory>();
             _reportingChannelFactoryMock.Setup(r =>
-                r.CreateChannelWithAnyAvailablePort()).Returns(_testRunnerChannelMock.Object);
+                r.CreateTestRunnerChannel()).Returns(_testRunnerChannelMock.Object);
 
             _testDiscoveryStartMessageHandler = new TestDiscoveryStartMessageHandler(
                 _testRunnerFactoryMock.Object,
@@ -131,7 +131,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                     _dotnetTestMock.Object,
                     _validMessage);
 
-            _reportingChannelFactoryMock.Verify(r => r.CreateChannelWithAnyAvailablePort(), Times.Once);
+            _reportingChannelFactoryMock.Verify(r => r.CreateTestRunnerChannel(), Times.Once);
         }
 
         [Fact]
