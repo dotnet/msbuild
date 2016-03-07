@@ -50,12 +50,12 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
-        public EnvironmentProvider(IEnumerable<string> extensionsOverride = null)
+        public EnvironmentProvider(
+            IEnumerable<string> extensionsOverride = null,
+            IEnumerable<string> searchPathsOverride = null)
         {
-            if (extensionsOverride != null)
-            {
-                _executableExtensions = extensionsOverride;
-            }
+            _executableExtensions = extensionsOverride;
+            _searchPaths = searchPathsOverride;
         }
 
         public string GetCommandPath(string commandName, params string[] extensions)
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public string GetCommandPathFromRootPath(string rootPath, string commandName, IEnumerable<string> extensions)
         {
-            var extensionsArr = extensions.EmptyIfNull().ToArray();
+            var extensionsArr = extensions.OrEmptyIfNull().ToArray();
 
             return GetCommandPathFromRootPath(rootPath, commandName, extensionsArr);
         }

@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return _commandSpecFactory.CreateCommandSpec(
                     commandResolverArguments.CommandName,
-                    commandResolverArguments.CommandArguments.EmptyIfNull(),
+                    commandResolverArguments.CommandArguments.OrEmptyIfNull(),
                     commandPath,
                     GetCommandResolutionStrategy(),
                     _environment);

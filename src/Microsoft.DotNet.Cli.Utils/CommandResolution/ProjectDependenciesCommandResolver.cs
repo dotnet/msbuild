@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandResolverArguments.Framework,
                     commandResolverArguments.Configuration,
                     commandResolverArguments.CommandName,
-                    commandResolverArguments.CommandArguments,
+                    commandResolverArguments.CommandArguments.OrEmptyIfNull(),
                     commandResolverArguments.OutputPath);
         }
 

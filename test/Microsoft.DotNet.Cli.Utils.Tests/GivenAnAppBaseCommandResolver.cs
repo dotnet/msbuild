@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void It_returns_null_when_CommandName_is_null()
         {
-            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver();
+            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(forceGeneric: true);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void It_returns_null_when_CommandName_does_not_exist_applocal()
         {
-            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver();
+            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(forceGeneric: true);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_returns_a_CommandSpec_with_CommandName_as_FileName_when_CommandName_exists_applocal()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment);
+            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment, forceGeneric: true);
 
             CommandResolverTestUtils.CreateNonRunnableTestCommand(AppContext.BaseDirectory, "appbasetestcommand1", ".exe");
 
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_returns_null_when_CommandName_exists_applocal_in_a_subdirectory()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment);
+            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment, forceGeneric: true);
 
             var testDir = Path.Combine(AppContext.BaseDirectory, "appbasetestsubdir");
             CommandResolverTestUtils.CreateNonRunnableTestCommand(testDir, "appbasetestsubdircommand", ".exe");
@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_escapes_CommandArguments_when_returning_a_CommandSpec()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment);
+            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment, forceGeneric: true);
 
             CommandResolverTestUtils.CreateNonRunnableTestCommand(AppContext.BaseDirectory, "appbasetestcommand1", ".exe");
 
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_returns_a_CommandSpec_with_Args_as_stringEmpty_when_returning_a_CommandSpec_and_CommandArguments_are_null()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment);
+            var appBaseCommandResolver = SetupPlatformAppBaseCommandResolver(environment, forceGeneric: true);
 
             CommandResolverTestUtils.CreateNonRunnableTestCommand(AppContext.BaseDirectory, "appbasetestcommand1", ".exe");
 
@@ -161,19 +161,44 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             commandFile.Should().Be("appbasetestcommand1.exe");
         }
 
-        private AppBaseCommandResolver SetupPlatformAppBaseCommandResolver(IEnvironmentProvider environment = null)
+        public void It_wraps_command_with_CMD_EXE_when_command_has_CMD_Extension_and_using_WindowsExePreferredCommandSpecFactory()
+        {
+            var environment = new EnvironmentProvider(new [] {".cmd"});
+            var platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();
+
+            var pathCommandResolver = new PathCommandResolver(environment, platformCommandSpecFactory);
+
+            var testCommandPath = 
+                CommandResolverTestUtils.CreateNonRunnableTestCommand(AppContext.BaseDirectory, "cmdWrapCommand", ".cmd");
+
+            var commandResolverArguments = new CommandResolverArguments()
+            {
+                CommandName = "cmdWrapCommand",
+                CommandArguments = null
+            };
+
+            var result = pathCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+
+            var commandFile = Path.GetFileName(result.Path);
+            commandFile.Should().Be("cmd.exe");
+
+            result.Args.Should().Contain(testCommandPath);
+        }
+
+        private AppBaseCommandResolver SetupPlatformAppBaseCommandResolver(
+            IEnvironmentProvider environment = null,
+            bool forceGeneric = false)
         {
             environment = environment ?? new EnvironmentProvider();
 
-            var platformCommandSpecFactory = default(IPlatformCommandSpecFactory);
+            IPlatformCommandSpecFactory platformCommandSpecFactory  = new GenericPlatformCommandSpecFactory();
 
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows
+                && !forceGeneric)
             {
                 platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();
-            }
-            else
-            {
-                platformCommandSpecFactory = new GenericPlatformCommandSpecFactory();
             }
 
             var appBaseCommandResolver = new AppBaseCommandResolver(environment, platformCommandSpecFactory);

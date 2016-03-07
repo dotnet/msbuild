@@ -13,9 +13,6 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class CommandResolver
     {
-        private static DefaultCommandResolver _defaultCommandResolver;
-        private static ScriptCommandResolver _scriptCommandResolver;
-
         public static CommandSpec TryResolveCommandSpec(
             string commandName, 
             IEnumerable<string> args, 
@@ -32,13 +29,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 Configuration = configuration,
                 OutputPath = outputPath
             };
-
-            if (_defaultCommandResolver == null)
-            {
-                _defaultCommandResolver = DefaultCommandResolver.Create();
-            }
-
-            return _defaultCommandResolver.Resolve(commandResolverArgs);
+            
+            var defaultCommandResolver = DefaultCommandResolverPolicy.Create();
+            
+            return defaultCommandResolver.Resolve(commandResolverArgs);
         }
         
         public static CommandSpec TryResolveScriptCommandSpec(
@@ -55,12 +49,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 InferredExtensions = inferredExtensionList
             };
 
-            if (_scriptCommandResolver == null)
-            {
-                _scriptCommandResolver = ScriptCommandResolver.Create();
-            }
-
-            return _scriptCommandResolver.Resolve(commandResolverArgs);
+            var scriptCommandResolver = ScriptCommandResolverPolicy.Create();
+            
+            return scriptCommandResolver.Resolve(commandResolverArgs);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Utils
             if (Path.IsPathRooted(commandResolverArguments.CommandName))
             {
                 var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(
-                    commandResolverArguments.CommandArguments.EmptyIfNull());
+                    commandResolverArguments.CommandArguments.OrEmptyIfNull());
 
                 return new CommandSpec(commandResolverArguments.CommandName, escapedArgs, CommandResolutionStrategy.RootedPath);
             }

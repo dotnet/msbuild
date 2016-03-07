@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void It_returns_null_when_CommandName_is_null()
         {
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver();
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(forceGeneric: true);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void It_returns_null_when_ProjectDirectory_is_null()
         {
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver();
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(forceGeneric: true);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void It_returns_null_when_CommandName_does_not_exist_in_ProjectDirectory()
         {
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver();
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(forceGeneric: true);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_returns_null_when_CommandName_exists_in_a_subdirectory_of_ProjectDirectory()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment);
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment, forceGeneric: true);
 
             var testDir = Path.Combine(s_testProjectDirectory, "projectpathtestsubdir");
             CommandResolverTestUtils.CreateNonRunnableTestCommand(testDir, "projectpathtestsubdircommand", ".exe");
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_returns_a_CommandSpec_with_CommandName_as_FileName_when_CommandName_exists_in_ProjectDirectory()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment);
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment, forceGeneric: true);
 
             CommandResolverTestUtils.CreateNonRunnableTestCommand(s_testProjectDirectory, "projectpathtestcommand1", ".exe");
 
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_escapes_CommandArguments_when_returning_a_CommandSpec()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment);
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment, forceGeneric: true);
 
             CommandResolverTestUtils.CreateNonRunnableTestCommand(s_testProjectDirectory, "projectpathtestcommand1", ".exe");
 
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_resolves_commands_with_extensions_defined_in_InferredExtensions()
         {
             var extensions = new string[] {".sh", ".cmd", ".foo", ".exe"};
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver();
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(forceGeneric: true);
 
             foreach (var extension in extensions)
             {
@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void It_returns_a_CommandSpec_with_Args_as_stringEmpty_when_returning_a_CommandSpec_and_CommandArguments_are_null()
         {
             var environment = CommandResolverTestUtils.SetupEnvironmentProviderWhichFindsExtensions(".exe");
-            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment);
+            var projectPathCommandResolver = SetupPlatformProjectPathCommandResolver(environment, forceGeneric: true);
 
             CommandResolverTestUtils.CreateNonRunnableTestCommand(s_testProjectDirectory, "projectpathtestcommand1", ".exe");
 
@@ -216,19 +216,44 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             commandFile.Should().Be("projectpathtestcommand1.exe");
         }
 
-        private ProjectPathCommandResolver SetupPlatformProjectPathCommandResolver(IEnvironmentProvider environment = null)
+        public void It_wraps_command_with_CMD_EXE_when_command_has_CMD_Extension_and_using_WindowsExePreferredCommandSpecFactory()
+        {
+            var environment = new EnvironmentProvider(new [] {".cmd"});
+            var platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();
+
+            var pathCommandResolver = new PathCommandResolver(environment, platformCommandSpecFactory);
+
+            var testCommandPath = 
+                CommandResolverTestUtils.CreateNonRunnableTestCommand(s_testProjectDirectory, "cmdWrapCommand", ".cmd");
+
+            var commandResolverArguments = new CommandResolverArguments()
+            {
+                CommandName = "cmdWrapCommand",
+                CommandArguments = null
+            };
+
+            var result = pathCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+
+            var commandFile = Path.GetFileName(result.Path);
+            commandFile.Should().Be("cmd.exe");
+
+            result.Args.Should().Contain(testCommandPath);
+        }
+
+        private ProjectPathCommandResolver SetupPlatformProjectPathCommandResolver(
+            IEnvironmentProvider environment = null,
+            bool forceGeneric = false)
         {
             environment = environment ?? new EnvironmentProvider();
 
-            var platformCommandSpecFactory = default(IPlatformCommandSpecFactory);
+            IPlatformCommandSpecFactory platformCommandSpecFactory = new GenericPlatformCommandSpecFactory();
 
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows
+                && !forceGeneric)
             {
                 platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();
-            }
-            else
-            {
-                platformCommandSpecFactory = new GenericPlatformCommandSpecFactory();
             }
 
             var projectPathCommandResolver = new ProjectPathCommandResolver(environment, platformCommandSpecFactory);

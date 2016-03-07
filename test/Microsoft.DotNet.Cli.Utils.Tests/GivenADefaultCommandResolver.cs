@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void It_contains_resolvers_in_the_right_order()
         {
-            var defaultCommandResolver = DefaultCommandResolver.Create();
+            var defaultCommandResolver = DefaultCommandResolverPolicy.Create();
 
             var resolvers = defaultCommandResolver.OrderedCommandResolvers;
 

@@ -32,9 +32,15 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandSpec Resolve(CommandResolverArguments commandResolverArguments)
         {
+            if (commandResolverArguments.CommandName == null
+                || commandResolverArguments.ProjectDirectory == null)
+            {
+                return null;
+            }
+            
             return ResolveFromProjectTools(
                 commandResolverArguments.CommandName, 
-                commandResolverArguments.CommandArguments,
+                commandResolverArguments.CommandArguments.OrEmptyIfNull(),
                 commandResolverArguments.ProjectDirectory);
         }
 
@@ -50,7 +56,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var toolsLibraries = projectContext.ProjectFile.Tools.EmptyIfNull();
+            var toolsLibraries = projectContext.ProjectFile.Tools.OrEmptyIfNull();
 
             return ResolveCommandSpecFromAllToolLibraries(
                 toolsLibraries,

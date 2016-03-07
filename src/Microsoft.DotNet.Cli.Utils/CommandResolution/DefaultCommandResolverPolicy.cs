@@ -11,9 +11,9 @@ using NuGet.Packaging;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class DefaultCommandResolver : CompositeCommandResolver
+    public class DefaultCommandResolverPolicy
     {
-        public static DefaultCommandResolver Create()
+        public static CompositeCommandResolver Create()
         {
             var environment = new EnvironmentProvider();
             var packagedCommandSpecFactory = new PackagedCommandSpecFactory();
@@ -28,18 +28,22 @@ namespace Microsoft.DotNet.Cli.Utils
                 platformCommandSpecFactory = new GenericPlatformCommandSpecFactory();
             }
 
-            return new DefaultCommandResolver(environment, packagedCommandSpecFactory, platformCommandSpecFactory);
+            return CreateDefaultCommandResolver(environment, packagedCommandSpecFactory, platformCommandSpecFactory);
         }
 
-        public DefaultCommandResolver(
+        public static CompositeCommandResolver CreateDefaultCommandResolver(
             IEnvironmentProvider environment,
             IPackagedCommandSpecFactory packagedCommandSpecFactory,
-            IPlatformCommandSpecFactory platformCommandSpecFactory) : base()
+            IPlatformCommandSpecFactory platformCommandSpecFactory)
         {
-            AddCommandResolver(new RootedCommandResolver());
-            AddCommandResolver(new ProjectToolsCommandResolver(packagedCommandSpecFactory));
-            AddCommandResolver(new AppBaseCommandResolver(environment, platformCommandSpecFactory));
-            AddCommandResolver(new PathCommandResolver(environment, platformCommandSpecFactory));
+            var compositeCommandResolver = new CompositeCommandResolver();
+
+            compositeCommandResolver.AddCommandResolver(new RootedCommandResolver());
+            compositeCommandResolver.AddCommandResolver(new ProjectToolsCommandResolver(packagedCommandSpecFactory));
+            compositeCommandResolver.AddCommandResolver(new AppBaseCommandResolver(environment, platformCommandSpecFactory));
+            compositeCommandResolver.AddCommandResolver(new PathCommandResolver(environment, platformCommandSpecFactory));
+            
+            return compositeCommandResolver;
         }
     }
 }

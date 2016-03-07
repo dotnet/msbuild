@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return _environment.GetCommandPathFromRootPath(
                 commandResolverArguments.ProjectDirectory, 
                 commandResolverArguments.CommandName,
-                commandResolverArguments.InferredExtensions.EmptyIfNull());
+                commandResolverArguments.InferredExtensions.OrEmptyIfNull());
         }
 
         internal override CommandResolutionStrategy GetCommandResolutionStrategy()

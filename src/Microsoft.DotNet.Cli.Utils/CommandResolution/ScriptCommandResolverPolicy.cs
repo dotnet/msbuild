@@ -11,9 +11,9 @@ using NuGet.Packaging;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class ScriptCommandResolver : CompositeCommandResolver
+    public class ScriptCommandResolverPolicy
     {
-        public static ScriptCommandResolver Create()
+        public static CompositeCommandResolver Create()
         {
             var environment = new EnvironmentProvider();
 
@@ -27,17 +27,21 @@ namespace Microsoft.DotNet.Cli.Utils
                 platformCommandSpecFactory = new GenericPlatformCommandSpecFactory();
             }
 
-            return new ScriptCommandResolver(environment, platformCommandSpecFactory);
+            return CreateScriptCommandResolver(environment, platformCommandSpecFactory);
         }
 
-        public ScriptCommandResolver(
+        public static CompositeCommandResolver CreateScriptCommandResolver(
             IEnvironmentProvider environment,
             IPlatformCommandSpecFactory platformCommandSpecFactory)
         {
-            AddCommandResolver(new RootedCommandResolver());
-            AddCommandResolver(new ProjectPathCommandResolver(environment, platformCommandSpecFactory));
-            AddCommandResolver(new AppBaseCommandResolver(environment, platformCommandSpecFactory));
-            AddCommandResolver(new PathCommandResolver(environment, platformCommandSpecFactory));
+            var compositeCommandResolver = new CompositeCommandResolver();
+
+            compositeCommandResolver.AddCommandResolver(new RootedCommandResolver());
+            compositeCommandResolver.AddCommandResolver(new ProjectPathCommandResolver(environment, platformCommandSpecFactory));
+            compositeCommandResolver.AddCommandResolver(new AppBaseCommandResolver(environment, platformCommandSpecFactory));
+            compositeCommandResolver.AddCommandResolver(new PathCommandResolver(environment, platformCommandSpecFactory));
+        
+            return compositeCommandResolver;
         }
     }
 }
