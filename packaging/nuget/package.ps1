@@ -13,8 +13,10 @@ if ($versionSuffix -ne "") {
     $versionArg = "--version-suffix"
 }
 
-. "$PSScriptRoot\..\..\scripts\common\_common.ps1"
-. "$REPOROOT\scripts\package\projectsToPack.ps1"
+$RepoRoot = Convert-Path "$PSScriptRoot\..\.."
+
+. "$RepoRoot\scripts\common\_common.ps1"
+. "$RepoRoot\scripts\package\projectsToPack.ps1"
 
 $IntermediatePackagesDir = "$RepoRoot\artifacts\packages\intermediate"
 $PackagesDir = "$RepoRoot\artifacts\packages"

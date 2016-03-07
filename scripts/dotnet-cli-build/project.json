@@ -9,12 +9,13 @@
         "NETStandard.Library": "1.0.0-rc2-23901",
         "System.IO.Compression.ZipFile": "4.0.1-rc2-23901",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
-        "Microsoft.DotNet.Cli.Build.Framework": "1.0.0-*"
+        "Microsoft.DotNet.Cli.Build.Framework": "1.0.0-*",
+        "WindowsAzure.Storage" : "6.2.2-preview"
     },
 
     "frameworks": {
         "netstandardapp1.5": {
-            "imports": "dnxcore50"
+            "imports": ["dnxcore50", "portable-net45+win8"]
         }
     }
 }

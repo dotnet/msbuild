@@ -48,6 +48,43 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
         }
 
+        public static bool IsUnix
+        {
+            get
+            {
+                return IsLinux || IsOSX;
+            }
+        }
+
+        public static bool IsLinux
+        {
+            get
+            {
+                return IsUbuntu || IsCentOS;
+            }
+        }
+
+        public static bool IsPlatform(BuildPlatform platform)
+        {
+            switch (platform)
+            {
+                case BuildPlatform.Windows:
+                    return IsWindows;
+                case BuildPlatform.Ubuntu:
+                    return IsUbuntu;
+                case BuildPlatform.OSX:
+                    return IsOSX;
+                case BuildPlatform.CentOS:
+                    return IsCentOS;
+                case BuildPlatform.Unix:
+                    return IsUnix;
+                case BuildPlatform.Linux:
+                    return IsLinux;
+                default:
+                    throw new Exception("Unrecognized Platform.");
+            }
+        }
+
         private static BuildPlatform DetermineCurrentPlatform()
         {
             if (IsWindows)

@@ -141,6 +141,3 @@ execute_build
 DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
 
 execute_test
-
-# Publish
-$REPOROOT/scripts/publish/publish.sh $DEBIAN_FILE 
