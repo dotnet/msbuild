@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Build
         nameof(PackageTargets.GenerateCompressedFile),
         nameof(InstallerTargets.GenerateInstaller),
         nameof(PackageTargets.GenerateNugetPackages))]
-        [Environment("DOTNET_BUILD_SKIP_PACKAGING", null)]
+        [Environment("DOTNET_BUILD_SKIP_PACKAGING", null, "0", "false")]
         public static BuildTargetResult Package(BuildTargetContext c)
         {
             return c.Success();

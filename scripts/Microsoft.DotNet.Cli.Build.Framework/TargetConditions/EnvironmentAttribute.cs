@@ -7,9 +7,9 @@ namespace Microsoft.DotNet.Cli.Build.Framework
     public class EnvironmentAttribute : TargetConditionAttribute
     {
         private string _envVar;
-        private string _expectedVal;
+        private string[] _expectedVals;
 
-        public EnvironmentAttribute(string envVar, string expectedVal)
+        public EnvironmentAttribute(string envVar, params string[] expectedVals)
         {
             if (string.IsNullOrEmpty(envVar))
             {
@@ -17,21 +17,22 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
 
             _envVar = envVar;
-            _expectedVal = expectedVal;
+            _expectedVals = expectedVals;
         }
 
         public override bool EvaluateCondition()
         {
             var actualVal = Environment.GetEnvironmentVariable(_envVar);
 
-            if (string.IsNullOrEmpty(_expectedVal))
+            foreach (var expectedVal in _expectedVals)
             {
-                return string.IsNullOrEmpty(actualVal) ||
-                       actualVal.Equals("0") ||
-                       actualVal.ToLower().Equals("false");
+                if (string.Equals(actualVal, expectedVal, StringComparison.Ordinal))
+                {
+                    return true;
+                }
             }
 
-            return _expectedVal.Equals(actualVal, StringComparison.Ordinal);
+            return false;
         }
     }
 }

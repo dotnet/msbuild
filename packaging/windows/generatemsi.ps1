@@ -4,7 +4,11 @@
 param(
     [Parameter(Mandatory=$true)][string]$inputDir,
     [Parameter(Mandatory=$true)][string]$DotnetMSIOutput,
-    [Parameter(Mandatory=$true)][string]$WixRoot
+    [Parameter(Mandatory=$true)][string]$WixRoot,
+    [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
+    [Parameter(Mandatory=$true)][string]$DotnetCLIVersion,
+    [Parameter(Mandatory=$true)][string]$Architecture,
+    [Parameter(Mandatory=$true)][string]$ReleaseSuffix
 )
 
 . "$PSScriptRoot\..\..\scripts\common\_common.ps1"
@@ -43,10 +47,10 @@ function RunCandle
     .\candle.exe -nologo `
         -dDotnetSrc="$inputDir" `
         -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" `
-        -dBuildVersion="$env:DOTNET_MSI_VERSION" `
-        -dDisplayVersion="$env:DOTNET_CLI_VERSION" `
-        -dReleaseSuffix="$env:ReleaseSuffix" `
-        -arch "$env:ARCHITECTURE" `
+        -dBuildVersion="$DotnetMSIVersion" `
+        -dDisplayVersion="$DotnetCLIVersion" `
+        -dReleaseSuffix="$ReleaseSuffix" `
+        -arch "$Architecture" `
         -ext WixDependencyExtension.dll `
         "$AuthWsxRoot\dotnet.wxs" `
         "$AuthWsxRoot\provider.wxs" `
@@ -99,11 +103,6 @@ function RunLight
 if(!(Test-Path $inputDir))
 {
     throw "$inputDir not found"
-}
-
-if(!(Test-Path $PackageDir))
-{
-    mkdir $PackageDir | Out-Null
 }
 
 Write-Host "Creating dotnet MSI at $DotnetMSIOutput"

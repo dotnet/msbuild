@@ -28,6 +28,14 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string Engine { get; set; }
 
+        private static string MsiVersion { get; set; }
+
+        private static string CliVersion { get; set; }
+
+        private static string Arch { get; } = CurrentArchitecture.Current.ToString();
+
+        private static string Channel { get; set; }
+
         private static void AcquireWix(BuildTargetContext c)
         {
             if (File.Exists(Path.Combine(WixRoot, "candle.exe")))
@@ -55,6 +63,12 @@ namespace Microsoft.DotNet.Cli.Build
             Bundle = c.BuildContext.Get<string>("InstallerFile");
             Msi = Path.ChangeExtension(Bundle, "msi");
             Engine = Path.Combine(Path.GetDirectoryName(Bundle), ENGINE);
+
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            MsiVersion = buildVersion.GenerateMsiVersion();
+            CliVersion = buildVersion.SimpleVersion;
+            Channel = c.BuildContext.Get<string>("Channel");
+
             AcquireWix(c);
             return c.Success();
         }
@@ -66,12 +80,6 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateMsis(BuildTargetContext c)
         {
-            var env = PackageTargets.GetCommonEnvVars(c);
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatemsi.ps1"), Dirs.Stage2, Msi, WixRoot)
-                    .Environment(env)
-                    .Execute()
-                    .EnsureSuccessful();
             return c.Success();
         }
 
@@ -79,10 +87,9 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateCLISDKMsi(BuildTargetContext c)
         {
-            var env = PackageTargets.GetCommonEnvVars(c);
             Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatemsi.ps1"), Dirs.Stage2, Msi, WixRoot)
-                    .Environment(env)
+                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatemsi.ps1"),
+                Dirs.Stage2, Msi, WixRoot, MsiVersion, CliVersion, Arch, Channel)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -107,10 +114,10 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateBundle(BuildTargetContext c)
         {
-            var env = PackageTargets.GetCommonEnvVars(c);
             Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatebundle.ps1"), Msi, Bundle, WixRoot)
-                    .Environment(env)
+                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatebundle.ps1"),
+                Msi, Bundle, WixRoot, MsiVersion, CliVersion, Arch, Channel)
+                    .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

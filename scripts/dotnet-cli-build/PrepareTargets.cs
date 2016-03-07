@@ -21,10 +21,10 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
         public static BuildTargetResult CheckPrereqs(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(CheckCoreclrPlatformDependencies),  nameof(CheckInstallerBuildPlatformDependencies))]
+        [Target(nameof(CheckCoreclrPlatformDependencies), nameof(CheckInstallerBuildPlatformDependencies))]
         public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(CheckUbuntuCoreclrAndCoreFxDependencies),  nameof(CheckCentOSCoreclrAndCoreFxDependencies))]
+        [Target(nameof(CheckUbuntuCoreclrAndCoreFxDependencies), nameof(CheckCentOSCoreclrAndCoreFxDependencies))]
         public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c) => c.Success();
 
         [Target(nameof(CheckUbuntuDebianPackageBuildDependencies))]
@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             c.BuildContext["Configuration"] = configEnv;
+            c.BuildContext["Channel"] = Environment.GetEnvironmentVariable("CHANNEL");
 
             c.Info($"Building {c.BuildContext["Configuration"]} to: {Dirs.Output}");
             c.Info("Build Environment:");
@@ -116,7 +117,7 @@ namespace Microsoft.DotNet.Cli.Build
             c.BuildContext["CompressedFile"] = Path.Combine(Dirs.Packages, productName + extension);
 
             string installer = "";
-            switch(CurrentPlatform.Current)
+            switch (CurrentPlatform.Current)
             {
                 case BuildPlatform.Windows:
                     installer = productName + ".exe";
@@ -131,7 +132,7 @@ namespace Microsoft.DotNet.Cli.Build
                     break;
             }
 
-            if(!string.IsNullOrEmpty(installer))
+            if (!string.IsNullOrEmpty(installer))
             {
                 c.BuildContext["InstallerFile"] = Path.Combine(Dirs.Packages, installer);
             }
@@ -279,7 +280,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CheckCentOSCoreclrAndCoreFxDependencies(BuildTargetContext c)
         {
             var errorMessageBuilder = new StringBuilder();
-            
+
             foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
             {
                 if (!YumDependencyUtility.PackageIsInstalled(package))

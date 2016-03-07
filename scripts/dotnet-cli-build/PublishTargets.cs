@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Build
     {
         private static CloudBlobContainer BlobContainer { get; set; }
 
-        private static string Channel { get; } = "Test";// Environment.GetEnvironmentVariable("RELEASE_SUFFIX");
+        private static string Channel { get; set; }
 
         private static string Version { get; set; }
 
@@ -30,13 +30,14 @@ namespace Microsoft.DotNet.Cli.Build
             BlobContainer = blobClient.GetContainerReference("dotnet");
 
             Version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            Channel = c.BuildContext.Get<string>("Channel");
             return c.Success();
         }
 
         [Target(nameof(PrepareTargets.Init),
         nameof(PublishTargets.InitPublish),
         nameof(PublishTargets.PublishArtifacts))]
-        [Environment("PUBLISH_TO_AZURE_BLOB", "true")] // This is set by CI systems
+        [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
         public static BuildTargetResult Publish(BuildTargetContext c)
         {
             return c.Success();

@@ -4,7 +4,11 @@
 param(
     [Parameter(Mandatory=$true)][string]$DotnetMSIFile,
     [Parameter(Mandatory=$true)][string]$DotnetBundleOutput,
-    [Parameter(Mandatory=$true)][string]$WixRoot
+    [Parameter(Mandatory=$true)][string]$WixRoot,
+    [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
+    [Parameter(Mandatory=$true)][string]$DotnetCLIVersion,
+    [Parameter(Mandatory=$true)][string]$Architecture,
+    [Parameter(Mandatory=$true)][string]$ReleaseSuffix
 )
 
 . "$PSScriptRoot\..\..\scripts\common\_common.ps1"
@@ -21,11 +25,11 @@ function RunCandleForBundle
     .\candle.exe -nologo `
         -dDotnetSrc="$inputDir" `
         -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" `
-        -dBuildVersion="$env:DOTNET_MSI_VERSION" `
-        -dDisplayVersion="$env:DOTNET_CLI_VERSION" `
-        -dReleaseSuffix="$env:ReleaseSuffix" `
+        -dBuildVersion="$DotnetMSIVersion" `
+        -dDisplayVersion="$DotnetCLIVersion" `
+        -dReleaseSuffix="$ReleaseSuffix" `
         -dMsiSourcePath="$DotnetMSIFile" `
-        -arch "$env:ARCHITECTURE" `
+        -arch "$Architecture" `
         -ext WixBalExtension.dll `
         -ext WixUtilExtension.dll `
         -ext WixTagExtension.dll `
