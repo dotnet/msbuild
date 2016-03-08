@@ -10,7 +10,7 @@
         "System.IO.Compression": "4.1.0-rc2-23901",
         "FluentAssertions": "4.0.0",
         "xunit": "2.1.0",
-        "dotnet-test-xunit": "1.0.0-dev-79755-47",
+        "dotnet-test-xunit": "1.0.0-dev-91790-12",
 
         "Microsoft.DotNet.TestFramework": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
