@@ -13,6 +13,7 @@
 
         "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
         
+        "moq.netcore": "4.4.0-beta8",
         "xunit": "2.1.0",
         "dotnet-test-xunit": "1.0.0-dev-79755-47"
     },
@@ -27,7 +28,11 @@
     },
 
     "content": [
-        "../../TestAssets/TestProjects/OutputStandardOutputAndError/*"
+        "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",
+        "../../TestAssets/TestProjects/TestAppWithArgs/*",
+        "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
+        "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
+        "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
     ],
 
     "testRunner": "xunit"
