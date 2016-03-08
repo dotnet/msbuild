@@ -83,15 +83,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuildNativeRyuJit()
         {
-            if(IsCentOS())
+            if(!IsNativeCompilationSupported())
             {
-                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
-                return;
-            }
-
-            if (IsWinX86())
-            {
-                Console.WriteLine("Skipping native compilation tests on Windows x86 - https://github.com/dotnet/cli/issues/1550");
                 return;
             }
 
@@ -105,15 +98,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuildNativeCpp()
         {
-            if(IsCentOS())
-            {
-                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
-                return;
-            }
-
-            if (IsWinX86())
-            {
-                Console.WriteLine("Skipping native compilation tests on Windows x86 - https://github.com/dotnet/cli/issues/1550");
+            if(!IsNativeCompilationSupported())
+            {   
                 return;
             }
 
@@ -127,15 +113,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetCompileNativeCppIncremental()
         {
-            if (IsCentOS())
-            {
-                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
-                return;
-            }
-
-            if (IsWinX86())
-            {
-                Console.WriteLine("Skipping native compilation tests on Windows x86 - https://github.com/dotnet/cli/issues/1550");
+            if(!IsNativeCompilationSupported())
+            {   
                 return;
             }
 
@@ -236,25 +215,26 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             Directory.SetCurrentDirectory(currentDirectory);
         }
 
-        private bool IsCentOS()
+        private bool IsNativeCompilationSupported()
         {
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            bool isSupported = true;
+            var platform = PlatformServices.Default.Runtime.OperatingSystem.ToLower();
+            switch (platform)
             {
-                const string OSIDFILE = "/etc/os-release";
-
-                if(File.Exists(OSIDFILE))
-                {
-                    return File.ReadAllText(OSIDFILE).ToLower().Contains("centos");
-                }
+                case "centos":
+                case "rhel":
+                    Console.WriteLine("Skipping native compilation tests on CentOS/RHEL - https://github.com/dotnet/cli/issues/453");
+                    isSupported = false;
+                    break;
+                case "windows":
+                    Console.WriteLine("Skipping native compilation tests on Windows x86 - https://github.com/dotnet/cli/issues/1550");
+                    isSupported = RuntimeInformation.ProcessArchitecture != Architecture.X86;
+                    break;
+                default:
+                    break;
             }
 
-            return false;
-        }
-
-        private bool IsWinX86()
-        {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-                RuntimeInformation.ProcessArchitecture == Architecture.X86;
+            return isSupported;
         }
 
         private static DateTime GetLastWriteTimeUtcOfDirectoryFiles(string outputDirectory)

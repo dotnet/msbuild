@@ -83,6 +83,8 @@ current_os()
             echo "ubuntu"
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             echo "centos"
+        elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
+            echo "rhel.7"
         fi
     fi
 }
