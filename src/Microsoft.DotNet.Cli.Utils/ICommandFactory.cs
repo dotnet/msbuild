@@ -9,6 +9,9 @@ namespace Microsoft.DotNet.Cli.Utils
     public interface ICommandFactory
     {
         ICommand Create(
-            string commandName, IEnumerable<string> args, NuGetFramework framework = null, string configuration = null);
+            string commandName,
+            IEnumerable<string> args,
+            NuGetFramework framework = null,
+            string configuration = Constants.DefaultConfiguration);
     }
 }

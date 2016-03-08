@@ -1,0 +1,11 @@
+{
+  "dependencies": { },
+  "frameworks": {
+    "dnxcore50": {
+      "dependencies":{
+        "NETStandard.Library": "1.0.0-rc2-23811",
+        "System.Console": "4.0.0-beta-*"
+      }
+    }
+  }
+}

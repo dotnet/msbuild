@@ -10,7 +10,7 @@
     <ProjectGuid>61b7c351-c77d-43f7-b56f-bb1440178e10</ProjectGuid>
     <RootNamespace>Microsoft.DotNet.Cli.Utils</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin\$(MSBuildProjectName)\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>

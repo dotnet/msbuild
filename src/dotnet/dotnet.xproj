@@ -8,8 +8,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>60cf7e6c-d6c8-439d-b7b7-d8a27e29be2c</ProjectGuid>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">..\artifacts\bin\$(MSBuildProjectName)\</OutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>

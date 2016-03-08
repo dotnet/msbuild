@@ -9,7 +9,7 @@
     <ProjectGuid>c7af0290-ef0d-44dc-9edc-600803b664f8</ProjectGuid>
     <RootNamespace>Microsoft.DotNet.ProjectModel.Loader</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin\$(MSBuildProjectName)\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -5,6 +5,8 @@ namespace Microsoft.Extensions.Testing.Abstractions
 {
     public interface ITestSink
     {
+        void SendWaitingCommand();
+
         void SendTestCompleted();
     }
 }

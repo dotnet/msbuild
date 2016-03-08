@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
                    Enumerable.SequenceEqual(local.ProjectDiagnostics, remote.ProjectDiagnostics);
         }
 
-        protected override object CreatePayload(ProjectSnapshot local)
+        protected override void SendPayload(ProjectSnapshot local, Action<object> send)
         {
-            return new DiagnosticsListMessage(local.ProjectDiagnostics);
+            send(new DiagnosticsListMessage(local.ProjectDiagnostics));
         }
 
         protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)

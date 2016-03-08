@@ -8,7 +8,7 @@ import jobs.generation.Utilities;
 def project = GithubProject
 def branch = GithubBranchName
 
-def osList = ['Ubuntu', 'OSX', 'Windows_NT', 'CentOS7.1']
+def osList = ['Ubuntu', 'OSX', 'Windows_NT', 'Windows_2016', 'CentOS7.1']
 
 def static getBuildJobName(def configuration, def os) {
     return configuration.toLowerCase() + '_' + os.toLowerCase()
@@ -26,20 +26,23 @@ def static getBuildJobName(def configuration, def os) {
 
             // Calculate the build command
             if (os == 'Windows_NT') {
-                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} Default"
+                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} -Targets Default"
+            }
+            else if (os == 'Windows_2016') {
+                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} -RunInstallerTestsInDocker -Targets Default"
             }
             else if (os == 'Ubuntu') {
-                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} --docker ubuntu Default"
+                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} --docker ubuntu --targets Default"
             }
             else {
                 // Jenkins non-Ubuntu CI machines don't have docker
-                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} Default"
+                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} --targets Default"
             }
 
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
                 // Set the label.
                 steps {
-                    if (os == 'Windows_NT') {
+                    if (os == 'Windows_NT' || os == 'Windows_2016') {
                         // Batch
                         batchFile(buildCommand)
                     }

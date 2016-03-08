@@ -47,16 +47,21 @@ namespace Microsoft.DotNet.ProjectModel.Server
             foreach (var export in allExports.Values)
             {
                 allSourceFiles.AddRange(export.SourceReferences.Select(f => f.ResolvedPath));
-                allFileReferences.AddRange(export.CompilationAssemblies.Select(asset => asset.ResolvedPath));
-
                 var diagnostics = diagnosticsLookup[export.Library].ToList();
                 var description = DependencyDescription.Create(export.Library, diagnostics, allExports);
                 allDependencies[description.Name] = description;
 
                 var projectDescription = export.Library as ProjectDescription;
-                if (projectDescription != null && projectDescription.Identity.Name != context.ProjectFile.Name)
+                if (projectDescription != null)
                 {
-                    allProjectReferences.Add(ProjectReferenceDescription.Create(projectDescription));
+                    if (projectDescription.Identity.Name != context.ProjectFile.Name)
+                    { 
+                        allProjectReferences.Add(ProjectReferenceDescription.Create(projectDescription));
+                    }
+                }
+                else
+                {
+                    allFileReferences.AddRange(export.CompilationAssemblies.Select(asset => asset.ResolvedPath));
                 }
             }
 

@@ -47,7 +47,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             _reportingChannelFactoryMock = new Mock<IReportingChannelFactory>();
             _reportingChannelFactoryMock.Setup(r =>
-                r.CreateChannelWithAnyAvailablePort()).Returns(_testRunnerChannelMock.Object);
+                r.CreateTestRunnerChannel()).Returns(_testRunnerChannelMock.Object);
 
             _testDiscoveryStartMessageHandler = new TestDiscoveryStartMessageHandler(
                 _testRunnerFactoryMock.Object,
@@ -61,7 +61,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
-        public void It_returns_NoOp_if_the_dotnet_test_state_is_not_VersionCheckCompleted()
+        public void It_returns_NoOp_if_the_dotnet_test_state_is_not_VersionCheckCompleted_or_InitialState()
         {
             var dotnetTestMock = new Mock<IDotnetTest>();
             dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.Terminated);
@@ -84,7 +84,19 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
-        public void It_returns_TestDiscoveryCompleted_when_it_handles_the_message()
+        public void It_returns_TestDiscoveryCompleted_when_it_handles_the_message_and_current_state_is_InitialState()
+        {
+            var dotnetTestMock = new Mock<IDotnetTest>();
+            dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.InitialState);
+
+            var nextState =
+                _testDiscoveryStartMessageHandler.HandleMessage(dotnetTestMock.Object, _validMessage);
+
+            nextState.Should().Be(DotnetTestState.TestDiscoveryStarted);
+        }
+
+        [Fact]
+        public void It_returns_TestDiscoveryCompleted_when_it_handles_the_message_and_current_state_is_VersionCheckCompleted()
         {
             var nextState =
                 _testDiscoveryStartMessageHandler.HandleMessage(_dotnetTestAtVersionCheckCompletedState, _validMessage);
@@ -119,7 +131,17 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                     _dotnetTestMock.Object,
                     _validMessage);
 
-            _reportingChannelFactoryMock.Verify(r => r.CreateChannelWithAnyAvailablePort(), Times.Once);
+            _reportingChannelFactoryMock.Verify(r => r.CreateTestRunnerChannel(), Times.Once);
+        }
+
+        [Fact]
+        public void It_calls_accept_on_the_test_runner_channel()
+        {
+            _testDiscoveryStartMessageHandler.HandleMessage(
+                    _dotnetTestMock.Object,
+                    _validMessage);
+
+            _testRunnerChannelMock.Verify(t => t.Accept(), Times.Once);
         }
 
         [Fact]

@@ -27,11 +27,12 @@ namespace Microsoft.DotNet.Cli.Build
             // This is overkill, but I want to cover all the variables used in all OSes (including where some have the same names)
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             var configuration = c.BuildContext.Get<string>("Configuration");
+            var architecture = PlatformServices.Default.Runtime.RuntimeArchitecture;
             var env = new Dictionary<string, string>()
             {
                 { "RID", PlatformServices.Default.Runtime.GetRuntimeIdentifier() },
                 { "OSNAME", PlatformServices.Default.Runtime.OperatingSystem },
-                { "TFM", "dnxcore50" },
+                { "TFM", "netstandardapp1.5" },
                 { "OutputDir", Dirs.Output },
                 { "Stage1Dir", Dirs.Stage1 },
                 { "Stage1CompilationDir", Dirs.Stage1Compilation },
@@ -50,7 +51,8 @@ namespace Microsoft.DotNet.Cli.Build
                 { "DOTNET_CLI_VERSION", buildVersion.SimpleVersion },
                 { "DOTNET_MSI_VERSION", buildVersion.GenerateMsiVersion() },
                 { "VersionSuffix", buildVersion.VersionSuffix },
-                { "CONFIGURATION", configuration }
+                { "CONFIGURATION", configuration },
+                { "ARCHITECTURE", architecture }
             };
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

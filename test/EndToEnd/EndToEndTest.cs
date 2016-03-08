@@ -89,6 +89,12 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 return;
             }
 
+            if (IsWinX86())
+            {
+                Console.WriteLine("Skipping native compilation tests on Windows x86 - https://github.com/dotnet/cli/issues/1550");
+                return;
+            }
+
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, framework: DefaultFramework);
 
             buildCommand.Execute().Should().Pass();
@@ -105,6 +111,12 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 return;
             }
 
+            if (IsWinX86())
+            {
+                Console.WriteLine("Skipping native compilation tests on Windows x86 - https://github.com/dotnet/cli/issues/1550");
+                return;
+            }
+
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true, framework: DefaultFramework);
 
             buildCommand.Execute().Should().Pass();
@@ -118,6 +130,12 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             if (IsCentOS())
             {
                 Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
+                return;
+            }
+
+            if (IsWinX86())
+            {
+                Console.WriteLine("Skipping native compilation tests on Windows x86 - https://github.com/dotnet/cli/issues/1550");
                 return;
             }
 
@@ -231,6 +249,12 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             }
 
             return false;
+        }
+
+        private bool IsWinX86()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                RuntimeInformation.ProcessArchitecture == Architecture.X86;
         }
 
         private static DateTime GetLastWriteTimeUtcOfDirectoryFiles(string outputDirectory)

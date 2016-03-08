@@ -17,7 +17,7 @@ Canonical scenarios
 
 # Overview
 
-This document outlines the End-to-End canonical scenarios for the CLI tooling. The scenarios outline the planned steps that the developer needs to to to work with her applications. 
+This document outlines the End-to-End canonical scenarios for the CLI tooling. The scenarios outline the planned steps that the developer needs to do to work with her applications. 
 
 Each scenario is organized around a narrative, which provides an explanation on what the developers are trying to do, steps that are needed for the user to achieve the needed narrative. Steps are organized as commands that the developer would need to execute on the command line to achieve the result.
 
@@ -440,6 +440,6 @@ mylib -> /mylib/bin/Debug/mylib.1.0.0.symbols.nupkg
 As our developer is going further with her usage of the CLI tools, she figures out that there is an easy way to extend the CLI tools on her machine by adding project-level tools to her `project.json`. She uses the CLI to work with the tools and she is able to extend the default toolset to further fit her needs. 
 
 ## Steps 
->**TODO:** at this point, this needs more work to figure out how it will surface; it is listed her so it is not forgotten.
+>**TODO:** at this point, this needs more work to figure out how it will surface; it is listed here so it is not forgotten.
 
 

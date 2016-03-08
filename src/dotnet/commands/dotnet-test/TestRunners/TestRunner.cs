@@ -29,11 +29,11 @@ namespace Microsoft.DotNet.Tools.Test
             ExecuteRunnerCommand();
         }
 
-        public ProcessStartInfo GetProcessStartInfo()
+        public TestStartInfo GetProcessStartInfo()
         {
             var command = CreateTestRunnerCommand();
 
-            return command.ToProcessStartInfo();
+            return command.ToTestStartInfo();
         }
 
         private void ExecuteRunnerCommand()
@@ -51,9 +51,10 @@ namespace Microsoft.DotNet.Tools.Test
             var commandArgs = _argumentsBuilder.BuildArguments();
 
             return _commandFactory.Create(
-                _testRunner,
+                $"dotnet-{_testRunner}",
                 commandArgs,
-                new NuGetFramework("DNXCore", Version.Parse("5.0")));
+                null,
+                null);
         }
     }
 }

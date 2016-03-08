@@ -98,30 +98,16 @@ function UploadBinaries($zipFile)
     }
 
     Write-Host "Updating the latest dotnet binaries for windows.."
-    $zipBlobLatest = "$env:CHANNEL/Binaries/Latest/dotnet-win-x64.latest.zip"
+    $zipBlobLatest = "$env:CHANNEL/Binaries/Latest/dotnet-win-$env:ARCHITECTURE.latest.zip"
 
     if(-Not (UploadFile $zipBlobLatest $zipFile $true))
     {
         return -1
     }
 
-
-    # update the index file too
-    $indexContent = "Binaries/$env:DOTNET_CLI_VERSION/$fileName"
-    $indexFile = "$env:TEMP\latest.win.index"
-    $indexContent | Out-File -FilePath $indexFile
-
-    # upload the index file
-    $indexBlob = "$env:CHANNEL/dnvm/latest.win.index"
-
-    if(-Not (UploadFile $indexBlob $indexFile $true))
-    {
-        return -1
-    }
-
     # update the version file
     $versionFile = Convert-Path $PSScriptRoot\..\..\artifacts\$env:RID\stage2\.version
-    $versionBlob = "$env:CHANNEL/dnvm/latest.win.version"
+    $versionBlob = "$env:CHANNEL/dnvm/latest.win.$env:ARCHITECTURE.version"
 
     if(-Not (UploadFile $versionBlob $versionFile $true))
     {
@@ -142,7 +128,7 @@ function UploadInstallers($installerFile)
     }
 
     Write-Host "Updating the latest dotnet installer for windows.."
-    $installerBlobLatest = "$env:CHANNEL/Installers/Latest/dotnet-win-x64.latest.exe"
+    $installerBlobLatest = "$env:CHANNEL/Installers/Latest/dotnet-win-$env:ARCHITECTURE.latest.exe"
 
     if(-Not (UploadFile $installerBlobLatest $installerFile $true))
     {

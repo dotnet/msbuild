@@ -215,11 +215,15 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var compileAsset = new LibraryAsset(
                     project.Project.Name,
-                    null,
-                    Path.GetFullPath(Path.Combine(project.Project.ProjectDirectory, assemblyPath)));
+                    Path.GetFileName(assemblyPath),
+                    assemblyPath);
 
                 builder.AddCompilationAssembly(compileAsset);
-                builder.AddRuntimeAsset(new LibraryAsset(Path.GetFileName(pdbPath), Path.GetFileName(pdbPath), pdbPath));
+                builder.AddRuntimeAssembly(compileAsset);
+                if (File.Exists(pdbPath))
+                {
+                    builder.AddRuntimeAsset(new LibraryAsset(Path.GetFileName(pdbPath), Path.GetFileName(pdbPath), pdbPath));
+                }
             }
             else if (project.Project.Files.SourceFiles.Any())
             {
@@ -286,7 +290,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
             path = path.Replace("{configuration}", configuration);
 
-            return path;
+            return Path.Combine(project.ProjectDirectory, path);
         }
 
         private LibraryExport ExportFrameworkLibrary(LibraryDescription library)
@@ -330,7 +334,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var assemblyPath = Path.Combine(package.Path, analyzer);
 
-                // $/analyzers/{Framework Name}{Version}/{Supported Architecture}/{Supported Programming Language}/{Analyzer}.dll 
+                // $/analyzers/{Framework Name}{Version}/{Supported Architecture}/{Supported Programming Language}/{Analyzer}.dll
                 switch (specifiers.Length)
                 {
                     // $/analyzers/{analyzer}.dll
@@ -392,7 +396,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private static bool LibraryIsOfType(LibraryType type, LibraryDescription library)
         {
-            return type.Equals(LibraryType.Unspecified) || // No type filter was requested 
+            return type.Equals(LibraryType.Unspecified) || // No type filter was requested
                    library.Identity.Type.Equals(type);     // OR, library type matches requested type
         }
     }

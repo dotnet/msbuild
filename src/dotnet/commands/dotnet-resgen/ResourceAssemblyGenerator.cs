@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Resgen
 
             compilation = compilation.AddSyntaxTrees(new[]
             {
-                CSharpSyntaxTree.ParseText(AssemblyInfoFileGenerator.Generate(metadata, Enumerable.Empty<string>()))
+                CSharpSyntaxTree.ParseText(AssemblyInfoFileGenerator.GenerateCSharp(metadata, Enumerable.Empty<string>()))
             });
 
             var result = compilation.Emit(outputStream, manifestResources: resourceDescriptions);

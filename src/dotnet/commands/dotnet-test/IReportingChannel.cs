@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Testing.Abstractions;
 
 namespace Microsoft.DotNet.Tools.Test
@@ -11,6 +12,8 @@ namespace Microsoft.DotNet.Tools.Test
         event EventHandler<Message> MessageReceived;
 
         int Port { get; }
+
+        void Accept();
 
         void Send(Message message);
 

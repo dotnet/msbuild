@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ProjectModel
         public int Column { get; private set; }
         
         public override string ToString()
-        {            
+        {
             return $"{Path}({Line},{Column}): Error: {base.ToString()}";
         }
 

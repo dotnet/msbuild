@@ -32,6 +32,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         internal static readonly OptionTemplate s_publicSignTemplate = new OptionTemplate("public-sign");
 
+        internal static readonly OptionTemplate s_debugTypeTemplate = new OptionTemplate("debug-type");
+
         internal static readonly OptionTemplate s_emitEntryPointTemplate = new OptionTemplate("emit-entry-point");
 
         internal static readonly OptionTemplate s_generateXmlDocumentation = new OptionTemplate("generate-xml-documentation");
@@ -44,6 +46,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             IReadOnlyList<string> suppressWarnings = null;
             string languageVersion = null;
             string platform = null;
+            string debugType = null;
             bool? allowUnsafe = null;
             bool? warningsAsErrors = null;
             bool? optimize = null;
@@ -61,6 +64,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             syntax.DefineOptionList(s_suppressWarningTemplate.LongName, ref suppressWarnings, "Suppresses the specified warning");
 
             syntax.DefineOptionList(s_additionalArgumentsTemplate.LongName, ref additionalArguments, "Pass the additional argument directly to the compiler");
+
+            syntax.DefineOption(s_debugTypeTemplate.LongName, ref debugType, "The type of PDB to emit: portable or full");
 
             syntax.DefineOption(s_languageVersionTemplate.LongName, ref languageVersion,
                     "The version of the language used to compile");
@@ -104,6 +109,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 KeyFile = keyFile,
                 DelaySign = delaySign,
                 PublicSign = publicSign,
+                DebugType = debugType,
                 EmitEntryPoint = emitEntryPoint,
                 GenerateXmlDocumentation = generateXmlDocumentation,
                 AdditionalArguments = additionalArguments
@@ -115,6 +121,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var defines = options.Defines;
             var suppressWarnings = options.SuppressWarnings;
             var languageVersion = options.LanguageVersion;
+            var debugType = options.DebugType;
             var platform = options.Platform;
             var allowUnsafe = options.AllowUnsafe;
             var warningsAsErrors = options.WarningsAsErrors;
@@ -181,6 +188,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             if (publicSign != null)
             {
                 args.Add(s_publicSignTemplate.ToLongArg(publicSign));
+            }
+
+            if (debugType != null)
+            {
+                args.Add(s_debugTypeTemplate.ToLongArg(debugType));
             }
 
             if (emitEntryPoint != null)

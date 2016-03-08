@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Testing.Abstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -18,37 +19,47 @@ namespace Microsoft.DotNet.Tools.Test
         public static ReportingChannel ListenOn(int port)
         {
             // This fixes the mono incompatibility but ties it to ipv4 connections
-            using (var listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            {
-                listenSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
-                listenSocket.Listen(10);
+            var listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                var socket = listenSocket.Accept();
+            listenSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
+            listenSocket.Listen(10);
 
-                return new ReportingChannel(socket);
-            }
+            return new ReportingChannel(listenSocket);
         }
 
-        private readonly BinaryWriter _writer;
-        private readonly BinaryReader _reader;
+        private BinaryWriter _writer;
+        private BinaryReader _reader;
+        private Socket _listenSocket;
 
-        private ReportingChannel(Socket socket)
+        private ReportingChannel(Socket listenSocket)
         {
-            Socket = socket;
-
-            var stream = new NetworkStream(Socket);
-            _writer = new BinaryWriter(stream);
-            _reader = new BinaryReader(stream);
-
-            // Read incoming messages on the background thread
-            new Thread(ReadMessages) { IsBackground = true }.Start();
+            _listenSocket = listenSocket;
+            Port = ((IPEndPoint)listenSocket.LocalEndPoint).Port;
         }
 
         public event EventHandler<Message> MessageReceived;
 
         public Socket Socket { get; private set; }
 
-        public int Port => ((IPEndPoint) Socket.LocalEndPoint).Port;
+        public int Port { get; }
+
+        public void Accept()
+        {
+            new Thread(() =>
+            {
+                using (_listenSocket)
+                {
+                    Socket = _listenSocket.Accept();
+
+                    var stream = new NetworkStream(Socket);
+                    _writer = new BinaryWriter(stream);
+                    _reader = new BinaryReader(stream);
+
+                    // Read incoming messages on the background thread
+                    new Thread(ReadMessages) { IsBackground = true }.Start();
+                }
+            }) { IsBackground = true }.Start();
+        }
 
         public void Send(Message message)
         {
@@ -99,9 +110,15 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 try
                 {
-                    var message = JsonConvert.DeserializeObject<Message>(_reader.ReadString());
+                    var rawMessage = _reader.ReadString();
+                    var message = JsonConvert.DeserializeObject<Message>(rawMessage);
 
                     MessageReceived?.Invoke(this, message);
+
+                    if (ShouldStopListening(message))
+                    {
+                        break;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -115,9 +132,18 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
+        private static bool ShouldStopListening(Message message)
+        {
+            return message.MessageType == TestMessageTypes.TestRunnerTestCompleted ||
+                message.MessageType == TestMessageTypes.TestSessionTerminate;
+        }
+
         public void Dispose()
         {
-            Socket.Dispose();
+            if (Socket != null)
+            {
+                Socket.Dispose();
+            }
         }
     }
 }

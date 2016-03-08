@@ -5,12 +5,14 @@
     },
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23811",
+        "NETStandard.Library": "1.0.0-rc2-23901",
         "dotnet-hello": { "version": "1.0.0", "target": "package" }
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "netstandardapp1.5": {
+            "imports": "dnxcore50"
+        }
     },
 
     "testRunner": "must-be-specified-to-generate-deps",

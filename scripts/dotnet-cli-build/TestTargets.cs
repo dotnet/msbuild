@@ -28,12 +28,15 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-compile.UnitTests",
             "dotnet-build.Tests",
             "dotnet-pack.Tests",
+            "dotnet-projectmodel-server.Tests",
             "dotnet-resgen.Tests",
+            "dotnet-run.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
             "Microsoft.Extensions.DependencyModel.Tests",
-            "ArgumentForwardingTests"
+            "ArgumentForwardingTests",
+            "dotnet-test.UnitTests"
         };
 
         [Target(nameof(PrepareTargets.Init), nameof(SetupTests), nameof(RestoreTests), nameof(BuildTests), nameof(RunTests), nameof(ValidateDependencies))]
@@ -71,12 +74,19 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
+                
             dotnet.Restore("--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
                 .Execute().EnsureSuccessful();
-
-            // The 'testapp' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
-            dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "testapp")).CaptureStdErr().CaptureStdOut().Execute();
+                
+            // The 'ProjectModelServer' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
+            dotnet.Restore()
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthTestProjects"))
+                .Execute();
+                
+            dotnet.Restore()
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthUpdateSearchPathSample"))
+                .Execute();
 
             return c.Success();
         }
@@ -122,7 +132,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var project in projects)
             {
                 c.Info($"Building: {project}");
-                dotnet.Build("--framework", "dnxcore50")
+                dotnet.Build("--framework", "netstandardapp1.5")
                     .WorkingDirectory(Path.GetDirectoryName(project))
                     .Execute()
                     .EnsureSuccessful();

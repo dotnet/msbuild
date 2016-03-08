@@ -102,7 +102,6 @@ namespace Microsoft.DotNet.Cli
             var builtIns = new Dictionary<string, Func<string[], int>>
             {
                 ["build"] = BuildCommand.Run,
-                ["compile"] = CommpileCommand.Run,
                 ["compile-csc"] = CompileCscCommand.Run,
                 ["compile-fsc"] = CompileFscCommand.Run,
                 ["compile-native"] = CompileNativeCommand.Run,
@@ -124,7 +123,7 @@ namespace Microsoft.DotNet.Cli
                 return builtIn(appArgs.ToArray());
             }
 
-            return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.DnxCore50)
+            return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute()

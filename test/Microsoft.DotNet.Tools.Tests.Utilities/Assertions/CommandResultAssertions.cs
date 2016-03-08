@@ -32,6 +32,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> NotPass()
+        {
+            Execute.Assertion.ForCondition(_commandResult.ExitCode != 0)
+                .FailWith(AppendDiagnosticsTo($"Expected command to fail but it did not."));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> Fail()
         {
             Execute.Assertion.ForCondition(_commandResult.ExitCode != 0)
@@ -93,14 +100,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 		
 		public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject)
         {
-            _commandResult.StdOut.Should().Contain($"Project {skippedProject} (DNXCore,Version=v5.0) was previously compiled. Skipping compilation.");
+            _commandResult.StdOut.Should().Contain($"Project {skippedProject} (.NETStandardApp,Version=v1.5) was previously compiled. Skipping compilation.");
 
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> HaveCompiledProject(string compiledProject)
         {
-            _commandResult.StdOut.Should().Contain($"Project {compiledProject} (DNXCore,Version=v5.0) will be compiled");
+            _commandResult.StdOut.Should().Contain($"Project {compiledProject} (.NETStandardApp,Version=v1.5) will be compiled");
 
             return new AndConstraint<CommandResultAssertions>(this);
         }

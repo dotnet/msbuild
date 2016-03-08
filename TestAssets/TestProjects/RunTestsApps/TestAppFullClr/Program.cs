@@ -6,7 +6,7 @@ namespace ConsoleApplication
     {
         public static void Main(string[] args)
         {
-            .WriteLine("NET451");
+            Console.WriteLine("NET451");
         }
     }
 }

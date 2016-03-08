@@ -42,7 +42,13 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             BuildTarget target;
             if (!Targets.TryGetValue(name, out target))
             {
-                Reporter.Verbose.WriteLine($"Skipping undefined target: {name}");
+                throw new UndefinedTargetException($"Undefined target: {name}");
+            }
+
+            if (!EvaluateTargetConditions(target))
+            {
+                Reporter.Verbose.WriteLine($"Skipping, Target Conditions not met: {target.Name}");
+                return new BuildTargetResult(target, success: true);
             }
 
             // Check if it's been completed
@@ -52,7 +58,6 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                 Reporter.Verbose.WriteLine($"Skipping completed target: {target.Name}");
                 return result;
             }
-
 
             // It hasn't, or we're forcing, so run it
             result = ExecTarget(target);
@@ -80,8 +85,36 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             Reporter.Error.WriteLine("error".Red().Bold() + $": {message}");
         }
 
+        private bool EvaluateTargetConditions(BuildTarget target)
+        {
+            if (target == null)
+            {
+                throw new ArgumentNullException("target");
+            }
+
+            if (target.Conditions == null)
+            {
+                return true;
+            }
+
+            foreach (var condition in target.Conditions)
+            {
+                if (!condition())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private BuildTargetResult ExecTarget(BuildTarget target)
         {
+            if (target == null)
+            {
+                throw new ArgumentNullException("target");
+            }
+
             var sectionName = $"{target.Name.PadRight(_maxTargetLen + 2).Yellow()} ({target.Source.White()})";
             BuildReporter.BeginSection("TARGET", sectionName);
 

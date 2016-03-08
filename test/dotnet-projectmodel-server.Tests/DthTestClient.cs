@@ -9,7 +9,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -34,6 +33,9 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
 
         public DthTestClient(DthTestServer server)
         {
+            // Avoid Socket exception 10006 on Linux
+            Thread.Sleep(100);
+            
             _socket = new Socket(AddressFamily.InterNetwork,
                                  SocketType.Stream,
                                  ProtocolType.Tcp);

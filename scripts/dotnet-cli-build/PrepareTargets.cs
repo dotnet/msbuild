@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Utils;
@@ -16,6 +17,18 @@ namespace Microsoft.DotNet.Cli.Build
     {
         [Target(nameof(Init), nameof(RestorePackages))]
         public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
+        public static BuildTargetResult CheckPrereqs(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckCoreclrPlatformDependencies),  nameof(CheckInstallerBuildPlatformDependencies))]
+        public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckUbuntuCoreclrAndCoreFxDependencies),  nameof(CheckCentOSCoreclrAndCoreFxDependencies))]
+        public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c) => c.Success();
+
+        [Target(nameof(CheckUbuntuDebianPackageBuildDependencies))]
+        public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c) => c.Success();
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
         [Target(nameof(GenerateVersions), nameof(CheckPrereqs), nameof(LocateStage0))]
@@ -87,38 +100,6 @@ namespace Microsoft.DotNet.Cli.Build
             // Identify the version
             var version = File.ReadAllLines(Path.Combine(stage0, "..", ".version"));
             c.Info($"Using Stage 0 Version: {version[1]}");
-
-            return c.Success();
-        }
-
-        [Target]
-        public static BuildTargetResult CheckPrereqs(BuildTargetContext c)
-        {
-            try
-            {
-                Command.Create("cmake", "--version")
-                    .CaptureStdOut()
-                    .CaptureStdErr()
-                    .Execute();
-            }
-            catch (Exception ex)
-            {
-                string message = $@"Error running cmake: {ex.Message}
-cmake is required to build the native host 'corehost'";
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    message += Environment.NewLine + "Download it from https://www.cmake.org";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    message += Environment.NewLine + "Ubuntu: 'sudo apt-get install cmake'";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    message += Environment.NewLine + "OS X w/Homebrew: 'brew install cmake'";
-                }
-                return c.Failed(message);
-            }
 
             return c.Success();
         }
@@ -198,6 +179,134 @@ cmake is required to build the native host 'corehost'";
             dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools")).Execute().EnsureSuccessful();
 
             return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult CheckUbuntuDebianPackageBuildDependencies(BuildTargetContext c)
+        {
+
+            var messageBuilder = new StringBuilder();
+            var aptDependencyUtility = new AptDependencyUtility();
+
+
+            foreach (var package in PackageDependencies.DebianPackageBuildDependencies)
+            {
+                if (!AptDependencyUtility.PackageIsInstalled(package))
+                {
+                    messageBuilder.Append($"Error: Debian package build dependency {package} missing.");
+                    messageBuilder.Append(Environment.NewLine);
+                    messageBuilder.Append($"-> install with apt-get install {package}");
+                    messageBuilder.Append(Environment.NewLine);
+                }
+            }
+
+            if (messageBuilder.Length == 0)
+            {
+                return c.Success();
+            }
+            else
+            {
+                return c.Failed(messageBuilder.ToString());
+            }
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult CheckUbuntuCoreclrAndCoreFxDependencies(BuildTargetContext c)
+        {
+            var errorMessageBuilder = new StringBuilder();
+            var stage0 = DotNetCli.Stage0.BinPath;
+
+            foreach (var package in PackageDependencies.UbuntuCoreclrAndCoreFxDependencies)
+            {
+                if (!AptDependencyUtility.PackageIsInstalled(package))
+                {
+                    errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                    errorMessageBuilder.Append($"-> install with apt-get install {package}");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                }
+            }
+
+            if (errorMessageBuilder.Length == 0)
+            {
+                return c.Success();
+            }
+            else
+            {
+                return c.Failed(errorMessageBuilder.ToString());
+            }
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.CentOS)]
+        public static BuildTargetResult CheckCentOSCoreclrAndCoreFxDependencies(BuildTargetContext c)
+        {
+            var errorMessageBuilder = new StringBuilder();
+            
+            foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
+            {
+                if (!YumDependencyUtility.PackageIsInstalled(package))
+                {
+                    errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                    errorMessageBuilder.Append($"-> install with yum install {package}");
+                    errorMessageBuilder.Append(Environment.NewLine);
+                }
+            }
+
+            if (errorMessageBuilder.Length == 0)
+            {
+                return c.Success();
+            }
+            else
+            {
+                return c.Failed(errorMessageBuilder.ToString());
+            }
+        }
+
+        [Target]
+        public static BuildTargetResult CheckPrereqCmakePresent(BuildTargetContext c)
+        {
+            try
+            {
+                Command.Create("cmake", "--version")
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute();
+            }
+            catch (Exception ex)
+            {
+                string message = $@"Error running cmake: {ex.Message}
+cmake is required to build the native host 'corehost'";
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    message += Environment.NewLine + "Download it from https://www.cmake.org";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    message += Environment.NewLine + "Ubuntu: 'sudo apt-get install cmake'";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    message += Environment.NewLine + "OS X w/Homebrew: 'brew install cmake'";
+                }
+                return c.Failed(message);
+            }
+
+            return c.Success();
+        }
+
+        private static bool AptPackageIsInstalled(string packageName)
+        {
+            var result = Command.Create("dpkg", "-s", packageName)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .QuietBuildReporter()
+                .Execute();
+
+            return result.ExitCode == 0;
         }
 
         private static IDictionary<string, string> ReadBranchInfo(BuildTargetContext c, string path)

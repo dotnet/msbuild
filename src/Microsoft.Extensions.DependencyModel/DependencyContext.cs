@@ -5,35 +5,74 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Extensions.DependencyModel
 {
     public class DependencyContext
     {
         private const string DepsResourceSufix = ".deps.json";
+        private const string DepsFileExtension = ".deps";
 
         private static readonly Lazy<DependencyContext> _defaultContext = new Lazy<DependencyContext>(LoadDefault);
 
-        public DependencyContext(string target, string runtime, CompilationOptions compilationOptions, CompilationLibrary[] compileLibraries, RuntimeLibrary[] runtimeLibraries)
+        public DependencyContext(string targetFramework,
+            string runtime,
+            bool isPortable,
+            CompilationOptions compilationOptions,
+            IEnumerable<CompilationLibrary> compileLibraries,
+            IEnumerable<RuntimeLibrary> runtimeLibraries,
+            IEnumerable<KeyValuePair<string, string[]>> runtimeGraph)
         {
-            Target = target;
+            if (targetFramework == null)
+            {
+                throw new ArgumentNullException(nameof(targetFramework));
+            }
+            if (runtime == null)
+            {
+                throw new ArgumentNullException(nameof(runtime));
+            }
+            if (compilationOptions == null)
+            {
+                throw new ArgumentNullException(nameof(compilationOptions));
+            }
+            if (compileLibraries == null)
+            {
+                throw new ArgumentNullException(nameof(compileLibraries));
+            }
+            if (runtimeLibraries == null)
+            {
+                throw new ArgumentNullException(nameof(runtimeLibraries));
+            }
+            if (runtimeGraph == null)
+            {
+                throw new ArgumentNullException(nameof(runtimeGraph));
+            }
+
+            TargetFramework = targetFramework;
             Runtime = runtime;
+            IsPortable = isPortable;
             CompilationOptions = compilationOptions;
-            CompileLibraries = compileLibraries;
-            RuntimeLibraries = runtimeLibraries;
+            CompileLibraries = compileLibraries.ToArray();
+            RuntimeLibraries = runtimeLibraries.ToArray();
+            RuntimeGraph = runtimeGraph.ToArray();
         }
 
         public static DependencyContext Default => _defaultContext.Value;
 
-        public string Target { get; }
+        public string TargetFramework { get; }
 
         public string Runtime { get; }
+
+        public bool IsPortable { get; }
 
         public CompilationOptions CompilationOptions { get; }
 
         public IReadOnlyList<CompilationLibrary> CompileLibraries { get; }
 
         public IReadOnlyList<RuntimeLibrary> RuntimeLibraries { get; }
+
+        public IReadOnlyList<KeyValuePair<string, string[]>> RuntimeGraph { get; }
 
         private static DependencyContext LoadDefault()
         {
@@ -43,22 +82,29 @@ namespace Microsoft.Extensions.DependencyModel
 
         public static DependencyContext Load(Assembly assembly)
         {
-            var stream = assembly.GetManifestResourceStream(assembly.GetName().Name + DepsResourceSufix);
-
-            if (stream == null)
+            if (assembly == null)
             {
-                return null;
+                throw new ArgumentNullException(nameof(assembly));
             }
 
-            using (stream)
+            using (var stream = assembly.GetManifestResourceStream(assembly.GetName().Name + DepsResourceSufix))
             {
-                return Load(stream);
+                if (stream != null)
+                {
+                    return new DependencyContextJsonReader().Read(stream);
+                }
             }
-        }
 
-        public static DependencyContext Load(Stream stream)
-        {
-            return new DependencyContextReader().Read(stream);
+            var depsFile = Path.ChangeExtension(assembly.Location, DepsFileExtension);
+            if (File.Exists(depsFile))
+            {
+                using (var stream = File.OpenRead(depsFile))
+                {
+                    return new DependencyContextCsvReader().Read(stream);
+                }
+            }
+
+            return null;
         }
     }
 }

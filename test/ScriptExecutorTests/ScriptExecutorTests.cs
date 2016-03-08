@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Utils.ScriptExecutorTests
 
             var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
             binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
-            project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
+            project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("netstandardapp1.5")).ProjectFile;
         }
 
         [Fact]

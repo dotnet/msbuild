@@ -2,7 +2,7 @@
     "version": "1.0.0-*",
     "dependencies": {
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-        "NETStandard.Library": "1.0.0-rc2-23811"
+        "NETStandard.Library": "1.0.0-rc2-23901"
     },
     "compilerName": "fsc",
     "compileFiles": [
@@ -10,8 +10,8 @@
         "Helper.fs"
     ],
     "frameworks": {
-        "dnxcore50": {
-            "imports": "portable-net45+win8"
+        "netstandardapp1.5": {
+            "imports": "dnxcore50"
         }
     }
 }

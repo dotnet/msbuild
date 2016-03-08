@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public TestMessagesCollection()
         {
-            _readQueue = new BlockingCollection<Message>(boundedCapacity: 1);
+            _readQueue = new BlockingCollection<Message>();
             _terminateWaitHandle = new ManualResetEventSlim();
         }
 

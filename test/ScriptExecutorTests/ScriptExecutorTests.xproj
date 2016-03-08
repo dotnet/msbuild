@@ -9,7 +9,7 @@
     <ProjectGuid>833ffee1-7eed-4f51-8dfd-946d48833333</ProjectGuid>
     <RootNamespace>Microsoft.DotNet.Cli.Utils.ScriptExecutorTests</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin\$(MSBuildProjectName)\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
