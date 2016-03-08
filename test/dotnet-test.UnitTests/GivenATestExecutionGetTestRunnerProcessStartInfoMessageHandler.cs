@@ -161,7 +161,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                     _dotnetTestMock.Object,
                     _validMessage);
 
-            _testRunnerChannelMock.Verify(t => t.Accept(), Times.Once);
+            _testRunnerChannelMock.Verify(t => t.Connect(), Times.Once);
         }
 
         [Fact]

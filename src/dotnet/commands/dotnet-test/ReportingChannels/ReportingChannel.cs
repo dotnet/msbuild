@@ -14,52 +14,26 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ReportingChannel : IReportingChannel
+    public abstract class ReportingChannel : IReportingChannel
     {
-        public static ReportingChannel ListenOn(int port)
-        {
-            // This fixes the mono incompatibility but ties it to ipv4 connections
-            var listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            listenSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
-            listenSocket.Listen(10);
-
-            return new ReportingChannel(listenSocket);
-        }
-
         private BinaryWriter _writer;
         private BinaryReader _reader;
-        private Socket _listenSocket;
 
-        private ReportingChannel(Socket listenSocket)
+        protected ReportingChannel(Socket connectSocket, int port)
         {
-            _listenSocket = listenSocket;
-            Port = ((IPEndPoint)listenSocket.LocalEndPoint).Port;
+            ConnectSocket = connectSocket;
+            Port = port;
         }
+
+        protected Socket Socket { get; set; }
 
         public event EventHandler<Message> MessageReceived;
 
-        public Socket Socket { get; private set; }
+        public Socket ConnectSocket { get; }
 
         public int Port { get; }
 
-        public void Accept()
-        {
-            new Thread(() =>
-            {
-                using (_listenSocket)
-                {
-                    Socket = _listenSocket.Accept();
-
-                    var stream = new NetworkStream(Socket);
-                    _writer = new BinaryWriter(stream);
-                    _reader = new BinaryReader(stream);
-
-                    // Read incoming messages on the background thread
-                    new Thread(ReadMessages) { IsBackground = true }.Start();
-                }
-            }) { IsBackground = true }.Start();
-        }
+        public abstract void Connect();
 
         public void Send(Message message)
         {
@@ -104,6 +78,16 @@ namespace Microsoft.DotNet.Tools.Test
             SendError(ex.ToString());
         }
 
+        protected void StartReadingMessages()
+        {
+            var stream = new NetworkStream(Socket);
+            _writer = new BinaryWriter(stream);
+            _reader = new BinaryReader(stream);
+
+            // Read incoming messages on the background thread
+            new Thread(ReadMessages) { IsBackground = true }.Start();
+        }
+
         private void ReadMessages()
         {
             while (true)
@@ -140,10 +124,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public void Dispose()
         {
-            if (Socket != null)
-            {
-                Socket.Dispose();
-            }
+            Socket?.Dispose();
         }
     }
 }

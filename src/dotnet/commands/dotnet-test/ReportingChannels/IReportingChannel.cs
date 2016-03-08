@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         int Port { get; }
 
-        void Accept();
+        void Connect();
 
         void Send(Message message);
 

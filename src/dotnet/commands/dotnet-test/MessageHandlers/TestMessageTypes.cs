@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Tools.Test
         public const string TestRunnerTestStarted = "TestExecution.TestStarted";
         public const string TestRunnerTestCompleted = "TestRunner.TestCompleted";
         public const string TestRunnerTestFound = "TestDiscovery.TestFound";
+        public const string TestSessionConnected = "TestSession.Connected";
         public const string TestSessionTerminate = "TestSession.Terminate";
         public const string VersionCheck = "ProtocolVersion";
         public const string TestDiscoveryStart = "TestDiscovery.Start";
