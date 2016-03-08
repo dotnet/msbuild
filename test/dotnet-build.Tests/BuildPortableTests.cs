@@ -22,23 +22,15 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var outputBase = new DirectoryInfo(Path.Combine(testInstance.TestRoot, "bin", "Debug"));
 
             var netstandardappOutput = outputBase.Sub("netstandardapp1.5");
-            var fxSubdirs = new[] {
-                netstandardappOutput,
-                outputBase.Sub("net45")
-            };
 
-            foreach(var fxSubdir in fxSubdirs)
-            {
-                fxSubdir.Should()
-                    .Exist().And
-                    .HaveFiles(new[]
-                    {
-                        "BuildTestPortableProject.dll",
-                        "BuildTestPortableProject.pdb"
-                    });
-            }
-
-            netstandardappOutput.Should().HaveFile("BuildTestPortableProject.deps");
+            netstandardappOutput.Should()
+                .Exist().And
+                .HaveFiles(new[]
+                {
+                    "BuildTestPortableProject.deps",
+                    "BuildTestPortableProject.dll",
+                    "BuildTestPortableProject.pdb"
+                });
         }
     }
 }
