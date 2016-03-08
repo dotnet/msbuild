@@ -8,12 +8,12 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class Monikers
     {
-        public static string GetProductMoniker(BuildTargetContext c)
+        public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix)
         {
             string osname = GetOSShortName();
             var arch = CurrentArchitecture.Current.ToString();
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
-            return $"dotnet-{osname}-{arch}.{version}";
+            return $"{artifactPrefix}-{osname}-{arch}.{version}";
         }
 
         public static string GetDebianPackageName(BuildTargetContext c)

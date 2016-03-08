@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GeneratePkg(BuildTargetContext c)
         {
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
-            var pkg = c.BuildContext.Get<string>("InstallerFile");
+            var pkg = c.BuildContext.Get<string>("SdkInstallerFile");
             Cmd(Path.Combine(Dirs.RepoRoot, "packaging", "osx", "package-osx.sh"),
                     "-v", version, "-i", Dirs.Stage2, "-o", pkg)
                     .Execute()
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Build
             var channel = c.BuildContext.Get<string>("Channel").ToLower();
             var packageName = Monikers.GetDebianPackageName(c);
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
-            var debFile = c.BuildContext.Get<string>("InstallerFile");
+            var debFile = c.BuildContext.Get<string>("SdkInstallerFile");
             var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
             var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
 

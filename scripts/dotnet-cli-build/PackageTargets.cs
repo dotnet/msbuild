@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateZip(BuildTargetContext c)
         {
-            var zipFile = c.BuildContext.Get<string>("CompressedFile");
+            var zipFile = c.BuildContext.Get<string>("SdkCompressedFile");
 
             if (File.Exists(zipFile))
             {
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Unix)]
         public static BuildTargetResult GenerateTarBall(BuildTargetContext c)
         {
-            var tarFile = c.BuildContext.Get<string>("CompressedFile");
+            var tarFile = c.BuildContext.Get<string>("SdkCompressedFile");
 
             if (File.Exists(tarFile))
             {
