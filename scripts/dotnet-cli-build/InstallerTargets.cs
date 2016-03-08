@@ -40,9 +40,14 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult GenerateDeb(BuildTargetContext c)
         {
-            var env = PackageTargets.GetCommonEnvVars(c);
-            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"))
-                    .Environment(env)
+            var channel = c.BuildContext.Get<string>("Channel").ToLower();
+            var packageName = Monikers.GetDebianPackageName(c);
+            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            var debFile = c.BuildContext.Get<string>("InstallerFile");
+            var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"),
+                "-v", version, "-i", Dirs.Stage2, "-o", debFile, "-p", packageName, "-m", manPagesDir, "-c", channel)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

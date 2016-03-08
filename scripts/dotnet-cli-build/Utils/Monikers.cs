@@ -16,6 +16,29 @@ namespace Microsoft.DotNet.Cli.Build
             return $"dotnet-{osname}-{arch}.{version}";
         }
 
+        public static string GetDebianPackageName(BuildTargetContext c)
+        {
+            var channel = c.BuildContext.Get<string>("Channel").ToLower();
+            var packageName = "";
+            switch (channel)
+            {
+                case "dev":
+                    packageName = "dotnet-nightly";
+                    break;
+                case "beta":
+                case "rc1":
+                case "rc2":
+                case "rtm":
+                    packageName = "dotnet";
+                    break;
+               default:
+                    throw new Exception($"Unknown channel - {channel}");
+                    break;
+            }
+
+            return packageName;
+        }
+
         public static string GetOSShortName()
         {
             string osname = "";

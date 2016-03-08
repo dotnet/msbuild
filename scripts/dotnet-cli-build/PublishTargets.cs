@@ -102,6 +102,44 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        [Target(nameof(PublishInstallerFile))]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult PublishDebFileToDebianRepo(BuildTargetContext c)
+        {
+            var packageName = Monikers.GetDebianPackageName(c);
+            var installerFile = c.BuildContext.Get<string>("InstallerFile");
+            var uploadUrl =  $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
+            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
+                    .Execute()
+                    .EnsureSuccessful();
+
+            return c.Success();
+        }
+
+        private static string GenerateUploadJsonFile(string packageName, string version, string uploadUrl)
+        {
+            var repoID = Environment.GetEnvironmentVariable("REPO_ID");
+            var uploadJson = Path.Combine(Dirs.Packages, "package_upload.json");
+            File.Delete(uploadJson);
+
+            using (var fileStream = File.Create(uploadJson))
+            {
+                using (StreamWriter sw = new StreamWriter(fileStream))
+                {
+                   sw.WriteLine("{");
+                   sw.WriteLine($"  \"name\":\"{packageName}\",");
+                   sw.WriteLine($"  \"version\":\"{version}\",");
+                   sw.WriteLine($"  \"repositoryId\":\"{repoID}\",");
+                   sw.WriteLine($"  \"sourceUrl\":\"{uploadUrl}\"");
+                   sw.WriteLine("}");
+                }
+            }
+
+            return uploadJson;
+        }
+
         private static BuildTargetResult PublishFile(BuildTargetContext c, string file)
         {
             var env = PackageTargets.GetCommonEnvVars(c);

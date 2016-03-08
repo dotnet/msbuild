@@ -17,44 +17,71 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
+REPOROOT="$DIR/../.."
 
-if [ "$OSNAME" != "ubuntu" ]; then
-    error "Debian Package build only supported on Ubuntu"
+help(){
+    echo "Usage: $0"
+    echo ""
+    echo "Options:"
+    echo "  --version <version>                Specify a version for the package."
+    echo "  --input <input directory>          Package the entire contents of the directory tree."
+    echo "  --manpages <man pages directory>   Directory containing man pages for the package."
+    echo "  --output <output debfile>          The full path to which the package will be written."
+    echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-nightly', 'dotnet'"
+    echo "  --channel <channel>                Channel against which to run the upgrade tests. Example - 'dev', 'beta'"
     exit 1
-fi
+}
+
+while [[ $# > 0 ]]; do
+    lowerI="$(echo $1 | awk '{print tolower($0)}')"
+    echo "$lowerI"
+    case $lowerI in
+        -m|--manpages)
+            MANPAGE_DIR=$2
+            shift
+            ;;
+        -o|--output)
+            OUTPUT_DEBIAN_FILE=$2
+            shift
+            ;;
+        -i|--input)
+            REPO_BINARIES_DIR=$2
+            shift
+            ;;
+        -p|--package-name)
+            DOTNET_DEB_PACKAGE_NAME=$2
+            shift
+            ;;
+        -v|--version)
+            DOTNET_CLI_VERSION=$2
+            shift
+            ;;
+        -c|--channel)
+            CHANNEL=$2
+            shift
+            ;;
+        --help)
+            help
+            ;;
+        *)
+            echo $lowerI
+            break
+            ;;
+    esac
+    shift
+done
 
 PACKAGING_ROOT="$REPOROOT/packaging/debian"
 PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
 
-OUTPUT_DIR="$REPOROOT/artifacts"
-PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
-PACKAGE_OUTPUT_DIR="$OUTPUT_DIR/packages/debian"
-TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/test"
-REPO_BINARIES_DIR="$REPOROOT/artifacts/ubuntu.14.04-x64/stage2"
-MANPAGE_DIR="$REPOROOT/Documentation/manpages"
-
-NIGHTLY_PACKAGE_NAME="dotnet-nightly"
-RELEASE_PACKAGE_NAME="dotnet"
-
-[ -z "$CHANNEL" ] && CHANNEL="dev"
+PACKAGE_OUTPUT_DIR=$(dirname "${OUTPUT_DEBIAN_FILE}")
+PACKAGE_LAYOUT_DIR="$PACKAGE_OUTPUT_DIR/deb_intermediate"
+TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/debian_tests"
 
 execute_build(){
-    determine_package_name
     create_empty_debian_layout
     copy_files_to_debian_layout
     create_debian_package
-}
-
-determine_package_name(){
-    if [[ "$RELEASE_SUFFIX" == "dev" ]]; then
-        DOTNET_DEB_PACKAGE_NAME=$NIGHTLY_PACKAGE_NAME
-    elif [[ "beta rc1 rc2 rtm" =~ (^| )"$RELEASE_SUFFIX"($| ) ]]; then
-        DOTNET_DEB_PACKAGE_NAME=$RELEASE_PACKAGE_NAME
-    elif [[ "$RELEASE_SUFFIX" == "" ]]; then
-        DOTNET_DEB_PACKAGE_NAME=$RELEASE_PACKAGE_NAME
-    else
-        DOTNET_DEB_PACKAGE_NAME=$NIGHTLY_PACKAGE_NAME
-    fi
 }
 
 execute_test(){
@@ -138,6 +165,8 @@ run_e2e_test(){
 
 execute_build
 
+rm -f "$OUTPUT_DEBIAN_FILE"
 DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
+mv -f "$DEBIAN_FILE" "$OUTPUT_DEBIAN_FILE"
 
 execute_test
