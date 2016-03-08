@@ -48,12 +48,14 @@ namespace Microsoft.DotNet.Tools.Test
 
         public static IDotnetTest AddTestRunnnersMessageHandlers(
             this IDotnetTest dotnetTest,
-            IReportingChannel adapterChannel)
+            IReportingChannel adapterChannel,
+            IReportingChannelFactory reportingChannelFactory)
         {
             dotnetTest.AddMessageHandler(new TestRunnerTestStartedMessageHandler(adapterChannel));
             dotnetTest.AddMessageHandler(new TestRunnerTestResultMessageHandler(adapterChannel));
             dotnetTest.AddMessageHandler(new TestRunnerTestFoundMessageHandler(adapterChannel));
             dotnetTest.AddMessageHandler(new TestRunnerTestCompletedMessageHandler(adapterChannel));
+            dotnetTest.AddMessageHandler(new TestRunnerWaitingCommandMessageHandler(reportingChannelFactory));
 
             return dotnetTest;
         }

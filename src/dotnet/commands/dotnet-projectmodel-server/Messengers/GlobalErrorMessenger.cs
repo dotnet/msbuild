@@ -16,9 +16,12 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
             return remote != null && Equals(local.GlobalErrorMessage, remote.GlobalErrorMessage);
         }
 
-        protected override object CreatePayload(ProjectSnapshot local)
+        protected override void SendPayload(ProjectSnapshot local, Action<object> send)
         {
-            return local.GlobalErrorMessage;
+            if (local.GlobalErrorMessage != null)
+            {
+                send(local.GlobalErrorMessage);
+            }
         }
 
         protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)

@@ -26,18 +26,9 @@ namespace Microsoft.DotNet.Tools.Test
                 _assemblyUnderTest,
                 "--designtime",
                 "--port",
-                $"{_port}"
+                $"{_port}",
+                "--wait-command"
             };
-
-            var tests = _message.Payload?.ToObject<RunTestsMessage>().Tests;
-            if (tests != null)
-            {
-                foreach (var test in tests)
-                {
-                    commandArgs.Add("--test");
-                    commandArgs.Add(test);
-                }
-            }
 
             return commandArgs;
         }

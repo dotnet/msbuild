@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 var projectDependency = dependency.Library as ProjectDescription;
 
-                if (projectDependency != null && projectDependency.Project.Files.SourceFiles.Any())
+                if (projectDependency != null && projectDependency.Resolved && projectDependency.Project.Files.SourceFiles.Any())
                 {
                     ProjectDependenciesWithSources[projectDependency.Identity.Name] = projectDependency;
                 }

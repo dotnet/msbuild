@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var compileAsset = new LibraryAsset(
                     project.Project.Name,
-                    null,
+                    Path.GetFileName(assemblyPath),
                     assemblyPath);
 
                 builder.AddCompilationAssembly(compileAsset);
@@ -334,7 +334,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var assemblyPath = Path.Combine(package.Path, analyzer);
 
-                // $/analyzers/{Framework Name}{Version}/{Supported Architecture}/{Supported Programming Language}/{Analyzer}.dll 
+                // $/analyzers/{Framework Name}{Version}/{Supported Architecture}/{Supported Programming Language}/{Analyzer}.dll
                 switch (specifiers.Length)
                 {
                     // $/analyzers/{analyzer}.dll
@@ -396,7 +396,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private static bool LibraryIsOfType(LibraryType type, LibraryDescription library)
         {
-            return type.Equals(LibraryType.Unspecified) || // No type filter was requested 
+            return type.Equals(LibraryType.Unspecified) || // No type filter was requested
                    library.Identity.Type.Equals(type);     // OR, library type matches requested type
         }
     }

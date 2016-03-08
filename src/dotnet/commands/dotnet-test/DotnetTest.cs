@@ -20,6 +20,8 @@ namespace Microsoft.DotNet.Tools.Test
 
         public string PathToAssemblyUnderTest { get; }
 
+        public IEnumerable<string> TestsToRun { get; set; }
+
         public DotnetTest(ITestMessagesCollection messages, string pathToAssemblyUnderTest)
         {
             PathToAssemblyUnderTest = pathToAssemblyUnderTest;

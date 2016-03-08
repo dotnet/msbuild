@@ -11,9 +11,10 @@
         "net35": { },
         "net40": { },
         "net461": { },
-        "dnxcore50": { 
+        "netstandardapp1.5": {
+            "imports": "dnxcore50",
             "dependencies": {
-                "NETStandard.Library": "1.0.0-rc2-23811"
+                "NETStandard.Library": "1.0.0-rc2-23901"
             }
         }
     }

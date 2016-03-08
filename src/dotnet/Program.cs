@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Cli
                 return builtIn(appArgs.ToArray());
             }
 
-            return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.DnxCore50)
+            return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute()

@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.Logging;
@@ -67,7 +66,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                             .AssertJArrayCount(2)
                                                             .Select(f => f["ShortName"].Value<string>());
 
-                Assert.Contains("dnxcore50", frameworkShortNames);
+                Assert.Contains("netstandardapp1.5", frameworkShortNames);
                 Assert.Contains("dnx451", frameworkShortNames);
             }
         }
@@ -284,6 +283,83 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                            .RetrievePropertyAs<JArray>("Errors")
                            .AssertJArrayContains<JObject>(error => error["ErrorCode"].Value<string>() == ErrorCodes.NU1009);
                 }
+            }
+        }
+
+        [Fact]
+        public void InvalidProjectJson()
+        {
+            var testAssetsPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer");
+            var assetsManager = new TestAssetsManager(testAssetsPath);
+            var testSource = assetsManager.CreateTestInstance("IncorrectProjectJson").TestRoot;
+            
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "EmptyLibrary"));
+                client.Initialize(testSource);
+
+                // Error for invalid project.json
+                var messages = client.DrainAllMessages();
+                messages.Single(msg => msg.MessageType == MessageTypes.Error)
+                        .Payload.AsJObject()
+                        .AssertProperty<string>("Path", v => v.Contains("IncorrectProjectJson"));
+
+                // Successfully initialize the other project
+                messages.Single(msg => msg.MessageType == MessageTypes.ProjectInformation)
+                        .Payload.AsJObject()
+                        .AssertProperty<string>("Name", v => string.Equals(v, "EmptyLibrary", StringComparison.Ordinal));
+
+                // Successfully initialize another project afterwards
+                client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "EmptyConsoleApp"));
+                messages = client.DrainAllMessages();
+                messages.Single(msg => msg.MessageType == MessageTypes.ProjectInformation)
+                        .Payload.AsJObject()
+                        .AssertProperty<string>("Name", v => string.Equals(v, "EmptyConsoleApp", StringComparison.Ordinal));
+            }
+        }
+
+        [Fact]
+        public void InvalidGlobalJson()
+        {
+            var testAssetsPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer");
+            var assetsManager = new TestAssetsManager(testAssetsPath);
+            var testSource = assetsManager.CreateTestInstance("IncorrectGlobalJson");
+
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                client.Initialize(Path.Combine(testSource.TestRoot, "src", "Project1"));
+
+                var messages = client.DrainAllMessages();
+                messages.ContainsMessage(MessageTypes.Error)
+                        .Single().Payload.AsJObject()
+                        .AssertProperty<string>("Path", v => v.Contains("InvalidGlobalJson"));
+            }
+        }
+        
+        [Fact]
+        public void RecoverFromGlobalError()
+        {
+            var testProject = _testAssetsManager.CreateTestInstance("EmptyConsoleApp")
+                                                .WithLockFiles()
+                                                .TestRoot;
+                                                
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                var projectFile = Path.Combine(testProject, Project.FileName);
+                var content = File.ReadAllText(projectFile);
+                File.WriteAllText(projectFile, content + "}");
+                
+                client.Initialize(testProject);
+                var messages = client.DrainAllMessages();
+                messages.ContainsMessage(MessageTypes.Error);
+                
+                File.WriteAllText(projectFile, content);
+                client.SendPayLoad(testProject, MessageTypes.FilesChanged);
+                messages = client.DrainAllMessages();
+                messages.AssertDoesNotContain(MessageTypes.Error);
             }
         }
     }

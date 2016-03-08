@@ -2,7 +2,8 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23811",
+    "NETStandard.Library": "1.0.0-rc2-23901",
+    "System.IO.Compression": "4.1.0-rc2-23901",
 
     "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
     "Microsoft.DotNet.Cli.Utils": {
@@ -11,12 +12,15 @@
 
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-*",
-    "dotnet-test-xunit": "1.0.0-dev-48273-16"
+    "dotnet-test-xunit": "1.0.0-dev-79755-47"
   },
 
   "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net45+win8"
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   },
 

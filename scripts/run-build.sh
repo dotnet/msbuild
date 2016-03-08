@@ -14,6 +14,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+source "$DIR/common/_prettyprint.sh"
+
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
     case $lowerI in
@@ -104,7 +106,7 @@ echo "Restoring Build Script projects..."
 
 # Build the builder
 echo "Compiling Build Scripts..."
-dotnet publish "$DIR/dotnet-cli-build" -o "$DIR/dotnet-cli-build/bin" --framework dnxcore50
+dotnet publish "$DIR/dotnet-cli-build" -o "$DIR/dotnet-cli-build/bin" --framework netstandardapp1.5
 
 # Run the builder
 echo "Invoking Build Scripts..."

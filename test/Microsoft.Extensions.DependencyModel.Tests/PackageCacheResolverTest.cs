@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             var exception = Assert.Throws<InvalidOperationException>(() => resolver.TryResolveAssemblyPaths(library, null));
             exception.Message.Should()
                 .Contain(library.Hash)
-                .And.Contain(library.PackageName);
+                .And.Contain(library.Name);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             var packagePath = Path.Combine(CachePath, F.DefaultPackageName, F.DefaultVersion);
             var fileSystem = FileSystemMockBuilder.Create()
                 .AddFile(
-                    Path.Combine(CachePath, $"{F.DefaultPackageName}.{F.DefaultVersion}.nupkg.{F.DefaultHashAlgoritm}"),
+                    Path.Combine(packagePath, $"{F.DefaultPackageName}.{F.DefaultVersion}.nupkg.{F.DefaultHashAlgoritm}"),
                     "WRONGHASH"
                 )
                 .AddFiles(packagePath, F.DefaultAssemblies)
@@ -77,7 +77,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             var packagePath = Path.Combine(CachePath, F.DefaultPackageName, F.DefaultVersion);
             var fileSystem = FileSystemMockBuilder.Create()
                 .AddFile(
-                    Path.Combine(CachePath, $"{F.DefaultPackageName}.{F.DefaultVersion}.nupkg.{F.DefaultHashAlgoritm}"),
+                    Path.Combine(packagePath, $"{F.DefaultPackageName}.{F.DefaultVersion}.nupkg.{F.DefaultHashAlgoritm}"),
                     F.DefaultHashValue
                 )
                 .AddFiles(packagePath, F.TwoAssemblies)
@@ -101,7 +101,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             var packagePath = Path.Combine(CachePath, F.DefaultPackageName, F.DefaultVersion);
             var fileSystem = FileSystemMockBuilder.Create()
                 .AddFile(
-                    Path.Combine(CachePath, $"{F.DefaultPackageName}.{F.DefaultVersion}.nupkg.{F.DefaultHashAlgoritm}"),
+                    Path.Combine(packagePath, $"{F.DefaultPackageName}.{F.DefaultVersion}.nupkg.{F.DefaultHashAlgoritm}"),
                     F.DefaultHashValue
                 )
                 .AddFiles(packagePath, F.DefaultAssemblyPath)
@@ -114,7 +114,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             var exception = Assert.Throws<InvalidOperationException>(() => resolver.TryResolveAssemblyPaths(library, assemblies));
             exception.Message.Should()
                 .Contain(F.SecondAssemblyPath)
-                .And.Contain(library.PackageName);
+                .And.Contain(library.Name);
         }
 
         private IEnvironment GetDefaultEnviroment()

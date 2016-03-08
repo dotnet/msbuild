@@ -19,7 +19,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             dotnetTestMessageScenario.TestRunnerMock
                 .Setup(t => t.GetProcessStartInfo())
-                .Returns(new ProcessStartInfo())
+                .Returns(new TestStartInfo())
                 .Verifiable();
 
             dotnetTestMessageScenario.AdapterChannelMock
@@ -36,6 +36,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             dotnetTestMessageScenario.AdapterChannelMock
                 .Setup(a => a.Send(
                     It.Is<Message>(m => m.MessageType == TestMessageTypes.TestExecutionTestRunnerProcessStartInfo)))
+                .Callback(() => dotnetTestMessageScenario.TestRunnerChannelMock.Raise(
+                    t => t.MessageReceived += null,
+                    dotnetTestMessageScenario.DotnetTestUnderTest,
+                    new Message
+                    {
+                        MessageType = TestMessageTypes.TestRunnerWaitingCommand
+                    }))
+                .Verifiable();
+
+            dotnetTestMessageScenario.TestRunnerChannelMock
+                .Setup(a => a.Send(
+                    It.Is<Message>(m => m.MessageType == TestMessageTypes.TestRunnerExecute)))
                 .Callback(() => dotnetTestMessageScenario.TestRunnerChannelMock.Raise(
                     t => t.MessageReceived += null,
                     dotnetTestMessageScenario.DotnetTestUnderTest,

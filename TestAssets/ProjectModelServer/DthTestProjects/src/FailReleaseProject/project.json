@@ -1,8 +1,9 @@
 {
   "frameworks": {
-    "dnxcore50": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50",
       "dependencies": {
-        "System.Runtime": "4.0.21-*"
+        "NETStandard.Library": "1.0.0-rc2-23901"
       }
     }
   },

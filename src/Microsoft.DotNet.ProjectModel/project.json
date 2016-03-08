@@ -5,7 +5,7 @@
     },
     "description": "Types to model a .NET Project",
     "dependencies": {
-        "System.Reflection.Metadata": "1.2.0-rc2-23811",
+        "System.Reflection.Metadata": "1.2.0-rc2-23901",
         "NuGet.Packaging": "3.4.0-beta-632",
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15996",
         "Microsoft.Extensions.JsonParser.Sources": {
@@ -32,15 +32,15 @@
                 }
             }
         },
-        "dnxcore50": {
-            "imports": "portable-net45+win8",
+        "netstandard1.3": {
+            "imports": "dnxcore50",
             "dependencies": {
-                "NETStandard.Library": "1.0.0-rc2-23811",
-                "System.Dynamic.Runtime": "4.0.11-rc2-23811",
-                "System.Runtime.Loader": "4.0.0-rc2-23811",
-                "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23811",
-                "Microsoft.CSharp": "4.0.1-rc2-23811",
-                "System.Xml.XDocument": "4.0.11-rc2-23811"
+                "NETStandard.Library": "1.0.0-rc2-23901",
+                "System.Dynamic.Runtime": "4.0.11-rc2-23901",
+                "System.Runtime.Loader": "4.0.0-rc2-23901",
+                "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23901",
+                "Microsoft.CSharp": "4.0.1-rc2-23901",
+                "System.Xml.XDocument": "4.0.11-rc2-23901"
             }
         }
     }

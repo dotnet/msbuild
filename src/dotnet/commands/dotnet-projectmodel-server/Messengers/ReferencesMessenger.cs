@@ -22,14 +22,14 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
                    Enumerable.SequenceEqual(local.ProjectReferences, remote.ProjectReferences);
         }
 
-        protected override object CreatePayload(ProjectContextSnapshot local)
+        protected override void SendPayload(ProjectContextSnapshot local, Action<object> send)
         {
-            return new ReferencesMessage
+            send(new ReferencesMessage
             {
                 Framework = local.TargetFramework.ToPayload(),
                 ProjectReferences = local.ProjectReferences,
                 FileReferences = local.FileReferences
-            };
+            });
         }
 
         protected override void SetValue(ProjectContextSnapshot local, ProjectContextSnapshot remote)

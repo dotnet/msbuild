@@ -19,7 +19,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
         private GetTestRunnerProcessStartInfoMessageHandler _testGetTestRunnerProcessStartInfoMessageHandler;
         private Message _validMessage;
-        private ProcessStartInfo _processStartInfo;
+        private TestStartInfo _testStartInfo;
+        private List<string> _testsToRun;
 
         private Mock<ITestRunner> _testRunnerMock;
         private Mock<ITestRunnerFactory> _testRunnerFactoryMock;
@@ -32,20 +33,25 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
         public GivenATestExecutionGetTestRunnerProcessStartInfoMessageHandler()
         {
+            _testsToRun = new List<string> {"test1", "test2"};
             _validMessage = new Message
             {
                 MessageType = TestMessageTypes.TestExecutionGetTestRunnerProcessStartInfo,
-                Payload = JToken.FromObject(new RunTestsMessage { Tests = new List<string> { "test1", "test2" } })
+                Payload = JToken.FromObject(new RunTestsMessage { Tests = _testsToRun })
             };
 
             _dotnetTestMock = new Mock<IDotnetTest>();
             _dotnetTestMock.Setup(d => d.State).Returns(DotnetTestState.VersionCheckCompleted);
             _dotnetTestMock.Setup(d => d.PathToAssemblyUnderTest).Returns(AssemblyUnderTest);
 
-            _processStartInfo = new ProcessStartInfo("runner", "arguments");
+            _testStartInfo = new TestStartInfo
+            {
+                FileName = "runner",
+                Arguments = "arguments"
+            };
 
             _testRunnerMock = new Mock<ITestRunner>();
-            _testRunnerMock.Setup(t => t.GetProcessStartInfo()).Returns(_processStartInfo);
+            _testRunnerMock.Setup(t => t.GetProcessStartInfo()).Returns(_testStartInfo);
 
             _testRunnerFactoryMock = new Mock<ITestRunnerFactory>();
             _testRunnerFactoryMock
@@ -59,7 +65,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             _reportingChannelFactoryMock = new Mock<IReportingChannelFactory>();
             _reportingChannelFactoryMock.Setup(r =>
-                r.CreateChannelWithAnyAvailablePort()).Returns(_testRunnerChannelMock.Object);
+                r.CreateTestRunnerChannel()).Returns(_testRunnerChannelMock.Object);
 
             _testGetTestRunnerProcessStartInfoMessageHandler = new GetTestRunnerProcessStartInfoMessageHandler(
                 _testRunnerFactoryMock.Object,
@@ -128,8 +134,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             _adapterChannelMock.Setup(r => r.Send(It.Is<Message>(m =>
                 m.MessageType == TestMessageTypes.TestExecutionTestRunnerProcessStartInfo &&
-                m.Payload.ToObject<ProcessStartInfo>().FileName == _processStartInfo.FileName &&
-                m.Payload.ToObject<ProcessStartInfo>().Arguments == _processStartInfo.Arguments))).Verifiable();
+                m.Payload.ToObject<ProcessStartInfo>().FileName == _testStartInfo.FileName &&
+                m.Payload.ToObject<ProcessStartInfo>().Arguments == _testStartInfo.Arguments))).Verifiable();
 
             _testGetTestRunnerProcessStartInfoMessageHandler.HandleMessage(
                     _dotnetTestMock.Object,
@@ -145,7 +151,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                     _dotnetTestMock.Object,
                     _validMessage);
 
-            _reportingChannelFactoryMock.Verify(r => r.CreateChannelWithAnyAvailablePort(), Times.Once);
+            _reportingChannelFactoryMock.Verify(r => r.CreateTestRunnerChannel(), Times.Once);
         }
 
         [Fact]
@@ -169,6 +175,16 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
+        public void It_sets_the_TestsToRun_of_DotnetTest()
+        {
+            _testGetTestRunnerProcessStartInfoMessageHandler.HandleMessage(
+                    _dotnetTestMock.Object,
+                    _validMessage);
+
+            _dotnetTestMock.VerifySet(d => d.TestsToRun = _testsToRun);
+        }
+
+        [Fact]
         public void It_passes_the_right_arguments_to_the_run_tests_arguments_builder()
         {
             _testGetTestRunnerProcessStartInfoMessageHandler.HandleMessage(
@@ -181,8 +197,6 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             arguments.Should().Contain("--port", $"{TestRunnerPort}");
             arguments.Should().Contain($"{AssemblyUnderTest}");
-            arguments.Should().Contain("--test", "test1");
-            arguments.Should().Contain("--test", "test2");
         }
     }
 }

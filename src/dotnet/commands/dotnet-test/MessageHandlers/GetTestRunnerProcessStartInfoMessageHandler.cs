@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         private void DoHandleMessage(IDotnetTest dotnetTest, Message message)
         {
-            var testRunnerChannel = _reportingChannelFactory.CreateChannelWithAnyAvailablePort();
+            var testRunnerChannel = _reportingChannelFactory.CreateTestRunnerChannel();
 
             dotnetTest.StartListeningTo(testRunnerChannel);
 
@@ -45,6 +45,8 @@ namespace Microsoft.DotNet.Tools.Test
 
             var testRunner = _testRunnerFactory.CreateTestRunner(
                 new RunTestsArgumentsBuilder(dotnetTest.PathToAssemblyUnderTest, testRunnerChannel.Port, message));
+
+            dotnetTest.TestsToRun = message.Payload?.ToObject<RunTestsMessage>().Tests;
 
             var processStartInfo = testRunner.GetProcessStartInfo();
 

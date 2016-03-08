@@ -111,11 +111,12 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (compilationOptions.PreserveCompilationContext == true)
             {
-                var dependencyContext = DependencyContextBuilder.Build(compilationOptions,
-                    exporter,
-                    args.ConfigValue,
+                var allExports = exporter.GetAllExports().ToList();
+                var dependencyContext = new DependencyContextBuilder().Build(compilationOptions,
+                    allExports,
+                    allExports,
                     context.TargetFramework,
-                    context.RuntimeIdentifier);
+                    context.RuntimeIdentifier ?? string.Empty);
 
                 var writer = new DependencyContextWriter();
                 var depsJsonFile = Path.Combine(intermediateOutputPath, context.ProjectFile.Name + "dotnet-compile.deps.json");

@@ -6,10 +6,12 @@
         "additionalArguments": [ "-highentropyva+" ]
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23808"
+        "NETStandard.Library": "1.0.0-rc2-23901"
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "netstandardapp1.5": {
+            "imports": "dnxcore50"
+        }
     }
 }
