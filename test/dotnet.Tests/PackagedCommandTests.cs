@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
+using FluentAssertions;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -20,11 +21,10 @@ namespace Microsoft.DotNet.Tests
 
         [Theory]
         [InlineData("AppWithDirectAndToolDependency")]
-        [InlineData("AppWithDirectDependency")]
         [InlineData("AppWithToolDependency")]
-        public void TestPackagedCommandDependency(string appName)
+        public void TestProjectToolIsAvailableThroughDriver(string appName)
         {
-            string appDirectory = Path.Combine(_testProjectsRoot, appName);
+            var appDirectory = Path.Combine(_testProjectsRoot, appName);
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
                 .Execute()
@@ -38,9 +38,36 @@ namespace Microsoft.DotNet.Tests
             {
                 CommandResult result = new HelloCommand().ExecuteWithCapturedOutput();
 
-                result.Should().HaveStdOut("Hello" + Environment.NewLine);
+                result.Should().HaveStdOut("Hello World!" + Environment.NewLine);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(currentDirectory);
+            }
+        }
+
+        [Fact]
+        public void TestProjectDependencyIsNotAvailableThroughDriver()
+        {
+            var appName = "AppWithDirectDependency";
+            var appDirectory = Path.Combine(_testProjectsRoot, appName);
+
+            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            var currentDirectory = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(appDirectory);
+
+            try
+            {
+                CommandResult result = new HelloCommand().ExecuteWithCapturedOutput();
+
+                result.StdOut.Should().Contain("No executable found matching command");
+                result.Should().NotPass();
             }
             finally
             {

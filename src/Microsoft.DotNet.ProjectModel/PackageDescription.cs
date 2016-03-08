@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.ProjectModel
         }
 
         private LockFileTargetLibrary Target { get; }
-        
+
         public LockFilePackageLibrary Library { get; }
 
         public IEnumerable<LockFileItem> RuntimeAssemblies => FilterPlaceholders(Target.RuntimeAssemblies);
@@ -44,6 +44,8 @@ namespace Microsoft.DotNet.ProjectModel
         public IEnumerable<LockFileItem> NativeLibraries => Target.NativeLibraries;
 
         public IEnumerable<LockFileContentFile> ContentFiles => Target.ContentFiles;
+
+        public IEnumerable<LockFileRuntimeTarget> RuntimeTargets => Target.RuntimeTargets;
 
         private IEnumerable<LockFileItem> FilterPlaceholders(IList<LockFileItem> items)
         {

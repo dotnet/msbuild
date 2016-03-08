@@ -85,6 +85,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return command;
         }
+
+        public static Command Create(CommandSpec commandSpec)
+        {
+            return new Command(commandSpec);
+        }
         
         public static Command CreateForScript(
             string commandName, 

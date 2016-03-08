@@ -1,6 +1,6 @@
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal class CommandSpec
+    public class CommandSpec
     {
         public CommandSpec(string path, string args, CommandResolutionStrategy resolutionStrategy)
         {

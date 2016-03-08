@@ -48,12 +48,18 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 if (!string.IsNullOrEmpty(runtimeIdentifier))
                 {
-                    runtimeOutputPath= PathUtility.EnsureTrailingSlash(Path.Combine(compilationOutputPath, runtimeIdentifier));
+                    runtimeOutputPath = PathUtility.EnsureTrailingSlash(Path.Combine(compilationOutputPath, runtimeIdentifier));
+                }
+                else
+                {
+                    // "Runtime" assets (i.e. the deps file) will be dropped to the compilation output path, because
+                    // we are building a RID-less target.
+                    runtimeOutputPath = compilationOutputPath;
                 }
             }
             else
             {
-                runtimeOutputPath= PathUtility.EnsureTrailingSlash(Path.GetFullPath(outputPath));
+                runtimeOutputPath = PathUtility.EnsureTrailingSlash(Path.GetFullPath(outputPath));
             }
 
             var intermediateOutputPath = PathUtility.EnsureTrailingSlash(Path.Combine(

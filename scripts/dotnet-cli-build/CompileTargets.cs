@@ -45,6 +45,13 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.Extensions.Testing.Abstractions"
         };
 
+        // Updates the stage 2 with recent changes.
+        [Target(nameof(PrepareTargets.Init), nameof(CompileStage2))]
+        public static BuildTargetResult UpdateBuild(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
         [Target(nameof(PrepareTargets.Init), nameof(CompileCoreHost), nameof(CompileStage1), nameof(CompileStage2))]
         public static BuildTargetResult Compile(BuildTargetContext c)
         {
@@ -238,9 +245,9 @@ namespace Microsoft.DotNet.Cli.Build
             // Find toolchain package
             string packageId;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (CurrentPlatform.IsWindows)
             {
-                if (IsWinx86)
+                if (CurrentArchitecture.Isx86)
                 {
                     // https://github.com/dotnet/cli/issues/1550
                     c.Warn("Native compilation is not yet working on Windows x86");
@@ -249,24 +256,16 @@ namespace Microsoft.DotNet.Cli.Build
 
                 packageId = "toolchain.win7-x64.Microsoft.DotNet.AppDep";
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            else if (CurrentPlatform.IsUbuntu)
             {
-                var osname = PlatformServices.Default.Runtime.OperatingSystem;
-                if (string.Equals(osname, "ubuntu", StringComparison.OrdinalIgnoreCase))
-                {
-                    packageId = "toolchain.ubuntu.14.04-x64.Microsoft.DotNet.AppDep";
-                }
-                else if (string.Equals(osname, "centos", StringComparison.OrdinalIgnoreCase))
-                {
-                    c.Warn("Native compilation is not yet working on CentOS");
-                    return c.Success();
-                }
-                else
-                {
-                    return c.Failed($"Unknown Linux Distro: {osname}");
-                }
+                packageId = "toolchain.ubuntu.14.04-x64.Microsoft.DotNet.AppDep";
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL)
+            {
+                c.Warn($"Native compilation is not yet working on {CurrentPlatform.Current}");
+                return c.Success();
+            }
+            else if (CurrentPlatform.IsOSX)
             {
                 packageId = "toolchain.osx.10.10-x64.Microsoft.DotNet.AppDep";
             }
@@ -296,28 +295,20 @@ namespace Microsoft.DotNet.Cli.Build
             // Find crossgen
             string arch = PlatformServices.Default.Runtime.RuntimeArchitecture;
             string packageId;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (CurrentPlatform.IsWindows)
             {
                 packageId = $"runtime.win7-{arch}.Microsoft.NETCore.Runtime.CoreCLR";
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            else if (CurrentPlatform.IsUbuntu)
             {
-                var osname = PlatformServices.Default.Runtime.OperatingSystem;
-                if (string.Equals(osname, "ubuntu", StringComparison.OrdinalIgnoreCase))
-                {
-                    packageId = "runtime.ubuntu.14.04-x64.Microsoft.NETCore.Runtime.CoreCLR";
-                }
-                else if (string.Equals(osname, "centos", StringComparison.OrdinalIgnoreCase))
-                {
-                    // CentOS runtime is in the runtime.rhel.7-x64... package.
-                    packageId = "runtime.rhel.7-x64.Microsoft.NETCore.Runtime.CoreCLR";
-                }
-                else
-                {
-                    return c.Failed($"Unknown Linux Distro: {osname}");
-                }
+                packageId = "runtime.ubuntu.14.04-x64.Microsoft.NETCore.Runtime.CoreCLR";
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL)
+            {
+                // CentOS runtime is in the runtime.rhel.7-x64... package.
+                packageId = "runtime.rhel.7-x64.Microsoft.NETCore.Runtime.CoreCLR";
+            }
+            else if (CurrentPlatform.IsOSX)
             {
                 packageId = "runtime.osx.10.10-x64.Microsoft.NETCore.Runtime.CoreCLR";
             }

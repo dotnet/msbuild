@@ -14,7 +14,7 @@ function CopyInstaller([string]$destination)
     # Copy both the .msi and the .exe to the testBin directory so
     # the tests running in the docker container have access to them.
     Copy-Item $inputMsi -Destination:$destination
-    
+
     $BundlePath = [System.IO.Path]::ChangeExtension($inputMsi, "exe")
     Copy-Item $BundlePath -Destination:$destination
 }
@@ -22,7 +22,7 @@ function CopyInstaller([string]$destination)
 function CopyTestXUnitRunner([string]$destination)
 {
     $XUnitRunnerDir = Join-Path $env:NUGET_PACKAGES xunit.runner.console\2.1.0\tools
-    
+
     Copy-Item $XUnitRunnerDir\xunit.console.exe -Destination:$destination
     Copy-Item $XUnitRunnerDir\xunit.runner.utility.desktop.dll -Destination:$destination
 }
@@ -42,7 +42,6 @@ pushd "$Stage2Dir\bin"
 
 try {
     .\dotnet restore `
-        --runtime win-anycpu `
         $testDir `
         -f https://www.myget.org/F/dotnet-buildtools/api/v3/index.json | Out-Host
 
@@ -53,7 +52,6 @@ try {
 
     .\dotnet publish `
         --framework net46 `
-        --runtime win-anycpu `
         --output $testBin `
         $testDir | Out-Host
 
@@ -68,7 +66,7 @@ try {
         CopyTestXUnitRunner $testBin
 
         Write-Host "Running installer tests in Windows Container"
-        
+
         # --net="none" works around a networking issue on the containers on the CI machines.
         # Since our installer tests don't require the network, it is fine to shut it off.
         $MsiFileName = [System.IO.Path]::GetFileName($inputMsi)

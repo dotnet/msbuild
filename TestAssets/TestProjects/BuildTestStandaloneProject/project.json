@@ -1,0 +1,20 @@
+{
+    "dependencies": { },
+    "frameworks": {
+        "netstandardapp1.5": {
+            "imports": [
+                "dnxcore50",
+                "portable-net45+win8"
+            ],
+            "dependencies": {
+                "NETStandard.Library": "1.0.0-rc2-23901"
+            }
+        }
+    },
+    "runtimes": {
+        "win7-x64": {},
+        "osx.10.10-x64": {},
+        "ubuntu.14.04-x64": {},
+        "centos.7-x64": {}
+    }
+}

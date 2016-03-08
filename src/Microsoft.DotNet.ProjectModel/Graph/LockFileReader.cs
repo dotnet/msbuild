@@ -170,6 +170,21 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             return library;
         }
 
+        private static LockFileRuntimeTarget ReadRuntimeTarget(string property, JsonValue json)
+        {
+            var jsonObject = json as JsonObject;
+            if (jsonObject == null)
+            {
+                throw FileFormatException.Create("The value type is not an object.", json);
+            }
+
+            return new LockFileRuntimeTarget(
+                path: property,
+                runtime: jsonObject.ValueAsString("runtime"),
+                assetType: jsonObject.ValueAsString("assetType")
+                );
+        }
+
         private static LockFileContentFile ReadContentFile(string property, JsonValue json)
         {
             var contentFile = new LockFileContentFile()

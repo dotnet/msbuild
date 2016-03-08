@@ -6,7 +6,7 @@
     "description": "Types to model a .NET Project",
     "dependencies": {
         "System.Reflection.Metadata": "1.2.0-rc2-23901",
-        "NuGet.Packaging": "3.4.0-beta-632",
+        "NuGet.Packaging": "3.4.0-rtm-0724",
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15996",
         "Microsoft.Extensions.JsonParser.Sources": {
             "type": "build",

@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var publishCommand = new PublishCommand(testProject);
             var result = publishCommand.ExecuteWithCapturedOutput();
 
-            result.Should().StdOutMatchPattern("\nprepublish_output( \\?[^%]+\\?){5}.+\npostpublish_output( \\?[^%]+\\?){5}", RegexOptions.Singleline);
+            result.Should().HaveStdOutMatching("\nprepublish_output( \\?[^%]+\\?){5}.+\npostpublish_output( \\?[^%]+\\?){5}", RegexOptions.Singleline);
             result.Should().Pass();
         }
     }

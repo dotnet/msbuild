@@ -49,8 +49,8 @@ namespace Microsoft.Extensions.DependencyModel
                 runtime,
                 false,
                 GetCompilationOptions(compilerOptions),
-                GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>().ToArray(),
-                GetLibraries(runtimeExports, dependencyLookup, runtime: true).Cast<RuntimeLibrary>().ToArray(),
+                GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(),
+                GetLibraries(runtimeExports, dependencyLookup, runtime: true).Cast<RuntimeLibrary>(),
                 new KeyValuePair<string, string[]>[0]);
         }
 
@@ -107,14 +107,14 @@ namespace Microsoft.Extensions.DependencyModel
                 }
             }
 
-            string[] assemblies;
+            IEnumerable<string> assemblies;
             if (type == LibraryType.ReferenceAssembly)
             {
                 assemblies = ResolveReferenceAssembliesPath(libraryAssets);
             }
             else
             {
-                assemblies = libraryAssets.Select(libraryAsset => libraryAsset.RelativePath).ToArray();
+                assemblies = libraryAssets.Select(libraryAsset => libraryAsset.RelativePath);
             }
 
             if (runtime)
@@ -124,9 +124,10 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Identity.Name,
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
-                    assemblies.Select(RuntimeAssembly.Create).ToArray(),
-                    new RuntimeTarget[0],
-                    libraryDependencies.ToArray(),
+                    assemblies.Select(RuntimeAssembly.Create),
+                    export.ResourceAssemblies.Select(CreateResourceAssembly),
+                    export.RuntimeTargets.Select(CreateRuntimeTarget),
+                    libraryDependencies,
                     serviceable
                     );
             }
@@ -138,15 +139,31 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
                     assemblies,
-                    libraryDependencies.ToArray(),
+                    libraryDependencies,
                     serviceable
                    );
             }
         }
 
-        private string[] ResolveReferenceAssembliesPath(IEnumerable<LibraryAsset> libraryAssets)
+        private ResourceAssembly CreateResourceAssembly(LibraryResourceAssembly resourceAssembly)
         {
-            var resolvedPaths = new List<string>();
+            return new ResourceAssembly(
+                path: resourceAssembly.Asset.RelativePath,
+                locale: resourceAssembly.Locale
+                );
+        }
+
+        private RuntimeTarget CreateRuntimeTarget(LibraryRuntimeTarget runtimeTarget)
+        {
+            return new RuntimeTarget(
+                runtime: runtimeTarget.Runtime,
+                assemblies: runtimeTarget.RuntimeAssemblies.Select(a => RuntimeAssembly.Create(a.RelativePath)),
+                nativeLibraries: runtimeTarget.NativeLibraries.Select(l => l.RelativePath)
+                );
+        }
+
+        private IEnumerable<string> ResolveReferenceAssembliesPath(IEnumerable<LibraryAsset> libraryAssets)
+        {
             var referenceAssembliesPath =
                 PathUtility.EnsureTrailingSlash(_referenceAssembliesPath);
             foreach (var libraryAsset in libraryAssets)
@@ -155,14 +172,13 @@ namespace Microsoft.Extensions.DependencyModel
                 // if not, save only assembly name and try to find it somehow later
                 if (libraryAsset.ResolvedPath.StartsWith(referenceAssembliesPath))
                 {
-                    resolvedPaths.Add(libraryAsset.ResolvedPath.Substring(referenceAssembliesPath.Length));
+                    yield return libraryAsset.ResolvedPath.Substring(referenceAssembliesPath.Length);
                 }
                 else
                 {
-                    resolvedPaths.Add(Path.GetFileName(libraryAsset.ResolvedPath));
+                    yield return Path.GetFileName(libraryAsset.ResolvedPath);
                 }
             }
-            return resolvedPaths.ToArray();
         }
     }
 }

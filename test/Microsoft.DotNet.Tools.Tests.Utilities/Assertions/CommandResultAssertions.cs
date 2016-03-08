@@ -32,6 +32,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> NotPass()
+        {
+            Execute.Assertion.ForCondition(_commandResult.ExitCode != 0)
+                .FailWith(AppendDiagnosticsTo($"Expected command to fail but it did not."));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> Fail()
         {
             Execute.Assertion.ForCondition(_commandResult.ExitCode != 0)
@@ -53,7 +60,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
-        public AndConstraint<CommandResultAssertions> StdOutMatchPattern(string pattern, RegexOptions options = RegexOptions.None)
+        public AndConstraint<CommandResultAssertions> HaveStdOutContaining(string pattern)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StdOut.Contains(pattern))
+                .FailWith(AppendDiagnosticsTo($"The command output did not contain expected result: {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> HaveStdOutMatching(string pattern, RegexOptions options = RegexOptions.None)
         {
             Execute.Assertion.ForCondition(Regex.Match(_commandResult.StdOut, pattern, options).Success)
                 .FailWith(AppendDiagnosticsTo($"Matching the command output failed. Pattern: {pattern}{Environment.NewLine}"));
@@ -64,6 +78,20 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             Execute.Assertion.ForCondition(!string.IsNullOrEmpty(_commandResult.StdErr))
                 .FailWith(AppendDiagnosticsTo("Command did not output anything to stderr."));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> HaveStdErrContaining(string pattern)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StdErr.Contains(pattern))
+                .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> HaveStdErrMatching(string pattern, RegexOptions options = RegexOptions.None)
+        {
+            Execute.Assertion.ForCondition(Regex.Match(_commandResult.StdErr, pattern, options).Success)
+                .FailWith(AppendDiagnosticsTo($"Matching the command error output failed. Pattern: {pattern}{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 

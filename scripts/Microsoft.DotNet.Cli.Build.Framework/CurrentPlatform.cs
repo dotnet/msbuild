@@ -48,6 +48,15 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
         }
 
+        public static bool IsRHEL
+        {
+            get
+            {
+                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                return string.Equals(osname, "rhel", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         public static bool IsUnix
         {
             get
@@ -60,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                return IsUbuntu || IsCentOS;
+                return IsUbuntu || IsCentOS || IsRHEL;
             }
         }
 
@@ -76,6 +85,8 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                     return IsOSX;
                 case BuildPlatform.CentOS:
                     return IsCentOS;
+                case BuildPlatform.RHEL:
+                    return IsRHEL;
                 case BuildPlatform.Unix:
                     return IsUnix;
                 case BuildPlatform.Linux:
@@ -102,6 +113,10 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             else if (IsCentOS)
             {
                 return BuildPlatform.CentOS;
+            }
+            else if (IsRHEL)
+            {
+                return BuildPlatform.RHEL;
             }
             else
             {

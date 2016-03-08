@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,36 +18,6 @@ namespace Microsoft.DotNet.ProjectModel.Tests
     {
         private const string PackagePath = "PackagePath";
 
-        private LibraryExport ExportSingle(LibraryDescription description = null)
-        {
-            var rootProject = new Project()
-            {
-                Name = "RootProject",
-                CompilerName = "csc"
-            };
-
-            var rootProjectDescription = new ProjectDescription(
-                new LibraryRange(),
-                rootProject,
-                new LibraryRange[] { },
-                new TargetFrameworkInformation(),
-                true);
-
-            if (description == null)
-            {
-                description = rootProjectDescription;
-            }
-            else
-            {
-                description.Parents.Add(rootProjectDescription);
-            }
-
-            var libraryManager = new LibraryManager(new[] { description }, new DiagnosticMessage[] { }, "");
-            var allExports = new LibraryExporter(rootProjectDescription, libraryManager, "config", "runtime", "basepath", "solutionroot").GetAllExports();
-            var export = allExports.Single();
-            return export;
-        }
-
         private PackageDescription CreateDescription(LockFileTargetLibrary target = null, LockFilePackageLibrary package = null)
         {
             return new PackageDescription(PackagePath,
@@ -54,7 +27,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
-        private void ExportsPackageNativeLibraries()
+        public void ExportsPackageNativeLibraries()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -76,7 +49,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
-        private void ExportsPackageCompilationAssebmlies()
+        public void ExportsPackageCompilationAssebmlies()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -98,7 +71,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
-        private void ExportsPackageRuntimeAssebmlies()
+        public void ExportsPackageRuntimeAssebmlies()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -120,7 +93,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
-        private void ExportsSources()
+        public void ExportsSources()
         {
             var description = CreateDescription(
                package: new LockFilePackageLibrary()
@@ -142,7 +115,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
-        private void ExportsCopyToOutputContentFiles()
+        public void ExportsCopyToOutputContentFiles()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -170,7 +143,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
 
         [Fact]
-        private void ExportsResourceContentFiles()
+        public void ExportsResourceContentFiles()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -196,7 +169,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
-        private void ExportsCompileContentFiles()
+        public void ExportsCompileContentFiles()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -224,7 +197,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
 
         [Fact]
-        private void SelectsContentFilesOfProjectCodeLanguage()
+        public void SelectsContentFilesOfProjectCodeLanguage()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -264,7 +237,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
-        private void SelectsContentFilesWithNoLanguageIfProjectLanguageNotMathed()
+        public void SelectsContentFilesWithNoLanguageIfProjectLanguageNotMathed()
         {
             var description = CreateDescription(
                 new LockFileTargetLibrary()
@@ -295,5 +268,84 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             libraryAsset.RelativePath.Should().Be(Path.Combine("content", "file.any"));
             libraryAsset.ResolvedPath.Should().Be(Path.Combine(PackagePath, "content", "file.any"));
         }
+
+        [Fact]
+        public void ExportsRuntimeTargets()
+        {
+            var win8Native = Path.Combine("native", "win8-x64", "Native.dll");
+            var win8Runtime = Path.Combine("runtime", "win8-x64", "Runtime.dll");
+            var linuxNative = Path.Combine("native", "linux", "Native.dll");
+
+            var description = CreateDescription(
+               new LockFileTargetLibrary()
+               {
+                   RuntimeTargets = new List<LockFileRuntimeTarget>()
+                   {
+                    new LockFileRuntimeTarget(
+                        path: win8Native,
+                        runtime: "win8-x64",
+                        assetType: "native"
+                    ),
+                    new LockFileRuntimeTarget(
+                        path: win8Runtime,
+                        runtime: "win8-x64",
+                        assetType: "runtime"
+                    ),
+                    new LockFileRuntimeTarget(
+                        path: linuxNative,
+                        runtime: "linux",
+                        assetType: "native"
+                    ),
+                   }
+               });
+
+            var result = ExportSingle(description);
+            result.RuntimeTargets.Should().HaveCount(2);
+
+            var runtimeTarget = result.RuntimeTargets.Should().Contain(t => t.Runtime == "win8-x64").Subject;
+            var runtime = runtimeTarget.RuntimeAssemblies.Single();
+            runtime.RelativePath.Should().Be(win8Runtime);
+            runtime.ResolvedPath.Should().Be(Path.Combine(PackagePath, win8Runtime));
+
+            var native = runtimeTarget.NativeLibraries.Single();
+            native.RelativePath.Should().Be(win8Native);
+            native.ResolvedPath.Should().Be(Path.Combine(PackagePath, win8Native));
+
+            runtimeTarget = result.RuntimeTargets.Should().Contain(t => t.Runtime == "linux").Subject;
+            native = runtimeTarget.NativeLibraries.Single();
+            native.RelativePath.Should().Be(linuxNative);
+            native.ResolvedPath.Should().Be(Path.Combine(PackagePath, linuxNative));
+        }
+
+        private LibraryExport ExportSingle(LibraryDescription description = null)
+        {
+            var rootProject = new Project()
+            {
+                Name = "RootProject",
+                CompilerName = "csc"
+            };
+
+            var rootProjectDescription = new ProjectDescription(
+                new LibraryRange(),
+                rootProject,
+                new LibraryRange[] { },
+                new TargetFrameworkInformation(),
+                true);
+
+            if (description == null)
+            {
+                description = rootProjectDescription;
+            }
+            else
+            {
+                description.Parents.Add(rootProjectDescription);
+            }
+
+            var libraryManager = new LibraryManager(new[] { description }, new DiagnosticMessage[] { }, "");
+            var allExports = new LibraryExporter(rootProjectDescription, libraryManager, "config", "runtime", "basepath", "solutionroot").GetAllExports();
+            var export = allExports.Single();
+            return export;
+        }
+
     }
 }
