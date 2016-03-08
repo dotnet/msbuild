@@ -113,6 +113,7 @@ namespace Microsoft.DotNet.Cli.Build
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
             AddInstallerArtifactToContext(c, "dotnet", "Sdk");
+            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost");
 
             return c.Success();
         }

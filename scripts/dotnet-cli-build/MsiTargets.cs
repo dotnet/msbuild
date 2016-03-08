@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SdkBundle { get; set; }
 
+        private static string SharedHostMsi { get; set; }
+
         private static string Engine { get; set; }
 
         private static string MsiVersion { get; set; }
@@ -64,6 +66,8 @@ namespace Microsoft.DotNet.Cli.Build
             SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
             Engine = Path.Combine(Path.GetDirectoryName(SdkBundle), ENGINE);
 
+            SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
+
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             MsiVersion = buildVersion.GenerateMsiVersion();
             CliVersion = buildVersion.SimpleVersion;
@@ -74,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target(nameof(MsiTargets.InitMsi),
-        nameof(GenerateDotnetMuxerMsi),
+        nameof(GenerateDotnetSharedHostMsi),
         nameof(GenerateDotnetSharedFxMsi),
         nameof(GenerateCliSdkMsi))]
         [BuildPlatforms(BuildPlatform.Windows)]
@@ -95,10 +99,25 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
+        [Target(nameof(SharedFrameworkTargets.PublishSharedHost))]
         [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateDotnetMuxerMsi(BuildTargetContext c)
+        public static BuildTargetResult GenerateDotnetSharedHostMsi(BuildTargetContext c)
         {
+            var inputDir = c.BuildContext.Get<string>("SharedHostPublishRoot");
+            var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedhost");
+
+            if (Directory.Exists(wixObjRoot))
+            {
+                Directory.Delete(wixObjRoot, true);
+            }
+
+            Directory.CreateDirectory(wixObjRoot);
+
+            Cmd("powershell", "-NoProfile", "-NoLogo",
+                Path.Combine(Dirs.RepoRoot, "packaging", "host", "windows", "generatemsi.ps1"),
+                inputDir, SharedHostMsi, WixRoot, MsiVersion, CliVersion, Arch, wixObjRoot)
+                    .Execute()
+                    .EnsureSuccessful();
             return c.Success();
         }
 
