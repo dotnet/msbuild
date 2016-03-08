@@ -20,17 +20,40 @@
           SkipUnchangedFiles="true"           
           />
   </Target>
+  
+  <!-- Copy content of BuildTools package to deployment folders -->
+  <Target Name="CopyBuildTools">
+    <PropertyGroup>
+      <BuildToolsVersionFile>$(RepoRoot)BuildToolsVersion.txt</BuildToolsVersionFile>
+    </PropertyGroup>
+    <ReadLinesFromFile File="$(BuildToolsVersionFile)">
+      <Output TaskParameter="Lines" ItemName="BuildToolsVersion" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <BuildToolsVersion>@(BuildToolsVersion)</BuildToolsVersion>
+    </PropertyGroup>
+    <ItemGroup>
+      <BuildToolsFiles Include="$(ToolPackagesDir)Microsoft.DotNet.BuildTools\$(BuildToolsVersion)\lib\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BuildToolsFiles)"
+          DestinationFolder="$(DeploymentDir)"
+          SkipUnchangedFiles="true"
+          />
+    <Copy SourceFiles="@(BuildToolsFiles)"
+          DestinationFolder="$(TestDeploymentDir)"
+          SkipUnchangedFiles="true"
+          />
+  </Target>
 
   <Target Name="CopyPackageContent">
     <ItemGroup>
       <!-- We want the list of files *after* restore, which happens
            early in build, so this item can't be defined outside of a
            target. -->
-      <NuspecFilesInPackagesDir Include="$(PackagesDir)\**\*.nupkg" />
-      <PackagesFoldersInPackagesDir Include="@(NuspecFilesInPackagesDir->'%(RootDir)%(Directory)')" />
+      <PackagesFoldersInPackagesDir Include="$(PackagesDir)\Microsoft.Portable.Targets\0.1.1-dev\" />
 
       <!-- For each package, get its content files. -->
-      <ContentFilesFromPackage Include="%(PackagesFoldersInPackagesDir.Identity)content\**\*.*" />
+      <ContentFilesFromPackage Include="%(PackagesFoldersInPackagesDir.Identity)contentFiles\any\any\**\*.*" />
     </ItemGroup>
 
     <!-- Copy the dependencies to both the deployment and the test directories -->
@@ -115,6 +138,6 @@
   </Target>
 
   <Target Name="DeployDependencies"
-          DependsOnTargets="CopyPackageContent;CopyCompilerTools;DeployRuntime" />
+          DependsOnTargets="CopyBuildTools;CopyPackageContent;CopyCompilerTools;DeployRuntime" />
 
 </Project>
