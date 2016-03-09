@@ -96,6 +96,8 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                     return IsCentOS;
                 case BuildPlatform.RHEL:
                     return IsRHEL;
+                case BuildPlatform.Debian:
+                    return IsDebian;
                 case BuildPlatform.Unix:
                     return IsUnix;
                 case BuildPlatform.Linux:
