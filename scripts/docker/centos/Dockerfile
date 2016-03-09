@@ -18,7 +18,7 @@ RUN yum -q -y install unzip libunwind gettext libcurl-devel openssl-devel zlib l
 #     apt-get -qqy install unzip curl libicu-dev libunwind8 gettext libssl-dev libcurl3-gnutls zlib1g liblttng-ust-dev lldb-3.6-dev lldb-3.6 
 
 # Install Build Prereqs
-RUN yum -q -y install tar git cmake clang make
+RUN yum -q -y install tar git cmake clang make glibc-devel
 
 # Use clang as c++ compiler
 RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
