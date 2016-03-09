@@ -17,13 +17,14 @@
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
       <group targetFramework="dotnet">
-        <dependency id="System.Collections" version="4.0.11-rc2-23712" />
-        <dependency id="System.Diagnostics.Debug" version="4.0.11-rc2-23712" />
-        <dependency id="System.Globalization" version="4.0.11-rc2-23712" />
-        <dependency id="System.Runtime" version="4.0.21-rc2-23712" />
-        <dependency id="System.Runtime.InteropServices" version="4.0.21-rc2-23712" />
-        <dependency id="System.Threading" version="4.0.11-rc2-23712" />
-        <dependency id="System.Threading.Thread" version="4.0.0-rc2-23712" />
+        <dependency id="System.Collections" version="4.0.11-rc3-23908" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.11-rc3-23908" />
+        <dependency id="System.Globalization" version="4.0.11-rc3-23908" />
+        <dependency id="System.Runtime" version="4.1.0-rc3-23908" />
+        <dependency id="System.Runtime.InteropServices" version="4.1.0-rc3-23908" />
+        <dependency id="System.Runtime.InteropServices.PInvoke" version="4.0.0-rc3-23908" />
+        <dependency id="System.Threading" version="4.0.11-rc3-23908" />
+        <dependency id="System.Threading.Thread" version="4.0.0-rc3-23908" />
       </group>
     </dependencies>
   </metadata>

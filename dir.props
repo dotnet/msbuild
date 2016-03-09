@@ -57,7 +57,7 @@
     <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'!='Windows_NT'">$(DotnetCliPath)dotnet</DotnetToolCommand>
 
     <DnuToolPath>$(DotnetToolCommand)</DnuToolPath>
-    <DnuCoreRestoreCommand>&quot;$(DnuToolPath)&quot; restore --parallel</DnuCoreRestoreCommand>
+    <DnuCoreRestoreCommand>&quot;$(DnuToolPath)&quot; restore</DnuCoreRestoreCommand>
     <DnuCoreRestoreCommand Condition="'$(OsEnvironment)'=='OSX'">ulimit -n 2500 ; $(DnuCoreRestoreCommand)</DnuCoreRestoreCommand>
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
@@ -185,8 +185,8 @@
 
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <TargetFrameworkIdentifier>DNXCore</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
 
     <!-- Setting this to false stops the AppX targets, which aren't supported on .NET Core, from beeing imported -->
@@ -199,8 +199,8 @@
   <!-- csharp targets locations -->
   <PropertyGroup>
     <CSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</CSharpTargets>
-    <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
-    <CSharpPortableTargetsFallback>$(ToolsDir)extensions\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
+    <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
+    <CSharpPortableTargetsFallback>$(ToolsDir)extensions\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
