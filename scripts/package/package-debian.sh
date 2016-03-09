@@ -34,7 +34,6 @@ help(){
 
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
-    echo "$lowerI"
     case $lowerI in
         -m|--manpages)
             MANPAGE_DIR=$2
@@ -64,7 +63,6 @@ while [[ $# > 0 ]]; do
             help
             ;;
         *)
-            echo $lowerI
             break
             ;;
     esac
@@ -77,6 +75,9 @@ PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
 PACKAGE_OUTPUT_DIR=$(dirname "${OUTPUT_DEBIAN_FILE}")
 PACKAGE_LAYOUT_DIR="$PACKAGE_OUTPUT_DIR/deb_intermediate"
 TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/debian_tests"
+
+# remove any residual deb files from earlier builds
+rm -f "$PACKAGE_OUTPUT_DIR/*.deb"
 
 execute_build(){
     create_empty_debian_layout
@@ -165,8 +166,8 @@ run_e2e_test(){
 
 execute_build
 
-rm -f "$OUTPUT_DEBIAN_FILE"
 DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
-mv -f "$DEBIAN_FILE" "$OUTPUT_DEBIAN_FILE"
 
 execute_test
+
+mv -f "$DEBIAN_FILE" "$OUTPUT_DEBIAN_FILE"

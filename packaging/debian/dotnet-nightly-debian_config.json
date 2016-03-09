@@ -28,7 +28,7 @@
     },
 
     "debian_dependencies":{
-        "libssl-dev" : {},
+        "libssl1.0.0" : {},
         "clang-3.5" : {},
         "libcurl3" : {}
     },
