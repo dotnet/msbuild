@@ -14,18 +14,25 @@ namespace Microsoft.DotNet.Cli.Build
     {
         [Target(nameof(MsiTargets.GenerateMsis),
         nameof(MsiTargets.GenerateBundle),
-        nameof(InstallerTargets.GeneratePkg),
-        nameof(InstallerTargets.GenerateDeb))]
+        nameof(InstallerTargets.GeneratePkgs),
+        nameof(InstallerTargets.GenerateDebs))]
         public static BuildTargetResult GenerateInstaller(BuildTargetContext c)
         {
             return c.Success();
         }
 
-
+        [Target(nameof(InstallerTargets.GenerateSdkPkg),
+        nameof(InstallerTargets.GenerateSharedFrameworkPkg),
+        nameof(InstallerTargets.GenerateSharedHostPkg))]
+        [BuildPlatforms(BuildPlatform.OSX)]
+        public static BuildTargetResult GeneratePkgs(BuildTargetContext c)
+        {
+            return c.Success();
+        }
 
         [Target]
         [BuildPlatforms(BuildPlatform.OSX)]
-        public static BuildTargetResult GeneratePkg(BuildTargetContext c)
+        public static BuildTargetResult GenerateSdkPkg(BuildTargetContext c)
         {
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             var pkg = c.BuildContext.Get<string>("SdkInstallerFile");
@@ -37,8 +44,31 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
+        [BuildPlatforms(BuildPlatform.OSX)]
+        public static BuildTargetResult GenerateSharedFrameworkPkg(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.OSX)]
+        public static BuildTargetResult GenerateSharedHostPkg(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target(nameof(InstallerTargets.GenerateSdkDeb),
+        nameof(InstallerTargets.GenerateSharedFrameworkDeb),
+        nameof(InstallerTargets.GenerateSharedHostDeb))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
-        public static BuildTargetResult GenerateDeb(BuildTargetContext c)
+        public static BuildTargetResult GenerateDebs(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult GenerateSdkDeb(BuildTargetContext c)
         {
             var channel = c.BuildContext.Get<string>("Channel").ToLower();
             var packageName = Monikers.GetDebianPackageName(c);
@@ -53,5 +83,20 @@ namespace Microsoft.DotNet.Cli.Build
                     .EnsureSuccessful();
             return c.Success();
         }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult GenerateSharedHostDeb(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult GenerateSharedFrameworkDeb(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
     }
 }
