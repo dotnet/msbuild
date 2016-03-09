@@ -24,12 +24,6 @@ RUN yum -q -y install tar git cmake clang make
 RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
 RUN update-alternatives --set c++ /usr/bin/clang++
 
-# Install azure cli. We need this to publish artifacts.
-RUN yum -y install nodejs && \
-    yum -y install npm && \
-    npm install -g azure-cli
-
-
 RUN yum -q -y install sudo
 
 # Setup User to match Host User, and give superuser permissions

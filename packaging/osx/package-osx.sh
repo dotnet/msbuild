@@ -16,9 +16,9 @@ help(){
     echo "Usage: $0 [--version <pkg version>] [--input <input directory>] [--output <output pkg>] [--help]"
     echo ""
     echo "Options:"
-    echo "  --version <pkg version>          Specify a version for the package."
+    echo "  --version <pkg version>          Specify a version for the package. Version format is 4 '.' separated numbers - <major>.<minor>.<patch>.<revision>"
     echo "  --input <input directory>        Package the entire contents of the directory tree."
-    echo "  --output <output pkg>            The path to which the package will be written."
+    echo "  --output <output pkg>            The path to where the package will be written."
     exit 1
 }
 
@@ -56,11 +56,11 @@ if [ -z "$OUTPUT_PKG" ]; then
 fi
 
 if [ -z "$INPUT_DIR" ]; then
-    echo "Provide an inout directory. Missing option '--input'" && help
+    echo "Provide an input directory. Missing option '--input'" && help
 fi
 
 if [ ! -d "$INPUT_DIR" ]; then
-    echo "Missing input directory - $INPUT_DIR" 1>&2
+    echo "'$INPUT_DIR' - is either missing or not a directory" 1>&2
     exit 1
 fi
 
