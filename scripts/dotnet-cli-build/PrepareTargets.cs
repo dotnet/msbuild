@@ -21,17 +21,17 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
         public static BuildTargetResult CheckPrereqs(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(CheckCoreclrPlatformDependencies),  nameof(CheckInstallerBuildPlatformDependencies))]
+        [Target(nameof(CheckCoreclrPlatformDependencies), nameof(CheckInstallerBuildPlatformDependencies))]
         public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(CheckUbuntuCoreclrAndCoreFxDependencies),  nameof(CheckCentOSCoreclrAndCoreFxDependencies))]
+        [Target(nameof(CheckUbuntuCoreclrAndCoreFxDependencies), nameof(CheckCentOSCoreclrAndCoreFxDependencies))]
         public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c) => c.Success();
 
         [Target(nameof(CheckUbuntuDebianPackageBuildDependencies))]
         public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c) => c.Success();
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
-        [Target(nameof(GenerateVersions), nameof(CheckPrereqs), nameof(LocateStage0))]
+        [Target(nameof(GenerateVersions), nameof(CheckPrereqs), nameof(LocateStage0), nameof(ExpectedBuildArtifacts))]
         public static BuildTargetResult Init(BuildTargetContext c)
         {
             var runtimeInfo = PlatformServices.Default.Runtime;
@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             c.BuildContext["Configuration"] = configEnv;
+            c.BuildContext["Channel"] = Environment.GetEnvironmentVariable("CHANNEL");
 
             c.Info($"Building {c.BuildContext["Configuration"]} to: {Dirs.Output}");
             c.Info("Build Environment:");
@@ -100,6 +101,41 @@ namespace Microsoft.DotNet.Cli.Build
             // Identify the version
             var version = File.ReadAllLines(Path.Combine(stage0, "..", ".version"));
             c.Info($"Using Stage 0 Version: {version[1]}");
+
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult ExpectedBuildArtifacts(BuildTargetContext c)
+        {
+            var productName = Monikers.GetProductMoniker(c);
+            var config = Environment.GetEnvironmentVariable("CONFIGURATION");
+            var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}_{config}_version_badge.svg";
+            c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
+
+            var extension = CurrentPlatform.IsWindows ? ".zip" : ".tar.gz";
+            c.BuildContext["CompressedFile"] = Path.Combine(Dirs.Packages, productName + extension);
+
+            string installer = "";
+            switch (CurrentPlatform.Current)
+            {
+                case BuildPlatform.Windows:
+                    installer = productName + ".exe";
+                    break;
+                case BuildPlatform.OSX:
+                    installer = productName + ".pkg";
+                    break;
+                case BuildPlatform.Ubuntu:
+                    installer = productName + ".deb";
+                    break;
+                default:
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(installer))
+            {
+                c.BuildContext["InstallerFile"] = Path.Combine(Dirs.Packages, installer);
+            }
 
             return c.Success();
         }
@@ -244,7 +280,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CheckCentOSCoreclrAndCoreFxDependencies(BuildTargetContext c)
         {
             var errorMessageBuilder = new StringBuilder();
-            
+
             foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
             {
                 if (!YumDependencyUtility.PackageIsInstalled(package))

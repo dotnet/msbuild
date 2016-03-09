@@ -17,44 +17,103 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
+REPOROOT="$DIR/../.."
 
-if [ "$OSNAME" != "ubuntu" ]; then
-    error "Debian Package build only supported on Ubuntu"
+help(){
+    echo "Usage: $0"
+    echo ""
+    echo "Options:"
+    echo "  --version <version>                Specify a version for the package."
+    echo "  --input <input directory>          Package the entire contents of the directory tree."
+    echo "  --manpages <man pages directory>   Directory containing man pages for the package (Optional)."
+    echo "  --output <output debfile>          The full path to which the package will be written."
+    echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-nightly', 'dotnet'"
+    echo "  --previous-version-url <url>           Url to the previous version of the debian packge against which to run the upgrade tests."
     exit 1
-fi
+}
+
+parseargs(){
+
+    while [[ $# > 0 ]]; do
+        lowerI="$(echo $1 | awk '{print tolower($0)}')"
+        case $lowerI in
+        -m|--manpages)
+            MANPAGE_DIR=$2
+            shift
+            ;;
+        -o|--output)
+            OUTPUT_DEBIAN_FILE=$2
+            shift
+            ;;
+        -i|--input)
+            REPO_BINARIES_DIR=$2
+            shift
+            ;;
+        -p|--package-name)
+            DOTNET_DEB_PACKAGE_NAME=$2
+            shift
+            ;;
+        -v|--version)
+            DOTNET_CLI_VERSION=$2
+            shift
+            ;;
+        --previous-version-url)
+            PREVIOUS_VERSION_URL=$2
+            shift
+            ;;
+        --help)
+            help
+            ;;
+        *)
+            break
+            ;;
+        esac
+        shift
+    done
+
+    if [ -z "$DOTNET_CLI_VERSION" ]; then
+        echo "Provide a version number. Missing option '--version'" && help
+    fi
+
+    if [ -z "$OUTPUT_DEBIAN_FILE" ]; then
+        echo "Provide an output deb. Missing option '--output'" && help
+    fi
+
+    if [ -z "$REPO_BINARIES_DIR" ]; then
+        echo "Provide an input directory. Missing option '--input'" && help
+    fi
+
+    if [ -z "$DOTNET_DEB_PACKAGE_NAME" ]; then
+        echo "Provide an the name for the debian package. Missing option '--package-name'" && help
+    fi
+
+    if [ -z "$PREVIOUS_VERSION_URL" ]; then
+        echo "Provide a URL to the previous debian pacakge (Required for running upgrade tests). Missing option '--previous-version-url'" && help
+    fi
+
+    if [ ! -d "$REPO_BINARIES_DIR" ]; then
+        echo "'$REPO_BINARIES_DIR' - is either missing or not a directory" 1>&2
+        exit 1
+    fi
+
+}
+
+parseargs $@
 
 PACKAGING_ROOT="$REPOROOT/packaging/debian"
 PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
 
-OUTPUT_DIR="$REPOROOT/artifacts"
-PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
-PACKAGE_OUTPUT_DIR="$OUTPUT_DIR/packages/debian"
-TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/test"
-REPO_BINARIES_DIR="$REPOROOT/artifacts/ubuntu.14.04-x64/stage2"
-MANPAGE_DIR="$REPOROOT/Documentation/manpages"
+PACKAGE_OUTPUT_DIR=$(dirname "${OUTPUT_DEBIAN_FILE}")
+PACKAGE_LAYOUT_DIR="$PACKAGE_OUTPUT_DIR/deb_intermediate"
+TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/debian_tests"
 
-NIGHTLY_PACKAGE_NAME="dotnet-nightly"
-RELEASE_PACKAGE_NAME="dotnet"
-
-[ -z "$CHANNEL" ] && CHANNEL="dev"
+# remove any residual deb files from earlier builds
+rm -f "$PACKAGE_OUTPUT_DIR/*.deb"
 
 execute_build(){
-    determine_package_name
     create_empty_debian_layout
     copy_files_to_debian_layout
     create_debian_package
-}
-
-determine_package_name(){
-    if [[ "$RELEASE_SUFFIX" == "dev" ]]; then
-        DOTNET_DEB_PACKAGE_NAME=$NIGHTLY_PACKAGE_NAME
-    elif [[ "beta rc1 rc2 rtm" =~ (^| )"$RELEASE_SUFFIX"($| ) ]]; then
-        DOTNET_DEB_PACKAGE_NAME=$RELEASE_PACKAGE_NAME
-    elif [[ "$RELEASE_SUFFIX" == "" ]]; then
-        DOTNET_DEB_PACKAGE_NAME=$RELEASE_PACKAGE_NAME
-    else
-        DOTNET_DEB_PACKAGE_NAME=$NIGHTLY_PACKAGE_NAME
-    fi
 }
 
 execute_test(){
@@ -120,7 +179,7 @@ remove_debian_package() {
 
 run_package_integrity_tests() {
     # Set LAST_VERSION_URL to enable upgrade tests
-    export LAST_VERSION_URL="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Installers/Latest/dotnet-ubuntu-x64.latest.deb"
+    export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
 
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
 }
@@ -142,5 +201,4 @@ DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
 
 execute_test
 
-# Publish
-$REPOROOT/scripts/publish/publish.sh $DEBIAN_FILE 
+mv -f "$DEBIAN_FILE" "$OUTPUT_DEBIAN_FILE"

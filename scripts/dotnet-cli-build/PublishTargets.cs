@@ -4,6 +4,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
@@ -11,71 +15,149 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public static class PublishTargets
     {
-        [Target(nameof(PrepareTargets.Init))]
+        private static CloudBlobContainer BlobContainer { get; set; }
+
+        private static string Channel { get; set; }
+
+        private static string Version { get; set; }
+
+
+        [Target]
+        public static BuildTargetResult InitPublish(BuildTargetContext c)
+        {
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("CONNECTION_STRING").Trim('"'));
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            BlobContainer = blobClient.GetContainerReference("dotnet");
+
+            Version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            Channel = c.BuildContext.Get<string>("Channel");
+            return c.Success();
+        }
+
+        [Target(nameof(PrepareTargets.Init),
+        nameof(PublishTargets.InitPublish),
+        nameof(PublishTargets.PublishArtifacts))]
+        [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
         public static BuildTargetResult Publish(BuildTargetContext c)
         {
-            if (string.Equals(Environment.GetEnvironmentVariable("DOTNET_BUILD_SKIP_PACKAGING"), "1", StringComparison.Ordinal))
-            {
-                c.Info("Skipping packaging because DOTNET_BUILD_SKIP_PACKAGING is set");
-                return c.Success();
-            }
-
-            // NOTE(anurse): Currently, this just invokes the remaining build scripts as-is. We should port those to C# as well, but
-            // I want to get the merged in.
-
-            // Set up the environment variables previously defined by common.sh/ps1
-            // This is overkill, but I want to cover all the variables used in all OSes (including where some have the same names)
-            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            var configuration = c.BuildContext.Get<string>("Configuration");
-            var architecture = PlatformServices.Default.Runtime.RuntimeArchitecture;
-            var env = new Dictionary<string, string>()
-            {
-                { "RID", PlatformServices.Default.Runtime.GetRuntimeIdentifier() },
-                { "OSNAME", PlatformServices.Default.Runtime.OperatingSystem },
-                { "TFM", "netstandardapp1.5" },
-                { "OutputDir", Dirs.Output },
-                { "Stage1Dir", Dirs.Stage1 },
-                { "Stage1CompilationDir", Dirs.Stage1Compilation },
-                { "Stage2Dir", Dirs.Stage2 },
-                { "STAGE2_DIR", Dirs.Stage2 },
-                { "Stage2CompilationDir", Dirs.Stage2Compilation },
-                { "HostDir", Dirs.Corehost },
-                { "PackageDir", Path.Combine(Dirs.Packages, "dnvm") }, // Legacy name
-                { "TestBinRoot", Dirs.TestOutput },
-                { "TestPackageDir", Dirs.TestPackages },
-                { "MajorVersion", buildVersion.Major.ToString() },
-                { "MinorVersion", buildVersion.Minor.ToString() },
-                { "PatchVersion", buildVersion.Patch.ToString() },
-                { "CommitCountVersion", buildVersion.CommitCountString },
-                { "COMMIT_COUNT_VERSION", buildVersion.CommitCountString },
-                { "DOTNET_CLI_VERSION", buildVersion.SimpleVersion },
-                { "DOTNET_MSI_VERSION", buildVersion.GenerateMsiVersion() },
-                { "VersionSuffix", buildVersion.VersionSuffix },
-                { "CONFIGURATION", configuration },
-                { "ARCHITECTURE", architecture }
-            };
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                env["OSNAME"] = "osx";
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Cmd("powershell", "-NoProfile", "-NoLogo", Path.Combine(c.BuildContext.BuildDirectory, "scripts", "package", "package.ps1"))
-                    .Environment(env)
-                    .Execute()
-                    .EnsureSuccessful();
-            }
-            else
-            {
-                // Can directly execute scripts on Unix :). Thank you shebangs!
-                Cmd(Path.Combine(c.BuildContext.BuildDirectory, "scripts", "package", "package.sh"))
-                    .Environment(env)
-                    .Execute()
-                    .EnsureSuccessful();
-            }
             return c.Success();
+        }
+
+        [Target(nameof(PublishTargets.PublishVersionBadge),
+        nameof(PublishTargets.PublishCompressedFile),
+        nameof(PublishTargets.PublishInstallerFile),
+        nameof(PublishTargets.PublishLatestVersionTextFile))]
+        public static BuildTargetResult PublishArtifacts(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishVersionBadge(BuildTargetContext c)
+        {
+            var versionBadge = c.BuildContext.Get<string>("VersionBadge");
+            var latestVersionBadgeBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(versionBadge)}";
+            var versionBadgeBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(versionBadge)}";
+
+            PublishFileAzure(versionBadgeBlob, versionBadge);
+            PublishFileAzure(latestVersionBadgeBlob, versionBadge);
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishCompressedFile(BuildTargetContext c)
+        {
+            var compressedFile = c.BuildContext.Get<string>("CompressedFile");
+            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
+            var latestCompressedFile = compressedFile.Replace(Version, "latest");
+            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
+
+            PublishFileAzure(compressedFileBlob, compressedFile);
+            PublishFileAzure(latestCompressedFileBlob, compressedFile);
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
+        public static BuildTargetResult PublishInstallerFile(BuildTargetContext c)
+        {
+            var installerFile = c.BuildContext.Get<string>("InstallerFile");
+            var installerFileBlob = $"{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
+            var latestInstallerFile = installerFile.Replace(Version, "latest");
+            var latestInstallerFileBlob = $"{Channel}/Installers/Latest/{Path.GetFileName(latestInstallerFile)}";
+
+            PublishFileAzure(installerFileBlob, installerFile);
+            PublishFileAzure(latestInstallerFileBlob, installerFile);
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishLatestVersionTextFile(BuildTargetContext c)
+        {
+            var osname = Monikers.GetOSShortName();
+            var latestVersionBlob = $"{Channel}/dnvm/latest.{osname}.{CurrentArchitecture.Current}.version";
+            var latestVersionFile = Path.Combine(Dirs.Stage2, ".version");
+
+            PublishFileAzure(latestVersionBlob, latestVersionFile);
+            return c.Success();
+        }
+
+        [Target(nameof(PublishInstallerFile))]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult PublishDebFileToDebianRepo(BuildTargetContext c)
+        {
+            var packageName = Monikers.GetDebianPackageName(c);
+            var installerFile = c.BuildContext.Get<string>("InstallerFile");
+            var uploadUrl =  $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
+            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
+                    .Execute()
+                    .EnsureSuccessful();
+
+            return c.Success();
+        }
+
+        private static string GenerateUploadJsonFile(string packageName, string version, string uploadUrl)
+        {
+            var repoID = Environment.GetEnvironmentVariable("REPO_ID");
+            var uploadJson = Path.Combine(Dirs.Packages, "package_upload.json");
+            File.Delete(uploadJson);
+
+            using (var fileStream = File.Create(uploadJson))
+            {
+                using (StreamWriter sw = new StreamWriter(fileStream))
+                {
+                   sw.WriteLine("{");
+                   sw.WriteLine($"  \"name\":\"{packageName}\",");
+                   sw.WriteLine($"  \"version\":\"{version}\",");
+                   sw.WriteLine($"  \"repositoryId\":\"{repoID}\",");
+                   sw.WriteLine($"  \"sourceUrl\":\"{uploadUrl}\"");
+                   sw.WriteLine("}");
+                }
+            }
+
+            return uploadJson;
+        }
+
+        private static BuildTargetResult PublishFile(BuildTargetContext c, string file)
+        {
+            var env = PackageTargets.GetCommonEnvVars(c);
+            Cmd("powershell", "-NoProfile", "-NoLogo",
+                Path.Combine(Dirs.RepoRoot, "scripts", "publish", "publish.ps1"), file)
+                    .Environment(env)
+                    .Execute()
+                    .EnsureSuccessful();
+            return c.Success();
+        }
+
+        private static void PublishFileAzure(string blob, string file)
+        {
+            CloudBlockBlob blockBlob = BlobContainer.GetBlockBlobReference(blob);
+            using (var fileStream = File.OpenRead(file))
+            {
+                blockBlob.UploadFromStreamAsync(fileStream).Wait();
+            }
         }
     }
 }

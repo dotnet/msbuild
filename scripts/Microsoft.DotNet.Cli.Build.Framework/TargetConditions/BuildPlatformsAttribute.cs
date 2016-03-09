@@ -20,16 +20,9 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         public override bool EvaluateCondition()
         {
-            var currentPlatform = CurrentPlatform.Current;
-
-            if (currentPlatform == default(BuildPlatform))
-            {
-                throw new Exception("Unrecognized Platform.");
-            }
-
             foreach (var platform in _buildPlatforms)
             {
-                if (platform == currentPlatform)
+                if (CurrentPlatform.IsPlatform(platform))
                 {
                     return true;
                 }

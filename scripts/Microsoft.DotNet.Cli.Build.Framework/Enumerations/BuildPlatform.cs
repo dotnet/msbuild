@@ -3,9 +3,11 @@ namespace Microsoft.DotNet.Cli.Build.Framework
     public enum BuildPlatform
     {
         Windows = 1,
-        OSX = 2,
-        Ubuntu = 3,
-        CentOS = 4,
-        RHEL = 5
+        Unix = 2,
+        Linux = 3,
+        OSX = 4,
+        Ubuntu = 5,
+        CentOS = 6,
+        RHEL = 7
     }
 }

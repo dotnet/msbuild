@@ -7,8 +7,9 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public static class Dirs
     {
+        public static readonly string RepoRoot = Directory.GetCurrentDirectory();
         public static readonly string Output = Path.Combine(
-            Directory.GetCurrentDirectory(),
+            RepoRoot,
             "artifacts",
             PlatformServices.Default.Runtime.GetRuntimeIdentifier());
         public static readonly string Packages = Path.Combine(Output, "packages");
