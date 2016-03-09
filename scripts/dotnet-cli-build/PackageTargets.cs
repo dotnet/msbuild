@@ -22,6 +22,8 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init),
         nameof(PackageTargets.InitPackage),
         nameof(PackageTargets.GenerateVersionBadge),
+        nameof(SharedFrameworkTargets.PublishSharedHost),
+        nameof(SharedFrameworkTargets.PublishSharedFramework),
         nameof(PackageTargets.GenerateCompressedFile),
         nameof(InstallerTargets.GenerateInstaller),
         nameof(PackageTargets.GenerateNugetPackages))]
@@ -55,14 +57,10 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateZip(BuildTargetContext c)
         {
-            var zipFile = c.BuildContext.Get<string>("SdkCompressedFile");
+            CreateZipFromDirectory(c.BuildContext.Get<string>("SharedHostPublishRoot"), c.BuildContext.Get<string>("SharedHostCompressedFile"));
+            CreateZipFromDirectory(c.BuildContext.Get<string>("SharedFrameworkPublishRoot"), c.BuildContext.Get<string>("SharedFrameworkCompressedFile"));
+            CreateZipFromDirectory(Dirs.Stage2, c.BuildContext.Get<string>("SdkCompressedFile"));
 
-            if (File.Exists(zipFile))
-            {
-                File.Delete(zipFile);
-            }
-
-            ZipFile.CreateFromDirectory(Dirs.Stage2, zipFile, CompressionLevel.Optimal, false);
             return c.Success();
         }
 
@@ -133,6 +131,16 @@ namespace Microsoft.DotNet.Cli.Build
             };
 
             return env;
+        }
+
+        private static void CreateZipFromDirectory(string directory, string artifactPath)
+        {
+            if (File.Exists(artifactPath))
+            {
+                File.Delete(artifactPath);
+            }
+
+            ZipFile.CreateFromDirectory(directory, artifactPath, CompressionLevel.Optimal, false);
         }
     }
 }

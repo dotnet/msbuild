@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(SharedFrameworkTargets.PublishSharedHost))]
+        [Target]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateDotnetSharedHostMsi(BuildTargetContext c)
         {
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(SharedFrameworkTargets.PublishSharedFramework))]
+        [Target]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateDotnetSharedFrameworkMsi(BuildTargetContext c)
         {
