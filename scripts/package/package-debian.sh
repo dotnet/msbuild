@@ -25,16 +25,18 @@ help(){
     echo "Options:"
     echo "  --version <version>                Specify a version for the package."
     echo "  --input <input directory>          Package the entire contents of the directory tree."
-    echo "  --manpages <man pages directory>   Directory containing man pages for the package."
+    echo "  --manpages <man pages directory>   Directory containing man pages for the package (Optional)."
     echo "  --output <output debfile>          The full path to which the package will be written."
     echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-nightly', 'dotnet'"
-    echo "  --channel <channel>                Channel against which to run the upgrade tests. Example - 'dev', 'beta'"
+    echo "  --previous-version-url <url>           Url to the previous version of the debian packge against which to run the upgrade tests."
     exit 1
 }
 
-while [[ $# > 0 ]]; do
-    lowerI="$(echo $1 | awk '{print tolower($0)}')"
-    case $lowerI in
+parseargs(){
+
+    while [[ $# > 0 ]]; do
+        lowerI="$(echo $1 | awk '{print tolower($0)}')"
+        case $lowerI in
         -m|--manpages)
             MANPAGE_DIR=$2
             shift
@@ -55,8 +57,8 @@ while [[ $# > 0 ]]; do
             DOTNET_CLI_VERSION=$2
             shift
             ;;
-        -c|--channel)
-            CHANNEL=$2
+        --previous-version-url)
+            PREVIOUS_VERSION_URL=$2
             shift
             ;;
         --help)
@@ -65,9 +67,38 @@ while [[ $# > 0 ]]; do
         *)
             break
             ;;
-    esac
-    shift
-done
+        esac
+        shift
+    done
+
+    if [ -z "$DOTNET_CLI_VERSION" ]; then
+        echo "Provide a version number. Missing option '--version'" && help
+    fi
+
+    if [ -z "$OUTPUT_DEBIAN_FILE" ]; then
+        echo "Provide an output deb. Missing option '--output'" && help
+    fi
+
+    if [ -z "$REPO_BINARIES_DIR" ]; then
+        echo "Provide an input directory. Missing option '--input'" && help
+    fi
+
+    if [ -z "$DOTNET_DEB_PACKAGE_NAME" ]; then
+        echo "Provide an the name for the debian package. Missing option '--package-name'" && help
+    fi
+
+    if [ -z "$PREVIOUS_VERSION_URL" ]; then
+        echo "Provide a URL to the previous debian pacakge (Required for running upgrade tests). Missing option '--previous-version-url'" && help
+    fi
+
+    if [ ! -d "$REPO_BINARIES_DIR" ]; then
+        echo "'$REPO_BINARIES_DIR' - is either missing or not a directory" 1>&2
+        exit 1
+    fi
+
+}
+
+parseargs $@
 
 PACKAGING_ROOT="$REPOROOT/packaging/debian"
 PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
@@ -148,7 +179,7 @@ remove_debian_package() {
 
 run_package_integrity_tests() {
     # Set LAST_VERSION_URL to enable upgrade tests
-    export LAST_VERSION_URL="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Installers/Latest/dotnet-ubuntu-x64.latest.deb"
+    export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
 
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
 }

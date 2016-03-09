@@ -55,6 +55,7 @@ RUN echo "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main"  | tee
 	libsasl2-2 \
 	libsqlite3-0 \
 	libssl1.0.0 \
+       libssl-dev \
 	libtasn1-6 \
 	libwind0-heimdal
 

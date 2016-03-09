@@ -45,9 +45,10 @@ namespace Microsoft.DotNet.Cli.Build
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             var debFile = c.BuildContext.Get<string>("InstallerFile");
             var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
+            var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"),
-                "-v", version, "-i", Dirs.Stage2, "-o", debFile, "-p", packageName, "-m", manPagesDir, "-c", channel)
+                "-v", version, "-i", Dirs.Stage2, "-o", debFile, "-p", packageName, "-m", manPagesDir, "--previous-version-url", previousVersionURL)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

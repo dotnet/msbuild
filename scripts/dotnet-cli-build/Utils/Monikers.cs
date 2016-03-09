@@ -33,7 +33,6 @@ namespace Microsoft.DotNet.Cli.Build
                     break;
                default:
                     throw new Exception($"Unknown channel - {channel}");
-                    break;
             }
 
             return packageName;
