@@ -68,16 +68,10 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Unix)]
         public static BuildTargetResult GenerateTarBall(BuildTargetContext c)
         {
-            var tarFile = c.BuildContext.Get<string>("SdkCompressedFile");
+            CreateTarBallFromDirectory(c.BuildContext.Get<string>("SharedHostPublishRoot"), c.BuildContext.Get<string>("SharedHostCompressedFile"));
+            CreateTarBallFromDirectory(c.BuildContext.Get<string>("SharedFrameworkPublishRoot"), c.BuildContext.Get<string>("SharedFrameworkCompressedFile"));
+            CreateTarBallFromDirectory(Dirs.Stage2, c.BuildContext.Get<string>("SdkCompressedFile"));
 
-            if (File.Exists(tarFile))
-            {
-                File.Delete(tarFile);
-            }
-
-            Cmd("tar", "-czf", tarFile, "-C", Dirs.Stage2, ".")
-                .Execute()
-                .EnsureSuccessful();
             return c.Success();
         }
 
@@ -141,6 +135,18 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             ZipFile.CreateFromDirectory(directory, artifactPath, CompressionLevel.Optimal, false);
+        }
+
+        private static void CreateTarBallFromDirectory(string directory, string artifactPath)
+        {
+            if (File.Exists(artifactPath))
+            {
+                File.Delete(artifactPath);
+            }
+
+            Cmd("tar", "-czf", artifactPath, "-C", directory, ".")
+                .Execute()
+                .EnsureSuccessful();
         }
     }
 }
