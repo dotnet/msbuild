@@ -26,6 +26,6 @@
   <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
 
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
+    <NuGetTargetMoniker>.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
 </Project>

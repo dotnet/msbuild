@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "System.Collections.Immutable": "1.2.0-rc2-23712",
+    "System.Collections.Immutable": "1.2.0-rc3-23908",
     "System.Reflection.Metadata": "1.1.0",
     "xunit.core": "2.1.0",
     "xunit.extensibility.core": "2.1.0",
@@ -15,28 +15,28 @@
       "dependencies": {
       }
     },
-    "dnxcore50": {
+    "netstandard1.3": {
       "dependencies": {
-        "System.Collections.Concurrent": "4.0.11-rc2-23712",
-        "System.Net.NetworkInformation": "4.1.0-rc2-23712",
-        "System.Reflection": "4.1.0-rc2-23712",
-        "Microsoft.NETCore": "5.0.1-rc2-23712",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-rc2-23712",
-        "System.Collections.NonGeneric": "4.0.1-rc2-23712",
-        "System.Console": "4.0.0-rc2-23712",
-        "System.Resources.ReaderWriter": "4.0.0-rc2-23712",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc2-23712",
-        "System.Diagnostics.TraceSource": "4.0.0-rc2-23712",
-        "System.Diagnostics.Process": "4.1.0-rc2-23712",
-        "System.Security.Cryptography.X509Certificates": "4.0.0-rc2-23712",
-        "System.Threading.Thread": "4.0.0-rc2-23712",
-        "System.Threading.ThreadPool": "4.0.10-rc2-23712",
-        "System.Xml.XmlDocument": "4.0.1-rc2-23712",
-        "Microsoft.Win32.Primitives":  "4.0.1-rc2-23712",
-        "Microsoft.NETCore.Runtime": "1.0.1-rc2-23712",
-        "Microsoft.NETCore.TestHost": "1.0.0-rc2-23712"
+        "System.Collections.Concurrent": "4.0.11-rc3-23908",
+        "System.Net.NetworkInformation": "4.1.0-rc3-23908",
+        "System.Reflection": "4.1.0-rc3-23908",
+        "Microsoft.NETCore": "5.0.1-rc3-23908",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-rc3-23908",
+        "System.Collections.NonGeneric": "4.0.1-rc3-23908",
+        "System.Console": "4.0.0-rc3-23908",
+        "System.Resources.ReaderWriter": "4.0.0-rc3-23908",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc3-23908",
+        "System.Diagnostics.TraceSource": "4.0.0-rc3-23908",
+        "System.Diagnostics.Process": "4.1.0-rc3-23908",
+        "System.Security.Cryptography.X509Certificates": "4.0.0-rc3-23908",
+        "System.Threading.Thread": "4.0.0-rc3-23908",
+        "System.Threading.ThreadPool": "4.0.10-rc3-23908",
+        "System.Xml.XmlDocument": "4.0.1-rc3-23908",
+        "Microsoft.Win32.Primitives":  "4.0.1-rc3-23908",
+        "Microsoft.NETCore.Runtime": "1.0.1-rc3-23908",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc3-23908"
       },
-      "imports": "portable-net451+win81"
+      "imports": [ "portable-net451+win81", "dnxcore50" ]
     }
   }
 }

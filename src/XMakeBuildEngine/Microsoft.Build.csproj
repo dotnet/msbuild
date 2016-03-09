@@ -39,9 +39,6 @@
     <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
       <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\TypeFilter.cs">
-      <Link>SharedUtilities\Compat\TypeFilter.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Compat\TypeExtensions.cs">
       <Link>SharedUtilities\Compat\TypeExtensions.cs</Link>
     </Compile>
