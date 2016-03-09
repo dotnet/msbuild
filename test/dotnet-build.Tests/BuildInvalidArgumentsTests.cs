@@ -9,11 +9,11 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void ErrorOccursWhenBuildingPortableProjectToSpecificOutputPathWithoutSpecifyingFramework()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("BuildTestPortableProject")
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
                 .WithLockFiles();
 
             var result = new BuildCommand(
-                    projectPath: testInstance.TestRoot,
+                    projectPath: Path.Combine(testInstance.TestRoot, "PortableApp"),
                     output: Path.Combine(testInstance.TestRoot, "out"))
                 .ExecuteWithCapturedOutput();
 
@@ -24,11 +24,11 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void ErrorOccursWhenBuildingPortableProjectAndSpecifyingFrameworkThatProjectDoesNotSupport()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("BuildTestPortableProject")
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
                 .WithLockFiles();
 
             var result = new BuildCommand(
-                    projectPath: testInstance.TestRoot,
+                    projectPath: Path.Combine(testInstance.TestRoot, "PortableApp"),
                     output: Path.Combine(testInstance.TestRoot, "out"),
                     framework: "sl40")
                 .ExecuteWithCapturedOutput();
@@ -40,11 +40,11 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void ErrorOccursWhenBuildingStandaloneProjectToSpecificOutputPathWithoutSpecifyingFramework()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("BuildTestStandaloneProject")
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
                 .WithLockFiles();
 
             var result = new BuildCommand(
-                    projectPath: testInstance.TestRoot,
+                    projectPath: Path.Combine(testInstance.TestRoot, "StandaloneApp"),
                     output: Path.Combine(testInstance.TestRoot, "out"))
                 .ExecuteWithCapturedOutput();
 

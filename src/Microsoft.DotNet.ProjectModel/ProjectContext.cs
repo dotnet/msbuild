@@ -140,6 +140,12 @@ namespace Microsoft.DotNet.ProjectModel
 
         public ProjectContext CreateRuntimeContext(IEnumerable<string> runtimeIdentifiers)
         {
+            // Temporary until we have removed RID inference from NuGet
+            if(TargetFramework.IsCompileOnly)
+            {
+                return this;
+            }
+
             // Check if there are any runtime targets (i.e. are we portable)
             var standalone = LockFile.Targets
                 .Where(t => t.TargetFramework.Equals(TargetFramework))

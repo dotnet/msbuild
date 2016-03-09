@@ -9,28 +9,27 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void BuildingAPortableProjectProducesDepsFile()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("BuildTestPortableProject")
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
                 .WithLockFiles();
 
             var result = new BuildCommand(
-                projectPath: testInstance.TestRoot,
-                forcePortable: true)
+                projectPath: Path.Combine(testInstance.TestRoot, "PortableApp"))
                 .ExecuteWithCapturedOutput();
 
             result.Should().Pass();
 
-            var outputBase = new DirectoryInfo(Path.Combine(testInstance.TestRoot, "bin", "Debug"));
+            var outputBase = new DirectoryInfo(Path.Combine(testInstance.TestRoot, "PortableApp", "bin", "Debug"));
 
-            var netstandardappOutput = outputBase.Sub("netstandardapp1.5");
+            var netstandardappOutput = outputBase.Sub("netstandard1.5");
 
             netstandardappOutput.Should()
                 .Exist().And
                 .HaveFiles(new[]
                 {
-                    "BuildTestPortableProject.deps",
-                    "BuildTestPortableProject.deps.json",
-                    "BuildTestPortableProject.dll",
-                    "BuildTestPortableProject.pdb"
+                    "PortableApp.deps",
+                    "PortableApp.deps.json",
+                    "PortableApp.dll",
+                    "PortableApp.pdb"
                 });
         }
     }

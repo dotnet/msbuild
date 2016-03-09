@@ -49,6 +49,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 var outputBinaryPath = Path.Combine(destinationPath, outputBinaryName);
                 var hostBinaryPath = Path.Combine(HostDir, binaryName);
                 File.Copy(hostBinaryPath, outputBinaryPath, overwrite: true);
+
+                // Update the last write time so this file can be treated as an output of a build
+                File.SetLastWriteTimeUtc(outputBinaryPath, DateTime.UtcNow);
             }
         }
     }

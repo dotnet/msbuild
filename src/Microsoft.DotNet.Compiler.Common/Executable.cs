@@ -14,11 +14,16 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Microsoft.Dotnet.Cli.Compiler.Common
 {
     public class Executable
     {
+        // GROOOOOSS
+        private static readonly string RedistPackageName = "Microsoft.NETCore.App";
+
         private readonly ProjectContext _context;
 
         private readonly LibraryExporter _exporter;
@@ -71,7 +76,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         {
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
-            if (!string.IsNullOrEmpty(_context.RuntimeIdentifier))
+            var emitEntryPoint = _context.ProjectFile.GetCompilerOptions(_context.TargetFramework, _configuration).EmitEntryPoint ?? false;
+            if (emitEntryPoint && !string.IsNullOrEmpty(_context.RuntimeIdentifier))
             {
                 // TODO: Pick a host based on the RID
                 CoreHost.CopyTo(_runtimeOutputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
@@ -106,6 +112,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
         {
             WriteDeps(exporter);
+            WriteRuntimeConfig(exporter);
 
             var projectExports = exporter.GetDependencies(LibraryType.Project);
             CopyAssemblies(projectExports);
@@ -113,6 +120,37 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
             var packageExports = exporter.GetDependencies(LibraryType.Package);
             CopyAssets(packageExports);
+        }
+
+        private void WriteRuntimeConfig(LibraryExporter exporter)
+        {
+            if (!_context.TargetFramework.IsDesktop())
+            {
+                // TODO: Suppress this file if there's nothing to write? RuntimeOutputFiles would have to be updated
+                // in order to prevent breaking incremental compilation...
+
+                var json = new JObject();
+                var runtimeOptions = new JObject();
+                json.Add("runtimeOptions", runtimeOptions);
+
+                var redistExport = exporter
+                    .GetAllExports()
+                    .FirstOrDefault(l => l.Library.Identity.Name.Equals(RedistPackageName, StringComparison.OrdinalIgnoreCase));
+                if (redistExport != null)
+                {
+                    var framework = new JObject(
+                        new JProperty("name", redistExport.Library.Identity.Name),
+                        new JProperty("version", redistExport.Library.Identity.Version.ToNormalizedString()));
+                    runtimeOptions.Add("framework", framework);
+                }
+
+                var runtimeConfigJsonFile = Path.Combine(_runtimeOutputPath, _context.ProjectFile.Name + FileNameSuffixes.RuntimeConfigJson);
+                using (var writer = new JsonTextWriter(new StreamWriter(File.Create(runtimeConfigJsonFile))))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    json.WriteTo(writer);
+                }
+            }
         }
 
         public void WriteDeps(LibraryExporter exporter)
@@ -128,7 +166,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
             var exports = exporter.GetAllExports().ToArray();
             var dependencyContext = new DependencyContextBuilder().Build(
-                compilerOptions: includeCompile? compilerOptions: null,
+                compilerOptions: includeCompile ? compilerOptions : null,
                 compilationExports: includeCompile ? exports : null,
                 runtimeExports: exports,
                 portable: string.IsNullOrEmpty(_context.RuntimeIdentifier),
@@ -141,9 +179,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             {
                 writer.Write(dependencyContext, fileStream);
             }
-
         }
-
 
         public void GenerateBindingRedirects(LibraryExporter exporter)
         {
