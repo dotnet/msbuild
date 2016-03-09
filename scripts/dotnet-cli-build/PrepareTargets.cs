@@ -114,6 +114,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             AddInstallerArtifactToContext(c, "dotnet", "Sdk");
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost");
+            AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework");
 
             return c.Success();
         }
