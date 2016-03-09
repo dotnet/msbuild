@@ -358,8 +358,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 
                 File.WriteAllText(projectFile, content);
                 client.SendPayLoad(testProject, MessageTypes.FilesChanged);
-                messages = client.DrainAllMessages();
-                messages.AssertDoesNotContain(MessageTypes.Error);
+                var clearError = client.DrainTillFirst(MessageTypes.Error);
+                clearError.Payload.AsJObject().AssertProperty("Message", null as string);
             }
         }
     }
