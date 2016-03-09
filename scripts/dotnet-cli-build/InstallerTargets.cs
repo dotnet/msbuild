@@ -14,45 +14,9 @@ namespace Microsoft.DotNet.Cli.Build
     {
         [Target(nameof(MsiTargets.GenerateMsis),
         nameof(MsiTargets.GenerateBundle),
-        nameof(InstallerTargets.GeneratePkgs),
+        nameof(PkgTargets.GeneratePkgs),
         nameof(InstallerTargets.GenerateDebs))]
         public static BuildTargetResult GenerateInstaller(BuildTargetContext c)
-        {
-            return c.Success();
-        }
-
-        [Target(nameof(InstallerTargets.GenerateSdkPkg),
-        nameof(InstallerTargets.GenerateSharedFrameworkPkg),
-        nameof(InstallerTargets.GenerateSharedHostPkg))]
-        [BuildPlatforms(BuildPlatform.OSX)]
-        public static BuildTargetResult GeneratePkgs(BuildTargetContext c)
-        {
-            return c.Success();
-        }
-
-        [Target]
-        [BuildPlatforms(BuildPlatform.OSX)]
-        public static BuildTargetResult GenerateSdkPkg(BuildTargetContext c)
-        {
-            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
-            var pkg = c.BuildContext.Get<string>("SdkInstallerFile");
-            Cmd(Path.Combine(Dirs.RepoRoot, "packaging", "osx", "package-osx.sh"),
-                    "-v", version, "-i", Dirs.Stage2, "-o", pkg)
-                    .Execute()
-                    .EnsureSuccessful();
-            return c.Success();
-        }
-
-        [Target]
-        [BuildPlatforms(BuildPlatform.OSX)]
-        public static BuildTargetResult GenerateSharedFrameworkPkg(BuildTargetContext c)
-        {
-            return c.Success();
-        }
-
-        [Target]
-        [BuildPlatforms(BuildPlatform.OSX)]
-        public static BuildTargetResult GenerateSharedHostPkg(BuildTargetContext c)
         {
             return c.Success();
         }
