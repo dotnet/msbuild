@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 $"--out:{outputName}"
             };
 
-            var compilationOptions = CompilerUtil.ResolveCompilationOptions(context, args.ConfigValue);
+            var compilationOptions = context.ResolveCompilationOptions(args.ConfigValue);
             var languageId = CompilerUtil.ResolveLanguageId(context);
 
             var references = new List<string>();
@@ -114,6 +114,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var dependencyContext = new DependencyContextBuilder().Build(compilationOptions,
                     allExports,
                     allExports,
+                    string.IsNullOrEmpty(context.RuntimeIdentifier),
                     context.TargetFramework,
                     context.RuntimeIdentifier ?? string.Empty);
 

@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.Tools.Restore
                 toolDescription.Identity.Name + FileNameSuffixes.Deps);
 
             var calculator = context.GetOutputPaths(Constants.DefaultConfiguration, buidBasePath: null, outputPath: context.ProjectDirectory);
-            var executable = new Executable(context, calculator, context.CreateExporter(Constants.DefaultConfiguration));
+            var executable = new Executable(context, calculator, context.CreateExporter(Constants.DefaultConfiguration), null);
 
             executable.MakeCompilationOutputRunnable();
 

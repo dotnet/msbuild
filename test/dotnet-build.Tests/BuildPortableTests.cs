@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 .HaveFiles(new[]
                 {
                     "BuildTestPortableProject.deps",
+                    "BuildTestPortableProject.deps.json",
                     "BuildTestPortableProject.dll",
                     "BuildTestPortableProject.pdb"
                 });

@@ -29,6 +29,7 @@ namespace Microsoft.Extensions.DependencyModel
         public DependencyContext Build(CommonCompilerOptions compilerOptions,
             IEnumerable<LibraryExport> compilationExports,
             IEnumerable<LibraryExport> runtimeExports,
+            bool portable,
             NuGetFramework target,
             string runtime)
         {
@@ -44,11 +45,14 @@ namespace Microsoft.Extensions.DependencyModel
                 .Select(identity => new Dependency(identity.Name, identity.Version.ToString()))
                 .ToDictionary(dependency => dependency.Name);
 
+            var compilationOptions = compilerOptions != null
+                ? GetCompilationOptions(compilerOptions)
+                : CompilationOptions.Default;
             return new DependencyContext(
                 target.DotNetFrameworkName,
                 runtime,
-                false,
-                GetCompilationOptions(compilerOptions),
+                portable,
+                compilationOptions,
                 GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(),
                 GetLibraries(runtimeExports, dependencyLookup, runtime: true).Cast<RuntimeLibrary>(),
                 new KeyValuePair<string, string[]>[0]);

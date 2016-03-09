@@ -16,8 +16,6 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private IList<LibraryAsset> _compilationAssets;
 
-        private IList<LibraryAsset> _debugAssets;
-
         private IList<LibraryAsset> _sourceReferences;
 
         private IList<LibraryAsset> _nativeLibraries;
