@@ -39,6 +39,13 @@ namespace Microsoft.DotNet.ProjectModel
                 return Path.ChangeExtension(Assembly, FileNameSuffixes.Deps);
             }
         }
+        public string DepsJson
+        {
+            get
+            {
+                return Path.ChangeExtension(Assembly, FileNameSuffixes.DepsJson);
+            }
+        }
 
         public string Config
         {
@@ -60,6 +67,11 @@ namespace Microsoft.DotNet.ProjectModel
             if (File.Exists(Deps))
             {
                 yield return Deps;
+            }
+
+            if (File.Exists(DepsJson))
+            {
+                yield return DepsJson;
             }
         }
     }

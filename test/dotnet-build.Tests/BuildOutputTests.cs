@@ -27,6 +27,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             "TestApp" + FileNameSuffixes.DotNet.ProgramDatabase,
             "TestApp" + FileNameSuffixes.CurrentPlatform.Exe,
             "TestApp" + FileNameSuffixes.Deps,
+            "TestApp" + FileNameSuffixes.DepsJson,
             "TestLibrary" + FileNameSuffixes.DotNet.DynamicLib,
             "TestLibrary" + FileNameSuffixes.DotNet.ProgramDatabase
         };

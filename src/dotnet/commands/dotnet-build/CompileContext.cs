@@ -436,7 +436,7 @@ namespace Microsoft.DotNet.Tools.Build
                 CopyCompilationOutput(outputPaths);
             }
 
-            var executable = new Executable(runtimeContext, outputPaths, libraryExporter);
+            var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);
             executable.MakeCompilationOutputRunnable();
 
             PatchMscorlibNextToCoreClr(runtimeContext, _args.ConfigValue);
@@ -579,7 +579,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         private static void AddCompilationOptions(ProjectContext project, string config, CompilerIO compilerIO)
         {
-            var compilerOptions = CompilerUtil.ResolveCompilationOptions(project, config);
+            var compilerOptions = project.ResolveCompilationOptions(config);
 
             // input: key file
             if (compilerOptions.KeyFile != null)

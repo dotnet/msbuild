@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
@@ -27,6 +29,28 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
 
             return baseOption;
+        }
+
+
+        // used in incremental compilation for the key file
+        public static CommonCompilerOptions ResolveCompilationOptions(this ProjectContext context, string configuration)
+        {
+            var compilationOptions = context.GetLanguageSpecificCompilerOptions(context.TargetFramework, configuration);
+
+            // Path to strong naming key in environment variable overrides path in project.json
+            var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);
+
+            if (!string.IsNullOrWhiteSpace(environmentKeyFile))
+            {
+                compilationOptions.KeyFile = environmentKeyFile;
+            }
+            else if (!string.IsNullOrWhiteSpace(compilationOptions.KeyFile))
+            {
+                // Resolve full path to key file
+                compilationOptions.KeyFile =
+                    Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
+            }
+            return compilationOptions;
         }
     }
 }
