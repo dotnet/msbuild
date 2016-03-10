@@ -4,6 +4,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.Logging;
@@ -18,7 +21,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
     {
         private readonly TestAssetsManager _testAssetsManager;
         private readonly ILoggerFactory _loggerFactory;
-        
+
         public DthTests()
         {
             _loggerFactory = new LoggerFactory();
@@ -32,11 +35,11 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             {
                 _loggerFactory.AddConsole(LogLevel.Information);
             }
-            else
+            else if (testVerbose == "0")
             {
                 _loggerFactory.AddConsole(LogLevel.Warning);
             }
-            
+
             _testAssetsManager = new TestAssetsManager(
                 Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "DthTestProjects", "src"));
         }
@@ -118,7 +121,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 Console.WriteLine("Test is skipped on Linux");
                 return;
             }
-            
+
             var projectPath = Path.Combine(_testAssetsManager.AssetsRoot, testProjectName);
             Assert.NotNull(projectPath);
 
@@ -292,7 +295,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var testAssetsPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer");
             var assetsManager = new TestAssetsManager(testAssetsPath);
             var testSource = assetsManager.CreateTestInstance("IncorrectProjectJson").TestRoot;
-            
+
             using (var server = new DthTestServer(_loggerFactory))
             using (var client = new DthTestClient(server))
             {
@@ -337,29 +340,72 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                         .AssertProperty<string>("Path", v => v.Contains("InvalidGlobalJson"));
             }
         }
-        
+
         [Fact]
         public void RecoverFromGlobalError()
         {
             var testProject = _testAssetsManager.CreateTestInstance("EmptyConsoleApp")
                                                 .WithLockFiles()
                                                 .TestRoot;
-                                                
+
             using (var server = new DthTestServer(_loggerFactory))
             using (var client = new DthTestClient(server))
             {
                 var projectFile = Path.Combine(testProject, Project.FileName);
                 var content = File.ReadAllText(projectFile);
                 File.WriteAllText(projectFile, content + "}");
-                
+
                 client.Initialize(testProject);
                 var messages = client.DrainAllMessages();
                 messages.ContainsMessage(MessageTypes.Error);
-                
+
                 File.WriteAllText(projectFile, content);
                 client.SendPayLoad(testProject, MessageTypes.FilesChanged);
                 var clearError = client.DrainTillFirst(MessageTypes.Error);
                 clearError.Payload.AsJObject().AssertProperty("Message", null as string);
+            }
+        }
+
+        [Theory]
+        [InlineData(500, true)]
+        [InlineData(3000, false)]
+        public void WaitForLockFileReleased(int occupyFileFor, bool expectSuccess)
+        {
+            var testProject = _testAssetsManager.CreateTestInstance("EmptyConsoleApp")
+                                                .WithLockFiles()
+                                                .TestRoot;
+
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                var lockFilePath = Path.Combine(testProject, LockFile.FileName);
+                var lockFileContent = File.ReadAllText(lockFilePath);
+                var fs = new FileStream(lockFilePath, FileMode.Create, FileAccess.Write, FileShare.None);
+
+                // Test the platform
+                // A sharing violation is expected in following code. Otherwise the FileSteam is not implemented correctly.
+                Assert.ThrowsAny<IOException>(() =>
+                {
+                    new FileStream(lockFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                });
+
+                var task = Task.Run(() =>
+                {
+                    // WorkspaceContext will try to open the lock file for 3 times with 500 ms interval in between.
+                    Thread.Sleep(occupyFileFor);
+                    fs.Dispose();
+                });
+
+                client.Initialize(testProject);
+                var messages = client.DrainAllMessages();
+                if (expectSuccess)
+                {
+                    messages.AssertDoesNotContain(MessageTypes.Error);
+                }
+                else
+                {
+                    messages.ContainsMessage(MessageTypes.Error);
+                }
             }
         }
     }
