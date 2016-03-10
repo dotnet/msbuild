@@ -65,11 +65,20 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
         }
 
+        public static bool IsDebian
+        {
+            get
+            {
+                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                return string.Equals(osname, "debian", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         public static bool IsLinux
         {
             get
             {
-                return IsUbuntu || IsCentOS || IsRHEL;
+                return IsUbuntu || IsCentOS || IsRHEL || IsDebian;
             }
         }
 
@@ -87,6 +96,8 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                     return IsCentOS;
                 case BuildPlatform.RHEL:
                     return IsRHEL;
+                case BuildPlatform.Debian:
+                    return IsDebian;
                 case BuildPlatform.Unix:
                     return IsUnix;
                 case BuildPlatform.Linux:
@@ -117,6 +128,10 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             else if (IsRHEL)
             {
                 return BuildPlatform.RHEL;
+            }
+            else if (IsDebian)
+            {
+                return BuildPlatform.Debian;
             }
             else
             {

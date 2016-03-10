@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 packageId = "toolchain.ubuntu.14.04-x64.Microsoft.DotNet.AppDep";
             }
-            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL)
+            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL || CurrentPlatform.IsDebian)
             {
                 c.Warn($"Native compilation is not yet working on {CurrentPlatform.Current}");
                 return c.Success();
@@ -307,6 +307,10 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 // CentOS runtime is in the runtime.rhel.7-x64... package.
                 packageId = "runtime.rhel.7-x64.Microsoft.NETCore.Runtime.CoreCLR";
+            }
+            else if (CurrentPlatform.IsDebian)
+            {
+                packageId = "runtime.debian.8.2-x64.Microsoft.NETCore.Runtime.CoreCLR";
             }
             else if (CurrentPlatform.IsOSX)
             {
