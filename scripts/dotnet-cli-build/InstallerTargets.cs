@@ -104,6 +104,26 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult GenerateSharedFrameworkDeb(BuildTargetContext c)
         {
+            var packageName = Monikers.GetDebianSharedFrameworkPackageName(c);
+            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            var inputRoot = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
+            var debFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
+            var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedframework");
+
+            if (Directory.Exists(objRoot))
+            {
+                Directory.Delete(objRoot, true);
+            }
+
+            Directory.CreateDirectory(objRoot);
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedframework-debian.sh"),
+                    "--input", inputRoot, "--output", debFile, "--package-name", packageName,
+                    "--framework-nuget-name", SharedFrameworkTargets.SharedFrameworkName,
+                    "--framework-nuget-version", c.BuildContext.Get<string>("SharedFrameworkNugetVersion"),
+                    "--obj-root", objRoot, "--version", version)
+                    .Execute()
+                    .EnsureSuccessful();
             return c.Success();
         }
 
