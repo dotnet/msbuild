@@ -112,6 +112,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
         {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
@@ -145,6 +146,9 @@ namespace Microsoft.Build.BackEnd
                     nodeStream.Dispose();
                 }
             }
+#else
+            throw new PlatformNotSupportedException("Shutting down nodes by enumerating processes and connecting to them is not supported when using anonymous pipes.");
+#endif
         }
 
         /// <summary>
@@ -174,6 +178,7 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = "MSBuild.exe";
             }
 
+#if FEATURE_NODE_REUSE
             string msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
 
             List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(msbuildName));
@@ -215,6 +220,7 @@ namespace Microsoft.Build.BackEnd
                     return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
                 }
             }
+#endif
 
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
@@ -224,6 +230,7 @@ namespace Microsoft.Build.BackEnd
             int retries = NodeCreationRetries;
             while (retries-- > 0)
             {
+#if FEATURE_NODE_REUSE
                 // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
                 // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                 // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
@@ -244,11 +251,19 @@ namespace Microsoft.Build.BackEnd
                         throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
                     }
                 }
+#endif
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+                var clientToServerStream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+                var serverToClientStream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
+
+                commandLineArgs += $" /clientToServerPipeHandle:{clientToServerStream.GetClientHandleAsString()} /serverToClientPipeHandle:{serverToClientStream.GetClientHandleAsString()}";
+#endif
 
                 // Create the node process
                 int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
                 _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
@@ -261,6 +276,18 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
                     return new NodeContext(nodeId, msbuildProcessId, nodeStream, factory, terminateNode);
                 }
+#else
+                if (WaitForConnectionFromProcess(clientToServerStream, serverToClientStream, msbuildProcessId, hostHandshake, clientHandshake))
+                {
+                    // Connection successful, use this node.
+
+                    clientToServerStream.DisposeLocalCopyOfClientHandle();
+                    serverToClientStream.DisposeLocalCopyOfClientHandle();
+
+                    CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
+                    return new NodeContext(nodeId, msbuildProcessId, clientToServerStream, serverToClientStream, factory, terminateNode);
+                }
+#endif
             }
 
             // We were unable to launch a node.
@@ -277,6 +304,8 @@ namespace Microsoft.Build.BackEnd
             return hostHandshake.ToString(CultureInfo.InvariantCulture) + "|" + clientHandshake.ToString(CultureInfo.InvariantCulture) + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
+
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
@@ -355,6 +384,47 @@ namespace Microsoft.Build.BackEnd
 
             return null;
         }
+#else
+        private bool WaitForConnectionFromProcess(AnonymousPipeServerStream clientToServerStream,
+                                                  AnonymousPipeServerStream serverToClientStream,
+                                                  int nodeProcessId, long hostHandshake, long clientHandshake)
+        {
+            try
+            {
+                CommunicationsUtilities.Trace("Attempting to handshake with PID {0}", nodeProcessId);
+
+                CommunicationsUtilities.Trace("Writing handshake to pipe");
+                serverToClientStream.WriteLongForHandshake(hostHandshake);
+
+                CommunicationsUtilities.Trace("Reading handshake from pipe");
+                long handshake = clientToServerStream.ReadLongForHandshake();
+
+                if (handshake != clientHandshake)
+                {
+                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from client not {1}. Probably the client is a different MSBuild build.", handshake, clientHandshake);
+                    throw new InvalidOperationException();
+                }
+
+                // We got a connection.
+                CommunicationsUtilities.Trace("Successfully connected got connection from PID {0}...!", nodeProcessId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ExceptionHandling.IsCriticalException(ex))
+                {
+                    throw;
+                }
+
+                CommunicationsUtilities.Trace("Failed to get connection from PID {0}. {1}", nodeProcessId, ex.ToString());
+
+                clientToServerStream.Dispose();
+                serverToClientStream.Dispose();
+
+                return false;
+            }
+        }
+#endif
 
         /// <summary>
         /// Creates a new MSBuild process
@@ -484,10 +554,9 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private static bool s_trace = String.Equals(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"), "1", StringComparison.Ordinal);
 
-            /// <summary>
-            /// The pipe used to communicate with the node.
-            /// </summary>
-            private NamedPipeClientStream _nodePipe;
+            // The pipe(s) used to communicate with the node.
+            private PipeStream _clientToServerStream;
+            private PipeStream _serverToClientStream;
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
@@ -532,11 +601,24 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, int processId, NamedPipeClientStream nodePipe, INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
+            public NodeContext(int nodeId, int processId,
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                NamedPipeClientStream nodePipe,
+#else
+                AnonymousPipeServerStream clientToServerStream,
+                AnonymousPipeServerStream serverToClientStream,
+#endif
+                INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
             {
                 _nodeId = nodeId;
                 _processId = processId;
-                _nodePipe = nodePipe;
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                _clientToServerStream = nodePipe;
+                _serverToClientStream = nodePipe;
+#else
+                _clientToServerStream = clientToServerStream;
+                _serverToClientStream = serverToClientStream;
+#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _smallReadBuffer = new byte[1000]; // 1000 was just an average seen on one profile run.
@@ -551,7 +633,7 @@ namespace Microsoft.Build.BackEnd
             public void BeginAsyncPacketRead()
             {
 #if FEATURE_APM
-                _nodePipe.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
+                _clientToServerStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
 #else
                 ThreadPool.QueueUserWorkItem(delegate
                 {
@@ -567,7 +649,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await _nodePipe.ReadAsync(_headerByte, 0, _headerByte.Length);
+                        int bytesRead = await _clientToServerStream.ReadAsync(_headerByte, 0, _headerByte.Length);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -597,7 +679,7 @@ namespace Microsoft.Build.BackEnd
 
                     try
                     {
-                        int bytesRead = await _nodePipe.ReadAsync(packetData, 0, packetLength);
+                        int bytesRead = await _clientToServerStream.ReadAsync(packetData, 0, packetLength);
                         if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
                         {
                             return;
@@ -666,9 +748,9 @@ namespace Microsoft.Build.BackEnd
                             // We are done, write the last bit asynchronously.  This is actually the general case for
                             // most packets in the build, and the asynchronous behavior here is desirable.
 #if FEATURE_APM
-                            _nodePipe.BeginWrite(writeStreamBuffer, i, lengthToWrite, PacketWriteComplete, null);
+                            _serverToClientStream.BeginWrite(writeStreamBuffer, i, lengthToWrite, PacketWriteComplete, null);
 #else
-                            _nodePipe.WriteAsync(writeStreamBuffer, i, lengthToWrite);
+                            _serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite);
 #endif
                             return;
                         }
@@ -679,10 +761,10 @@ namespace Microsoft.Build.BackEnd
                             // might want to send data immediately afterward, and that could result in overlapping writes
                             // to the pipe on different threads.
 #if FEATURE_APM
-                            IAsyncResult result = _nodePipe.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, null, null);
-                            _nodePipe.EndWrite(result);
+                            IAsyncResult result = _serverToClientStream.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, null, null);
+                            _serverToClientStream.EndWrite(result);
 #else
-                            _nodePipe.Write(writeStreamBuffer, i, lengthToWrite);
+                            _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
 #endif
                         }
                     }
@@ -703,7 +785,11 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void Close()
             {
-                _nodePipe.Dispose();
+                _clientToServerStream.Dispose();
+                if (!object.ReferenceEquals(_clientToServerStream, _serverToClientStream))
+                {
+                    _serverToClientStream.Dispose();
+                }
                 _terminateDelegate(_nodeId);
             }
 
@@ -715,7 +801,7 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    _nodePipe.EndWrite(result);
+                    _serverToClientStream.EndWrite(result);
                 }
                 catch (IOException)
                 {
@@ -770,7 +856,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _nodePipe.EndRead(result);
+                        bytesRead = _clientToServerStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async
@@ -808,7 +894,7 @@ namespace Microsoft.Build.BackEnd
                     packetData = new byte[packetLength];
                 }
 
-                _nodePipe.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+                _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
             }
 #endif
 
@@ -862,7 +948,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _nodePipe.EndRead(result);
+                        bytesRead = _clientToServerStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async

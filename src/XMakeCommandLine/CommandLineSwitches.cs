@@ -93,6 +93,10 @@ namespace Microsoft.Build.CommandLine
             NodeReuse,
 #endif
             Preprocess,
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+            ClientToServerPipeHandle,
+            ServerToClientPipeHandle,
+#endif
             NumberOfParameterizedSwitches
         }
 
@@ -257,7 +261,11 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_NODE_REUSE
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true    ),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true    )
+            new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true    ),
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+            new ParameterizedSwitchInfo(  new string[] { "clientToServerPipeHandle", "c2s" },   ParameterizedSwitch.ClientToServerPipeHandle,   null,                           false,          null,                                  true    ),
+            new ParameterizedSwitchInfo(  new string[] { "serverToClientPipeHandle", "s2c" },   ParameterizedSwitch.ServerToClientPipeHandle,   null,                           false,          null,                                  true    )
+#endif
         };
 
         /// <summary>

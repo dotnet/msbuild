@@ -50,13 +50,24 @@ namespace Microsoft.Build.BackEnd
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         /// <param name="host">The component host.</param>
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
-        internal NodeEndpointOutOfProc(string pipeName, IBuildComponentHost host, bool enableReuse)
+        internal NodeEndpointOutOfProc(
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+            string pipeName, 
+#else
+            string clientToServerPipeHandle,
+            string serverToClientPipeHandle,
+#endif
+            IBuildComponentHost host, bool enableReuse)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
             _componentHost = host;
             _enableReuse = enableReuse;
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             InternalConstruct(pipeName);
+#else
+            InternalConstruct(clientToServerPipeHandle, serverToClientPipeHandle);
+#endif
         }
 
         #endregion
