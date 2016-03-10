@@ -77,8 +77,17 @@ namespace Microsoft.DotNet.Cli.Build
             var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
             var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
 
+            var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sdk");
+
+            if (Directory.Exists(objRoot))
+            {
+                Directory.Delete(objRoot, true);
+            }
+
+            Directory.CreateDirectory(objRoot);
+
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"),
-                "-v", version, "-i", Dirs.Stage2, "-o", debFile, "-p", packageName, "-m", manPagesDir, "--previous-version-url", previousVersionURL)
+                "-v", version, "-i", Dirs.Stage2, "-o", debFile, "-p", packageName, "-m", manPagesDir, "--previous-version-url", previousVersionURL, "--obj-root", objRoot)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
