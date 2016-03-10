@@ -154,9 +154,12 @@ namespace Microsoft.DotNet.Cli.Build
         private static void PublishFileAzure(string blob, string file)
         {
             CloudBlockBlob blockBlob = BlobContainer.GetBlockBlobReference(blob);
-            using (var fileStream = File.OpenRead(file))
+            blockBlob.UploadFromFileAsync(file, FileMode.Open).Wait();
+
+            if (Path.GetExtension(blockBlob.Uri.AbsolutePath.ToLower()) == ".svg")
             {
-                blockBlob.UploadFromStreamAsync(fileStream).Wait();
+                blockBlob.Properties.ContentType = "image/svg+xml";
+                blockBlob.SetPropertiesAsync().Wait();
             }
         }
     }
