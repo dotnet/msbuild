@@ -74,20 +74,20 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
         [Fact]
         public void LibraryWithAnalyzer()
-        {            
+        {
             var root = Temp.CreateDirectory();
             var testLibDir = root.CreateDirectory("TestLibraryWithAnalyzer");
             var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibraryWithAnalyzer");
 
             CopyProjectToTempDir(sourceTestLibDir, testLibDir);
-            
+
             // run compile
             var outputDir = Path.Combine(testLibDir.Path, "bin");
             var testProject = GetProjectPath(testLibDir);
             var buildCmd = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
             var result = buildCmd.ExecuteWithCapturedOutput();
             result.Should().Pass();
-            
+
             Assert.Contains("CA1018", result.StdErr);
         }
 
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             var testProjectDir = Path.Combine(_testProjectsRoot, "TestAppCompilationContext", "TestApp");
             var testProject = Path.Combine(testProjectDir, "project.json");
-            
+
             var buildCommand = new BuildCommand(testProject);
 
             buildCommand.Execute().Should().Pass();
@@ -165,6 +165,24 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
                 var runCommand = new RunCommand(testProject);
                 runCommand.Execute().Should().Pass();
+        }
+
+        [Fact]
+        public void CanSetOutputAssemblyName()
+        {
+            var testInstance =
+                TestAssetsManager
+                    .CreateTestInstance("LibraryWithOutputAssemblyName")
+                    .WithLockFiles();
+
+            var root = testInstance.TestRoot;
+            var outputDir = Path.Combine(root, "bin");
+            var testProject = ProjectUtils.GetProjectJson(root, "LibraryWithOutputAssemblyName");
+            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var result = buildCommand.ExecuteWithCapturedOutput();
+            result.Should().Pass();
+
+            new DirectoryInfo(outputDir).Should().HaveFiles(new [] { "MyLibrary.dll" });
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
