@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var dependencyContext = new DependencyContextBuilder().Build(compilationOptions,
                     allExports,
                     allExports,
-                    string.IsNullOrEmpty(context.RuntimeIdentifier),
+                    args.PortableMode,
                     context.TargetFramework,
                     context.RuntimeIdentifier ?? string.Empty);
 
