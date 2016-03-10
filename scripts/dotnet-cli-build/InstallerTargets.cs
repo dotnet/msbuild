@@ -97,6 +97,22 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult GenerateSharedHostDeb(BuildTargetContext c)
         {
+            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            var inputRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
+            var debFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
+            var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedhost");
+
+            if (Directory.Exists(objRoot))
+            {
+                Directory.Delete(objRoot, true);
+            }
+
+            Directory.CreateDirectory(objRoot);
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedhost-debian.sh"),
+                    "--input", inputRoot, "--output", debFile, "--obj-root", objRoot, "--version", version)
+                    .Execute()
+                    .EnsureSuccessful();
             return c.Success();
         }
 
@@ -126,6 +142,5 @@ namespace Microsoft.DotNet.Cli.Build
                     .EnsureSuccessful();
             return c.Success();
         }
-
     }
 }
