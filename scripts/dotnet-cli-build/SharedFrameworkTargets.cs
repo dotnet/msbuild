@@ -60,6 +60,10 @@ namespace Microsoft.DotNet.Cli.Build
 
                 CrossGenAllManagedAssemblies(SharedFrameworkNameAndVersionRoot);
             }
+            else
+            {
+                c.Warn("Shared framework will not be crossgen'd because mscorlib.ni.dll does not exist.");
+            }
 
             return c.Success();
         }
