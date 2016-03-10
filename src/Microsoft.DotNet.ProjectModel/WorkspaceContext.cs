@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Utilities;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -205,8 +206,23 @@ namespace Microsoft.DotNet.ProjectModel
                 else
                 {
                     currentEntry.FilePath = Path.Combine(projectDirectory, LockFile.FileName);
-                    currentEntry.Model = LockFileReader.Read(currentEntry.FilePath);
-                    currentEntry.UpdateLastWriteTimeUtc();
+
+                    using (var fs = ResilientFileStreamOpener.OpenFile(currentEntry.FilePath, retry: 2))
+                    {
+                        try
+                        {
+                            currentEntry.Model = LockFileReader.Read(currentEntry.FilePath, fs);
+                            currentEntry.UpdateLastWriteTimeUtc();
+                        }
+                        catch (FileFormatException ex)
+                        {
+                            throw ex.WithFilePath(currentEntry.FilePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw FileFormatException.Create(ex, currentEntry.FilePath);
+                        }
+                    }
                 }
             }
 

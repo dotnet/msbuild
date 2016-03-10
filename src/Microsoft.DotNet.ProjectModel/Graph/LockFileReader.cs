@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
     {
         public static LockFile Read(string lockFilePath)
         {
-            using (var stream = new FileStream(lockFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var stream = ResilientFileStreamOpener.OpenFile(lockFilePath))
             {
                 try
                 {
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             }
         }
 
-        internal static LockFile Read(string lockFilePath, Stream stream)
+        public static LockFile Read(string lockFilePath, Stream stream)
         {
             try
             {
