@@ -11,7 +11,8 @@
         "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23901",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
         "Microsoft.DotNet.Cli.Build.Framework": "1.0.0-*",
-        "WindowsAzure.Storage" : "6.2.2-preview"
+        "WindowsAzure.Storage" : "6.2.2-preview",
+        "System.Reflection.Metadata" : "1.2.0"
     },
 
     "frameworks": {
