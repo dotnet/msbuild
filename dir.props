@@ -127,14 +127,14 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">portable</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">portable</DebugType>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
 
@@ -160,11 +160,6 @@
     <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">DNXCore,Version=v5.0</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true'">.NETFramework,Version=v4.6</NuGetTargetMoniker>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(OS)' != 'Windows_NT' and '$(MonoBuild)' != 'true'">
-    <DebugType/>
-    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
