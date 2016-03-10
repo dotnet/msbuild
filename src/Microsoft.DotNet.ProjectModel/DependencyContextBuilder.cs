@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.DependencyModel
                 compilationOptions,
                 GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(),
                 GetLibraries(runtimeExports, dependencyLookup, runtime: true).Cast<RuntimeLibrary>(),
-                new KeyValuePair<string, string[]>[0]);
+                new RuntimeFallbacks[] {});
         }
 
         private static CompilationOptions GetCompilationOptions(CommonCompilerOptions compilerOptions)
