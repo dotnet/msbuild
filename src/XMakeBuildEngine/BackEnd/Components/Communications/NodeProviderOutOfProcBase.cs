@@ -311,8 +311,27 @@ namespace Microsoft.Build.BackEnd
             return hostHandshake.ToString(CultureInfo.InvariantCulture) + "|" + clientHandshake.ToString(CultureInfo.InvariantCulture) + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
-
 #if FEATURE_NAMED_PIPES_FULL_DUPLEX
+        //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
+        //  on non-Windows operating systems
+        private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
+        {
+            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+#if FEATURE_PIPE_SECURITY
+            PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
+#else
+            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
+                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
+#endif
+            IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
+            if (remoteOwner != identifier)
+            {
+                CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
+                throw new UnauthorizedAccessException();
+            }
+        }
+
+
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
@@ -336,19 +355,7 @@ namespace Microsoft.Build.BackEnd
                     // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
                     // remote node could set the owner to something else would also let it change owners on other objects, so
                     // this would be a security flaw upstream of us.
-                    SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-#if FEATURE_PIPE_SECURITY
-                    PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-                    var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                        System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
-                    IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
-                    if (remoteOwner != identifier)
-                    {
-                        CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
-                        throw new UnauthorizedAccessException();
-                    }
+                    ValidateRemotePipeSecurityOnWindows(nodeStream);
 
                 }
 
