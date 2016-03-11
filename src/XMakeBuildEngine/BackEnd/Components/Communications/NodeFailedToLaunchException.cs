@@ -35,6 +35,10 @@ namespace Microsoft.Build.BackEnd
         {
         }
 
+        internal NodeFailedToLaunchException(Exception innerException)
+            : base(innerException.Message, innerException)
+        { }
+
         /// <summary>
         /// Constructs a standard NodeFailedToLaunchException.
         /// </summary>

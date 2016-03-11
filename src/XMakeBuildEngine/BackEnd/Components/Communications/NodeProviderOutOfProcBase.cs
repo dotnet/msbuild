@@ -401,15 +401,42 @@ namespace Microsoft.Build.BackEnd
             BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
 
 
+            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
+
 #if RUNTIME_TYPE_NETCORE
             string coreRunName = NativeMethodsShared.IsUnixLike ? "corerun" : "CoreRun.exe";
             string exeName = Path.Combine(Path.GetDirectoryName(msbuildLocation), coreRunName);
             commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = exeName;
+            processStartInfo.Arguments = commandLineArgs;
+            processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
+            processStartInfo.UseShellExecute = false;
+
+            Process process;
+            try
+            {
+                process = Process.Start(processStartInfo);
+            }
+            catch (Exception ex)
+            {
+                 CommunicationsUtilities.Trace
+                    (
+                        "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
+                        msbuildLocation,
+                        commandLineArgs,
+                        ex.ToString()
+                    );
+
+                throw new NodeFailedToLaunchException(ex);
+            }
+            
+            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", processInfo.dwProcessId);
+            return process.Id;
 #else
             string exeName = msbuildLocation;
-#endif
-
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
+            
             bool result = BackendNativeMethods.CreateProcess
                 (
                     exeName,
@@ -443,6 +470,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", processInfo.dwProcessId);
             return processInfo.dwProcessId;
+#endif
         }
 
         /// <summary>
