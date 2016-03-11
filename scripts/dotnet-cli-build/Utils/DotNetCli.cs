@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
             else
             {
-                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(), "share", "dotnet", "bin");
+                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(), "bin");
             }
 
         }
