@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         // TODO: debug/release support
         private readonly string [] _cLibsFlags = { "-lm", "-ldl"};
-        private readonly string [] _cflags = { "-g", "-lstdc++", "-lrt", "-Wno-invalid-offsetof", "-pthread"};
+        private readonly string [] _cflags = { "-g", "-lstdc++", "-lrt", "-Wno-invalid-offsetof", "-lpthread"};
 
         public IEnumerable<string> CompilerArgs { get; set; }
 
