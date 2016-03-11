@@ -48,6 +48,65 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
         }
 
+        public static bool IsRHEL
+        {
+            get
+            {
+                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                return string.Equals(osname, "rhel", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        public static bool IsUnix
+        {
+            get
+            {
+                return IsLinux || IsOSX;
+            }
+        }
+
+        public static bool IsDebian
+        {
+            get
+            {
+                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                return string.Equals(osname, "debian", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        public static bool IsLinux
+        {
+            get
+            {
+                return IsUbuntu || IsCentOS || IsRHEL || IsDebian;
+            }
+        }
+
+        public static bool IsPlatform(BuildPlatform platform)
+        {
+            switch (platform)
+            {
+                case BuildPlatform.Windows:
+                    return IsWindows;
+                case BuildPlatform.Ubuntu:
+                    return IsUbuntu;
+                case BuildPlatform.OSX:
+                    return IsOSX;
+                case BuildPlatform.CentOS:
+                    return IsCentOS;
+                case BuildPlatform.RHEL:
+                    return IsRHEL;
+                case BuildPlatform.Debian:
+                    return IsDebian;
+                case BuildPlatform.Unix:
+                    return IsUnix;
+                case BuildPlatform.Linux:
+                    return IsLinux;
+                default:
+                    throw new Exception("Unrecognized Platform.");
+            }
+        }
+
         private static BuildPlatform DetermineCurrentPlatform()
         {
             if (IsWindows)
@@ -65,6 +124,14 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             else if (IsCentOS)
             {
                 return BuildPlatform.CentOS;
+            }
+            else if (IsRHEL)
+            {
+                return BuildPlatform.RHEL;
+            }
+            else if (IsDebian)
+            {
+                return BuildPlatform.Debian;
             }
             else
             {

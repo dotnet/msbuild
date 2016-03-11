@@ -16,8 +16,6 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private IList<LibraryAsset> _compilationAssets;
 
-        private IList<LibraryAsset> _debugAssets;
-
         private IList<LibraryAsset> _sourceReferences;
 
         private IList<LibraryAsset> _nativeLibraries;
@@ -25,6 +23,10 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         private IList<LibraryAsset> _embeddedResources;
 
         private IList<AnalyzerReference> _analyzerReferences;
+
+        private IList<LibraryRuntimeTarget> _runtimeTargets;
+
+        private IList<LibraryResourceAssembly> _resourceAssemblies;
 
         public LibraryDescription Library { get; set; }
 
@@ -43,6 +45,10 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public IEnumerable<LibraryAsset> EmbeddedResources => _embeddedResources;
 
         public IEnumerable<AnalyzerReference> AnalyzerReferences => _analyzerReferences;
+
+        public IEnumerable<LibraryRuntimeTarget> RuntimeTargets => _runtimeTargets;
+
+        public IEnumerable<LibraryResourceAssembly> ResourceAssemblies => _resourceAssemblies;
 
         public static LibraryExportBuilder Create(LibraryDescription library = null)
         {
@@ -63,7 +69,9 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 RuntimeAssets ?? EmptyArray<LibraryAsset>.Value,
                 NativeLibraries ?? EmptyArray<LibraryAsset>.Value,
                 EmbeddedResources ?? EmptyArray<LibraryAsset>.Value,
-                AnalyzerReferences ?? EmptyArray<AnalyzerReference>.Value);
+                AnalyzerReferences ?? EmptyArray<AnalyzerReference>.Value,
+                RuntimeTargets ?? EmptyArray<LibraryRuntimeTarget>.Value,
+                ResourceAssemblies ?? EmptyArray<LibraryResourceAssembly>.Value);
         }
 
         public LibraryExportBuilder WithLibrary(LibraryDescription libraryDescription)
@@ -89,7 +97,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             Replace(ref _compilationAssemblies, assets);
             return this;
         }
-        
+
         public LibraryExportBuilder WithSourceReferences(IEnumerable<LibraryAsset> assets)
         {
             Replace(ref _sourceReferences, assets);
@@ -111,6 +119,18 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public LibraryExportBuilder WithAnalyzerReference(IEnumerable<AnalyzerReference> assets)
         {
             Replace(ref _analyzerReferences, assets);
+            return this;
+        }
+
+        public LibraryExportBuilder WithRuntimeTargets(IEnumerable<LibraryRuntimeTarget> targets)
+        {
+            Replace(ref _runtimeTargets, targets);
+            return this;
+        }
+
+        public LibraryExportBuilder WithResourceAssemblies(IEnumerable<LibraryResourceAssembly> assemblies)
+        {
+            Replace(ref _resourceAssemblies, assemblies);
             return this;
         }
 
@@ -156,9 +176,28 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             return this;
         }
 
+        public LibraryExportBuilder AddRuntimeTarget(LibraryRuntimeTarget target)
+        {
+            Add(ref _runtimeTargets, target);
+            return this;
+        }
+
+        public LibraryExportBuilder AddResourceAssembly(LibraryResourceAssembly assembly)
+        {
+            Add(ref _resourceAssemblies, assembly);
+            return this;
+        }
+
         private void Replace<T>(ref IList<T> list, IEnumerable<T> enumerable)
         {
-            list = new List<T>(enumerable);
+            if (enumerable == null)
+            {
+                list = null;
+            }
+            else
+            {
+                list = new List<T>(enumerable);
+            }
         }
 
         private void Add<T>(ref IList<T> list, T item)

@@ -119,27 +119,6 @@ namespace Microsoft.DotNet.Tools.Compiler
         // used in incremental compilation
         public static IEnumerable<string> GetCompilationSources(ProjectContext project) => project.ProjectFile.Files.SourceFiles;
 
-        // used in incremental compilation for the key file
-        public static CommonCompilerOptions ResolveCompilationOptions(ProjectContext context, string configuration)
-        {
-            var compilationOptions = context.GetLanguageSpecificCompilerOptions(context.TargetFramework, configuration);
-
-            // Path to strong naming key in environment variable overrides path in project.json
-            var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);
-
-            if (!string.IsNullOrWhiteSpace(environmentKeyFile))
-            {
-                compilationOptions.KeyFile = environmentKeyFile;
-            }
-            else if (!string.IsNullOrWhiteSpace(compilationOptions.KeyFile))
-            {
-                // Resolve full path to key file
-                compilationOptions.KeyFile =
-                    Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
-            }
-            return compilationOptions;
-        }
-
         //used in incremental precondition checks
         public static IEnumerable<string> GetCommandsInvokedByCompile(ProjectContext project)
         {

@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.ProjectModel
                 return Path.GetDirectoryName(ProjectFilePath);
             }
         }
-        
+
         public AnalyzerOptions AnalyzerOptions { get; set; }
 
         public string Name { get; set; }
@@ -124,12 +124,12 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool HasRuntimeOutput(string configuration)
         {
-
             var compilationOptions = GetCompilerOptions(targetFramework: null, configurationName: configuration);
 
             // TODO: Make this opt in via another mechanism
             return compilationOptions.EmitEntryPoint.GetValueOrDefault() || IsTestProject;
         }
+
         private CommonCompilerOptions GetCompilerOptions()
         {
             return _defaultCompilerOptions;

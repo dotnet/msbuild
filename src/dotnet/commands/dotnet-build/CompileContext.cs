@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             CreateOutputDirectories();
 
-            return CompileDendencies(incremental) && CompileRootProject(incremental);
+            return CompileDependencies(incremental) && CompileRootProject(incremental);
         }
 
         private bool CompileRootProject(bool incremental)
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Build
             return success;
         }
 
-        private bool CompileDendencies(bool incremental)
+        private bool CompileDependencies(bool incremental)
         {
             if (_args.ShouldSkipDependencies)
             {
@@ -395,15 +395,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             if (succeeded)
             {
-                if (_rootProject.ProjectFile.HasRuntimeOutput(_args.ConfigValue))
-                {
-                    MakeRunnable();
-                }
-                else if (!string.IsNullOrEmpty(_args.OutputValue))
-                {
-                    var outputPaths = _rootProject.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
-                    CopyCompilationOutput(outputPaths);
-                }
+                MakeRunnable();
             }
 
             return succeeded;
@@ -428,10 +420,23 @@ namespace Microsoft.DotNet.Tools.Build
         private void MakeRunnable()
         {
             var runtimeContext = _rootProject.CreateRuntimeContext(_args.GetRuntimes());
+            if(_args.PortableMode)
+            {
+                // HACK: Force the use of the portable target
+                runtimeContext = _rootProject;
+            }
+
             var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
             var libraryExporter = runtimeContext.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
-            CopyCompilationOutput(outputPaths);
-            var executable = new Executable(runtimeContext, outputPaths, libraryExporter);
+
+            // If we're building for a specific RID, we need to copy the RID-less compilation output into
+            // the RID-specific output dir
+            if (!string.IsNullOrEmpty(runtimeContext.RuntimeIdentifier))
+            {
+                CopyCompilationOutput(outputPaths);
+            }
+
+            var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);
             executable.MakeCompilationOutputRunnable();
 
             PatchMscorlibNextToCoreClr(runtimeContext, _args.ConfigValue);
@@ -574,7 +579,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         private static void AddCompilationOptions(ProjectContext project, string config, CompilerIO compilerIO)
         {
-            var compilerOptions = CompilerUtil.ResolveCompilationOptions(project, config);
+            var compilerOptions = project.ResolveCompilationOptions(config);
 
             // input: key file
             if (compilerOptions.KeyFile != null)

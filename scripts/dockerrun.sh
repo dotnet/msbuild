@@ -94,9 +94,6 @@ echo "Using code from: $DOCKER_HOST_SHARE_DIR"
 docker run $INTERACTIVE -t --rm --sig-proxy=true \
     --name $DOTNET_BUILD_CONTAINER_NAME \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
-    -e SASTOKEN \
-    -e STORAGE_ACCOUNT \
-    -e STORAGE_CONTAINER \
     -e CHANNEL \
     -e CONNECTION_STRING \
     -e REPO_ID \
@@ -104,5 +101,6 @@ docker run $INTERACTIVE -t --rm --sig-proxy=true \
     -e REPO_PASS \
     -e REPO_SERVER \
     -e DOTNET_BUILD_SKIP_CROSSGEN \
+    -e PUBLISH_TO_AZURE_BLOB \
     $DOTNET_BUILD_CONTAINER_TAG \
     $BUILD_COMMAND "$@"

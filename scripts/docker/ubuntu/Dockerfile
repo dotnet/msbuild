@@ -55,6 +55,7 @@ RUN echo "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main"  | tee
 	libsasl2-2 \
 	libsqlite3-0 \
 	libssl1.0.0 \
+       libssl-dev \
 	libtasn1-6 \
 	libwind0-heimdal
 
@@ -68,11 +69,6 @@ RUN apt-get -qq install -y debhelper build-essential devscripts git cmake
 # Use clang as c++ compiler
 RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.5 100
 RUN update-alternatives --set c++ /usr/bin/clang++-3.5
-
-# Install azure cli. We need this to publish artifacts.
-RUN apt-get -qqy install nodejs-legacy && \
-    apt-get -qqy install npm && \
-    npm install -g azure-cli
 
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0

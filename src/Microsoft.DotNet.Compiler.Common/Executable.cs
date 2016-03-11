@@ -12,6 +12,7 @@ using Microsoft.DotNet.Files;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
 
 namespace Microsoft.Dotnet.Cli.Compiler.Common
@@ -22,28 +23,26 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         private readonly LibraryExporter _exporter;
 
+        private readonly string _configuration;
+
         private readonly OutputPaths _outputPaths;
 
         private readonly string _runtimeOutputPath;
 
         private readonly string _intermediateOutputPath;
 
-        public Executable(ProjectContext context, OutputPaths outputPaths, LibraryExporter exporter)
+        public Executable(ProjectContext context, OutputPaths outputPaths, LibraryExporter exporter, string configuration)
         {
             _context = context;
             _outputPaths = outputPaths;
             _runtimeOutputPath = outputPaths.RuntimeOutputPath;
             _intermediateOutputPath = outputPaths.IntermediateOutputDirectoryPath;
             _exporter = exporter;
+            _configuration = configuration;
         }
 
         public void MakeCompilationOutputRunnable()
         {
-            if (string.IsNullOrEmpty(_context.RuntimeIdentifier))
-            {
-                throw new InvalidOperationException($"Can not make output runnable for framework {_context.TargetFramework}, because it doesn't have runtime target");
-            }
-
             CopyContentFiles();
             ExportRuntimeAssets();
         }
@@ -72,8 +71,11 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         {
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
-            // TODO: Pick a host based on the RID
-            CoreHost.CopyTo(_runtimeOutputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
+            if (!string.IsNullOrEmpty(_context.RuntimeIdentifier))
+            {
+                // TODO: Pick a host based on the RID
+                CoreHost.CopyTo(_runtimeOutputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
+            }
         }
 
         private void CopyContentFiles()
@@ -103,9 +105,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
         {
-            exporter
-                .GetDependencies(LibraryType.Package)
-                .WriteDepsTo(Path.Combine(_runtimeOutputPath, _context.ProjectFile.Name + FileNameSuffixes.Deps));
+            WriteDeps(exporter);
 
             var projectExports = exporter.GetDependencies(LibraryType.Project);
             CopyAssemblies(projectExports);
@@ -114,6 +114,36 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             var packageExports = exporter.GetDependencies(LibraryType.Package);
             CopyAssets(packageExports);
         }
+
+        public void WriteDeps(LibraryExporter exporter)
+        {
+            var path = Path.Combine(_runtimeOutputPath, _context.ProjectFile.Name + FileNameSuffixes.Deps);
+            CreateDirectoryIfNotExists(path);
+            File.WriteAllLines(path, exporter
+                .GetDependencies(LibraryType.Package)
+                .SelectMany(GenerateLines));
+
+            var compilerOptions = _context.ResolveCompilationOptions(_configuration);
+            var includeCompile = compilerOptions.PreserveCompilationContext == true;
+
+            var exports = exporter.GetAllExports().ToArray();
+            var dependencyContext = new DependencyContextBuilder().Build(
+                compilerOptions: includeCompile? compilerOptions: null,
+                compilationExports: includeCompile ? exports : null,
+                runtimeExports: exports,
+                portable: string.IsNullOrEmpty(_context.RuntimeIdentifier),
+                target: _context.TargetFramework,
+                runtime: _context.RuntimeIdentifier ?? string.Empty);
+
+            var writer = new DependencyContextWriter();
+            var depsJsonFile = Path.Combine(_runtimeOutputPath, _context.ProjectFile.Name + FileNameSuffixes.DepsJson);
+            using (var fileStream = File.Create(depsJsonFile))
+            {
+                writer.Write(dependencyContext, fileStream);
+            }
+
+        }
+
 
         public void GenerateBindingRedirects(LibraryExporter exporter)
         {
@@ -142,6 +172,33 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             {
                 appConfig.Save(stream);
             }
+        }
+
+
+        private static void CreateDirectoryIfNotExists(string path)
+        {
+            var depsFile = new FileInfo(path);
+            depsFile.Directory.Create();
+        }
+
+        private static IEnumerable<string> GenerateLines(LibraryExport export)
+        {
+            return GenerateLines(export, export.RuntimeAssemblies, "runtime")
+                .Union(GenerateLines(export, export.NativeLibraries, "native"));
+        }
+
+        private static IEnumerable<string> GenerateLines(LibraryExport export, IEnumerable<LibraryAsset> items, string type)
+        {
+            return items.Select(i => DepsFormatter.EscapeRow(new[]
+            {
+                export.Library.Identity.Type.Value,
+                export.Library.Identity.Name,
+                export.Library.Identity.Version.ToNormalizedString(),
+                export.Library.Hash,
+                type,
+                i.Name,
+                i.RelativePath
+            }));
         }
     }
 }

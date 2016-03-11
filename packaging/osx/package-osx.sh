@@ -12,26 +12,65 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/../../scripts/common/_common.sh"
+help(){
+    echo "Usage: $0 [--version <pkg version>] [--input <input directory>] [--output <output pkg>] [--help]"
+    echo ""
+    echo "Options:"
+    echo "  --version <pkg version>          Specify a version for the package. Version format is 4 '.' separated numbers - <major>.<minor>.<patch>.<revision>"
+    echo "  --input <input directory>        Package the entire contents of the directory tree."
+    echo "  --output <output pkg>            The path to where the package will be written."
+    exit 1
+}
+
+while [[ $# > 0 ]]; do
+    lowerI="$(echo $1 | awk '{print tolower($0)}')"
+    case $lowerI in
+        -v|--version)
+            DOTNET_CLI_VERSION=$2
+            shift
+            ;;
+        -o|--output)
+            OUTPUT_PKG=$2
+            shift
+            ;;
+        -i|--input)
+            INPUT_DIR=$2
+            shift
+            ;;
+        --help)
+            help
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
 
 if [ -z "$DOTNET_CLI_VERSION" ]; then
-    echo "Provide a version number (DOTNET_CLI_VERSION) $DOTNET_CLI_VERSION" && exit 1
+    echo "Provide a version number. Missing option '--version'" && help
 fi
 
-STAGE2_DIR=$REPOROOT/artifacts/$RID/stage2
+if [ -z "$OUTPUT_PKG" ]; then
+    echo "Provide an output pkg. Missing option '--output'" && help
+fi
 
-if [ ! -d "$STAGE2_DIR" ]; then
-    echo "Missing stage2 output in $STAGE2_DIR" 1>&2
+if [ -z "$INPUT_DIR" ]; then
+    echo "Provide an input directory. Missing option '--input'" && help
+fi
+
+if [ ! -d "$INPUT_DIR" ]; then
+    echo "'$INPUT_DIR' - is either missing or not a directory" 1>&2
     exit 1
 fi
 
-PACKAGE_DIR=$REPOROOT/artifacts/packages/pkg
+PACKAGE_DIR=$(dirname "${OUTPUT_PKG}")
 [ -d "$PACKAGE_DIR" ] || mkdir -p $PACKAGE_DIR
 
-PACKAGE_ID=dotnet-osx-x64.${DOTNET_CLI_VERSION}.pkg
-PACKAGE_NAME=$PACKAGE_DIR/$PACKAGE_ID
-#chmod -R 755 $STAGE2_DIR
-pkgbuild --root $STAGE2_DIR \
+PACKAGE_ID=$(basename "${OUTPUT_PKG}")
+
+#chmod -R 755 $INPUT_DIR
+pkgbuild --root $INPUT_DIR \
          --version $DOTNET_CLI_VERSION \
          --scripts $DIR/scripts \
          --identifier com.microsoft.dotnet.cli.pkg.dotnet-osx-x64 \
@@ -40,10 +79,8 @@ pkgbuild --root $STAGE2_DIR \
 
 cat $DIR/Distribution-Template | sed "/{VERSION}/s//$DOTNET_CLI_VERSION/g" > $DIR/Dist
 
-productbuild --version $DOTNET_CLI_VERSION --identifier com.microsoft.dotnet.cli --package-path $DIR --resources $DIR/resources --distribution $DIR/Dist $PACKAGE_NAME
+productbuild --version $DOTNET_CLI_VERSION --identifier com.microsoft.dotnet.cli --package-path $DIR --resources $DIR/resources --distribution $DIR/Dist $OUTPUT_PKG
 
 #Clean temp files
 rm $DIR/$PACKAGE_ID
 rm $DIR/Dist
-
-$REPOROOT/scripts/publish/publish.sh $PACKAGE_NAME

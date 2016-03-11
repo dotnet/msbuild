@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.DotNet.ProjectModel.Server.Models;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
@@ -21,6 +22,16 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
             if (local.GlobalErrorMessage != null)
             {
                 send(local.GlobalErrorMessage);
+            }
+            else
+            {
+                send(new ErrorMessage
+                {
+                    Message = null,
+                    Path = null,
+                    Line = -1,
+                    Column = -1
+                });
             }
         }
 

@@ -61,18 +61,20 @@ namespace Microsoft.DotNet.ProjectModel
             return true;
         }
 
-        public static Project GetProject(string projectFile, ProjectReaderSettings settings = null)
-        {
-            return GetProject(projectFile, new List<DiagnosticMessage>(), settings);
-        }
+        public static Project GetProject(string projectPath, ProjectReaderSettings settings = null) => GetProject(projectPath, new List<DiagnosticMessage>(), settings);
 
-        public static Project GetProject(string projectFile, ICollection<DiagnosticMessage> diagnostics, ProjectReaderSettings settings = null)
+        public static Project GetProject(string projectPath, ICollection<DiagnosticMessage> diagnostics, ProjectReaderSettings settings = null)
         {
-            var name = Path.GetFileName(Path.GetDirectoryName(projectFile));
-
-            using (var stream = new FileStream(projectFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+            if (!projectPath.EndsWith(Project.FileName))
             {
-                return new ProjectReader().ReadProject(stream, name, projectFile, diagnostics, settings);
+                projectPath = Path.Combine(projectPath, Project.FileName);
+            }
+
+            var name = Path.GetFileName(Path.GetDirectoryName(projectPath));
+
+            using (var stream = new FileStream(projectPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return new ProjectReader().ReadProject(stream, name, projectPath, diagnostics, settings);
             }
         }
 
@@ -546,7 +548,8 @@ namespace Microsoft.DotNet.ProjectModel
                             analyzerOptions.LanguageId = languageId;
                             break;
 
-                        default:;
+                        default:
+                            ;
                             throw FileFormatException.Create(
                                $"Unrecognized analyzerOption key: {key}",
                                project.ProjectFilePath);

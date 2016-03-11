@@ -122,6 +122,8 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                     .WithNativeLibraries(libraryExport.NativeLibraries)
                     .WithEmbedddedResources(libraryExport.EmbeddedResources)
                     .WithAnalyzerReference(analyzerReferences)
+                    .WithResourceAssemblies(libraryExport.ResourceAssemblies)
+                    .WithRuntimeTargets(libraryExport.RuntimeTargets)
                     .Build();
             }
         }
@@ -197,6 +199,28 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                             builder.AddRuntimeAsset(new LibraryAsset(contentFile.Path, contentFile.OutputPath, fullPath, fileTransform));
                         }
                     }
+                }
+            }
+            if (package.RuntimeTargets.Any())
+            {
+                foreach (var targetGroup in package.RuntimeTargets.GroupBy(t => t.Runtime))
+                {
+                    var runtime = new List<LibraryAsset>();
+                    var native = new List<LibraryAsset>();
+
+                    foreach (var lockFileRuntimeTarget in targetGroup)
+                    {
+                        if (string.Equals(lockFileRuntimeTarget.AssetType, "native", StringComparison.OrdinalIgnoreCase))
+                        {
+                            native.Add(LibraryAsset.CreateFromRelativePath(package.Path, lockFileRuntimeTarget.Path));
+                        }
+                        else if (string.Equals(lockFileRuntimeTarget.AssetType, "runtime", StringComparison.OrdinalIgnoreCase))
+                        {
+                            runtime.Add(LibraryAsset.CreateFromRelativePath(package.Path, lockFileRuntimeTarget.Path));
+                        }
+                    }
+
+                    builder.AddRuntimeTarget(new LibraryRuntimeTarget(targetGroup.Key, runtime, native));
                 }
             }
 

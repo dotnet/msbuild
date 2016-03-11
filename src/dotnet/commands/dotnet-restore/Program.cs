@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.Tools.Restore
                 toolDescription.Identity.Name + FileNameSuffixes.Deps);
 
             var calculator = context.GetOutputPaths(Constants.DefaultConfiguration, buidBasePath: null, outputPath: context.ProjectDirectory);
-            var executable = new Executable(context, calculator, context.CreateExporter(Constants.DefaultConfiguration));
+            var executable = new Executable(context, calculator, context.CreateExporter(Constants.DefaultConfiguration), null);
 
             executable.MakeCompilationOutputRunnable();
 
@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.Tools.Restore
             Console.WriteLine($"Restoring Tool '{tooldep.Name}' for '{projectPath}' in '{tempPath}'");
 
             File.WriteAllText(projectPath, GenerateProjectJsonContents(new[] {"netstandardapp1.5"}, tooldep));
-            return NuGet3.Restore(new [] { $"{projectPath}", "--runtime", $"{DefaultRid}"}.Concat(args), quiet) == 0;
+            return NuGet3.Restore(new[] { $"{projectPath}" }.Concat(args), quiet) == 0;
         }
 
         private static string GenerateProjectJsonContents(IEnumerable<string> frameworks, LibraryRange tooldep)
@@ -194,9 +194,11 @@ namespace Microsoft.DotNet.Tools.Restore
             foreach (var framework in frameworks)
             {
                 var importsStatement = "\"imports\": [ \"dnxcore50\", \"portable-net452+win81\" ]";
-                
                 sb.AppendLine($"        \"{framework}\": {{ {importsStatement} }}");
             }
+            sb.AppendLine("    },");
+            sb.AppendLine("    \"runtimes\": { ");
+            sb.AppendLine($"        \"{DefaultRid}\": {{}}");
             sb.AppendLine("    }");
             sb.AppendLine("}");
             var pjContents = sb.ToString();

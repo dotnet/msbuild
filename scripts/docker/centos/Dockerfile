@@ -18,17 +18,22 @@ RUN yum -q -y install unzip libunwind gettext libcurl-devel openssl-devel zlib l
 #     apt-get -qqy install unzip curl libicu-dev libunwind8 gettext libssl-dev libcurl3-gnutls zlib1g liblttng-ust-dev lldb-3.6-dev lldb-3.6 
 
 # Install Build Prereqs
-RUN yum -q -y install tar git cmake clang make
+# CMake 3.3.2 from GhettoForge; LLVM 3.6.2 built from source ourselves;
+RUN yum install -y http://mirror.symnds.com/distributions/gf/el/7/plus/x86_64/cmake-3.3.2-1.gf.el7.x86_64.rpm \
+        https://matell.blob.core.windows.net/rpms/clang-3.6.2-1.el7.centos.x86_64.rpm \
+        https://matell.blob.core.windows.net/rpms/clang-libs-3.6.2-1.el7.centos.x86_64.rpm \
+        https://matell.blob.core.windows.net/rpms/lldb-3.6.2-1.el7.centos.x86_64.rpm \
+        https://matell.blob.core.windows.net/rpms/lldb-devel-3.6.2-1.el7.centos.x86_64.rpm \
+        https://matell.blob.core.windows.net/rpms/llvm-3.6.2-1.el7.centos.x86_64.rpm \
+        https://matell.blob.core.windows.net/rpms/llvm-libs-3.6.2-1.el7.centos.x86_64.rpm \
+        which \
+        make
+
+RUN yum -q -y install tar git
 
 # Use clang as c++ compiler
 RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
 RUN update-alternatives --set c++ /usr/bin/clang++
-
-# Install azure cli. We need this to publish artifacts.
-RUN yum -y install nodejs && \
-    yum -y install npm && \
-    npm install -g azure-cli
-
 
 RUN yum -q -y install sudo
 

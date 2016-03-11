@@ -9,7 +9,6 @@ using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
@@ -77,7 +76,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 $"--out:{outputName}"
             };
 
-            var compilationOptions = CompilerUtil.ResolveCompilationOptions(context, args.ConfigValue);
+            var compilationOptions = context.ResolveCompilationOptions(args.ConfigValue);
             var languageId = CompilerUtil.ResolveLanguageId(context);
 
             var references = new List<string>();
@@ -115,6 +114,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var dependencyContext = new DependencyContextBuilder().Build(compilationOptions,
                     allExports,
                     allExports,
+                    args.PortableMode,
                     context.TargetFramework,
                     context.RuntimeIdentifier ?? string.Empty);
 
@@ -161,6 +161,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                 contextVariables.Add(
                     "compile:RuntimeOutputDir",
                     runtimeOutputPath.RuntimeOutputPath.TrimEnd('\\', '/'));
+
+                contextVariables.Add(
+                    "compile:RuntimeIdentifier",
+                    runtimeContext.RuntimeIdentifier);
             }
 
             _scriptRunner.RunScripts(context, ScriptNames.PreCompile, contextVariables);

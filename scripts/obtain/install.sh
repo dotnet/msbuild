@@ -83,6 +83,10 @@ current_os()
             echo "ubuntu"
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             echo "centos"
+        elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
+            echo "rhel.7"
+        elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
+            echo "debian"
         fi
     fi
 }
@@ -104,11 +108,19 @@ check_pre_reqs() {
     fi
 
     if [ "$(uname)" = "Linux" ]; then
-        [ -z "$(ldconfig -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && _failing=true
+
+        if ! [ -x "$(command -v ldconfig)" ]; then
+            echo "ldconfig is not in PATH, trying /sbin/ldconfig."
+            LDCONFIG_COMMAND="/sbin/ldconfig"
+        else
+            LDCONFIG_COMMAND="ldconfig"
+        fi
+
+        [ -z "$($LDCONFIG_COMMAND -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && _failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && _failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && _failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && _failing=true
     fi
 
     if [ "$_failing" = true ]; then

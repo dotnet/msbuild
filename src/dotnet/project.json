@@ -3,16 +3,16 @@
     "compilationOptions": {
         "emitEntryPoint": true
     },
-    "compileExclude": [ 
-        "commands/dotnet-new/CSharp_Console/**", 
-        "commands/dotnet-new/FSharp_Console/**" 
+    "compileExclude": [
+        "commands/dotnet-new/CSharp_Console/**",
+        "commands/dotnet-new/FSharp_Console/**"
     ],
-    "resource": [ 
-        "commands/dotnet-new/CSharp_Console/NuGet.Config", 
-        "commands/dotnet-new/CSharp_Console/Program.cs", 
-        "commands/dotnet-new/CSharp_Console/project.json.template", 
-        "commands/dotnet-new/FSharp_Console/NuGet.config", 
-        "commands/dotnet-new/FSharp_Console/Program.fs", 
+    "resource": [
+        "commands/dotnet-new/CSharp_Console/NuGet.Config",
+        "commands/dotnet-new/CSharp_Console/Program.cs",
+        "commands/dotnet-new/CSharp_Console/project.json.template",
+        "commands/dotnet-new/FSharp_Console/NuGet.config",
+        "commands/dotnet-new/FSharp_Console/Program.fs",
         "commands/dotnet-new/FSharp_Console/project.json.template"
     ],
     "dependencies": {
@@ -24,7 +24,7 @@
         "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160225-02",
         "Microsoft.DiaSymReader.Native": "1.3.3",
 
-        "NuGet.CommandLine.XPlat": "3.4.0-beta-632",
+        "NuGet.CommandLine.XPlat": "3.4.0-rtm-0733",
         "System.CommandLine": "0.1.0-e160119-1",
 
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
