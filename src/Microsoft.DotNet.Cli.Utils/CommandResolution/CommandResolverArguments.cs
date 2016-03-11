@@ -22,5 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public string Configuration { get; set; }
 
         public IEnumerable<string> InferredExtensions { get; set; }
+
+        public string BuildBasePath { get; set; }
     }
 }
