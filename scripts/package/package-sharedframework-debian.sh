@@ -79,6 +79,7 @@ PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
 
 PACKAGE_OUTPUT_DIR="$OBJECT_DIR/deb_output"
 PACKAGE_LAYOUT_DIR="$OBJECT_DIR/deb_intermediate"
+TEST_STAGE_DIR="$OBJECT_DIR/debian_tests"
 
 execute_build(){
     create_empty_debian_layout
@@ -125,8 +126,29 @@ update_debian_json()
     sed -i "s/%SHARED_FRAMEWORK_NUGET_VERSION%/$SHARED_FRAMEWORK_NUGET_VERSION/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
 }
 
+test_debian_package(){
+    header "Testing debian package"
+
+    install_bats
+    run_package_integrity_tests
+}
+
+install_bats() {
+    rm -rf $TEST_STAGE_DIR
+    git clone https://github.com/sstephenson/bats.git $TEST_STAGE_DIR
+}
+
+run_package_integrity_tests() {
+    # Set LAST_VERSION_URL to enable upgrade tests
+    # export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
+
+    $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
+}
+
 execute_build
 
 DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
+
+test_debian_package
 
 mv -f "$DEBIAN_FILE" "$OUTPUT_DEBIAN_FILE"
