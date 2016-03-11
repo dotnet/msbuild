@@ -208,7 +208,9 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         private static FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework, string referenceAssembliesPath)
         {
             // Check for legacy frameworks
-            if (targetFramework.IsDesktop() && targetFramework.Version <= new Version(3, 5))
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows &&
+                targetFramework.IsDesktop() &&
+                targetFramework.Version <= new Version(3, 5))
             {
                 return GetLegacyFrameworkInformation(targetFramework, referenceAssembliesPath);
             }
