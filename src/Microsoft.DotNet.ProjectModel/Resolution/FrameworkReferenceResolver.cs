@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Microsoft.DotNet.ProjectModel.Utilities;
+using Microsoft.Extensions.DependencyModel.Resolution;
 using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
@@ -53,7 +54,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         public static string GetDefaultReferenceAssembliesPath()
         {
             // Allow setting the reference assemblies path via an environment variable
-            var referenceAssembliesPath = Environment.GetEnvironmentVariable("DOTNET_REFERENCE_ASSEMBLIES_PATH");
+            var referenceAssembliesPath = DotNetReferenceAssembliesPathResolver.Resolve();
 
             if (!string.IsNullOrEmpty(referenceAssembliesPath))
             {
@@ -207,7 +208,9 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         private static FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework, string referenceAssembliesPath)
         {
             // Check for legacy frameworks
-            if (targetFramework.IsDesktop() && targetFramework.Version <= new Version(3, 5))
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows &&
+                targetFramework.IsDesktop() &&
+                targetFramework.Version <= new Version(3, 5))
             {
                 return GetLegacyFrameworkInformation(targetFramework, referenceAssembliesPath);
             }
