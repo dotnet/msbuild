@@ -159,6 +159,7 @@ namespace Microsoft.DotNet.Cli.Build
             if (Path.GetExtension(blockBlob.Uri.AbsolutePath.ToLower()) == ".svg")
             {
                 blockBlob.Properties.ContentType = "image/svg+xml";
+                blockBlob.Properties.CacheControl = "no-cache";
                 blockBlob.SetPropertiesAsync().Wait();
             }
         }
