@@ -109,7 +109,7 @@ check_pre_reqs() {
         return 0
     fi
 
-      if [ "$(uname)" = "Linux" ]; then
+    if [ "$(uname)" = "Linux" ]; then
         [ -z "$(ldconfig -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && _failing=true
         [ -z "$(ldconfig -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && _failing=true
         [ -z "$(ldconfig -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
@@ -128,7 +128,7 @@ check_pre_reqs() {
         [ -z "$($LDCONFIG_COMMAND -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
         [ -z "$($LDCONFIG_COMMAND -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && _failing=true
         [ -z "$($LDCONFIG_COMMAND -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && _failing=true
-     fi
+    fi
 
     if [ "$failing" = true ]; then
        return 1
