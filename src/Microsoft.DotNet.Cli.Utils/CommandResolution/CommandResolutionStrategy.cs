@@ -2,6 +2,9 @@
 {
     public enum CommandResolutionStrategy
     {
+        // command loaded from a deps file
+        DepsFile,
+
         // command loaded from project dependencies nuget package
         ProjectDependenciesPackage,
 

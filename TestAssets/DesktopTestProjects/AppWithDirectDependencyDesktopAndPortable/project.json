@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "dotnet-desktop-and-portable": "1.0.0"
+    "dotnet-desktop-and-portable": "1.0.0-*"
   },
   "frameworks": {
     "netstandardapp1.5": {

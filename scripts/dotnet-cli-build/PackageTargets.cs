@@ -12,6 +12,20 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public static class PackageTargets
     {
+        public static readonly string[] ProjectsToPack  = new string[]
+        {
+            "Microsoft.DotNet.Cli.Utils",
+            "Microsoft.DotNet.ProjectModel",
+            "Microsoft.DotNet.ProjectModel.Loader",
+            "Microsoft.DotNet.ProjectModel.Workspaces",
+            "Microsoft.DotNet.InternalAbstractions",
+            "Microsoft.Extensions.DependencyModel",
+            "Microsoft.Extensions.Testing.Abstractions",
+            "Microsoft.DotNet.Compiler.Common",
+            "Microsoft.DotNet.Files",
+            "dotnet-compile-fsc"
+        };
+
         [Target(nameof(PackageTargets.CopyCLISDKLayout),
         nameof(PackageTargets.CopySharedHostLayout),
         nameof(PackageTargets.CopySharedFxLayout),
@@ -28,8 +42,8 @@ namespace Microsoft.DotNet.Cli.Build
         nameof(PackageTargets.GenerateVersionBadge),
         nameof(PackageTargets.GenerateCompressedFile),
         nameof(InstallerTargets.GenerateInstaller),
-        nameof(InstallerTargets.TestInstaller),
-        nameof(PackageTargets.GenerateNugetPackages))]
+        nameof(PackageTargets.GenerateNugetPackages),
+        nameof(InstallerTargets.TestInstaller))]
         [Environment("DOTNET_BUILD_SKIP_PACKAGING", null, "0", "false")]
         public static BuildTargetResult Package(BuildTargetContext c)
         {
@@ -175,16 +189,45 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateNugetPackages(BuildTargetContext c)
         {
             var versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").VersionSuffix;
+            var configuration = c.BuildContext.Get<string>("Configuration");
+
             var env = GetCommonEnvVars(c);
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "nuget", "package.ps1"), Dirs.Stage2, versionSuffix)
-                    .Environment(env)
+            var dotnet = DotNetCli.Stage2;
+
+            var packagingBuildBasePath = Path.Combine(Dirs.Stage2Compilation, "forPackaging");
+
+            FS.Mkdirp(Dirs.PackagesIntermediate);
+            FS.Mkdirp(Dirs.Packages);
+
+            foreach (var projectName in ProjectsToPack)
+            {
+                var projectFile = Path.Combine(Dirs.RepoRoot, "src", projectName, "project.json");
+
+                dotnet.Pack(
+                    projectFile, 
+                    "--no-build", 
+                    "--build-base-path", packagingBuildBasePath, 
+                    "--output", Dirs.PackagesIntermediate, 
+                    "--configuration", configuration, 
+                    "--version-suffix", versionSuffix)
                     .Execute()
                     .EnsureSuccessful();
+            }
+
+            var packageFiles = Directory.EnumerateFiles(Dirs.PackagesIntermediate, "*.nupkg");
+
+            foreach (var packageFile in packageFiles)
+            {
+                if (!packageFile.EndsWith(".symbols.nupkg"))
+                {
+                    var destinationPath = Path.Combine(Dirs.Packages, Path.GetFileName(packageFile));
+                    File.Copy(packageFile, destinationPath, overwrite: true);
+                }
+            }
+
             return c.Success();
         }
 
