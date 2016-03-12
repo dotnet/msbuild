@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private IEnumerable<string> CompilerArgs;
 
         // TODO: debug/release support
-        private readonly string [] _cflags = { "-g", "-lstdc++", "-Wno-invalid-offsetof", "-pthread", "-ldl", "-lm", "-liconv" };
+        private readonly string [] _cflags = { "-g", "-lstdc++", "-Wno-invalid-offsetof", "-lpthread", "-ldl", "-lm", "-liconv" };
 
         private readonly string[] _ilcSdkLibs = 
             {
