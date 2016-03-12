@@ -70,11 +70,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             var compilationFiles = new CompilationOutputFiles(compilationOutputPath, project, configuration, framework);
 
-            RuntimeOutputFiles runtimeFiles = null;
-            if (runtimeOutputPath != null)
-            {
-                runtimeFiles = new RuntimeOutputFiles(runtimeOutputPath, project, configuration, framework);
-            }
+            RuntimeOutputFiles runtimeFiles = new RuntimeOutputFiles(runtimeOutputPath, project, configuration, framework, runtimeIdentifier);
             return new OutputPaths(intermediateOutputPath, compilationOutputPath, runtimeOutputPath, compilationFiles, runtimeFiles);
         }
     }

@@ -1,5 +1,7 @@
 {
-    "dependencies": { },
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
     "frameworks": {
         "netstandardapp1.5": {
             "imports": [
@@ -7,7 +9,7 @@
                 "portable-net45+win8"
             ],
             "dependencies": {
-                "NETStandard.Library": "1.0.0-rc2-23901"
+                "Microsoft.NETCore.App": "1.0.0-rc2-23911"
             }
         }
     },

@@ -25,12 +25,12 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (environment == null)
             {
-                throw new ArgumentNullException("environment");
+                throw new ArgumentNullException(nameof(environment));
             }
 
             if (packagedCommandSpecFactory == null)
             {
-                throw new ArgumentNullException("packagedCommandSpecFactory");
+                throw new ArgumentNullException(nameof(packagedCommandSpecFactory));
             }
 
             _environment = environment;

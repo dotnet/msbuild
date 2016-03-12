@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.TestFramework
             {
                 throw new Exception($"Cannot find '{testProjectName}' at '{AssetsRoot}'");
             }
-            
+
             string testDestination = Path.Combine(AppContext.BaseDirectory, callingMethod + identifier, testProjectName);
             var testInstance = new TestInstance(testProjectDir, testDestination);
             return testInstance;

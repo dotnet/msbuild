@@ -9,11 +9,15 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class RuntimeOutputFiles : CompilationOutputFiles
     {
+        private readonly string _runtimeIdentifier;
+
         public RuntimeOutputFiles(string basePath,
             Project project,
             string configuration,
-            NuGetFramework framework) : base(basePath, project, configuration, framework)
+            NuGetFramework framework,
+            string runtimeIdentifier) : base(basePath, project, configuration, framework)
         {
+            _runtimeIdentifier = runtimeIdentifier;
         }
 
         public string Executable
@@ -39,11 +43,20 @@ namespace Microsoft.DotNet.ProjectModel
                 return Path.ChangeExtension(Assembly, FileNameSuffixes.Deps);
             }
         }
+
         public string DepsJson
         {
             get
             {
                 return Path.ChangeExtension(Assembly, FileNameSuffixes.DepsJson);
+            }
+        }
+
+        public string RuntimeConfigJson
+        {
+            get
+            {
+                return Path.ChangeExtension(Assembly, FileNameSuffixes.RuntimeConfigJson);
             }
         }
 
@@ -59,19 +72,27 @@ namespace Microsoft.DotNet.ProjectModel
                 yield return file;
             }
 
+            if (Project.HasRuntimeOutput(Config))
+            {
+                if (!Framework.IsDesktop())
+                {
+                    yield return Deps;
+                    yield return DepsJson;
+                    yield return RuntimeConfigJson;
+                }
+
+                // If the project actually has an entry point AND we're doing a standalone build
+                var hasEntryPoint = Project.GetCompilerOptions(targetFramework: null, configurationName: Configuration).EmitEntryPoint ?? false;
+                if (hasEntryPoint && !string.IsNullOrEmpty(_runtimeIdentifier))
+                {
+                    // Yield the executable
+                    yield return Executable;
+                }
+            }
+
             if (File.Exists(Config))
             {
                 yield return Config;
-            }
-
-            if (File.Exists(Deps))
-            {
-                yield return Deps;
-            }
-
-            if (File.Exists(DepsJson))
-            {
-                yield return DepsJson;
             }
         }
     }

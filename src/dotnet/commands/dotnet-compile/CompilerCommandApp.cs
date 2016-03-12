@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Tools.Compiler
         private CommandOption _runtimeOption;
         private CommandOption _versionSuffixOption;
         private CommandOption _configurationOption;
-        private CommandOption _portableOption;
         private CommandArgument _projectArgument;
         private CommandOption _nativeOption;
         private CommandOption _archOption;
@@ -55,7 +54,6 @@ namespace Microsoft.DotNet.Tools.Compiler
         public bool IsCppModeValue { get; set; }
         public string AppDepSdkPathValue { get; set; }
         public string CppCompilerFlagsValue { get; set; }
-        public bool PortableMode { get; set; }
 
         // workaround: CommandLineApplication is internal therefore I cannot make _app protected so baseclasses can add their own params
         private readonly Dictionary<string, CommandOption> baseClassOptions;
@@ -85,9 +83,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             _configurationOption = _app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             _versionSuffixOption = _app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
             _projectArgument = _app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
-
-            // HACK: Allow us to treat a project as though it was portable by ignoring the runtime-specific targets. This is temporary until RID inference is removed from NuGet
-            _portableOption = _app.Option("--portable", "TEMPORARY: Enforces portable build/publish mode", CommandOptionType.NoValue);
 
             // Native Args
             _nativeOption = _app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
@@ -122,7 +117,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                 ConfigValue = _configurationOption.Value() ?? Constants.DefaultConfiguration;
                 RuntimeValue = _runtimeOption.Value();
                 VersionSuffixValue = _versionSuffixOption.Value();
-                PortableMode = _portableOption.HasValue();
 
                 IsNativeValue = _nativeOption.HasValue();
                 ArchValue = _archOption.Value();

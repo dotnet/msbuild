@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         }
 
         public AndConstraint<DirectoryInfoAssertions> HaveFiles(IEnumerable<string> expectedFiles)
-        {            
+        {
             foreach (var expectedFile in expectedFiles)
             {
                 HaveFile(expectedFile);
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var dir = _dirInfo.EnumerateDirectories(expectedDir, SearchOption.TopDirectoryOnly).SingleOrDefault();
             Execute.Assertion.ForCondition(dir != null)
                 .FailWith("Expected directory {0} cannot be found inside directory {1}.", expectedDir, _dirInfo.FullName);
-            
+
             return new AndConstraint<DirectoryInfoAssertions>(new DirectoryInfoAssertions(dir));
         }
     }
