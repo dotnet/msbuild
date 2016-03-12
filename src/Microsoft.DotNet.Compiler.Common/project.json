@@ -1,23 +1,23 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "keyFile": "../../tools/Key.snk"
-    },
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901",
-        "System.CommandLine": "0.1.0-e160119-1",
-        "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160202-02",
-        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-        "Microsoft.DotNet.Files": "1.0.0-*"
-    },
-    "frameworks": {
-        "netstandard1.3": {
-            "imports": [
-                "dnxcore50",
-                "portable-net45+win8"
-            ]
-        }
-    },
-    "scripts": {}
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "System.CommandLine": "0.1.0-e160119-1",
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160202-02",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "Microsoft.DotNet.Files": "1.0.0-*"
+  },
+  "frameworks": {
+    "netstandard1.3": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  },
+  "scripts": {}
 }
