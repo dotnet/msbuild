@@ -6,6 +6,10 @@
     "dotnet": {
       "target": "project"
     },
+    "Microsoft.Win32.Registry": {
+      "version": "4.0.0-rc2-23911",
+      "exclude": "Compile"
+    },
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-91790-12",
     "moq.netcore": "4.4.0-beta8",

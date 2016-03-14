@@ -3,6 +3,10 @@
     "dotnet": {
       "target": "project"
     },
+    "Microsoft.Win32.Registry": {
+      "version": "4.0.0-rc2-23911",
+      "exclude": "Compile"
+    },
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
