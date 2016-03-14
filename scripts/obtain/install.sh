@@ -13,7 +13,7 @@ set -u
 set -o pipefail
 
 # Use in the the functions: eval $invocation
-invocation='say_verbose "Calling: ${red:-}${FUNCNAME[0]} ${green:-}$*${normal:-}"'
+invocation='say_verbose "Calling: ${yellow:-}${FUNCNAME[0]} ${green:-}$*${normal:-}"'
 
 # standard output may be used as a return value in the functions
 # we need a way to write text on the screen in the functions so that
@@ -110,12 +110,6 @@ check_pre_reqs() {
     fi
 
     if [ "$(uname)" = "Linux" ]; then
-        [ -z "$(ldconfig -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && _failing=true
-
         if ! [ -x "$(command -v ldconfig)" ]; then
             echo "ldconfig is not in PATH, trying /sbin/ldconfig."
             LDCONFIG_COMMAND="/sbin/ldconfig"
@@ -123,11 +117,11 @@ check_pre_reqs() {
             LDCONFIG_COMMAND="ldconfig"
         fi
 
-        [ -z "$($LDCONFIG_COMMAND -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && _failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && failing=true
     fi
 
     if [ "$failing" = true ]; then
@@ -148,7 +142,7 @@ to_lowercase() {
 
 # args:
 # input - $1
-remove_trailing_backslash() {
+remove_trailing_slash() {
     eval $invocation
     
     echo "${1%/}"
@@ -157,7 +151,7 @@ remove_trailing_backslash() {
 
 # args:
 # input - $1
-remove_beginning_backslash() {
+remove_beginning_slash() {
     eval $invocation
     
     echo "${1#/}"
@@ -176,8 +170,8 @@ combine_paths() {
         return 1
     fi
     
-    local root_path=$(remove_trailing_backslash $1)
-    local child_path=$(remove_beginning_backslash $2)
+    local root_path=$(remove_trailing_slash $1)
+    local child_path=$(remove_beginning_slash $2)
     say_verbose "combine_paths: root_path=$root_path"
     say_verbose "combine_paths: child_path=$child_path"
     echo "$root_path/$child_path"
@@ -194,13 +188,13 @@ get_machine_architecture() {
 
 # args:
 # architecture - $1
-get_cli_architecture_from_architecture() {
+get_normalized_architecture_from_architecture() {
     eval $invocation
     
     local architecture=$(to_lowercase $1)
     case $architecture in
-        auto)
-            echo "$(get_cli_architecture_from_architecture $(get_machine_architecture))"
+        \<auto\>)
+            echo "$(get_normalized_architecture_from_architecture $(get_machine_architecture))"
             return 0
             ;;
         amd64|x64)
@@ -213,7 +207,7 @@ get_cli_architecture_from_architecture() {
             ;;
     esac
    
-    say_err "Architecture not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues"
+    say_err "Architecture ``$architecture`` not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues"
     return 1
 }
 
@@ -243,13 +237,13 @@ get_commit_hash_from_version_info() {
 # args:
 # azure_feed - $1
 # azure_channel - $2
-# cli_architecture - $3
+# normalized_architecture - $3
 get_latest_version_info() {
     eval $invocation
     
     local azure_feed=$1
     local azure_channel=$2
-    local cli_architecture=$3
+    local normalized_architecture=$3
     
     local osname=$(get_current_os_name)
     
@@ -287,19 +281,19 @@ get_azure_channel_from_channel() {
 # args:
 # azure_feed - $1
 # azure_channel - $2
-# cli_architecture - $3
+# normalized_architecture - $3
 # version - $4
 get_specific_version_from_version() {
     eval $invocation
     
     local azure_feed=$1
     local azure_channel=$2
-    local cli_architecture=$3
+    local normalized_architecture=$3
     local version=$(to_lowercase $4)
     
     case $version in
         latest)
-            local version_info="$(get_latest_version_info $1 $2 $3)"
+            local version_info="$(get_latest_version_info $azure_feed $azure_channel $normalized_architecture)"
             say_verbose "get_specific_version_from_version: version_info=$version_info"
             echo "$version_info" | get_version_from_version_info
             return 0
@@ -318,19 +312,19 @@ get_specific_version_from_version() {
 # args:
 # azure_feed - $1
 # azure_channel - $2
-# cli_architecture - $3
+# normalized_architecture - $3
 # specific_version - $4
 construct_download_link() {
     eval $invocation
     
     local azure_feed=$1
     local azure_channel=$2
-    local cli_architecture=$3
+    local normalized_architecture=$3
     local specific_version=$4
     
     local osname=$(get_current_os_name)
     
-    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-$osname-$cli_architecture.$specific_version.tar.gz"
+    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-$osname-$normalized_architecture.$specific_version.tar.gz"
     echo "$download_link"
     return 0
 }
@@ -354,7 +348,7 @@ resolve_installation_path() {
     eval $invocation
     
     local install_dir=$1
-    if [ "$install_dir" == "<usershare>" ]; then
+    if [ "$install_dir" == "<auto>" ]; then
         local user_share_path=$(get_user_share_path)
         say_verbose "resolve_installation_path: share_path=$user_share_path"
         echo "$user_share_path"
@@ -438,17 +432,17 @@ calculate_vars() {
     azure_channel=$(get_azure_channel_from_channel "$channel")
     say_verbose "azure_channel=$azure_channel"
     
-    cli_architecture=$(get_cli_architecture_from_architecture "$architecture")
-    say_verbose "cli_architecture=$cli_architecture"
+    normalized_architecture=$(get_normalized_architecture_from_architecture "$architecture")
+    say_verbose "normalized_architecture=$normalized_architecture"
     
-    specific_version=$(get_specific_version_from_version $azure_feed $azure_channel $cli_architecture $version)
+    specific_version=$(get_specific_version_from_version $azure_feed $azure_channel $normalized_architecture $version)
     say_verbose "specific_version=$specific_version"
     if [ -z "$specific_version" ]; then
         say_err "Could not get version information."
         return 1
     fi
     
-    download_link=$(construct_download_link $azure_feed $azure_channel $cli_architecture $specific_version)
+    download_link=$(construct_download_link $azure_feed $azure_channel $normalized_architecture $specific_version)
     say_verbose "download_link=$download_link"
     
     install_root=$(resolve_installation_path $install_dir)
@@ -462,7 +456,7 @@ install_dotnet() {
     local local_version
     local version_text
     if [ -z "$local_version_info" ]; then
-        version_text="<No CLI installed>"
+        version_text="<No .NET CLI installed>"
     else
         local_version=$(echo "$local_version_info" | get_version_from_version_info)
         version_text=$local_version
@@ -470,7 +464,7 @@ install_dotnet() {
     say_verbose "Local CLI version is: $version_text"
     
     if [ ! -z "${local_version:-}" ] && [ "$specific_version" == "$local_version" ]; then
-        say "Your version of CLI is up-to-date."
+        say "Your version of .NET CLI is up-to-date."
         return 0
     fi
     
@@ -492,8 +486,8 @@ bin_folder_relative_path="/bin"
 
 channel="preview"
 version="Latest"
-install_dir="<usershare>"
-architecture="auto"
+install_dir="<auto>"
+architecture="<auto>"
 debug_symbols=false
 dry_run=false
 no_path=false

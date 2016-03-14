@@ -26,9 +26,9 @@
     Default: %LocalAppData%\Microsoft\.dotnet
     Path to where to install dotnet. Note that binaries will be placed directly in a given directory.
 .PARAMETER Architecture
-    Default: auto - this value represents currently running OS architecture
+    Default: <auto> - this value represents currently running OS architecture
     Architecture of dotnet binaries to be installed.
-    Possible values are: auto, x64 and x86
+    Possible values are: <auto>, x64 and x86
 .PARAMETER DebugSymbols
     If set the installer will include symbols in the installation.
 .PARAMETER DryRun
@@ -49,8 +49,8 @@
 param(
    [string]$Channel="preview",
    [string]$Version="Latest",
-   [string]$InstallDir="<usershare>",
-   [string]$Architecture="auto",
+   [string]$InstallDir="<auto>",
+   [string]$Architecture="<auto>",
    [switch]$DebugSymbols, # TODO: Switch does not work yet. Symbols zip is not being uploaded yet.
    [switch]$DryRun,
    [switch]$NoPath,
@@ -90,7 +90,7 @@ function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
     Say-Invocation $MyInvocation
 
     switch ($Architecture.ToLower()) {
-        { $_ -eq "auto" } { return Get-CLIArchitecture-From-Architecture $(Get-Machine-Architecture) }
+        { $_ -eq "<auto>" } { return Get-CLIArchitecture-From-Architecture $(Get-Machine-Architecture) }
         { ($_ -eq "amd64") -or ($_ -eq "x64") } { return "x64" }
         { $_ -eq "x86" } { return "x86" }
         default { throw "Architecture not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues" }
@@ -167,7 +167,7 @@ function Get-User-Share-Path() {
 function Resolve-Installation-Path([string]$InstallDir) {
     Say-Invocation $MyInvocation
 
-    if ($InstallDir -eq "<usershare>") {
+    if ($InstallDir -eq "<auto>") {
         return Get-User-Share-Path
     }
     return $InstallDir
