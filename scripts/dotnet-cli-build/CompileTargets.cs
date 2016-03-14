@@ -335,7 +335,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static List<string> GetAssembliesToCrossGen()
         {
-            var list = new List<string>
+            return new List<string>
             {
                 "System.Collections.Immutable.dll",
                 "System.Reflection.Metadata.dll",
@@ -345,15 +345,6 @@ namespace Microsoft.DotNet.Cli.Build
                 "csc.dll",
                 "vbc.dll"
             };
-
-            // mscorlib is already crossgenned on Windows
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // mscorlib has to be crossgenned first
-                list.Insert(0, "mscorlib.dll");
-            }
-
-            return list;
         }
     }
 }
