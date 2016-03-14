@@ -293,40 +293,12 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             // Find crossgen
-            string arch = PlatformServices.Default.Runtime.RuntimeArchitecture;
-            string packageId;
-            if (CurrentPlatform.IsWindows)
-            {
-                packageId = $"runtime.win7-{arch}.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsUbuntu)
-            {
-                packageId = "runtime.ubuntu.14.04-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL)
-            {
-                // CentOS runtime is in the runtime.rhel.7-x64... package.
-                packageId = "runtime.rhel.7-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsDebian)
-            {
-                packageId = "runtime.debian.8.2-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsOSX)
-            {
-                packageId = "runtime.osx.10.10-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else
+            var crossGenExePath = Microsoft.DotNet.Cli.Build.Crossgen.GetCrossgenPathForVersion(CoreCLRVersion);
+
+            if (string.IsNullOrEmpty(crossGenExePath))
             {
                 return c.Failed("Unsupported OS Platform");
             }
-
-            var crossGenExePath = Path.Combine(
-                Dirs.NuGetPackages,
-                packageId,
-                CoreCLRVersion,
-                "tools",
-                $"crossgen{Constants.ExeSuffix}");
 
             // We have to copy crossgen next to mscorlib
             var crossgen = Path.Combine(outputDir, $"crossgen{Constants.ExeSuffix}");

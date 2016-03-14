@@ -108,34 +108,13 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult ExpectedBuildArtifacts(BuildTargetContext c)
         {
-            var productName = Monikers.GetProductMoniker(c);
             var config = Environment.GetEnvironmentVariable("CONFIGURATION");
             var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}_{config}_version_badge.svg";
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
-            var extension = CurrentPlatform.IsWindows ? ".zip" : ".tar.gz";
-            c.BuildContext["CompressedFile"] = Path.Combine(Dirs.Packages, productName + extension);
-
-            string installer = "";
-            switch (CurrentPlatform.Current)
-            {
-                case BuildPlatform.Windows:
-                    installer = productName + ".exe";
-                    break;
-                case BuildPlatform.OSX:
-                    installer = productName + ".pkg";
-                    break;
-                case BuildPlatform.Ubuntu:
-                    installer = productName + ".deb";
-                    break;
-                default:
-                    break;
-            }
-
-            if (!string.IsNullOrEmpty(installer))
-            {
-                c.BuildContext["InstallerFile"] = Path.Combine(Dirs.Packages, installer);
-            }
+            AddInstallerArtifactToContext(c, "dotnet", "Sdk");
+            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost");
+            AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework");
 
             return c.Success();
         }
@@ -360,6 +339,36 @@ cmake is required to build the native host 'corehost'";
                 }
             }
             return dict;
+        }
+
+        private static void AddInstallerArtifactToContext(BuildTargetContext c, string artifactPrefix, string contextPrefix)
+        {
+            var productName = Monikers.GetProductMoniker(c, artifactPrefix);
+
+            var extension = CurrentPlatform.IsWindows ? ".zip" : ".tar.gz";
+            c.BuildContext[contextPrefix + "CompressedFile"] = Path.Combine(Dirs.Packages, productName + extension);
+
+            string installer = "";
+            switch (CurrentPlatform.Current)
+            {
+                case BuildPlatform.Windows:
+                    installer = productName + ".exe";
+                    break;
+                case BuildPlatform.OSX:
+                    installer = productName + ".pkg";
+                    break;
+                case BuildPlatform.Ubuntu:
+                    installer = productName + ".deb";
+                    break;
+                default:
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(installer))
+            {
+                c.BuildContext[contextPrefix + "InstallerFile"] = Path.Combine(Dirs.Packages, installer);
+            }
+
         }
     }
 }

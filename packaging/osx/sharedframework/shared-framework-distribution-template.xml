@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <title>.NET Core Shared Framework ({SharedFrameworkNugetName} {SharedFrameworkNugetVersion})</title>
+    <license file="eula.rtf" mime-type="application/rtf" />
+    <background file="dotnetbackground.png" mime-type="image/png"/>
+    <options customize="never" require-scripts="false" />
+    <volume-check>
+        <allowed-os-version>
+            <os-version min="10.10" />
+        </allowed-os-version>
+    </volume-check>
+    <choices-outline>
+        <line choice="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg" />
+        <line choice="com.microsoft.dotnet.sharedhost.osx.x64" />
+    </choices-outline>
+    <choice id="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg" visible="true" title=".NET Core Shared Framework (x64)" description="The .NET Core Shared Framework">
+        <pkg-ref id="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg" />
+    </choice>
+    <choice id="com.microsoft.dotnet.sharedhost.osx.x64" visible="true" title=".NET Core Shared Host (x64)" description="The .NET Core Shared Host." >
+        <pkg-ref id="com.microsoft.dotnet.sharedhost.osx.x64" />
+    </choice>
+    <pkg-ref id="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg">com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg</pkg-ref>
+    <pkg-ref id="com.microsoft.dotnet.sharedhost.osx.x64">com.microsoft.dotnet.sharedhost.osx.x64.pkg</pkg-ref>
+</installer-gui-script>

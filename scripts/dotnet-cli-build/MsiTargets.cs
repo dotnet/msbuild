@@ -22,9 +22,13 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
-        private static string Msi { get; set; }
+        private static string SdkMsi { get; set; }
 
-        private static string Bundle { get; set; }
+        private static string SdkBundle { get; set; }
+
+        private static string SharedHostMsi { get; set; }
+
+        private static string SharedFrameworkMsi { get; set; }
 
         private static string Engine { get; set; }
 
@@ -60,9 +64,12 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult InitMsi(BuildTargetContext c)
         {
-            Bundle = c.BuildContext.Get<string>("InstallerFile");
-            Msi = Path.ChangeExtension(Bundle, "msi");
-            Engine = Path.Combine(Path.GetDirectoryName(Bundle), ENGINE);
+            SdkBundle = c.BuildContext.Get<string>("SdkInstallerFile");
+            SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
+            Engine = Path.Combine(Path.GetDirectoryName(SdkBundle), ENGINE);
+
+            SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
+            SharedFrameworkMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), "msi");
 
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             MsiVersion = buildVersion.GenerateMsiVersion();
@@ -74,9 +81,9 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target(nameof(MsiTargets.InitMsi),
-        nameof(GenerateDotnetMuxerMsi),
-        nameof(GenerateDotnetSharedFxMsi),
-        nameof(GenerateCLISDKMsi))]
+        nameof(GenerateDotnetSharedHostMsi),
+        nameof(GenerateDotnetSharedFrameworkMsi),
+        nameof(GenerateCliSdkMsi))]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateMsis(BuildTargetContext c)
         {
@@ -85,11 +92,11 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target]
         [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateCLISDKMsi(BuildTargetContext c)
+        public static BuildTargetResult GenerateCliSdkMsi(BuildTargetContext c)
         {
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatemsi.ps1"),
-                Dirs.Stage2, Msi, WixRoot, MsiVersion, CliVersion, Arch, Channel)
+                Dirs.Stage2, SdkMsi, WixRoot, MsiVersion, CliVersion, Arch, Channel)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -97,15 +104,48 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target]
         [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateDotnetMuxerMsi(BuildTargetContext c)
+        public static BuildTargetResult GenerateDotnetSharedHostMsi(BuildTargetContext c)
         {
+            var inputDir = c.BuildContext.Get<string>("SharedHostPublishRoot");
+            var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedhost");
+
+            if (Directory.Exists(wixObjRoot))
+            {
+                Directory.Delete(wixObjRoot, true);
+            }
+
+            Directory.CreateDirectory(wixObjRoot);
+
+            Cmd("powershell", "-NoProfile", "-NoLogo",
+                Path.Combine(Dirs.RepoRoot, "packaging", "host", "windows", "generatemsi.ps1"),
+                inputDir, SharedHostMsi, WixRoot, MsiVersion, CliVersion, Arch, wixObjRoot)
+                    .Execute()
+                    .EnsureSuccessful();
             return c.Success();
         }
 
         [Target]
         [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateDotnetSharedFxMsi(BuildTargetContext c)
+        public static BuildTargetResult GenerateDotnetSharedFrameworkMsi(BuildTargetContext c)
         {
+            var inputDir = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
+            var sharedFrameworkNuGetName = SharedFrameworkTargets.SharedFrameworkName;
+            var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+            var upgradeCode = Utils.GenerateGuidFromName($"{sharedFrameworkNuGetName}-{sharedFrameworkNuGetVersion}-{Arch}").ToString().ToUpper();
+            var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedframework");
+
+            if (Directory.Exists(wixObjRoot))
+            {
+                Directory.Delete(wixObjRoot, true);
+            }
+
+            Directory.CreateDirectory(wixObjRoot);
+
+            Cmd("powershell", "-NoProfile", "-NoLogo",
+                Path.Combine(Dirs.RepoRoot, "packaging", "sharedframework", "windows", "generatemsi.ps1"),
+                inputDir, SharedFrameworkMsi, WixRoot, MsiVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot)
+                    .Execute()
+                    .EnsureSuccessful();
             return c.Success();
         }
 
@@ -116,7 +156,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatebundle.ps1"),
-                Msi, Bundle, WixRoot, MsiVersion, CliVersion, Arch, Channel)
+                SdkMsi, SdkBundle, WixRoot, MsiVersion, CliVersion, Arch, Channel)
                     .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
                     .Execute()
                     .EnsureSuccessful();
@@ -127,7 +167,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult ExtractEngineFromBundle(BuildTargetContext c)
         {
-            Cmd($"{WixRoot}\\insignia.exe", "-ib", Bundle, "-o", Engine)
+            Cmd($"{WixRoot}\\insignia.exe", "-ib", SdkBundle, "-o", Engine)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -137,7 +177,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult ReattachEngineToBundle(BuildTargetContext c)
         {
-            Cmd($"{WixRoot}\\insignia.exe", "-ab", Engine, Bundle, "-o", Bundle)
+            Cmd($"{WixRoot}\\insignia.exe", "-ab", Engine, SdkBundle, "-o", SdkBundle)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
