@@ -397,7 +397,7 @@ extract_and_override_zip() {
     local out_path=$2
     
     local failed=false
-    tar -xzf "$zip_path" -C "$out_path" --overwrite &> /dev/null || failed=true
+    tar -xzf "$zip_path" -C "$out_path" --overwrite > /dev/null || failed=true
     if [ "$failed" == true ]; then
         say_err "Extraction failed"
         return 1
@@ -474,6 +474,7 @@ install_dotnet() {
     
     say "Downloading $download_link"
     download "$download_link" $zip_path
+    say_verbose "Downloaded file exists and readable? $(if [ -r $zip_path ]; then echo "yes"; else echo "no"; fi)"
     
     say "Extracting zip"
     extract_and_override_zip $zip_path $install_root
