@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Cli.Build
                 Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"));
             File.Copy(
                 Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}{HostPolicyBaseName}{Constants.DynamicLibSuffix}"),
-                Path.Combine(SharedFrameworkNameAndVersionRoot, $"{Constants.DynamicLibPrefix}{HostPolicyBaseName}{Constants.DynamicLibSuffix}"));
+                Path.Combine(SharedFrameworkNameAndVersionRoot, $"{Constants.DynamicLibPrefix}{HostPolicyBaseName}{Constants.DynamicLibSuffix}"), true);
 
             if (File.Exists(Path.Combine(SharedFrameworkNameAndVersionRoot, "mscorlib.ni.dll")))
             {
@@ -93,6 +93,11 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult PublishSharedHost(BuildTargetContext c)
         {
             string SharedHostPublishRoot = Path.Combine(Dirs.Output, "obj", "sharedhost");
+            if (Directory.Exists(SharedHostPublishRoot))
+            {
+                Directory.Delete(SharedHostPublishRoot);
+            }
+
             Directory.CreateDirectory(SharedHostPublishRoot);
 
             // corehost will be renamed to dotnet at some point and then this can be removed.
