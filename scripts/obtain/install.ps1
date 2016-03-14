@@ -209,8 +209,10 @@ function Extract-And-Override-Zip([string]$ZipPath, [string]$OutPath) {
         foreach ($entry in $Zip.Entries) {
             $DestinationPath = Get-Absolute-Path $(Join-Path -Path $OutPath -ChildPath $entry.FullName)
             $DestinationDir = Split-Path -Parent $DestinationPath
-            New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
-            [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $true)
+            if (-not $DestinationPath.EndsWith("\")) {
+                New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
+                [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $true)
+            }
         }
     }
     finally {
