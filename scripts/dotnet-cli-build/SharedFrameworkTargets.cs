@@ -14,12 +14,18 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class SharedFrameworkTargets
     {
-        public const string SharedFrameworkName = "NETStandard.Library";
+        public const string SharedFrameworkName = "Microsoft.NETCore.App";
 
         private const string CoreHostBaseName = "corehost";
 
-        [Target]
+        [Target(nameof(PackageSharedFramework), nameof(CrossGenAllManagedAssemblies))]
         public static BuildTargetResult PublishSharedFramework(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PackageSharedFramework(BuildTargetContext c)
         {
             string SharedFrameworkPublishRoot = Path.Combine(Dirs.Output, "obj", "sharedframework");
             string SharedFrameworkSourceRoot = Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework");
@@ -33,7 +39,22 @@ namespace Microsoft.DotNet.Cli.Build
             // We publish to a sub folder of the PublishRoot so tools like heat and zip can generate folder structures easier.
             string SharedFrameworkNameAndVersionRoot = Path.Combine(SharedFrameworkPublishRoot, "shared", SharedFrameworkName, SharedFrameworkNugetVersion);
 
-            DotNetCli.Stage0.Publish("--output", SharedFrameworkNameAndVersionRoot, SharedFrameworkSourceRoot).Execute().EnsureSuccessful();
+            string publishFramework = "dnxcore50"; // Temporary, use "netcoreapp" when we update nuget.
+            string publishRuntime;
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            {
+                publishRuntime = $"win7-{PlatformServices.Default.Runtime.RuntimeArchitecture}";
+            }
+            else
+            {
+                publishRuntime = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+            }
+
+            DotNetCli.Stage2.Publish(
+                "--output", SharedFrameworkNameAndVersionRoot,
+                "-r", publishRuntime,
+                "-f", publishFramework,
+                SharedFrameworkSourceRoot).Execute().EnsureSuccessful();
 
             c.BuildContext["SharedFrameworkPublishRoot"] = SharedFrameworkPublishRoot;
             c.BuildContext["SharedFrameworkNugetVersion"] = SharedFrameworkNugetVersion;
@@ -45,6 +66,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Rename the .deps file
             File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps"));
+            File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps.json"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps.json"));
 
             // corehost will be renamed to dotnet at some point and then this can be removed.
             File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, $"{CoreHostBaseName}{Constants.ExeSuffix}"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"));
@@ -57,8 +79,7 @@ namespace Microsoft.DotNet.Cli.Build
                 // Publish already places the crossgen'd version of mscorlib into the output, so we can
                 // remove the IL version
                 File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "mscorlib.dll"));
-
-                CrossGenAllManagedAssemblies(SharedFrameworkNameAndVersionRoot);
+                c.BuildContext["SharedFrameworkNameAndVersionRoot"] = SharedFrameworkNameAndVersionRoot;
             }
             else
             {
@@ -72,25 +93,9 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult PublishSharedHost(BuildTargetContext c)
         {
             string SharedHostPublishRoot = Path.Combine(Dirs.Output, "obj", "sharedhost");
-
-            if (Directory.Exists(SharedHostPublishRoot))
-            {
-                Directory.Delete(SharedHostPublishRoot, true);
-            }
-
-            DotNetCli.Stage0.Publish("--output", SharedHostPublishRoot, Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "host")).Execute().EnsureSuccessful();
-
-            // For the shared host, we only want corerun and not any of the other artifacts in the package (like the hostpolicy)
-            foreach (var filePath in Directory.GetFiles(SharedHostPublishRoot))
-            {
-                if (Path.GetFileName(filePath) != $"{CoreHostBaseName}{Constants.ExeSuffix}")
-                {
-                    File.Delete(filePath);
-                }
-            }
-
+            Directory.CreateDirectory(SharedHostPublishRoot);
             // corehost will be renamed to dotnet at some point and then this can be removed.
-            File.Move(Path.Combine(SharedHostPublishRoot, $"{CoreHostBaseName}{Constants.ExeSuffix}"), Path.Combine(SharedHostPublishRoot, $"dotnet{Constants.ExeSuffix}"));
+            File.Copy(Path.Combine(Dirs.Corehost, $"{CoreHostBaseName}{Constants.ExeSuffix}"), Path.Combine(SharedHostPublishRoot, $"dotnet{Constants.ExeSuffix}"));
 
             c.BuildContext["SharedHostPublishRoot"] = SharedHostPublishRoot;
 
@@ -111,11 +116,15 @@ namespace Microsoft.DotNet.Cli.Build
                 }
             }
 
-            return null;
+            throw new InvalidOperationException("Unable to match the version name from " + pathToProjectJson);
         }
 
-        private static void CrossGenAllManagedAssemblies(string pathToAssemblies)
+        [Target]
+        [Environment("CROSSGEN_SHAREDFRAMEWORK", "1", "true")]
+        public static BuildTargetResult CrossGenAllManagedAssemblies(BuildTargetContext c)
         {
+            string pathToAssemblies = c.BuildContext.Get<string>("SharedFrameworkNameAndVersionRoot");
+
             foreach (var file in Directory.GetFiles(pathToAssemblies))
             {
                 string fileName = Path.GetFileName(file);
@@ -138,6 +147,8 @@ namespace Microsoft.DotNet.Cli.Build
                 File.Delete(file);
                 File.Move(tempPathName, file);
             }
+
+            return c.Success();
         }
 
         private static bool HasMetadata(string pathToFile)
