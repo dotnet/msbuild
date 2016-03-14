@@ -517,7 +517,9 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-#if FEATURE_OSVERSION
+#if MONO
+                return File.Exists("/usr/lib/libc.dylib");
+#elif FEATURE_OSVERSION
                 return Environment.OSVersion.Platform == PlatformID.MacOSX;
 #else
                 return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
