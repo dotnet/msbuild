@@ -469,7 +469,7 @@ install_dotnet() {
     fi
     
     mkdir -p $install_root
-    zip_path=$(mktemp /tmp/dotnet.XXXXXX)
+    zip_path=$(mktemp)
     say_verbose "Zip path: $zip_path"
     
     say "Downloading $download_link"
