@@ -57,7 +57,11 @@
     "System.IO.Compression.ZipFile": "4.0.1-rc2-23911",
     "System.Threading.ThreadPool": "4.0.10-rc2-23911",
     "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23911",
-    "System.Private.DataContractSerialization": "4.1.0-rc2-23911"
+    "System.Private.DataContractSerialization": "4.1.0-rc2-23911",
+    "Microsoft.Win32.Registry": {
+      "version": "4.0.0-rc2-23911",
+      "exclude": "Compile"
+    }
   },
   "frameworks": {
     "netstandardapp1.5": {
