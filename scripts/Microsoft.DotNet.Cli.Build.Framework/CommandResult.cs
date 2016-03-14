@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Text;
 using System.Diagnostics;
 
 namespace Microsoft.DotNet.Cli.Build.Framework
@@ -27,7 +28,19 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             if(ExitCode != 0)
             {
-                throw new BuildFailureException($"Command failed with exit code {ExitCode}: {StartInfo.FileName} {StartInfo.Arguments}");
+                StringBuilder message = new StringBuilder($"Command failed with exit code {ExitCode}: {StartInfo.FileName} {StartInfo.Arguments}");
+
+                if (!string.IsNullOrEmpty(StdOut))
+                {
+                    message.AppendLine($"{Environment.NewLine}Standard Output:{Environment.NewLine}{StdOut}");
+                }
+
+                if (!string.IsNullOrEmpty(StdErr))
+                {
+                    message.AppendLine($"{Environment.NewLine}Standard Error:{Environment.NewLine}{StdErr}");
+                }
+
+                throw new BuildFailureException(message.ToString());
             }
         }
     }
