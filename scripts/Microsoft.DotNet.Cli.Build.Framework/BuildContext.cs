@@ -22,7 +22,17 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         public object this[string name]
         {
-            get { return Properties.ContainsKey(name) ? Properties[name] : null; }
+            get
+            {
+                if (Properties.ContainsKey(name))
+                {
+                    return Properties[name];
+                }
+                else
+                {
+                    throw new KeyNotFoundException("No property with key " + name + " was found.");
+                }
+            }
             set { Properties[name] = value; }
         }
 
