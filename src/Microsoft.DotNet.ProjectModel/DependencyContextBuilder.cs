@@ -129,6 +129,7 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
                     assemblies.Select(RuntimeAssembly.Create),
+                    export.NativeLibraries.Select(l => l.RelativePath),
                     export.ResourceAssemblies.Select(CreateResourceAssembly),
                     export.RuntimeTargets.Select(CreateRuntimeTarget),
                     libraryDependencies,
