@@ -334,8 +334,6 @@ get_user_share_path() {
     
     if [ ! -z "${DOTNET_INSTALL_DIR:-}" ]; then
         echo $DOTNET_INSTALL_DIR
-    elif [ ! -z "${PREFIX:-}" ]; then
-        echo $PREFIX
     else
         echo "/usr/local/share/dotnet"
     fi
@@ -499,39 +497,39 @@ while [ $# -ne 0 ]
 do
     name=$1
     case $name in
-        -c|--channel)
+        -c|--channel|-[Cc]hannel)
             shift
             channel=$1
             ;;
-        -v|--version)
+        -v|--version|-[Vv]ersion)
             shift
             version="$1"
             ;;
-        -p|--prefix)
+        -i|--install-dir|-[Ii]nstall[Dd]ir)
             shift
             install_dir="$1"
             ;;
-        --arch|--architecture)
+        --arch|--architecture|-[Aa]rch|-[Aa]rchitecture)
             shift
             architecture="$1"
             ;;
-        --debug-symbols)
+        --debug-symbols|-[Dd]ebug[Ss]ymbols)
             debug_symbols=true
             ;;
-        --dry-run)
+        --dry-run|-[Dd]ry[Rr]un)
             dry_run=true
             ;;
-        --no-path)
+        --no-path|-[Nn]o[Pp]ath)
             no_path=true
             ;;
-        --verbose)
+        --verbose|-[Vv]erbose)
             verbose=true
             ;;
-        --azure-feed)
+        --azure-feed|-[Aa]zure[Ff]eed)
             shift
             azure_feed="$1"
             ;;
-        -?|--?|-h|--help)
+        -?|--?|-h|--help|-[Hh]elp)
             script_name="$(basename $0)"
             echo ".NET Tools Installer"
             echo "Usage: $script_name [-c|--channel <CHANNEL>] [-v|--version <VERSION>] [-p|--prefix <DESTINATION>]"
@@ -541,22 +539,24 @@ do
             echo ""
             echo "Options:"
             echo "  -c,--channel <CHANNEL>         Download from the CHANNEL specified (default: $channel)."
+            echo "      -Channel"
             echo "  -v,--version <VERSION>         Use specific version, ``latest`` or ``lkg``. Defaults to ``latest``."
-            echo "  -p,--prefix <PREFIX>           Install under specified location (see Install Location below)"
-            echo "  --arch                         Architecture of .NET Tools. Currently only x64 is supported."
+            echo "      -Version"
+            echo "  -i,--install-dir <DIR>         Install under specified location (see Install Location below)"
+            echo "      -InstallDir"
             echo "  --architecture <ARCHITECTURE>  Architecture of .NET Tools. Currently only x64 is supported."
-            echo "  --debug-symbols                Specifies if symbols should be included in the installation."
-            echo "  --dry-run                      Do not perform installation. Display download link."
-            echo "  --no-path                      Do not set PATH for the current process."
-            echo "  --verbose                      Display diagnostics information."
-            echo "  --azure-feed                   Azure feed location. Defaults to $azure_feed"
-            echo "  -?,--?,-h,--help               Shows this help message"
+            echo "      --arch,-Architecture,-Arch"
+            echo "  --debug-symbols,-DebugSymbols  Specifies if symbols should be included in the installation."
+            echo "  --dry-run,-DryRun              Do not perform installation. Display download link."
+            echo "  --no-path, -NoPath             Do not set PATH for the current process."
+            echo "  --verbose,-Verbose             Display diagnostics information."
+            echo "  --azure-feed,-AzureFeed        Azure feed location. Defaults to $azure_feed"
+            echo "  -?,--?,-h,--help,-Help         Shows this help message"
             echo ""
             echo "Install Location:"
             echo "  Location is chosen in following order:"
-            echo "    - --prefix option"
+            echo "    - --install-dir option"
             echo "    - Environmental variable DOTNET_INSTALL_DIR"
-            echo "    - Environmental variable PREFIX"
             echo "    - /usr/local/share/dotnet"
             exit 0
             ;;
@@ -573,7 +573,7 @@ check_min_reqs
 calculate_vars
 if [ "$dry_run" == true ]; then
     say "Payload URL: $download_link"
-    say "Repeatable invocation: .\$(basename $0) --version $specific_version --channel $channel --prefix $prefix"
+    say "Repeatable invocation: ./$(basename $0) --version $specific_version --channel $channel --install-dir $install_dir"
 else
     check_pre_reqs
     install_dotnet
