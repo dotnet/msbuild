@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var commandPath = _command;
             ResolveCommand(ref commandPath, ref args);
 
-            Console.WriteLine($"Executing - {_command} {args}");
+            Console.WriteLine($"Executing - {commandPath} {args}");
 
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
@@ -38,12 +38,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public virtual CommandResult ExecuteWithCapturedOutput(string args = "")
         {
-            Console.WriteLine($"Executing (Captured Output) - {_command} {args}");
-
             var command = _command;
             ResolveCommand(ref command, ref args);
             var commandPath = Env.GetCommandPath(command, ".exe", ".cmd", "") ??
                 Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, command, ".exe", ".cmd", "");
+                
+            Console.WriteLine($"Executing (Captured Output) - {commandPath} {args}");
 
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     newArgs += " " + args;
                 }
                 args = newArgs;
-                executable = "corehost";
+                executable = "dotnet";
             }
 
             if (!Path.IsPathRooted(executable))

@@ -25,6 +25,7 @@ help(){
     echo "Options:"
     echo "  --input <input directory>          Package the entire contents of the directory tree."
     echo "  --output <output debfile>          The full path to which the package will be written."
+    echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-sharedhost'"
     echo "  --obj-root <object root>           Root folder for intermediate objects."
     echo "  --version <version>                Version for the debain package."
     exit 1
@@ -39,6 +40,10 @@ while [[ $# > 0 ]]; do
             ;;
         -i|--input)
             REPO_BINARIES_DIR=$2
+            shift
+            ;;
+        -p|--package-name)
+            SHARED_HOST_DEBIAN_PACKAGE_NAME=$2
             shift
             ;;
         --obj-root)
@@ -99,11 +104,11 @@ create_debian_package(){
 
     mkdir -p "$PACKAGE_OUTPUT_DIR"
 
-    "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v "$SHARED_HOST_DEBIAN_VERSION"
+    "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -n "$SHARED_HOST_DEBIAN_PACKAGE_NAME" -v "$SHARED_HOST_DEBIAN_VERSION"
 }
 
 test_debian_package(){
-    header "Testing debian package"
+    header "Testing debian Shared Host package"
 
     install_bats
     run_package_integrity_tests

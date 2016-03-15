@@ -31,5 +31,9 @@
     "debian_dependencies":{
         "libssl-dev" : {},
         "libcurl3" : {}
+    },
+    
+    "symlinks": {
+        "dotnet" : "/usr/bin/dotnet"
     }
 }

@@ -28,9 +28,8 @@
     },
 
     "debian_dependencies":{
-        "libssl1.0.0" : {},
         "clang-3.5" : {},
-        "libcurl3" : {}
+        "SHARED_FRAMEWORK_NUGET_NAME" : {}
     },
 
     "package_conflicts" : [

@@ -62,6 +62,14 @@ parseargs(){
             PREVIOUS_VERSION_URL=$2
             shift
             ;;
+        --framework-nuget-name)
+            SHARED_FRAMEWORK_NUGET_NAME=$2
+            shift
+            ;;
+        --framework-nuget-version)
+            SHARED_FRAMEWORK_NUGET_VERSION=$2
+            shift
+            ;;
         --obj-root)
             OBJECT_DIR=$2
             shift
@@ -118,6 +126,7 @@ rm -f "$PACKAGE_OUTPUT_DIR/*.deb"
 execute_build(){
     create_empty_debian_layout
     copy_files_to_debian_layout
+	update_debian_json
     create_debian_package
 }
 
@@ -158,15 +167,18 @@ create_debian_package(){
     "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION -n $DOTNET_DEB_PACKAGE_NAME
 }
 
+update_debian_json()
+{
+    header "Updating debian.json file"
+    sed -i "s/%SHARED_FRAMEWORK_NUGET_NAME%/$SHARED_FRAMEWORK_NUGET_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
+    sed -i "s/%SHARED_FRAMEWORK_NUGET_VERSION%/$SHARED_FRAMEWORK_NUGET_VERSION/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
+}
+
 test_debian_package(){
     header "Testing debian package"
     
     install_bats
     run_package_integrity_tests
-
-    install_debian_package
-    run_e2e_test
-    remove_debian_package
 }
 
 install_bats() {
@@ -174,30 +186,11 @@ install_bats() {
     git clone https://github.com/sstephenson/bats.git $TEST_STAGE_DIR
 }
 
-install_debian_package() {
-    sudo dpkg -i $DEBIAN_FILE
-}
-
-remove_debian_package() {
-    sudo dpkg -r $DOTNET_DEB_PACKAGE_NAME
-}
-
 run_package_integrity_tests() {
     # Set LAST_VERSION_URL to enable upgrade tests
     export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
 
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
-}
-
-run_e2e_test(){
-    local dotnet_path="/usr/bin/dotnet"
-
-    header "Running EndToEnd Tests against debian package using ${dotnet_path}"
-    
-    # Won't affect outer functions
-    cd $REPOROOT/test/EndToEnd
-    $dotnet_path build
-    $dotnet_path test -xml $TEST_STAGE_DIR/debian-endtoend-testResults.xml
 }
 
 execute_build

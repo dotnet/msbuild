@@ -47,6 +47,13 @@ namespace Microsoft.DotNet.Cli.Build
             return $"dotnet-sharedframework-{SharedFrameworkName}-{sharedFrameworkNugetVersion}".ToLower();
         }
 
+        public static string GetDebianSharedHostPackageName(BuildTargetContext c)
+        {
+            var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+
+            return $"dotnet-host".ToLower();
+        }
+
         public static string GetOSShortName()
         {
             string osname = "";
