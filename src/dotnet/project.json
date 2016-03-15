@@ -22,7 +22,7 @@
     "Microsoft.Net.CSharp.Interactive.netcore": "1.3.0-beta1-20160225-02",
     "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160225-02",
     "Microsoft.DiaSymReader.Native": "1.3.3",
-    "NuGet.CommandLine.XPlat": "3.4.0-rtm-0733",
+    "NuGet.CommandLine.XPlat": "3.4.0-rtm-0763",
     "System.CommandLine": "0.1.0-e160119-1",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
