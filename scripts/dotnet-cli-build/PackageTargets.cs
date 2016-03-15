@@ -57,14 +57,36 @@ namespace Microsoft.DotNet.Cli.Build
 
             if (Directory.Exists(cliSdkRoot))
             {
+                string[] files = Directory.GetFiles(cliSdkRoot, "*", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    File.SetAttributes(file, FileAttributes.Normal);
+                    File.Delete(file);
+                }
+
                 Directory.Delete(cliSdkRoot, true);
             }
 
             Directory.CreateDirectory(cliSdk);
 
+            var binPath = Path.Combine(Dirs.Stage2, "bin");
+            foreach (var file in Directory.GetFiles(binPath, "*", SearchOption.AllDirectories))
+            {
+                string destFile = file.Replace(binPath, cliSdk);
+                Directory.CreateDirectory(Path.GetDirectoryName(destFile));
+                File.Copy(file, destFile, true);
+            }
+
+            File.Copy(Path.Combine(Dirs.Stage2, ".version"), Path.Combine(cliSdk, ".version"), true);
+
+            // copy stage2 to "cliSdkRoot\bin".
+            // this is a temp hack until we fix the build scripts to use the new shared fx and shared host
+            // the current build scripts need the CLI sdk to be in the bin folder.
+
             foreach (var file in Directory.GetFiles(Dirs.Stage2, "*", SearchOption.AllDirectories))
             {
-                string destFile = Path.Combine(cliSdk, Path.GetFileName(file));
+                string destFile = file.Replace(Dirs.Stage2, cliSdkRoot);
+                Directory.CreateDirectory(Path.GetDirectoryName(destFile));
                 File.Copy(file, destFile, true);
             }
 
@@ -84,7 +106,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             CreateZipFromDirectory(c.BuildContext.Get<string>("SharedHostPublishRoot"), c.BuildContext.Get<string>("SharedHostCompressedFile"));
             CreateZipFromDirectory(c.BuildContext.Get<string>("SharedFrameworkPublishRoot"), c.BuildContext.Get<string>("SharedFrameworkCompressedFile"));
-            CreateZipFromDirectory(Dirs.Stage2, c.BuildContext.Get<string>("SdkCompressedFile"));
+            CreateZipFromDirectory(c.BuildContext.Get<string>("CLISDKRoot"), c.BuildContext.Get<string>("SdkCompressedFile"));
 
             return c.Success();
         }
@@ -95,7 +117,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             CreateTarBallFromDirectory(c.BuildContext.Get<string>("SharedHostPublishRoot"), c.BuildContext.Get<string>("SharedHostCompressedFile"));
             CreateTarBallFromDirectory(c.BuildContext.Get<string>("SharedFrameworkPublishRoot"), c.BuildContext.Get<string>("SharedFrameworkCompressedFile"));
-            CreateTarBallFromDirectory(Dirs.Stage2, c.BuildContext.Get<string>("SdkCompressedFile"));
+            CreateTarBallFromDirectory(c.BuildContext.Get<string>("CLISDKRoot"), c.BuildContext.Get<string>("SdkCompressedFile"));
 
             return c.Success();
         }
