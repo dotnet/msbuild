@@ -12,7 +12,9 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public static class PackageTargets
     {
-        [Target]
+        [Target(nameof(PackageTargets.CopyCLISDKLayout),
+        nameof(SharedFrameworkTargets.PublishSharedHost),
+        nameof(SharedFrameworkTargets.PublishSharedFramework))]
         public static BuildTargetResult InitPackage(BuildTargetContext c)
         {
             Directory.CreateDirectory(Dirs.Packages);
@@ -22,9 +24,6 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init),
         nameof(PackageTargets.InitPackage),
         nameof(PackageTargets.GenerateVersionBadge),
-        nameof(PackageTargets.CopyCLISDKLayout),
-        nameof(SharedFrameworkTargets.PublishSharedHost),
-        nameof(SharedFrameworkTargets.PublishSharedFramework),
         nameof(PackageTargets.GenerateCompressedFile),
         nameof(InstallerTargets.GenerateInstaller),
         nameof(PackageTargets.GenerateNugetPackages))]
