@@ -22,7 +22,7 @@
 
    <!-- Common repo directories -->
   <PropertyGroup>
-    <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
+    <BuildToolsVersion>1.0.25-prerelease-00199</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
     <XunitVersion>2.1.0-rc1-build3168</XunitVersion>
 
@@ -36,8 +36,8 @@
     <!-- Input Directories -->
     <PackagesDir>$(ProjectDir)packages\</PackagesDir>
     <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
+    <BuildToolsTaskDir>$(ToolsDir)net45\</BuildToolsTaskDir>
     <CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>
-
     <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
   </PropertyGroup>
 
