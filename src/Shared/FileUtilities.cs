@@ -461,17 +461,6 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            // See if we have a framework path and adjust it if needed
-            if (checkValue.StartsWith("/"))
-            {
-                var adjustedValue = NativeMethodsShared.FixFrameworkPath(checkValue);
-
-                if (adjustedValue != null)
-                {
-                    return quote + adjustedValue + quote;
-                }
-            }
-
             return LooksLikeUnixFilePath(checkValue) ? newValue : value;
         }
 

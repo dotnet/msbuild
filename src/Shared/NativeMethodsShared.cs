@@ -550,11 +550,6 @@ namespace Microsoft.Build.Shared
         private static string s_frameworkCurrentPath;
 
         /// <summary>
-        /// The regex for matching Mono framework paths
-        /// </summary>
-        private static Regex s_frameworkPathRegex;
-
-        /// <summary>
         /// Gets the currently running framework path
         /// </summary>
         internal static string FrameworkCurrentPath
@@ -592,63 +587,6 @@ namespace Microsoft.Build.Shared
 
                 return s_frameworkBasePath;
             }
-        }
-
-        /// <summary>
-        ///  Regex for framework paths under MONO
-        /// </summary>
-        internal static Regex FrameworkPathRegex
-        {
-            get
-            {
-                return s_frameworkPathRegex
-                       ?? (s_frameworkPathRegex =
-                           new Regex(FrameworkBasePath + @"/(?:xbuild/)?v?(\d+)\.(\d+)(?:[.\d]*/?)?(.*)?"));
-            }
-        }
-
-        /// <summary>
-        ///  Check if the path is in the framework path on Unix/Mono.
-        ///  Verify that the path in one of the version directory.
-        /// </summary>
-        internal static string FixFrameworkPath(string path)
-        {
-            // Only valid for Mono
-            if (!IsUnixLike || !IsMono)
-            {
-                return null;
-            }
-
-            // Check if this is a framework path in the version
-            // directory.
-            Match m = FrameworkPathRegex.Match(path);
-            if (!m.Success || m.Groups.Count <= 1 ||
-                string.IsNullOrEmpty(m.Groups[1].Value) ||
-                string.IsNullOrEmpty(m.Groups[2].Value))
-            {
-                return null;
-            }
-
-            // We matched. We only care about the 2nd and 3rd captures, which tells us
-            // us the version number.
-            int majorVersion;
-            if (!int.TryParse(m.Groups[1].Value, out majorVersion))
-            {
-                return null;
-            }
-
-            // Based on the version directory, find the correct path.
-            string root = majorVersion > 4 ?
-                Path.Combine(
-                              FrameworkBasePath,
-                              "xbuild",
-                              m.Groups[1].Value + '.' + m.Groups[2].Value,
-                              "bin") :
-                Path.Combine(
-                              FrameworkBasePath,
-                              m.Groups[1].Value + '.' + m.Groups[2].Value);
-            string lastChar = path.EndsWith("/") ? "/" : "";
-            return string.IsNullOrEmpty(m.Groups[3].Value) ? root + lastChar : Path.Combine(root, m.Groups[3].Value);
         }
 
         /// <summary>
