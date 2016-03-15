@@ -51,7 +51,12 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult CopyCLISDKLayout(BuildTargetContext c)
         {
-            var nugetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
+            // CLI SDK must be layed out in path which has a Nuget version.
+            // But the muxer does not currently support the pre-release CLI SDK without a global.json file.
+            // So we are creating a production version.
+            // var nugetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
+            var nugetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").ProductionVersion;
+
             var cliSdkRoot = Path.Combine(Dirs.Output, "obj", "clisdk");
             var cliSdk = Path.Combine(cliSdkRoot, "sdk", nugetVersion);
 
