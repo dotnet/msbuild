@@ -2,36 +2,6 @@
   "locked": false,
   "version": 1,
   "targets": {
-    ".NETFramework,Version=v4.5.1": {
-      "Microsoft.Tpl.Dataflow/4.5.24": {
-        "compile": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        }
-      }
-    },
-    ".NETFramework,Version=v4.5.1/win": {
-      "Microsoft.Tpl.Dataflow/4.5.24": {
-        "compile": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        }
-      }
-    },
-    ".NETFramework,Version=v4.5.1/win-": {
-      "Microsoft.Tpl.Dataflow/4.5.24": {
-        "compile": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        }
-      }
-    },
     ".NETFramework,Version=v4.6": {
       "Microsoft.Tpl.Dataflow/4.5.24": {
         "compile": {
@@ -84,7 +54,6 @@
     "": [
       "Microsoft.Tpl.Dataflow >= 4.5.24"
     ],
-    ".NETFramework,Version=v4.5.1": [],
     ".NETFramework,Version=v4.6": []
   }
 }
