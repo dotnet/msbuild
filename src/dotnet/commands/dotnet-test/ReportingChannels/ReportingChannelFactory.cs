@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public IReportingChannel CreateTestRunnerChannel()
         {
-            var testRunnerChannel = ReportingChannel.ListenOn(0);
+            var testRunnerChannel = TestRunnerReportingChannel.ListenOn(0);
 
             TestRunnerChannelCreated?.Invoke(this, testRunnerChannel);
 
@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public IReportingChannel CreateAdapterChannel(int port)
         {
-            return ReportingChannel.ListenOn(port);
+            return AdapterReportingChannel.ConnectTo(port);
         }
     }
 }

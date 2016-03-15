@@ -58,7 +58,8 @@
     "Microsoft.Win32.Registry": {
       "version": "4.0.0-rc2-23911",
       "exclude": "Compile"
-    }
+    },
+    "System.Net.NameResolution": "4.0.0-rc2-23911"
   },
   "frameworks": {
     "netstandardapp1.5": {
