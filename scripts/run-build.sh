@@ -114,7 +114,7 @@ echo "Invoking Build Scripts..."
 echo "Configuration: $CONFIGURATION"
 
 if [ -f "$DIR/dotnet-cli-build/bin/dotnet-cli-build" ]; then
-    $DIR/dotnet-cli-build/bin/dotnet-cli-build "${targets[@]}"
+    $DIR/dotnet-cli-build/bin/dotnet-cli-build ${targets[@]}
     exit $?
 else
     # We're on an older CLI. This is temporary while Ubuntu and CentOS VSO builds are stalled.
