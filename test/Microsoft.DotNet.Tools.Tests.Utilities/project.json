@@ -7,7 +7,6 @@
   "dependencies": {
     "NETStandard.Library": "1.5.0-rc2-23911",
     "System.Collections.Immutable": "1.2.0-rc2-23911",
-    "System.IO.Compression": "4.1.0-rc2-23911",
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-91790-12",
