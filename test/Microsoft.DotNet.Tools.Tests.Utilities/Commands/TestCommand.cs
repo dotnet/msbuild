@@ -23,11 +23,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public virtual CommandResult Execute(string args = "")
         {
             var commandPath = _command;
-            if (!Path.IsPathRooted(_command))
-            {
-                _command = Env.GetCommandPath(_command) ??
-                           Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, _command);
-            }
+            ResolveCommand(ref commandPath, ref args);
 
             Console.WriteLine($"Executing - {_command} {args}");
 
@@ -44,9 +40,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             Console.WriteLine($"Executing (Captured Output) - {_command} {args}");
 
-            var commandPath = Env.GetCommandPath(_command, ".exe", ".cmd", "") ??
-                Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, _command, ".exe", ".cmd", "");
-                
+            var command = _command;
+            ResolveCommand(ref command, ref args);
+            var commandPath = Env.GetCommandPath(command, ".exe", ".cmd", "") ??
+                Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, command, ".exe", ".cmd", "");
+
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
 
@@ -54,6 +52,26 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             stdErr.Capture();
 
             return RunProcess(commandPath, args, stdOut, stdErr);
+        }
+
+        private void ResolveCommand(ref string executable, ref string args)
+        {
+            if (executable.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+            {
+                var newArgs = ArgumentEscaper.EscapeSingleArg(executable);
+                if (!string.IsNullOrEmpty(args))
+                {
+                    newArgs += " " + args;
+                }
+                args = newArgs;
+                executable = "corehost";
+            }
+
+            if (!Path.IsPathRooted(executable))
+            {
+                executable = Env.GetCommandPath(executable) ??
+                           Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, executable);
+            }
         }
 
         private CommandResult RunProcess(string executable, string args, StreamForwarder stdOut, StreamForwarder stdErr)
@@ -88,8 +106,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             var result = new CommandResult(
                 process.StartInfo,
-                process.ExitCode, 
-                stdOut.CapturedOutput, 
+                process.ExitCode,
+                stdOut.CapturedOutput,
                 stdErr.CapturedOutput);
 
             return result;

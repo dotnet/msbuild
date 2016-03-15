@@ -74,6 +74,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new DirectoryInfo(output);
         }
 
+        public string GetPortableOutputName()
+        {
+            return $"{_project.Name}.dll";
+        }
+
         public string GetOutputExecutable()
         {
             var result = _project.Name;

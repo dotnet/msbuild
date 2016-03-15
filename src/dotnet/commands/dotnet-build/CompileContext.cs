@@ -405,6 +405,13 @@ namespace Microsoft.DotNet.Tools.Build
         {
             var dest = outputPaths.RuntimeOutputPath;
             var source = outputPaths.CompilationOutputPath;
+
+            // No need to copy if dest and source are the same
+            if(string.Equals(dest, source, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             foreach (var file in outputPaths.CompilationFiles.All())
             {
                 var destFileName = file.Replace(source, dest);
@@ -423,12 +430,7 @@ namespace Microsoft.DotNet.Tools.Build
             var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
             var libraryExporter = runtimeContext.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
 
-            // If we're building for a specific RID, we need to copy the RID-less compilation output into
-            // the RID-specific output dir
-            if (!string.IsNullOrEmpty(runtimeContext.RuntimeIdentifier))
-            {
-                CopyCompilationOutput(outputPaths);
-            }
+            CopyCompilationOutput(outputPaths);
 
             var options = runtimeContext.ProjectFile.GetCompilerOptions(runtimeContext.TargetFramework, _args.ConfigValue);
             var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);

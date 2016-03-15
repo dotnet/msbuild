@@ -26,12 +26,18 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 var extension = FileNameSuffixes.CurrentPlatform.Exe;
 
-                // This is the check for mono, if we're not on windows and producing outputs for
-                // the desktop framework then it's an exe
                 if (Framework.IsDesktop())
                 {
+                    // This is the check for mono, if we're not on windows and producing outputs for
+                    // the desktop framework then it's an exe
                     extension = FileNameSuffixes.DotNet.Exe;
                 }
+                else if (string.IsNullOrEmpty(_runtimeIdentifier))
+                {
+                    // The executable is a DLL in this case
+                    extension = FileNameSuffixes.DotNet.DynamicLib;
+                }
+
                 return Path.Combine(BasePath, Project.Name + extension);
             }
         }
@@ -81,9 +87,9 @@ namespace Microsoft.DotNet.ProjectModel
                     yield return RuntimeConfigJson;
                 }
 
-                // If the project actually has an entry point AND we're doing a standalone build
+                // If the project actually has an entry point
                 var hasEntryPoint = Project.GetCompilerOptions(targetFramework: null, configurationName: Configuration).EmitEntryPoint ?? false;
-                if (hasEntryPoint && !string.IsNullOrEmpty(_runtimeIdentifier))
+                if (hasEntryPoint)
                 {
                     // Yield the executable
                     yield return Executable;

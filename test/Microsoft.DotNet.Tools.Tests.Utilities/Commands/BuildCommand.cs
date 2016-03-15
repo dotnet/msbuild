@@ -254,6 +254,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return base.ExecuteWithCapturedOutput(args);
         }
 
+        public string GetPortableOutputName()
+        {
+            return $"{_project.Name}.dll";
+        }
+
         public string GetOutputExecutableName()
         {
             var result = _project.Name;

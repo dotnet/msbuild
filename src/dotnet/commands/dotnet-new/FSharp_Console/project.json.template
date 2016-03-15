@@ -9,11 +9,11 @@
   ],
   "dependencies": {
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-    "NETStandard.Library": "1.5.0-rc2-23911"
+    "Microsoft.NETCore.App": "1.0.0-rc2-23911"
   },
   "frameworks": {
-    "netstandardapp1.5": {
-      "imports": "dnxcore50"
+    "netstandard1.5": {
+      "imports": [ "portable-net45+win8", "dnxcore50" ]
     }
   }
 }

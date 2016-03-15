@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             foreach (var arg in args)
             {
-                escapedArgs.Add(EscapeArg(arg));
+                escapedArgs.Add(EscapeSingleArg(arg));
             }
 
             return escapedArgs;
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return escapedArgs;
         }
 
-        private static string EscapeArg(string arg)
+        public static string EscapeSingleArg(string arg)
         {
             var sb = new StringBuilder();
 
