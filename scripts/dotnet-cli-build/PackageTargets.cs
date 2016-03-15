@@ -57,16 +57,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             if (Directory.Exists(cliSdkRoot))
             {
-                string[] files = Directory.GetFiles(cliSdkRoot, "*", SearchOption.AllDirectories);
-                foreach (string file in files)
-                {
-                    File.SetAttributes(file, FileAttributes.Normal);
-                    File.Delete(file);
-                }
-
-                Directory.Delete(cliSdkRoot, true);
+                Utils.DeleteDirectory(cliSdkRoot);
             }
-
             Directory.CreateDirectory(cliSdk);
 
             var binPath = Path.Combine(Dirs.Stage2, "bin");

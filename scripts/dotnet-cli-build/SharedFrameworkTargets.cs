@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             if (Directory.Exists(SharedFrameworkPublishRoot))
             {
-                Directory.Delete(SharedFrameworkPublishRoot, true);
+                Utils.DeleteDirectory(SharedFrameworkPublishRoot);
             }
 
             // We publish to a sub folder of the PublishRoot so tools like heat and zip can generate folder structures easier.
@@ -113,11 +113,11 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult PublishSharedHost(BuildTargetContext c)
         {
             string SharedHostPublishRoot = Path.Combine(Dirs.Output, "obj", "sharedhost");
+
             if (Directory.Exists(SharedHostPublishRoot))
             {
-                Directory.Delete(SharedHostPublishRoot);
+                Utils.DeleteDirectory(SharedHostPublishRoot);
             }
-
             Directory.CreateDirectory(SharedHostPublishRoot);
 
             // corehost will be renamed to dotnet at some point and then this can be removed.
