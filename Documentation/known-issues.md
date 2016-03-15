@@ -1,23 +1,6 @@
 Known issues & workarounds
 ==========================
 
-## El Capitan support
-If you try to use the `dotnet` commands on El Capitan (OS X 10.11), you will encounter errors as it is not currently 
-fully supported for all scenarios.  
-
-**Issues tracking this:** 
-
-* [#498](https://github.com/dotnet/cli/issues/498)
-* [#291](https://github.com/dotnet/cli/issues/291)
-
-**Affects:** most of the commands, but more than likely you will not be able to 
-use `dotnet compile` and `dotnet-run` on El Capitan. For others, there is a 
-workaround.
-
-**Workaround:** use the --runtime switch with the value of `osx.10.11-x64` in 
-`dotnet restore` and `dotnet publish` and you will be able to run your app from 
-the published directory. 
-
 ## Resolving the Standard library packages
 The StdLib package is on a MyGet feed. In order to restore it, a MyGet feed needs to be added 
 to the NuGet feeds, either locally per application or in a central location. 
