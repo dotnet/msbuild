@@ -1,16 +1,16 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "keyFile": "../../tools/Key.snk"
-    },
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901",
-        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "System.Runtime.Loader": "4.0.0-rc2-23901"
-    },
-    "frameworks": {
-        "netstandard1.3": {
-            "imports": "dnxcore50"
-        }
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "System.Runtime.Loader": "4.0.0-rc2-23911"
+  },
+  "frameworks": {
+    "netstandard1.3": {
+      "imports": "dnxcore50"
     }
+  }
 }

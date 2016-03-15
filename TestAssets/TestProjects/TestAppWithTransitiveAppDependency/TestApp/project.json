@@ -1,24 +1,27 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true,
-        "preserveCompilationContext": true
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+  "dependencies": {
+    "TestLibrary": {
+      "target": "project",
+      "version": "1.0.0-*"
     },
-
-    "dependencies": {
-        "TestLibrary": { "target":"project", "version":"1.0.0-*" },
-
-        "NETStandard.Library": "1.0.0-rc2-23901"
-    },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
-    },
-
-    "scripts": {
-        "prepublish" : ["echo prepublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:Framework%? ?%publish:Runtime%?"],
-        "postpublish" : ["echo postpublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:Framework%? ?%publish:Runtime%?"]
+    "NETStandard.Library": "1.5.0-rc2-23911"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  },
+  "scripts": {
+    "prepublish": [
+      "echo prepublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:Framework%? ?%publish:Runtime%?"
+    ],
+    "postpublish": [
+      "echo postpublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:Framework%? ?%publish:Runtime%?"
+    ]
+  }
 }

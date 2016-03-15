@@ -1,14 +1,15 @@
 {
-    "version": "1.0.0-*",
-    "dependencies": {
-        "TestApp":  { "target":"project", "version":"1.0.0-*" },
-
-        "NETStandard.Library": "1.0.0-rc2-23901"
+  "version": "1.0.0-*",
+  "dependencies": {
+    "TestApp": {
+      "target": "project",
+      "version": "1.0.0-*"
     },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
+    "NETStandard.Library": "1.5.0-rc2-23911"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  }
 }

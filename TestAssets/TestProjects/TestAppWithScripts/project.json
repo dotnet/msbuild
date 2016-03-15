@@ -1,24 +1,21 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
-
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901"
-    },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
-    },
-
-    "scripts": {
-        "prepublish" : ["echoscript prepublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:TargetFramework%? ?%publish:Runtime%?"],
-        "postpublish" : ["echoscript postpublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:TargetFramework%? ?%publish:Runtime%?"],
-
-        "precompile" : ["echoscript precompile_output ?%compile:ProjectPath%? ?%compile:Configuration%? ?%compile:OutputPath%? ?%compile:TargetFramework%? ?%compile:Runtime%?"],
-        "postcompile" : ["echoscript postcompile_output ?%compile:ProjectPath%? ?%compile:Configuration%? ?%compile:OutputPath%? ?%compile:TargetFramework%? ?%compile:Runtime%?"]
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  },
+  "scripts": {
+    "prepublish": [ "echoscript prepublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:TargetFramework%? ?%publish:Runtime%?" ],
+    "postpublish": [ "echoscript postpublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:TargetFramework%? ?%publish:Runtime%?" ],
+
+    "precompile": [ "echoscript precompile_output ?%compile:ProjectPath%? ?%compile:Configuration%? ?%compile:OutputPath%? ?%compile:TargetFramework%? ?%compile:Runtime%?" ],
+    "postcompile": [ "echoscript postcompile_output ?%compile:ProjectPath%? ?%compile:Configuration%? ?%compile:OutputPath%? ?%compile:TargetFramework%? ?%compile:Runtime%?" ]
+  }
 }
