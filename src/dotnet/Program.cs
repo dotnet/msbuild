@@ -112,7 +112,6 @@ namespace Microsoft.DotNet.Cli
                 ["publish"] = PublishCommand.Run,
                 ["repl"] = ReplCommand.Run,
                 ["restore"] = RestoreCommand.Run,
-                ["resgen"] = ResgenCommand.Run,
                 ["run"] = RunCommand.Run,
                 ["test"] = TestCommand.Run
             };
