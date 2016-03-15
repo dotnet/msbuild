@@ -87,7 +87,7 @@ get_current_os_name() {
 machine_has() {
     eval $invocation
     
-    type "$1" > /dev/null 2>&1
+    which "$1" > /dev/null 2>&1
     return $?
 }
 
@@ -346,7 +346,7 @@ resolve_installation_path() {
     eval $invocation
     
     local install_dir=$1
-    if [ "$install_dir" == "<auto>" ]; then
+    if [ "$install_dir" = "<auto>" ]; then
         local user_share_path=$(get_user_share_path)
         say_verbose "resolve_installation_path: share_path=$user_share_path"
         echo "$user_share_path"
@@ -396,7 +396,7 @@ extract_and_override_zip() {
     
     local failed=false
     tar -xzf "$zip_path" -C "$out_path" > /dev/null || failed=true
-    if [ "$failed" == true ]; then
+    if [ "$failed" = true ]; then
         say_err "Extraction failed"
         return 1
     fi
@@ -418,7 +418,7 @@ download() {
         curl --fail -s -o $out_path $remote_path || failed=true
     fi
     
-    if [ "$failed" == true ]; then
+    if [ "$failed" = true ]; then
         say_err "Download failed"
         return 1
     fi
@@ -461,7 +461,7 @@ install_dotnet() {
     fi
     say_verbose "Local CLI version is: $version_text"
     
-    if [ ! -z "${local_version:-}" ] && [ "$specific_version" == "$local_version" ]; then
+    if [ ! -z "${local_version:-}" ] && [ "$specific_version" = "$local_version" ]; then
         say "Your version of .NET CLI is up-to-date."
         return 0
     fi
@@ -571,7 +571,7 @@ done
 
 check_min_reqs
 calculate_vars
-if [ "$dry_run" == true ]; then
+if [ "$dry_run" = true ]; then
     say "Payload URL: $download_link"
     say "Repeatable invocation: ./$(basename $0) --version $specific_version --channel $channel --install-dir $install_dir"
 else
@@ -580,7 +580,7 @@ else
 fi
 
 bin_path=$(get_absolute_path $(combine_paths $install_root $bin_folder_relative_path))
-if [ "$no_path" == false ]; then
+if [ "$no_path" = false ]; then
     say "Adding to current process PATH: ``$bin_path``. Note: This change will be visible only when sourcing script."
     export PATH=$PATH:$bin_path
 else
