@@ -1,16 +1,13 @@
 {
-    "version": "1.0.0-*",
-
-    "dependencies": {
-        "L12": "1.0.0-*",
-        "L21": "1.0.0-*",
-
-        "NETStandard.Library": "1.0.0-rc2-23901"
-    },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
+  "version": "1.0.0-*",
+  "dependencies": {
+    "L12": "1.0.0-*",
+    "L21": "1.0.0-*",
+    "NETStandard.Library": "1.5.0-rc2-23911"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  }
 }

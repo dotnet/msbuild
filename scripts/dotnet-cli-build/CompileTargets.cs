@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class CompileTargets
     {
-        public static readonly string CoreCLRVersion = "1.0.2-rc2-23901";
+        public static readonly string CoreCLRVersion = "1.0.2-rc2-23911";
         public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
         public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
@@ -70,15 +70,20 @@ namespace Microsoft.DotNet.Cli.Build
             var configuration = c.BuildContext.Get<string>("Configuration");
 
             // Run the build
+            string version = DotNetCli.Stage0.Exec("", "--version").CaptureStdOut().Execute().StdOut;
+            string rid = Array.Find<string>(version.Split(Environment.NewLine.ToCharArray()), (e) => e.Contains("Runtime Id:")).Replace("Runtime Id:", "").Trim();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
                 // See the comment in "src/corehost/build.sh" for details. It doesn't work for some reason.
                 var visualStudio = IsWinx86 ? "Visual Studio 14 2015" : "Visual Studio 14 2015 Win64";
                 var archMacro = IsWinx86 ? "-DCLI_CMAKE_PLATFORM_ARCH_I386=1" : "-DCLI_CMAKE_PLATFORM_ARCH_AMD64=1";
+                var ridMacro = $"-DCLI_CMAKE_RUNTIME_ID:STRING={rid}";
+
                 ExecIn(cmakeOut, "cmake",
                     Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost"),
                     archMacro,
+                    ridMacro,
                     "-G",
                     visualStudio);
 
@@ -101,14 +106,21 @@ namespace Microsoft.DotNet.Cli.Build
                 File.Copy(Path.Combine(cmakeOut, "cli", configuration, "corehost.pdb"), Path.Combine(Dirs.Corehost, "corehost.pdb"), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.dll"), Path.Combine(Dirs.Corehost, "hostpolicy.dll"), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.pdb"), Path.Combine(Dirs.Corehost, "hostpolicy.pdb"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", configuration, "hostfxr.dll"), Path.Combine(Dirs.Corehost, "hostfxr.dll"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", configuration, "hostfxr.pdb"), Path.Combine(Dirs.Corehost, "hostfxr.pdb"), overwrite: true);
             }
             else
             {
-                ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"));
+                ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"),
+                        "--arch",
+                        "amd64",
+                        "--rid",
+                        rid);
 
                 // Copy the output out
                 File.Copy(Path.Combine(cmakeOut, "cli", "corehost"), Path.Combine(Dirs.Corehost, "corehost"), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "dll", $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), overwrite: true);
             }
 
             return c.Success();
@@ -193,6 +205,7 @@ namespace Microsoft.DotNet.Cli.Build
             // Copy corehost
             File.Copy(Path.Combine(Dirs.Corehost, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), overwrite: true);
             File.Copy(Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(binDir, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
+            File.Copy(Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), Path.Combine(binDir, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), overwrite: true);
 
             // Corehostify binaries
             foreach (var binaryToCorehostify in BinariesForCoreHost)
@@ -335,7 +348,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static List<string> GetAssembliesToCrossGen()
         {
-            var list = new List<string>
+            return new List<string>
             {
                 "System.Collections.Immutable.dll",
                 "System.Reflection.Metadata.dll",
@@ -345,15 +358,6 @@ namespace Microsoft.DotNet.Cli.Build
                 "csc.dll",
                 "vbc.dll"
             };
-
-            // mscorlib is already crossgenned on Windows
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // mscorlib has to be crossgenned first
-                list.Insert(0, "mscorlib.dll");
-            }
-
-            return list;
         }
     }
 }

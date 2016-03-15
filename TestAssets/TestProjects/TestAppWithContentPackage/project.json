@@ -1,11 +1,10 @@
-﻿{
+{
   "version": "1.0.0-*",
   "compilationOptions": {
     "emitEntryPoint": true
   },
-
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23901",
+    "NETStandard.Library": "1.5.0-rc2-23911",
     "SharedContentA": "1.0.0-*"
   },
   "frameworks": {

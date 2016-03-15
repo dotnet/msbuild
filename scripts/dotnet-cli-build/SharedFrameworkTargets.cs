@@ -9,6 +9,8 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.Extensions.PlatformAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -17,6 +19,8 @@ namespace Microsoft.DotNet.Cli.Build
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
 
         private const string CoreHostBaseName = "corehost";
+        private const string DotnetHostFxrBaseName = "hostfxr";
+        private const string HostPolicyBaseName = "hostpolicy";
 
         [Target(nameof(PackageSharedFramework), nameof(CrossGenAllManagedAssemblies))]
         public static BuildTargetResult PublishSharedFramework(BuildTargetContext c)
@@ -63,16 +67,36 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, $"framework{Constants.ExeSuffix}"));
             File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.dll"));
             File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.pdb"));
+            File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.runtimeconfig.json"));
 
             // Rename the .deps file
+            var destinationDeps = Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps.json");
             File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps"));
-            File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps.json"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps.json"));
+            File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps.json"), destinationDeps);
 
-            // corehost will be renamed to dotnet at some point and then this can be removed.
-            File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, $"{CoreHostBaseName}{Constants.ExeSuffix}"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"));
+            // Merge in the RID fallback graph
+            var fallbackFileName = PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString().ToLowerInvariant() + ".json";
+            var fallbackFile = Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "rid-fallbacks", fallbackFileName);
+            if (File.Exists(fallbackFile))
+            {
+                c.Info($"Merging in RID fallback graph: {fallbackFile}");
+                var deps = JObject.Parse(File.ReadAllText(destinationDeps));
+                var ridfallback = JObject.Parse(File.ReadAllText(fallbackFile));
+                deps["runtimes"] = ridfallback["runtimes"];
+                File.WriteAllText(destinationDeps, deps.ToString(Formatting.Indented));
+            }
+            else
+            {
+                c.Warn($"RID fallback graph file not found: {fallbackFile}");
+            }
 
-            // hostpolicy will be renamed to dotnet at some point and then this can be removed.
-            File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{Constants.DynamicLibPrefix}dotnethostimpl{Constants.DynamicLibSuffix}"));
+            // corehost will be renamed to dotnet at some point and then we will not need to rename it here.
+            File.Copy(
+                Path.Combine(Dirs.Corehost, $"{CoreHostBaseName}{Constants.ExeSuffix}"),
+                Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"));
+            File.Copy(
+                Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}{HostPolicyBaseName}{Constants.DynamicLibSuffix}"),
+                Path.Combine(SharedFrameworkNameAndVersionRoot, $"{Constants.DynamicLibPrefix}{HostPolicyBaseName}{Constants.DynamicLibSuffix}"), true);
 
             if (File.Exists(Path.Combine(SharedFrameworkNameAndVersionRoot, "mscorlib.ni.dll")))
             {
@@ -80,10 +104,6 @@ namespace Microsoft.DotNet.Cli.Build
                 // remove the IL version
                 File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "mscorlib.dll"));
                 c.BuildContext["SharedFrameworkNameAndVersionRoot"] = SharedFrameworkNameAndVersionRoot;
-            }
-            else
-            {
-                c.Warn("Shared framework will not be crossgen'd because mscorlib.ni.dll does not exist.");
             }
 
             return c.Success();
@@ -93,9 +113,20 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult PublishSharedHost(BuildTargetContext c)
         {
             string SharedHostPublishRoot = Path.Combine(Dirs.Output, "obj", "sharedhost");
+            if (Directory.Exists(SharedHostPublishRoot))
+            {
+                Directory.Delete(SharedHostPublishRoot);
+            }
+
             Directory.CreateDirectory(SharedHostPublishRoot);
+
             // corehost will be renamed to dotnet at some point and then this can be removed.
-            File.Copy(Path.Combine(Dirs.Corehost, $"{CoreHostBaseName}{Constants.ExeSuffix}"), Path.Combine(SharedHostPublishRoot, $"dotnet{Constants.ExeSuffix}"));
+            File.Copy(
+                Path.Combine(Dirs.Corehost, $"{CoreHostBaseName}{Constants.ExeSuffix}"),
+                Path.Combine(SharedHostPublishRoot, $"dotnet{Constants.ExeSuffix}"));
+            File.Copy(
+                Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}{DotnetHostFxrBaseName}{Constants.DynamicLibSuffix}"),
+                Path.Combine(SharedHostPublishRoot, $"{Constants.DynamicLibPrefix}{DotnetHostFxrBaseName}{Constants.DynamicLibSuffix}"));
 
             c.BuildContext["SharedHostPublishRoot"] = SharedHostPublishRoot;
 

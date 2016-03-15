@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.Extensions.DependencyModel.Tests
@@ -73,6 +74,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                     throw new FileNotFoundException(path);
                 }
                 return text;
+            }
+
+            public Stream OpenRead(string path)
+            {
+                return new MemoryStream(Encoding.UTF8.GetBytes(ReadAllText(path)));
             }
         }
 

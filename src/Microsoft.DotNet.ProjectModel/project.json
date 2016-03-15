@@ -1,47 +1,47 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "keyFile": "../../tools/Key.snk"
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
+  "description": "Types to model a .NET Project",
+  "dependencies": {
+    "System.Reflection.Metadata": "1.2.0-rc2-23911",
+    "NuGet.Packaging": "3.4.0-rtm-0763",
+    "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15996",
+    "Microsoft.Extensions.JsonParser.Sources": {
+      "type": "build",
+      "version": "1.0.0-rc2-16453"
     },
-    "description": "Types to model a .NET Project",
-    "dependencies": {
-        "System.Reflection.Metadata": "1.2.0-rc2-23901",
-        "NuGet.Packaging": "3.4.0-rtm-0733",
-        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15996",
-        "Microsoft.Extensions.JsonParser.Sources": {
-            "type": "build",
-            "version": "1.0.0-rc2-16453"
-        },
-        "Microsoft.Extensions.HashCodeCombiner.Sources": {
-            "type": "build",
-            "version": "1.0.0-rc2-16054"
-        },
-        "Microsoft.Extensions.DependencyModel": "1.0.0-*"
+    "Microsoft.Extensions.HashCodeCombiner.Sources": {
+      "type": "build",
+      "version": "1.0.0-rc2-16054"
     },
-    "frameworks": {
-        "net451": {
-            "frameworkAssemblies": {
-                "System.Runtime": {
-                    "type": "build"
-                },
-                "System.Collections": {
-                    "type": "build"
-                },
-                "System.IO": {
-                    "type": "build"
-                }
-            }
+    "Microsoft.Extensions.DependencyModel": "1.0.0-*"
+  },
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": {
+          "type": "build"
         },
-        "netstandard1.3": {
-            "imports": "dnxcore50",
-            "dependencies": {
-                "NETStandard.Library": "1.0.0-rc2-23901",
-                "System.Dynamic.Runtime": "4.0.11-rc2-23901",
-                "System.Runtime.Loader": "4.0.0-rc2-23901",
-                "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23901",
-                "Microsoft.CSharp": "4.0.1-rc2-23901",
-                "System.Xml.XDocument": "4.0.11-rc2-23901"
-            }
+        "System.Collections": {
+          "type": "build"
+        },
+        "System.IO": {
+          "type": "build"
         }
+      }
+    },
+    "netstandard1.3": {
+      "imports": "dnxcore50",
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-rc2-23911",
+        "System.Dynamic.Runtime": "4.0.11-rc2-23911",
+        "System.Runtime.Loader": "4.0.0-rc2-23911",
+        "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23911",
+        "Microsoft.CSharp": "4.0.1-rc2-23911",
+        "System.Xml.XDocument": "4.0.11-rc2-23911"
+      }
     }
+  }
 }

@@ -1,39 +1,37 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
     },
-
-    "dependencies": {
-        "NETStandard.Library" : "1.0.0-rc2-23901",
-        "System.IO.Compression": "4.1.0-rc2-23901",
-
-        "Microsoft.DotNet.ProjectModel": { "target": "project" },
-        "Microsoft.DotNet.Cli.Utils": { "target": "project" },
-
-        "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
-        
-        "moq.netcore": "4.4.0-beta8",
-        "xunit": "2.1.0",
-        "dotnet-test-xunit": "1.0.0-dev-79755-47"
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
     },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": [
-                "dnxcore50",
-                "portable-net45+win8"
-            ]
-        }
+    "Microsoft.DotNet.Tools.Tests.Utilities": {
+      "target": "project"
     },
-
-    "content": [
-        "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",
-        "../../TestAssets/TestProjects/TestAppWithArgs/*",
-        "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
-        "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
-        "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
-    ],
-
-    "testRunner": "xunit"
+    "moq.netcore": "4.4.0-beta8",
+    "xunit": "2.1.0",
+    "dotnet-test-xunit": "1.0.0-dev-79755-47"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  },
+  "content": [
+    "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",
+    "../../TestAssets/TestProjects/TestAppWithArgs/*",
+    "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
+    "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
+    "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
+  ],
+  "testRunner": "xunit"
 }

@@ -1,12 +1,12 @@
 {
-  "dependencies": { },
+  "dependencies": {},
   "frameworks": {
     "netstandardapp1.5": {
       "imports": "dnxcore50",
       "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901"
+        "NETStandard.Library": "1.5.0-rc2-23911"
       }
     },
-    "dnx451": { }
+    "dnx451": {}
   }
 }

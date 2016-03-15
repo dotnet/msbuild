@@ -29,7 +29,8 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
         "gcConcurrent": false,
         "framework": {
             "name": "Microsoft.DotNetCore",
-            "version": "1.0.1"
+            "version": "1.0.1",
+            "rollForward": false,
         }
     }
 }
@@ -118,7 +119,11 @@ This section is copied verbatim from an identical section in the input `project.
 
 * `gcServer` - Boolean indicating if the server GC should be used (Default: _TBD_). Note: This is designed to mirror the existing [app.config](https://msdn.microsoft.com/en-us/library/ms229357.aspx) setting)
 * `gcConcurrent` - Boolean indicating if background garbage collection should be used (Default: _TBD_). Note: This is designed to mirror the existing [app.config](https://msdn.microsoft.com/en-us/library/yhwwzef8.aspx) setting).
-* `framework` - Indicates the name and version of the shared framework to use when activating the application. The presence of this section indicates that the application is a portable app designed to use a shared redistributable framework.
+* `framework` - Indicates the `name`, `version`, and other properties of the shared framework to use when activating the application. The presence of this section indicates that the application is a portable app designed to use a shared redistributable framework.
+  * `rollForward` - When `false`, the framework version is strictly obeyed by the host. When `rollForward` is unspecified or specified as `true`, the framework from either the same or a higher version that differs only in the `SemVer` patch field will be used.
+    * For example, if `version=1.0.1` and `rollForward` is `true`, the host would load the shared framework from `1.0.{n}`, where `n >= 1`, but will not load from `1.1.0`, even if present. When `rollForward` is `false`, the shared framework will be loaded from `1.0.1` strictly.
+    * **Note:** This does not apply to `SemVer`'s `prerelease` versions, but only for `production` releases.
+    * **Note:** This section will not be present for standalone applications that do not rely upon a shared framework.
 * Others _TBD_
 
 These settings are read by `corehost` to determine how to initialize the runtime. All versions of `corehost` **must ignore** settings in this section that they do not understand (thus allowing new settings to be added in later versions).

@@ -46,6 +46,9 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PublishTargets.PublishVersionBadge),
         nameof(PublishTargets.PublishCompressedFile),
         nameof(PublishTargets.PublishSdkInstallerFile),
+        nameof(PublishTargets.PublishDebFileToDebianRepo),
+        nameof(PublishTargets.PublishSharedFrameworkCompressedFile),
+        nameof(PublishTargets.PublishSharedHostCompressedFile),
         nameof(PublishTargets.PublishLatestVersionTextFile))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c)
         {
@@ -138,6 +141,32 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return uploadJson;
+        }
+
+        [Target]
+        public static BuildTargetResult PublishSharedFrameworkCompressedFile(BuildTargetContext c)
+        {
+            var compressedFile = c.BuildContext.Get<string>("SharedFrameworkCompressedFile");
+            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
+            var latestCompressedFile = compressedFile.Replace(Version, "latest");
+            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
+
+            PublishFileAzure(compressedFileBlob, compressedFile);
+            PublishFileAzure(latestCompressedFileBlob, compressedFile);
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishSharedHostCompressedFile(BuildTargetContext c)
+        {
+            var compressedFile = c.BuildContext.Get<string>("SharedHostCompressedFile");
+            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
+            var latestCompressedFile = compressedFile.Replace(Version, "latest");
+            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
+
+            PublishFileAzure(compressedFileBlob, compressedFile);
+            PublishFileAzure(latestCompressedFileBlob, compressedFile);
+            return c.Success();
         }
 
         private static BuildTargetResult PublishFile(BuildTargetContext c, string file)

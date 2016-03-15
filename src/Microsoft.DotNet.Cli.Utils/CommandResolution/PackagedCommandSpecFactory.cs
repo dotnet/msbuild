@@ -98,7 +98,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (depsFilePath != null)
             {
-                arguments.Add($"--depsfile:{depsFilePath}");
+                arguments.Add("--depsfile");
+                arguments.Add(depsFilePath);
             }
 
             arguments.AddRange(commandArguments);

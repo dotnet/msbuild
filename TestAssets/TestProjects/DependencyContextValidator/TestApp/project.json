@@ -1,18 +1,16 @@
-﻿{
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true,
-        "preserveCompilationContext": true
-    },
-
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901",
-        "DependencyContextValidator": "1.0.0-*"
-    },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "DependencyContextValidator": "1.0.0-*"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  }
 }
