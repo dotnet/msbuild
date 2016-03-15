@@ -25,6 +25,7 @@
     <BuildToolsVersion>1.0.25-prerelease-00199</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
     <XunitVersion>2.1.0-rc1-build3168</XunitVersion>
+    <MicroBuildVersion>0.2.0</MicroBuildVersion>
 
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <SourceDir>$(ProjectDir)src\</SourceDir>
@@ -39,6 +40,7 @@
     <BuildToolsTaskDir>$(ToolsDir)net45\</BuildToolsTaskDir>
     <CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>
     <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
+    <MicroBuildDir>$(PackagesDir)\MicroBuild.Core.$(MicroBuildVersion)\build\</MicroBuildDir>
   </PropertyGroup>
 
   <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
