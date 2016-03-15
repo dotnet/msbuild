@@ -5,6 +5,8 @@
   <!-- OSS sign assemblies after compile runs. -->
   <Import Project="$(ToolsDir)\sign.targets" />
 
+  <Import Project="$(MicroBuildDir)\MicroBuild.Core.targets" />
+
   <!-- Restore packages -->
   <PropertyGroup>
     <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$(MSBuildProjectDirectory)\packages.config</PackagesConfig>
