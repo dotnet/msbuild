@@ -46,6 +46,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PublishTargets.PublishVersionBadge),
         nameof(PublishTargets.PublishCompressedFile),
         nameof(PublishTargets.PublishSdkInstallerFile),
+        nameof(PublishTargets.PublishDebFileToDebianRepo),
         nameof(PublishTargets.PublishSharedFrameworkCompressedFile),
         nameof(PublishTargets.PublishSharedHostCompressedFile),
         nameof(PublishTargets.PublishLatestVersionTextFile))]
