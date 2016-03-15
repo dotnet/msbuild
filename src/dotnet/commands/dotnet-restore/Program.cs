@@ -162,14 +162,21 @@ namespace Microsoft.DotNet.Tools.Restore
                 Path.GetDirectoryName(toolDescription.RuntimeAssemblies.First().Path),
                 toolDescription.Identity.Name + FileNameSuffixes.Deps);
 
+            var depsJsonPath = Path.Combine(
+                toolDescription.Path,
+                Path.GetDirectoryName(toolDescription.RuntimeAssemblies.First().Path),
+                toolDescription.Identity.Name + FileNameSuffixes.DepsJson);
+
             var calculator = context.GetOutputPaths(Constants.DefaultConfiguration, buidBasePath: null, outputPath: context.ProjectDirectory);
             var executable = new Executable(context, calculator, context.CreateExporter(Constants.DefaultConfiguration), null);
 
             executable.MakeCompilationOutputRunnable();
 
             if (File.Exists(depsPath)) File.Delete(depsPath);
+            if (File.Exists(depsJsonPath)) File.Delete(depsJsonPath);
 
             File.Move(Path.Combine(calculator.RuntimeOutputPath, "bin" + FileNameSuffixes.Deps), depsPath);
+            File.Move(Path.Combine(calculator.RuntimeOutputPath, "bin" + FileNameSuffixes.DepsJson), depsJsonPath);
         }
 
         private static bool RestoreToolToPath(LibraryRange tooldep, IEnumerable<string> args, string tempPath, bool quiet)
