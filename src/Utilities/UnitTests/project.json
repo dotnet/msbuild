@@ -4,7 +4,6 @@
     "xunit.runner.visualstudio": "2.1.0"
   },
   "frameworks": {
-    "net451": {},
     "net46": {}
   },
   "runtimes": {
