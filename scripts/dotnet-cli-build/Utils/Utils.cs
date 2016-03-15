@@ -85,5 +85,20 @@ namespace Microsoft.DotNet.Cli.Build
             b[x] = b[y];
             b[y] = t;
         }
+
+        public static void DeleteDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    File.SetAttributes(file, FileAttributes.Normal);
+                    File.Delete(file);
+                }
+
+                Directory.Delete(path, true);
+            }
+        }
     }
 }

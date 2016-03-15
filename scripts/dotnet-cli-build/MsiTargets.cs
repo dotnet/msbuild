@@ -112,9 +112,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             if (Directory.Exists(wixObjRoot))
             {
-                Directory.Delete(wixObjRoot, true);
+                Utils.DeleteDirectory(wixObjRoot);
             }
-
             Directory.CreateDirectory(wixObjRoot);
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
@@ -137,9 +136,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             if (Directory.Exists(wixObjRoot))
             {
-                Directory.Delete(wixObjRoot, true);
+                Utils.DeleteDirectory(wixObjRoot);
             }
-
             Directory.CreateDirectory(wixObjRoot);
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
