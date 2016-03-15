@@ -212,6 +212,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool _disposed = false;
 
+#if DEBUG
+        public static bool WaitForDebugger { get; set; }
+#endif
+
         /// <summary>
         /// Creates a new unnamed build manager.
         /// Normally there is only one build manager in a process, and it is the default build manager.

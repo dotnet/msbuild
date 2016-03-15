@@ -1799,6 +1799,22 @@ namespace Microsoft.Build.CommandLine
             commandLineSwitches.Append(switchesFromAutoResponseFile);    // lowest precedence
             commandLineSwitches.Append(switchesNotFromAutoResponseFile);
 
+#if DEBUG
+            if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.WaitForDebugger])
+            {
+                BuildManager.WaitForDebugger = true;
+
+                if (!Debugger.IsAttached)
+                {
+                    Console.WriteLine("Waiting for debugger to attach... (PID {0})", Process.GetCurrentProcess().Id);
+                    while (!Debugger.IsAttached)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
+            }
+#endif
+
             // show copyright message if nologo switch is not set
             // NOTE: we heed the nologo switch even if there are switch errors
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] && !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))

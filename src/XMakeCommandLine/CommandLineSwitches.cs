@@ -50,6 +50,9 @@ namespace Microsoft.Build.CommandLine
             DistributedFileLogger,
             Debugger,
             DetailedSummary,
+#if DEBUG
+            WaitForDebugger,
+#endif
             NumberOfParameterlessSwitches
         }
 
@@ -224,7 +227,10 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null, null    ),
 
             new ParameterlessSwitchInfo(  new string[] { "debug", "d" },         ParameterlessSwitch.Debugger,                         null, "DebuggerEnabled"),
-            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null   )
+            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null   ),
+#if DEBUG
+            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null , null   ),
+#endif
         };
 
         // map switches that take parameters to their identifiers (taken from ParameterizedSwitch enum)

@@ -157,6 +157,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The pipe stream representing the node.</returns>
         protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
         {
+#if DEBUG
+            if (Execution.BuildManager.WaitForDebugger)
+            {
+                commandLineArgs += " /wfd";
+            }
+#endif
+
             if (String.IsNullOrEmpty(msbuildLocation))
             {
                 msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
