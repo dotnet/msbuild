@@ -38,6 +38,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 "--build-base-path", BuildBasePath,
                 "--configuration", Config,
                 "--runtime", Runtime,
+                "--no-build",
                 "--additional-parameters", "additional-parameter-value"
             });
 
@@ -178,6 +179,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             _dotnetTestFullParams.RemainingArguments.ShouldBeEquivalentTo(
                 new [] { "--additional-parameters", "additional-parameter-value" });
+        }
+
+        [Fact]
+        public void It_sets_no_build_to_true_when_it_is_passed()
+        {
+            _dotnetTestFullParams.NoBuild.Should().BeTrue();
+        }
+
+        [Fact]
+        public void It_sets_no_build_to_false_when_it_is_not_passed_in()
+        {
+            _emptyDotnetTestParams.NoBuild.Should().BeFalse();
         }
     }
 }

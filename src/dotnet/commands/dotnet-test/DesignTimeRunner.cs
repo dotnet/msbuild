@@ -7,9 +7,9 @@ using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class DesignTimeRunner : IDotnetTestRunner
+    public class DesignTimeRunner : BaseDotnetTestRunner
     {
-        public int RunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        internal override int DoRunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
         {
             Console.WriteLine("Listening on port {0}", dotnetTestParams.Port.Value);
 
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Test
 
                     dotnetTest.StartListeningTo(adapterChannel);
 
-                    adapterChannel.Accept();
+                    adapterChannel.Connect();
 
                     dotnetTest.StartHandlingMessages();
                 }

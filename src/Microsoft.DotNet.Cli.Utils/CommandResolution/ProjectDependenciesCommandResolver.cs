@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             var depsFilePath =
-                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.Deps;
+                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.DepsJson;
 
             var dependencyLibraries = GetAllDependencyLibraries(projectContext);
 

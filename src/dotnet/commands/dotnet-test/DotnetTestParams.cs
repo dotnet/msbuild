@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Tools.Test
         private CommandOption _portOption;
         private CommandOption _parentProcessIdOption;
         private CommandArgument _projectPath;
+        private CommandOption _noBuildOption;
 
         public int? Port { get; set; }
 
@@ -43,6 +44,8 @@ namespace Microsoft.DotNet.Tools.Test
         public NuGetFramework Framework { get; set; }
 
         public List<string> RemainingArguments { get; set; }
+
+        public bool NoBuild { get; set; }
 
         public DotnetTestParams()
         {
@@ -101,6 +104,7 @@ namespace Microsoft.DotNet.Tools.Test
                 BuildBasePath = _buildBasePath.Value();
                 Config = _configurationOption.Value() ?? Constants.DefaultConfiguration;
                 Runtime = _runtimeOption.Value();
+                NoBuild = _noBuildOption.HasValue();
 
                 RemainingArguments = _app.RemainingArguments;
 
@@ -142,9 +146,11 @@ namespace Microsoft.DotNet.Tools.Test
                 "-r|--runtime <RUNTIME_IDENTIFIER>",
                 "Look for test binaries for a for the specified runtime",
                 CommandOptionType.SingleValue);
+            _noBuildOption =
+                _app.Option("--no-build", "Do not build project before testing", CommandOptionType.NoValue);
             _projectPath = _app.Argument(
                 "<PROJECT>",
-                "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");
+                "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");            
         }
     }
 }

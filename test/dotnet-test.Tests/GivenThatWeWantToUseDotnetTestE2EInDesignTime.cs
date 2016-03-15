@@ -41,7 +41,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 adapter.Listen();
 
                 var testCommand = new DotnetTestCommand();
-                var result = testCommand.Execute($"{_projectFilePath} -o {_outputPath} --port {adapter.Port}");
+                var result = testCommand.Execute($"{_projectFilePath} -o {_outputPath} --port {adapter.Port} --no-build");
                 result.Should().Pass();
 
                 adapter.Messages["TestSession.Connected"].Count.Should().Be(1);
@@ -58,7 +58,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 adapter.Listen();
 
                 var testCommand = new DotnetTestCommand();
-                var result = testCommand.Execute($"{_projectFilePath} -o {_outputPath} --port {adapter.Port}");
+                var result = testCommand.Execute($"{_projectFilePath} -o {_outputPath} --port {adapter.Port} --no-build");
                 result.Should().Pass();
 
                 adapter.Messages["TestSession.Connected"].Count.Should().Be(1);

@@ -7,9 +7,9 @@ using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ConsoleTestRunner : IDotnetTestRunner
+    public class ConsoleTestRunner : BaseDotnetTestRunner
     {
-        public int RunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        internal override int DoRunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
         {
             var commandFactory =
                 new ProjectDependenciesCommandFactory(

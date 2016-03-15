@@ -21,15 +21,17 @@ namespace Microsoft.DotNet.Tools.Test
         {
             get
             {
-                var assemblyUnderTest = _projectContext.GetOutputPaths(
+                var outputPaths = _projectContext.GetOutputPaths(
                     _dotentTestParams.Config,
-                    outputPath: _dotentTestParams.Output).CompilationFiles.Assembly;
+                    _dotentTestParams.BuildBasePath,
+                    _dotentTestParams.Output);
 
-                if (!string.IsNullOrEmpty(_dotentTestParams.Output))
+                var assemblyUnderTest = outputPaths.CompilationFiles.Assembly;
+
+                if (!string.IsNullOrEmpty(_dotentTestParams.Output) ||
+                    !string.IsNullOrEmpty(_dotentTestParams.BuildBasePath))
                 {
-                    assemblyUnderTest = _projectContext.GetOutputPaths(
-                        _dotentTestParams.Config,
-                        outputPath: _dotentTestParams.Output).RuntimeFiles.Assembly;
+                    assemblyUnderTest = outputPaths.RuntimeFiles.Assembly;
                 }
 
                 return assemblyUnderTest;
