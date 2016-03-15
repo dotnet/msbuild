@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init),
         nameof(PackageTargets.InitPackage),
         nameof(PackageTargets.GenerateVersionBadge),
+        nameof(PackageTargets.CopyCLISDKLayout),
         nameof(SharedFrameworkTargets.PublishSharedHost),
         nameof(SharedFrameworkTargets.PublishSharedFramework),
         nameof(PackageTargets.GenerateCompressedFile),
@@ -44,6 +45,30 @@ namespace Microsoft.DotNet.Cli.Build
             versionSvgContent = versionSvgContent.Replace("ver_number", buildVersion.SimpleVersion);
             File.WriteAllText(outputVersionSvg, versionSvgContent);
 
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult CopyCLISDKLayout(BuildTargetContext c)
+        {
+            var nugetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
+            var cliSdkRoot = Path.Combine(Dirs.Output, "obj", "clisdk");
+            var cliSdk = Path.Combine(cliSdkRoot, "sdk", nugetVersion);
+
+            if (Directory.Exists(cliSdkRoot))
+            {
+                Directory.Delete(cliSdkRoot, true);
+            }
+
+            Directory.CreateDirectory(cliSdk);
+
+            foreach (var file in Directory.GetFiles(Dirs.Stage2, "*", SearchOption.AllDirectories))
+            {
+                string destFile = Path.Combine(cliSdk, Path.GetFileName(file));
+                File.Copy(file, destFile, true);
+            }
+
+            c.BuildContext["CLISDKRoot"] = cliSdkRoot;
             return c.Success();
         }
 

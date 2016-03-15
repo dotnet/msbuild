@@ -23,8 +23,6 @@
           <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
           <RegistryValue Action="write" Name="BuildType" Type="string" Value="$(var.BuildType)" />
         </RegistryKey>
-
-        <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]bin" Part="last" Action="set" System="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
