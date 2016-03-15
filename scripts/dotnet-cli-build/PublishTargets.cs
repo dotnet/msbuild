@@ -142,6 +142,7 @@ namespace Microsoft.DotNet.Cli.Build
             return uploadJson;
         }
 
+        [Target]
         public static BuildTargetResult PublishSharedFrameworkCompressedFile(BuildTargetContext c)
         {
             var compressedFile = c.BuildContext.Get<string>("SharedFrameworkCompressedFile");
@@ -154,6 +155,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        [Target]
         public static BuildTargetResult PublishSharedHostCompressedFile(BuildTargetContext c)
         {
             var compressedFile = c.BuildContext.Get<string>("SharedHostCompressedFile");
