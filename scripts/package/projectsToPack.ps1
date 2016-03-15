@@ -3,10 +3,13 @@
 
 $ProjectsToPack = @(
     "Microsoft.DotNet.Cli.Utils",
+    "Microsoft.DotNet.Compiler.Common",
+    "Microsoft.DotNet.Files",
+    "Microsoft.DotNet.InternalAbstractions",
     "Microsoft.DotNet.ProjectModel",
     "Microsoft.DotNet.ProjectModel.Loader",
     "Microsoft.DotNet.ProjectModel.Workspaces",
-    "Microsoft.DotNet.InternalAbstractions",
+    "Microsoft.DotNet.TestFramework",
     "Microsoft.Extensions.DependencyModel",
     "Microsoft.Extensions.Testing.Abstractions"
 )
