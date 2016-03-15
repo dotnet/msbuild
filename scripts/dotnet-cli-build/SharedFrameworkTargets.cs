@@ -74,20 +74,37 @@ namespace Microsoft.DotNet.Cli.Build
             File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps"));
             File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps.json"), destinationDeps);
 
-            // Merge in the RID fallback graph
-            var fallbackFileName = PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString().ToLowerInvariant() + ".json";
-            var fallbackFile = Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "rid-fallbacks", fallbackFileName);
-            if (File.Exists(fallbackFile))
+            // Generate RID fallback graph
+            string runtimeGraphGeneratorRuntime = null;
+            switch (PlatformServices.Default.Runtime.OperatingSystemPlatform)
             {
-                c.Info($"Merging in RID fallback graph: {fallbackFile}");
-                var deps = JObject.Parse(File.ReadAllText(destinationDeps));
-                var ridfallback = JObject.Parse(File.ReadAllText(fallbackFile));
-                deps["runtimes"] = ridfallback["runtimes"];
-                File.WriteAllText(destinationDeps, deps.ToString(Formatting.Indented));
+                case Platform.Windows:
+                    runtimeGraphGeneratorRuntime = "win";
+                    break;
+                case Platform.Linux:
+                    runtimeGraphGeneratorRuntime = "linux";
+                    break;
+                case Platform.Darwin:
+                    runtimeGraphGeneratorRuntime = "osx";
+                    break;
+            }
+            if (!string.IsNullOrEmpty(runtimeGraphGeneratorRuntime))
+            {
+                var runtimeGraphGeneratorName = "RuntimeGraphGenerator";
+                var runtimeGraphGeneratorProject = Path.Combine(c.BuildContext.BuildDirectory, "tools", runtimeGraphGeneratorName);
+                var runtimeGraphGeneratorOutput = Path.Combine(Dirs.Output, "tools", runtimeGraphGeneratorName);
+
+                DotNetCli.Stage2.Publish(
+                    "--output", runtimeGraphGeneratorOutput,
+                    runtimeGraphGeneratorProject).Execute().EnsureSuccessful();
+                var runtimeGraphGeneratorExe = Path.Combine(runtimeGraphGeneratorOutput, $"{runtimeGraphGeneratorName}{Constants.ExeSuffix}");
+
+                Cmd(runtimeGraphGeneratorExe, "--project", SharedFrameworkSourceRoot, "--deps", destinationDeps, runtimeGraphGeneratorRuntime)
+                    .Execute();
             }
             else
             {
-                c.Warn($"RID fallback graph file not found: {fallbackFile}");
+                c.Error($"Could not determine rid graph generation runtime for platform {PlatformServices.Default.Runtime.OperatingSystemPlatform}");
             }
 
             // corehost will be renamed to dotnet at some point and then we will not need to rename it here.
