@@ -2,7 +2,9 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [Parameter(Mandatory=$true)][string]$DotnetMSIFile,
+    [Parameter(Mandatory=$true)][string]$CLISDKMSIFile,
+    [Parameter(Mandatory=$true)][string]$SharedFxMSIFile,
+    [Parameter(Mandatory=$true)][string]$SharedHostMSIFile,
     [Parameter(Mandatory=$true)][string]$DotnetBundleOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
     [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
@@ -28,7 +30,9 @@ function RunCandleForBundle
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
         -dReleaseSuffix="$ReleaseSuffix" `
-        -dMsiSourcePath="$DotnetMSIFile" `
+        -dCLISDKMsiSourcePath="$CLISDKMSIFile" `
+        -dSharedFXMsiSourcePath="$SharedFxMSIFile" `
+        -dSharedHostMsiSourcePath="$SharedHostMSIFile" `
         -arch "$Architecture" `
         -ext WixBalExtension.dll `
         -ext WixUtilExtension.dll `
@@ -73,9 +77,9 @@ function RunLightForBundle
 }
 
 
-if(!(Test-Path $DotnetMSIFile))
+if(!(Test-Path $CLISDKMSIFile))
 {
-    throw "$DotnetMSIFile not found"
+    throw "$CLISDKMSIFile not found"
 }
 
 Write-Host "Creating dotnet Bundle at $DotnetBundleOutput"
@@ -103,6 +107,6 @@ if(!(Test-Path $DotnetBundleOutput))
 
 Write-Host -ForegroundColor Green "Successfully created dotnet bundle - $DotnetBundleOutput"
 
-_ $RepoRoot\test\Installer\testmsi.ps1 @("$DotnetMSIFile")
+_ $RepoRoot\test\Installer\testmsi.ps1 @("$CLISDKMSIFile")
 
 exit $LastExitCode
