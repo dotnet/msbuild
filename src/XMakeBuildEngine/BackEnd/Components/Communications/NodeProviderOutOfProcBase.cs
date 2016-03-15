@@ -502,7 +502,7 @@ namespace Microsoft.Build.BackEnd
                 throw new NodeFailedToLaunchException(ex);
             }
             
-            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", processInfo.dwProcessId);
+            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
             return process.Id;
 #else
             string exeName = msbuildLocation;
