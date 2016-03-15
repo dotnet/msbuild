@@ -9,6 +9,8 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.Extensions.PlatformAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -65,10 +67,28 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, $"framework{Constants.ExeSuffix}"));
             File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.dll"));
             File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.pdb"));
+            File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.runtimeconfig.json"));
 
             // Rename the .deps file
+            var destinationDeps = Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps.json");
             File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps"));
-            File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps.json"), Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps.json"));
+            File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps.json"), destinationDeps);
+
+            // Merge in the RID fallback graph
+            var fallbackFileName = PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString().ToLowerInvariant() + ".json";
+            var fallbackFile = Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "rid-fallbacks", fallbackFileName);
+            if (File.Exists(fallbackFile))
+            {
+                c.Info($"Merging in RID fallback graph: {fallbackFile}");
+                var deps = JObject.Parse(File.ReadAllText(destinationDeps));
+                var ridfallback = JObject.Parse(File.ReadAllText(fallbackFile));
+                deps["runtimes"] = ridfallback["runtimes"];
+                File.WriteAllText(destinationDeps, deps.ToString(Formatting.Indented));
+            }
+            else
+            {
+                c.Warn($"RID fallback graph file not found: {fallbackFile}");
+            }
 
             // corehost will be renamed to dotnet at some point and then we will not need to rename it here.
             File.Copy(
