@@ -261,9 +261,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public string GetOutputExecutableName()
         {
-            var result = _project.Name;
-            result += RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
-            return result;
+            return _project.Name + GetExecutableExtension();
+        }
+
+        public string GetExecutableExtension()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
         }
 
         private string BuildArgs()

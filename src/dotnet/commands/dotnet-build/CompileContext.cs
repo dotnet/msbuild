@@ -438,7 +438,6 @@ namespace Microsoft.DotNet.Tools.Build
 
             CopyCompilationOutput(outputPaths);
 
-            var options = runtimeContext.ProjectFile.GetCompilerOptions(runtimeContext.TargetFramework, _args.ConfigValue);
             var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);
             executable.MakeCompilationOutputRunnable();
 

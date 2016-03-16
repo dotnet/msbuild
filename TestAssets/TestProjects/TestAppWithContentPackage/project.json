@@ -1,7 +1,8 @@
 {
   "version": "1.0.0-*",
   "compilationOptions": {
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "outputName": "AppWithContentPackage"
   },
   "dependencies": {
     "NETStandard.Library": "1.5.0-rc2-23911",

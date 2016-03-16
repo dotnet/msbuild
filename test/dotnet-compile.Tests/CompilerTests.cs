@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var result = buildCommand.ExecuteWithCapturedOutput();
             result.Should().Pass();
 
-            result = Command.Create(Path.Combine(outputDir, buildCommand.GetOutputExecutableName()), new string [0])
+            result = Command.Create(Path.Combine(outputDir, "AppWithContentPackage" + buildCommand.GetExecutableExtension()), new string [0])
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute();
@@ -137,13 +137,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             new DirectoryInfo(outputDir).Should()
                 .HaveFile("config.xml");
             // verify embedded resources
-            result.StdOut.Should().Contain("TestAppWithContentPackage.dnf.png");
-            result.StdOut.Should().Contain("TestAppWithContentPackage.ui.png");
+            result.StdOut.Should().Contain("AppWithContentPackage.dnf.png");
+            result.StdOut.Should().Contain("AppWithContentPackage.ui.png");
             // verify 'all' language files not included
-            result.StdOut.Should().NotContain("TestAppWithContentPackage.dnf_all.png");
-            result.StdOut.Should().NotContain("TestAppWithContentPackage.ui_all.png");
+            result.StdOut.Should().NotContain("AppWithContentPackage.dnf_all.png");
+            result.StdOut.Should().NotContain("AppWithContentPackage.ui_all.png");
             // verify classes
-            result.StdOut.Should().Contain("TestAppWithContentPackage.Foo");
+            result.StdOut.Should().Contain("AppWithContentPackage.Foo");
             result.StdOut.Should().Contain("MyNamespace.Util");
         }
 
@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         }
 
         [Fact]
-        public void CanSetOutputAssemblyName()
+        public void CanSetOutputAssemblyNameForLibraries()
         {
             var testInstance =
                 TestAssetsManager
@@ -183,6 +183,26 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             result.Should().Pass();
 
             new DirectoryInfo(outputDir).Should().HaveFiles(new [] { "MyLibrary.dll" });
+        }
+
+        [Fact]
+        public void CanSetOutputAssemblyNameForApps()
+        {
+            var testInstance =
+                TestAssetsManager
+                    .CreateTestInstance("AppWithOutputAssemblyName")
+                    .WithLockFiles();
+
+            var root = testInstance.TestRoot;
+            var outputDir = Path.Combine(root, "bin");
+            var testProject = ProjectUtils.GetProjectJson(root, "AppWithOutputAssemblyName");
+            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var result = buildCommand.ExecuteWithCapturedOutput();
+            result.Should().Pass();
+
+            new DirectoryInfo(outputDir).Should().HaveFiles(
+                new [] { "MyApp.dll", "MyApp" + buildCommand.GetExecutableExtension(),
+                    "MyApp.runtimeconfig.json", "MyApp.deps", "MyApp.deps.json" });
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
