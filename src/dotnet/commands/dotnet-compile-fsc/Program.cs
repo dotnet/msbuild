@@ -90,7 +90,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateFSharp(assemblyInfoOptions));
             allArgs.Add($"{assemblyInfo}");
 
-            bool targetNetCore = commonOptions.Defines.Contains("DNXCORE50");
+            bool targetNetCore = 
+                commonOptions.Defines.Contains("DNXCORE50") ||
+                commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARDAPP1_")).Any() ||
+                commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARD1_")).Any();
 
             //HACK fsc raise error FS0208 if target exe doesnt have extension .exe
             bool hackFS0208 = targetNetCore && commonOptions.EmitEntryPoint == true;
