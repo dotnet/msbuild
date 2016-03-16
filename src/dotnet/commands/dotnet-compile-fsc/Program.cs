@@ -220,15 +220,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-fsc.rsp");
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 
-            //with env var DOTNET_COMPILEFSC_USE_RESPONSE_FILE, use the response file instead of
-            //call fsc with all arguments
-            if (Environment.GetEnvironmentVariable("DOTNET_COMPILEFSC_USE_RESPONSE_FILE") == "1")
-            {
-                allArgs = new List<string> { $"@{rsp}" };
-            }
-
             // Execute FSC!
-            var result = RunFsc(allArgs)
+            var result = RunFsc(new List<string> { $"@{rsp}" })
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
