@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Net.Http;
+using System.Text;
 using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
@@ -36,7 +33,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(nameof(PrepareTargets.Init),
         nameof(PublishTargets.InitPublish),
-        nameof(PublishTargets.PublishArtifacts))]
+        nameof(PublishTargets.PublishArtifacts),
+        nameof(PublishTargets.TriggerDockerHubBuilds))]
         [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
         public static BuildTargetResult Publish(BuildTargetContext c)
         {
@@ -113,13 +111,52 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var packageName = Monikers.GetDebianPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
-            var uploadUrl =  $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
+            var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
             var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
                     .Execute()
                     .EnsureSuccessful();
 
+            return c.Success();
+        }
+
+        [Target]
+        [Environment("DOCKER_HUB_REPO")]
+        [Environment("DOCKER_HUB_TRIGGER_TOKEN")]
+        public static BuildTargetResult TriggerDockerHubBuilds(BuildTargetContext c)
+        {
+            string dockerHubRepo = Environment.GetEnvironmentVariable("DOCKER_HUB_REPO");
+            string dockerHubTriggerToken = Environment.GetEnvironmentVariable("DOCKER_HUB_TRIGGER_TOKEN");
+
+            Uri baseDockerHubUri = new Uri("https://registry.hub.docker.com/u/");
+            Uri dockerHubTriggerUri;
+            if (!Uri.TryCreate(baseDockerHubUri, $"{dockerHubRepo}/trigger/{dockerHubTriggerToken}/", out dockerHubTriggerUri))
+            {
+                return c.Failed("Invalid DOCKER_HUB_REPO and/or DOCKER_HUB_TRIGGER_TOKEN");
+            }
+
+            c.Info($"Triggering automated DockerHub builds for {dockerHubRepo}");
+            using (HttpClient client = new HttpClient())
+            {
+                StringContent requestContent = new StringContent("{\"build\": true}", Encoding.UTF8, "application/json");
+                try
+                {
+                    HttpResponseMessage response = client.PostAsync(dockerHubTriggerUri, requestContent).Result;
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        sb.AppendLine($"HTTP request to {dockerHubTriggerUri.ToString()} was unsuccessful.");
+                        sb.AppendLine($"Response status code: {response.StatusCode}. Reason phrase: {response.ReasonPhrase}.");
+                        sb.Append($"Respone content: {response.Content.ReadAsStringAsync().Result}");
+                        return c.Failed(sb.ToString());
+                    }
+                }
+                catch (AggregateException e)
+                {
+                    return c.Failed($"HTTP request to {dockerHubTriggerUri.ToString()} failed. {e.ToString()}");
+                }
+            }
             return c.Success();
         }
 
@@ -133,12 +170,12 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 using (StreamWriter sw = new StreamWriter(fileStream))
                 {
-                   sw.WriteLine("{");
-                   sw.WriteLine($"  \"name\":\"{packageName}\",");
-                   sw.WriteLine($"  \"version\":\"{version}\",");
-                   sw.WriteLine($"  \"repositoryId\":\"{repoID}\",");
-                   sw.WriteLine($"  \"sourceUrl\":\"{uploadUrl}\"");
-                   sw.WriteLine("}");
+                    sw.WriteLine("{");
+                    sw.WriteLine($"  \"name\":\"{packageName}\",");
+                    sw.WriteLine($"  \"version\":\"{version}\",");
+                    sw.WriteLine($"  \"repositoryId\":\"{repoID}\",");
+                    sw.WriteLine($"  \"sourceUrl\":\"{uploadUrl}\"");
+                    sw.WriteLine("}");
                 }
             }
 

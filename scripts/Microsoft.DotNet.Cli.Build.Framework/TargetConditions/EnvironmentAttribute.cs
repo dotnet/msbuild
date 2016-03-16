@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Build.Framework
 {
@@ -13,7 +13,11 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             if (string.IsNullOrEmpty(envVar))
             {
-                throw new ArgumentNullException("envVar");
+                throw new ArgumentNullException(nameof(envVar));
+            }
+            if (expectedVals == null)
+            {
+                throw new ArgumentNullException(nameof(expectedVals));
             }
 
             _envVar = envVar;
@@ -24,15 +28,14 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             var actualVal = Environment.GetEnvironmentVariable(_envVar);
 
-            foreach (var expectedVal in _expectedVals)
+            if (_expectedVals.Any())
             {
-                if (string.Equals(actualVal, expectedVal, StringComparison.Ordinal))
-                {
-                    return true;
-                }
+                return _expectedVals.Any(ev => string.Equals(actualVal, ev, StringComparison.Ordinal));
             }
-
-            return false;
+            else
+            {
+                return !string.IsNullOrEmpty(actualVal);
+            }
         }
     }
 }
