@@ -49,6 +49,8 @@ namespace Microsoft.DotNet.Cli.Build
         nameof(PublishTargets.PublishDebFileToDebianRepo),
         nameof(PublishTargets.PublishSharedFrameworkCompressedFile),
         nameof(PublishTargets.PublishSharedHostCompressedFile),
+        nameof(PublishTargets.PublishCombinedFrameworkSDKHostFile),
+        nameof(PublishTargets.PublishCombinedFrameworkHostFile),
         nameof(PublishTargets.PublishLatestVersionTextFile))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c)
         {
@@ -160,6 +162,32 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult PublishSharedHostCompressedFile(BuildTargetContext c)
         {
             var compressedFile = c.BuildContext.Get<string>("SharedHostCompressedFile");
+            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
+            var latestCompressedFile = compressedFile.Replace(Version, "latest");
+            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
+
+            PublishFileAzure(compressedFileBlob, compressedFile);
+            PublishFileAzure(latestCompressedFileBlob, compressedFile);
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishCombinedFrameworkSDKHostFile(BuildTargetContext c)
+        {
+            var compressedFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile");
+            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
+            var latestCompressedFile = compressedFile.Replace(Version, "latest");
+            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
+
+            PublishFileAzure(compressedFileBlob, compressedFile);
+            PublishFileAzure(latestCompressedFileBlob, compressedFile);
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishCombinedFrameworkHostFile(BuildTargetContext c)
+        {
+            var compressedFile = c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile");
             var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
             var latestCompressedFile = compressedFile.Replace(Version, "latest");
             var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
