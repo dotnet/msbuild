@@ -7,11 +7,11 @@ using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    internal class DotNetCli
+    public class DotNetCli
     {
         public static readonly DotNetCli Stage0 = new DotNetCli(GetStage0Path());
-        public static readonly DotNetCli Stage1 = new DotNetCli(Path.Combine(Dirs.Stage1, "bin"));
-        public static readonly DotNetCli Stage2 = new DotNetCli(Path.Combine(Dirs.Stage2, "bin"));
+        public static readonly DotNetCli Stage1 = new DotNetCli(Dirs.Stage1);
+        public static readonly DotNetCli Stage2 = new DotNetCli(Dirs.Stage2);
 
         public string BinPath { get; }
 
