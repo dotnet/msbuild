@@ -280,7 +280,7 @@ if ($DryRun) {
     foreach ($DownloadLink in $DownloadLinks) {
         Say "- $DownloadLink"
     }
-    Say "Repeatable invocation: .\$($MyInvocation.MyCommand) -Version $SpecificVersion -Channel $Channel -DebugSymbols `$$DebugSymbols -Architecture $CLIArchitecture -InstallDir $InstallDir -NoPath `$$NoPath"
+    Say "Repeatable invocation: .\$($MyInvocation.MyCommand) -Version $SpecificVersion -Channel $Channel -Architecture $CLIArchitecture -InstallDir $InstallDir"
     return
 }
 
