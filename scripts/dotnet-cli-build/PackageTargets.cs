@@ -14,7 +14,9 @@ namespace Microsoft.DotNet.Cli.Build
     {
         [Target(nameof(PackageTargets.CopyCLISDKLayout),
         nameof(SharedFrameworkTargets.PublishSharedHost),
-        nameof(SharedFrameworkTargets.PublishSharedFramework))]
+        nameof(SharedFrameworkTargets.PublishSharedFramework),
+        nameof(PackageTargets.CopyCombinedFrameworkSDKHostLayout),
+        nameof(PackageTargets.CopyCombinedFrameworkHostLayout))]
         public static BuildTargetResult InitPackage(BuildTargetContext c)
         {
             Directory.CreateDirectory(Dirs.Packages);
@@ -90,6 +92,39 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        [Target]
+        public static BuildTargetResult CopyCombinedFrameworkSDKHostLayout(BuildTargetContext c)
+        {
+            var combinedRoot = Path.Combine(Dirs.Output, "obj", "combined-framework-sdk-host");
+
+            string sdkPublishRoot = c.BuildContext.Get<string>("CLISDKRoot");
+            Utils.CopyDirectoryRecursively(sdkPublishRoot, combinedRoot);
+
+            string sharedFrameworkPublishRoot = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
+            Utils.CopyDirectoryRecursively(sharedFrameworkPublishRoot, combinedRoot);
+
+            string sharedHostPublishRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
+            Utils.CopyDirectoryRecursively(sharedHostPublishRoot, combinedRoot);
+
+            c.BuildContext["CombinedFrameworkSDKHostRoot"] = combinedRoot;
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult CopyCombinedFrameworkHostLayout(BuildTargetContext c)
+        {
+            var combinedRoot = Path.Combine(Dirs.Output, "obj", "combined-framework-host");
+
+            string sharedFrameworkPublishRoot = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
+            Utils.CopyDirectoryRecursively(sharedFrameworkPublishRoot, combinedRoot);
+
+            string sharedHostPublishRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
+            Utils.CopyDirectoryRecursively(sharedHostPublishRoot, combinedRoot);
+
+            c.BuildContext["CombinedFrameworkHostRoot"] = combinedRoot;
+            return c.Success();
+        }
+
         [Target(nameof(PackageTargets.GenerateZip), nameof(PackageTargets.GenerateTarBall))]
         public static BuildTargetResult GenerateCompressedFile(BuildTargetContext c)
         {
@@ -103,6 +138,8 @@ namespace Microsoft.DotNet.Cli.Build
             CreateZipFromDirectory(c.BuildContext.Get<string>("SharedHostPublishRoot"), c.BuildContext.Get<string>("SharedHostCompressedFile"));
             CreateZipFromDirectory(c.BuildContext.Get<string>("SharedFrameworkPublishRoot"), c.BuildContext.Get<string>("SharedFrameworkCompressedFile"));
             CreateZipFromDirectory(c.BuildContext.Get<string>("CLISDKRoot"), c.BuildContext.Get<string>("SdkCompressedFile"));
+            CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
+            CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile"));
 
             return c.Success();
         }
@@ -113,7 +150,8 @@ namespace Microsoft.DotNet.Cli.Build
         {
             CreateTarBallFromDirectory(c.BuildContext.Get<string>("SharedHostPublishRoot"), c.BuildContext.Get<string>("SharedHostCompressedFile"));
             CreateTarBallFromDirectory(c.BuildContext.Get<string>("SharedFrameworkPublishRoot"), c.BuildContext.Get<string>("SharedFrameworkCompressedFile"));
-            CreateTarBallFromDirectory(c.BuildContext.Get<string>("CLISDKRoot"), c.BuildContext.Get<string>("SdkCompressedFile"));
+            CreateTarBallFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
+            CreateTarBallFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile"));
 
             return c.Success();
         }
