@@ -18,7 +18,7 @@
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
     "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160225-02",
-    "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-151218",
+    "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-160316",
     "Microsoft.Net.CSharp.Interactive.netcore": "1.3.0-beta1-20160225-02",
     "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160225-02",
     "Microsoft.DiaSymReader.Native": "1.3.3",
