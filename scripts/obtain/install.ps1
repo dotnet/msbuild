@@ -64,6 +64,9 @@ $ProgressPreference="SilentlyContinue"
 $LocalVersionFileRelativePath="\.version"
 $BinFolderRelativePath="\bin"
 
+# example path with regex: shared/1.0.0-beta-12345/somepath
+$VersionRegEx="/\d+\.\d+[^/]+/"
+
 function Say($str) {
     Write-Host "dotnet_install: $str"
 }
@@ -146,12 +149,19 @@ function Get-Specific-Version-From-Version([string]$AzureFeed, [string]$AzureCha
     }
 }
 
-function Construct-Download-Link([string]$AzureFeed, [string]$AzureChannel, [string]$SpecificVersion, [string]$CLIArchitecture) {
+function Get-Download-Links([string]$AzureFeed, [string]$AzureChannel, [string]$SpecificVersion, [string]$CLIArchitecture) {
     Say-Invocation $MyInvocation
+    
+    $ret = @()
+    $files = @("dotnet", "dotnet-sharedframework", "dotnet-host")
+    
+    foreach ($file in $files) {
+        $PayloadURL = "$AzureFeed/$AzureChannel/Binaries/$SpecificVersion/$file-win-$CLIArchitecture.$SpecificVersion.zip"
+        Say-Verbose "Constructed payload URL: $PayloadURL"
+        $ret += $PayloadURL
+    }
 
-    $DownloadLink = "$AzureFeed/$AzureChannel/Binaries/$SpecificVersion/dotnet-win-$CLIArchitecture.$SpecificVersion.zip"
-    Say-Verbose "Constructed Download link: $DownloadLink"
-    return $DownloadLink
+    return $ret
 }
 
 function Get-User-Share-Path() {
@@ -198,7 +208,48 @@ function Get-Absolute-Path([string]$RelativeOrAbsolutePath) {
     return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($RelativeOrAbsolutePath)
 }
 
-function Extract-And-Override-Zip([string]$ZipPath, [string]$OutPath) {
+function Find-Index-Containing-Version($arr) {
+    for ($i = 0; $i -lt $arr.length; $i++) {
+        if ($arr[$i] -match "^\d+\.\d+") {
+            return $i
+        }
+    }
+    
+    return -1
+}
+
+function Get-Path-Prefix-With-Version($path) {
+    $match = [regex]::match($path, $VersionRegEx)
+    if ($match.Success) {
+        return $entry.FullName.Substring(0, $match.Index + $match.Length)
+    }
+    
+    return $null
+}
+
+function Get-List-Of-Directories-And-Versions-To-Unpack-From-Dotnet-Package([System.IO.Compression.ZipArchive]$Zip, [string]$OutPath) {
+    Say-Invocation $MyInvocation
+    
+    $ret = @()
+    foreach ($entry in $Zip.Entries) {
+        $dir = Get-Path-Prefix-With-Version $entry.FullName
+        if ($dir -ne $null) {
+            $path = Get-Absolute-Path $(Join-Path -Path $OutPath -ChildPath $dir)
+            if (-Not (Test-Path $path -PathType Container)) {
+                $ret += $dir
+            }
+        }
+    }
+    
+    $ret = $ret | Sort-Object | Get-Unique
+    
+    $values = ($ret | foreach { "$_" }) -join ";"
+    Say-Verbose "Directories to unpack: $values"
+    
+    return $ret
+}
+
+function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     Say-Invocation $MyInvocation
 
     Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
@@ -206,12 +257,17 @@ function Extract-And-Override-Zip([string]$ZipPath, [string]$OutPath) {
     try {
         $Zip = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
         
+        $DirectoriesToUnpack = Get-List-Of-Directories-And-Versions-To-Unpack-From-Dotnet-Package -Zip $Zip -OutPath $OutPath
+        
         foreach ($entry in $Zip.Entries) {
-            $DestinationPath = Get-Absolute-Path $(Join-Path -Path $OutPath -ChildPath $entry.FullName)
-            $DestinationDir = Split-Path -Parent $DestinationPath
-            if (-not $DestinationPath.EndsWith("\")) {
-                New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
-                [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $true)
+            $PathWithVersion = Get-Path-Prefix-With-Version $entry.FullName
+            if (($PathWithVersion -eq $null) -Or ($DirectoriesToUnpack -contains $PathWithVersion)) {
+                $DestinationPath = Get-Absolute-Path $(Join-Path -Path $OutPath -ChildPath $entry.FullName)
+                $DestinationDir = Split-Path -Parent $DestinationPath
+                if ((-Not $DestinationPath.EndsWith("\")) -And (-Not (Test-Path $DestinationPath))) {
+                    New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
+                    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $false)
+                }
             }
         }
     }
@@ -225,10 +281,13 @@ function Extract-And-Override-Zip([string]$ZipPath, [string]$OutPath) {
 $AzureChannel = Get-Azure-Channel-From-Channel -Channel $Channel
 $CLIArchitecture = Get-CLIArchitecture-From-Architecture $Architecture
 $SpecificVersion = Get-Specific-Version-From-Version -AzureFeed $AzureFeed -AzureChannel $AzureChannel -CLIArchitecture $CLIArchitecture -Version $Version
-$DownloadLink = Construct-Download-Link -AzureFeed $AzureFeed -AzureChannel $AzureChannel -SpecificVersion $SpecificVersion -CLIArchitecture $CLIArchitecture
+$DownloadLinks = Get-Download-Links -AzureFeed $AzureFeed -AzureChannel $AzureChannel -SpecificVersion $SpecificVersion -CLIArchitecture $CLIArchitecture
 
 if ($DryRun) {
-    Say "Payload URL: $DownloadLink"
+    Say "Payload URLs:"
+    foreach ($DownloadLink in $DownloadLinks) {
+        Say "- $DownloadLink"
+    }
     Say "Repeatable invocation: .\$($MyInvocation.MyCommand) -Version $SpecificVersion -Channel $Channel -DebugSymbols `$$DebugSymbols -Architecture $CLIArchitecture -InstallDir $InstallDir -NoPath `$$NoPath"
     return
 }
@@ -246,16 +305,16 @@ if (($VersionInfo -ne $null) -and ($SpecificVersion -eq $VersionInfo.Version)) {
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
-$ZipPath = [System.IO.Path]::GetTempFileName()
+foreach ($DownloadLink in $DownloadLinks) {
+    $ZipPath = [System.IO.Path]::GetTempFileName()
+    Say "Downloading $DownloadLink"
+    $resp = Invoke-WebRequest -UseBasicParsing $DownloadLink -OutFile $ZipPath
 
-Say "Downloading $DownloadLink"
-$resp = Invoke-WebRequest -UseBasicParsing $DownloadLink -OutFile $ZipPath
+    Say "Extracting zip from $DownloadLink"
+    Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $InstallRoot
 
-Say "Extracting zip"
-Extract-And-Override-Zip -ZipPath $ZipPath -OutPath $InstallRoot
-
-Say "Removing installation artifacts"
-Remove-Item $ZipPath
+    Remove-Item $ZipPath
+}
 
 $BinPath = Get-Absolute-Path $(Join-Path -Path $InstallRoot -ChildPath $BinFolderRelativePath)
 if (-Not $NoPath) {
