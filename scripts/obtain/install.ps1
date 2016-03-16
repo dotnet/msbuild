@@ -62,10 +62,11 @@ $ErrorActionPreference="Stop"
 $ProgressPreference="SilentlyContinue"
 
 $LocalVersionFileRelativePath="\.version"
-$BinFolderRelativePath="\bin"
+$BinFolderRelativePath=""
 
 # example path with regex: shared/1.0.0-beta-12345/somepath
 $VersionRegEx="/\d+\.\d+[^/]+/"
+$OverrideNonVersionedFiles=$true
 
 function Say($str) {
     Write-Host "dotnet_install: $str"
@@ -153,7 +154,7 @@ function Get-Download-Links([string]$AzureFeed, [string]$AzureChannel, [string]$
     Say-Invocation $MyInvocation
     
     $ret = @()
-    $files = @("dotnet", "dotnet-sharedframework", "dotnet-host")
+    $files = @("dotnet-combined-framework-sdk-host")
     
     foreach ($file in $files) {
         $PayloadURL = "$AzureFeed/$AzureChannel/Binaries/$SpecificVersion/$file-win-$CLIArchitecture.$SpecificVersion.zip"
@@ -208,16 +209,6 @@ function Get-Absolute-Path([string]$RelativeOrAbsolutePath) {
     return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($RelativeOrAbsolutePath)
 }
 
-function Find-Index-Containing-Version($arr) {
-    for ($i = 0; $i -lt $arr.length; $i++) {
-        if ($arr[$i] -match "^\d+\.\d+") {
-            return $i
-        }
-    }
-    
-    return -1
-}
-
 function Get-Path-Prefix-With-Version($path) {
     $match = [regex]::match($path, $VersionRegEx)
     if ($match.Success) {
@@ -264,9 +255,10 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
             if (($PathWithVersion -eq $null) -Or ($DirectoriesToUnpack -contains $PathWithVersion)) {
                 $DestinationPath = Get-Absolute-Path $(Join-Path -Path $OutPath -ChildPath $entry.FullName)
                 $DestinationDir = Split-Path -Parent $DestinationPath
-                if ((-Not $DestinationPath.EndsWith("\")) -And (-Not (Test-Path $DestinationPath))) {
+                $OverrideFiles=$OverrideNonVersionedFiles -Or (-Not (Test-Path $DestinationPath))
+                if ((-Not $DestinationPath.EndsWith("\")) -And $OverrideFiles) {
                     New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
-                    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $false)
+                    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $OverrideNonVersionedFiles)
                 }
             }
         }
@@ -294,14 +286,6 @@ if ($DryRun) {
 
 $InstallRoot = Resolve-Installation-Path $InstallDir
 Say-Verbose "InstallRoot: $InstallRoot"
-
-$VersionInfo = Get-Installed-Version-Info $InstallRoot
-$LocalVersionText = if ($VersionInfo -ne $null) { $VersionInfo.Version } else { "<No version installed>" }
-Say-Verbose "Local CLI version is: $LocalVersionText"
-if (($VersionInfo -ne $null) -and ($SpecificVersion -eq $VersionInfo.Version)) {
-    Say "Your version of CLI is up-to-date."
-    return
-}
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
