@@ -60,6 +60,8 @@
     <NuGetConfigFile>$(SourceDir).nuget\NuGet.Config</NuGetConfigFile>
     <NuGetPackageSource>@(NuGetSourceList -> '-source %(Identity)', ' ')</NuGetPackageSource>
     <NuGetConfigCommandLine>$(NuGetPackageSource) -ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
+    <NuGetConfigDir>$([System.IO.Path]::Combine($(SourceDir),".nuget"))</NuGetConfigDir>
+    <NuGetDir>$(PackagesDir)</NuGetDir>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
@@ -68,6 +70,7 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
     <NugetRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
+    <_RestoreBuildToolsCommand>$(NugetRestoreCommand) "$(SourceDir).nuget/packages.config"</_RestoreBuildToolsCommand>
   </PropertyGroup>
 
   <!-- Set default Configuration and Platform -->
