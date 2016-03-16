@@ -100,5 +100,15 @@ namespace Microsoft.DotNet.Cli.Build
                 Directory.Delete(path, true);
             }
         }
+
+        public static void CopyDirectoryRecursively(string path, string destination)
+        {
+            foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+            {
+                string destFile = file.Replace(path, destination);
+                Directory.CreateDirectory(Path.GetDirectoryName(destFile));
+                File.Copy(file, destFile, true);
+            }
+        }
     }
 }
