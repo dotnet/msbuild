@@ -67,7 +67,7 @@ Write-Host "Installing .NET Core CLI Stage 0 from beta channel"
 & "$PSScriptRoot\obtain\install.ps1" -Channel $env:CHANNEL -Architecture $Architecture
 
 # Put the stage0 on the path
-$env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
+$env:PATH = "$env:DOTNET_INSTALL_DIR\cli;$env:PATH"
 
 # Restore the build scripts
 Write-Host "Restoring Build Script projects..."

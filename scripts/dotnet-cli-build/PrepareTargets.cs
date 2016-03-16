@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             // Identify the version
-            var version = File.ReadAllLines(Path.Combine(stage0, "..", ".version"));
+            var version = File.ReadAllLines(Path.Combine(stage0, ".version"));
             c.Info($"Using Stage 0 Version: {version[1]}");
 
             return c.Success();

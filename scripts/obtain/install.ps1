@@ -4,7 +4,7 @@
 #
 
 param(
-   [string]$Channel="dev",
+   [string]$Channel="beta",
    [string]$version="Latest",
    [string]$Architecture="x64"
 )
@@ -17,7 +17,8 @@ if ($fileVersion -eq "Latest") {
     $fileVersion = "latest"
 }
 $Feed="https://dotnetcli.blob.core.windows.net/dotnet"
-$DotNetFileName="dotnet-win-$Architecture.$fileVersion.zip"
+
+$DotNetFileName="dotnet-combined-framework-sdk-host-win-$Architecture.$fileVersion.zip"
 $DotNetUrl="$Feed/$Channel/Binaries/$Version"
 
 function say($str)
@@ -105,4 +106,4 @@ if (Test-Path "$InstallDir\$DotNetFileName") {
 say "The .NET Tools have been installed to $InstallDir\cli!"
 
 # New layout
-say "Add '$InstallDir\cli\bin' to your PATH to use dotnet"
+say "Add '$InstallDir\cli' to your PATH to use dotnet"
