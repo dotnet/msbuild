@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 
@@ -213,6 +215,11 @@ namespace Microsoft.Build.Utilities
         /// Cache the list of supported frameworks
         /// </summary>
         private static List<string> s_targetFrameworkMonikers = null;
+
+        /// <summary>
+        /// List of fallback paths where to look for Target frameworks
+        /// </summary>
+        private static Lazy<ReadOnlyCollection<string>> s_fallbackTargetFrameworkRootPathsLazy = new Lazy<ReadOnlyCollection<string>>(() => GetFallbackTargetFrameworkRootPaths(), isThreadSafe:true);
 
         private const string retailConfigurationName = "Retail";
         private const string neutralArchitectureName = "Neutral";
@@ -2075,6 +2082,12 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
         /// The method will not check to see if the path exists or not.
+        ///
+        /// To find the given framework, it looks through various paths, which are (in order):
+        ///
+        /// 1. @targetFrameworkRootPath parameter
+        /// 2. Any fallback paths specified in the app.config as a property named `TargetFrameworkRootPathSearchPaths$(OSName)`
+        ///
         /// </summary>
         /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
@@ -2088,6 +2101,32 @@ namespace Microsoft.Build.Utilities
             //Verify the framework class passed in is not null. Other than being null the class will ensure it is consistent and the internal state is correct
             ErrorUtilities.VerifyThrowArgumentNull(frameworkName, "frameworkName");
 
+            var searchPaths = new List<string>(s_fallbackTargetFrameworkRootPathsLazy.Value);
+            searchPaths.Insert(0, targetFrameworkRootPath);
+
+            foreach (var path in searchPaths)
+            {
+                var asmList = GetPathToReferenceAssembliesActual(path, frameworkName);
+                if (asmList.Count > 0)
+                {
+                    return asmList;
+                }
+            }
+
+            return new List<string>();
+        }
+
+        /// <summary>
+        /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
+        /// The method will not check to see if the path exists or not.
+        /// </summary>
+        /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
+        /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
+        /// </param>
+        /// <param name="frameworkName">A frameworkName class which represents a TargetFrameworkMoniker. This cannot be null.</param>
+        /// <returns>Collection of reference assembly locations.</returns>
+        private static IList<String> GetPathToReferenceAssembliesActual(string targetFrameworkRootPath, FrameworkNameVersioning frameworkName)
+        {
             string referenceAssemblyCacheKey = GenerateReferenceAssemblyCacheKey(targetFrameworkRootPath, frameworkName);
             CreateReferenceAssemblyPathsCache();
 
@@ -2138,6 +2177,37 @@ namespace Microsoft.Build.Utilities
             }
 
             return dotNetFrameworkReferenceAssemblies;
+        }
+
+        private static ReadOnlyCollection<string> GetFallbackTargetFrameworkRootPaths()
+        {
+            //
+            // - We need to read the fallback paths from the Toolset defined in app.config .
+            // - ToolsetElement is a source file shared by Microsoft.Build and Microsoft.Build.Utilities.Core
+            //
+            // - If we try to read the toolset from the config file, like:
+            //      var msbuildSection = configuration.GetSection("msbuildToolsets")
+            //   then `msbuildSection` has a type `Microsoft.Build::Microsoft.Build.Evaluation.ToolsetConfigurationSection`,
+            //   since that is the type specified in the config file as:
+            //
+            //   <section name="msbuildToolsets" type="Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build, Version=14.1.0.0, Culture=neutral" />
+            //
+            //   To be able to extract the relevant property from this `ToolsetConfigurationSection`, we would need to
+            //   cast it to a concrete type like:
+            //
+            //      var toolsetConfigSection = (ToolsetConfigurationSection) configuration.GetSection("msbuildToolsets")
+            //
+            //   but this will fail since, the `(ToolsetConfigurationSection)` has the assembly identity of `Microsoft.Build.Utilities.Core`,
+            //   since this code is in that assembly (this file!).
+            //
+            //   Also, since these types are internal, using `extern alias` won't really help here.
+            //   So, we use reflection. This method should really get called only once, so, it shouldn't matter
+            //   for performance.
+            //
+            Assembly buildAsm = Assembly.Load("Microsoft.Build");
+            var type = buildAsm.GetType("Microsoft.Build.Shared.FrameworkLocationHelper");
+            var mi = type.GetMethod("GetTargetFrameworkRootFallbackPaths", BindingFlags.NonPublic | BindingFlags.Static);
+            return new ReadOnlyCollection<string>((IList<string>)mi.Invoke(null, new object[] { CurrentToolsVersion } ));
         }
 
         /// <summary>

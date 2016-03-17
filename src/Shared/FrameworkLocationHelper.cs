@@ -990,6 +990,91 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        internal static IList<string> GetTargetFrameworkRootFallbackPaths(string toolsVersion)
+        {
+#if FEATURE_SYSTEM_CONFIGURATION
+            return GetTargetFrameworkRootFallbackPathsFromConfigFor(toolsVersion);
+#else
+            return new List<string>();
+#endif
+        }
+
+#if FEATURE_SYSTEM_CONFIGURATION
+        /// <summary>
+        /// Returns the list of fallback search paths for looking up Target frameworks for the current OS,
+        /// specified in app.config like:
+        ///
+        ///     <msbuildToolsets default="14.1">
+        ///         <toolset toolsVersion="14.1">
+        ///         <property name="TargetFrameworkRootPathSearchPathsOSX" value="/tmp/foo;/tmp/bar" />
+        ///
+        /// </summary>
+        internal static IList<string> GetTargetFrameworkRootFallbackPathsFromConfigFor(string toolsVersion)
+        {
+            try
+            {
+                ToolsetElement toolset = GetToolsetElementFromConfigFor(toolsVersion);
+                PropertyElement searchPathsfromConfiguration = toolset?.PropertyElements.GetElement("TargetFrameworkRootPathSearchPaths" + GetOSNameForTargetFrameworkRoot());
+                var searchPaths = searchPathsfromConfiguration?.Value;
+
+                if (searchPaths != null)
+                {
+                    //FIXME: Split on unix
+                    var pathsList = searchPaths.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+                    return pathsList;
+                }
+            }
+            catch (ConfigurationException)
+            {
+                // may happen if the .exe.config contains bad data.  Shouldn't ever happen in 
+                // practice since we'll long since have loaded all toolsets in the toolset loading 
+                // code and thrown errors to the user at that point if anything was invalid, but just 
+                // in case, just eat the exception here, so that we can go on to look in the registry
+                // to see if there is any valid data there.  
+            }
+            return new List<string>();
+        }
+#endif
+
+#if FEATURE_SYSTEM_CONFIGURATION
+        private static ToolsetElement GetToolsetElementFromConfigFor(string toolsVersion)
+        {
+            ToolsetConfigurationSection configurationSection = null;
+
+            if (ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
+            {
+                Configuration configuration = BuildEnvironmentHelper.Instance.RunningTests
+                                                  ? ConfigurationManager.OpenExeConfiguration(
+                                                      BuildEnvironmentHelper.Instance.CurrentMSBuildExePath)
+                                                  : ConfigurationManager.OpenExeConfiguration(
+                                                      ConfigurationUserLevel.None);
+
+                configurationSection = ToolsetConfigurationReaderHelpers.ReadToolsetConfigurationSection(configuration);
+            }
+
+            return configurationSection?.Toolsets.GetElement(toolsVersion);
+        }
+#endif
+
+        /// <summary>
+        /// OS name that can be used as the suffix for `TargetFrameworkRootPathSearchPaths` property name
+        /// in app.config
+        /// </summary>
+        private static string GetOSNameForTargetFrameworkRoot()
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return "Windows";
+            }
+
+            if (NativeMethodsShared.IsOSX)
+            {
+                return "OSX";
+            }
+
+            return "Unix";
+        }
+
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Look up the path to the build tools directory in the registry for the requested ToolsVersion and requested architecture  
