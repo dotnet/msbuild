@@ -1,4 +1,4 @@
-These instructions refer to working with the Master branch.
+**These instructions refer to working with the Master branch.**
 
 ## Required Software
 **Microsoft Visual Studio 2015 **
