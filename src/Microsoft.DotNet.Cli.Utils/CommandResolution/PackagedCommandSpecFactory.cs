@@ -122,6 +122,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 host = CoreHost.LocalHostExePath;
             }
 
+            arguments.Add(commandPath);
+
             if (depsFilePath != null)
             {
                 arguments.Add("--depsfile");
@@ -130,8 +132,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
             arguments.Add("--additionalprobingpath");
             arguments.Add(nugetPackagesRoot);
-
-            arguments.Add(commandPath);
 
             arguments.AddRange(commandArguments);
 
