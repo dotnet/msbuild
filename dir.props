@@ -8,7 +8,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
          copying its dependencies (which are in the GAC). -->
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
@@ -22,9 +22,10 @@
 
    <!-- Common repo directories -->
   <PropertyGroup>
-    <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
+    <BuildToolsVersion>1.0.25-prerelease-00199</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
     <XunitVersion>2.1.0-rc1-build3168</XunitVersion>
+    <MicroBuildVersion>0.2.0</MicroBuildVersion>
 
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <SourceDir>$(ProjectDir)src\</SourceDir>
@@ -36,9 +37,10 @@
     <!-- Input Directories -->
     <PackagesDir>$(ProjectDir)packages\</PackagesDir>
     <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
+    <BuildToolsTaskDir>$(ToolsDir)net45\</BuildToolsTaskDir>
     <CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>
-
     <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
+    <MicroBuildDir>$(PackagesDir)\MicroBuild.Core.$(MicroBuildVersion)\build\</MicroBuildDir>
   </PropertyGroup>
 
   <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
@@ -58,6 +60,8 @@
     <NuGetConfigFile>$(SourceDir).nuget\NuGet.Config</NuGetConfigFile>
     <NuGetPackageSource>@(NuGetSourceList -> '-source %(Identity)', ' ')</NuGetPackageSource>
     <NuGetConfigCommandLine>$(NuGetPackageSource) -ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
+    <NuGetConfigDir>$([System.IO.Path]::Combine($(SourceDir),".nuget"))</NuGetConfigDir>
+    <NuGetDir>$(PackagesDir)</NuGetDir>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
@@ -66,6 +70,7 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
     <NugetRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
+    <_RestoreBuildToolsCommand>$(NugetRestoreCommand) "$(SourceDir).nuget/packages.config"</_RestoreBuildToolsCommand>
   </PropertyGroup>
 
   <!-- Set default Configuration and Platform -->
