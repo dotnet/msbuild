@@ -17,8 +17,8 @@
   },
   "testRunner": "must-be-specified-to-generate-deps",
   "tools": {
-    "dotnet-hello": {
-      "version": "2.0.0",
+    "dotnet-portable": {
+      "version": "1.0.0",
       "target": "package"
     }
   }
