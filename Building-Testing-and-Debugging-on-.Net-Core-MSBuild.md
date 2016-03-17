@@ -1,18 +1,41 @@
-MSBuild can be successfully built on Windows, OS X, and Ubuntu from the [`xplat`](https://github.com/Microsoft/msbuild/tree/xplat) branch.
+**These instructions refer to working with the [`xplat`](https://github.com/Microsoft/msbuild/tree/xplat) branch.**
 
-# Required packages
+MSBuild can be successfully built on Windows, OS X, and Ubuntu.
 
-The initial build process is done with a Mono-hosted version of MSBuild. Until we migrate our build to use MSBuild on the CoreCLR, we require that `mono` be installed and on your PATH.
+## Windows ##
+**Build process**
 
-# Build process
+`RebuildWithLocalMSBuild.cmd`. This script uses a .NET core hosted MSBuild to target .NET Core and run the tests.
 
-```sh
-./cibuild.sh
-```
+**Debugging**
 
-# Tests
+For debugging tests, use the `/d` switch for CoreRun.exe. This prompts the core CLR to wait for a debugger to attach. You can attach using Visual Studio.
+
+## Unix ##
+
+**Required packages**
+
+_Mono_, when doing a Mono-hosted version of MSBuild
+
+**Build process**
+
+Targeting .Net Core: `./cibuild.sh --target CoreCLR`
+
+Targeting Mono: `./cibuild.sh --target Mono`
+
+Using a .NET core MSBuild host: `./cibuild.sh --host CoreCLR`
+
+Using a Mono MSBuild host: `./cibuild --host Mono`
+
+Default arguments lead to a Mono hosted MSBuild targeting CoreCLR: `./cibuild.sh`
+
+**Tests**
 
 Tests are currently disabled on platforms other than Windows. If you'd like to run them, explicitly opt in with
 ```sh
 ./cibuild.sh --scope Test
 ```
+
+**Debugging**
+
+TBD
