@@ -101,8 +101,15 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
-        public static void CopyDirectoryRecursively(string path, string destination)
+        public static void CopyDirectoryRecursively(string path, string destination, bool keepParentDir = false)
         {
+            if (keepParentDir)
+            {
+                path = path.TrimEnd(Path.DirectorySeparatorChar);
+                destination = Path.Combine(destination, Path.GetFileName(path));
+                Directory.CreateDirectory(destination);
+            }
+
             foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
             {
                 string destFile = file.Replace(path, destination);

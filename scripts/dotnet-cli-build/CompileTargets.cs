@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
-            
+
             if (Directory.Exists(Dirs.Stage1))
             {
                 Utils.DeleteDirectory(Dirs.Stage1);
@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(Dirs.Stage1);
 
             CopySharedHost(Dirs.Stage1);
-            PackageSharedFramework(c, Dirs.Stage1, DotNetCli.Stage0);
+            PublishSharedFramework(c, Dirs.Stage1, DotNetCli.Stage0);
             return CompileCliSdk(c,
                 dotnet: DotNetCli.Stage0,
                 outputDir: Dirs.Stage1);
@@ -160,14 +160,14 @@ namespace Microsoft.DotNet.Cli.Build
 
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
-            
+
             if (Directory.Exists(Dirs.Stage2))
             {
                 Utils.DeleteDirectory(Dirs.Stage2);
             }
             Directory.CreateDirectory(Dirs.Stage2);
 
-            PackageSharedFramework(c, Dirs.Stage2, DotNetCli.Stage1);
+            PublishSharedFramework(c, Dirs.Stage2, DotNetCli.Stage1);
             CopySharedHost(Dirs.Stage2);
             var result = CompileCliSdk(c,
                 dotnet: DotNetCli.Stage1,
@@ -211,10 +211,10 @@ namespace Microsoft.DotNet.Cli.Build
                 Path.Combine(outputDir, DotnetHostFxrBaseName), true);
         }
 
-        public static void PackageSharedFramework(BuildTargetContext c, string outputDir, DotNetCli dotnetCli)
+        public static void PublishSharedFramework(BuildTargetContext c, string outputDir, DotNetCli dotnetCli)
         {
             string SharedFrameworkSourceRoot = Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework");
-            string SharedFrameworkNugetVersion = GetVersionFromProjectJson(Path.Combine(Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework"), "project.json"));
+            string SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
 
             // We publish to a sub folder of the PublishRoot so tools like heat and zip can generate folder structures easier.
             string SharedFrameworkNameAndVersionRoot = Path.Combine(outputDir, "shared", SharedFrameworkName, SharedFrameworkNugetVersion);
@@ -301,23 +301,6 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             CrossgenSharedFx(c, SharedFrameworkNameAndVersionRoot);
-        }
-
-        private static string GetVersionFromProjectJson(string pathToProjectJson)
-        {
-            Regex r = new Regex($"\"{Regex.Escape(SharedFrameworkName)}\"\\s*:\\s*\"(?'version'[^\"]*)\"");
-
-            foreach (var line in File.ReadAllLines(pathToProjectJson))
-            {
-                var m = r.Match(line);
-
-                if (m.Success)
-                {
-                    return m.Groups["version"].Value;
-                }
-            }
-
-            throw new InvalidOperationException("Unable to match the version name from " + pathToProjectJson);
         }
 
         private static BuildTargetResult CompileCliSdk(BuildTargetContext c, DotNetCli dotnet, string outputDir)
@@ -499,7 +482,7 @@ namespace Microsoft.DotNet.Cli.Build
                 c.Warn("Skipping crossgen for SharedFx because CROSSGEN_SHAREDFRAMEWORK is not set to 1");
                 return c.Success();
             }
-            
+
             foreach (var file in Directory.GetFiles(pathToAssemblies))
             {
                 string fileName = Path.GetFileName(file);

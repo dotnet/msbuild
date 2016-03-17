@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedframework-debian.sh"),
                     "--input", inputRoot, "--output", debFile, "--package-name", packageName,
-                    "--framework-nuget-name", SharedFrameworkTargets.SharedFrameworkName,
+                    "--framework-nuget-name", Monikers.SharedFrameworkName,
                     "--framework-nuget-version", c.BuildContext.Get<string>("SharedFrameworkNugetVersion"),
                     "--obj-root", objRoot, "--version", version)
                     .Execute()

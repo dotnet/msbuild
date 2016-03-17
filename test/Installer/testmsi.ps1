@@ -38,7 +38,7 @@ $testName = "Microsoft.DotNet.Cli.Msi.Tests"
 $testDir="$PSScriptRoot\$testName"
 $testBin="$RepoRoot\artifacts\tests\$testName"
 
-pushd "$Stage2Dir\bin"
+pushd "$Stage2Dir"
 
 try {
     .\dotnet restore `

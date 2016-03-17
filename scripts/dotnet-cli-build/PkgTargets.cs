@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.OSX)]
         public static BuildTargetResult GenerateSharedFrameworkProductArchive(BuildTargetContext c)
         {
-            string sharedFrameworkNugetName = SharedFrameworkTargets.SharedFrameworkName;
+            string sharedFrameworkNugetName = Monikers.SharedFrameworkName;
             string sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             string version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             string id = $"com.microsoft.dotnet.sharedframework.{sharedFrameworkNugetName}.{sharedFrameworkNugetVersion}.osx.x64";
@@ -53,9 +53,9 @@ namespace Microsoft.DotNet.Cli.Build
                 "shared-framework-distribution-template.xml");
             string distTemplate = File.ReadAllText(inputDistTemplatePath);
             string distributionPath = Path.Combine(packageIntermediatesPath, "shared-framework-formatted-distribution.xml");
-            string formattedDistContents = 
+            string formattedDistContents =
                 distTemplate.Replace("{SharedFrameworkNugetVersion}", sharedFrameworkNugetVersion)
-                .Replace("{SharedFrameworkNugetName}", SharedFrameworkTargets.SharedFrameworkName)
+                .Replace("{SharedFrameworkNugetName}", Monikers.SharedFrameworkName)
                 .Replace("{VERSION}", version);
             File.WriteAllText(distributionPath, formattedDistContents);
 
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Build
                 "--version", version,
                 "--identifier", id,
                 "--package-path", packageIntermediatesPath,
-                "--resources", resourcePath, 
+                "--resources", resourcePath,
                 "--distribution", distributionPath,
                 outFilePath)
             .Execute()
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.OSX)]
         public static BuildTargetResult GenerateSharedFrameworkPkg(BuildTargetContext c)
         {
-            string sharedFrameworkNugetName = SharedFrameworkTargets.SharedFrameworkName;
+            string sharedFrameworkNugetName = Monikers.SharedFrameworkName;
             string sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             Directory.CreateDirectory(Path.Combine(Dirs.Output, "obj", "pkg"));
             string version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
