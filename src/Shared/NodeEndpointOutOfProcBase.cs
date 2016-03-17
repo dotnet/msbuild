@@ -510,7 +510,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
             IAsyncResult result = localPipeServer.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-            Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length);
+            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
 
             bool exitLoop = false;
@@ -587,7 +587,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
                             result = localPipeServer.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                            readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length);
+                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
                         }
 
