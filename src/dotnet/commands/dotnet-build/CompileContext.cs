@@ -255,27 +255,33 @@ namespace Microsoft.DotNet.Tools.Build
 
         private void CollectCompilerNamePreconditions(ProjectContext project, IncrementalPreconditions preconditions)
         {
-            var projectCompiler = project.ProjectFile.CompilerName;
-
-            if (!KnownCompilers.Any(knownCompiler => knownCompiler.Equals(projectCompiler, StringComparison.Ordinal)))
+            if (project.ProjectFile != null)
             {
-                preconditions.AddUnknownCompilerPrecondition(project.ProjectName(), projectCompiler);
+                var projectCompiler = project.ProjectFile.CompilerName;
+
+                if (!KnownCompilers.Any(knownCompiler => knownCompiler.Equals(projectCompiler, StringComparison.Ordinal)))
+                {
+                    preconditions.AddUnknownCompilerPrecondition(project.ProjectName(), projectCompiler);
+                }
             }
         }
 
         private void CollectScriptPreconditions(ProjectContext project, IncrementalPreconditions preconditions)
         {
-            var preCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PreCompile);
-            var postCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PostCompile);
-
-            if (preCompileScripts.Any())
+            if (project.ProjectFile != null)
             {
-                preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PreCompile);
-            }
+                var preCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PreCompile);
+                var postCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PostCompile);
 
-            if (postCompileScripts.Any())
-            {
-                preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PostCompile);
+                if (preCompileScripts.Any())
+                {
+                    preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PreCompile);
+                }
+
+                if (postCompileScripts.Any())
+                {
+                    preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PostCompile);
+                }
             }
         }
 

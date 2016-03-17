@@ -126,30 +126,9 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         {
             if (!_context.TargetFramework.IsDesktop())
             {
-                // TODO: Suppress this file if there's nothing to write? RuntimeOutputFiles would have to be updated
-                // in order to prevent breaking incremental compilation...
-
-                var json = new JObject();
-                var runtimeOptions = new JObject();
-                json.Add("runtimeOptions", runtimeOptions);
-
-                var redistExport = exporter
-                    .GetAllExports()
-                    .FirstOrDefault(l => l.Library.Identity.Name.Equals(RedistPackageName, StringComparison.OrdinalIgnoreCase));
-                if (redistExport != null)
-                {
-                    var framework = new JObject(
-                        new JProperty("name", redistExport.Library.Identity.Name),
-                        new JProperty("version", redistExport.Library.Identity.Version.ToNormalizedString()));
-                    runtimeOptions.Add("framework", framework);
-                }
-
                 var runtimeConfigJsonFile = Path.Combine(_runtimeOutputPath, _context.ProjectFile.Name + FileNameSuffixes.RuntimeConfigJson);
-                using (var writer = new JsonTextWriter(new StreamWriter(File.Create(runtimeConfigJsonFile))))
-                {
-                    writer.Formatting = Formatting.Indented;
-                    json.WriteTo(writer);
-                }
+
+                RuntimeConfigGenerator.WriteRuntimeConfigToFile(exporter, runtimeConfigJsonFile);
             }
         }
 
@@ -209,7 +188,6 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 appConfig.Save(stream);
             }
         }
-
 
         private static void CreateDirectoryIfNotExists(string path)
         {
