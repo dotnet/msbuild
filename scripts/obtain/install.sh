@@ -58,7 +58,7 @@ say_verbose() {
 
 get_current_os_name() {
     eval $invocation
-    
+
     local uname=$(uname)
     if [ "$uname" = "Darwin" ]; then
         echo "osx"
@@ -134,7 +134,7 @@ check_pre_reqs() {
 # args:
 # input - $1
 to_lowercase() {
-    eval $invocation
+    #eval $invocation
     
     echo "$1" | tr '[:upper:]' '[:lower:]'
     return 0
@@ -143,24 +143,26 @@ to_lowercase() {
 # args:
 # input - $1
 remove_trailing_slash() {
-    eval $invocation
+    #eval $invocation
     
-    echo "${1%/}"
+    local input=${1:-}
+    echo "${input%/}"
     return 0
 }
 
 # args:
 # input - $1
 remove_beginning_slash() {
-    eval $invocation
+    #eval $invocation
     
-    echo "${1#/}"
+    local input=${1:-}
+    echo "${input#/}"
     return 0
 }
 
 # args:
 # root_path - $1
-# child_path - $2
+# child_path - $2 - this parameter can be empty
 combine_paths() {
     eval $invocation
     
@@ -171,7 +173,7 @@ combine_paths() {
     fi
     
     local root_path=$(remove_trailing_slash $1)
-    local child_path=$(remove_beginning_slash $2)
+    local child_path=$(remove_beginning_slash ${2:-})
     say_verbose "combine_paths: root_path=$root_path"
     say_verbose "combine_paths: child_path=$child_path"
     echo "$root_path/$child_path"
@@ -247,7 +249,7 @@ get_latest_version_info() {
     
     local osname=$(get_current_os_name)
     
-    local version_file_url="$azure_feed/$azure_channel/dnvm/latest.$osname.version"
+    local version_file_url="$azure_feed/$azure_channel/dnvm/latest.$osname.$normalized_architecture.version"
     say_verbose "get_latest_version_info: latest url: $version_file_url"
     
     download $version_file_url
@@ -324,7 +326,7 @@ construct_download_link() {
     
     local osname=$(get_current_os_name)
     
-    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-$osname-$normalized_architecture.$specific_version.tar.gz"
+    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-combined-framework-sdk-host-$osname-$normalized_architecture.$specific_version.tar.gz"
     echo "$download_link"
     return 0
 }
@@ -386,16 +388,48 @@ get_absolute_path() {
 }
 
 # args:
+# input_files - stdin
+# root_path - $1
+# out_path - $2
+# override - $3
+copy_files_or_dirs_from_list() {
+    eval $invocation
+
+    local root_path=$(remove_trailing_slash $1)
+    local out_path=$(remove_trailing_slash $2)
+    local override=$3
+    local override_switch=$(if [ "$override" = false ]; then printf -- "-n"; fi)
+    
+    cat | uniq | while read -r file_path; do
+        local path=$(remove_beginning_slash ${file_path#$root_path})
+        local target=$out_path/$path
+        if [ "$override" = true ] || (! ([ -d "$target" ] || [ -e "$target" ])); then
+            mkdir -p $out_path/$(dirname $path)
+            cp -R $override_switch $root_path/$path $target
+        fi
+    done
+}
+
+# args:
 # zip_path - $1
 # out_path - $2
-extract_and_override_zip() {
+extract_dotnet_package() {
     eval $invocation
     
     local zip_path=$1
     local out_path=$2
     
+    local temp_out_path=$(mktemp -d)
+    
     local failed=false
-    tar -xzf "$zip_path" -C "$out_path" > /dev/null || failed=true
+    tar -xzf "$zip_path" -C "$temp_out_path" > /dev/null || failed=true
+    
+    local folders_with_version_regex='^.*/\d+\.\d+[^/]+/'
+    find $temp_out_path -type f | grep -Po $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path false
+    find $temp_out_path -type f | grep -Pv $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path true
+    
+    rm -rf $temp_out_path
+    
     if [ "$failed" = true ]; then
         say_err "Extraction failed"
         return 1
@@ -449,23 +483,7 @@ calculate_vars() {
 
 install_dotnet() {
     eval $invocation
-    
-    local local_version_info=$(get_installed_version_info $install_root)
-    local local_version
-    local version_text
-    if [ -z "$local_version_info" ]; then
-        version_text="<No .NET CLI installed>"
-    else
-        local_version=$(echo "$local_version_info" | get_version_from_version_info)
-        version_text=$local_version
-    fi
-    say_verbose "Local CLI version is: $version_text"
-    
-    if [ ! -z "${local_version:-}" ] && [ "$specific_version" = "$local_version" ]; then
-        say "Your version of .NET CLI is up-to-date."
-        return 0
-    fi
-    
+
     mkdir -p $install_root
     zip_path=$(mktemp)
     say_verbose "Zip path: $zip_path"
@@ -475,13 +493,13 @@ install_dotnet() {
     say_verbose "Downloaded file exists and readable? $(if [ -r $zip_path ]; then echo "yes"; else echo "no"; fi)"
     
     say "Extracting zip"
-    extract_and_override_zip $zip_path $install_root
+    extract_dotnet_package $zip_path $install_root
     
     return 0
 }
 
 local_version_file_relative_path="/.version"
-bin_folder_relative_path="/bin"
+bin_folder_relative_path=""
 
 channel="preview"
 version="Latest"
@@ -574,10 +592,11 @@ calculate_vars
 if [ "$dry_run" = true ]; then
     say "Payload URL: $download_link"
     say "Repeatable invocation: ./$(basename $0) --version $specific_version --channel $channel --install-dir $install_dir"
-else
-    check_pre_reqs
-    install_dotnet
+    return 0
 fi
+
+check_pre_reqs
+install_dotnet
 
 bin_path=$(get_absolute_path $(combine_paths $install_root $bin_folder_relative_path))
 if [ "$no_path" = false ]; then

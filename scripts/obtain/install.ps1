@@ -240,6 +240,19 @@ function Get-List-Of-Directories-And-Versions-To-Unpack-From-Dotnet-Package([Sys
     return $ret
 }
 
+# Example zip content and extraction algorithm:
+# Rule: files if extracted are always being extracted to the same relative path locally
+# .\
+#       a.exe   # file does not exist locally, extract
+#       b.dll   # file exists locally, override only if $OverrideFiles set
+#       aaa\    # same rules as for files
+#           ...
+#       abc\1.0.0\  # directory contains version and exists locally
+#           ...     # do not extract content under versioned part
+#       abc\asd\    # same rules as for files
+#            ...
+#       def\ghi\1.0.1\  # directory contains version and does not exist locally
+#           ...         # extract content
 function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     Say-Invocation $MyInvocation
 
