@@ -152,10 +152,17 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             var commandDir = Path.GetDirectoryName(commandPath);
 
-            var runtimeConfig = Directory.EnumerateFiles(commandDir)
+            var runtimeConfigPath = Directory.EnumerateFiles(commandDir)
                 .FirstOrDefault(x => x.EndsWith("runtimeconfig.json"));
 
-            return runtimeConfig != null;
+            if (runtimeConfigPath == null)
+            {
+                return false;
+            }
+
+            var runtimeConfig = new RuntimeConfig(runtimeConfigPath);
+
+            return runtimeConfig.IsPortable;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -111,6 +112,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             if (IsPortable(executablePath))
             {
+                args.Add("exec");
                 args.Add(ArgumentEscaper.EscapeSingleArg(executablePath));
 
                 var muxer = new Muxer();
@@ -153,12 +155,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private bool IsPortable(string executablePath)
         {
-            var executableDir = Path.GetDirectoryName(executablePath);
+            var commandDir = Path.GetDirectoryName(executablePath);
 
-            var runtimeConfig = Directory.EnumerateFiles(executableDir)
+            var runtimeConfigPath = Directory.EnumerateFiles(commandDir)
                 .FirstOrDefault(x => x.EndsWith("runtimeconfig.json"));
 
-            return runtimeConfig != null;
+            if (runtimeConfigPath == null)
+            {
+                return false;
+            }
+
+            var runtimeConfig = new RuntimeConfig(runtimeConfigPath);
+            Console.WriteLine(runtimeConfig.Framework);
+            return runtimeConfig.IsPortable;
         }
     }
 }
