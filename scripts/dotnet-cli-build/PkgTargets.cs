@@ -24,10 +24,11 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateSdkProductArchive(BuildTargetContext c)
         {
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
-            var pkg = c.BuildContext.Get<string>("SdkInstallerFile");
+            var pkg = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
+            var input = c.BuildContext.Get<string>("CLISDKRoot");
 
             Cmd(Path.Combine(Dirs.RepoRoot, "packaging", "osx", "package-osx.sh"),
-                    "-v", version, "-i", Dirs.Stage2, "-o", pkg)
+                    "-v", version, "-i", input, "-o", pkg)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
