@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void It_returns_a_CommandSpec_with_CoreHost_as_FileName_and_CommandName_in_Args_when_CommandName_exists_in_ProjectTools()
+        public void It_returns_a_CommandSpec_with_DOTNET_as_FileName_and_CommandName_in_Args_when_CommandName_exists_in_ProjectTools()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var commandFile = Path.GetFileNameWithoutExtension(result.Path);
 
-            commandFile.Should().Be("corehost");
+            commandFile.Should().Be("dotnet");
 
             result.Args.Should().Contain(commandResolverArguments.CommandName);
         }
