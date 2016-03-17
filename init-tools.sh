@@ -9,6 +9,7 @@ __DOTNET_CMD=$__DOTNET_PATH/bin/dotnet
 if [ -z "$__BUILDTOOLS_SOURCE" ]; then __BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json; fi
 __BUILD_TOOLS_PACKAGE_VERSION=$(cat $__scriptpath/BuildToolsVersion.txt)
 __DOTNET_TOOLS_VERSION=$(cat $__scriptpath/DotnetCLIVersion.txt)
+__DOTNET_SEMAPHORE=$__DOTNET_PATH/dotnetcli.$__DOTNET_TOOLS_VERSION.completed
 __BUILD_TOOLS_PATH=$__PACKAGES_DIR/Microsoft.DotNet.BuildTools/$__BUILD_TOOLS_PACKAGE_VERSION/lib
 __PROJECT_JSON_PATH=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION
 __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
@@ -41,10 +42,11 @@ case $OSName in
         ;;
 esac
 
-if [ ! -e $__PROJECT_JSON_FILE ]; then
+if [ ! -e $__PROJECT_JSON_FILE -o ! -e $__DOTNET_SEMAPHORE ]; then
     if [ -e $__TOOLRUNTIME_DIR ]; then rm -rf -- $__TOOLRUNTIME_DIR; fi
     echo "Running: $__scriptpath/init-tools.sh" > $__init_tools_log
-    if [ ! -e $__DOTNET_PATH ]; then
+    if [ ! -e $__DOTNET_PATH  -o ! -e $__DOTNET_SEMAPHORE ]; then
+        if [ -e $__DOTNET_PATH ]; then rm -rf -- $__DOTNET_PATH; fi
         echo "Installing dotnet cli..."
         __DOTNET_LOCATION="https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
         # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
@@ -64,6 +66,8 @@ if [ ! -e $__PROJECT_JSON_FILE ]; then
             cp -R $BUILDTOOLS_OVERRIDE_RUNTIME/* $__DOTNET_PATH/bin/dnx
             cp -R $BUILDTOOLS_OVERRIDE_RUNTIME/* $__DOTNET_PATH/runtime/coreclr
         fi
+        
+        echo $__DOTNET_TOOLS_VERSION > "$__DOTNET_SEMAPHORE"
 
         cd $__scriptpath
     fi
