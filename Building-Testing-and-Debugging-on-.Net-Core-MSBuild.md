@@ -39,3 +39,17 @@ Tests are currently disabled on platforms other than Windows. If you'd like to r
 **Debugging**
 
 TBD
+
+## Unofficial: Getting .Net Core MSBuild binaries without building the code ##
+
+```
+git clone https://github.com/Microsoft/msbuild.git
+cd msbuild
+git fetch --all
+git checkout origin/xplat
+init-tools.cmd # windows
+./init-tools.sh # unix
+
+./Tools/corerun ./Tools/MSBuild.exe /path/to/project
+```
+
