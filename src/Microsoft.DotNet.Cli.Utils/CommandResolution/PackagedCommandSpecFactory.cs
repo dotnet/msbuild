@@ -21,9 +21,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> allowedExtensions,
             string nugetPackagesRoot,
             CommandResolutionStrategy commandResolutionStrategy,
-            string depsFilePath,
-            LibraryExporter exporter = null,
-            bool generateRuntimeConfig = false)
+            string depsFilePath)
         {
             var packageDirectory = GetPackageDirectoryFullPath(library, nugetPackagesRoot);
 
@@ -124,8 +122,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 host = CoreHost.LocalHostExePath;
             }
 
-            arguments.Add(commandPath);
-
             if (depsFilePath != null)
             {
                 arguments.Add("--depsfile");
@@ -134,6 +130,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             arguments.Add("--additionalprobingpath");
             arguments.Add(nugetPackagesRoot);
+
+            arguments.Add(commandPath);
 
             arguments.AddRange(commandArguments);
 
