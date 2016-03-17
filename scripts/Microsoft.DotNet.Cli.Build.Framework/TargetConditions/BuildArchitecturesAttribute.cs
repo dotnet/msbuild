@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             if (architectures == null)
             {
-                throw new ArgumentNullException("architectures");
+                throw new ArgumentNullException(nameof(architectures));
             }
 
             _buildArchitectures = architectures;

@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             if (target == null)
             {
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
             }
 
             if (target.Conditions == null)
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             if (target == null)
             {
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
             }
 
             var sectionName = $"{target.Name.PadRight(_maxTargetLen + 2).Yellow()} ({target.Source.White()})";

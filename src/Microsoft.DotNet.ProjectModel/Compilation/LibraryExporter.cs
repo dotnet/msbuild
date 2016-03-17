@@ -117,13 +117,12 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 yield return LibraryExportBuilder.Create(library)
                     .WithCompilationAssemblies(compilationAssemblies)
                     .WithSourceReferences(sourceReferences)
-                    .WithRuntimeAssemblies(libraryExport.RuntimeAssemblies)
+                    .WithRuntimeAssemblyGroups(libraryExport.RuntimeAssemblyGroups)
                     .WithRuntimeAssets(libraryExport.RuntimeAssets)
-                    .WithNativeLibraries(libraryExport.NativeLibraries)
+                    .WithNativeLibraryGroups(libraryExport.NativeLibraryGroups)
                     .WithEmbedddedResources(libraryExport.EmbeddedResources)
                     .WithAnalyzerReference(analyzerReferences)
                     .WithResourceAssemblies(libraryExport.ResourceAssemblies)
-                    .WithRuntimeTargets(libraryExport.RuntimeTargets)
                     .Build();
             }
         }
@@ -158,8 +157,8 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         private LibraryExport ExportPackage(PackageDescription package)
         {
             var builder = LibraryExportBuilder.Create(package);
-            builder.WithNativeLibraries(PopulateAssets(package, package.NativeLibraries));
-            builder.WithRuntimeAssemblies(PopulateAssets(package, package.RuntimeAssemblies));
+            builder.AddNativeLibraryGroup(new LibraryAssetGroup(PopulateAssets(package, package.NativeLibraries)));
+            builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(PopulateAssets(package, package.RuntimeAssemblies)));
             builder.WithCompilationAssemblies(PopulateAssets(package, package.CompileTimeAssemblies));
             builder.WithSourceReferences(GetSharedSources(package));
             builder.WithAnalyzerReference(GetAnalyzerReferences(package));
@@ -220,7 +219,15 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                         }
                     }
 
-                    builder.AddRuntimeTarget(new LibraryRuntimeTarget(targetGroup.Key, runtime, native));
+                    if (runtime.Any())
+                    {
+                        builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(targetGroup.Key, runtime));
+                    }
+
+                    if (native.Any())
+                    {
+                        builder.AddNativeLibraryGroup(new LibraryAssetGroup(targetGroup.Key, native));
+                    }
                 }
             }
 
@@ -243,7 +250,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                     assemblyPath);
 
                 builder.AddCompilationAssembly(compileAsset);
-                builder.AddRuntimeAssembly(compileAsset);
+                builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(new[] { compileAsset }));
                 if (File.Exists(pdbPath))
                 {
                     builder.AddRuntimeAsset(new LibraryAsset(Path.GetFileName(pdbPath), Path.GetFileName(pdbPath), pdbPath));
@@ -266,12 +273,12 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                         outputPaths.RuntimeFiles.BasePath,
                         outputPaths.RuntimeFiles.Assembly);
 
-                    builder.AddRuntimeAssembly(runtimeAssemblyAsset);
+                    builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(new[] { runtimeAssemblyAsset }));
                     builder.WithRuntimeAssets(CollectAssets(outputPaths.RuntimeFiles));
                 }
                 else
                 {
-                    builder.AddRuntimeAssembly(compilationAssemblyAsset);
+                    builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(new[] { compilationAssemblyAsset }));
                     builder.WithRuntimeAssets(CollectAssets(outputPaths.CompilationFiles));
                 }
             }
@@ -324,7 +331,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             var builder = LibraryExportBuilder.Create(library);
             if (!string.IsNullOrEmpty(library.Path))
             {
-                builder.WithCompilationAssemblies(new []
+                builder.WithCompilationAssemblies(new[]
                 {
                     new LibraryAsset(library.Identity.Name, null, library.Path)
                 });

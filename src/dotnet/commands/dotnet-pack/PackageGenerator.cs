@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             foreach (var dependency in project.Dependencies)
             {
-                if (!dependency.HasFlag(LibraryDependencyTypeFlag.BecomesNupkgDependency))
+                if (dependency.Type.Equals(LibraryDependencyType.Build))
                 {
                     continue;
                 }

@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Runtime assemblies.
             // TODO: native assets/resources.
             var references = exports
-                .SelectMany(export => export.RuntimeAssemblies)
+                .SelectMany(export => export.RuntimeAssemblyGroups.GetDefaultAssets())
                 .Select(r => r.ResolvedPath)
                 .ToList();
 

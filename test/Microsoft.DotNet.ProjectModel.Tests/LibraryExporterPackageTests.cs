@@ -39,9 +39,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 });
 
             var result = ExportSingle(description);
-            result.NativeLibraries.Should().HaveCount(1);
+            result.NativeLibraryGroups.Should().HaveCount(1);
 
-            var libraryAsset = result.NativeLibraries.First();
+            var libraryAsset = result.NativeLibraryGroups.GetDefaultAssets().First();
             libraryAsset.Name.Should().Be("Native");
             libraryAsset.Transform.Should().BeNull();
             libraryAsset.RelativePath.Should().Be("lib/Native.so");
@@ -83,13 +83,47 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 });
 
             var result = ExportSingle(description);
-            result.RuntimeAssemblies.Should().HaveCount(1);
+            result.RuntimeAssemblyGroups.Should().HaveCount(1);
 
-            var libraryAsset = result.RuntimeAssemblies.First();
+            var libraryAsset = result.RuntimeAssemblyGroups.GetDefaultAssets().First();
             libraryAsset.Name.Should().Be("Native");
             libraryAsset.Transform.Should().BeNull();
             libraryAsset.RelativePath.Should().Be("ref/Native.dll");
             libraryAsset.ResolvedPath.Should().Be(Path.Combine(PackagePath, "ref/Native.dll"));
+        }
+
+        [Fact]
+        public void ExportsPackageRuntimeTargets()
+        {
+            var description = CreateDescription(
+                new LockFileTargetLibrary()
+                {
+                    RuntimeTargets = new List<LockFileRuntimeTarget>()
+                    {
+                        new LockFileRuntimeTarget("native/native.dylib", "osx", "native"),
+                        new LockFileRuntimeTarget("lib/Something.OSX.dll", "osx", "runtime")
+                    }
+                });
+
+            var result = ExportSingle(description);
+            result.RuntimeAssemblyGroups.Should().HaveCount(2);
+            result.RuntimeAssemblyGroups.First(g => g.Runtime == string.Empty).Assets.Should().HaveCount(0);
+            result.RuntimeAssemblyGroups.First(g => g.Runtime == "osx").Assets.Should().HaveCount(1);
+            result.NativeLibraryGroups.Should().HaveCount(2);
+            result.NativeLibraryGroups.First(g => g.Runtime == string.Empty).Assets.Should().HaveCount(0);
+            result.NativeLibraryGroups.First(g => g.Runtime == "osx").Assets.Should().HaveCount(1);
+
+            var nativeAsset = result.NativeLibraryGroups.GetRuntimeAssets("osx").First();
+            nativeAsset.Name.Should().Be("native");
+            nativeAsset.Transform.Should().BeNull();
+            nativeAsset.RelativePath.Should().Be("native/native.dylib");
+            nativeAsset.ResolvedPath.Should().Be(Path.Combine(PackagePath, "native/native.dylib"));
+
+            var runtimeAsset = result.RuntimeAssemblyGroups.GetRuntimeAssets("osx").First();
+            runtimeAsset.Name.Should().Be("Something.OSX");
+            runtimeAsset.Transform.Should().BeNull();
+            runtimeAsset.RelativePath.Should().Be("lib/Something.OSX.dll");
+            runtimeAsset.ResolvedPath.Should().Be(Path.Combine(PackagePath, "lib/Something.OSX.dll"));
         }
 
         [Fact]
@@ -267,54 +301,6 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             libraryAsset.Transform.Should().NotBeNull();
             libraryAsset.RelativePath.Should().Be(Path.Combine("content", "file.any"));
             libraryAsset.ResolvedPath.Should().Be(Path.Combine(PackagePath, "content", "file.any"));
-        }
-
-        [Fact]
-        public void ExportsRuntimeTargets()
-        {
-            var win8Native = Path.Combine("native", "win8-x64", "Native.dll");
-            var win8Runtime = Path.Combine("runtime", "win8-x64", "Runtime.dll");
-            var linuxNative = Path.Combine("native", "linux", "Native.dll");
-
-            var description = CreateDescription(
-               new LockFileTargetLibrary()
-               {
-                   RuntimeTargets = new List<LockFileRuntimeTarget>()
-                   {
-                    new LockFileRuntimeTarget(
-                        path: win8Native,
-                        runtime: "win8-x64",
-                        assetType: "native"
-                    ),
-                    new LockFileRuntimeTarget(
-                        path: win8Runtime,
-                        runtime: "win8-x64",
-                        assetType: "runtime"
-                    ),
-                    new LockFileRuntimeTarget(
-                        path: linuxNative,
-                        runtime: "linux",
-                        assetType: "native"
-                    ),
-                   }
-               });
-
-            var result = ExportSingle(description);
-            result.RuntimeTargets.Should().HaveCount(2);
-
-            var runtimeTarget = result.RuntimeTargets.Should().Contain(t => t.Runtime == "win8-x64").Subject;
-            var runtime = runtimeTarget.RuntimeAssemblies.Single();
-            runtime.RelativePath.Should().Be(win8Runtime);
-            runtime.ResolvedPath.Should().Be(Path.Combine(PackagePath, win8Runtime));
-
-            var native = runtimeTarget.NativeLibraries.Single();
-            native.RelativePath.Should().Be(win8Native);
-            native.ResolvedPath.Should().Be(Path.Combine(PackagePath, win8Native));
-
-            runtimeTarget = result.RuntimeTargets.Should().Contain(t => t.Runtime == "linux").Subject;
-            native = runtimeTarget.NativeLibraries.Single();
-            native.RelativePath.Should().Be(linuxNative);
-            native.ResolvedPath.Should().Be(Path.Combine(PackagePath, linuxNative));
         }
 
         private LibraryExport ExportSingle(LibraryDescription description = null)

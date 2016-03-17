@@ -86,9 +86,9 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
             foreach (var projectDependency in projectDependencies)
             {
-                var runtimeAssemblies = projectDependency.RuntimeAssemblies;
+                var runtimeAssemblies = projectDependency.RuntimeAssemblyGroups;
 
-                foreach (var runtimeAssembly in runtimeAssemblies)
+                foreach (var runtimeAssembly in runtimeAssemblies.GetDefaultAssets())
                 {
                     var runtimeAssemblyPath = runtimeAssembly.ResolvedPath;
                     runtimeDependencies.Add(runtimeAssemblyPath);

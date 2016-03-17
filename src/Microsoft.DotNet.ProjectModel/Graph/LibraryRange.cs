@@ -145,10 +145,5 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 
             return sb.ToString();
         }
-
-        public bool HasFlag(LibraryDependencyTypeFlag flag)
-        {
-            return Type.HasFlag(flag);
-        }
     }
 }

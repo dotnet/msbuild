@@ -5,45 +5,28 @@ using System;
 
 namespace Microsoft.DotNet.ProjectModel.Graph
 {
-    public struct LibraryDependencyType
+    public struct LibraryDependencyType : IEquatable<LibraryDependencyType>, IEquatable<string>
     {
-        public static LibraryDependencyType Default = LibraryDependencyType.Parse("default");
+        public static LibraryDependencyType Empty = new LibraryDependencyType();
+        public static LibraryDependencyType Default = new LibraryDependencyType("default");
+        public static LibraryDependencyType Build = new LibraryDependencyType("build");
+        public static LibraryDependencyType Platform = new LibraryDependencyType("platform");
 
-        public static LibraryDependencyType Build = LibraryDependencyType.Parse("build");
+        public string Value { get; }
 
-        public LibraryDependencyTypeFlag Flags { get; private set; }
-
-        private LibraryDependencyType(LibraryDependencyTypeFlag flags)
+        private LibraryDependencyType(string value)
         {
-            Flags = flags;
+            Value = value;
         }
 
-        public static LibraryDependencyType Parse(string keyword)
-        {
-            if (string.Equals(keyword, "default", StringComparison.OrdinalIgnoreCase) ||
-                string.IsNullOrEmpty(keyword)) // Need the default value of the struct to behave like "default"
-            {
-                return new LibraryDependencyType(
-                       LibraryDependencyTypeFlag.MainReference |
-                       LibraryDependencyTypeFlag.MainSource |
-                       LibraryDependencyTypeFlag.MainExport |
-                       LibraryDependencyTypeFlag.RuntimeComponent |
-                       LibraryDependencyTypeFlag.BecomesNupkgDependency);
-            }
+        public static LibraryDependencyType Parse(string value) => new LibraryDependencyType(value.ToLowerInvariant());
 
-            if (string.Equals(keyword, "build", StringComparison.OrdinalIgnoreCase))
-            {
-                return new LibraryDependencyType(
-                    LibraryDependencyTypeFlag.MainSource |
-                    LibraryDependencyTypeFlag.PreprocessComponent);
-            }
+        public override int GetHashCode() => Value.GetHashCode();
 
-            throw new InvalidOperationException(string.Format("unknown keyword {0}", keyword));
-        }
+        public override bool Equals(object obj) => obj is LibraryDependencyType && Equals((LibraryDependencyType)obj);
 
-        public bool HasFlag(LibraryDependencyTypeFlag flag)
-        {
-            return (Flags & flag) != 0;
-        }
+        public bool Equals(string other) => string.Equals(Value, other, StringComparison.Ordinal);
+
+        public bool Equals(LibraryDependencyType other) => string.Equals(Value, other.Value, StringComparison.Ordinal);
     }
 }

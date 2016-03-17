@@ -17,7 +17,7 @@ namespace NuGet
         {
             if (packageId == null)
             {
-                throw new ArgumentNullException("packageId");
+                throw new ArgumentNullException(nameof(packageId));
             }
             return _idRegex.IsMatch(packageId);
         }

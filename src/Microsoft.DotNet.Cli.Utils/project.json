@@ -7,10 +7,10 @@
   "dependencies": {
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
-    "NuGet.Versioning": "3.4.0-rtm-0763",
-    "NuGet.Packaging": "3.4.0-rtm-0763",
-    "NuGet.Frameworks": "3.4.0-rtm-0763",
-    "NuGet.ProjectModel": "3.4.0-rtm-0763"
+    "NuGet.Versioning": "3.5.0-beta-1034",
+    "NuGet.Packaging": "3.5.0-beta-1034",
+    "NuGet.Frameworks": "3.5.0-beta-1034",
+    "NuGet.ProjectModel": "3.5.0-beta-1034"
   },
   "frameworks": {
     "net451": {

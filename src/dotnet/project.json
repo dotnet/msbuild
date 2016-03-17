@@ -16,21 +16,26 @@
     "commands/dotnet-new/FSharp_Console/project.json.template"
   ],
   "dependencies": {
+    "NuGet.Commands": {
+      "version": "3.5.0-beta-1034",
+      "exclude": "compile"
+    },
+    "NuGet.CommandLine.XPlat": "3.5.0-beta-1034",
+
     "Newtonsoft.Json": "7.0.1",
     "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160225-02",
-    "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-160316",
+    "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-151218",
     "Microsoft.Net.CSharp.Interactive.netcore": "1.3.0-beta1-20160225-02",
     "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160225-02",
     "Microsoft.DiaSymReader.Native": "1.3.3",
-    "NuGet.CommandLine.XPlat": "3.4.0-rtm-0763",
-    "System.CommandLine": "0.1.0-e160119-1",
+    "System.CommandLine": "0.1.0-e160323-1",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.ILCompiler.SDK": "1.0.6-prerelease-00003",
     "Microsoft.Extensions.Logging": "1.0.0-rc2-16040",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16040",
-    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-20100",
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
       "version": "1.0.0-rc2-16453"
@@ -57,7 +62,7 @@
     "System.Threading.ThreadPool": "4.0.10-rc2-23911",
     "Microsoft.Win32.Registry": {
       "version": "4.0.0-rc2-23911",
-      "exclude": "Compile"
+      "exclude": "compile"
     },
     "System.Net.NameResolution": "4.0.0-rc2-23911"
   },
@@ -69,5 +74,5 @@
       ]
     }
   },
-  "scripts": {}
+  "scripts": { }
 }

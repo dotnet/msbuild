@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -90,16 +91,10 @@ namespace Microsoft.Extensions.DependencyModel
             var serviceable = (export.Library as PackageDescription)?.Library.IsServiceable ?? false;
             var libraryDependencies = new HashSet<Dependency>();
 
-            var libraryAssets = runtime ? export.RuntimeAssemblies : export.CompilationAssemblies;
-
             foreach (var libraryDependency in export.Library.Dependencies)
             {
                 // skip build time dependencies
-                if (!libraryDependency.Type.HasFlag(
-                        LibraryDependencyTypeFlag.MainReference |
-                        LibraryDependencyTypeFlag.MainExport |
-                        LibraryDependencyTypeFlag.RuntimeComponent |
-                        LibraryDependencyTypeFlag.BecomesNupkgDependency))
+                if (libraryDependency.Type.Equals(LibraryDependencyType.Build))
                 {
                     continue;
                 }
@@ -111,16 +106,6 @@ namespace Microsoft.Extensions.DependencyModel
                 }
             }
 
-            IEnumerable<string> assemblies;
-            if (type == LibraryType.ReferenceAssembly)
-            {
-                assemblies = ResolveReferenceAssembliesPath(libraryAssets);
-            }
-            else
-            {
-                assemblies = libraryAssets.Select(libraryAsset => libraryAsset.RelativePath);
-            }
-
             if (runtime)
             {
                 return new RuntimeLibrary(
@@ -128,16 +113,25 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Identity.Name,
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
-                    assemblies.Select(RuntimeAssembly.Create),
-                    export.NativeLibraries.Select(l => l.RelativePath),
+                    export.RuntimeAssemblyGroups.Select(CreateRuntimeAssetGroup).ToArray(),
+                    export.NativeLibraryGroups.Select(CreateRuntimeAssetGroup).ToArray(),
                     export.ResourceAssemblies.Select(CreateResourceAssembly),
-                    export.RuntimeTargets.Select(CreateRuntimeTarget),
                     libraryDependencies,
                     serviceable
                     );
             }
             else
             {
+                IEnumerable<string> assemblies;
+                if (type == LibraryType.ReferenceAssembly)
+                {
+                    assemblies = ResolveReferenceAssembliesPath(export.CompilationAssemblies);
+                }
+                else
+                {
+                    assemblies = export.CompilationAssemblies.Select(libraryAsset => libraryAsset.RelativePath);
+                }
+
                 return new CompilationLibrary(
                     type.ToString().ToLowerInvariant(),
                     export.Library.Identity.Name,
@@ -145,9 +139,15 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Hash,
                     assemblies,
                     libraryDependencies,
-                    serviceable
-                   );
+                    serviceable);
             }
+        }
+
+        private RuntimeAssetGroup CreateRuntimeAssetGroup(LibraryAssetGroup libraryAssetGroup)
+        {
+            return new RuntimeAssetGroup(
+                libraryAssetGroup.Runtime,
+                libraryAssetGroup.Assets.Select(a => a.RelativePath));
         }
 
         private ResourceAssembly CreateResourceAssembly(LibraryResourceAssembly resourceAssembly)
@@ -155,15 +155,6 @@ namespace Microsoft.Extensions.DependencyModel
             return new ResourceAssembly(
                 path: resourceAssembly.Asset.RelativePath,
                 locale: resourceAssembly.Locale
-                );
-        }
-
-        private RuntimeTarget CreateRuntimeTarget(LibraryRuntimeTarget runtimeTarget)
-        {
-            return new RuntimeTarget(
-                runtime: runtimeTarget.Runtime,
-                assemblies: runtimeTarget.RuntimeAssemblies.Select(a => RuntimeAssembly.Create(a.RelativePath)),
-                nativeLibraries: runtimeTarget.NativeLibraries.Select(l => l.RelativePath)
                 );
         }
 
