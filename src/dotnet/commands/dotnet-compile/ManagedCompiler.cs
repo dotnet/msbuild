@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     var transformedResource = resourceFile.GetTransformedFile(intermediateOutputPath);
                     var resourceName = ResourceManifestName.CreateManifestName(
-                        Path.GetFileName(resourceFile.ResolvedPath), compilationOptions.OutputName ?? context.ProjectFile.Name);
+                        Path.GetFileName(resourceFile.ResolvedPath), compilationOptions.OutputName);
                     compilerArgs.Add($"--resource:\"{transformedResource}\",{resourceName}");
                 }
 
@@ -120,14 +120,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                     context.RuntimeIdentifier ?? string.Empty);
 
                 var writer = new DependencyContextWriter();
-                var depsJsonFile = Path.Combine(intermediateOutputPath,
-                    (compilationOptions.OutputName ?? context.ProjectFile.Name) + "dotnet-compile.deps.json");
+                var depsJsonFile = Path.Combine(intermediateOutputPath, compilationOptions.OutputName + "dotnet-compile.deps.json");
                 using (var fileStream = File.Create(depsJsonFile))
                 {
                     writer.Write(dependencyContext, fileStream);
                 }
 
-                compilerArgs.Add($"--resource:\"{depsJsonFile}\",{compilationOptions.OutputName ?? context.ProjectFile.Name}.deps.json");
+                compilerArgs.Add($"--resource:\"{depsJsonFile}\",{compilationOptions.OutputName}.deps.json");
             }
 
             if (!AddNonCultureResources(context.ProjectFile, compilerArgs, intermediateOutputPath))

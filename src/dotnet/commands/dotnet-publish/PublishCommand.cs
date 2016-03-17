@@ -240,7 +240,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
 
                 var outputBinaryName = binaryName.Equals(Constants.HostExecutableName)
-                    ? ((compilationOptions.OutputName ?? context.ProjectFile.Name) + Constants.ExeSuffix)
+                    ? compilationOptions.OutputName + Constants.ExeSuffix
                     : binaryName;
                 var outputBinaryPath = Path.Combine(outputPath, outputBinaryName);
 

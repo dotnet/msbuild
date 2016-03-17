@@ -80,7 +80,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             if (emitEntryPoint && !string.IsNullOrEmpty(_context.RuntimeIdentifier))
             {
                 // TODO: Pick a host based on the RID
-                CoreHost.CopyTo(_runtimeOutputPath, GetOutputName() + Constants.ExeSuffix);
+                CoreHost.CopyTo(_runtimeOutputPath, _compilerOptions.OutputName + Constants.ExeSuffix);
             }
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 }
 
                 var runtimeConfigJsonFile =
-                    Path.Combine(_runtimeOutputPath, GetOutputName() + FileNameSuffixes.RuntimeConfigJson);
+                    Path.Combine(_runtimeOutputPath, _compilerOptions.OutputName + FileNameSuffixes.RuntimeConfigJson);
 
                 using (var writer = new JsonTextWriter(new StreamWriter(File.Create(runtimeConfigJsonFile))))
                 {
@@ -159,7 +159,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         {
             Directory.CreateDirectory(_runtimeOutputPath);
 
-            var depsFilePath = Path.Combine(_runtimeOutputPath, GetOutputName() + FileNameSuffixes.Deps);
+            var depsFilePath = Path.Combine(_runtimeOutputPath, _compilerOptions.OutputName + FileNameSuffixes.Deps);
             File.WriteAllLines(depsFilePath, exporter
                 .GetDependencies(LibraryType.Package)
                 .SelectMany(GenerateLines));
@@ -176,7 +176,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 runtime: _context.RuntimeIdentifier ?? string.Empty);
 
             var writer = new DependencyContextWriter();
-            var depsJsonFilePath = Path.Combine(_runtimeOutputPath, GetOutputName() + FileNameSuffixes.DepsJson);
+            var depsJsonFilePath = Path.Combine(_runtimeOutputPath, _compilerOptions.OutputName + FileNameSuffixes.DepsJson);
             using (var fileStream = File.Create(depsJsonFilePath))
             {
                 writer.Write(dependencyContext, fileStream);
@@ -210,11 +210,6 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             {
                 appConfig.Save(stream);
             }
-        }
-
-        private string GetOutputName()
-        {
-            return _compilerOptions.OutputName ?? _context.ProjectFile.Name;
         }
 
         private static IEnumerable<string> GenerateLines(LibraryExport export)

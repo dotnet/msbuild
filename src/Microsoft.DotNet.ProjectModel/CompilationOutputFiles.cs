@@ -42,9 +42,7 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 var compilationOptions = Project.GetCompilerOptions(Framework, Configuration);
 
-                return Path.Combine(
-                    BasePath,
-                    (compilationOptions.OutputName ?? Project.Name) + OutputExtension);
+                return Path.Combine(BasePath, compilationOptions.OutputName + OutputExtension);
             }
         }
 

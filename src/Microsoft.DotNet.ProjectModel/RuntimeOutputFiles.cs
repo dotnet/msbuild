@@ -37,12 +37,10 @@ namespace Microsoft.DotNet.ProjectModel
                     // The executable is a DLL in this case
                     extension = FileNameSuffixes.DotNet.DynamicLib;
                 }
-                
+
                 var compilationOptions = Project.GetCompilerOptions(Framework, Configuration);
 
-                return Path.Combine(
-                    BasePath,
-                    (compilationOptions.OutputName ?? Project.Name) + extension);
+                return Path.Combine(BasePath, compilationOptions.OutputName + extension);
             }
         }
 
