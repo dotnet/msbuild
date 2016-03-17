@@ -41,6 +41,7 @@ Tests are currently disabled on platforms other than Windows. If you'd like to r
 TBD
 
 ## Unofficial: Getting .Net Core MSBuild binaries without building the code ##
+This is a non-ideal, intermediary solution for getting .NET core MSBuild binaries. We plan on improving this experience.
 
 ```
 git clone https://github.com/Microsoft/msbuild.git
