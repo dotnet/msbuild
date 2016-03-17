@@ -20,6 +20,7 @@
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <CompilerToolsVersion>1.2.0-beta1-20160108-01</CompilerToolsVersion>
+    <MicroBuildVersion>0.2.0</MicroBuildVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
@@ -32,7 +33,8 @@
     <!-- When running in .NET Core, use the MSBuild bin path as the ToolsDir.  This supports the bootstrap scenario -->
     <ToolsDir Condition="'$(MSBuildRuntimeType)'=='Core'">$(MSBuildBinPath)$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
-    
+    <MicroBuildDir>$(ToolPackagesDir)\MicroBuild.Core\$(MicroBuildVersion)\build\</MicroBuildDir>
+
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
     <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
 
@@ -60,7 +62,6 @@
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
     <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages $(PackagesDir)</DnuRestoreCommand>
-
   </PropertyGroup>
 
   <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
