@@ -12,7 +12,7 @@ INSTALL_DESTINATION=$2
 chmod -R 755 $INSTALL_DESTINATION
 
 # Add the installation bin directory to the system-wide paths
-echo $INSTALL_DESTINATION/bin | tee -a /etc/paths.d/dotnet
+echo $INSTALL_DESTINATION | tee -a /etc/paths.d/dotnet
 
 
 exit 0

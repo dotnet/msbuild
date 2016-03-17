@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.ProjectModel
         {
             ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
 
-            if (GlobalSettings == null)
+            if (GlobalSettings == null && ProjectDirectory != null)
             {
                 RootDirectory = ProjectRootResolver.ResolveRootDirectory(ProjectDirectory);
 
@@ -157,7 +157,6 @@ namespace Microsoft.DotNet.ProjectModel
             var frameworkReferenceResolver = new FrameworkReferenceResolver(ReferenceAssembliesPath);
 
             LockFileLookup lockFileLookup = null;
-
             EnsureProjectLoaded();
 
             LockFile = LockFile ?? LockFileResolver(ProjectDirectory);
@@ -167,7 +166,10 @@ namespace Microsoft.DotNet.ProjectModel
 
             if (LockFile != null)
             {
-                validLockFile = LockFile.IsValidForProject(Project, out lockFileValidationMessage);
+                if (Project != null)
+                {
+                    validLockFile = LockFile.IsValidForProject(Project, out lockFileValidationMessage);
+                }
 
                 lockFileLookup = new LockFileLookup(LockFile);
             }
@@ -175,10 +177,14 @@ namespace Microsoft.DotNet.ProjectModel
             var libraries = new Dictionary<LibraryKey, LibraryDescription>();
             var projectResolver = new ProjectDependencyProvider(ProjectResolver);
 
-            var mainProject = projectResolver.GetDescription(TargetFramework, Project, targetLibrary: null);
+            ProjectDescription mainProject = null;
+            if (Project != null)
+            {
+                mainProject = projectResolver.GetDescription(TargetFramework, Project, targetLibrary: null);
 
-            // Add the main project
-            libraries.Add(new LibraryKey(mainProject.Identity.Name), mainProject);
+                // Add the main project
+                libraries.Add(new LibraryKey(mainProject.Identity.Name), mainProject);
+            }
 
             LockFileTarget target = null;
             if (lockFileLookup != null)
@@ -251,7 +257,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
 
             // Create a library manager
-            var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics, Project.ProjectFilePath);
+            var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics, Project?.ProjectFilePath);
 
             return new ProjectContext(
                 GlobalSettings,
@@ -375,13 +381,9 @@ namespace Microsoft.DotNet.ProjectModel
 
         private void EnsureProjectLoaded()
         {
-            if (Project == null)
+            if (Project == null && ProjectDirectory != null)
             {
                 Project = ProjectResolver(ProjectDirectory);
-                if (Project == null)
-                {
-                    throw new InvalidOperationException($"Unable to resolve project from {ProjectDirectory}");
-                }
             }
         }
 

@@ -37,7 +37,8 @@ namespace Microsoft.DotNet.Cli.Build
             var channel = c.BuildContext.Get<string>("Channel").ToLower();
             var packageName = Monikers.GetDebianPackageName(c);
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
-            var debFile = c.BuildContext.Get<string>("SdkInstallerFile");
+            var debFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
+            var input = c.BuildContext.Get<string>("CLISDKRoot");
             var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
             var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
 
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(objRoot);
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"),
-                "-v", version, "-i", Dirs.Stage2, "-o", debFile, "-p", packageName, "-m", manPagesDir, "--previous-version-url", previousVersionURL, "--obj-root", objRoot)
+                "-v", version, "-i", input, "-o", debFile, "-p", packageName, "-m", manPagesDir, "--previous-version-url", previousVersionURL, "--obj-root", objRoot)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -99,7 +100,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedframework-debian.sh"),
                     "--input", inputRoot, "--output", debFile, "--package-name", packageName,
-                    "--framework-nuget-name", SharedFrameworkTargets.SharedFrameworkName,
+                    "--framework-nuget-name", Monikers.SharedFrameworkName,
                     "--framework-nuget-version", c.BuildContext.Get<string>("SharedFrameworkNugetVersion"),
                     "--obj-root", objRoot, "--version", version)
                     .Execute()

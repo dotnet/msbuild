@@ -8,6 +8,8 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class Monikers
     {
+        public const string SharedFrameworkName = "Microsoft.NETCore.App";
+
         public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix)
         {
             string osname = GetOSShortName();
@@ -31,7 +33,7 @@ namespace Microsoft.DotNet.Cli.Build
                 case "rtm":
                     packageName = "dotnet";
                     break;
-               default:
+                default:
                     throw new Exception($"Unknown channel - {channel}");
             }
 
@@ -42,7 +44,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
 
-            return $"dotnet-sharedframework-{SharedFrameworkTargets.SharedFrameworkName}-{sharedFrameworkNugetVersion}".ToLower();
+            return $"dotnet-sharedframework-{SharedFrameworkName}-{sharedFrameworkNugetVersion}".ToLower();
         }
 
         public static string GetOSShortName()

@@ -10,6 +10,7 @@ using System.Text;
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Utils;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -45,6 +46,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             c.BuildContext["Configuration"] = configEnv;
             c.BuildContext["Channel"] = Environment.GetEnvironmentVariable("CHANNEL");
+            c.BuildContext["SharedFrameworkNugetVersion"] = GetVersionFromProjectJson(Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework", "project.json"));
 
             c.Info($"Building {c.BuildContext["Configuration"]} to: {Dirs.Output}");
             c.Info("Build Environment:");
@@ -112,11 +114,11 @@ namespace Microsoft.DotNet.Cli.Build
             var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}_{config}_version_badge.svg";
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
-            AddInstallerArtifactToContext(c, "dotnet", "Sdk");
+            AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk");
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost");
             AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework");
-            AddInstallerArtifactToContext(c, "dotnet-combined-framework-sdk-host", "CombinedFrameworkSDKHost");
-            AddInstallerArtifactToContext(c, "dotnet-combined-framework-host", "CombinedFrameworkHost");
+            AddInstallerArtifactToContext(c, "dotnet-dev", "CombinedFrameworkSDKHost");
+            AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost");
 
             return c.Success();
         }
@@ -313,6 +315,23 @@ cmake is required to build the native host 'corehost'";
             }
 
             return c.Success();
+        }
+
+        private static string GetVersionFromProjectJson(string pathToProjectJson)
+        {
+            Regex r = new Regex($"\"{Regex.Escape(Monikers.SharedFrameworkName)}\"\\s*:\\s*\"(?'version'[^\"]*)\"");
+
+            foreach (var line in File.ReadAllLines(pathToProjectJson))
+            {
+                var m = r.Match(line);
+
+                if (m.Success)
+                {
+                    return m.Groups["version"].Value;
+                }
+            }
+
+            throw new InvalidOperationException("Unable to match the version name from " + pathToProjectJson);
         }
 
         private static bool AptPackageIsInstalled(string packageName)

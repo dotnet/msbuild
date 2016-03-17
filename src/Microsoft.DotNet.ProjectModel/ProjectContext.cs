@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public string RuntimeIdentifier { get; }
 
-        public Project ProjectFile => RootProject.Project;
+        public Project ProjectFile => RootProject?.Project;
 
         public LockFile LockFile { get; }
 
