@@ -107,10 +107,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string expectedOutput)
         {
             var executablePath = Path.Combine(outputDir, executableName);
+            var args = new List<string>();
+
+            if (IsPortable(executablePath))
+            {
+                args.Add(ArgumentEscaper.EscapeSingleArg(executablePath));
+
+                var muxer = new Muxer();
+                executablePath = muxer.MuxerPath;
+            }
 
             var executableCommand = new TestCommand(executablePath);
 
-            var result = executableCommand.ExecuteWithCapturedOutput("");
+            var result = executableCommand.ExecuteWithCapturedOutput(string.Join(" ", args));
 
             result.Should().HaveStdOut(expectedOutput);
             result.Should().NotHaveStdErr();
@@ -140,6 +149,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             return executablePath;
+        }
+
+        private bool IsPortable(string executablePath)
+        {
+            var executableDir = Path.GetDirectoryName(executablePath);
+
+            var runtimeConfig = Directory.EnumerateFiles(executableDir)
+                .FirstOrDefault(x => x.EndsWith("runtimeconfig.json"));
+
+            return runtimeConfig != null;
         }
     }
 }
