@@ -20,6 +20,8 @@
         <dependency id="Microsoft.Build.Framework" />
         <dependency id="Microsoft.Tpl.Dataflow" version="4.5.24" />
         <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23516" />
+        <dependency id="System.Security.AccessControl" version="4.0.0-rc2-23512" />
+        <dependency id="System.Security.Principal.Windows" version="4.0.0-rc2-23712" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1-rc2-23712" />
         <dependency id="System.AppContext" version="4.0.1-rc2-23712" />
         <dependency id="System.Collections" version="4.0.11-rc2-23712" />
@@ -51,8 +53,6 @@
         <dependency id="System.Runtime.InteropServices" version="4.0.21-rc2-23712" />
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0-rc2-23712" />
         <dependency id="System.Runtime.Loader" version="4.0.0-rc2-23712" />
-        <dependency id="System.Security.AccessControl" version="4.0.0-rc2-23512" />
-        <dependency id="System.Security.Principal.Windows" version="4.0.0-rc2-23712" />
         <dependency id="System.Text.Encoding" version="4.0.11-rc2-23712" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.11-rc2-23712" />
         <dependency id="System.Text.RegularExpressions" version="4.0.11-rc2-23712" />

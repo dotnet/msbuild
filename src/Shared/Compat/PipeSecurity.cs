@@ -15,6 +15,8 @@
 
 //  Copied from https://github.com/Microsoft/referencesource/blob/d925d870f3cb3f6acdb14e71522ece7054e2233b/System.Core/System/IO/Pipes/PipeSecurity.cs
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX && !FEATURE_PIPE_SECURITY
+
 using System;
 using System.Collections;
 using System.Security.AccessControl;
@@ -482,3 +484,4 @@ namespace System.IO.Pipes {
     }
 }
 
+#endif
