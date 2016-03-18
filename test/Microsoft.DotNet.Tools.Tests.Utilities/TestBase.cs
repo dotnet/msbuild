@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -107,10 +108,20 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string expectedOutput)
         {
             var executablePath = Path.Combine(outputDir, executableName);
+            var args = new List<string>();
+
+            if (IsPortable(executablePath))
+            {
+                args.Add("exec");
+                args.Add(ArgumentEscaper.EscapeSingleArg(executablePath));
+
+                var muxer = new Muxer();
+                executablePath = muxer.MuxerPath;
+            }
 
             var executableCommand = new TestCommand(executablePath);
 
-            var result = executableCommand.ExecuteWithCapturedOutput("");
+            var result = executableCommand.ExecuteWithCapturedOutput(string.Join(" ", args));
 
             result.Should().HaveStdOut(expectedOutput);
             result.Should().NotHaveStdErr();
@@ -140,6 +151,23 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             return executablePath;
+        }
+
+        private bool IsPortable(string executablePath)
+        {
+            var commandDir = Path.GetDirectoryName(executablePath);
+
+            var runtimeConfigPath = Directory.EnumerateFiles(commandDir)
+                .FirstOrDefault(x => x.EndsWith("runtimeconfig.json"));
+
+            if (runtimeConfigPath == null)
+            {
+                return false;
+            }
+
+            var runtimeConfig = new RuntimeConfig(runtimeConfigPath);
+            Console.WriteLine(runtimeConfig.Framework);
+            return runtimeConfig.IsPortable;
         }
     }
 }

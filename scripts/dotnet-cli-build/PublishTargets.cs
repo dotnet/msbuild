@@ -42,11 +42,8 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target(nameof(PublishTargets.PublishVersionBadge),
-        nameof(PublishTargets.PublishCompressedFile),
         nameof(PublishTargets.PublishSdkInstallerFile),
         nameof(PublishTargets.PublishDebFileToDebianRepo),
-        nameof(PublishTargets.PublishSharedFrameworkCompressedFile),
-        nameof(PublishTargets.PublishSharedHostCompressedFile),
         nameof(PublishTargets.PublishCombinedFrameworkSDKHostFile),
         nameof(PublishTargets.PublishCombinedFrameworkHostFile),
         nameof(PublishTargets.PublishLatestVersionTextFile))]
@@ -68,23 +65,10 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        public static BuildTargetResult PublishCompressedFile(BuildTargetContext c)
-        {
-            var compressedFile = c.BuildContext.Get<string>("SdkCompressedFile");
-            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
-            var latestCompressedFile = compressedFile.Replace(Version, "latest");
-            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
-
-            PublishFileAzure(compressedFileBlob, compressedFile);
-            PublishFileAzure(latestCompressedFileBlob, compressedFile);
-            return c.Success();
-        }
-
-        [Target]
         [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSdkInstallerFile(BuildTargetContext c)
         {
-            var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
+            var installerFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
             var installerFileBlob = $"{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
             var latestInstallerFile = installerFile.Replace(Version, "latest");
             var latestInstallerFileBlob = $"{Channel}/Installers/Latest/{Path.GetFileName(latestInstallerFile)}";
@@ -180,32 +164,6 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return uploadJson;
-        }
-
-        [Target]
-        public static BuildTargetResult PublishSharedFrameworkCompressedFile(BuildTargetContext c)
-        {
-            var compressedFile = c.BuildContext.Get<string>("SharedFrameworkCompressedFile");
-            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
-            var latestCompressedFile = compressedFile.Replace(Version, "latest");
-            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
-
-            PublishFileAzure(compressedFileBlob, compressedFile);
-            PublishFileAzure(latestCompressedFileBlob, compressedFile);
-            return c.Success();
-        }
-
-        [Target]
-        public static BuildTargetResult PublishSharedHostCompressedFile(BuildTargetContext c)
-        {
-            var compressedFile = c.BuildContext.Get<string>("SharedHostCompressedFile");
-            var compressedFileBlob = $"{Channel}/Binaries/{Version}/{Path.GetFileName(compressedFile)}";
-            var latestCompressedFile = compressedFile.Replace(Version, "latest");
-            var latestCompressedFileBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(latestCompressedFile)}";
-
-            PublishFileAzure(compressedFileBlob, compressedFile);
-            PublishFileAzure(latestCompressedFileBlob, compressedFile);
-            return c.Success();
         }
 
         [Target]

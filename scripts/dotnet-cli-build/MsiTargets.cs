@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult InitMsi(BuildTargetContext c)
         {
-            SdkBundle = c.BuildContext.Get<string>("SdkInstallerFile");
+            SdkBundle = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
             SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
             Engine = Path.Combine(Path.GetDirectoryName(SdkBundle), ENGINE);
 
@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateDotnetSharedFrameworkMsi(BuildTargetContext c)
         {
             var inputDir = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
-            var sharedFrameworkNuGetName = SharedFrameworkTargets.SharedFrameworkName;
+            var sharedFrameworkNuGetName = Monikers.SharedFrameworkName;
             var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             var upgradeCode = Utils.GenerateGuidFromName($"{sharedFrameworkNuGetName}-{sharedFrameworkNuGetVersion}-{Arch}").ToString().ToUpper();
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedframework");

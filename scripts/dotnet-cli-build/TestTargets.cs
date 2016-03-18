@@ -16,7 +16,8 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string[] TestPackageProjects = new[]
         {
             "dotnet-hello/v1/dotnet-hello",
-            "dotnet-hello/v2/dotnet-hello"
+            "dotnet-hello/v2/dotnet-hello",
+            "dotnet-portable"
         };
 
         public static readonly string[] TestProjects = new[]

@@ -5,6 +5,11 @@
   },
   "dependencies": {
     "NETStandard.Library": "1.5.0-rc2-23911",
+    "NuGet.Versioning": "3.4.0-rtm-0763",
+    "NuGet.Packaging": "3.4.0-rtm-0763",
+    "NuGet.Frameworks": "3.4.0-rtm-0763",
+    "NuGet.ProjectModel": "3.4.0-rtm-0763",
+    
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
