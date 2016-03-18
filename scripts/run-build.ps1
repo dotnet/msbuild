@@ -72,7 +72,7 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
 # Restore the build scripts
 Write-Host "Restoring Build Script projects..."
 pushd $PSScriptRoot
-dotnet restore
+dotnet restore --disable-parallel
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 popd
 

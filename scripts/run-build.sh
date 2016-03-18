@@ -102,7 +102,7 @@ fi
 echo "Restoring Build Script projects..."
 (
     cd $DIR
-    dotnet restore
+    dotnet restore --disable-parallel
 )
 
 # Build the builder
