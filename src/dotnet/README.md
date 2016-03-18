@@ -35,7 +35,7 @@ The following commands exist for dotnet.
 
 `dotnet-compile(1)`
 
-    Compile the application to either an intermidiate language (IL) or to a native binary. 
+    Compile the application to either an intermediate language (IL) or to a native binary. 
 
 `dotnet-restore(1)`
 
@@ -59,7 +59,7 @@ The following commands exist for dotnet.
 
 # EXAMPLES
 
-`dotnew new`
+`dotnet new`
 
     Initializes a sample .NET Core console application that can be compiled and ran.
 
