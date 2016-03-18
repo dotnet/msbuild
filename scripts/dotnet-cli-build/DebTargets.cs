@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
+        [Target(nameof(InstallSharedFramework))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult GenerateSdkDeb(BuildTargetContext c)
         {
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
+        [Target(nameof(InstallSharedHost))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult GenerateSharedFrameworkDeb(BuildTargetContext c)
         {
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(InstallPackages),
+        [Target(nameof(InstallSDK),
                 nameof(RunE2ETest),
                 nameof(RemovePackages))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
@@ -109,22 +109,25 @@ namespace Microsoft.DotNet.Cli.Build
         }
         
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
-        public static BuildTargetResult InstallPackages(BuildTargetContext c)
+        public static BuildTargetResult InstallSharedHost(BuildTargetContext c)
         {
-            IEnumerable<string> orderedPackageFiles = new List<string>()
-            {
-                c.BuildContext.Get<string>("SharedHostInstallerFile"),
-                c.BuildContext.Get<string>("SharedFrameworkInstallerFile"),
-                c.BuildContext.Get<string>("SdkInstallerFile")
-            };
+            InstallPackage(c.BuildContext.Get<string>("SharedHostInstallerFile"));
             
-            foreach(var fileName in orderedPackageFiles)
-            {
-                Cmd("sudo", "dpkg", "-i", fileName)
-                    .Execute()
-                    .EnsureSuccessful();
-            }
+            return c.Success();
+        }
+        
+        [Target]
+        public static BuildTargetResult InstallSharedFramework(BuildTargetContext c)
+        {
+            InstallPackage(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"));
+            
+            return c.Success();
+        }
+        
+        [Target]
+        public static BuildTargetResult InstallSDK(BuildTargetContext c)
+        {
+            InstallPackage(c.BuildContext.Get<string>("SdkInstallerFile"));
             
             return c.Success();
         }
@@ -152,21 +155,33 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult RemovePackages(BuildTargetContext c)
         {
-            IEnumerable<string> orderedPackageFiles = new List<string>()
+            IEnumerable<string> orderedPackageNames = new List<string>()
             {
                 Monikers.GetDebianPackageName(c),
                 Monikers.GetDebianSharedFrameworkPackageName(c),
                 Monikers.GetDebianSharedHostPackageName(c)
             };
             
-            foreach(var packageFile in orderedPackageFiles)
+            foreach(var packageName in orderedPackageNames)
             {
-                Cmd("sudo", "dpkg", "-r", packageFile)
-                    .Execute()
-                    .EnsureSuccessful();
+                RemovePackage(packageName);
             }
             
             return c.Success();
+        }
+        
+        private static void InstallPackage(string packagePath)
+        {
+            Cmd("sudo", "dpkg", "-i", packagePath)
+                .Execute()
+                .EnsureSuccessful();
+        }
+        
+        private static void RemovePackage(string packageName)
+        {
+            Cmd("sudo", "dpkg", "-r", packageName)
+                .Execute()
+                .EnsureSuccessful();
         }
     }
 }

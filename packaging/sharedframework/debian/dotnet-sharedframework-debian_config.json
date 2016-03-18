@@ -3,7 +3,7 @@
     "maintainer_email": "dotnetcore@microsoft.com",
 
     "package_name": "%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%",
-    "install_root": "/usr/share/dotnet",
+    "install_root": "/usr/share/dotnet/shared/%SHARED_FRAMEWORK_NUGET_NAME%/%SHARED_FRAMEWORK_NUGET_VERSION%",
 
     "short_description": ".NET Core Shared Framework %SHARED_FRAMEWORK_NUGET_NAME% %SHARED_FRAMEWORK_NUGET_VERSION%",
     "long_description": ".NET Core is a cross-platform implementation of .NET Framework, a modern, modular platform\n for building diverse kinds of applications, from command-line applications to microservices and \n modern websites.\n This package contains a runtime and framework which can be used by .NET Core applications.",
