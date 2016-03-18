@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string Version { get; set; }
 
+        private static string NuGetVersion { get; set; }
+
 
         [Target]
         public static BuildTargetResult InitPublish(BuildTargetContext c)
@@ -27,6 +29,7 @@ namespace Microsoft.DotNet.Cli.Build
             BlobContainer = blobClient.GetContainerReference("dotnet");
 
             Version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            NuGetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             Channel = c.BuildContext.Get<string>("Channel");
             return c.Success();
         }
@@ -83,7 +86,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var osname = Monikers.GetOSShortName();
             var latestVersionBlob = $"{Channel}/dnvm/latest.{osname}.{CurrentArchitecture.Current}.version";
-            var latestVersionFile = Path.Combine(Dirs.Stage2, ".version");
+            var latestVersionFile = Path.Combine(Dirs.Stage2, "sdk", NuGetVersion, ".version");
 
             PublishFileAzure(latestVersionBlob, latestVersionFile);
             return c.Success();
