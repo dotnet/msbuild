@@ -23,15 +23,21 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+#endif
 
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc node for hosting tasks.
     /// </summary>
-    internal class OutOfProcTaskHostNode : MarshalByRefObject, INodePacketFactory, INodePacketHandler,
-#if CLR2COMPATIBILITY 
+    internal class OutOfProcTaskHostNode :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject, 
+#endif
+        INodePacketFactory, INodePacketHandler,
+#if CLR2COMPATIBILITY
         IBuildEngine3
 #else
         IBuildEngine4
@@ -165,17 +171,34 @@ namespace Microsoft.Build.CommandLine
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
 #endif
 
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+        private string _clientToServerPipeHandle;
+        private string _serverToClientPipeHandle;
+#endif
+
         /// <summary>
         /// Constructor.
         /// </summary>
-        public OutOfProcTaskHostNode()
+        public OutOfProcTaskHostNode(
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+            string clientToServerPipeHandle,
+            string serverToClientPipeHandle
+#endif       
+            )
         {
             // We don't know what the current build thinks this variable should be until RunTask(), but as a fallback in case there are 
             // communications before we get the configuration set up, just go with what was already in the environment from when this node
             // was initially launched. 
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
+#if FEATURE_APPDOMAIN
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
+#endif
+
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+            _clientToServerPipeHandle = clientToServerPipeHandle;
+            _serverToClientPipeHandle = serverToClientPipeHandle;
+#endif
 
             _receivedPackets = new Queue<INodePacket>();
 
@@ -502,9 +525,13 @@ namespace Microsoft.Build.CommandLine
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             string pipeName = "MSBuild" + Process.GetCurrentProcess().Id;
 
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(pipeName);
+#else
+            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(_clientToServerPipeHandle, _serverToClientPipeHandle);
+#endif
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
@@ -618,7 +645,7 @@ namespace Microsoft.Build.CommandLine
             // If so, now that we've completed the task, we want to shut down 
             // this node -- with no reuse, since we don't know whether the 
             // task we canceled left the node in a good state or not. 
-            if (_taskCancelledEvent.WaitOne(0, false))
+            if (_taskCancelledEvent.WaitOne(0))
             {
                 _shutdownReason = NodeEngineShutdownReason.BuildComplete;
                 _shutdownEvent.Set();
@@ -644,9 +671,11 @@ namespace Microsoft.Build.CommandLine
                     // It means we're already in the process of shutting down - Wait for the taskCompleteEvent to be set instead.
                     if (_isTaskExecuting)
                     {
+#if FEATURE_THREAD_ABORT
                         // The thread will be terminated crudely so our environment may be trashed but it's ok since we are 
                         // shutting down ASAP.
                         _taskRunnerThread.Abort();
+#endif
                     }
                 }
             }
@@ -687,8 +716,10 @@ namespace Microsoft.Build.CommandLine
             _registeredTaskObjectCache = null;
 #endif
 
+#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
             // Restore the original current directory.
             NativeMethodsShared.SetCurrentDirectory(Environment.SystemDirectory);
+#endif
 
             // Restore the original environment.
             CommunicationsUtilities.SetEnvironment(_savedEnvironment);
@@ -705,10 +736,10 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.Disconnect();
 
             // Dispose these WaitHandles
-            _packetReceivedEvent.Close();
-            _shutdownEvent.Close();
-            _taskCompleteEvent.Close();
-            _taskCancelledEvent.Close();
+            _packetReceivedEvent.Dispose();
+            _shutdownEvent.Dispose();
+            _taskCompleteEvent.Dispose();
+            _taskCancelledEvent.Dispose();
 
             return _shutdownReason;
         }
@@ -765,8 +796,14 @@ namespace Microsoft.Build.CommandLine
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
 
                 // Set culture
+#if FEATURE_CULTUREINFO_SETTERS
+                CultureInfo.CurrentCulture = taskConfiguration.Culture;
+                CultureInfo.CurrentUICulture = taskConfiguration.UICulture;
+
+#else
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
                 Thread.CurrentThread.CurrentUICulture = taskConfiguration.UICulture;
+#endif
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
@@ -783,18 +820,23 @@ namespace Microsoft.Build.CommandLine
                     taskConfiguration.ProjectFileOfTask,
                     taskConfiguration.LineNumberOfTask,
                     taskConfiguration.ColumnNumberOfTask,
+#if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
+#endif
                     taskParams
                 );
             }
             catch (Exception e)
             {
+#if FEATURE_VARIOUS_EXCEPTIONS
                 if (e is ThreadAbortException)
                 {
                     // This thread was aborted as part of Cancellation, we will return a failure task result
                     taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
                 }
-                else if (ExceptionHandling.IsCriticalException(e))
+                else
+#endif
+                if (ExceptionHandling.IsCriticalException(e))
                 {
                     throw;
                 }
@@ -826,11 +868,13 @@ namespace Microsoft.Build.CommandLine
                                                     );
                     }
 
+#if FEATURE_APPDOMAIN
                     foreach (TaskParameter param in taskParams.Values)
                     {
                         // Tell remoting to forget connections to the parameter
                         RemotingServices.Disconnect(param);
                     }
+#endif
 
                     // Restore the original clean environment
                     CommunicationsUtilities.SetEnvironment(_savedEnvironment);
@@ -1033,7 +1077,11 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint != null && _nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
+#if FEATURE_BINARY_SERIALIZATION
                 if (!e.GetType().GetTypeInfo().IsSerializable)
+#else
+                if (!NodePacketTranslator.IsSerializable(e))
+#endif
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
                     // that the warning that we constructed is serializable, so everything should be good.  

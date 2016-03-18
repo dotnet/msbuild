@@ -15,7 +15,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Security;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
+#endif
 using System.Security.Principal;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
@@ -81,7 +83,7 @@ namespace Microsoft.Build.BackEnd
         {
             long baseHandshake = Constants.AssemblyTimestamp;
 
-            baseHandshake = baseHandshake*17 + Environment.Is64BitProcess.GetHashCode();
+            baseHandshake = baseHandshake*17 + EnvironmentUtilities.Is64BitProcess.GetHashCode();
 
             baseHandshake = baseHandshake*17 + enableNodeReuse.GetHashCode();
 

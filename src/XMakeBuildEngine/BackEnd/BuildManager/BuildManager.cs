@@ -77,12 +77,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private INodeManager _nodeManager;
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// The object responsible for creating and managing task host nodes.
         /// </summary>
         private INodeManager _taskHostNodeManager;
-#endif
 
         /// <summary>
         /// The object which determines which projects to build, and where.
@@ -213,6 +211,10 @@ namespace Microsoft.Build.Execution
         /// Flag indicating we have disposed. 
         /// </summary>
         private bool _disposed = false;
+
+#if DEBUG
+        public static bool WaitForDebugger { get; set; }
+#endif
 
         /// <summary>
         /// Creates a new unnamed build manager.
@@ -383,9 +385,7 @@ namespace Microsoft.Build.Execution
 
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
-#if FEATURE_APPDOMAIN
                 _taskHostNodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.TaskHostNodeManager) as INodeManager;
-#endif
                 _scheduler = ((IBuildComponentHost)this).GetComponent(BuildComponentType.Scheduler) as IScheduler;
                 _configCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
                 _resultsCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
@@ -1163,7 +1163,6 @@ namespace Microsoft.Build.Execution
             // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
             _nodeManager.ShutdownConnectedNodes(abort ? false : _buildParameters.EnableNodeReuse);
 
-#if FEATURE_APPDOMAIN
             // if we are aborting, the task host will hear about it in time through the task building infrastructure; 
             // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
             // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).  
@@ -1171,7 +1170,6 @@ namespace Microsoft.Build.Execution
             {
                 _taskHostNodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
             }
-#endif
         }
 
         /// <summary>
@@ -1422,9 +1420,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 _nodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
-#if FEATURE_APPDOMAIN
                 _taskHostNodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
-#endif
 
                 foreach (BuildSubmission submission in _buildSubmissions.Values)
                 {

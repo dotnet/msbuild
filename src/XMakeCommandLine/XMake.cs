@@ -537,7 +537,11 @@ namespace Microsoft.Build.CommandLine
 #endif
                 string schemaFile = null;
                 int cpuCount = 1;
+#if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
+#else
+                bool enableNodeReuse = false;
+#endif
                 TextWriter preprocessWriter = null;
                 bool debugger = false;
                 bool detailedSummary = false;
@@ -561,14 +565,15 @@ namespace Microsoft.Build.CommandLine
                         ref schemaFile,
 #endif
                         ref cpuCount,
+#if FEATURE_NODE_REUSE
                         ref enableNodeReuse,
+#endif
                         ref preprocessWriter,
                         ref debugger,
                         ref detailedSummary,
                         recursing: false
                         ))
                 {
-#if FEATURE_APPDOMAIN
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
                     // However we want to give a hint to anyone who is building single proc without realizing it that there
                     // is a better way.
@@ -576,7 +581,6 @@ namespace Microsoft.Build.CommandLine
                     {
                         Console.WriteLine(ResourceUtilities.FormatResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
-#endif
                     if (preprocessWriter != null || debugger)
                     {
                         // Indicate to the engine that it can NOT toss extraneous file content: we want to 
@@ -1072,7 +1076,7 @@ namespace Microsoft.Build.CommandLine
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
                     BuildResult results = null;
@@ -1775,7 +1779,9 @@ namespace Microsoft.Build.CommandLine
             ref string schemaFile,
 #endif
             ref int cpuCount,
+#if FEATURE_NODE_REUSE
             ref bool enableNodeReuse,
+#endif
             ref TextWriter preprocessWriter,
             ref bool debugger,
             ref bool detailedSummary,
@@ -1793,6 +1799,22 @@ namespace Microsoft.Build.CommandLine
             commandLineSwitches.Append(switchesFromAutoResponseFile);    // lowest precedence
             commandLineSwitches.Append(switchesNotFromAutoResponseFile);
 
+#if DEBUG
+            if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.WaitForDebugger])
+            {
+                BuildManager.WaitForDebugger = true;
+
+                if (!Debugger.IsAttached)
+                {
+                    Console.WriteLine("Waiting for debugger to attach... (PID {0})", Process.GetCurrentProcess().Id);
+                    while (!Debugger.IsAttached)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
+            }
+#endif
+
             // show copyright message if nologo switch is not set
             // NOTE: we heed the nologo switch even if there are switch errors
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] && !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
@@ -1805,12 +1827,10 @@ namespace Microsoft.Build.CommandLine
             {
                 ShowHelpMessage();
             }
-#if FEATURE_APPDOMAIN
             else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
                 StartLocalNode(commandLineSwitches);
             }
-#endif
             else
             {
                 // if help switch is not set, and errors were found, abort (don't process the remaining switches)
@@ -1862,7 +1882,9 @@ namespace Microsoft.Build.CommandLine
                                                                ref schemaFile,
 #endif
                                                                ref cpuCount,
+#if FEATURE_NODE_REUSE
                                                                ref enableNodeReuse,
+#endif
                                                                ref preprocessWriter,
                                                                ref debugger,
                                                                ref detailedSummary,
@@ -1879,13 +1901,15 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out which properties have been set on the command line
                     globalProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property]);
-#if FEATURE_APPDOMAIN
+
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
+#if FEATURE_NODE_REUSE
                     // figure out if we shold reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 #endif
+
                     // determine what if any writer to preprocess to
                     preprocessWriter = null;
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
@@ -1944,6 +1968,7 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
+#if FEATURE_NODE_REUSE
         /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
@@ -1977,6 +2002,7 @@ namespace Microsoft.Build.CommandLine
 
             return enableNodeReuse;
         }
+#endif
 
         /// <summary>
         /// Figure out what TextWriter we should preprocess the project file to.
@@ -2005,7 +2031,7 @@ namespace Microsoft.Build.CommandLine
 
             return writer;
         }
-#if FEATURE_APPDOMAIN
+
         /// <summary>
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
@@ -2040,18 +2066,48 @@ namespace Microsoft.Build.CommandLine
                 bool restart = true;
                 while (restart)
                 {
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle].Length == 0)
+                    {
+                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "clientToServerPipeHandle");
+                    }
+                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle].Length == 0)
+                    {
+                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "serverToClientPipeHandle");
+                    }
+
+                    string clientToServerPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle][0];
+                    string serverToClientPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle][0];
+#endif
+
                     Exception nodeException = null;
                     NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
                     // normal OOP node case
                     if (nodeModeNumber == 1)
                     {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcNode node = new OutOfProcNode();
-                        shutdownReason = node.Run(ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]), out nodeException);
+#else
+                        OutOfProcNode node = new OutOfProcNode(clientToServerPipeHandle, serverToClientPipeHandle);
+#endif
+
+                        
+                        bool nodeReuse = false;
+#if FEATURE_NODE_REUSE
+                        nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+#endif
+
+                        shutdownReason = node.Run(nodeReuse, out nodeException);
+
                         FileUtilities.ClearCacheDirectory();
                     }
                     else if (nodeModeNumber == 2)
                     {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
+#else
+                        OutOfProcTaskHostNode node = new OutOfProcTaskHostNode(clientToServerPipeHandle, serverToClientPipeHandle);
+#endif
                         shutdownReason = node.Run(out nodeException);
                     }
                     else
@@ -2096,7 +2152,6 @@ namespace Microsoft.Build.CommandLine
         {
             Microsoft.Build.BuildEngine.LocalNode.StartLocalNodeServer(nodeNumber);
         }
-#endif
 #endif
 
         /// <summary>
@@ -3067,9 +3122,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_3_SwitchesHeader"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_9_TargetSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_10_PropertySwitch"));
-#if FEATURE_APPDOMAIN
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_17_MaximumCPUSwitch"));
-#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_23_ToolsVersionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_12_VerbositySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_13_ConsoleLoggerParametersSwitch"));
@@ -3081,7 +3134,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
-#if FEATURE_APPDOMAIN
+#if FEATURE_NODE_REUSE
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));

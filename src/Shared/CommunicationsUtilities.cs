@@ -18,6 +18,7 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Microsoft.Build.Internal
 {
@@ -445,6 +446,21 @@ namespace Microsoft.Build.Internal
             }
 
             return result;
+        }
+
+        internal static async Task<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
+        {
+            int totalBytesRead = 0;
+            while (totalBytesRead < bytesToRead)
+            {
+                int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead);
+                if (bytesRead == 0)
+                {
+                    return totalBytesRead;
+                }
+                totalBytesRead += bytesRead;
+            }
+            return totalBytesRead;
         }
 
         /// <summary>

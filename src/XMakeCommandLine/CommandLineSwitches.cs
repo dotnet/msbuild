@@ -50,6 +50,9 @@ namespace Microsoft.Build.CommandLine
             DistributedFileLogger,
             Debugger,
             DetailedSummary,
+#if DEBUG
+            WaitForDebugger,
+#endif
             NumberOfParameterlessSwitches
         }
 
@@ -75,10 +78,8 @@ namespace Microsoft.Build.CommandLine
             Validate,
 #endif
             ConsoleLoggerParameters,
-#if FEATURE_APPDOMAIN
             NodeMode,
             MaxCPUCount,
-#endif
             IgnoreProjectExtensions,
             ToolsVersion,
             FileLoggerParameters,
@@ -91,10 +92,14 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters7,
             FileLoggerParameters8,
             FileLoggerParameters9,
-#if FEATURE_APPDOMAIN
+#if FEATURE_NODE_REUSE
             NodeReuse,
 #endif
             Preprocess,
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+            ClientToServerPipeHandle,
+            ServerToClientPipeHandle,
+#endif
             NumberOfParameterizedSwitches
         }
 
@@ -222,7 +227,10 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null, null    ),
 
             new ParameterlessSwitchInfo(  new string[] { "debug", "d" },         ParameterlessSwitch.Debugger,                         null, "DebuggerEnabled"),
-            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null   )
+            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null   ),
+#if DEBUG
+            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null , null   ),
+#endif
         };
 
         // map switches that take parameters to their identifiers (taken from ParameterizedSwitch enum)
@@ -242,10 +250,8 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true    ),
 #endif
             new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true    ),
-#if FEATURE_APPDOMAIN
             new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false   ),
             new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true    ),
-#endif
             new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true    ),
             new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters", "flp" },       ParameterizedSwitch.FileLoggerParameters,       null,                           false,          "MissingFileLoggerParameterError",     true    ),
@@ -258,10 +264,14 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-#if FEATURE_APPDOMAIN
+#if FEATURE_NODE_REUSE
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true    ),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true    )
+            new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true    ),
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+            new ParameterizedSwitchInfo(  new string[] { "clientToServerPipeHandle", "c2s" },   ParameterizedSwitch.ClientToServerPipeHandle,   null,                           false,          null,                                  true    ),
+            new ParameterizedSwitchInfo(  new string[] { "serverToClientPipeHandle", "s2c" },   ParameterizedSwitch.ServerToClientPipeHandle,   null,                           false,          null,                                  true    )
+#endif
         };
 
         /// <summary>

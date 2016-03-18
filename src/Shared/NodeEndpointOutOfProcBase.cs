@@ -17,7 +17,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Security;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
+#endif
 using System.Security.Principal;
 using System.Threading.Tasks;
 #if FEATURE_SECURITY_PERMISSIONS
@@ -53,10 +55,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LinkStatus _status;
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// The pipe client used by the nodes.
         /// </summary>
         private NamedPipeServerStream _pipeServer;
+#else
+        private AnonymousPipeClientStream _pipeClientToServer;
+        private AnonymousPipeClientStream _pipeServerToClient;
+#endif
 
         // The following private data fields are used only when the endpoint is in ASYNCHRONOUS mode.
 
@@ -175,6 +182,7 @@ namespace Microsoft.Build.BackEnd
 
         #region Construction
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
@@ -189,6 +197,7 @@ namespace Microsoft.Build.BackEnd
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
+#if FEATURE_PIPE_SECURITY
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
@@ -200,6 +209,7 @@ namespace Microsoft.Build.BackEnd
             PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
             security.AddAccessRule(rule);
             security.SetOwner(identifier);
+#endif
 
             _pipeServer = new NamedPipeServerStream
                 (
@@ -209,11 +219,29 @@ namespace Microsoft.Build.BackEnd
                 PipeTransmissionMode.Byte,
                 PipeOptions.Asynchronous | PipeOptions.WriteThrough,
                 PipeBufferSize, // Default input buffer
-                PipeBufferSize, // Default output buffer
-                security,
+                PipeBufferSize  // Default output buffer
+#if FEATURE_PIPE_SECURITY
+                , security,
                 HandleInheritability.None
+#endif
                 );
         }
+#else
+        internal void InternalConstruct(string clientToServerPipeHandle, string serverToClientPipeHandle)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(clientToServerPipeHandle, "clientToServerPipeHandle");
+            ErrorUtilities.VerifyThrowArgumentLength(serverToClientPipeHandle, "serverToClientPipeHandle");
+
+            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
+
+            _status = LinkStatus.Inactive;
+            _asyncDataMonitor = new object();
+            _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
+
+            _pipeClientToServer = new AnonymousPipeClientStream(PipeDirection.Out, clientToServerPipeHandle);
+            _pipeServerToClient = new AnonymousPipeClientStream(PipeDirection.In, serverToClientPipeHandle);
+        }
+#endif
 
         #endregion
 
@@ -264,7 +292,12 @@ namespace Microsoft.Build.BackEnd
             _terminatePacketPump.Set();
             _packetPump.Join();
             _terminatePacketPump.Dispose();
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             _pipeServer.Dispose();
+#else
+            _pipeClientToServer.Dispose();
+            _pipeServerToClient.Dispose();
+#endif
             _packetPump = null;
             ChangeLinkStatus(LinkStatus.Inactive);
         }
@@ -312,7 +345,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void PacketPumpProc()
         {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             NamedPipeServerStream localPipeServer = _pipeServer;
+            PipeStream localWritePipe = _pipeServer;
+            PipeStream localReadPipe = _pipeServer;
+#else
+            PipeStream localWritePipe = _pipeClientToServer;
+            PipeStream localReadPipe = _pipeServerToClient;
+#endif
+
             AutoResetEvent localPacketAvailable = _packetAvailable;
             AutoResetEvent localTerminatePacketPump = _terminatePacketPump;
             Queue<INodePacket> localPacketQueue = _packetQueue;
@@ -330,6 +371,7 @@ namespace Microsoft.Build.BackEnd
 
                 try
                 {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                     // Wait for a connection
 #if FEATURE_APM
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
@@ -354,6 +396,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
                     localPipeServer.EndWaitForConnection(resultForConnection);
 #endif
+#endif
 
                     // The handshake protocol is a simple long exchange.  The host sends us a long, and we
                     // respond with another long.  Once the handshake is complete, both sides can be assured the
@@ -375,17 +418,26 @@ namespace Microsoft.Build.BackEnd
                     // it will cause the host to reject us; new hosts expect 00 and old hosts expect F5 or 06).
                     try
                     {
-                        long handshake = localPipeServer.ReadLongForHandshake(/* reject these leads */ new byte[] { 0x5F, 0x60 }, 0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */);
+                        long handshake = localReadPipe.ReadLongForHandshake(/* reject these leads */ new byte[] { 0x5F, 0x60 }, 0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */);
+
+#if FEATURE_SECURITY_PERMISSIONS
                         WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
                         string remoteUserName = localPipeServer.GetImpersonationUserName();
+#endif
 
                         if (handshake != GetHostHandshake())
                         {
                             CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshake, GetHostHandshake());
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                             localPipeServer.Disconnect();
+#else
+                            localWritePipe.Dispose();
+                            localReadPipe.Dispose();
+#endif
                             continue;
                         }
 
+#if FEATURE_SECURITY_PERMISSIONS
                         // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
                         // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
                         // user we were started by.
@@ -398,6 +450,7 @@ namespace Microsoft.Build.BackEnd
                             localPipeServer.Disconnect();
                             continue;
                         }
+#endif
                     }
                     catch (IOException e)
                     {
@@ -405,6 +458,7 @@ namespace Microsoft.Build.BackEnd
                         // 1. The host (OOP main node) connects to us, it immediately checks for user privileges
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
                         if (localPipeServer.IsConnected)
                         {
@@ -412,6 +466,9 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         continue;
+#else
+                        throw;
+#endif
                     }
 
                     gotValidConnection = true;
@@ -424,10 +481,15 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                     if (localPipeServer.IsConnected)
                     {
                         localPipeServer.Disconnect();
                     }
+#else
+                    localWritePipe.Dispose();
+                    localReadPipe.Dispose();
+#endif
 
                     ExceptionHandling.DumpExceptionToFile(e);
                     ChangeLinkStatus(LinkStatus.Failed);
@@ -436,7 +498,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             CommunicationsUtilities.Trace("Writing handshake to parent");
-            localPipeServer.WriteLongForHandshake(GetClientHandshake());
+            localWritePipe.WriteLongForHandshake(GetClientHandshake());
             ChangeLinkStatus(LinkStatus.Active);
 
             // Ordering of the wait handles is important.  The first signalled wait handle in the array 
@@ -448,7 +510,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
             IAsyncResult result = localPipeServer.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-            Task<int> readTask = localPipeServer.ReadAsync(headerByte, 0, headerByte.Length);
+            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
 
             bool exitLoop = false;
@@ -510,7 +572,7 @@ namespace Microsoft.Build.BackEnd
 
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, NodePacketTranslator.GetReadTranslator(localPipeServer, _sharedReadBuffer));
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, NodePacketTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
                             }
                             catch (Exception e)
                             {
@@ -525,7 +587,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
                             result = localPipeServer.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                            readTask = localPipeServer.ReadAsync(headerByte, 0, headerByte.Length);
+                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
                         }
 
@@ -567,11 +629,11 @@ namespace Microsoft.Build.BackEnd
                                 ArraySegment<byte> packetStreamBuffer;
                                 if (packetStream.TryGetBuffer(out packetStreamBuffer))
                                 {
-                                    localPipeServer.Write(packetStreamBuffer.Array, packetStreamBuffer.Offset, packetStreamBuffer.Count);
+                                    localWritePipe.Write(packetStreamBuffer.Array, packetStreamBuffer.Offset, packetStreamBuffer.Count);
                                 }
                                 else
                                 {
-                                    localPipeServer.Write(packetStream.ToArray(), 0, (int)packetStream.Length);
+                                    localWritePipe.Write(packetStream.ToArray(), 0, (int)packetStream.Length);
                                 }
 #endif
 
@@ -608,11 +670,17 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 if (localPipeServer.IsConnected)
                 {
                     localPipeServer.WaitForPipeDrain();
                     localPipeServer.Disconnect();
                 }
+#else
+                localReadPipe.Dispose();
+                localWritePipe.WaitForPipeDrain();
+                localWritePipe.Dispose();
+#endif
             }
             catch (Exception)
             {

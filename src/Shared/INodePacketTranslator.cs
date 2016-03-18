@@ -204,7 +204,12 @@ namespace Microsoft.Build.BackEnd
         /// methods.
         /// </remarks>
         void TranslateDotNet<T>(ref T value);
+#else
+        //  BuildEventArgs can't implement INodePacketTranslatable because it's in Microsoft.Build.Framework, which doesn't have that interface
+        void TranslateBuildEventArgs(ref BuildEventArgs value);
 #endif
+
+        void TranslateException(ref Exception value);
 
         /// <summary>
         /// Translates an object implementing INodePacketTranslatable.

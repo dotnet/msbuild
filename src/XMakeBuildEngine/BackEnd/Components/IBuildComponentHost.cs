@@ -61,12 +61,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         InProcNodeProvider,
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// OutOfProcNodeProvider
         /// </summary>
         OutOfProcNodeProvider,
-#endif
 
         /// <summary>
         /// RemoteNodeProvider
@@ -118,7 +116,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         TestDataProvider,
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// OutOfProcTaskHostNodeProvider
         /// </summary>
@@ -128,7 +125,6 @@ namespace Microsoft.Build.BackEnd
         /// Node manager for task host nodes
         /// </summary>
         TaskHostNodeManager,
-#endif
 
         /// <summary>
         /// The cache of registered disposable objects.

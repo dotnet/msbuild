@@ -20,9 +20,7 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.BackEnd;
 
-#if FEATURE_APPDOMAIN
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
-#endif
 
 namespace Microsoft.Build.Evaluation
 {
@@ -612,11 +610,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (s_debugLogCacheActivity)
             {
-#if FEATURE_APPDOMAIN
                 string prefix = OutOfProcNode.IsOutOfProcNode ? "C" : "P";
-#else
-                string prefix = "P";
-#endif
                 Trace.WriteLine(prefix + " " + Process.GetCurrentProcess().Id + " | " + message + param1);
             }
         }

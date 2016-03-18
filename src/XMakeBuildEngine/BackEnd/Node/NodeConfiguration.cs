@@ -10,8 +10,6 @@ using System.Diagnostics;
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Logging;
-#if FEATURE_APPDOMAIN
-#endif
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -144,7 +142,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _nodeId);
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_APPDOMAIN
             translator.TranslateDotNet(ref _appDomainSetup);
 #endif
         }

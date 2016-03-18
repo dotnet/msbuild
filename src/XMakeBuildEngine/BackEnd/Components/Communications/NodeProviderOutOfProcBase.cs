@@ -24,6 +24,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+using System.Threading.Tasks;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -111,6 +112,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
         {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
@@ -144,6 +146,9 @@ namespace Microsoft.Build.BackEnd
                     nodeStream.Dispose();
                 }
             }
+#else
+            throw new PlatformNotSupportedException("Shutting down nodes by enumerating processes and connecting to them is not supported when using anonymous pipes.");
+#endif
         }
 
         /// <summary>
@@ -152,6 +157,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The pipe stream representing the node.</returns>
         protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
         {
+#if DEBUG
+            if (Execution.BuildManager.WaitForDebugger)
+            {
+                commandLineArgs += " /wfd";
+            }
+#endif
+
             if (String.IsNullOrEmpty(msbuildLocation))
             {
                 msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
@@ -173,6 +185,7 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = "MSBuild.exe";
             }
 
+#if FEATURE_NODE_REUSE
             string msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
 
             List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(msbuildName));
@@ -214,6 +227,7 @@ namespace Microsoft.Build.BackEnd
                     return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
                 }
             }
+#endif
 
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
@@ -223,6 +237,7 @@ namespace Microsoft.Build.BackEnd
             int retries = NodeCreationRetries;
             while (retries-- > 0)
             {
+#if FEATURE_NODE_REUSE
                 // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
                 // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                 // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
@@ -243,11 +258,19 @@ namespace Microsoft.Build.BackEnd
                         throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
                     }
                 }
+#endif
+#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
+                var clientToServerStream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+                var serverToClientStream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
+
+                commandLineArgs += $" /clientToServerPipeHandle:{clientToServerStream.GetClientHandleAsString()} /serverToClientPipeHandle:{serverToClientStream.GetClientHandleAsString()}";
+#endif
 
                 // Create the node process
                 int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
                 _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
@@ -260,6 +283,18 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
                     return new NodeContext(nodeId, msbuildProcessId, nodeStream, factory, terminateNode);
                 }
+#else
+                if (WaitForConnectionFromProcess(clientToServerStream, serverToClientStream, msbuildProcessId, hostHandshake, clientHandshake))
+                {
+                    // Connection successful, use this node.
+
+                    clientToServerStream.DisposeLocalCopyOfClientHandle();
+                    serverToClientStream.DisposeLocalCopyOfClientHandle();
+
+                    CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
+                    return new NodeContext(nodeId, msbuildProcessId, clientToServerStream, serverToClientStream, factory, terminateNode);
+                }
+#endif
             }
 
             // We were unable to launch a node.
@@ -276,6 +311,8 @@ namespace Microsoft.Build.BackEnd
             return hostHandshake.ToString(CultureInfo.InvariantCulture) + "|" + clientHandshake.ToString(CultureInfo.InvariantCulture) + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
+
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
@@ -291,19 +328,28 @@ namespace Microsoft.Build.BackEnd
             {
                 nodeStream.Connect(timeout);
 
-                // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                // remote node could set the owner to something else would also let it change owners on other objects, so
-                // this would be a security flaw upstream of us.
-                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-                PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-                IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
-                if (remoteOwner != identifier)
+                if (NativeMethodsShared.IsWindows)
                 {
-                    CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
-                    throw new UnauthorizedAccessException();
+                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
+                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
+                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
+                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
+                    // remote node could set the owner to something else would also let it change owners on other objects, so
+                    // this would be a security flaw upstream of us.
+                    SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+#if FEATURE_PIPE_SECURITY
+                    PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
+#else
+                    var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
+                        System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
+#endif
+                    IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
+                    if (remoteOwner != identifier)
+                    {
+                        CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
+                        throw new UnauthorizedAccessException();
+                    }
+
                 }
 
                 CommunicationsUtilities.Trace("Writing handshake to pipe {0}", pipeName);
@@ -345,6 +391,47 @@ namespace Microsoft.Build.BackEnd
 
             return null;
         }
+#else
+        private bool WaitForConnectionFromProcess(AnonymousPipeServerStream clientToServerStream,
+                                                  AnonymousPipeServerStream serverToClientStream,
+                                                  int nodeProcessId, long hostHandshake, long clientHandshake)
+        {
+            try
+            {
+                CommunicationsUtilities.Trace("Attempting to handshake with PID {0}", nodeProcessId);
+
+                CommunicationsUtilities.Trace("Writing handshake to pipe");
+                serverToClientStream.WriteLongForHandshake(hostHandshake);
+
+                CommunicationsUtilities.Trace("Reading handshake from pipe");
+                long handshake = clientToServerStream.ReadLongForHandshake();
+
+                if (handshake != clientHandshake)
+                {
+                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from client not {1}. Probably the client is a different MSBuild build.", handshake, clientHandshake);
+                    throw new InvalidOperationException();
+                }
+
+                // We got a connection.
+                CommunicationsUtilities.Trace("Successfully connected got connection from PID {0}...!", nodeProcessId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ExceptionHandling.IsCriticalException(ex))
+                {
+                    throw;
+                }
+
+                CommunicationsUtilities.Trace("Failed to get connection from PID {0}. {1}", nodeProcessId, ex.ToString());
+
+                clientToServerStream.Dispose();
+                serverToClientStream.Dispose();
+
+                return false;
+            }
+        }
+#endif
 
         /// <summary>
         /// Creates a new MSBuild process
@@ -390,12 +477,46 @@ namespace Microsoft.Build.BackEnd
 
             BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
 
-            string appName = msbuildLocation;
 
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
+
+#if RUNTIME_TYPE_NETCORE
+            string coreRunName = NativeMethodsShared.IsUnixLike ? "corerun" : "CoreRun.exe";
+            string exeName = Path.Combine(Path.GetDirectoryName(msbuildLocation), coreRunName);
+            commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = exeName;
+            processStartInfo.Arguments = commandLineArgs;
+            processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
+            processStartInfo.UseShellExecute = false;
+
+            Process process;
+            try
+            {
+                process = Process.Start(processStartInfo);
+            }
+            catch (Exception ex)
+            {
+                 CommunicationsUtilities.Trace
+                    (
+                        "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
+                        msbuildLocation,
+                        commandLineArgs,
+                        ex.ToString()
+                    );
+
+                throw new NodeFailedToLaunchException(ex);
+            }
+            
+            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
+            return process.Id;
+#else
+            string exeName = msbuildLocation;
+            
             bool result = BackendNativeMethods.CreateProcess
                 (
-                    msbuildLocation,
+                    exeName,
                     commandLineArgs,
                     ref processSecurityAttributes,
                     ref threadSecurityAttributes,
@@ -426,6 +547,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", processInfo.dwProcessId);
             return processInfo.dwProcessId;
+#endif
         }
 
         /// <summary>
@@ -439,10 +561,9 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private static bool s_trace = String.Equals(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"), "1", StringComparison.Ordinal);
 
-            /// <summary>
-            /// The pipe used to communicate with the node.
-            /// </summary>
-            private NamedPipeClientStream _nodePipe;
+            // The pipe(s) used to communicate with the node.
+            private PipeStream _clientToServerStream;
+            private PipeStream _serverToClientStream;
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
@@ -487,11 +608,24 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, int processId, NamedPipeClientStream nodePipe, INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
+            public NodeContext(int nodeId, int processId,
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                NamedPipeClientStream nodePipe,
+#else
+                AnonymousPipeServerStream clientToServerStream,
+                AnonymousPipeServerStream serverToClientStream,
+#endif
+                INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
             {
                 _nodeId = nodeId;
                 _processId = processId;
-                _nodePipe = nodePipe;
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                _clientToServerStream = nodePipe;
+                _serverToClientStream = nodePipe;
+#else
+                _clientToServerStream = clientToServerStream;
+                _serverToClientStream = serverToClientStream;
+#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _smallReadBuffer = new byte[1000]; // 1000 was just an average seen on one profile run.
@@ -505,7 +639,79 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void BeginAsyncPacketRead()
             {
-                _nodePipe.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
+#if FEATURE_APM
+                _clientToServerStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
+#else
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    var ignored = RunPacketReadLoopAsync();
+                });
+#endif
+            }
+
+
+            public async Task RunPacketReadLoopAsync()
+            {
+                while (true)
+                {
+                    try
+                    {
+                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+                        if (!ProcessHeaderBytesRead(bytesRead))
+                        {
+                            return;
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync: {0}", e);
+                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                        Close();
+                        return;
+                    }
+
+                    NodePacketType packetType = (NodePacketType)_headerByte[0];
+                    int packetLength = BitConverter.ToInt32(_headerByte, 1);
+
+                    byte[] packetData;
+                    if (packetLength < _smallReadBuffer.Length)
+                    {
+                        packetData = _smallReadBuffer;
+                    }
+                    else
+                    {
+                        // Preallocated buffer is not large enough to hold the body. Allocate now, but don't hold it forever.
+                        packetData = new byte[packetLength];
+                    }
+
+                    try
+                    {
+                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, packetData, packetLength);
+                        if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
+                        {
+                            return;
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync (Reading): {0}", e);
+                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                        Close();
+                        return;
+                    }
+
+                    // Read and route the packet.
+                    if (!ReadAndRoutePacket(packetType, packetData, packetLength))
+                    {
+                        return;
+                    }
+
+                    if (packetType == NodePacketType.NodeShutdown)
+                    {
+                        Close();
+                        return;
+                    }
+                }
             }
 
             /// <summary>
@@ -535,6 +741,12 @@ namespace Microsoft.Build.BackEnd
                     }
 #endif
 
+#if FEATURE_MEMORYSTREAM_GETBUFFER
+                    byte[] writeStreamBuffer = writeStream.GetBuffer();
+#else
+                    byte[] writeStreamBuffer = writeStream.ToArray();
+#endif
+
                     for (int i = 0; i < writeStream.Length; i += MaxPacketWriteSize)
                     {
                         int lengthToWrite = Math.Min((int)writeStream.Length - i, MaxPacketWriteSize);
@@ -542,7 +754,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             // We are done, write the last bit asynchronously.  This is actually the general case for
                             // most packets in the build, and the asynchronous behavior here is desirable.
-                            _nodePipe.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, PacketWriteComplete, null);
+#if FEATURE_APM
+                            _serverToClientStream.BeginWrite(writeStreamBuffer, i, lengthToWrite, PacketWriteComplete, null);
+#else
+                            _serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite);
+#endif
                             return;
                         }
                         else
@@ -551,8 +767,12 @@ namespace Microsoft.Build.BackEnd
                             // return out of this function and let the rest of the system continue because another operation
                             // might want to send data immediately afterward, and that could result in overlapping writes
                             // to the pipe on different threads.
-                            IAsyncResult result = _nodePipe.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, null, null);
-                            _nodePipe.EndWrite(result);
+#if FEATURE_APM
+                            IAsyncResult result = _serverToClientStream.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, null, null);
+                            _serverToClientStream.EndWrite(result);
+#else
+                            _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
+#endif
                         }
                     }
                 }
@@ -572,10 +792,15 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void Close()
             {
-                _nodePipe.Close();
+                _clientToServerStream.Dispose();
+                if (!object.ReferenceEquals(_clientToServerStream, _serverToClientStream))
+                {
+                    _serverToClientStream.Dispose();
+                }
                 _terminateDelegate(_nodeId);
             }
 
+#if FEATURE_APM
             /// <summary>
             /// Completes the asynchronous packet write to the node.
             /// </summary>
@@ -583,14 +808,51 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    _nodePipe.EndWrite(result);
+                    _serverToClientStream.EndWrite(result);
                 }
                 catch (IOException)
                 {
                     // Do nothing here because any exception will be caught by the async read handler
                 }
             }
+#endif
 
+            private bool ProcessHeaderBytesRead(int bytesRead)
+            {
+                if (bytesRead != _headerByte.Length)
+                {
+                    CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _processId, bytesRead, _headerByte.Length);
+                    try
+                    {
+                        Process childProcess = Process.GetProcessById(_processId);
+                        if (childProcess == null || childProcess.HasExited)
+                        {
+                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
+                        }
+                        else
+                        {
+                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _processId);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (ExceptionHandling.IsCriticalException(e))
+                        {
+                            throw;
+                        }
+
+                        CommunicationsUtilities.Trace(_nodeId, "Unable to retrieve remote process information. {0}", e);
+                    }
+
+                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                    Close();
+                    return false;
+                }
+
+                return true;
+            }
+
+#if FEATURE_APM
             /// <summary>
             /// Callback invoked by the completion of a read of a header byte on one of the named pipes.
             /// </summary>
@@ -601,7 +863,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _nodePipe.EndRead(result);
+                        bytesRead = _clientToServerStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async
@@ -612,33 +874,8 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (bytesRead != _headerByte.Length)
+                    if (!ProcessHeaderBytesRead(bytesRead))
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _processId, bytesRead, _headerByte.Length);
-                        try
-                        {
-                            Process childProcess = Process.GetProcessById(_processId);
-                            if (childProcess == null || childProcess.HasExited)
-                            {
-                                CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
-                            }
-                            else
-                            {
-                                CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _processId);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            if (ExceptionHandling.IsCriticalException(e))
-                            {
-                                throw;
-                            }
-
-                            CommunicationsUtilities.Trace(_nodeId, "Unable to retrieve remote process information. {0}", e);
-                        }
-
-                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                        Close();
                         return;
                     }
                 }
@@ -664,9 +901,45 @@ namespace Microsoft.Build.BackEnd
                     packetData = new byte[packetLength];
                 }
 
-                _nodePipe.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+                _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+            }
+#endif
+
+            private bool ProcessBodyBytesRead(int bytesRead, int packetLength, NodePacketType packetType)
+            {
+                if (bytesRead != packetLength)
+                {
+                    CommunicationsUtilities.Trace(_nodeId, "Bad packet read for packet {0} - Expected {1} bytes, got {2}", packetType, packetLength, bytesRead);
+                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                    Close();
+                    return false;
+                }
+                return true;
             }
 
+            private bool ReadAndRoutePacket(NodePacketType packetType, byte [] packetData, int packetLength)
+            {
+                try
+                {
+                    // The buffer is publicly visible so that InterningBinaryReader doesn't have to copy to an intermediate buffer.
+                    // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
+                    using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
+                    {
+                        INodePacketTranslator readTranslator = NodePacketTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
+                        _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
+                    }
+                }
+                catch (IOException e)
+                {
+                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in ReadAndRoutPacket: {0}", e);
+                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+                    Close();
+                    return false;
+                }
+                return true;
+            }
+
+#if FEATURE_APM
             /// <summary>
             /// Method called when the body of a packet has been read.
             /// </summary>
@@ -682,7 +955,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _nodePipe.EndRead(result);
+                        bytesRead = _clientToServerStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async
@@ -693,11 +966,8 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (bytesRead != packetLength)
+                    if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "Bad packet read for packet {0} - Expected {1} bytes, got {2}", packetType, packetLength, bytesRead);
-                        _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                        Close();
                         return;
                     }
                 }
@@ -709,22 +979,9 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // Read and route the packet.            
-                try
+                // Read and route the packet.
+                if (!ReadAndRoutePacket(packetType, packetData, packetLength))
                 {
-                    // The buffer is publicly visible so that InterningBinaryReader doesn't have to copy to an intermediate buffer.
-                    // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
-                    using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
-                    {
-                        INodePacketTranslator readTranslator = NodePacketTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
-                        _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
-                    }
-                }
-                catch (IOException e)
-                {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in BodyReadComplete (Routing): {0}", e);
-                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                    Close();
                     return;
                 }
 
@@ -738,6 +995,7 @@ namespace Microsoft.Build.BackEnd
                     Close();
                 }
             }
+#endif
         }
     }
 }

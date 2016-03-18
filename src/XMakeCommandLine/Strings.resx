@@ -692,7 +692,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         This is like LoggerFailurePrefixNoErrorCode, but the logger didn't supply its own error code, so we have to provide one.
         LOCALIZATION: The word "Logger" should be localized, the words "MSBuild" and "error" should NOT be localized.
       </comment>
-  </data>    
+  </data>
   <data name="MissingLoggerError" UESanitized="true" Visibility="Public">
     <value>MSBUILD : error MSB1007: Specify a logger.</value>
     <comment>
@@ -924,6 +924,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <value>MSBUILD : error MSB1048: Solution files cannot be debugged directly. Run MSBuild first with an environment variable MSBUILDEMITSOLUTION=1 to create a corresponding ".sln.metaproj" file. Then debug that.</value>
     <comment>{StrBegin="MSBUILD : error MSB1048: "} LOC: ".SLN" should not be localized</comment>
   </data>
+  <data name="ParameterRequiredError">
+    <value>MSBUILD : error MSB1049: The {0} parameter must be specified</value>
+    <comment>{StrBegin="MSBUILD : error MSB1049: "}</comment>
+  </data>
   <!-- #################################################################################################-->
   <!-- ######################################## Shared strings #########################################-->
   <!-- ###### These belong in Strings.shared.resx, but have been copied here for performance ###########-->
@@ -942,7 +946,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1049.
+        Next error code should be MSB1050.
 
         Don't forget to update this comment after using the new code.
   -->
