@@ -44,12 +44,13 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(PublishTargets.PublishVersionBadge),
-        nameof(PublishTargets.PublishSdkInstallerFile),
-        nameof(PublishTargets.PublishDebFileToDebianRepo),
-        nameof(PublishTargets.PublishCombinedFrameworkSDKHostFile),
-        nameof(PublishTargets.PublishCombinedFrameworkHostFile),
-        nameof(PublishTargets.PublishLatestVersionTextFile))]
+        [Target(
+            nameof(PublishTargets.PublishVersionBadge),
+            nameof(PublishTargets.PublishSdkInstallerFile),
+            //nameof(PublishTargets.PublishDebFileToDebianRepo),
+            nameof(PublishTargets.PublishCombinedFrameworkSDKHostFile),
+            nameof(PublishTargets.PublishCombinedFrameworkHostFile),
+            nameof(PublishTargets.PublishLatestVersionTextFile))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c)
         {
             return c.Success();
@@ -68,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX)]//, BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSdkInstallerFile(BuildTargetContext c)
         {
             var installerFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");

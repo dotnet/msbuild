@@ -14,16 +14,17 @@ namespace Microsoft.DotNet.Cli.Build
     {
         [Target(nameof(MsiTargets.GenerateMsis),
         nameof(MsiTargets.GenerateBundle),
-        nameof(PkgTargets.GeneratePkgs),
-        nameof(InstallerTargets.GenerateDebs))]
+        nameof(PkgTargets.GeneratePkgs)]//,
+        //nameof(InstallerTargets.GenerateDebs))]
         public static BuildTargetResult GenerateInstaller(BuildTargetContext c)
         {
             return c.Success();
         }
 
-        [Target(nameof(InstallerTargets.GenerateSdkDeb),
-        nameof(InstallerTargets.GenerateSharedFrameworkDeb),
-        nameof(InstallerTargets.GenerateSharedHostDeb))]
+        [Target(
+            nameof(InstallerTargets.GenerateSdkDeb),
+            nameof(InstallerTargets.GenerateSharedFrameworkDeb),
+            nameof(InstallerTargets.GenerateSharedHostDeb))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult GenerateDebs(BuildTargetContext c)
         {
