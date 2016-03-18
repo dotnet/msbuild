@@ -102,5 +102,7 @@ docker run $INTERACTIVE -t --rm --sig-proxy=true \
     -e REPO_SERVER \
     -e DOTNET_BUILD_SKIP_CROSSGEN \
     -e PUBLISH_TO_AZURE_BLOB \
+    -e DOCKER_HUB_REPO \
+    -e DOCKER_HUB_TRIGGER_TOKEN \
     $DOTNET_BUILD_CONTAINER_TAG \
     $BUILD_COMMAND "$@"
