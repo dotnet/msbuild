@@ -314,7 +314,7 @@ namespace Microsoft.DotNet.Tools.Build
                 args.Add(_args.BuildBasePathValue);
             }
 
-            var compileResult = CommpileCommand.Run(args.ToArray());
+            var compileResult = CompileCommand.Run(args.ToArray());
 
             return compileResult == 0;
         }
@@ -395,7 +395,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             args.Add(_rootProject.ProjectDirectory);
 
-            var compileResult = CommpileCommand.Run(args.ToArray());
+            var compileResult = CompileCommand.Run(args.ToArray());
 
             var succeeded = compileResult == 0;
 
