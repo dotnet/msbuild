@@ -328,6 +328,7 @@ namespace Microsoft.Build.BackEnd
             {
                 nodeStream.Connect(timeout);
 
+#if !MONO
                 if (NativeMethodsShared.IsWindows)
                 {
                     // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
@@ -351,6 +352,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                 }
+#endif
 
                 CommunicationsUtilities.Trace("Writing handshake to pipe {0}", pipeName);
                 nodeStream.WriteLongForHandshake(hostHandshake);
