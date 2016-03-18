@@ -18,7 +18,7 @@ if ($fileVersion -eq "Latest") {
 }
 $Feed="https://dotnetcli.blob.core.windows.net/dotnet"
 
-$DotNetFileName="dotnet-combined-framework-sdk-host-win-$Architecture.$fileVersion.zip"
+$DotNetFileName="dotnet-dev-win-$Architecture.$fileVersion.zip"
 $DotNetUrl="$Feed/$Channel/Binaries/$Version"
 
 function say($str)

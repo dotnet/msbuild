@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -101,7 +102,14 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             // Identify the version
-            var version = File.ReadAllLines(Path.Combine(stage0, ".version"));
+            string versionFile = Directory.GetFiles(stage0, ".version", SearchOption.AllDirectories).FirstOrDefault();
+
+            if (string.IsNullOrEmpty(versionFile))
+            {
+                throw new Exception($"'.version' file not found in '{stage0}' folder");
+            }
+
+            var version = File.ReadAllLines(versionFile);
             c.Info($"Using Stage 0 Version: {version[1]}");
 
             return c.Success();
