@@ -42,7 +42,15 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(objRoot);
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"),
-                "-v", version, "-i", Dirs.Stage2, "-o", debFile, "-p", packageName, "-m", manPagesDir, "--previous-version-url", previousVersionURL, "--obj-root", objRoot)
+                "-v", version, 
+                "-i", Dirs.Stage2, 
+                "-o", debFile, 
+                "-p", packageName, 
+                "-m", manPagesDir, 
+                "--framework-nuget-name", Monikers.SharedFrameworkName,
+                "--framework-nuget-version", c.BuildContext.Get<string>("SharedFrameworkNugetVersion"),
+                "--previous-version-url", previousVersionURL, 
+                "--obj-root", objRoot)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

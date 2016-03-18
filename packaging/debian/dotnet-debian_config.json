@@ -2,7 +2,8 @@
     "maintainer_name":"Microsoft",
     "maintainer_email": "dotnetcore@microsoft.com",        
 
-    "package_name": "dotnet",                           
+    "package_name": "dotnet-dev-%SDK_NUGET_VERSION%",
+    "install_root": "/usr/share/dotnet/sdk/%SDK_NUGET_VERSION%",
 
     "short_description": ".NET Core & command line tools",              
     "long_description": ".NET Core is a cross-platform implementation of .NET Framework, a modern, modular platform\n for building diverse kinds of applications, from command-line applications to microservices and \n modern websites.\n This package contains the tools you will need to start writing applications for .NET Core. It includes \n compilers, package managers and other utilities that developers need.", 
@@ -33,7 +34,7 @@
     },
 
     "package_conflicts" : [
-        "dotnet-nightly"
+        "dotnet-dev-nightly"
     ],
 
     "symlinks": {
