@@ -1,32 +1,30 @@
 {
-    "version": "1.0.0-*",
-    "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
-    "compilationOptions": {
-        "keyFile": "../../tools/Key.snk"
-    },
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901",
-        "System.Collections.Immutable": "1.2.0-rc2-23901",
-        "System.IO.Compression": "4.1.0-rc2-23901",
-        "FluentAssertions": "4.0.0",
-        "xunit": "2.1.0",
-        "dotnet-test-xunit": "1.0.0-dev-91790-12",
-
-        "Microsoft.DotNet.TestFramework": "1.0.0-*",
-        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
-        "Microsoft.DotNet.InternalAbstractions": {
-            "target": "project",
-            "version": "1.0.0-*"
-        }
-    },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": [
-                "dnxcore50",
-                "portable-net45+win8"
-            ]
-        }
-    },
+  "version": "1.0.0-*",
+  "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
+  "compilationOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "System.Collections.Immutable": "1.2.0-rc2-23911",
+    "FluentAssertions": "4.0.0",
+    "xunit": "2.1.0",
+    "dotnet-test-xunit": "1.0.0-dev-91790-12",
+    "Microsoft.DotNet.TestFramework": "1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
+    "Microsoft.DotNet.InternalAbstractions": {
+      "target": "project",
+      "version": "1.0.0-*"
+    }
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
 }

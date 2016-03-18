@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         private readonly string[] _libCompileFiles =
         {
             "TestLibrary" + FileNameSuffixes.DotNet.DynamicLib,
-            "TestLibrary" + FileNameSuffixes.DotNet.ProgramDatabase,
+            "TestLibrary" + FileNameSuffixes.DotNet.ProgramDatabase
         };
 
         private void GetProjectInfo(string testRoot)
@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             fileVersion.Should().NotBeNull();
             fileVersion.Should().BeEquivalentTo("1.0.0.345");
         }
-        
+
         [Fact]
         public void SettingVersionSuffixFlag_ShouldStampAssemblyInfoInOutputAssembly()
         {

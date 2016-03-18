@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public string Name { get; }
         public string RelativePath { get; }
         public string ResolvedPath { get; }
+        public string FileName => Path.GetFileName(RelativePath);
         public Action<Stream, Stream> Transform { get; set; }
 
         public LibraryAsset(string name, string relativePath, string resolvedPath, Action<Stream, Stream> transform = null)

@@ -16,7 +16,8 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string[] TestPackageProjects = new[]
         {
             "dotnet-hello/v1/dotnet-hello",
-            "dotnet-hello/v2/dotnet-hello"
+            "dotnet-hello/v2/dotnet-hello",
+            "dotnet-portable"
         };
 
         public static readonly string[] TestProjects = new[]
@@ -36,7 +37,8 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.DotNet.ProjectModel.Tests",
             "Microsoft.Extensions.DependencyModel.Tests",
             "ArgumentForwardingTests",
-            "dotnet-test.UnitTests"
+            "dotnet-test.UnitTests",
+            "dotnet-test.Tests"
         };
 
         [Target(nameof(PrepareTargets.Init), nameof(SetupTests), nameof(RestoreTests), nameof(BuildTests), nameof(RunTests), nameof(ValidateDependencies))]
@@ -44,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(nameof(SetupTestPackages), nameof(SetupTestProjects))]
         public static BuildTargetResult SetupTests(BuildTargetContext c) => c.Success();
-        
+
         [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
         public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
 
@@ -60,11 +62,11 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore().WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages")).Execute().EnsureSuccessful();
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages")).Execute().EnsureSuccessful();
 
             return c.Success();
         }
-        
+
         [Target]
         public static BuildTargetResult RestoreTestAssetProjects(BuildTargetContext c)
         {
@@ -74,17 +76,17 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-                
-            dotnet.Restore("--fallbacksource", Dirs.TestPackages)
+
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
                 .Execute().EnsureSuccessful();
-                
+
             // The 'ProjectModelServer' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
-            dotnet.Restore()
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthTestProjects"))
                 .Execute();
-                
-            dotnet.Restore()
+
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthUpdateSearchPathSample"))
                 .Execute();
 
@@ -94,6 +96,8 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(CleanTestPackages))]
         public static BuildTargetResult BuildTestAssetPackages(BuildTargetContext c)
         {
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"));
+
             var dotnet = DotNetCli.Stage2;
 
             Rmdir(Dirs.TestPackages);
@@ -108,21 +112,23 @@ namespace Microsoft.DotNet.Cli.Build
                     .Execute()
                     .EnsureSuccessful();
             }
-            
+
             return c.Success();
         }
-        
+
         [Target]
         public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
         {
             Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-hello"));
-            
+
             return c.Success();
         }
 
         [Target]
         public static BuildTargetResult BuildTestAssetProjects(BuildTargetContext c)
         {
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"));
+
             var dotnet = DotNetCli.Stage2;
             var nobuildFileName = ".noautobuild";
             string testProjectsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
@@ -137,7 +143,7 @@ namespace Microsoft.DotNet.Cli.Build
                     .Execute()
                     .EnsureSuccessful();
             }
-            
+
             return c.Success();
         }
 
@@ -148,7 +154,7 @@ namespace Microsoft.DotNet.Cli.Build
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
 
             CleanNuGetTempCache();
-            DotNetCli.Stage2.Restore("--fallbacksource", Dirs.TestPackages)
+            DotNetCli.Stage2.Restore("--verbosity", "verbose", "--disable-parallel", "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test"))
                 .Execute()
                 .EnsureSuccessful();
@@ -246,7 +252,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 return new Dictionary<string, string>();
             }
-            
+
             c.Verbose("Start Collecting Visual Studio Environment Variables");
 
             var vsvarsPath = Path.GetFullPath(Path.Combine(Environment.GetEnvironmentVariable("VS140COMNTOOLS"), "..", "..", "VC"));
@@ -273,14 +279,14 @@ set");
                     File.Delete(temp);
                 }
             }
-            
+
             result.EnsureSuccessful();
-            
+
             var vars = new Dictionary<string, string>();
             foreach (var line in result.StdOut.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var splat = line.Split(new[] { '=' }, 2);
-                
+
                 if (splat.Length == 2)
                 {
                     c.Verbose($"Adding variable '{line}'");
@@ -291,9 +297,8 @@ set");
                     c.Info($"Skipping VS Env Variable. Unknown format: '{line}'");
                 }
             }
-            
+
             c.Verbose("Finish Collecting Visual Studio Environment Variables");
-            
             return vars;
         }
     }

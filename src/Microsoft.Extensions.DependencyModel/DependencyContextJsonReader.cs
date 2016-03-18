@@ -10,10 +10,14 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Extensions.DependencyModel
 {
-    public class DependencyContextJsonReader
+    public class DependencyContextJsonReader: IDependencyContextReader
     {
         public DependencyContext Read(Stream stream)
         {
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
             using (var streamReader = new StreamReader(stream))
             {
                 using (var reader = new JsonTextReader(streamReader))
@@ -39,33 +43,58 @@ namespace Microsoft.Extensions.DependencyModel
 
             JObject runtimeTarget = null;
             JObject compileTarget = null;
-            if (targetsObject != null)
+
+            if (targetsObject == null)
             {
-                var compileTargetProperty = targetsObject.Properties()
-                    .FirstOrDefault(p => !IsRuntimeTarget(p.Name));
+                throw new FormatException("Dependency file does not have 'targets' section");
+            }
 
-                compileTarget = (JObject)compileTargetProperty.Value;
-                target = compileTargetProperty.Name;
-
-                if (!string.IsNullOrEmpty(runtimeTargetName))
+            if (!string.IsNullOrEmpty(runtimeTargetName))
+            {
+                runtimeTarget = (JObject) targetsObject[runtimeTargetName];
+                if (runtimeTarget == null)
                 {
-                    runtimeTarget = (JObject) targetsObject[runtimeTargetName];
-                    if (runtimeTarget == null)
-                    {
-                        throw new FormatException($"Target with name {runtimeTargetName} not found");
-                    }
+                    throw new FormatException($"Target with name {runtimeTargetName} not found");
+                }
+            }
+            else
+            {
+                var runtimeTargetProperty = targetsObject.Properties()
+                    .FirstOrDefault(p => IsRuntimeTarget(p.Name));
 
-                    var seperatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeperator);
-                    if (seperatorIndex > -1 && seperatorIndex < runtimeTargetName.Length)
-                    {
-                        runtime = runtimeTargetName.Substring(seperatorIndex + 1);
-                        isPortable = false;
-                    }
+                runtimeTarget = (JObject)runtimeTargetProperty?.Value;
+                runtimeTargetName = runtimeTargetProperty?.Name;
+            }
+
+            if (runtimeTargetName != null)
+            {
+                var seperatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeperator);
+                if (seperatorIndex > -1 && seperatorIndex < runtimeTargetName.Length)
+                {
+                    runtime = runtimeTargetName.Substring(seperatorIndex + 1);
+                    target = runtimeTargetName.Substring(0, seperatorIndex);
+                    isPortable = false;
                 }
                 else
                 {
-                    runtimeTarget = compileTarget;
+                    target = runtimeTargetName;
                 }
+            }
+
+            var ridlessTargetProperty = targetsObject.Properties().FirstOrDefault(p => !IsRuntimeTarget(p.Name));
+            if (ridlessTargetProperty != null)
+            {
+                compileTarget = (JObject)ridlessTargetProperty.Value;
+                if (runtimeTarget == null)
+                {
+                    runtimeTarget = compileTarget;
+                    target = ridlessTargetProperty.Name;
+                }
+            }
+
+            if (runtimeTarget == null)
+            {
+                throw new FormatException("No runtime target found");
             }
 
             return new DependencyContext(
@@ -79,18 +108,16 @@ namespace Microsoft.Extensions.DependencyModel
                 );
         }
 
-        private IEnumerable<KeyValuePair<string, string[]>> ReadRuntimeGraph(JObject runtimes)
+        private IEnumerable<RuntimeFallbacks> ReadRuntimeGraph(JObject runtimes)
         {
             if (runtimes == null)
             {
                 yield break;
             }
 
-            var targets = runtimes.Children();
-            var runtime = (JProperty)targets.Single();
-            foreach (var pair in (JObject)runtime.Value)
+            foreach (var pair in runtimes)
             {
-                yield return new KeyValuePair<string, string[]>(pair.Key, pair.Value.Values<string>().ToArray());
+                yield return new RuntimeFallbacks(pair.Key, pair.Value.Values<string>().ToArray());
             }
         }
 
@@ -102,7 +129,7 @@ namespace Microsoft.Extensions.DependencyModel
             }
 
             return new CompilationOptions(
-                compilationOptionsObject[DependencyContextStrings.DefinesPropertyName]?.Values<string>(),
+                compilationOptionsObject[DependencyContextStrings.DefinesPropertyName]?.Values<string>() ?? Enumerable.Empty<string>(),
                 compilationOptionsObject[DependencyContextStrings.LanguageVersionPropertyName]?.Value<string>(),
                 compilationOptionsObject[DependencyContextStrings.PlatformPropertyName]?.Value<string>(),
                 compilationOptionsObject[DependencyContextStrings.AllowUnsafePropertyName]?.Value<bool>(),
@@ -169,9 +196,11 @@ namespace Microsoft.Extensions.DependencyModel
                         ));
                 }
 
-                var assemblies = ReadAssemblies(libraryObject, DependencyContextStrings.RuntimeAssembliesKey)
+                var assemblies = ReadAssetList(libraryObject, DependencyContextStrings.RuntimeAssembliesKey)
                     .Select(RuntimeAssembly.Create)
                     .ToArray();
+
+                var nativeLibraries = ReadAssetList(libraryObject, DependencyContextStrings.NativeLibrariesKey);
 
                 var resourceAssemblies = ReadResourceAssemblies((JObject)libraryObject[DependencyContextStrings.ResourceAssembliesPropertyName]);
 
@@ -181,6 +210,7 @@ namespace Microsoft.Extensions.DependencyModel
                     version: version,
                     hash: stub.Hash,
                     assemblies: assemblies,
+                    nativeLibraries: nativeLibraries,
                     resourceAssemblies: resourceAssemblies,
                     subTargets: runtimeTargets.ToArray(),
                     dependencies: dependencies,
@@ -188,7 +218,7 @@ namespace Microsoft.Extensions.DependencyModel
             }
             else
             {
-                var assemblies = ReadAssemblies(libraryObject, DependencyContextStrings.CompileTimeAssembliesKey);
+                var assemblies = ReadAssetList(libraryObject, DependencyContextStrings.CompileTimeAssembliesKey);
                 return new CompilationLibrary(stub.Type, name, version, stub.Hash, assemblies, dependencies, stub.Serviceable);
             }
         }
@@ -226,7 +256,7 @@ namespace Microsoft.Extensions.DependencyModel
             }
         }
 
-        private static string[] ReadAssemblies(JObject libraryObject, string name)
+        private static string[] ReadAssetList(JObject libraryObject, string name)
         {
             var assembliesObject = (JObject) libraryObject[name];
 

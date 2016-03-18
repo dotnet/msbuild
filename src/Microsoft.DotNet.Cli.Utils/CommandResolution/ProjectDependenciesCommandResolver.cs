@@ -25,12 +25,12 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (environment == null)
             {
-                throw new ArgumentNullException("environment");
+                throw new ArgumentNullException(nameof(environment));
             }
 
             if (packagedCommandSpecFactory == null)
             {
-                throw new ArgumentNullException("packagedCommandSpecFactory");
+                throw new ArgumentNullException(nameof(packagedCommandSpecFactory));
             }
 
             _environment = environment;
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var depsFilePath = projectContext.GetOutputPaths(configuration, outputPath: outputPath).RuntimeFiles.Deps;
+            var depsFilePath = projectContext.GetOutputPaths(configuration, outputPath: outputPath).RuntimeFiles.DepsJson;
 
             var dependencyLibraries = GetAllDependencyLibraries(projectContext);
              

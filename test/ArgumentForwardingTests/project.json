@@ -1,31 +1,32 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
     },
-
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901",
-        "System.IO.Compression": "4.1.0-rc2-23901",
-
-        "Microsoft.DotNet.ProjectModel": { "target": "project" },
-        "Microsoft.DotNet.Cli.Utils": { "target": "project" },
-        "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
-
-        "xunit": "2.1.0",
-        "dotnet-test-xunit": "1.0.0-dev-79755-47"
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
     },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": [
-                "dnxcore50",
-                "portable-net45+win8"
-            ]
-        }
+    "Microsoft.DotNet.Tools.Tests.Utilities": {
+      "target": "project"
     },
-
-    "testRunner": "xunit",
-
-    "scripts": { "precompile": "dotnet build ../ArgumentsReflector/project.json --framework netstandardapp1.5 --runtime %compile:RuntimeIdentifier% --output %compile:RuntimeOutputDir%" }
+    "xunit": "2.1.0",
+    "dotnet-test-xunit": "1.0.0-dev-91790-12"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  },
+  "testRunner": "xunit",
+  "scripts": {
+    "precompile": "dotnet build ../ArgumentsReflector/project.json --framework netstandardapp1.5 --runtime %compile:RuntimeIdentifier% --output %compile:RuntimeOutputDir%"
+  }
 }

@@ -1,0 +1,2 @@
+# What is this?
+This is a test wrapped project where we've checked in the binaries. To protect it from the build scripts cleaning the `bin` folder, we've renamed that folder to `bin.keep`. Please don't rename it!

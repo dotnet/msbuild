@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         //used in incremental precondition checks
         public static IEnumerable<string> GetCommandsInvokedByCompile(ProjectContext project)
         {
-            return new List<string> {project.ProjectFile.CompilerName, "compile"};
+            return new List<string> {project.ProjectFile?.CompilerName, "compile"};
         }
     }
 }

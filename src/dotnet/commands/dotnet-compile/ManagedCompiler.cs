@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var dependencyContext = new DependencyContextBuilder().Build(compilationOptions,
                     allExports,
                     allExports,
-                    args.PortableMode,
+                    false, // For now, just assume non-portable mode in the legacy deps file (this is going away soon anyway)
                     context.TargetFramework,
                     context.RuntimeIdentifier ?? string.Empty);
 

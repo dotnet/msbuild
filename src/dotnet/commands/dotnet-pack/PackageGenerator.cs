@@ -94,6 +94,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             TryAddOutputFile(context, inputFolder, outputName);
             TryAddOutputFile(context, inputFolder, $"{Project.Name}.xml");
+            TryAddOutputFile(context, inputFolder, $"{Project.Name}.runtimeconfig.json");
         }
 
         protected virtual bool GeneratePackage(string nupkg, List<DiagnosticMessage> packDiagnostics)

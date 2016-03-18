@@ -1,23 +1,25 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
-
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901",
-        "dotnet-hello": { "version": "1.0.0", "target": "package" }
-    },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
-    },
-
-    "testRunner": "must-be-specified-to-generate-deps",
-
-    "tools": {
-        "dotnet-hello": { "version": "2.0.0", "target": "package" }
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "dotnet-hello": {
+      "version": "1.0.0",
+      "target": "package"
     }
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
+    }
+  },
+  "testRunner": "must-be-specified-to-generate-deps",
+  "tools": {
+    "dotnet-portable": {
+      "version": "1.0.0",
+      "target": "package"
+    }
+  }
 }

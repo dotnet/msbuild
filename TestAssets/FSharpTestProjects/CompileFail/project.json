@@ -1,20 +1,19 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
-    "compilerName": "fsc",
-    "compileFiles": [
-        "Program.fs"
-    ],
-    "dependencies": {
-        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-        "NETStandard.Library": "1.0.0-rc2-23901"
-    },
-
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "compilerName": "fsc",
+  "compileFiles": [
+    "Program.fs"
+  ],
+  "dependencies": {
+    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
+    "NETStandard.Library": "1.5.0-rc2-23911"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  }
 }

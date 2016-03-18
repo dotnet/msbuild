@@ -13,16 +13,24 @@ endif()
 include(../setup.cmake)
 
 include_directories(../../common)
+include_directories(../json/casablanca/include)
 
 # CMake does not recommend using globbing since it messes with the freshness checks
 set(SOURCES
     ../../common/trace.cpp
     ../../common/utils.cpp
-
+    ../libhost.cpp
+    ../runtime_config.cpp
+    ../json/casablanca/src/json/json.cpp
+    ../json/casablanca/src/json/json_parsing.cpp
+    ../json/casablanca/src/json/json_serialization.cpp
+    ../json/casablanca/src/utilities/asyncrt_utils.cpp
     ../args.cpp
     ../hostpolicy.cpp
     ../coreclr.cpp
     ../deps_resolver.cpp
+    ../deps_format.cpp
+    ../deps_entry.cpp
     ../servicing_index.cpp)
 
 
@@ -32,6 +40,8 @@ else()
     list(APPEND SOURCES ../../common/pal.unix.cpp)
 endif()
 
+add_definitions(-D_NO_ASYNCRTIMP)
+add_definitions(-D_NO_PPLXIMP)
 add_definitions(-DCOREHOST_MAKE_DLL=1)
 
 add_library(hostpolicy SHARED ${SOURCES})

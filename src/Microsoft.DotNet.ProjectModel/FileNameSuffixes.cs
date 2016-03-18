@@ -7,6 +7,7 @@ namespace Microsoft.DotNet.ProjectModel
     {
         public const string Deps = ".deps";
         public const string DepsJson = ".deps.json";
+        public const string RuntimeConfigJson = ".runtimeconfig.json";
 
         public static PlatformFileNameSuffixes CurrentPlatform
         {

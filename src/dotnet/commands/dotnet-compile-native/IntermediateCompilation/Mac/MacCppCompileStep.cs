@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         public const string InputExtension = ".cpp";
 
         // TODO: debug/release support
-        private readonly string [] _cflags = { "-g", "-lstdc++", "-Wno-invalid-offsetof", "-pthread"};
+        private readonly string [] _cflags = { "-g", "-lstdc++", "-Wno-invalid-offsetof", "-lpthread"};
         
         // Link to iconv APIs
         private const string LibFlags = "-liconv";

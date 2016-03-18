@@ -8,12 +8,14 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class Monikers
     {
-        public static string GetProductMoniker(BuildTargetContext c)
+        public const string SharedFrameworkName = "Microsoft.NETCore.App";
+
+        public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix)
         {
             string osname = GetOSShortName();
             var arch = CurrentArchitecture.Current.ToString();
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
-            return $"dotnet-{osname}-{arch}.{version}";
+            return $"{artifactPrefix}-{osname}-{arch}.{version}";
         }
 
         public static string GetDebianPackageName(BuildTargetContext c)
@@ -31,11 +33,18 @@ namespace Microsoft.DotNet.Cli.Build
                 case "rtm":
                     packageName = "dotnet";
                     break;
-               default:
+                default:
                     throw new Exception($"Unknown channel - {channel}");
             }
 
             return packageName;
+        }
+
+        public static string GetDebianSharedFrameworkPackageName(BuildTargetContext c)
+        {
+            var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+
+            return $"dotnet-sharedframework-{SharedFrameworkName}-{sharedFrameworkNugetVersion}".ToLower();
         }
 
         public static string GetOSShortName()

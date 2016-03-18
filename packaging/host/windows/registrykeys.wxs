@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?include "Variables.wxi" ?>
+  <Fragment>
+    <ComponentGroup Id="AuthoredRegistryKeys">
+      <?if $(var.Platform) = x64?>
+      <Component Id="SetupRegistry_x64" Directory="TARGETDIR" Win64="yes">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\sharedhost\Setup">
+          <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
+          <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
+          <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
+        </RegistryKey>
+        <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]" Part="last" Action="set" System="yes" />
+      </Component>
+      <?endif?>
+
+      <?if $(var.Platform) = x86?>
+      <Component Id="SetupRegistry_x86" Directory="TARGETDIR" Win64="no">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\sharedhost\Setup">
+          <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
+          <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
+          <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
+        </RegistryKey>
+        <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]" Part="last" Action="set" System="yes" />
+      </Component>
+      <?endif?>
+
+    </ComponentGroup>
+  </Fragment>
+</Wix>

@@ -29,6 +29,7 @@ help(){
     echo "  --output <output debfile>          The full path to which the package will be written."
     echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-nightly', 'dotnet'"
     echo "  --previous-version-url <url>           Url to the previous version of the debian packge against which to run the upgrade tests."
+    echo "  --obj-root <object root>           Root folder for intermediate objects."
     exit 1
 }
 
@@ -59,6 +60,10 @@ parseargs(){
             ;;
         --previous-version-url)
             PREVIOUS_VERSION_URL=$2
+            shift
+            ;;
+        --obj-root)
+            OBJECT_DIR=$2
             shift
             ;;
         --help)
@@ -103,9 +108,9 @@ parseargs $@
 PACKAGING_ROOT="$REPOROOT/packaging/debian"
 PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
 
-PACKAGE_OUTPUT_DIR=$(dirname "${OUTPUT_DEBIAN_FILE}")
-PACKAGE_LAYOUT_DIR="$PACKAGE_OUTPUT_DIR/deb_intermediate"
-TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/debian_tests"
+PACKAGE_OUTPUT_DIR="$OBJECT_DIR/deb_output"
+PACKAGE_LAYOUT_DIR="$OBJECT_DIR/deb_intermediate"
+TEST_STAGE_DIR="$OBJECT_DIR/debian_tests"
 
 # remove any residual deb files from earlier builds
 rm -f "$PACKAGE_OUTPUT_DIR/*.deb"

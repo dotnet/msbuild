@@ -84,7 +84,7 @@ current_os()
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             echo "centos"
         elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
-            echo "rhel.7"
+            echo "rhel"
         elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
             echo "debian"
         fi
@@ -189,7 +189,7 @@ install_dotnet()
             local localVersion=$(tail -n 1 "$installLocation/cli/.version" 2>/dev/null)
             if [ "$VERSION" == "Latest" ]; then
                 # Check if we need to bother
-                local remoteData="$(curl -s https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/dnvm/latest.$os.version)"
+                local remoteData="$(curl -s https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/dnvm/latest.$os.x64.version)"
                 [ $? != 0 ] && say_err "Unable to determine latest version." && return 1
 
                 local remoteVersion=$(IFS="\n" && echo $remoteData | tail -n 1)

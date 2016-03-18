@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             _rootProject = rootProject;
 
-            // Cleaner to clone the args and mutate the clone than have separate CompileContext fields for mutated args 
+            // Cleaner to clone the args and mutate the clone than have separate CompileContext fields for mutated args
             // and then reasoning which ones to get from args and which ones from fields.
             _args = (BuilderCommandApp)args.ShallowCopy();
 
@@ -255,27 +255,33 @@ namespace Microsoft.DotNet.Tools.Build
 
         private void CollectCompilerNamePreconditions(ProjectContext project, IncrementalPreconditions preconditions)
         {
-            var projectCompiler = project.ProjectFile.CompilerName;
-
-            if (!KnownCompilers.Any(knownCompiler => knownCompiler.Equals(projectCompiler, StringComparison.Ordinal)))
+            if (project.ProjectFile != null)
             {
-                preconditions.AddUnknownCompilerPrecondition(project.ProjectName(), projectCompiler);
+                var projectCompiler = project.ProjectFile.CompilerName;
+
+                if (!KnownCompilers.Any(knownCompiler => knownCompiler.Equals(projectCompiler, StringComparison.Ordinal)))
+                {
+                    preconditions.AddUnknownCompilerPrecondition(project.ProjectName(), projectCompiler);
+                }
             }
         }
 
         private void CollectScriptPreconditions(ProjectContext project, IncrementalPreconditions preconditions)
         {
-            var preCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PreCompile);
-            var postCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PostCompile);
-
-            if (preCompileScripts.Any())
+            if (project.ProjectFile != null)
             {
-                preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PreCompile);
-            }
+                var preCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PreCompile);
+                var postCompileScripts = project.ProjectFile.Scripts.GetOrEmpty(ScriptNames.PostCompile);
 
-            if (postCompileScripts.Any())
-            {
-                preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PostCompile);
+                if (preCompileScripts.Any())
+                {
+                    preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PreCompile);
+                }
+
+                if (postCompileScripts.Any())
+                {
+                    preconditions.AddPrePostScriptPrecondition(project.ProjectName(), ScriptNames.PostCompile);
+                }
             }
         }
 
@@ -405,6 +411,13 @@ namespace Microsoft.DotNet.Tools.Build
         {
             var dest = outputPaths.RuntimeOutputPath;
             var source = outputPaths.CompilationOutputPath;
+
+            // No need to copy if dest and source are the same
+            if(string.Equals(dest, source, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             foreach (var file in outputPaths.CompilationFiles.All())
             {
                 var destFileName = file.Replace(source, dest);
@@ -420,22 +433,12 @@ namespace Microsoft.DotNet.Tools.Build
         private void MakeRunnable()
         {
             var runtimeContext = _rootProject.CreateRuntimeContext(_args.GetRuntimes());
-            if(_args.PortableMode)
-            {
-                // HACK: Force the use of the portable target
-                runtimeContext = _rootProject;
-            }
-
             var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
             var libraryExporter = runtimeContext.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
 
-            // If we're building for a specific RID, we need to copy the RID-less compilation output into
-            // the RID-specific output dir
-            if (!string.IsNullOrEmpty(runtimeContext.RuntimeIdentifier))
-            {
-                CopyCompilationOutput(outputPaths);
-            }
+            CopyCompilationOutput(outputPaths);
 
+            var options = runtimeContext.ProjectFile.GetCompilerOptions(runtimeContext.TargetFramework, _args.ConfigValue);
             var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);
             executable.MakeCompilationOutputRunnable();
 
@@ -446,24 +449,22 @@ namespace Microsoft.DotNet.Tools.Build
         // time. See: https://github.com/dotnet/cli/issues/1374
         private static void PatchMscorlibNextToCoreClr(ProjectContext context, string config)
         {
+            foreach (var exp in context.CreateExporter(config).GetAllExports())
             {
-                foreach (var exp in context.CreateExporter(config).GetAllExports())
+                var coreclrLib = exp.NativeLibraries.FirstOrDefault(nLib =>
+                        string.Equals(Constants.LibCoreClrFileName, nLib.Name));
+                if (string.IsNullOrEmpty(coreclrLib.ResolvedPath))
                 {
-                    var coreclrLib = exp.NativeLibraries.FirstOrDefault(nLib =>
-                            string.Equals(Constants.LibCoreClrFileName, nLib.Name));
-                    if (string.IsNullOrEmpty(coreclrLib.ResolvedPath))
-                    {
-                        continue;
-                    }
-                    var coreclrDir = Path.GetDirectoryName(coreclrLib.ResolvedPath);
-                    if (File.Exists(Path.Combine(coreclrDir, "mscorlib.dll")) ||
-                        File.Exists(Path.Combine(coreclrDir, "mscorlib.ni.dll")))
-                    {
-                        continue;
-                    }
-                    var mscorlibFile = exp.RuntimeAssemblies.FirstOrDefault(r => r.Name.Equals("mscorlib") || r.Name.Equals("mscorlib.ni")).ResolvedPath;
-                    File.Copy(mscorlibFile, Path.Combine(coreclrDir, Path.GetFileName(mscorlibFile)), overwrite: true);
+                    continue;
                 }
+                var coreclrDir = Path.GetDirectoryName(coreclrLib.ResolvedPath);
+                if (File.Exists(Path.Combine(coreclrDir, "mscorlib.dll")) ||
+                    File.Exists(Path.Combine(coreclrDir, "mscorlib.ni.dll")))
+                {
+                    continue;
+                }
+                var mscorlibFile = exp.RuntimeAssemblies.FirstOrDefault(r => r.Name.Equals("mscorlib") || r.Name.Equals("mscorlib.ni")).ResolvedPath;
+                File.Copy(mscorlibFile, Path.Combine(coreclrDir, Path.GetFileName(mscorlibFile)), overwrite: true);
             }
         }
 
@@ -533,12 +534,16 @@ namespace Microsoft.DotNet.Tools.Build
             // input: dependencies
             AddDependencies(dependencies, compilerIO);
 
-            var allOutputPath = new List<string>(calculator.CompilationFiles.All());
+            var allOutputPath = new HashSet<string>(calculator.CompilationFiles.All());
             if (isRootProject && project.ProjectFile.HasRuntimeOutput(buildConfiguration))
             {
                 var runtimeContext = project.CreateRuntimeContext(_args.GetRuntimes());
-                allOutputPath.AddRange(runtimeContext.GetOutputPaths(buildConfiguration, buildBasePath, outputPath).RuntimeFiles.All());
+                foreach (var path in runtimeContext.GetOutputPaths(buildConfiguration, buildBasePath, outputPath).RuntimeFiles.All())
+                {
+                    allOutputPath.Add(path);
+                }
             }
+
             // output: compiler outputs
             foreach (var path in allOutputPath)
             {

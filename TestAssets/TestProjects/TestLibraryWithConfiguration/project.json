@@ -1,21 +1,23 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "nowarn": [ "CS1591" ],
-        "xmlDoc": true,
-        "additionalArguments": [ "-highentropyva+" ]
-    },
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901"
-    },
-    "configurations": {
-        "Test": {
-
-        }
-    },
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true,
+    "additionalArguments": [
+      "-highentropyva+"
+    ]
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911"
+  },
+  "configurations": {
+    "Test": {}
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  }
 }

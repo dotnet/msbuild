@@ -16,6 +16,14 @@ namespace Microsoft.Extensions.DependencyModel
     {
         public void Write(DependencyContext context, Stream stream)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
             using (var writer = new StreamWriter(stream))
             {
                 using (var jsonWriter = new JsonTextWriter(writer) { Formatting = Formatting.Indented })
@@ -50,7 +58,7 @@ namespace Microsoft.Extensions.DependencyModel
         private JObject WriteRuntimeGraph(DependencyContext context)
         {
             return new JObject(
-                context.RuntimeGraph.Select(g => new JProperty(g.Key, new JArray(g.Value)))
+                context.RuntimeGraph.Select(g => new JProperty(g.Runtime, new JArray(g.Fallbacks)))
                 );
         }
 
@@ -79,7 +87,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
             if (value != null)
             {
-                o[name] = value.ToString();
+                o.Add(new JProperty(name, value));
             }
             }
 
@@ -147,7 +155,7 @@ namespace Microsoft.Extensions.DependencyModel
                 return;
             }
             libraryObject.Add(new JProperty(DependencyContextStrings.CompileTimeAssembliesKey,
-                 WriteAssemblies(compilationAssemblies))
+                 WriteAssetList(compilationAssemblies))
              );
         }
 
@@ -158,7 +166,7 @@ namespace Microsoft.Extensions.DependencyModel
                 return;
             }
             libraryObject.Add(new JProperty(DependencyContextStrings.RuntimeAssembliesKey,
-                       WriteAssemblies(runtimeAssemblies.Select(a => a.Path)))
+                       WriteAssetList(runtimeAssemblies.Select(a => a.Path)))
                    );
         }
 
@@ -168,7 +176,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 return;
             }
-            libraryObject.Add(
+            libraryObject.AddFirst(
                 new JProperty(DependencyContextStrings.DependenciesPropertyName,
                 new JObject(
                     dependencies.Select(dependency => new JProperty(dependency.Name, dependency.Version))))
@@ -197,6 +205,12 @@ namespace Microsoft.Extensions.DependencyModel
                 AddDependencies(libraryObject, runtimeLibrary.Dependencies);
                 AddRuntimeAssemblies(libraryObject, runtimeLibrary.Assemblies);
                 AddResourceAssemblies(libraryObject, runtimeLibrary.ResourceAssemblies);
+
+                if (runtimeLibrary.NativeLibraries.Any())
+                {
+                    libraryObject.Add(DependencyContextStrings.NativeLibrariesKey, WriteAssetList(runtimeLibrary.NativeLibraries));
+                }
+
                 return libraryObject;
             }
 
@@ -213,7 +227,6 @@ namespace Microsoft.Extensions.DependencyModel
 
         private JObject WritePortableTargetLibrary(RuntimeLibrary runtimeLibrary, CompilationLibrary compilationLibrary)
         {
-
             var libraryObject = new JObject();
 
             var dependencies = new HashSet<Dependency>();
@@ -227,8 +240,9 @@ namespace Microsoft.Extensions.DependencyModel
                         new JObject(runtimeLibrary.RuntimeTargets.SelectMany(WriteRuntimeTarget)))
                         );
                 }
-                AddResourceAssemblies(libraryObject, runtimeLibrary.ResourceAssemblies);
                 AddRuntimeAssemblies(libraryObject, runtimeLibrary.Assemblies);
+                AddResourceAssemblies(libraryObject, runtimeLibrary.ResourceAssemblies);
+                libraryObject.Add(DependencyContextStrings.NativeLibrariesKey, WriteAssetList(runtimeLibrary.NativeLibraries));
 
                 dependencies.UnionWith(runtimeLibrary.Dependencies);
             }
@@ -272,9 +286,9 @@ namespace Microsoft.Extensions.DependencyModel
             }
         }
 
-        private JObject WriteAssemblies(IEnumerable<string> assemblies)
+        private JObject WriteAssetList(IEnumerable<string> assetPaths)
         {
-            return new JObject(assemblies.Select(assembly => new JProperty(NormalizePath(assembly), new JObject())));
+            return new JObject(assetPaths.Select(assembly => new JProperty(NormalizePath(assembly), new JObject())));
         }
 
         private JObject WriteLibraries(DependencyContext context)

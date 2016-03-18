@@ -3,8 +3,8 @@
     "netstandardapp1.5": {
       "imports": "dnxcore50",
       "bin": {
-        "assembly": "bin\\{configuration}\\dnxcore50\\TestLibrary.dll",
-        "pdb": "bin\\{configuration}\\dnxcore50\\TestLibrary.pdb"
+        "assembly": "bin.keep\\{configuration}\\dnxcore50\\TestLibrary.dll",
+        "pdb": "bin.keep\\{configuration}\\dnxcore50\\TestLibrary.pdb"
       }
     }
   }

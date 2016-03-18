@@ -36,9 +36,9 @@ namespace Microsoft.DotNet.Tests
 
             try
             {
-                CommandResult result = new HelloCommand().ExecuteWithCapturedOutput();
+                CommandResult result = new PortableCommand().ExecuteWithCapturedOutput();
 
-                result.Should().HaveStdOut("Hello World!" + Environment.NewLine);
+                result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
             }
@@ -91,6 +91,26 @@ namespace Microsoft.DotNet.Tests
             public override CommandResult ExecuteWithCapturedOutput(string args = "")
             {
                 args = $"hello {args}";
+                return base.ExecuteWithCapturedOutput(args);
+            }
+        }
+
+        class PortableCommand : TestCommand
+        {
+            public PortableCommand()
+                : base("dotnet")
+            {
+            }
+
+            public override CommandResult Execute(string args = "")
+            {
+                args = $"portable {args}";
+                return base.Execute(args);
+            }
+
+            public override CommandResult ExecuteWithCapturedOutput(string args = "")
+            {
+                args = $"portable {args}";
                 return base.ExecuteWithCapturedOutput(args);
             }
         }
