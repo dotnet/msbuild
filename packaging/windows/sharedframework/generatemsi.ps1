@@ -53,7 +53,7 @@ function RunCandle
     pushd "$WixRoot"
 
     Write-Host Running candle..
-    $AuthWsxRoot = Join-Path $RepoRoot "packaging\sharedframework\windows"
+    $AuthWsxRoot = Join-Path $RepoRoot "packaging\windows\sharedframework"
     $SharedFrameworkComponentVersion = $SharedFrameworkNugetVersion.Replace('-', '_');
 
     .\candle.exe -nologo `

@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Build
     public class InstallerTargets
     {
         [Target(nameof(MsiTargets.GenerateMsis),
-        nameof(MsiTargets.GenerateBundle),
+        nameof(MsiTargets.GenerateBundles),
         nameof(PkgTargets.GeneratePkgs))]//,
         //nameof(InstallerTargets.GenerateDebs))]
         public static BuildTargetResult GenerateInstaller(BuildTargetContext c)

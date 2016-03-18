@@ -30,6 +30,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkMsi { get; set; }
 
+        private static string SharedFrameworkBundle { get; set; }
+
         private static string Engine { get; set; }
 
         private static string MsiVersion { get; set; }
@@ -68,6 +70,7 @@ namespace Microsoft.DotNet.Cli.Build
             SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
             Engine = Path.Combine(Path.GetDirectoryName(SdkBundle), ENGINE);
 
+            SharedFrameworkBundle = c.BuildContext.Get<string>("CombinedFrameworkHostInstallerFile");
             SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
             SharedFrameworkMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), "msi");
 
@@ -90,13 +93,22 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        [Target(nameof(MsiTargets.InitMsi),
+        nameof(GenerateCliSdkBundle),
+        nameof(GenerateSharedFxBundle))]
+        [BuildPlatforms(BuildPlatform.Windows)]
+        public static BuildTargetResult GenerateBundles(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
         [Target]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateCliSdkMsi(BuildTargetContext c)
         {
             var cliSdkRoot = c.BuildContext.Get<string>("CLISDKRoot");
             Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatemsi.ps1"),
+                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatemsi.ps1"),
                 cliSdkRoot, SdkMsi, WixRoot, MsiVersion, CliVersion, Arch, Channel)
                     .Execute()
                     .EnsureSuccessful();
@@ -117,7 +129,7 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(wixObjRoot);
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "host", "windows", "generatemsi.ps1"),
+                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "host", "generatemsi.ps1"),
                 inputDir, SharedHostMsi, WixRoot, MsiVersion, CliVersion, Arch, wixObjRoot)
                     .Execute()
                     .EnsureSuccessful();
@@ -141,7 +153,7 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(wixObjRoot);
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "sharedframework", "windows", "generatemsi.ps1"),
+                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatemsi.ps1"),
                 inputDir, SharedFrameworkMsi, WixRoot, MsiVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot)
                     .Execute()
                     .EnsureSuccessful();
@@ -151,12 +163,28 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(nameof(MsiTargets.InitMsi))]
         [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateBundle(BuildTargetContext c)
+        public static BuildTargetResult GenerateCliSdkBundle(BuildTargetContext c)
         {
             Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "generatebundle.ps1"),
+                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),
                 SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, MsiVersion, CliVersion, Arch, Channel)
                     .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
+                    .Execute()
+                    .EnsureSuccessful();
+            return c.Success();
+        }
+
+        [Target(nameof(MsiTargets.InitMsi))]
+        [BuildPlatforms(BuildPlatform.Windows)]
+        public static BuildTargetResult GenerateSharedFxBundle(BuildTargetContext c)
+        {
+            var sharedFrameworkNuGetName = Monikers.SharedFrameworkName;
+            var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+            var upgradeCode = Utils.GenerateGuidFromName($"{sharedFrameworkNuGetName}-{sharedFrameworkNuGetVersion}-{Arch}-bundle").ToString().ToUpper();
+
+            Cmd("powershell", "-NoProfile", "-NoLogo",
+                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatebundle.ps1"),
+                SharedFrameworkMsi, SharedHostMsi, SharedFrameworkBundle, WixRoot, MsiVersion, CliVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, Channel)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
