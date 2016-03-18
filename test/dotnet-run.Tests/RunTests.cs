@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Tools.Run.Tests
 {
     public class RunTests : TestBase
     {
+        private const string PortableAppsTestBase = "PortableTests";
         private const string RunTestsBase = "RunTestsApps";
 
         [WindowsOnlyFact]
@@ -39,6 +40,34 @@ namespace Microsoft.DotNet.Tools.Run.Tests
                                                      .WithBuildArtifacts();
             new RunCommand(instance.TestRoot).Execute().Should().Fail();
         }
+
+        [Fact]
+        public void ItRunsPortableApps()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(PortableAppsTestBase, "PortableApp"))
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot).Execute().Should().Pass();
+        }
+
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/1940")]
+        public void ItRunsPortableAppsWithNative()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(PortableAppsTestBase, "PortableAppWithNative"))
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot).Execute().Should().Pass();
+        }
+
+        [Fact]
+        public void ItRunsStandaloneApps()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(PortableAppsTestBase, "StandaloneApp"))
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot).Execute().Should().Pass();
+        }
+
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {

@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Tools.Run
                 // The executable is a ".dll", we need to call it through dotnet.exe
                 var muxer = new Muxer();
 
-                command = Command.Create(muxer.MuxerPath, Enumerable.Concat(new[] { outputName }, _args));
+                command = Command.Create(muxer.MuxerPath, Enumerable.Concat(new[] { "exec", outputName }, _args));
             }
             else
             {
