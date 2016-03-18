@@ -4,54 +4,6 @@
 
 # Note: This script should be compatible with the dash shell used in Ubuntu. So avoid bashisms! See https://wiki.ubuntu.com/DashAsBinSh for more info
 
-# This is a herestring Everything from the line AFTER the "read" until the line containing ONLY "EOF" is part of the string
-# The quotes around "EOF" ensure that $ is not interpreted as a variable expansion. The indentation of the herestring must be
-# kept exactly consistent
-LINK_SCRIPT_CONTENT=$(cat <<-"EOF"
-#!/usr/bin/env bash
-
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
-if [ -z "$DOTNET_TOOLS" ]; then
-    # We should be in $PREFIX/bin, so just get the directory above us.
-    PREFIX="$( cd -P "$DIR/.." && pwd)"
-
-    # The tools are in $PREFIX/share/dotnet/cli by default
-    DOTNET_TOOLS_DEFAULT=$PREFIX/share/dotnet/cli
-
-    # Check the default location
-    if [ -d "$DOTNET_TOOLS_DEFAULT" ]; then
-        export DOTNET_TOOLS=$DOTNET_TOOLS_DEFAULT
-    else
-        echo "error: the .NET tools installation appears to be corrupt!" 1>&2
-        echo "error: specifically, the tools could not be located in the $DOTNET_TOOLS_DEFAULT directory" 1>&2
-        exit 1
-    fi
-fi
-
-MY_NAME=$(basename ${BASH_SOURCE[0]})
-MY_TARGET=$DOTNET_TOOLS/bin/$MY_NAME
-
-if [ ! -e "$MY_TARGET" ]; then
-    echo "error: the tool $MY_TARGET cannot be found" 1>&2
-    exit 1
-fi
-
-if [ ! -x "$MY_TARGET" ]; then
-    echo "error: the tool $MY_TARGET is not executable" 1>&2
-    exit 1
-fi
-
-exec "$MY_TARGET" "$@"
-EOF
-)
-
 #setup some colors to use. These need to work in fairly limited shells, like the Ubuntu Docker container where there are only 8 colors.
 #See if stdout is a terminal
 if [ -t 1 ]; then
@@ -138,18 +90,13 @@ say() {
 
 make_link() {
     local target_name=$1
-    local dest=$PREFIX/bin/$target_name
-    say "Linking $dest -> $PREFIX/share/dotnet/cli/$target_name"
+    local src=$INSTALLDIR/cli/$target_name
+    local dest=$BINDIR/$target_name
+    say "Linking $dest -> $src"
     if [ -e $dest ]; then
         rm $dest
     fi
-
-    [ -d "$PREFIX/bin" ] || mkdir -p $PREFIX/bin
-
-    echo "$LINK_SCRIPT_CONTENT" > $dest
-
-    # Make mode: rwxr-xr-x
-    chmod 755 $dest
+    ln -s $src $dest
 }
 
 install_dotnet()
@@ -159,7 +106,7 @@ install_dotnet()
         return 1
     fi
 
-    say "Preparing to install .NET Tools from '$CHANNEL' channel to '$PREFIX'"
+    say "Preparing to install .NET Tools from '$CHANNEL' channel to '$INSTALLDIR'"
 
     if [ -e "$PREFIX/share/dotnet/cli/dotnet" ] && [ ! -w "$PREFIX/share/dotnet/cli/dotnet" ]; then
         say_err "dotnet cli is already installed and not writeable. Use 'curl -sSL <url> | sudo sh' to force install."
@@ -180,9 +127,9 @@ install_dotnet()
     fi
 
     local os=$(current_os)
-    local installLocation="$PREFIX/share/dotnet"
+    local installLocation="$INSTALLDIR"
     local dotnet_url="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Binaries/$VERSION"
-    local dotnet_filename="dotnet-$os-x64.$fileVersion.tar.gz"
+    local dotnet_filename="dotnet-combined-framework-sdk-host-$os-x64.$fileVersion.tar.gz"
 
     if [ "$RELINK" = "0" ]; then
         if [ "$FORCE" = "0" ]; then
@@ -236,11 +183,9 @@ install_dotnet()
         return 1
     fi
 
-    for f in $(find "$installLocation/cli" -regex ".*/dotnet[a-z\-]*$")
-    do
-        local baseFile=$(basename $f)
-        make_link $baseFile
-    done
+    if [ ! -z "$BINDIR" ]; then
+        make_link "dotnet"
+    fi
 
     if [ -e "$installLocation/$dotnet_filename" ]; then
         say "Cleaning $dotnet_filename"
@@ -306,13 +251,15 @@ do
 done
 
 #set default prefix (PREFIX is a fairly standard env-var, but we also want to allow the use the specific "DOTNET_INSTALL_DIR" one)
-if [ ! -z "$DOTNET_INSTALL_DIR" ]; then
-    PREFIX=$DOTNET_INSTALL_DIR
-elif [ -z "$PREFIX" ]; then
-    PREFIX=/usr/local
+if [ -z "$DOTNET_INSTALL_DIR" ]; then
+    INSTALLDIR=/usr/local/share/dotnet
+    BINDIR=/usr/local/bin
+else
+    INSTALLDIR=$DOTNET_INSTALL_DIR
+    BINDIR=
 fi
 
-[ -z "$CHANNEL" ] && CHANNEL="dev"
+[ -z "$CHANNEL" ] && CHANNEL="beta"
 [ -z "$VERSION" ] && VERSION="Latest"
 
 install_dotnet

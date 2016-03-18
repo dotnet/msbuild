@@ -37,11 +37,11 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0",
                     PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(),
-                    PlatformServices.Default.Runtime.RuntimeArchitecture, "cli", "bin");
+                    PlatformServices.Default.Runtime.RuntimeArchitecture, "cli");
             }
             else
             {
-                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(), "share", "dotnet", "cli", "bin");
+                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(), "cli");
             }
         }
     }
