@@ -11,17 +11,20 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly NuGetFramework _nugetFramework;
         private readonly string _configuration;
         private readonly string _outputPath;
+        private readonly string _buildBasePath;
         private readonly string _projectDirectory;
 
         public ProjectDependenciesCommandFactory(
-            NuGetFramework nugetFramework, 
-            string configuration, 
+            NuGetFramework nugetFramework,
+            string configuration,
             string outputPath,
+            string buildBasePath,
             string projectDirectory)
         {
             _nugetFramework = nugetFramework;
             _configuration = configuration;
             _outputPath = outputPath;
+            _buildBasePath = buildBasePath;
             _projectDirectory = projectDirectory;
         }
 
@@ -42,11 +45,12 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             var commandSpec = FindProjectDependencyCommands(
-                commandName, 
-                args, 
-                configuration, 
-                framework, 
+                commandName,
+                args,
+                configuration,
+                framework,
                 _outputPath,
+                _buildBasePath,
                 _projectDirectory);
 
             return Command.Create(commandSpec);
@@ -58,6 +62,7 @@ namespace Microsoft.DotNet.Cli.Utils
             string configuration,
             NuGetFramework framework,
             string outputPath,
+            string buildBasePath,
             string projectDirectory)
         {
             var commandResolverArguments = new CommandResolverArguments
@@ -67,6 +72,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 Framework = framework,
                 Configuration = configuration,
                 OutputPath = outputPath,
+                BuildBasePath = buildBasePath,
                 ProjectDirectory = projectDirectory
             };
 

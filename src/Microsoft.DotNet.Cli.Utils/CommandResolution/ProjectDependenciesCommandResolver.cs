@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandSpec Resolve(CommandResolverArguments commandResolverArguments)
         {
-            if (commandResolverArguments.Framework == null 
+            if (commandResolverArguments.Framework == null
                 || commandResolverArguments.ProjectDirectory == null
                 || commandResolverArguments.Configuration == null
                 || commandResolverArguments.CommandName == null)
@@ -53,7 +53,8 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandResolverArguments.Configuration,
                     commandResolverArguments.CommandName,
                     commandResolverArguments.CommandArguments.OrEmptyIfNull(),
-                    commandResolverArguments.OutputPath);
+                    commandResolverArguments.OutputPath,
+                    commandResolverArguments.BuildBasePath);
         }
 
         private CommandSpec ResolveFromProjectDependencies(
@@ -62,23 +63,25 @@ namespace Microsoft.DotNet.Cli.Utils
             string configuration,
             string commandName,
             IEnumerable<string> commandArguments,
-            string outputPath)
+            string outputPath,
+            string buildBasePath)
         {
             var allowedExtensions = GetAllowedCommandExtensionsFromEnvironment(_environment);
 
             var projectContext = GetProjectContextFromDirectory(
-                projectDirectory, 
+                projectDirectory,
                 framework);
 
             if (projectContext == null)
-            { 
+            {
                 return null;
             }
 
-            var depsFilePath = projectContext.GetOutputPaths(configuration, outputPath: outputPath).RuntimeFiles.DepsJson;
+            var depsFilePath =
+                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.DepsJson;
 
             var dependencyLibraries = GetAllDependencyLibraries(projectContext);
-             
+
             return ResolveFromDependencyLibraries(
                 dependencyLibraries,
                 depsFilePath,

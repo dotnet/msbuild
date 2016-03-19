@@ -14,9 +14,9 @@ namespace FakeTests
         }
         
         [Fact]
-        public void It_fails()
+        public void It_also_succeeds()
         {
-            Assert.True(false);
+            Assert.True(true);
         }
     }
 }

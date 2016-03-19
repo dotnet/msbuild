@@ -186,6 +186,64 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
+        public void It_sets_depsfile_based_on_output_path_when_returning_a_commandspec()
+        {
+            var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
+
+            var commandResolverArguments = new CommandResolverArguments
+            {
+                CommandName = "dotnet-hello",
+                CommandArguments = null,
+                ProjectDirectory = s_liveProjectDirectory,
+                Configuration = "Debug",
+                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                OutputPath = AppContext.BaseDirectory
+            };
+
+            var projectContext = ProjectContext.Create(
+                s_liveProjectDirectory,
+                FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+
+            var depsFilePath =
+                projectContext.GetOutputPaths("Debug", outputPath: AppContext.BaseDirectory).RuntimeFiles.DepsJson;
+
+            var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+            result.Args.Should().Contain($"--depsfile {depsFilePath}");
+        }
+
+        [Fact]
+        public void It_sets_depsfile_based_on_build_base_path_when_returning_a_commandspec()
+        {
+            var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
+
+            var commandResolverArguments = new CommandResolverArguments
+            {
+                CommandName = "dotnet-hello",
+                CommandArguments = null,
+                ProjectDirectory = s_liveProjectDirectory,
+                Configuration = "Debug",
+                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                BuildBasePath = AppContext.BaseDirectory
+            };
+
+            var projectContext = ProjectContext.Create(
+                s_liveProjectDirectory,
+                FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+
+            var depsFilePath =
+                projectContext.GetOutputPaths("Debug", AppContext.BaseDirectory).RuntimeFiles.DepsJson;
+
+            var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+            result.Args.Should().Contain($"--depsfile {depsFilePath}");
+        }
+
+        [Fact]
         public void It_returns_a_CommandSpec_with_CommandName_in_Args_when_returning_a_CommandSpec_and_CommandArguments_are_null()
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
