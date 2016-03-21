@@ -424,9 +424,9 @@ extract_dotnet_package() {
     local failed=false
     tar -xzf "$zip_path" -C "$temp_out_path" > /dev/null || failed=true
     
-    local folders_with_version_regex='^.*/\d+\.\d+[^/]+/'
-    find $temp_out_path -type f | grep -Po $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path false
-    find $temp_out_path -type f | grep -Pv $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path true
+    local folders_with_version_regex='^.*/[0-9]+\.[0-9]+[^/]+/'
+    find $temp_out_path -type f | grep -Eo $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path false
+    find $temp_out_path -type f | grep -Ev $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path true
     
     rm -rf $temp_out_path
     
