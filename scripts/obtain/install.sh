@@ -141,10 +141,6 @@ install_dotnet()
     local dotnet_url="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Binaries/$VERSION"
     local dotnet_filename="dotnet-dev-$os-x64.$fileVersion.tar.gz"
     
-    if [ "$os" = "ubuntu" ]; then
-        dotnet_filename="dotnet-$os-x64.$fileVersion.tar.gz"
-    fi
-
     if [ "$RELINK" = "0" ]; then
         if [ "$FORCE" = "0" ]; then
             local localVersion=$(tail -n 1 "$installLocation/cli/.version" 2>/dev/null)
@@ -192,10 +188,6 @@ install_dotnet()
         [ $? != 0 ] && say_err "Failed to clean current dotnet install" && return 1
 
         mv "$installLocation/cli_new" "$installLocation/cli"
-         
-        if [ "$os" = "ubuntu" ]; then
-            make_bootstrap_link
-        fi
     elif [ ! -e "$installLocation/cli" ]; then
         say_err "${red}cannot relink dotnet, it is not installed in $PREFIX!"
         return 1
