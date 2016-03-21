@@ -12,7 +12,7 @@
         "System.Console": "4.0.0-rc3-23908",
         "System.Diagnostics.Process": "4.1.0-rc3-23908",
         "System.Diagnostics.TraceSource": "4.0.0-rc3-23908",
-        "System.Security.Cryptography.X509Certificates": "4.0.0-rc3-23908",
+        "System.Security.Cryptography.X509Certificates": "4.0.0-rc3-23904",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc3-23908",
         "System.Threading.Thread": "4.0.0-rc3-23908",
         "System.IO.FileSystem": "4.0.1-rc3-23908",

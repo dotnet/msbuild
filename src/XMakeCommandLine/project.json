@@ -18,7 +18,7 @@
         "System.Diagnostics.Process": "4.1.0-rc3-23908",
         "System.Diagnostics.TraceSource": "4.0.0-rc3-23908",
         "System.Runtime.Loader": "4.0.0-rc3-23908",
-        "System.Security.Cryptography.X509Certificates": "4.0.0-rc3-23908",
+        "System.Security.Cryptography.X509Certificates": "4.0.0-rc3-23904",
         "System.Threading.Thread": "4.0.0-rc3-23908",
         "System.Threading.ThreadPool": "4.0.10-rc3-23908",
         "System.Xml.XmlDocument": "4.0.1-rc3-23908",
