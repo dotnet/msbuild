@@ -45,7 +45,7 @@
         <dependency id="System.Runtime.InteropServices" version="4.1.0-rc3-23908" />
         <dependency id="System.Runtime.InteropServices.PInvoke" version="4.0.0-rc3-23908" />
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0-rc3-23908" />
-        <dependency id="System.Security.Cryptography.X509Certificates" version="4.1.0-rc2-23908" />
+        <dependency id="System.Security.Cryptography.X509Certificates" version="4.0.0-rc3-23904" />
         <dependency id="System.Text.Encoding" version="4.0.11-rc3-23908" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.11-rc3-23908" />
         <dependency id="System.Text.RegularExpressions" version="4.0.12-rc3-23908" />

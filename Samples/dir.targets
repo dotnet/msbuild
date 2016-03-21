@@ -21,6 +21,8 @@
                       and !Exists('$(CSharpPortableTargets)')"/>
 
  
+  <Import Project="$(RepoRoot)\targets\OverrideGetReferenceAssemblyPaths.targets"
+          Condition="'$(NetCoreBuild)' == 'true'" />     
   
   <!-- nuget targets -->
   <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
