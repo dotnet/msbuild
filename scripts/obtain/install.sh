@@ -326,7 +326,7 @@ construct_download_link() {
     
     local osname=$(get_current_os_name)
     
-    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-combined-framework-sdk-host-$osname-$normalized_architecture.$specific_version.tar.gz"
+    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
     echo "$download_link"
     return 0
 }
