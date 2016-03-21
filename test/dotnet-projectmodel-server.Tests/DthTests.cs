@@ -39,6 +39,10 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             {
                 _loggerFactory.AddConsole(LogLevel.Warning);
             }
+            else
+            {
+                _loggerFactory.AddConsole(LogLevel.Error);
+            }
 
             _testAssetsManager = new TestAssetsManager(
                 Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "DthTestProjects", "src"));
