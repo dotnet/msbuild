@@ -54,7 +54,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         public void It_builds_the_project_using_the_output_passed()
         {
             var testCommand = new DotnetTestCommand();
-            var result = testCommand.Execute($"{_projectFilePath} -o {AppContext.BaseDirectory} -f netstandardapp1.5");
+            var result = testCommand.Execute(
+                $"{_projectFilePath} -o {Path.Combine(AppContext.BaseDirectory, "output")} -f netstandardapp1.5");
             result.Should().Pass();
         }
 
