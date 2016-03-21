@@ -225,7 +225,17 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             _writer.Dispose();
             _networkStream.Dispose();
             _readCancellationToken.Cancel();
-            _socket.Shutdown(SocketShutdown.Both);
+            
+            try
+            {
+                _socket.Shutdown(SocketShutdown.Both);
+            }
+            catch (SocketException)
+            {
+                // Swallow this error for now.
+                // This is a temporary fix for a random failure on CI. The issue happens on Windowx x86
+                // only.
+            }
         }
 
         private void ReadMessage(CancellationToken cancellationToken)
