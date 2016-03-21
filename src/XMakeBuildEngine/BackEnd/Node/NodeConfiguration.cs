@@ -142,7 +142,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _nodeId);
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
-#if FEATURE_APPDOMAIN
+#if FEATURE_BINARY_SERIALIZATION && FEATURE_APPDOMAIN
             translator.TranslateDotNet(ref _appDomainSetup);
 #endif
         }
