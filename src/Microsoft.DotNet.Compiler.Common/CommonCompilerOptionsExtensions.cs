@@ -40,6 +40,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         internal static readonly OptionTemplate s_additionalArgumentsTemplate = new OptionTemplate("additional-argument");
 
+        internal static readonly OptionTemplate s_outputNameTemplate = new OptionTemplate("output-name");
+
         public static CommonCompilerOptions Parse(ArgumentSyntax syntax)
         {
             IReadOnlyList<string> defines = null;
@@ -55,6 +57,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             bool? publicSign = null;
             bool? emitEntryPoint = null;
             bool? generateXmlDocumentation = null;
+            string outputName = null;
             IReadOnlyList<string> additionalArguments = null;
 
             Func<string, bool?> nullableBoolConverter = v => bool.Parse(v);
@@ -97,6 +100,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             syntax.DefineOption(s_generateXmlDocumentation.LongName, ref generateXmlDocumentation,
                     nullableBoolConverter, "Generate XML documentation file");
 
+            syntax.DefineOption(s_outputNameTemplate.LongName, ref outputName, "Output assembly name");
+
             return new CommonCompilerOptions
             {
                 Defines = defines,
@@ -112,6 +117,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 DebugType = debugType,
                 EmitEntryPoint = emitEntryPoint,
                 GenerateXmlDocumentation = generateXmlDocumentation,
+                OutputName = outputName,
                 AdditionalArguments = additionalArguments
             };
         }
@@ -131,6 +137,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var publicSign = options.PublicSign;
             var emitEntryPoint = options.EmitEntryPoint;
             var generateXmlDocumentation = options.GenerateXmlDocumentation;
+            var outputName = options.OutputName;
             var additionalArguments = options.AdditionalArguments;
 
             var args = new List<string>();
@@ -203,6 +210,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             if (generateXmlDocumentation != null)
             {
                 args.Add(s_generateXmlDocumentation.ToLongArg(generateXmlDocumentation));
+            }
+
+            if (outputName != null)
+            {
+                args.Add(s_outputNameTemplate.ToLongArg(outputName));
             }
 
             return args;

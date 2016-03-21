@@ -575,7 +575,8 @@ namespace Microsoft.DotNet.ProjectModel
                 DebugType = rawOptions.ValueAsString("debugType"),
                 EmitEntryPoint = rawOptions.ValueAsNullableBoolean("emitEntryPoint"),
                 GenerateXmlDocumentation = rawOptions.ValueAsNullableBoolean("xmlDoc"),
-                PreserveCompilationContext = rawOptions.ValueAsNullableBoolean("preserveCompilationContext")
+                PreserveCompilationContext = rawOptions.ValueAsNullableBoolean("preserveCompilationContext"),
+                OutputName = rawOptions.ValueAsString("outputName")
             };
         }
 

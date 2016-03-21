@@ -39,6 +39,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IEnumerable<string> AdditionalArguments { get; set; }
 
+        public string OutputName { get;set; }
+
         public override bool Equals(object obj)
         {
             var other = obj as CommonCompilerOptions;
@@ -57,7 +59,8 @@ namespace Microsoft.DotNet.ProjectModel
                    PreserveCompilationContext == other.PreserveCompilationContext &&
                    EnumerableEquals(Defines, other.Defines) &&
                    EnumerableEquals(SuppressWarnings, other.SuppressWarnings) &&
-                   EnumerableEquals(AdditionalArguments, other.AdditionalArguments);
+                   EnumerableEquals(AdditionalArguments, other.AdditionalArguments) &&
+                   OutputName == other.OutputName;
         }
 
         private static bool EnumerableEquals(IEnumerable<string> left, IEnumerable<string> right)
@@ -152,6 +155,11 @@ namespace Microsoft.DotNet.ProjectModel
                 if (option.GenerateXmlDocumentation != null)
                 {
                     result.GenerateXmlDocumentation = option.GenerateXmlDocumentation;
+                }
+
+                if (option.OutputName != null)
+                {
+                    result.OutputName = option.OutputName;
                 }
             }
 

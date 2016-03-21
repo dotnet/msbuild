@@ -108,7 +108,14 @@ namespace Microsoft.DotNet.ProjectModel
             var targetFrameworkOptions = targetFramework != null ? GetCompilerOptions(targetFramework) : null;
 
             // Combine all of the options
-            return CommonCompilerOptions.Combine(rootOptions, configurationOptions, targetFrameworkOptions);
+            var compilerOptions = CommonCompilerOptions.Combine(rootOptions, configurationOptions, targetFrameworkOptions);
+
+            if (compilerOptions.OutputName == null)
+            {
+                compilerOptions.OutputName = Name;
+            }
+
+            return compilerOptions;
         }
 
         public TargetFrameworkInformation GetTargetFramework(NuGetFramework targetFramework)

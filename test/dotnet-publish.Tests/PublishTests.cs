@@ -193,5 +193,28 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             result.Should().HaveStdOutMatching("\nprepublish_output( \\?[^%]+\\?){5}.+\npostpublish_output( \\?[^%]+\\?){5}", RegexOptions.Singleline);
             result.Should().Pass();
         }
+
+        public void PublishAppWithOutputAssemblyName()
+        {
+            TestInstance instance =
+                TestAssetsManager
+                    .CreateTestInstance("AppWithOutputAssemblyName")
+                    .WithLockFiles()
+                    .WithBuildArtifacts();
+
+            var testRoot = _getProjectJson(instance.TestRoot, "AppWithOutputAssemblyName");
+            var publishCommand = new PublishCommand(testRoot, output: testRoot);
+            publishCommand.Execute().Should().Pass();
+
+            var publishedDir = publishCommand.GetOutputDirectory();
+            var extension = publishCommand.GetExecutableExtension();
+            var outputExe = "MyApp" + extension;
+            publishedDir.Should().HaveFiles(new[] { "MyApp.dll", outputExe });
+            publishedDir.Should().NotHaveFile("AppWithOutputAssemblyName" + extension);
+            publishedDir.Should().NotHaveFile("AppWithOutputAssemblyName.dll");
+
+            var command = new TestCommand(Path.Combine(publishedDir.FullName, outputExe));
+            command.Execute("").Should().ExitWith(0);
+        }
     }
 }

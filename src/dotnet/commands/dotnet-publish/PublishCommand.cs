@@ -193,7 +193,7 @@ namespace Microsoft.DotNet.Tools.Publish
             if (options.EmitEntryPoint.GetValueOrDefault() && !string.IsNullOrEmpty(context.RuntimeIdentifier))
             {
                 Reporter.Verbose.WriteLine($"Copying native host to output to create fully standalone output.");
-                PublishHost(context, outputPath);
+                PublishHost(context, outputPath, options);
             }
 
             RunScripts(context, ScriptNames.PostPublish, contextVariables);
@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
         }
 
-        private static int PublishHost(ProjectContext context, string outputPath)
+        private static int PublishHost(ProjectContext context, string outputPath, CommonCompilerOptions compilationOptions)
         {
             if (context.TargetFramework.IsDesktop())
             {
@@ -239,7 +239,9 @@ namespace Microsoft.DotNet.Tools.Publish
                     return 1;
                 }
 
-                var outputBinaryName = binaryName.Equals(Constants.HostExecutableName) ? (context.ProjectFile.Name + Constants.ExeSuffix) : binaryName;
+                var outputBinaryName = binaryName.Equals(Constants.HostExecutableName)
+                    ? compilationOptions.OutputName + Constants.ExeSuffix
+                    : binaryName;
                 var outputBinaryPath = Path.Combine(outputPath, outputBinaryName);
 
                 File.Copy(hostBinaryPath, outputBinaryPath, overwrite: true);
@@ -341,8 +343,8 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // No RID-specific target found, use the RID-less target and publish portable
-            return allContexts.FirstOrDefault(c => 
-                Equals(c.TargetFramework, f) && 
+            return allContexts.FirstOrDefault(c =>
+                Equals(c.TargetFramework, f) &&
                 string.IsNullOrEmpty(c.RuntimeIdentifier));
         }
 

@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Compiler
     public class PackageGenerator
     {
         protected ArtifactPathsCalculator ArtifactPathsCalculator { get; }
-        
+
         protected Project Project { get; }
 
         protected string Configuration { get; }
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             ArtifactPathsCalculator = artifactPathsCalculator;
             Project = project;
             Configuration = configuration;
-        }        
+        }
 
         public bool BuildPackage(IEnumerable<ProjectContext> contexts, List<DiagnosticMessage> packDiagnostics)
         {
@@ -323,7 +323,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             return Project.Name + outputExtension;
-        }                
+        }
 
         private static string GetDefaultRootOutputPath(Project project, string outputOptionValue)
         {
