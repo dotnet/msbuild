@@ -64,6 +64,10 @@ parseargs(){
             PREVIOUS_VERSION_URL=$2
             shift
             ;;
+        --framework-debian-package-name)
+            SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME=$2
+            shift
+            ;;
         --framework-nuget-name)
             SHARED_FRAMEWORK_NUGET_NAME=$2
             shift
@@ -121,7 +125,7 @@ parseargs(){
 
 }
 
-parseargs $@
+parseargs "$@"
 
 PACKAGING_ROOT="$REPOROOT/packaging/debian"
 PACKAGING_TOOL_DIR="$REPOROOT/tools/DebianPackageTool"
@@ -174,12 +178,13 @@ create_debian_package(){
 
     mkdir -p "$PACKAGE_OUTPUT_DIR"
     
-    "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION -n $DOTNET_DEB_PACKAGE_NAME
+    "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION
 }
 
 update_debian_json()
 {
     header "Updating debian.json file"
+    sed -i "s/%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%/$SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
     sed -i "s/%SHARED_FRAMEWORK_NUGET_NAME%/$SHARED_FRAMEWORK_NUGET_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
     sed -i "s/%SHARED_FRAMEWORK_NUGET_VERSION%/$SHARED_FRAMEWORK_NUGET_VERSION/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
     sed -i "s/%SDK_NUGET_VERSION%/$DOTNET_CLI_VERSION/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
@@ -199,7 +204,8 @@ install_bats() {
 
 run_package_integrity_tests() {
     # Set LAST_VERSION_URL to enable upgrade tests
-    export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
+    # Temporarily disable last version until we have one with shared fx
+    # export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
 
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
 }
