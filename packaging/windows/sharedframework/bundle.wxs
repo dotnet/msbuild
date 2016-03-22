@@ -6,13 +6,13 @@
   <?include "Variables.wxi" ?>
 
   <Bundle Name="$(var.ProductName)" Manufacturer="$(var.Manufacturer)"
-          Version="$(var.DisplayVersion)" UpgradeCode="70A1576F-63B6-4659-9E39-25C7B769DDE5"
+          Version="$(var.DisplayVersion)" UpgradeCode="$(var.UpgradeCode)"
           AboutUrl="http://dotnet.github.io/"
           Compressed="yes">
 
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.Foundation">
       <bal:WixStandardBootstrapperApplication
-        LicenseFile="..\osx\resources\en.lproj\eula.rtf"
+        LicenseFile="..\..\osx\resources\en.lproj\eula.rtf"
         ShowFilesInUse="yes"
         ShowVersion="yes"
         />
@@ -22,19 +22,12 @@
 
     <swid:Tag Regid="microsoft.com" InstallPath="[DOTNETHOME]" />
 
-    <Variable Name="BuildType" Value="$(var.BuildType)" />
-    <Variable Name="DisplayVersion" Value="$(var.DisplayVersion)" />
-    <Variable Name="ReleaseSuffix" Value="$(var.ReleaseSuffix)" />
-
     <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles6432Folder]dotnet" bal:Overridable="yes" />
 
-    <util:RegistrySearch Id="PreviousInstallFolderSearch" Root="HKLM" Key="SOFTWARE\dotnet\Setup" Value="InstallDir" Variable="PreviousInstallFolder" />
+    <util:RegistrySearch Id="PreviousInstallFolderSearch" Root="HKLM" Key="SOFTWARE\dotnet\sharedframework\$(var.FrameworkName) $(var.FrameworkDisplayVersion)\Setup" Value="InstallDir" Variable="PreviousInstallFolder" />
     <util:DirectorySearch Path="[PreviousInstallFolder]" Variable="DOTNETHOME" After="PreviousInstallFolderSearch" Condition="PreviousInstallFolder" />
 
     <Chain DisableSystemRestore="yes" ParallelCache="yes">
-      <MsiPackage SourceFile="$(var.CLISDKMsiSourcePath)">
-        <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
-      </MsiPackage>
       <MsiPackage SourceFile="$(var.SharedFXMsiSourcePath)">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
@@ -48,7 +41,7 @@
     <PayloadGroup Id="DotnetCoreBAPayloads">
       <Payload Name="thm.xml" Compressed="yes" SourceFile="bundle.thm" />
       <Payload Name="thm.wxl" Compressed="yes" SourceFile="bundle.wxl" />
-      <Payload Name="bg.png" Compressed="yes" SourceFile="..\osx\resources\dotnetbackground.png" />
+      <Payload Name="bg.png" Compressed="yes" SourceFile="..\..\osx\resources\dotnetbackground.png" />
 
       <Payload Name='eula.rtf' Compressed='yes' SourceFile='!(wix.WixStdbaLicenseRtf)' />
     </PayloadGroup>

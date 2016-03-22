@@ -13,8 +13,8 @@ param(
     [Parameter(Mandatory=$true)][string]$ReleaseSuffix
 )
 
-. "$PSScriptRoot\..\..\scripts\common\_common.ps1"
-$RepoRoot = Convert-Path "$PSScriptRoot\..\.."
+. "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
+$RepoRoot = Convert-Path "$PSScriptRoot\..\..\.."
 
 function RunCandleForBundle
 {
@@ -22,7 +22,7 @@ function RunCandleForBundle
     pushd "$WixRoot"
 
     Write-Host Running candle for bundle..
-    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows"
+    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
     .\candle.exe -nologo `
         -dDotnetSrc="$inputDir" `
@@ -55,7 +55,7 @@ function RunLightForBundle
     pushd "$WixRoot"
 
     Write-Host Running light for bundle..
-    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows"
+    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
     .\light.exe -nologo `
         -cultures:en-us `

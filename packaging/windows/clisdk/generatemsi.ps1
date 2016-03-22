@@ -11,8 +11,8 @@ param(
     [Parameter(Mandatory=$true)][string]$ReleaseSuffix
 )
 
-. "$PSScriptRoot\..\..\scripts\common\_common.ps1"
-$RepoRoot = Convert-Path "$PSScriptRoot\..\.."
+. "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
+$RepoRoot = Convert-Path "$PSScriptRoot\..\..\.."
 
 $InstallFileswsx = "install-files.wxs"
 $InstallFilesWixobj = "install-files.wixobj"
@@ -42,7 +42,7 @@ function RunCandle
     pushd "$WixRoot"
 
     Write-Host Running candle..
-    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows"
+    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
     .\candle.exe -nologo `
         -dDotnetSrc="$inputDir" `
@@ -75,7 +75,7 @@ function RunLight
 
     Write-Host Running light..
     $CabCache = Join-Path $WixRoot "cabcache"
-    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows"
+    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
     .\light.exe -nologo -ext WixUIExtension -ext WixDependencyExtension -ext WixUtilExtension `
         -cultures:en-us `

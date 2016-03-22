@@ -20,7 +20,7 @@ function RunCandle
     pushd "$WixRoot"
 
     Write-Host Running candle..
-    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\host\windows"
+    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\host"
 
     .\candle.exe -nologo `
         -out "$WixObjRoot\" `
