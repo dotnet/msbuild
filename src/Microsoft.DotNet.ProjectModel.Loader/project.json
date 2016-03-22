@@ -9,7 +9,7 @@
     "System.Runtime.Loader": "4.0.0-rc2-23922"
   },
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.5": {
       "imports": "dnxcore50"
     }
   }

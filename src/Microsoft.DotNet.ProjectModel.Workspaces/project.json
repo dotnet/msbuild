@@ -10,7 +10,7 @@
     "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.2.0-beta1-20160202-02"
   },
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.5": {
       "imports": [
         "dnxcore50",
         "portable-net45+win8"
