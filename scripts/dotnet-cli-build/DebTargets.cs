@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.Build
                 "-m", manPagesDir, 
                 "--framework-nuget-name", Monikers.SharedFrameworkName,
                 "--framework-nuget-version", c.BuildContext.Get<string>("SharedFrameworkNugetVersion"),
-                "--previous-version-url", previousVersionURL, 
+                //"--previous-version-url", previousVersionURL, 
                 "--obj-root", objRoot)
                     .Execute()
                     .EnsureSuccessful();

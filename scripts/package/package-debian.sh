@@ -101,11 +101,7 @@ parseargs(){
     if [ -z "$DOTNET_DEB_PACKAGE_NAME" ]; then
         echo "Provide an the name for the debian package. Missing option '--package-name'" && help
     fi
-
-    if [ -z "$PREVIOUS_VERSION_URL" ]; then
-        echo "Provide a URL to the previous debian pacakge (Required for running upgrade tests). Missing option '--previous-version-url'" && help
-    fi
-
+    
     if [ -z "$SHARED_FRAMEWORK_NUGET_NAME" ]; then
         echo "Provide the NuGet name of the targetted Shared Framework. Missing option '--framework-nuget-name'" && help
     fi
@@ -199,7 +195,9 @@ install_bats() {
 
 run_package_integrity_tests() {
     # Set LAST_VERSION_URL to enable upgrade tests
-    export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
+    if [ -z "$PREVIOUS_VERSION_URL" ]; then
+        export LAST_VERSION_URL="$PREVIOUS_VERSION_URL"
+    fi
 
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
 }
