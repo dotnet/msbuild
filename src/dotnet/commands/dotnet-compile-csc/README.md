@@ -8,7 +8,7 @@ dotnet-compile -- Compiles source files for a single project to a binary format 
 dotnet compile [--output] [--build-base-path] [--framework] [--configuration] [--output] [--arch] [--verbose]
 
 # DESCRIPTION
-The compile command compiles source files from a single project to a binary file, either intermmediate language (IL) byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future. Users who want to benefit from incremental builds and who want to compile both the project and its dependencies should use the dotnet-build(1) command.
+The compile command compiles source files from a single project to a binary file, either intermediate language (IL) byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future. Users who want to benefit from incremental builds and who want to compile both the project and its dependencies should use the dotnet-build(1) command.
 
 The result of compilation is by default an executable file that can be ran. Output files, are written to the child `bin` folder, which will be created if it doesn't exist. Files will be overwritten as needed. The temporary files that are created during compilation are placed in the child `obj` folder. 
  
@@ -16,8 +16,8 @@ The executables also require a special configuration section in project.json:
 
 ```json
 { 
-    "compilerOptions": {
-      "emitEntryPoints": true
+    "compilationOptions": {
+      "emitEntryPoint": true
     }
 }
 ```

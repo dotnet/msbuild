@@ -14,7 +14,7 @@ dotnet compile [\-\-native] [\-\-output] [\-\-temp\-output]
 .SH DESCRIPTION
 .PP
 The compile command compiles source files from a single project to a
-binary file, either intermmediate language (IL) byte code or native
+binary file, either intermediate language (IL) byte code or native
 machine code, depending on the options provided.
 The default option is compilation to IL byte code, but may change in the
 future.
@@ -36,8 +36,8 @@ project.json:
 .nf
 \f[C]
 {\ 
-\ \ \ \ "compilerOptions":\ {
-\ \ \ \ \ \ "emitEntryPoints":\ true
+\ \ \ \ "compilationOptions":\ {
+\ \ \ \ \ \ "emitEntryPoint":\ true
 \ \ \ \ }
 }
 \f[]
