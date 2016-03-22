@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                                         SetColor(ConsoleColor.Gray);
                                         break;
                                     case 39:
-                                        SetColor(OriginalForegroundColor);
+                                        Console.ForegroundColor = OriginalForegroundColor;
                                         break;
                                 }
                             }
