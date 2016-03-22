@@ -6,7 +6,7 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
-    public class CommpileCommand
+    public class CompileCommand
     {
 
         public static int Run(string[] args)
