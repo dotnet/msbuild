@@ -97,6 +97,9 @@ copy_files_to_debian_layout(){
 
     # Copy config file
     cp "$PACKAGING_ROOT/dotnet-sharedhost-debian_config.json" "$PACKAGE_LAYOUT_DIR/debian_config.json"
+
+    # Copy Manpages
+    cp -a "$MANPAGE_DIR/host/." "$PACKAGE_LAYOUT_DIR/docs"
 }
 
 create_debian_package(){
