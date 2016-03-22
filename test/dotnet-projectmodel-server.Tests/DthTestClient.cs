@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -20,7 +21,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         private readonly BinaryReader _reader;
         private readonly BinaryWriter _writer;
         private readonly NetworkStream _networkStream;
-
+        private readonly ILogger _logger;
         private readonly BlockingCollection<DthMessage> _messageQueue;
         private readonly CancellationTokenSource _readCancellationToken;
 
@@ -31,10 +32,12 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         private int _nextContextId;
         private readonly Socket _socket;
 
-        public DthTestClient(DthTestServer server)
+        public DthTestClient(DthTestServer server, ILoggerFactory loggerFactory)
         {
             // Avoid Socket exception 10006 on Linux
             Thread.Sleep(100);
+            
+            _logger = loggerFactory.CreateLogger<DthTestClient>();
             
             _socket = new Socket(AddressFamily.InterNetwork,
                                  SocketType.Stream,
@@ -225,7 +228,18 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             _writer.Dispose();
             _networkStream.Dispose();
             _readCancellationToken.Cancel();
-            _socket.Shutdown(SocketShutdown.Both);
+            
+            try
+            {
+                _socket.Shutdown(SocketShutdown.Both);
+            }
+            catch (SocketException ex)
+            {
+                // Swallow this error for now.
+                // This is a temporary fix for a random failure on CI. The issue happens on Windowx x86
+                // only.
+                _logger.LogError($"Exception thrown durning socket shutting down: {ex.SocketErrorCode}.");
+            }
         }
 
         private void ReadMessage(CancellationToken cancellationToken)
