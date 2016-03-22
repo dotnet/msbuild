@@ -278,7 +278,8 @@ namespace Microsoft.DotNet.Cli.Build
                 var runtimeGraphGeneratorExe = Path.Combine(runtimeGraphGeneratorOutput, $"{runtimeGraphGeneratorName}{Constants.ExeSuffix}");
 
                 Cmd(runtimeGraphGeneratorExe, "--project", SharedFrameworkSourceRoot, "--deps", destinationDeps, runtimeGraphGeneratorRuntime)
-                    .Execute();
+                    .Execute()
+                    .EnsureSuccessful();
             }
             else
             {
