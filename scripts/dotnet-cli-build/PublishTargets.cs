@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(
             nameof(PublishTargets.PublishVersionBadge),
             nameof(PublishTargets.PublishSdkInstallerFile),
-            //nameof(PublishTargets.PublishDebFileToDebianRepo),
+            nameof(PublishTargets.PublishDebFilesToDebianRepo),
             nameof(PublishTargets.PublishCombinedFrameworkSDKHostFile),
             nameof(PublishTargets.PublishCombinedFrameworkHostFile),
             nameof(PublishTargets.PublishLatestVersionTextFile))]
@@ -93,12 +93,54 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(PublishSdkInstallerFile))]
+        [Target(
+            nameof(PublishSdkDebToDebianRepo),
+            nameof(PublishSharedFrameworkDebToDebianRepo),
+            nameof(PublishSharedHostDebToDebianRepo))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
-        public static BuildTargetResult PublishDebFileToDebianRepo(BuildTargetContext c)
+        public static BuildTargetResult PublishDebFilesToDebianRepo(BuildTargetContext c)
         {
-            var packageName = Monikers.GetDebianPackageName(c);
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult PublishSdkDebToDebianRepo(BuildTargetContext c)
+        {
+            var packageName = Monikers.GetSdkDebianPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
+            var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
+            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
+                    .Execute()
+                    .EnsureSuccessful();
+
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult PublishSharedFrameworkDebToDebianRepo(BuildTargetContext c)
+        {
+            var packageName = Monikers.GetDebianSharedFrameworkPackageName(c);
+            var installerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
+            var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
+            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
+                    .Execute()
+                    .EnsureSuccessful();
+
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        public static BuildTargetResult PublishSharedHostDebToDebianRepo(BuildTargetContext c)
+        {
+            var packageName = Monikers.GetDebianSharedHostPackageName(c);
+            var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
             var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
             var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
 

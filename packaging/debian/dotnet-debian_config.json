@@ -33,10 +33,6 @@
         "%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%" : {}
     },
 
-    "package_conflicts" : [
-        "dotnet-dev-nightly"
-    ],
-
     "symlinks": {
         "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native"
     }

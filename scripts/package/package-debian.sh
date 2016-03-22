@@ -167,7 +167,7 @@ copy_files_to_debian_layout(){
     cp -a "$REPO_BINARIES_DIR/." "$PACKAGE_LAYOUT_DIR/package_root"
 
     # Copy config file
-    cp "$PACKAGING_ROOT/$DOTNET_DEB_PACKAGE_NAME-debian_config.json" "$PACKAGE_LAYOUT_DIR/debian_config.json"
+    cp "$PACKAGING_ROOT/dotnet-debian_config.json" "$PACKAGE_LAYOUT_DIR/debian_config.json"
 
     # Copy Manpages
     cp -a "$MANPAGE_DIR/." "$PACKAGE_LAYOUT_DIR/docs"
