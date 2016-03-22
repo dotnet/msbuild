@@ -419,7 +419,7 @@ extract_dotnet_package() {
     local zip_path=$1
     local out_path=$2
     
-    local temp_out_path=$(mktemp -d)
+    local temp_out_path=$(mktemp -d $temporary_file_template)
     
     local failed=false
     tar -xzf "$zip_path" -C "$temp_out_path" > /dev/null || failed=true
@@ -485,7 +485,7 @@ install_dotnet() {
     eval $invocation
 
     mkdir -p $install_root
-    zip_path=$(mktemp)
+    zip_path=$(mktemp $temporary_file_template)
     say_verbose "Zip path: $zip_path"
     
     say "Downloading $download_link"
@@ -500,6 +500,7 @@ install_dotnet() {
 
 local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
+temporary_file_template="${TMPDIR:-/tmp}/dotnet.XXXXXXXXX"
 
 channel="preview"
 version="Latest"
