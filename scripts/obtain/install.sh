@@ -4,8 +4,25 @@
 
 # Note: This script should be compatible with the dash shell used in Ubuntu. So avoid bashisms! See https://wiki.ubuntu.com/DashAsBinSh for more info
 
-#setup some colors to use. These need to work in fairly limited shells, like the Ubuntu Docker container where there are only 8 colors.
-#See if stdout is a terminal
+# Stop script on NZEC
+set -e
+# Stop script if unbound variable found (use ${var:-} if intentional)
+set -u
+# By default cmd1 | cmd2 returns exit code of cmd2 regardless of cmd1 success
+# This is causing it to fail
+set -o pipefail
+
+# Use in the the functions: eval $invocation
+invocation='say_verbose "Calling: ${yellow:-}${FUNCNAME[0]} ${green:-}$*${normal:-}"'
+
+# standard output may be used as a return value in the functions
+# we need a way to write text on the screen in the functions so that
+# it won't interfere with the return value.
+# Exposing stream 3 as a pipe to standard output of the script itself
+exec 3>&1
+
+# Setup some colors to use. These need to work in fairly limited shells, like the Ubuntu Docker container where there are only 8 colors.
+# See if stdout is a terminal
 if [ -t 1 ]; then
     # see if it supports colors
     ncolors=$(tput colors)
@@ -23,44 +40,76 @@ if [ -t 1 ]; then
     fi
 fi
 
-#Standardise OS name to what is put into filenames of the tarballs.
-current_os()
-{
+say_err() {
+    printf "%b\n" "${red:-}dotnet_install: Error: $1${normal:-}" >&2
+}
+
+say() {
+    # using stream 3 (defined in the beginning) to not interfere with stdout of functions
+    # which may be used as return value
+    printf "%b\n" "${cyan:-}dotnet_install:${normal:-} $1" >&3
+}
+
+say_verbose() {
+    if [ "$verbose" = true ]; then
+        say "$1"
+    fi
+}
+
+get_current_os_name() {
+    eval $invocation
+
     local uname=$(uname)
     if [ "$uname" = "Darwin" ]; then
         echo "osx"
+        return 0
     else
         # Detect Distro
         if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
             echo "ubuntu"
+            return 0
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             echo "centos"
+            return 0
         elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
             echo "rhel"
+            return 0
         elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
             echo "debian"
+            return 0
         fi
     fi
+    
+    say_err "OS name could not be detected"
+    return 1
 }
 
 machine_has() {
-    type "$1" > /dev/null 2>&1
+    eval $invocation
+    
+    which "$1" > /dev/null 2>&1
     return $?
 }
 
-#Not 100% sure at the moment that these checks are enough. We might need to take version into account or do something
-#more complicated. This seemed like a good beginning though as it should catch the default "clean" machine case and give
-#people an appropriate hint.
-check_pre_reqs() {
-    local os=$(current_os)
-    local _failing=false;
+check_min_reqs() {
+    if ! machine_has "curl"; then
+        say_err "curl is required to download dotnet. Install curl to proceed."
+        return 1
+    fi
+    
+    return 0
+}
 
-    if [ "$DOTNET_INSTALL_SKIP_PREREQS" = "1" ]; then
+check_pre_reqs() {
+    eval $invocation
+    
+    local failing=false;
+
+    if [ "${DOTNET_INSTALL_SKIP_PREREQS:-}" = "1" ]; then
         return 0
     fi
 
     if [ "$(uname)" = "Linux" ]; then
-
         if ! [ -x "$(command -v ldconfig)" ]; then
             echo "ldconfig is not in PATH, trying /sbin/ldconfig."
             LDCONFIG_COMMAND="/sbin/ldconfig"
@@ -68,208 +117,493 @@ check_pre_reqs() {
             LDCONFIG_COMMAND="ldconfig"
         fi
 
-        [ -z "$($LDCONFIG_COMMAND -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && _failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && _failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && failing=true
     fi
 
-    if [ "$_failing" = true ]; then
+    if [ "$failing" = true ]; then
        return 1
     fi
-}
-
-say_err() {
-    printf "%b\n" "${red}dotnet_install: Error: $1${normal}" >&2
-}
-
-say() {
-    printf "%b\n" "dotnet_install: $1"
-}
-
-make_link() {
-    local target_name=$1
-    local src=$INSTALLDIR/cli/$target_name
-    local dest=$BINDIR/$target_name
-    say "Linking $dest -> $src"
-    if [ -e $dest ]; then
-        rm $dest
-    fi
-    ln -s $src $dest
-}
-
-make_bootstrap_link() {
-    local src=$INSTALLDIR/cli/bin/dotnet
-    local dest=$INSTALLDIR/cli/dotnet
-    say "Linking $dest -> $src"
-    if [ -e $dest ]; then
-        rm $dest
-    fi
-    ln -s $src $dest
-}
-
-install_dotnet()
-{
-    if ! machine_has "curl"; then
-        printf "%b\n" "${red}curl is required to download dotnet. Install curl to proceed. ${normal}" >&2
-        return 1
-    fi
-
-    say "Preparing to install .NET Tools from '$CHANNEL' channel to '$INSTALLDIR'"
-
-    if [ -e "$PREFIX/share/dotnet/cli/dotnet" ] && [ ! -w "$PREFIX/share/dotnet/cli/dotnet" ]; then
-        say_err "dotnet cli is already installed and not writeable. Use 'curl -sSL <url> | sudo sh' to force install."
-        say_err "If you have previously installed the cli using a package manager or installer then that is why it is write protected, and you need to run sudo to install the new version."
-        say_err "Alternatively, removing the '$PREFIX/share/dotnet' directory completely before running the script will also resolve the issue."
-        return 1
-    fi
-
-    if ! check_pre_reqs; then
-        say_err "Ending install due to missing pre-reqs"
-        return 1;
-    fi
-
-    if [ "$VERSION" == "Latest" ]; then
-      local fileVersion=latest
-    else
-      local fileVersion=$VERSION
-    fi
-
-    local os=$(current_os)
-    local installLocation="$INSTALLDIR"
-    local dotnet_url="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Binaries/$VERSION"
-    local dotnet_filename="dotnet-dev-$os-x64.$fileVersion.tar.gz"
     
-    if [ "$RELINK" = "0" ]; then
-        if [ "$FORCE" = "0" ]; then
-            local localVersion=$(tail -n 1 "$installLocation/cli/.version" 2>/dev/null)
-            if [ "$VERSION" == "Latest" ]; then
-                # Check if we need to bother
-                local remoteData="$(curl -s https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/dnvm/latest.$os.x64.version)"
-                [ $? != 0 ] && say_err "Unable to determine latest version." && return 1
+    return 0
+}
 
-                local remoteVersion=$(IFS="\n" && echo $remoteData | tail -n 1)
-                local remoteHash=$(IFS="\n" && echo $remoteData | head -n 1)
+# args:
+# input - $1
+to_lowercase() {
+    #eval $invocation
+    
+    echo "$1" | tr '[:upper:]' '[:lower:]'
+    return 0
+}
 
-                [ -z $localVersion ] && localVersion='<none>'
-                local localHash=$(head -n 1 "$installLocation/cli/.version" 2>/dev/null)
+# args:
+# input - $1
+remove_trailing_slash() {
+    #eval $invocation
+    
+    local input=${1:-}
+    echo "${input%/}"
+    return 0
+}
 
-                say "Latest Version: $remoteVersion"
-                say "Local Version: $localVersion"
+# args:
+# input - $1
+remove_beginning_slash() {
+    #eval $invocation
+    
+    local input=${1:-}
+    echo "${input#/}"
+    return 0
+}
 
-                [ "$remoteHash" = "$localHash" ] && say "${green}You already have the latest version.${normal}" && return 0
-            else
-                [ "$fileVersion" = "$localVersion" ] && say "${green}You already have the version $fileVersion.${normal}" && return 0
-            fi
-        fi
-
-        #This should noop if the directory already exists.
-        mkdir -p $installLocation
-
-        say "Downloading $dotnet_filename from $dotnet_url"
-
-        #Download file and check status code, error and return if we cannot download a cli tar.
-        local httpResult=$(curl -L -D - "$dotnet_url/$dotnet_filename" -o "$installLocation/$dotnet_filename" -# | grep "^HTTP/1.1" | head -n 1 | sed "s/HTTP.1.1 \([0-9]*\).*/\1/")
-        [ $httpResult -ne "302" ] && [ $httpResult -ne "200" ] && echo "${Red}HTTP Error $httpResult fetching the dotnet cli from $dotnet_url ${RCol}" && return 1
-
-        say "Extracting tarball"
-        #Any of these could fail for various reasons so we will check each one and end the script there if it fails.
-        rm -rf "$installLocation/cli_new"
-        mkdir "$installLocation/cli_new"
-        [ $? != 0 ] && say_err "failed to clean and create temporary cli directory to extract into" && return 1
-
-        tar -xzf "$installLocation/$dotnet_filename" -C "$installLocation/cli_new"
-        [ $? != 0 ] && say_err "failed to extract tar" && return 1
-
-        say "Moving new CLI into install location and symlinking"
-
-        rm -rf "$installLocation/cli"
-        [ $? != 0 ] && say_err "Failed to clean current dotnet install" && return 1
-
-        mv "$installLocation/cli_new" "$installLocation/cli"
-    elif [ ! -e "$installLocation/cli" ]; then
-        say_err "${red}cannot relink dotnet, it is not installed in $PREFIX!"
+# args:
+# root_path - $1
+# child_path - $2 - this parameter can be empty
+combine_paths() {
+    eval $invocation
+    
+    # TODO: Consider making it work with any number of paths. For now:
+    if [ ! -z "${3:-}" ]; then
+        say_err "combine_paths: Function takes two parameters."
         return 1
     fi
+    
+    local root_path=$(remove_trailing_slash $1)
+    local child_path=$(remove_beginning_slash ${2:-})
+    say_verbose "combine_paths: root_path=$root_path"
+    say_verbose "combine_paths: child_path=$child_path"
+    echo "$root_path/$child_path"
+    return 0
+}
 
-    if [ ! -z "$BINDIR" ]; then
-        make_link "dotnet"
-    fi
+get_machine_architecture() {
+    eval $invocation
+    
+    # Currently the only one supported
+    echo "x64"
+    return 0
+}
 
-    if [ -e "$installLocation/$dotnet_filename" ]; then
-        say "Cleaning $dotnet_filename"
-        if ! rm "$installLocation/$dotnet_filename"; then
-            say_err "Failed to delete tar after extracting."
+# args:
+# architecture - $1
+get_normalized_architecture_from_architecture() {
+    eval $invocation
+    
+    local architecture=$(to_lowercase $1)
+    case $architecture in
+        \<auto\>)
+            echo "$(get_normalized_architecture_from_architecture $(get_machine_architecture))"
+            return 0
+            ;;
+        amd64|x64)
+            echo "x64"
+            return 0
+            ;;
+        x86)
+            say_err "Architecture ``x86`` currently not supported"
             return 1
+            ;;
+    esac
+   
+    say_err "Architecture ``$architecture`` not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues"
+    return 1
+}
+
+# version_info is a conceptual two line string representing commit hash and 4-part version
+# format:
+# Line 1: # commit_hash
+# Line 2: # 4-part version
+
+# args:
+# version_text - stdin
+get_version_from_version_info() {
+    eval $invocation
+    
+    cat | tail -n 1
+    return 0
+}
+
+# args:
+# version_text - stdin
+get_commit_hash_from_version_info() {
+    eval $invocation
+    
+    cat | head -n 1
+    return 0
+}
+
+# args:
+# azure_feed - $1
+# azure_channel - $2
+# normalized_architecture - $3
+get_latest_version_info() {
+    eval $invocation
+    
+    local azure_feed=$1
+    local azure_channel=$2
+    local normalized_architecture=$3
+    
+    local osname=$(get_current_os_name)
+    
+    local version_file_url="$azure_feed/$azure_channel/dnvm/latest.$osname.$normalized_architecture.version"
+    say_verbose "get_latest_version_info: latest url: $version_file_url"
+    
+    download $version_file_url
+    return $?
+}
+
+# args:
+# channel - $1
+get_azure_channel_from_channel() {
+    eval $invocation
+    
+    local channel=$(to_lowercase $1)
+    case $channel in
+        future|dev)
+            echo "dev"
+            return 0
+            ;;
+        preview|beta)
+            echo "beta"
+            return 0
+            ;;
+        production)
+            say_err "Production channel does not exist yet"
+            return 1
+    esac
+    
+    say_err "``$1`` is an invalid channel name. Use one of the following: ``future``, ``preview``, ``production``"
+    return 1
+}
+
+# args:
+# azure_feed - $1
+# azure_channel - $2
+# normalized_architecture - $3
+# version - $4
+get_specific_version_from_version() {
+    eval $invocation
+    
+    local azure_feed=$1
+    local azure_channel=$2
+    local normalized_architecture=$3
+    local version=$(to_lowercase $4)
+    
+    case $version in
+        latest)
+            local version_info="$(get_latest_version_info $azure_feed $azure_channel $normalized_architecture)"
+            say_verbose "get_specific_version_from_version: version_info=$version_info"
+            echo "$version_info" | get_version_from_version_info
+            return 0
+            ;;
+        lkg)
+            say_err "``--version LKG`` not supported yet."
+            return 1
+            ;;
+        *)
+            echo $version
+            return 0
+            ;;
+    esac
+}
+
+# args:
+# azure_feed - $1
+# azure_channel - $2
+# normalized_architecture - $3
+# specific_version - $4
+construct_download_link() {
+    eval $invocation
+    
+    local azure_feed=$1
+    local azure_channel=$2
+    local normalized_architecture=$3
+    local specific_version=$4
+    
+    local osname=$(get_current_os_name)
+    
+    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
+    echo "$download_link"
+    return 0
+}
+
+get_user_share_path() {
+    eval $invocation
+    
+    if [ ! -z "${DOTNET_INSTALL_DIR:-}" ]; then
+        echo $DOTNET_INSTALL_DIR
+    else
+        echo "/usr/local/share/dotnet"
+    fi
+    return 0
+}
+
+# args:
+# install_dir - $1
+resolve_installation_path() {
+    eval $invocation
+    
+    local install_dir=$1
+    if [ "$install_dir" = "<auto>" ]; then
+        local user_share_path=$(get_user_share_path)
+        say_verbose "resolve_installation_path: share_path=$user_share_path"
+        echo "$user_share_path"
+        return 0
+    fi
+    
+    echo "$install_dir"
+    return 0
+}
+
+# args:
+# install_root - $1
+get_installed_version_info() {
+    eval $invocation
+    
+    local install_root=$1
+    local version_file=$(combine_paths "$install_root" "$local_version_file_relative_path")
+    say_verbose "Local version file: $version_file"
+    if [ ! -z "$version_file" ] | [ -r "$version_file" ]; then
+        local version_info="$(cat $version_file)"
+        echo "$version_info"
+        return 0
+    fi
+    
+    say_verbose "Local version file not found."
+    return 0
+}
+
+# args:
+# relative_or_absolute_path - $1
+get_absolute_path() {
+    eval $invocation
+    
+    local relative_or_absolute_path=$1
+    echo $(cd $(dirname "$1") && pwd -P)/$(basename "$1")
+    return 0
+}
+
+# args:
+# input_files - stdin
+# root_path - $1
+# out_path - $2
+# override - $3
+copy_files_or_dirs_from_list() {
+    eval $invocation
+
+    local root_path=$(remove_trailing_slash $1)
+    local out_path=$(remove_trailing_slash $2)
+    local override=$3
+    local override_switch=$(if [ "$override" = false ]; then printf -- "-n"; fi)
+    
+    cat | uniq | while read -r file_path; do
+        local path=$(remove_beginning_slash ${file_path#$root_path})
+        local target=$out_path/$path
+        if [ "$override" = true ] || (! ([ -d "$target" ] || [ -e "$target" ])); then
+            mkdir -p $out_path/$(dirname $path)
+            cp -R $override_switch $root_path/$path $target
         fi
+    done
+}
+
+# args:
+# zip_path - $1
+# out_path - $2
+extract_dotnet_package() {
+    eval $invocation
+    
+    local zip_path=$1
+    local out_path=$2
+    
+    local temp_out_path=$(mktemp -d)
+    
+    local failed=false
+    tar -xzf "$zip_path" -C "$temp_out_path" > /dev/null || failed=true
+    
+    local folders_with_version_regex='^.*/[0-9]+\.[0-9]+[^/]+/'
+    find $temp_out_path -type f | grep -Eo $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path false
+    find $temp_out_path -type f | grep -Ev $folders_with_version_regex | copy_files_or_dirs_from_list $temp_out_path $out_path true
+    
+    rm -rf $temp_out_path
+    
+    if [ "$failed" = true ]; then
+        say_err "Extraction failed"
+        return 1
     fi
 }
 
-FORCE=0
-RELINK=0
+# args:
+# remote_path - $1
+# [out_path] - $2 - stdout if not provided
+download() {
+    eval $invocation
+    
+    local remote_path=$1
+    local out_path=${2:-}
+
+    local failed=false
+    if [ -z "$out_path" ]; then
+        curl --fail -s $remote_path || failed=true
+    else
+        curl --fail -s -o $out_path $remote_path || failed=true
+    fi
+    
+    if [ "$failed" = true ]; then
+        say_err "Download failed"
+        return 1
+    fi
+}
+
+calculate_vars() {
+    eval $invocation
+    
+    azure_channel=$(get_azure_channel_from_channel "$channel")
+    say_verbose "azure_channel=$azure_channel"
+    
+    normalized_architecture=$(get_normalized_architecture_from_architecture "$architecture")
+    say_verbose "normalized_architecture=$normalized_architecture"
+    
+    specific_version=$(get_specific_version_from_version $azure_feed $azure_channel $normalized_architecture $version)
+    say_verbose "specific_version=$specific_version"
+    if [ -z "$specific_version" ]; then
+        say_err "Could not get version information."
+        return 1
+    fi
+    
+    download_link=$(construct_download_link $azure_feed $azure_channel $normalized_architecture $specific_version)
+    say_verbose "download_link=$download_link"
+    
+    install_root=$(resolve_installation_path $install_dir)
+    say_verbose "install_root=$install_root"
+}
+
+install_dotnet() {
+    eval $invocation
+
+    mkdir -p $install_root
+    zip_path=$(mktemp)
+    say_verbose "Zip path: $zip_path"
+    
+    say "Downloading $download_link"
+    download "$download_link" $zip_path
+    say_verbose "Downloaded file exists and readable? $(if [ -r $zip_path ]; then echo "yes"; else echo "no"; fi)"
+    
+    say "Extracting zip"
+    extract_dotnet_package $zip_path $install_root
+    
+    return 0
+}
+
+local_version_file_relative_path="/.version"
+bin_folder_relative_path=""
+
+channel="preview"
+version="Latest"
+install_dir="<auto>"
+architecture="<auto>"
+debug_symbols=false
+dry_run=false
+no_path=false
+azure_feed="https://dotnetcli.blob.core.windows.net/dotnet"
+verbose=false
+
 while [ $# -ne 0 ]
 do
     name=$1
     case $name in
-        -f|--force)
-            FORCE=1
-            ;;
-        -r|--relink)
-            RELINK=1
-            ;;
-        -c|--channel)
+        -c|--channel|-[Cc]hannel)
             shift
-            CHANNEL=$1
+            channel=$1
             ;;
-        -v|--version)
+        -v|--version|-[Vv]ersion)
             shift
-            VERSION=$1
+            version="$1"
             ;;
-        -d|--destination)
+        -i|--install-dir|-[Ii]nstall[Dd]ir)
             shift
-            DOTNET_INSTALL_DIR=$1
+            install_dir="$1"
             ;;
-        -?|-h|--help)
+        --arch|--architecture|-[Aa]rch|-[Aa]rchitecture)
+            shift
+            architecture="$1"
+            ;;
+        --debug-symbols|-[Dd]ebug[Ss]ymbols)
+            debug_symbols=true
+            ;;
+        --dry-run|-[Dd]ry[Rr]un)
+            dry_run=true
+            ;;
+        --no-path|-[Nn]o[Pp]ath)
+            no_path=true
+            ;;
+        --verbose|-[Vv]erbose)
+            verbose=true
+            ;;
+        --azure-feed|-[Aa]zure[Ff]eed)
+            shift
+            azure_feed="$1"
+            ;;
+        -?|--?|-h|--help|-[Hh]elp)
+            script_name="$(basename $0)"
             echo ".NET Tools Installer"
+            echo "Usage: $script_name [-c|--channel <CHANNEL>] [-v|--version <VERSION>] [-p|--prefix <DESTINATION>]"
+            echo "       $script_name -h|-?|--help"
             echo ""
-            echo "Usage:"
-            echo "  $0 [-f|--force] [-r|--relink] [-c|--channel <CHANNEL>] [-d|--destination <DESTINATION>]"
-            echo "  $0 -h|-?|--help"
+            echo "$script_name is a simple command line interface for obtaining dotnet cli."
             echo ""
             echo "Options:"
-            echo "  -f,--force                  Force reinstallation even if you have the most recent version installed"
-            echo "  -r,--relink                 Don't re-download, just recreate the links in $PREFIX/bin"
-            echo "  -c,--channel <CHANNEL>      Download from the CHANNEL specified (default: dev)"
-            echo "  -d,--destination <PATH>     Install under the specified root (see Install Location below)"
-            echo "  -?,-h,--help                Show this help message"
+            echo "  -c,--channel <CHANNEL>         Download from the CHANNEL specified (default: $channel)."
+            echo "      -Channel"
+            echo "  -v,--version <VERSION>         Use specific version, ``latest`` or ``lkg``. Defaults to ``latest``."
+            echo "      -Version"
+            echo "  -i,--install-dir <DIR>         Install under specified location (see Install Location below)"
+            echo "      -InstallDir"
+            echo "  --architecture <ARCHITECTURE>  Architecture of .NET Tools. Currently only x64 is supported."
+            echo "      --arch,-Architecture,-Arch"
+            echo "  --debug-symbols,-DebugSymbols  Specifies if symbols should be included in the installation."
+            echo "  --dry-run,-DryRun              Do not perform installation. Display download link."
+            echo "  --no-path, -NoPath             Do not set PATH for the current process."
+            echo "  --verbose,-Verbose             Display diagnostics information."
+            echo "  --azure-feed,-AzureFeed        Azure feed location. Defaults to $azure_feed"
+            echo "  -?,--?,-h,--help,-Help         Shows this help message"
             echo ""
             echo "Install Location:"
-            echo "  By default, this script installs the .NET Tools to /usr/local. However, if the PREFIX environment variable"
-            echo "  is specified, that will be used as the installation root. If the DOTNET_INSTALL_DIR environment variable"
-            echo "  is specified, it will be used as the installation root (overriding PREFIX). Finally, if the '--destination'"
-            echo "  option is specified, it will override all environment variables and be used as the installation location"
-            echo ""
-            echo "  After installation, the .NET Tools will be installed to the 'share/dotnet/cli' subdirectory of the "
-            echo "  installation location (i.e. /usr/local/share/dotnet/cli). Binaries will be symlinked to the 'bin'"
-            echo "  subdirectory of the installation location (i.e. /usr/local/bin/dotnet)"
+            echo "  Location is chosen in following order:"
+            echo "    - --install-dir option"
+            echo "    - Environmental variable DOTNET_INSTALL_DIR"
+            echo "    - /usr/local/share/dotnet"
             exit 0
+            ;;
+        *)
+            say_err "Unknown argument \`$name\`"
+            exit 1
             ;;
     esac
 
     shift
 done
 
-#set default prefix (PREFIX is a fairly standard env-var, but we also want to allow the use the specific "DOTNET_INSTALL_DIR" one)
-if [ -z "$DOTNET_INSTALL_DIR" ]; then
-    INSTALLDIR=/usr/local/share/dotnet
-    BINDIR=/usr/local/bin
-else
-    INSTALLDIR=$DOTNET_INSTALL_DIR
-    BINDIR=
+check_min_reqs
+calculate_vars
+if [ "$dry_run" = true ]; then
+    say "Payload URL: $download_link"
+    say "Repeatable invocation: ./$(basename $0) --version $specific_version --channel $channel --install-dir $install_dir"
+    return 0
 fi
 
-[ -z "$CHANNEL" ] && CHANNEL="beta"
-[ -z "$VERSION" ] && VERSION="Latest"
-
+check_pre_reqs
 install_dotnet
+
+bin_path=$(get_absolute_path $(combine_paths $install_root $bin_folder_relative_path))
+if [ "$no_path" = false ]; then
+    say "Adding to current process PATH: ``$bin_path``. Note: This change will be visible only when sourcing script."
+    export PATH=$PATH:$bin_path
+else
+    say "Binaries of dotnet can be found in $bin_path"
+fi
+
+say "Installation finished successfuly."

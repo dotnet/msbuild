@@ -85,10 +85,10 @@ done < "$DIR/../branchinfo.txt"
 
 # Ensure the latest stage0 is installed
 export CHANNEL=$RELEASE_SUFFIX
-$DIR/obtain/install.sh --channel $CHANNEL
+$DIR/obtain/install.sh --channel $CHANNEL --verbose
 
 # Put stage 0 on the PATH (for this shell only)
-PATH="$DOTNET_INSTALL_DIR/cli:$PATH"
+PATH="$DOTNET_INSTALL_DIR:$PATH"
 
 # Increases the file descriptors limit for this bash. It prevents an issue we were hitting during restore
 FILE_DESCRIPTOR_LIMIT=$( ulimit -n )
