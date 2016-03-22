@@ -178,7 +178,7 @@ create_debian_package(){
 
     mkdir -p "$PACKAGE_OUTPUT_DIR"
     
-    "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION
+    "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION -n "$DOTNET_DEB_PACKAGE_NAME"
 }
 
 update_debian_json()
