@@ -1,15 +1,15 @@
 {
-    "compilationOptions": {
-        "outputName": "MyApp",
-        "emitEntryPoint": true,
-        "preserveCompilationContext": true
-    },
-    "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23901"
-    },
-    "frameworks": {
-        "netstandardapp1.5": {
-            "imports": "dnxcore50"
-        }
+  "compilationOptions": {
+    "outputName": "MyApp",
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+  "dependencies": {
+    "NETStandard.Library": "1.0.0-rc2-23922"
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": "dnxcore50"
     }
+  }
 }

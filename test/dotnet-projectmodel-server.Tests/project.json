@@ -4,7 +4,7 @@
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-23911",
+      "version": "4.0.0-rc2-23922",
       "exclude": "Compile"
     },
     "Microsoft.DotNet.ProjectModel": {
@@ -15,7 +15,7 @@
     },
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-91790-12",
-    "System.Net.NameResolution": "4.0.0-rc2-23911"
+    "System.Net.NameResolution": "4.0.0-rc2-23922"
   },
   "frameworks": {
     "netstandardapp1.5": {

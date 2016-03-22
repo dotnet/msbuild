@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23911",
+    "NETStandard.Library": "1.5.0-rc2-23922",
     "Microsoft.DotNet.TestFramework": "1.0.0-*",
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"

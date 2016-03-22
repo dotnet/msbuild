@@ -1,18 +1,21 @@
-﻿{
+{
   "version": "1.0.0-*",
   "description": "Build scripts for dotnet-cli",
   "compilationOptions": {
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23911",
+    "NETStandard.Library": "1.5.0-rc2-23922",
     "Microsoft.DotNet.Cli.Build.Framework": "1.0.0-*",
     "WindowsAzure.Storage": "6.2.2-preview",
     "System.Reflection.Metadata": "1.2.0"
   },
   "frameworks": {
     "netstandardapp1.5": {
-      "imports": [ "dnxcore50", "portable-net45+win8" ]
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }
