@@ -68,6 +68,7 @@ namespace Microsoft.DotNet.Cli.Build
             var inputRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
             var debFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
             var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedhost");
+            var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
 
             if (Directory.Exists(objRoot))
             {
@@ -77,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(objRoot);
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedhost-debian.sh"),
-                    "--input", inputRoot, "--output", debFile, "--obj-root", objRoot, "--version", version)
+                    "--input", inputRoot, "--output", debFile, "--obj-root", objRoot, "--version", version, "-m", manPagesDir)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

@@ -57,6 +57,10 @@ while [[ $# > 0 ]]; do
         --help)
             help
             ;;
+        -m|--manpages)
+            MANPAGE_DIR=$2
+            shift
+            ;;
         *)
             break
             ;;
