@@ -5,9 +5,9 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23922",
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23922",
-    "System.Collections.Immutable": "1.2.0-rc2-23922",
+    "NETStandard.Library": "1.5.0-rc2-23923",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23923",
+    "System.Collections.Immutable": "1.2.0-rc2-23923",
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-91790-12",

@@ -11,7 +11,7 @@
   "licenseUrl": "",
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "NETStandard.Library": "1.5.0-rc2-23922"
+    "NETStandard.Library": "1.5.0-rc2-23923"
   },
   "frameworks": {
     "netstandard1.5": {

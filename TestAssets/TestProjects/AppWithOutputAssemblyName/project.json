@@ -5,7 +5,7 @@
     "preserveCompilationContext": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23922"
+    "NETStandard.Library": "1.0.0-rc2-23923"
   },
   "frameworks": {
     "netstandardapp1.5": {

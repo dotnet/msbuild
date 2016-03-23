@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-23922",
+    "Microsoft.NETCore.App": "1.0.0-rc2-23923",
     "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160318-02"
   },
   "runtimes": {

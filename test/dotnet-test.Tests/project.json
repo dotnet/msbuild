@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
-    "NETStandard.Library": "1.5.0-rc2-23922",
+    "NETStandard.Library": "1.5.0-rc2-23923",
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
@@ -15,9 +15,9 @@
     "Microsoft.Extensions.Testing.Abstractions": {
       "target": "project"
     },
-    "System.Net.NameResolution": "4.0.0-rc2-23922",
-    "System.Net.Sockets": "4.1.0-rc2-23922",
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23922",
+    "System.Net.NameResolution": "4.0.0-rc2-23923",
+    "System.Net.Sockets": "4.1.0-rc2-23923",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23923",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-91790-12"
   },
