@@ -409,6 +409,11 @@ namespace Microsoft.Build.Evaluation
         protected abstract IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion);
 
         /// <summary>
+        /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
+        /// </summary>
+        protected abstract Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os);
+
+        /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
         /// </summary>
         private void ReadEachToolset
@@ -511,6 +516,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
                 toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion);
+                toolset.MSBuildExtensionsPathSearchPathsTable = GetMSBuildExtensionPathsSearchPathsTable(toolsVersion.Name, GetOSNameForExtensionsPath());
             }
             catch (ArgumentException e)
             {
@@ -518,6 +524,25 @@ namespace Microsoft.Build.Evaluation
             }
 
             return toolset;
+        }
+
+        /// <summary>
+        /// OS name that can be used for the msbuildExtensionsPathSearchPaths element
+        /// for a toolset
+        /// </summary>
+        private static string GetOSNameForExtensionsPath()
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return "windows";
+            }
+
+            if (NativeMethodsShared.IsOSX)
+            {
+                return "osx";
+            }
+
+            return "unix";
         }
 
         /// <summary>
@@ -758,4 +783,69 @@ namespace Microsoft.Build.Evaluation
             return path;
         }
     }
+
+    /// <summary>
+    /// struct representing a reference to MSBuildExtensionsPath* property
+    /// </summary>
+    internal struct MSBuildExtensionsPathReferenceKind
+    {
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath"
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind Default = new MSBuildExtensionsPathReferenceKind("MSBuildExtensionsPath");
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath32"
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind Path32 = new MSBuildExtensionsPathReferenceKind("MSBuildExtensionsPath32");
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath64"
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind Path64 = new MSBuildExtensionsPathReferenceKind("MSBuildExtensionsPath64");
+
+        /// <summary>
+        /// MSBuildExtensionsPathReferenceKind instance representing no MSBuildExtensionsPath* property reference
+        /// </summary>
+        public static readonly MSBuildExtensionsPathReferenceKind None = new MSBuildExtensionsPathReferenceKind(String.Empty);
+
+        private MSBuildExtensionsPathReferenceKind(string value)
+        {
+            StringRepresentation = value;
+        }
+
+        /// <summary>
+        /// String representation of the property reference - eg. "MSBuildExtensionsPath32"
+        /// </summary>
+        public string StringRepresentation { get; private set; }
+
+        /// <summary>
+        /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
+        /// </summary>
+        public string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
+
+        /// <summary>
+        /// Tries to find a reference to MSBuildExtensionsPath* property in the given string
+        /// </summary>
+        public static MSBuildExtensionsPathReferenceKind FindIn(string expression)
+        {
+            if (expression.IndexOf("$(MSBuildExtensionsPath)") >= 0)
+            {
+                return MSBuildExtensionsPathReferenceKind.Default;
+            }
+
+            if (expression.IndexOf("$(MSBuildExtensionsPath32)") >= 0)
+            {
+                return MSBuildExtensionsPathReferenceKind.Path32;
+            }
+
+            if (expression.IndexOf("$(MSBuildExtensionsPath64)") >= 0)
+            {
+                return MSBuildExtensionsPathReferenceKind.Path64;
+            }
+
+            return MSBuildExtensionsPathReferenceKind.None;
+        }
+     }
 }

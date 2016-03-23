@@ -252,6 +252,12 @@
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency. 
     </comment>
   </data>
+  <data name="SearchPathsForMSBuildExtensionsPath">
+      <value>Search paths being used for {0} are {1}</value>
+  </data>
+  <data name="TryingExtensionsPath">
+      <value>Trying to import {0} using extensions path {1}</value>
+  </data>
   <data name="OverrideTasksFileFailure" UESanitized="false" Visibility="Public">
     <value>MSB4194: The override tasks file could not be successfully loaded. {0}</value>
     <comment>
@@ -412,6 +418,14 @@
   <data name="ImportedProjectNotFound" UESanitized="false" Visibility="Public">
     <value>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
+  </data>
+  <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" UESanitized="false" Visibility="Public">
+    <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
+    <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
+  </data>
+  <data name="ImportedProjectFromExtensionsPathNotFound" UESanitized="false" Visibility="Public">
+    <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
+    <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
   <data name="IncorrectNumberOfFunctionArguments" UESanitized="false" Visibility="Public">
     <value>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</value>
@@ -611,6 +625,10 @@
   <data name="MultipleDefinitionsForSameToolset" UESanitized="false" Visibility="Public">
     <value>MSB4144: Multiple definitions were found for the toolset "{0}". </value>
     <comment>{StrBegin="MSB4144: "}</comment>
+  </data>
+  <data name="MultipleDefinitionsForSameExtensionsPathOS" UESanitized="false" Visibility="Public">
+      <value>MSB4225: Toolset contains multiple definitions of searchPaths for the OS "{0}" at "{1}".</value>
+    <comment>{StrBegin="MSB4225: "}</comment>
   </data>
   <data name="MultipleDefinitionsForSameProperty" UESanitized="false" Visibility="Public">
     <value>MSB4145: Multiple definitions were found for the property "{0}".</value>
@@ -1528,7 +1546,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4225.
+        Next message code should be MSB4227.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
