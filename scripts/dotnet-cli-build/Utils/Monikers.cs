@@ -40,11 +40,42 @@ namespace Microsoft.DotNet.Cli.Build
             return packageName;
         }
 
+        public static string GetSdkDebianPackageName(BuildTargetContext c)
+        {
+            var channel = c.BuildContext.Get<string>("Channel").ToLower();
+            var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+
+            var packagePrefix = "";
+            switch (channel)
+            {
+                case "dev":
+                    packagePrefix = "dotnet-nightly";
+                    break;
+                case "beta":
+                case "rc1":
+                case "rc2":
+                case "rtm":
+                    packagePrefix = "dotnet";
+                    break;
+                default:
+                    throw new Exception($"Unknown channel - {channel}");
+            }
+
+            return $"{packagePrefix}-dev-{sharedFrameworkNugetVersion}";
+        }
+
         public static string GetDebianSharedFrameworkPackageName(BuildTargetContext c)
         {
             var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
 
             return $"dotnet-sharedframework-{SharedFrameworkName}-{sharedFrameworkNugetVersion}".ToLower();
+        }
+
+        public static string GetDebianSharedHostPackageName(BuildTargetContext c)
+        {
+            var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+
+            return $"dotnet-host".ToLower();
         }
 
         public static string GetOSShortName()

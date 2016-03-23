@@ -127,7 +127,7 @@ update_debian_json()
 }
 
 test_debian_package(){
-    header "Testing debian package"
+    header "Testing debian Shared Framework package"
 
     install_bats
     run_package_integrity_tests

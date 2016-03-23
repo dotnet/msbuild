@@ -29,6 +29,7 @@
     },
 
     "debian_dependencies":{
+        "dotnet-host" : {},
         "libssl1.0.0" : {},
         "libcurl3" : {}
     }
