@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(
             nameof(PublishTargets.PublishVersionBadge),
-            nameof(PublishTargets.PublishSdkInstallerFile),
+            nameof(PublishTargets.PublishCombinedFrameworkSDKHostInstallerFile),
             nameof(PublishTargets.PublishDebFilesToDebianRepo),
             nameof(PublishTargets.PublishCombinedFrameworkSDKHostFile),
             nameof(PublishTargets.PublishCombinedFrameworkHostFile),
@@ -69,8 +69,8 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX)]//, BuildPlatform.Ubuntu)]
-        public static BuildTargetResult PublishSdkInstallerFile(BuildTargetContext c)
+        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX)]
+        public static BuildTargetResult PublishCombinedFrameworkSDKHostInstallerFile(BuildTargetContext c)
         {
             var installerFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
             var installerFileBlob = $"{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
@@ -109,12 +109,8 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var packageName = Monikers.GetSdkDebianPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
-            var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
-            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
 
-            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
-                    .Execute()
-                    .EnsureSuccessful();
+            PublishDebFileToDebianRepo(packageName, installerFile);
 
             return c.Success();
         }
@@ -125,12 +121,8 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var packageName = Monikers.GetDebianSharedFrameworkPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
-            var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
-            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
-
-            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
-                    .Execute()
-                    .EnsureSuccessful();
+            
+            PublishDebFileToDebianRepo(packageName, installerFile);
 
             return c.Success();
         }
@@ -141,12 +133,8 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var packageName = Monikers.GetDebianSharedHostPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
-            var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
-            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
 
-            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
-                    .Execute()
-                    .EnsureSuccessful();
+            PublishDebFileToDebianRepo(packageName, installerFile);
 
             return c.Success();
         }
@@ -247,6 +235,16 @@ namespace Microsoft.DotNet.Cli.Build
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
+        }
+
+        private static void PublishDebFileToDebianRepo(string packageName, string installerFile)
+        {
+            var uploadUrl = $"https://dotnetcli.blob.core.windows.net/dotnet/{Channel}/Installers/{Version}/{Path.GetFileName(installerFile)}";
+            var uploadJson = GenerateUploadJsonFile(packageName, Version, uploadUrl);
+
+            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "publish", "repoapi_client.sh"), "-addpkg", uploadJson)
+                    .Execute()
+                    .EnsureSuccessful();
         }
 
         private static void PublishFileAzure(string blob, string file)
