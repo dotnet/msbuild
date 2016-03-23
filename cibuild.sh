@@ -125,7 +125,7 @@ fi
 # Determine configuration
 case $target in
     CoreCLR)
-        CONFIGURATION=Debug-Netcore
+        CONFIGURATION=Debug-NetCore
         ;;
 
     Mono)
@@ -136,7 +136,7 @@ case $target in
         ;;
     *)
         echo "Unsupported target detected: $target. Configuring as if for CoreCLR"
-        CONFIGURATION=Debug-Netcore
+        CONFIGURATION=Debug-NetCore
         ;;
 esac
 
