@@ -105,12 +105,19 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 }
                 else if (type == "project")
                 {
-                    lockFile.ProjectLibraries.Add(new LockFileProjectLibrary
+                    var projectLibrary = new LockFileProjectLibrary
                     {
                         Name = name,
-                        Version = version,
-                        Path = ReadString(value.Value("path"))
-                    });
+                        Version = version
+                    };
+
+                    var pathValue = value.Value("path");
+                    projectLibrary.Path = pathValue == null ? null : ReadString(pathValue);
+
+                    var buildTimeDependencyValue = value.Value("msbuildProject");
+                    projectLibrary.MSBuildProject = buildTimeDependencyValue == null ? null : ReadString(buildTimeDependencyValue);
+
+                    lockFile.ProjectLibraries.Add(projectLibrary);
                 }
             }
         }
