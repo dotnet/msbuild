@@ -108,14 +108,11 @@ namespace Microsoft.DotNet.Cli
             {
                 ["build"] = BuildCommand.Run,
                 ["compile-csc"] = CompileCscCommand.Run,
-                ["compile-fsc"] = CompileFscCommand.Run,
-                ["compile-native"] = CompileNativeCommand.Run,
                 ["help"] = HelpCommand.Run,
                 ["new"] = NewCommand.Run,
                 ["pack"] = PackCommand.Run,
                 ["projectmodel-server"] = ProjectModelServerCommand.Run,
                 ["publish"] = PublishCommand.Run,
-                ["repl"] = ReplCommand.Run,
                 ["restore"] = RestoreCommand.Run,
                 ["run"] = RunCommand.Run,
                 ["test"] = TestCommand.Run

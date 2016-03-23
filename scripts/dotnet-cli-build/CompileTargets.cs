@@ -20,9 +20,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static readonly string[] BinariesForCoreHost = new[]
         {
-            "csi",
-            "csc",
-            "vbc"
+            "csc"
         };
 
         public static readonly string[] ProjectsToPublish = new[]
@@ -32,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static readonly string[] FilesToClean = new[]
         {
-            "README.md"
+            "vbc.exe"
         };
 
         public static readonly string[] ProjectsToPack = new[]
@@ -165,9 +163,13 @@ namespace Microsoft.DotNet.Cli.Build
 
             CopySharedHost(Dirs.Stage1);
             PublishSharedFramework(c, Dirs.Stage1, DotNetCli.Stage0);
-            return CompileCliSdk(c,
+            var result = CompileCliSdk(c,
                 dotnet: DotNetCli.Stage0,
                 outputDir: Dirs.Stage1);
+
+            CleanOutputDir(Path.Combine(Dirs.Stage1, "sdk"));
+
+            return result;
         }
 
         [Target]
@@ -214,7 +216,15 @@ namespace Microsoft.DotNet.Cli.Build
                 }
             }
 
+            CleanOutputDir(Path.Combine(Dirs.Stage2, "sdk"));
+
             return c.Success();
+        }
+
+        private static void CleanOutputDir(string directory)
+        {
+            FS.RmFilesInDirRecursive(directory, "vbc.exe");
+            FS.RmFilesInDirRecursive(directory, "*.pdb");
         }
 
         private static void CopySharedHost(string outputDir)
