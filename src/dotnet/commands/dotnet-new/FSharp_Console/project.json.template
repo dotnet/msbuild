@@ -8,7 +8,7 @@
     "Program.fs"
   ],
   "dependencies": {
-    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
+    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160316",
     "Microsoft.NETCore.App": "1.0.0-rc2-23911"
   },
   "frameworks": {

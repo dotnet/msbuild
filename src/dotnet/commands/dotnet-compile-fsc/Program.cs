@@ -80,17 +80,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 return returnCode;
             }
 
-            var translated = TranslateCommonOptions(commonOptions, outputName);
 
-            var allArgs = new List<string>(translated);
-            allArgs.AddRange(GetDefaultOptions());
+            // TODO less hacky
+            bool targetNetCore = 
+                commonOptions.Defines.Contains("DNXCORE50") ||
+                commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARDAPP1_")).Any() ||
+                commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARD1_")).Any();
 
-            // Generate assembly info
-            var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.fs");
-            File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateFSharp(assemblyInfoOptions));
-            allArgs.Add($"{assemblyInfo}");
-
-            bool targetNetCore = commonOptions.Defines.Contains("DNXCORE50");
+            // FSC arguments
+            var allArgs = new List<string>();
 
             //HACK fsc raise error FS0208 if target exe doesnt have extension .exe
             bool hackFS0208 = targetNetCore && commonOptions.EmitEntryPoint == true;
@@ -106,21 +104,124 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 allArgs.Add($"--out:{outputName}");
             }
 
+            //debug info (only windows pdb supported, not portablepdb)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                allArgs.Add("--debug");
+                //TODO check if full or pdbonly
+                allArgs.Add("--debug:pdbonly");
+            }
+            else
+                allArgs.Add("--debug-");
+
+            // Default options
+            allArgs.Add("--noframework");
+            allArgs.Add("--nologo");
+            allArgs.Add("--simpleresolution");
+
+            // project.json compilationOptions
+            if (commonOptions.Defines != null)
+            {
+                allArgs.AddRange(commonOptions.Defines.Select(def => $"--define:{def}"));
+            }
+
+            if (commonOptions.GenerateXmlDocumentation == true)
+            {
+                allArgs.Add($"--doc:{Path.ChangeExtension(outputName, "xml")}");
+            }
+
+            if (commonOptions.KeyFile != null)
+            {
+                allArgs.Add($"--keyfile:{commonOptions.KeyFile}");
+            }
+
+            if (commonOptions.Optimize == true)
+            {
+                allArgs.Add("--optimize+");
+            }
+
+            //--resource doesnt expect "
+            //bad: --resource:"path/to/file",name 
+            //ok:  --resource:path/to/file,name 
+            allArgs.AddRange(resources.Select(resource => $"--resource:{resource.Replace("\"", "")}"));
+
+            allArgs.AddRange(references.Select(r => $"-r:{r}"));
+
+            if (commonOptions.EmitEntryPoint != true)
+            {
+                allArgs.Add("--target:library");
+            }
+            else
+            {
+                allArgs.Add("--target:exe");
+
+                //HACK we need default.win32manifest for exe
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var win32manifestPath = Path.Combine(AppContext.BaseDirectory, "default.win32manifest");
+                    allArgs.Add($"--win32manifest:{win32manifestPath}");
+                }
+            }
+
+            if (commonOptions.SuppressWarnings != null)
+            {
+                allArgs.Add("--nowarn:" + string.Join(",", commonOptions.SuppressWarnings.ToArray()));
+            }
+
+            if (commonOptions.LanguageVersion != null)
+            {
+                // Not used in fsc
+            }
+
+            if (commonOptions.Platform != null)
+            {
+                allArgs.Add($"--platform:{commonOptions.Platform}");
+            }
+
+            if (commonOptions.AllowUnsafe == true)
+            {
+            }
+
+            if (commonOptions.WarningsAsErrors == true)
+            {
+                allArgs.Add("--warnaserror");
+            }
+
             //set target framework
             if (targetNetCore)
             {
                 allArgs.Add("--targetprofile:netcore");
             }
 
-            allArgs.AddRange(references.Select(r => $"-r:{r}"));
-            allArgs.AddRange(resources.Select(resource => $"--resource:{resource}"));
-            allArgs.AddRange(sources.Select(s => $"{s}"));
+            if (commonOptions.DelaySign == true)
+            {
+                allArgs.Add("--delaysign+");
+            }
+
+            if (commonOptions.PublicSign == true)
+            {
+            }
+
+            if (commonOptions.AdditionalArguments != null)
+            {
+                // Additional arguments are added verbatim
+                allArgs.AddRange(commonOptions.AdditionalArguments);
+            }
+
+            // Generate assembly info
+            var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.fs");
+            File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateFSharp(assemblyInfoOptions));
+
+            //source files + assemblyInfo
+            allArgs.AddRange(GetSourceFiles(sources, assemblyInfo).ToArray());
+
+            //TODO check the switch enabled in fsproj in RELEASE and DEBUG configuration 
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-fsc.rsp");
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 
             // Execute FSC!
-            var result = RunFsc(allArgs)
+            var result = RunFsc(new List<string> { $"@{rsp}" })
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -144,112 +245,43 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             return result.ExitCode;
         }
 
-        // TODO: Review if this is the place for default options
-        private static IEnumerable<string> GetDefaultOptions()
-        {
-            var args = new List<string>()
-            {
-                "--noframework",
-                "--nologo",
-                "--simpleresolution"
-            };
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                args.Add("--debug:full");
-            else
-                args.Add("--debug-");
-
-            return args;
-        }
-
-        private static IEnumerable<string> TranslateCommonOptions(CommonCompilerOptions options, string outputName)
-        {
-            List<string> commonArgs = new List<string>();
-
-            if (options.Defines != null)
-            {
-                commonArgs.AddRange(options.Defines.Select(def => $"-d:{def}"));
-            }
-
-            if (options.SuppressWarnings != null)
-            {
-            }
-
-            // Additional arguments are added verbatim
-            if (options.AdditionalArguments != null)
-            {
-                commonArgs.AddRange(options.AdditionalArguments);
-            }
-
-            if (options.LanguageVersion != null)
-            {
-            }
-
-            if (options.Platform != null)
-            {
-                commonArgs.Add($"--platform:{options.Platform}");
-            }
-
-            if (options.AllowUnsafe == true)
-            {
-            }
-
-            if (options.WarningsAsErrors == true)
-            {
-                commonArgs.Add("--warnaserror");
-            }
-
-            if (options.Optimize == true)
-            {
-                commonArgs.Add("--optimize");
-            }
-
-            if (options.KeyFile != null)
-            {
-            }
-
-            if (options.DelaySign == true)
-            {
-            }
-
-            if (options.PublicSign == true)
-            {
-            }
-
-            if (options.GenerateXmlDocumentation == true)
-            {
-                commonArgs.Add($"--doc:{Path.ChangeExtension(outputName, "xml")}");
-            }
-
-            if (options.EmitEntryPoint != true)
-            {
-                commonArgs.Add("--target:library");
-            }
-            else
-            {
-                commonArgs.Add("--target:exe");
-
-                //HACK we need default.win32manifest for exe
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    var win32manifestPath = Path.Combine(AppContext.BaseDirectory, "default.win32manifest");
-                    commonArgs.Add($"--win32manifest:{win32manifestPath}");
-                }
-            }
-
-            return commonArgs;
-        }
-
         private static Command RunFsc(List<string> fscArgs)
         {
-            var corerun = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-            var fscExe = Path.Combine(AppContext.BaseDirectory, "fsc.exe");
+            var fscExe = Environment.GetEnvironmentVariable("DOTNET_FSC_PATH")
+                      ?? Path.Combine(AppContext.BaseDirectory, "fsc.exe");
 
-            List<string> args = new List<string>();
-            args.Add(fscExe);
-            args.AddRange(fscArgs);
-            
-            return Command.Create(corerun, args.ToArray());
+            var exec = Environment.GetEnvironmentVariable("DOTNET_FSC_EXEC")?.ToUpper() ?? "COREHOST";
+
+            switch (exec)
+            {
+                case "RUN":
+                    return Command.Create(fscExe, fscArgs.ToArray());
+
+                case "COREHOST":
+                default:
+                    var corehost = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
+                    return Command.Create(corehost, new[] { fscExe }.Concat(fscArgs).ToArray());
+            }
+
+        }
+
+        // The assembly info must be in the last minus 1 position because:
+        // - assemblyInfo should be in the end to override attributes
+        // - assemblyInfo cannot be in the last position, because last file contains the main
+        private static IEnumerable<string> GetSourceFiles(IReadOnlyList<string> sourceFiles, string assemblyInfo)
+        {
+            if (!sourceFiles.Any())
+            {
+                yield return assemblyInfo;
+                yield break;
+            }
+
+            foreach (var s in sourceFiles.Take(sourceFiles.Count() - 1))
+                yield return s;
+
+            yield return assemblyInfo;
+
+            yield return sourceFiles.Last();
         }
     }
 }
