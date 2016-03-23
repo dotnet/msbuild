@@ -192,8 +192,9 @@ namespace Microsoft.DotNet.ProjectModel
                 target = SelectTarget(LockFile);
                 if (target != null)
                 {
-                    var packageResolver = new PackageDependencyProvider(PackagesDirectory, frameworkReferenceResolver);
-                    ScanLibraries(target, lockFileLookup, libraries, packageResolver, projectResolver);
+                    var nugetPackageResolver = new PackageDependencyProvider(PackagesDirectory, frameworkReferenceResolver);
+                    var msbuildProjectResolver = new MSBuildDependencyProvider(ProjectResolver);
+                    ScanLibraries(target, lockFileLookup, libraries, msbuildProjectResolver, nugetPackageResolver, projectResolver);
                 }
             }
 
@@ -342,7 +343,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
         }
 
-        private void ScanLibraries(LockFileTarget target, LockFileLookup lockFileLookup, Dictionary<LibraryKey, LibraryDescription> libraries, PackageDependencyProvider packageResolver, ProjectDependencyProvider projectDependencyProvider)
+        private void ScanLibraries(LockFileTarget target, LockFileLookup lockFileLookup, Dictionary<LibraryKey, LibraryDescription> libraries, MSBuildDependencyProvider msbuildResolver, PackageDependencyProvider packageResolver, ProjectDependencyProvider projectResolver)
         {
             foreach (var library in target.Libraries)
             {
@@ -355,11 +356,18 @@ namespace Microsoft.DotNet.ProjectModel
 
                     if (projectLibrary != null)
                     {
-                        var path = Path.GetFullPath(Path.Combine(ProjectDirectory, projectLibrary.Path));
-                        description = projectDependencyProvider.GetDescription(library.Name, path, library, ProjectResolver);
+                        if (MSBuildDependencyProvider.IsMSBuildProjectLibrary(projectLibrary))
+                        {
+                            description = msbuildResolver.GetDescription(TargetFramework, projectLibrary, library);
+                            type = LibraryType.MSBuildProject;
+                        }
+                        else
+                        {
+                            var path = Path.GetFullPath(Path.Combine(ProjectDirectory, projectLibrary.Path));
+                            description = projectResolver.GetDescription(library.Name, path, library, ProjectResolver);
+                            type = LibraryType.Project;
+                        }
                     }
-
-                    type = LibraryType.Project;
                 }
                 else
                 {

@@ -61,6 +61,10 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 
                 return lockFile;
             }
+            catch (LockFilePatchingException exception)
+            {
+                throw;
+            }
             catch
             {
                 // Ran into parsing errors, mark it as unlocked and out-of-date

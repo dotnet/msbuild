@@ -11,11 +11,13 @@ namespace Microsoft.DotNet.ProjectModel.Graph
         public static readonly LibraryType Package = new LibraryType(nameof(Package));
         public static readonly LibraryType Project = new LibraryType(nameof(Project));
         public static readonly LibraryType ReferenceAssembly = new LibraryType(nameof(ReferenceAssembly));
+        public static readonly LibraryType MSBuildProject = new LibraryType(nameof(MSBuildProject));
 
         // Default value
         public static readonly LibraryType Unspecified = new LibraryType();
 
         public string Value { get; }
+        
 
         private LibraryType(string value)
         {
