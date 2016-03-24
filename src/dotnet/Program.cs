@@ -61,7 +61,12 @@ namespace Microsoft.DotNet.Cli
                 }
                 else if (IsArg(args[lastArg], "version"))
                 {
-                    PrintVersionInfo();
+                    PrintVersion();
+                    return 0;
+                }
+                else if (IsArg(args[lastArg], "info"))
+                {
+                    PrintInfo();
                     return 0;
                 }
                 else if (IsArg(args[lastArg], "h", "help"))
@@ -129,7 +134,12 @@ namespace Microsoft.DotNet.Cli
                 .ExitCode;
         }
 
-        private static void PrintVersionInfo()
+        private static void PrintVersion()
+        {
+            Reporter.Output.WriteLine(HelpCommand.ProductVersion);
+        }
+
+        private static void PrintInfo()
         {
             HelpCommand.PrintVersionHeader();
 
@@ -144,7 +154,7 @@ namespace Microsoft.DotNet.Cli
             Reporter.Output.WriteLine($" OS Name:     {runtimeEnvironment.OperatingSystem}");
             Reporter.Output.WriteLine($" OS Version:  {runtimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {runtimeEnvironment.OperatingSystemPlatform}");
-            Reporter.Output.WriteLine($" Runtime Id:  {runtimeEnvironment.GetRuntimeIdentifier()}");
+            Reporter.Output.WriteLine($" RID:         {runtimeEnvironment.GetRuntimeIdentifier()}");
         }
 
         private static bool IsArg(string candidate, string longName)
