@@ -152,19 +152,14 @@ namespace Microsoft.DotNet.Tools.Publish
             // Use a library exporter to collect publish assets
             var exporter = context.CreateExporter(configuration);
 
+            var isPortable = string.IsNullOrEmpty(context.RuntimeIdentifier);
             foreach (var export in exporter.GetAllExports())
             {
                 Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
-                PublishFiles(export.RuntimeAssemblies, outputPath, nativeSubdirectories: false, preserveRelativePath: false);
-                PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories, preserveRelativePath: false);
+                PublishAssetGroups(export.RuntimeAssemblyGroups, outputPath, nativeSubdirectories: false, includeRuntimeGroups: isPortable);
+                PublishAssetGroups(export.NativeLibraryGroups, outputPath, nativeSubdirectories, includeRuntimeGroups: isPortable);
                 export.RuntimeAssets.StructuredCopyTo(outputPath, outputPaths.IntermediateOutputDirectoryPath);
-
-                if (string.IsNullOrEmpty(context.RuntimeIdentifier))
-                {
-                    var assets = export.RuntimeTargets.SelectMany(t => Enumerable.Concat(t.NativeLibraries, t.RuntimeAssemblies));
-                    PublishFiles(assets, outputPath, nativeSubdirectories: false, preserveRelativePath: true);
-                }
 
                 if (options.PreserveCompilationContext.GetValueOrDefault())
                 {
@@ -212,7 +207,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Do not copy compilation assembly if it's in runtime assemblies
-            var runtimeAssemblies = new HashSet<LibraryAsset>(export.RuntimeAssemblies);
+            var runtimeAssemblies = new HashSet<LibraryAsset>(export.RuntimeAssemblyGroups.GetDefaultAssets());
             foreach (var compilationAssembly in export.CompilationAssemblies)
             {
                 if (!runtimeAssemblies.Contains(compilationAssembly))
@@ -259,23 +254,26 @@ namespace Microsoft.DotNet.Tools.Publish
             }
         }
 
-        private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath, bool nativeSubdirectories, bool preserveRelativePath)
+        private void PublishAssetGroups(IEnumerable<LibraryAssetGroup> groups, string outputPath, bool nativeSubdirectories, bool includeRuntimeGroups)
         {
-            foreach (var file in files)
+            foreach (var group in groups.Where(g => includeRuntimeGroups || string.IsNullOrEmpty(g.Runtime)))
             {
-                var destinationDirectory = DetermineFileDestinationDirectory(file, outputPath, nativeSubdirectories);
-
-                if (preserveRelativePath)
+                foreach (var file in group.Assets)
                 {
-                    destinationDirectory = Path.Combine(destinationDirectory, Path.GetDirectoryName(file.RelativePath));
-                }
+                    var destinationDirectory = DetermineFileDestinationDirectory(file, outputPath, nativeSubdirectories);
 
-                if (!Directory.Exists(destinationDirectory))
-                {
-                    Directory.CreateDirectory(destinationDirectory);
-                }
+                    if (!string.IsNullOrEmpty(group.Runtime))
+                    {
+                        destinationDirectory = Path.Combine(destinationDirectory, Path.GetDirectoryName(file.RelativePath));
+                    }
 
-                File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, file.FileName), overwrite: true);
+                    if (!Directory.Exists(destinationDirectory))
+                    {
+                        Directory.CreateDirectory(destinationDirectory);
+                    }
+
+                    File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, file.FileName), overwrite: true);
+                }
             }
         }
 

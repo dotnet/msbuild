@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             if (platforms == null)
             {
-                throw new ArgumentNullException("platforms");
+                throw new ArgumentNullException(nameof(platforms));
             }
 
             _buildPlatforms = platforms;

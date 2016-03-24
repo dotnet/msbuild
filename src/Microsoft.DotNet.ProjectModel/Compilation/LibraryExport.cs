@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public LibraryDescription Library { get; }
 
         /// <summary>
-        /// Gets a list of fully-qualified paths to MSIL binaries required to run
+        /// Gets a list of MSIL binaries required to run
         /// </summary>
-        public IEnumerable<LibraryAsset> RuntimeAssemblies { get; }
+        public IEnumerable<LibraryAssetGroup> RuntimeAssemblyGroups { get; }
 
         /// <summary>
         /// Non assembly runtime assets.
@@ -25,9 +25,9 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public IEnumerable<LibraryAsset> RuntimeAssets { get; }
 
         /// <summary>
-        /// Gets a list of fully-qualified paths to native binaries required to run
+        /// Gets a list of native binaries required to run
         /// </summary>
-        public IEnumerable<LibraryAsset> NativeLibraries { get; }
+        public IEnumerable<LibraryAssetGroup> NativeLibraryGroups { get; }
 
         /// <summary>
         /// Gets a list of fully-qualified paths to MSIL metadata references
@@ -50,11 +50,6 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public IEnumerable<AnalyzerReference> AnalyzerReferences { get; }
 
         /// <summary>
-        /// Get a list of runtime targets provided by this export.
-        /// </summary>
-        public IEnumerable<LibraryRuntimeTarget> RuntimeTargets { get; }
-
-        /// <summary>
         /// Get a list of resource assemblies provided by this export.
         /// </summary>
         public IEnumerable<LibraryResourceAssembly> ResourceAssemblies { get; }
@@ -62,23 +57,21 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public LibraryExport(LibraryDescription library,
                              IEnumerable<LibraryAsset> compileAssemblies,
                              IEnumerable<LibraryAsset> sourceReferences,
-                             IEnumerable<LibraryAsset> runtimeAssemblies,
+                             IEnumerable<LibraryAssetGroup> runtimeAssemblyGroups,
                              IEnumerable<LibraryAsset> runtimeAssets,
-                             IEnumerable<LibraryAsset> nativeLibraries,
+                             IEnumerable<LibraryAssetGroup> nativeLibraryGroups,
                              IEnumerable<LibraryAsset> embeddedResources,
                              IEnumerable<AnalyzerReference> analyzers,
-                             IEnumerable<LibraryRuntimeTarget> runtimeTargets,
                              IEnumerable<LibraryResourceAssembly> resourceAssemblies)
         {
             Library = library;
             CompilationAssemblies = compileAssemblies;
             SourceReferences = sourceReferences;
-            RuntimeAssemblies = runtimeAssemblies;
+            RuntimeAssemblyGroups = runtimeAssemblyGroups;
             RuntimeAssets = runtimeAssets;
-            NativeLibraries = nativeLibraries;
+            NativeLibraryGroups = nativeLibraryGroups;
             EmbeddedResources = embeddedResources;
             AnalyzerReferences = analyzers;
-            RuntimeTargets = runtimeTargets;
             ResourceAssemblies = resourceAssemblies;
         }
 

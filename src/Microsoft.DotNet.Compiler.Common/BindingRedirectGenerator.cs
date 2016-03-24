@@ -109,7 +109,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private static AssemblyRedirect[] CollectRedirects(IEnumerable<LibraryExport> dependencies)
         {
-            var allRuntimeAssemblies = dependencies.SelectMany(d => d.RuntimeAssemblies).Select(GetAssemblyInfo).ToArray();
+            var allRuntimeAssemblies = dependencies
+                .SelectMany(d => d.RuntimeAssemblyGroups.GetDefaultAssets())
+                .Select(GetAssemblyInfo)
+                .ToArray();
+
             var assemblyLookup = allRuntimeAssemblies.ToDictionary(r => r.Identity.ToLookupKey());
 
             var redirectAssemblies = new HashSet<AssemblyRedirect>();

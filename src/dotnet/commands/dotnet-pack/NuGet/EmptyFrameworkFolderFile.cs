@@ -17,7 +17,7 @@ namespace NuGet
         {
             if (directoryPathInPackage == null)
             {
-                throw new ArgumentNullException("directoryPathInPackage");
+                throw new ArgumentNullException(nameof(directoryPathInPackage));
             }
 
             TargetPath = System.IO.Path.Combine(directoryPathInPackage, Constants.PackageEmptyFileName);

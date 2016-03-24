@@ -32,7 +32,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         //ISSUE https://github.com/dotnet/cli/issues/1935
-        [WindowsOnlyFact]
+        // This fact technically succeeds on Windows, but it causes a crash dialog to pop, which interrupts the build.
+        //[WindowsOnlyFact]
         public void It_returns_a_failure_when_it_fails_to_run_the_tests()
         {
             var testCommand = new DotnetTestCommand();

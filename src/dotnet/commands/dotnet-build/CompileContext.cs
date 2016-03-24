@@ -440,31 +440,6 @@ namespace Microsoft.DotNet.Tools.Build
 
             var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);
             executable.MakeCompilationOutputRunnable();
-
-            PatchMscorlibNextToCoreClr(runtimeContext, _args.ConfigValue);
-        }
-
-        // Workaround: CoreCLR packaging doesn't include side by side mscorlib, so copy it at build
-        // time. See: https://github.com/dotnet/cli/issues/1374
-        private static void PatchMscorlibNextToCoreClr(ProjectContext context, string config)
-        {
-            foreach (var exp in context.CreateExporter(config).GetAllExports())
-            {
-                var coreclrLib = exp.NativeLibraries.FirstOrDefault(nLib =>
-                        string.Equals(Constants.LibCoreClrFileName, nLib.Name));
-                if (string.IsNullOrEmpty(coreclrLib.ResolvedPath))
-                {
-                    continue;
-                }
-                var coreclrDir = Path.GetDirectoryName(coreclrLib.ResolvedPath);
-                if (File.Exists(Path.Combine(coreclrDir, "mscorlib.dll")) ||
-                    File.Exists(Path.Combine(coreclrDir, "mscorlib.ni.dll")))
-                {
-                    continue;
-                }
-                var mscorlibFile = exp.RuntimeAssemblies.FirstOrDefault(r => r.Name.Equals("mscorlib") || r.Name.Equals("mscorlib.ni")).ResolvedPath;
-                File.Copy(mscorlibFile, Path.Combine(coreclrDir, Path.GetFileName(mscorlibFile)), overwrite: true);
-            }
         }
 
         private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)

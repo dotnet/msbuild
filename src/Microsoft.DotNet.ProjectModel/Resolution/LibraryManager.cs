@@ -41,6 +41,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var dependencies = new Dictionary<string, List<DependencyItem>>();
             var topLevel = new List<LibraryItem>();
 
+            var platformLibraries = new List<LibraryDescription>();
             foreach (var library in GetLibraries())
             {
                 if (!library.Resolved)
@@ -67,6 +68,11 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 }
                 else
                 {
+                    var isPlatform = library.RequestedRanges.Any(r => r.Type.Equals(LibraryDependencyType.Platform));
+                    if (isPlatform)
+                    {
+                        platformLibraries.Add(library);
+                    }
                     // Store dependency -> library for later
                     // J.N -> [(R1, P1), (R2, P2)]
                     foreach (var dependency in library.Dependencies)
@@ -128,6 +134,20 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 }
             }
 
+            if (platformLibraries.Count > 1)
+            {
+                foreach (var platformLibrary in platformLibraries)
+                {
+                    AddDiagnostics(
+                        messages,
+                        platformLibrary,
+                        "The following dependencies are marked with type 'platform', however only one dependency can have this type: " +
+                            string.Join(", ", platformLibraries.Select(l => l.Identity.Name).ToArray()),
+                        DiagnosticMessageSeverity.Error,
+                        ErrorCodes.DOTNET1013);
+                }
+            }
+
             // Version conflicts
             foreach (var libraryItem in topLevel)
             {
@@ -186,10 +206,10 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             return range.Name + " " + VersionUtility.RenderVersion(range.VersionRange);
         }
 
-        private void AddDiagnostics(List<DiagnosticMessage> messages, 
-                                    LibraryDescription library, 
-                                    string message, 
-                                    DiagnosticMessageSeverity severity, 
+        private void AddDiagnostics(List<DiagnosticMessage> messages,
+                                    LibraryDescription library,
+                                    string message,
+                                    DiagnosticMessageSeverity severity,
                                     string errorCode)
         {
             // A (in project.json) -> B (unresolved) (not in project.json)

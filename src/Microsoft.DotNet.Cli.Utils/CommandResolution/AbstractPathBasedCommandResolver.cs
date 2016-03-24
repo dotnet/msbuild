@@ -15,17 +15,17 @@ namespace Microsoft.DotNet.Cli.Utils
         protected IEnvironmentProvider _environment;
         protected IPlatformCommandSpecFactory _commandSpecFactory;
 
-        public AbstractPathBasedCommandResolver(IEnvironmentProvider environment, 
+        public AbstractPathBasedCommandResolver(IEnvironmentProvider environment,
             IPlatformCommandSpecFactory commandSpecFactory)
         {
             if (environment == null)
             {
-                throw new ArgumentNullException("environment");
+                throw new ArgumentNullException(nameof(environment));
             }
 
             if (commandSpecFactory == null)
             {
-                throw new ArgumentNullException("commandSpecFactory");
+                throw new ArgumentNullException(nameof(commandSpecFactory));
             }
 
             _environment = environment;
