@@ -221,12 +221,12 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                     if (runtime.Any())
                     {
-                        builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(targetGroup.Key, runtime));
+                        builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(targetGroup.Key, runtime.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a.RelativePath))));
                     }
 
                     if (native.Any())
                     {
-                        builder.AddNativeLibraryGroup(new LibraryAssetGroup(targetGroup.Key, native));
+                        builder.AddNativeLibraryGroup(new LibraryAssetGroup(targetGroup.Key, native.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a.RelativePath))));
                     }
                 }
             }
