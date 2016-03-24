@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static string GetSdkDebianPackageName(BuildTargetContext c)
         {
             var channel = c.BuildContext.Get<string>("Channel").ToLower();
-            var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+            var nugetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
 
             var packagePrefix = "";
             switch (channel)
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.Build
                     throw new Exception($"Unknown channel - {channel}");
             }
 
-            return $"{packagePrefix}-dev-{sharedFrameworkNugetVersion}";
+            return $"{packagePrefix}-dev-{nugetVersion}";
         }
 
         public static string GetDebianSharedFrameworkPackageName(BuildTargetContext c)

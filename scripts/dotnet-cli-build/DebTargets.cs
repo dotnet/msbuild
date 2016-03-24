@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var channel = c.BuildContext.Get<string>("Channel").ToLower();
             var packageName = Monikers.GetSdkDebianPackageName(c);
-            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             var debFile = c.BuildContext.Get<string>("SdkInstallerFile");
             var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
             var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateSharedHostDeb(BuildTargetContext c)
         {
             var packageName = Monikers.GetDebianSharedHostPackageName(c);
-            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             var inputRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
             var debFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
             var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedhost");
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateSharedFrameworkDeb(BuildTargetContext c)
         {
             var packageName = Monikers.GetDebianSharedFrameworkPackageName(c);
-            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            var version = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             var inputRoot = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
             var debFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
             var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedframework");
