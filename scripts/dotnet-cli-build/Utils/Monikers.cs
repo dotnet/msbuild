@@ -10,11 +10,10 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
 
-        public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix)
+        public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix, string version)
         {
             string osname = GetOSShortName();
             var arch = CurrentArchitecture.Current.ToString();
-            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             return $"{artifactPrefix}-{osname}-{arch}.{version}";
         }
 

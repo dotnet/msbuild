@@ -47,7 +47,6 @@ namespace Microsoft.DotNet.Cli.Build
 
             c.BuildContext["Configuration"] = configEnv;
             c.BuildContext["Channel"] = Environment.GetEnvironmentVariable("CHANNEL");
-            c.BuildContext["SharedFrameworkNugetVersion"] = GetVersionFromProjectJson(Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework", "project.json"));
 
             c.Info($"Building {c.BuildContext["Configuration"]} to: {Dirs.Output}");
             c.Info("Build Environment:");
@@ -83,6 +82,7 @@ namespace Microsoft.DotNet.Cli.Build
             };
             c.BuildContext["BuildVersion"] = buildVersion;
             c.BuildContext["CommitHash"] = commitHash;
+            c.BuildContext["SharedFrameworkNugetVersion"] = GetVersionFromProjectJson(Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework", "project.json"));
 
             c.Info($"Building Version: {buildVersion.SimpleVersion} (NuGet Packages: {buildVersion.NuGetVersion})");
             c.Info($"From Commit: {commitHash}");
@@ -122,11 +122,14 @@ namespace Microsoft.DotNet.Cli.Build
             var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}_{config}_version_badge.svg";
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
-            AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk");
-            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost");
-            AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework");
-            AddInstallerArtifactToContext(c, "dotnet-dev", "CombinedFrameworkSDKHost");
-            AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost");
+            var cliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
+            var sharedFrameworkVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+
+            AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk", cliVersion);
+            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", cliVersion);
+            AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
+            AddInstallerArtifactToContext(c, "dotnet-dev", "CombinedFrameworkSDKHost", cliVersion);
+            AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);
 
             return c.Success();
         }
@@ -370,9 +373,13 @@ cmake is required to build the native host 'corehost'";
             return dict;
         }
 
-        private static void AddInstallerArtifactToContext(BuildTargetContext c, string artifactPrefix, string contextPrefix)
+        private static void AddInstallerArtifactToContext(
+            BuildTargetContext c, 
+            string artifactPrefix, 
+            string contextPrefix,
+            string version)
         {
-            var productName = Monikers.GetProductMoniker(c, artifactPrefix);
+            var productName = Monikers.GetProductMoniker(c, artifactPrefix, version);
 
             var extension = CurrentPlatform.IsWindows ? ".zip" : ".tar.gz";
             c.BuildContext[contextPrefix + "CompressedFile"] = Path.Combine(Dirs.Packages, productName + extension);

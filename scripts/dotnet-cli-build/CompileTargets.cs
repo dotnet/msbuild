@@ -375,7 +375,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             // Generate .version file
-            var version = buildVersion.SimpleVersion;
+            var version = buildVersion.NuGetVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(outputDir, ".version"), content);
 

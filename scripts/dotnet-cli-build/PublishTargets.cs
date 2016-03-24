@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Cli.Build
             AzurePublisherTool = new AzurePublisher();
             DebRepoPublisherTool = new DebRepoPublisher(Dirs.Packages);
 
-            CliVersion = c.BuildContext.Get<BuildVersion>("BuildCliVersion").SimpleVersion;
-            CliNuGetVersion = c.BuildContext.Get<BuildVersion>("BuildCliVersion").NuGetVersion;
+            CliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
+            CliNuGetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             Channel = c.BuildContext.Get<string>("Channel");
 
@@ -82,12 +82,12 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult PublishCliVersionBadge(BuildTargetContext c)
         {
-            var CliversionBadge = c.BuildContext.Get<string>("CliVersionBadge");
-            var latestCliVersionBadgeBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(CliversionBadge)}";
-            var CliversionBadgeBlob = $"{Channel}/Binaries/{CliVersion}/{Path.GetFileName(CliversionBadge)}";
+            var versionBadge = c.BuildContext.Get<string>("VersionBadge");
+            var latestVersionBadgeBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(versionBadge)}";
+            var versionBadgeBlob = $"{Channel}/Binaries/{CliNuGetVersion}/{Path.GetFileName(versionBadge)}";
 
-            AzurePublisherTool.PublishFile(CliversionBadgeBlob, CliversionBadge);
-            AzurePublisherTool.PublishFile(latestCliVersionBadgeBlob, CliversionBadge);
+            AzurePublisherTool.PublishFile(versionBadgeBlob, versionBadge);
+            AzurePublisherTool.PublishFile(latestVersionBadgeBlob, versionBadge);
             return c.Success();
         }
 
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult PublishSdkInstallerFileToAzure(BuildTargetContext c)
         {
             var version = CliNuGetVersion;
-            var installerFile = c.BuildContext.Get<string>("SDKInstallerFile");
+            var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
 
             AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
 
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = CliNuGetVersion;
             var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile");
 
-            AzurePublisherTool.PublishInstallerFileAndLatest(archiveFile, Channel, version);
+            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
 
             return c.Success();
         }
@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = SharedFrameworkNugetVersion;
             var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile");
 
-            AzurePublisherTool.PublishInstallerFileAndLatest(archiveFile, Channel, version);
+            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
             return c.Success();
         }
 
