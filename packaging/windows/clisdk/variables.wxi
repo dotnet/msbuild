@@ -13,14 +13,14 @@
   <?define Dotnet_DisplayVersion   =   "1.0" ?>
   <?define Dotnet_BuildVersion   =   "$(var.BuildVersion)" ?>
   <?define Manufacturer     =   "Microsoft Corporation" ?>
-  <?define ProductName      =   "Microsoft .NET CLI for Windows ($(var.DisplayVersion) $(var.ReleaseSuffix))" ?>
+  <?define ProductName      =   "Microsoft .NET Core CLI for Windows ($(var.DisplayVersion) $(var.ReleaseSuffix))" ?>
   <?define ProductLanguage  =   "1033" ?>
   <?define ProductVersion   =   "$(var.Dotnet_ProductVersion)" ?>
   <?define ProductFamily    =   "dotnet" ?>
   <?define ProductEdition   =   "001dotnet" ?>
   <?define LCID  = "$(var.ProductLanguage)"?>
   <?define DowngradeErrorMessage  = "A newer version is already installed; please uninstall it and re-run setup."?>
-  <?define IncompatibleBuildTypeError = "You have installed '[INSTALLEDCLIBUILDTYPE]' build of .NET CLI. It cannot be upgraded to a '$(var.BuildType)' build of .NET CLI. Please uninstall it and re-run setup."?>
+  <?define IncompatibleBuildTypeError = "You have installed '[INSTALLEDCLIBUILDTYPE]' build of .NET Core CLI. It cannot be upgraded to a '$(var.BuildType)' build of .NET Core CLI. Please uninstall it and re-run setup."?>
 
   <?define Platform   =   "$(sys.BUILDARCH)" ?>
   <?if $(var.Platform)=x86?>

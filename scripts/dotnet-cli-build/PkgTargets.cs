@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Build
             string sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             string version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             string id = $"com.microsoft.dotnet.dev.{version}.osx.x64";
-            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "resources");
+            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "clisdk", "resources");
             string outFilePath = Path.Combine(Dirs.Packages, c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile"));
 
             string inputDistTemplatePath = Path.Combine(
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Build
             string sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             string version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             string id = $"com.microsoft.dotnet.{sharedFrameworkNugetName}.{sharedFrameworkNugetVersion}.osx.x64";
-            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "resources");
+            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "sharedframework", "resources");
             string outFilePath = Path.Combine(PkgsIntermediateDir, c.BuildContext.Get<string>("CombinedFrameworkHostInstallerFile"));
 
             string inputDistTemplatePath = Path.Combine(
