@@ -237,6 +237,27 @@ get_commit_hash_from_version_info() {
 }
 
 # args:
+# install_root - $1
+# relative_path_to_package - $2
+# specific_version - $3
+is_dotnet_package_installed() {
+    eval $invocation
+    
+    local install_root=$1
+    local relative_path_to_package=$2
+    local specific_version=$3
+    
+    local dotnet_package_path=$(combine_paths $(combine_paths $install_root $relative_path_to_package) $specific_version)
+    say_verbose "is_dotnet_package_installed: dotnet_package_path=$dotnet_package_path"
+    
+    if [ -d "$dotnet_package_path" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# args:
 # azure_feed - $1
 # azure_channel - $2
 # normalized_architecture - $3
@@ -483,7 +504,12 @@ calculate_vars() {
 
 install_dotnet() {
     eval $invocation
-
+    
+    if is_dotnet_package_installed $install_root "sdk" $specific_version; then
+        say ".NET SDK version $specific_version is already installed."
+        return 0
+    fi
+    
     mkdir -p $install_root
     zip_path=$(mktemp $temporary_file_template)
     say_verbose "Zip path: $zip_path"
