@@ -61,7 +61,6 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference="Stop"
 $ProgressPreference="SilentlyContinue"
 
-$LocalVersionFileRelativePath="\.version"
 $BinFolderRelativePath=""
 
 # example path with regex: shared/1.0.0-beta-12345/somepath
@@ -184,11 +183,10 @@ function Resolve-Installation-Path([string]$InstallDir) {
     return $InstallDir
 }
 
-# TODO: check for global.json
-function Get-Installed-Version-Info([string]$InstallRoot) {
+function Get-Version-Info-From-Version-File([string]$InstallRoot, [string]$RelativePathToVersionFile) {
     Say-Invocation $MyInvocation
 
-    $VersionFile = Join-Path -Path $InstallRoot -ChildPath $LocalVersionFileRelativePath
+    $VersionFile = Join-Path -Path $InstallRoot -ChildPath $RelativePathToVersionFile
     Say-Verbose "Local version file: $VersionFile"
     
     if (Test-Path $VersionFile) {
@@ -200,6 +198,14 @@ function Get-Installed-Version-Info([string]$InstallRoot) {
     Say-Verbose "Local version file not found."
 
     return $null
+}
+
+function Is-Dotnet-Package-Installed([string]$InstallRoot, [string]$RelativePathToPackage, [string]$SpecificVersion) {
+    Say-Invocation $MyInvocation
+    
+    $DotnetPackagePath = Join-Path -Path $InstallRoot -ChildPath $RelativePathToPackage | Join-Path -ChildPath $SpecificVersion
+    Say-Verbose "Is-Dotnet-Package-Installed: Path to a package: $DotnetPackagePath"
+    return Test-Path $DotnetPackagePath -PathType Container
 }
 
 function Get-Absolute-Path([string]$RelativeOrAbsolutePath) {
@@ -299,6 +305,13 @@ if ($DryRun) {
 
 $InstallRoot = Resolve-Installation-Path $InstallDir
 Say-Verbose "InstallRoot: $InstallRoot"
+
+$IsSdkInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -RelativePathToPackage "sdk" -SpecificVersion $SpecificVersion
+Say-Verbose ".NET SDK installed? $IsSdkInstalled"
+if ($IsSdkInstalled) {
+    Say ".NET SDK version $SpecificVersion is already installed."
+    return
+}
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
