@@ -83,6 +83,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "update-dependencies", "scri
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Cli.Utils.Tests", "test\Microsoft.DotNet.Cli.Utils.Tests\Microsoft.DotNet.Cli.Utils.Tests.xproj", "{09C52F96-EFDD-4448-95EC-6D362DD60BAA}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RuntimeGraphGenerator", "tools\RuntimeGraphGenerator\RuntimeGraphGenerator.xproj", "{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -591,6 +593,22 @@ Global
 		{09C52F96-EFDD-4448-95EC-6D362DD60BAA}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
 		{09C52F96-EFDD-4448-95EC-6D362DD60BAA}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
 		{09C52F96-EFDD-4448-95EC-6D362DD60BAA}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Debug|x64.Build.0 = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.MinSizeRel|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.MinSizeRel|Any CPU.Build.0 = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.MinSizeRel|x64.ActiveCfg = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.MinSizeRel|x64.Build.0 = Debug|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Release|x64.ActiveCfg = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.Release|x64.Build.0 = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -629,5 +647,6 @@ Global
 		{60C33D0A-A5D8-4AB0-9956-1F804654DF05} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{A28BD8AC-DF15-4F58-8299-98A9AE2B8726} = {88278B81-7649-45DC-8A6A-D3A645C5AFC3}
 		{09C52F96-EFDD-4448-95EC-6D362DD60BAA} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{EFC4FE68-83EB-40E4-BFA8-61D0B4626F25} = {0722D325-24C8-4E83-B5AF-0A083E7F0749}
 	EndGlobalSection
 EndGlobal
