@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
@@ -49,14 +51,39 @@ namespace Microsoft.Extensions.DependencyModel
             var compilationOptions = compilerOptions != null
                 ? GetCompilationOptions(compilerOptions)
                 : CompilationOptions.Default;
+
+            var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
+
             return new DependencyContext(
-                target.DotNetFrameworkName,
-                runtime,
-                portable,
+                new TargetInfo(target.DotNetFrameworkName, runtime, runtimeSignature, portable),
                 compilationOptions,
                 GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(),
                 GetLibraries(runtimeExports, dependencyLookup, runtime: true).Cast<RuntimeLibrary>(),
                 new RuntimeFallbacks[] {});
+        }
+
+        private static string GenerateRuntimeSignature(IEnumerable<LibraryExport> runtimeExports)
+        {
+            var sha1 = SHA1.Create();
+            var builder = new StringBuilder();
+            var packages = runtimeExports
+                .Where(libraryExport => libraryExport.Library.Identity.Type == LibraryType.Package);
+            var seperator = "|";
+            foreach (var libraryExport in packages)
+            {
+                builder.Append(libraryExport.Library.Identity.Name);
+                builder.Append(seperator);
+                builder.Append(libraryExport.Library.Identity.Version.ToString());
+                builder.Append(seperator);
+            }
+            var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
+
+            builder.Clear();
+            foreach (var b in hash)
+            {
+                builder.AppendFormat("{0:x2}", b);
+            }
+            return builder.ToString();
         }
 
         private static CompilationOptions GetCompilationOptions(CommonCompilerOptions compilerOptions)
