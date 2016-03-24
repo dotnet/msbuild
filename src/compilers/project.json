@@ -1,0 +1,26 @@
+{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+
+    "dependencies": {
+      "Microsoft.NETCore.App": {
+        "type":"platform",
+        "version":"1.0.0-rc2-23928"
+      },
+      "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160321-04",
+      "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160321-04",
+      "Microsoft.Net.CSharp.Interactive.netcore": "1.3.0-beta1-20160321-04",
+      "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-160318",
+      "Microsoft.DiaSymReader.Native": "1.3.3",
+    },
+    "frameworks": {
+      "netstandard1.5": {
+        "imports": [
+          "dnxcore50",
+          "portable-net45+win8"
+        ]
+      }
+    }
+}

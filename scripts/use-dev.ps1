@@ -4,7 +4,7 @@
 #
 
 # Put the stage2 output on the front of the path
-$stage2 = "$PSScriptRoot\..\artifacts\win10-x64\stage2\bin"
+$stage2 = "$PSScriptRoot\..\artifacts\win10-x64\stage2"
 if (Test-Path $stage2) {
     $splat = $env:PATH.Split(";")
     $stage2 = Convert-Path $stage2

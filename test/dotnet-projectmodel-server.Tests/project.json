@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "Microsoft.NETCore.App": "1.0.0-rc2-23925",
     "dotnet": {
       "target": "project"
     },
@@ -7,10 +8,10 @@
       "version": "4.0.0-rc2-23928",
       "exclude": "Compile"
     },
-    "Microsoft.DotNet.ProjectModel": {
+    "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
-    "Microsoft.DotNet.Tools.Tests.Utilities": {
+    "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
     "xunit": "2.1.0",

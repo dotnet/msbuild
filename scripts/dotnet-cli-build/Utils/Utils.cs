@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Build
                     File.SetAttributes(file, FileAttributes.Normal);
                     File.Delete(file);
                 }
-
+                System.Threading.Thread.Sleep(1); 
                 Directory.Delete(path, true);
             }
         }

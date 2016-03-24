@@ -24,6 +24,17 @@ namespace Microsoft.DotNet.ProjectModel
             IsPortable = Framework != null;
         }
 
+        public static bool IsApplicationPortable(string entryAssemblyPath)
+        {
+            var runtimeConfigFile = Path.ChangeExtension(entryAssemblyPath, FileNameSuffixes.RuntimeConfigJson);
+            if (File.Exists(runtimeConfigFile))
+            {
+                var runtimeConfig = new RuntimeConfig(runtimeConfigFile);
+                return runtimeConfig.IsPortable;
+            }
+            return false;
+        }
+
         private JObject OpenRuntimeConfig(string runtimeConfigPath)
         {
             return JObject.Parse(File.ReadAllText(runtimeConfigPath));
