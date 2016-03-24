@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             string projectDirectory)
         {
-            var projectContext = GetProjectContextFromDirectory(projectDirectory, s_toolPackageFramework);
+            var projectContext = GetProjectContextFromDirectoryForFirstTarget(projectDirectory);
 
             if (projectContext == null)
             {
@@ -162,29 +162,19 @@ namespace Microsoft.DotNet.Cli.Utils
                 s_toolPackageFramework);
         }
 
-        private ProjectContext GetProjectContextFromDirectory(string directory, NuGetFramework framework)
+        private ProjectContext GetProjectContextFromDirectoryForFirstTarget(string projectRootPath)
         {
-            if (directory == null || framework == null)
+            if (projectRootPath == null)
             {
                 return null;
             }
-
-            var projectRootPath = directory;
 
             if (!File.Exists(Path.Combine(projectRootPath, Project.FileName)))
             {
                 return null;
             }
 
-            var projectContext = ProjectContext.Create(
-                projectRootPath, 
-                framework, 
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
-
-            if (projectContext.RuntimeIdentifier == null)
-            {
-                return null;
-            }
+            var projectContext = ProjectContext.CreateContextForEachTarget(projectRootPath).FirstOrDefault();
 
             return projectContext;
         }

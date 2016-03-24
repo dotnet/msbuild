@@ -120,6 +120,8 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
         {
             Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-hello"));
+            Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-portable"));
+            Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", "dotnet-portable"));
 
             return c.Success();
         }
