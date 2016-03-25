@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 
                 return lockFile;
             }
-            catch (LockFilePatchingException exception)
+            catch (LockFilePatchingException)
             {
                 throw;
             }

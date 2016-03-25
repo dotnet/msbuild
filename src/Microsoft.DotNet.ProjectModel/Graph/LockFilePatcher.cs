@@ -84,8 +84,6 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             libraryToPatch.RuntimeAssemblies = export.RuntimeAssemblies;
         }
 
-        
-
         private static IList<LockFileTargetLibrary> GetTargetsForLibrary(LockFile lockFile, LockFileProjectLibrary library)
         {
             return lockFile.Targets
