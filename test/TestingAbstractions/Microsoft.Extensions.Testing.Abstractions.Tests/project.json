@@ -1,18 +1,24 @@
-﻿{
+{
   "version": "1.0.0-*",
-
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23924",
-    "Microsoft.Extensions.Testing.Abstractions": { "target": "project" },
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23924",
-    "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
-    "TestAppWithFullPdbs": { "target": "project" },
-    "TestAppWithPortablePdbs": { "target": "project" },
+    "NETStandard.Library": "1.5.0-rc2-23925",
+    "Microsoft.Extensions.Testing.Abstractions": {
+      "target": "project"
+    },
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23925",
+    "Microsoft.DotNet.Tools.Tests.Utilities": {
+      "target": "project"
+    },
+    "TestAppWithFullPdbs": {
+      "target": "project"
+    },
+    "TestAppWithPortablePdbs": {
+      "target": "project"
+    },
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-91790-12",
     "FluentAssertions": "4.2.2"
   },
-
   "frameworks": {
     "netstandardapp1.5": {
       "imports": [
@@ -22,6 +28,5 @@
       ]
     }
   },
-
   "testRunner": "xunit"
 }
