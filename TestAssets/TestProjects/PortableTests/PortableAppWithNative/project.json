@@ -1,14 +1,20 @@
 {
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
-    "frameworks": {
-        "netstandard1.5": {
-            "imports": [ "dnxcore50", "portable-net45+win8" ],
-            "dependencies": {
-                "Microsoft.NETCore.App": { "type": "platform", "version": "1.0.0-rc2-23924" },
-                "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-*"
-            }
-        }
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "frameworks": {
+    "netstandard1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ],
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0-rc2-23925"
+        },
+        "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-*"
+      }
     }
+  }
 }

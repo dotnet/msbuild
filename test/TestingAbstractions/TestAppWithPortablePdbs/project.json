@@ -4,11 +4,14 @@
     "debugType": "portable"
   },
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23924"
+    "NETStandard.Library": "1.5.0-rc2-23925"
   },
   "frameworks": {
     "netstandard1.5": {
-      "imports": [ "portable-net45+win8", "dnxcore50" ]
+      "imports": [
+        "portable-net45+win8",
+        "dnxcore50"
+      ]
     }
   }
 }

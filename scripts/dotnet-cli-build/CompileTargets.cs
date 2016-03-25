@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class CompileTargets
     {
-        public static readonly string CoreCLRVersion = "1.0.2-rc2-23924";
+        public static readonly string CoreCLRVersion = "1.0.2-rc2-23925";
         public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
         public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
@@ -308,7 +308,7 @@ namespace Microsoft.DotNet.Cli.Build
             // corehost will be renamed to dotnet at some point and then we will not need to rename it here.
             File.Copy(
                 Path.Combine(Dirs.Corehost, CoreHostBaseName),
-                Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"));
+                Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"), true);
             File.Copy(
                 Path.Combine(Dirs.Corehost, HostPolicyBaseName),
                 Path.Combine(SharedFrameworkNameAndVersionRoot, HostPolicyBaseName), true);

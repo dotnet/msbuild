@@ -28,7 +28,7 @@ Write-Host "Installing .NET Core CLI Stage 0"
 & "$PSScriptRoot\obtain\install.ps1" -Architecture x64
 
 # Put the stage0 on the path
-$env:PATH = "$env:DOTNET_INSTALL_DIR\cli;$env:PATH"
+$env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
 $appPath = "$PSScriptRoot\update-dependencies"
 

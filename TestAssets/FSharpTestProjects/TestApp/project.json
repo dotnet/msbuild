@@ -9,7 +9,7 @@
   ],
   "dependencies": {
     "TestLibrary": "1.0.0-*",
-    "NETStandard.Library": "1.5.0-rc2-23924",
+    "NETStandard.Library": "1.5.0-rc2-23925",
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221"
   },
   "frameworks": {
