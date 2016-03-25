@@ -12,9 +12,6 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "Microsoft.Extensions.Testing.Abstractions": {
-      "target": "project"
-    },
     "System.Net.NameResolution": "4.0.0-rc2-23924",
     "System.Net.Sockets": "4.1.0-rc2-23924",
     "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23924",
