@@ -129,6 +129,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             allArgs.Add("--noframework");
             allArgs.Add("--nologo");
             allArgs.Add("--simpleresolution");
+            allArgs.Add("--nocopyfsharpcore");
 
             // project.json compilationOptions
             if (commonOptions.Defines != null)
