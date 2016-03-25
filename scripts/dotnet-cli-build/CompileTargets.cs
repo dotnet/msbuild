@@ -308,7 +308,7 @@ namespace Microsoft.DotNet.Cli.Build
             // corehost will be renamed to dotnet at some point and then we will not need to rename it here.
             File.Copy(
                 Path.Combine(Dirs.Corehost, CoreHostBaseName),
-                Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"));
+                Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"), true);
             File.Copy(
                 Path.Combine(Dirs.Corehost, HostPolicyBaseName),
                 Path.Combine(SharedFrameworkNameAndVersionRoot, HostPolicyBaseName), true);
