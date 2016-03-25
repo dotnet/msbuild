@@ -328,11 +328,11 @@ namespace Microsoft.Build.Tasks
             string pathToTool = null;
 
             // If ToolPath wasn't passed in, we want to default to the latest
-            pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolName, TargetDotNetFrameworkVersion.VersionLatest);
+            pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolExe, TargetDotNetFrameworkVersion.VersionLatest);
 
             if (pathToTool == null)
             {
-                Log.LogErrorWithCodeFromResources("General.FrameworksFileNotFound", ToolName,
+                Log.LogErrorWithCodeFromResources("General.FrameworksFileNotFound", ToolExe,
                     ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.VersionLatest));
             }
 

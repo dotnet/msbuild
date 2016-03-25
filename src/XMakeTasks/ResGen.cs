@@ -537,7 +537,7 @@ namespace Microsoft.Build.Tasks
                                             SdkToolsPathUtility.FileInfoExists,
                                             MSBuildProcessorArchitecture.CurrentProcessArchitecture,
                                             SdkToolsPath,
-                                            ToolName,
+                                            ToolExe,
                                             Log,
                                             true /* log errors and warnings */
                                         );

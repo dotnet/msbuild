@@ -137,7 +137,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to lc.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolName, Log, true);
+            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             return pathToTool;
         }
 
