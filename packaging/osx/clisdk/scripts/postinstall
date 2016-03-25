@@ -9,10 +9,6 @@ INSTALL_DESTINATION=$2
 
 
 # A temporary fix for the permissions issue(s)
-chmod -R 755 $INSTALL_DESTINATION
-
-# Add the installation bin directory to the system-wide paths
-echo $INSTALL_DESTINATION | tee -a /etc/paths.d/dotnet
-
+chmod -R 755 $INSTALL_DESTINATIONs
 
 exit 0
