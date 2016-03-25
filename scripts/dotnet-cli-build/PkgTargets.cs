@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.OSX)]
         public static BuildTargetResult GenerateCLISdkProductArchive(BuildTargetContext c)
         {
-            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "resources");
+            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "clisdk", "resources");
             string outFilePath = Path.Combine(Dirs.Packages, c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile"));
 
             string inputDistTemplatePath = Path.Combine(
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.OSX)]
         public static BuildTargetResult GenerateSharedFrameworkProductArchive(BuildTargetContext c)
         {
-            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "resources");
+            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "sharedframework", "resources");
             string outFilePath = Path.Combine(PkgsIntermediateDir, c.BuildContext.Get<string>("CombinedFrameworkHostInstallerFile"));
 
             string inputDistTemplatePath = Path.Combine(

@@ -1,9 +1,8 @@
-﻿using System.IO;
-using System.Linq;
-using System;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli.Build.Framework;
+﻿using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.Extensions.PlatformAbstractions;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -22,7 +21,15 @@ namespace Microsoft.DotNet.Cli.Build
 
         public Command Exec(string command, params string[] args)
         {
-            return Command.Create(Path.Combine(BinPath, $"dotnet{Constants.ExeSuffix}"), Enumerable.Concat(new[] { command }, args));
+            var newArgs = args.ToList();
+            newArgs.Insert(0, command);
+
+            if (EnvVars.Verbose)
+            {
+                newArgs.Insert(0, "-v");
+            }
+
+            return Command.Create(Path.Combine(BinPath, $"dotnet{Constants.ExeSuffix}"), newArgs);
         }
 
         public Command Restore(params string[] args) => Exec("restore", args);

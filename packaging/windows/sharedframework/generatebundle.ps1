@@ -27,7 +27,7 @@ function RunCandleForBundle
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\sharedframework"
 
     .\candle.exe -nologo `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
         -dReleaseSuffix="$ReleaseSuffix" `
