@@ -12,10 +12,12 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public class MSBuildDependencyProvider
     {
+        private readonly Project _rootProject;
         private readonly Func<string, Project> _projectResolver;
 
-        public MSBuildDependencyProvider(Func<string, Project> projectResolver)
+        public MSBuildDependencyProvider(Project rootProject, Func<string, Project> projectResolver)
         {
+            _rootProject = rootProject;
             _projectResolver = projectResolver;
         }
 
@@ -28,13 +30,13 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary, targetFramework);
 
-            var path = Path.GetDirectoryName(Path.GetFullPath(projectLibrary.MSBuildProject));
-            var exists = Directory.Exists(path);
+            var msbuildProjectPath = GetMSbuildProjectPath(projectLibrary);
+            var exists = Directory.Exists(msbuildProjectPath);
 
             var projectFile = projectLibrary.Path == null ? null : _projectResolver(projectLibrary.Path);
 
             var msbuildPackageDescription = new MSBuildProjectDescription(
-                path,
+                msbuildProjectPath,
                 projectLibrary,
                 targetLibrary,
                 projectFile,
@@ -43,6 +45,20 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 resolved: compatible && exists);
 
             return msbuildPackageDescription;
+        }
+
+        private string GetMSbuildProjectPath(LockFileProjectLibrary projectLibrary)
+        {
+            if (_rootProject == null)
+            {
+                throw new InvalidOperationException("Root xproj project does not exist. Cannot compute the path of its referenced csproj projects.");
+            }
+
+            var rootProjectPath = Path.GetDirectoryName(_rootProject.ProjectFilePath);
+            var msbuildProjectFilePath = Path.Combine(rootProjectPath, projectLibrary.MSBuildProject);
+            var msbuildProjectPath = Path.GetDirectoryName(Path.GetFullPath(msbuildProjectFilePath));
+
+            return msbuildProjectPath;
         }
 
         private void PopulateDependencies(
