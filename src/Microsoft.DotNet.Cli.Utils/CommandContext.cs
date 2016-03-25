@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return _ansiPassThru.Value;
         }
-        
+
         private static bool GetBool(string name, bool defaultValue = false)
         {
             var str = Environment.GetEnvironmentVariable(name);
