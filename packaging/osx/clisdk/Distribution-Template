@@ -14,20 +14,20 @@
     
     
     <choices-outline>
-        <line choice="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg" />
-        <line choice="com.microsoft.dotnet.sharedhost.osx.x64" />
-        <line choice="com.microsoft.dotnet.sdk.osx.x64"/>
+        <line choice="{SharedFxComponentId}.pkg" />
+        <line choice="{SharedHostComponentId}.pkg" />
+        <line choice="{CLISdkComponentId}.pkg"/>
     </choices-outline>
-    <choice id="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg" visible="true" title=".NET Core Shared Framework (x64)" description="The .NET Core Shared Framework">
-        <pkg-ref id="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg" />
+    <choice id="{SharedFxComponentId}.pkg" visible="true" title=".NET Core Shared Framework (x64)" description="The .NET Core Shared Framework">
+        <pkg-ref id="{SharedFxComponentId}.pkg" />
     </choice>
-    <choice id="com.microsoft.dotnet.sharedhost.osx.x64" visible="true" title=".NET Core Shared Host (x64)" description="The .NET Core Shared Host." >
-        <pkg-ref id="com.microsoft.dotnet.sharedhost.osx.x64" />
+    <choice id="{SharedHostComponentId}.pkg" visible="true" title=".NET Core Shared Host (x64)" description="The .NET Core Shared Host." >
+        <pkg-ref id="{SharedHostComponentId}.pkg" />
     </choice>
-    <choice id="com.microsoft.dotnet.sdk.osx.x64" visible="true" title=".NET CLI (x64)" description=".NET CLI">
-        <pkg-ref id="com.microsoft.dotnet.sdk.osx.x64"/>
+    <choice id="{CLISdkComponentId}.pkg" visible="true" title=".NET CLI (x64)" description=".NET CLI">
+        <pkg-ref id="{CLISdkComponentId}.pkg"/>
     </choice>
-    <pkg-ref id="com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg">com.microsoft.dotnet.sharedframework.{SharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64.pkg</pkg-ref>
-    <pkg-ref id="com.microsoft.dotnet.sharedhost.osx.x64">com.microsoft.dotnet.sharedhost.osx.x64.pkg</pkg-ref>
-    <pkg-ref id="com.microsoft.dotnet.sdk.osx.x64">com.microsoft.dotnet.sdk.osx.x64.pkg</pkg-ref>
+    <pkg-ref id="{SharedFxComponentId}.pkg">{SharedFxComponentId}.pkg</pkg-ref>
+    <pkg-ref id="{SharedHostComponentId}.pkg">{SharedHostComponentId}.pkg</pkg-ref>
+    <pkg-ref id="{CLISdkComponentId}.pkg">{CLISdkComponentId}.pkg</pkg-ref>
 </installer-gui-script>
