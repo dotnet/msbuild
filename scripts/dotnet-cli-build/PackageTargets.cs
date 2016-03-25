@@ -61,6 +61,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             Directory.CreateDirectory(cliSdkRoot);
             Utils.CopyDirectoryRecursively(Path.Combine(Dirs.Stage2, "sdk"), cliSdkRoot, true);
+            FixPermissions(cliSdkRoot);
+
             c.BuildContext["CLISDKRoot"] = cliSdkRoot;
             return c.Success();
         }
@@ -81,6 +83,7 @@ namespace Microsoft.DotNet.Cli.Build
                 var destFile = file.Replace(Dirs.Stage2, sharedHostRoot);
                 File.Copy(file, destFile, true);
             }
+            FixPermissions(sharedHostRoot);
 
             c.BuildContext["SharedHostPublishRoot"] = sharedHostRoot;
             return c.Success();
@@ -97,6 +100,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             Directory.CreateDirectory(sharedFxRoot);
             Utils.CopyDirectoryRecursively(Path.Combine(Dirs.Stage2, "shared"), sharedFxRoot, true);
+            FixPermissions(sharedFxRoot);
+
             c.BuildContext["SharedFrameworkPublishRoot"] = sharedFxRoot;
             return c.Success();
         }
@@ -241,6 +246,18 @@ namespace Microsoft.DotNet.Cli.Build
             Cmd("tar", "-czf", artifactPath, "-C", directory, ".")
                 .Execute()
                 .EnsureSuccessful();
+        }
+
+        private static void FixPermissions(string directory)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Reset everything to user readable/writeable and group and world readable.
+                FS.ChmodAll(directory, "*", "644");
+
+                // Now make things that should be executable, executable.
+                FS.FixModeFlags(directory);
+            }
         }
     }
 }
