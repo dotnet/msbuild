@@ -107,9 +107,11 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateCliSdkMsi(BuildTargetContext c)
         {
             var cliSdkRoot = c.BuildContext.Get<string>("CLISDKRoot");
+            var upgradeCode = Utils.GenerateGuidFromName(SdkMsi).ToString().ToUpper();
+
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatemsi.ps1"),
-                cliSdkRoot, SdkMsi, WixRoot, MsiVersion, CliVersion, Arch, Channel)
+                cliSdkRoot, SdkMsi, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch, Channel)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -143,7 +145,8 @@ namespace Microsoft.DotNet.Cli.Build
             var inputDir = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
             var sharedFrameworkNuGetName = Monikers.SharedFrameworkName;
             var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var upgradeCode = Utils.GenerateGuidFromName($"{sharedFrameworkNuGetName}-{sharedFrameworkNuGetVersion}-{Arch}").ToString().ToUpper();
+            var msiVerison = sharedFrameworkNuGetVersion.Split('-')[0];
+            var upgradeCode = Utils.GenerateGuidFromName(SharedFrameworkMsi).ToString().ToUpper();
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedframework");
 
             if (Directory.Exists(wixObjRoot))
@@ -154,7 +157,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatemsi.ps1"),
-                inputDir, SharedFrameworkMsi, WixRoot, MsiVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot)
+                inputDir, SharedFrameworkMsi, WixRoot, msiVerison, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -165,9 +168,11 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateCliSdkBundle(BuildTargetContext c)
         {
+            var upgradeCode = Utils.GenerateGuidFromName(SdkBundle).ToString().ToUpper();
+
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),
-                SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, MsiVersion, CliVersion, Arch, Channel)
+                SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch, Channel)
                     .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
                     .Execute()
                     .EnsureSuccessful();
@@ -180,7 +185,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var sharedFrameworkNuGetName = Monikers.SharedFrameworkName;
             var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var upgradeCode = Utils.GenerateGuidFromName($"{sharedFrameworkNuGetName}-{sharedFrameworkNuGetVersion}-{Arch}-bundle").ToString().ToUpper();
+            var upgradeCode = Utils.GenerateGuidFromName(SharedFrameworkBundle).ToString().ToUpper();
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatebundle.ps1"),

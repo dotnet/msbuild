@@ -26,11 +26,9 @@
   <?if $(var.Platform)=x86?>
   <?define Program_Files="ProgramFilesFolder"?>
   <?define Win64AttributeValue=no?>
-  <?define UpgradeCode="25CAE344-22A6-422D-942E-942687C56A45"?>
   <?elseif $(var.Platform)=x64?>
   <?define Program_Files="ProgramFiles64Folder"?>
   <?define Win64AttributeValue=yes?>
-  <?define UpgradeCode="7D73E4F7-71E2-4236-8CF5-1C499BA3FF50"?>
   <?else?>
   <?error Invalid Platform ($(var.Platform))?>
   <?endif?>

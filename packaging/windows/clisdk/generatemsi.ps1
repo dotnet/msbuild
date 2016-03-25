@@ -7,6 +7,7 @@ param(
     [Parameter(Mandatory=$true)][string]$WixRoot,
     [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
     [Parameter(Mandatory=$true)][string]$DotnetCLIVersion,
+    [Parameter(Mandatory=$true)][string]$UpgradeCode,
     [Parameter(Mandatory=$true)][string]$Architecture,
     [Parameter(Mandatory=$true)][string]$ReleaseSuffix
 )
@@ -49,6 +50,7 @@ function RunCandle
         -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
+        -dUpgradeCode="$UpgradeCode" `
         -dReleaseSuffix="$ReleaseSuffix" `
         -arch "$Architecture" `
         -ext WixDependencyExtension.dll `

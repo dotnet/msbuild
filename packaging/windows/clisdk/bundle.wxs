@@ -6,9 +6,11 @@
   <?include "Variables.wxi" ?>
 
   <Bundle Name="$(var.ProductName)" Manufacturer="$(var.Manufacturer)"
-          Version="$(var.DisplayVersion)" UpgradeCode="70A1576F-63B6-4659-9E39-25C7B769DDE5"
+          Version="$(var.DisplayVersion)" UpgradeCode="$(var.UpgradeCode)"
           AboutUrl="http://dotnet.github.io/"
-          Compressed="yes">
+          Compressed="yes"
+          DisableModify="yes"
+          DisableRemove="yes">
 
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.Foundation">
       <bal:WixStandardBootstrapperApplication
@@ -32,13 +34,13 @@
     <util:DirectorySearch Path="[PreviousInstallFolder]" Variable="DOTNETHOME" After="PreviousInstallFolderSearch" Condition="PreviousInstallFolder" />
 
     <Chain DisableSystemRestore="yes" ParallelCache="yes">
-      <MsiPackage SourceFile="$(var.CLISDKMsiSourcePath)">
+      <MsiPackage SourceFile="$(var.CLISDKMsiSourcePath)" Visible="yes">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
-      <MsiPackage SourceFile="$(var.SharedFXMsiSourcePath)">
+      <MsiPackage SourceFile="$(var.SharedFXMsiSourcePath)" Visible="yes">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
-      <MsiPackage SourceFile="$(var.SharedHostMsiSourcePath)">
+      <MsiPackage SourceFile="$(var.SharedHostMsiSourcePath)" Visible="yes">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
     </Chain>
