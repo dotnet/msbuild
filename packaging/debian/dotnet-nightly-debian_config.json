@@ -4,8 +4,8 @@
 
     "package_name": "dotnet-nightly",                           
 
-    "short_description": "Unstable Developer Build of .NET Core & command line tools",              
-    "long_description": "Unstable Developer Build of .NET Core is a cross-platform implementation of .NET Framework, a modern, modular platform\n for building diverse kinds of applications, from command-line applications to microservices and \n modern websites.\n This package contains the tools you will need to start writing applications for .NET Core. It includes \n compilers, package managers and other utilities that developers need.", 
+    "short_description": "Unstable Developer Build of .NET Core CLI",              
+    "long_description": ".NET Core is a development platform that you can use to build command-line applications, microservices and modern websites. It is open source, cross-platform and is supported by Microsoft. We hope you enjoy using it! If you do, please consider joining the active community of developers that are contributing to the project on GitHub (https://github.com/dotnet/core). We happily accept issues and PRs.", 
     "homepage": "https://dotnet.github.io/core",                        
 
     "release":{
