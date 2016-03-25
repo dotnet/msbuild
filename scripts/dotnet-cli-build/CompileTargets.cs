@@ -78,8 +78,7 @@ namespace Microsoft.DotNet.Cli.Build
             var configuration = c.BuildContext.Get<string>("Configuration");
 
             // Run the build
-            string version = DotNetCli.Stage0.Exec("", "--version").CaptureStdOut().Execute().StdOut;
-            string rid = Array.Find<string>(version.Split(Environment.NewLine.ToCharArray()), (e) => e.Contains("Runtime Id:")).Replace("Runtime Id:", "").Trim();
+            string rid = GetRuntimeId();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
@@ -132,6 +131,26 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return c.Success();
+        }
+
+        private static string GetRuntimeId()
+        {
+            string info = DotNetCli.Stage0.Exec("", "--info").CaptureStdOut().Execute().StdOut;
+            string rid = Array.Find<string>(info.Split(Environment.NewLine.ToCharArray()), (e) => e.Contains("RID:"))?.Replace("RID:", "").Trim();
+
+            // TODO: when Stage0 is updated with the new --info, remove this legacy check for --version
+            if (string.IsNullOrEmpty(rid))
+            {
+                string version = DotNetCli.Stage0.Exec("", "--version").CaptureStdOut().Execute().StdOut;
+                rid = Array.Find<string>(version.Split(Environment.NewLine.ToCharArray()), (e) => e.Contains("Runtime Id:")).Replace("Runtime Id:", "").Trim();
+            }
+
+            if (string.IsNullOrEmpty(rid))
+            {
+                throw new BuildFailureException("Could not find the Runtime ID from Stage0 --info or --version");
+            }
+
+            return rid;
         }
 
         [Target]

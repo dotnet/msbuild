@@ -17,7 +17,8 @@ Arguments:
 
 Common Options (passed before the command):
   -v|--verbose  Enable verbose output
-  --version     Display .NET CLI Version Info
+  --version     Display .NET CLI Version Number
+  --info        Display .NET CLI Info
 
 Common Commands:
   new           Initialize a basic .NET project
