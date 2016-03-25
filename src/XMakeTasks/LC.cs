@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return "LC.exe";
+                return "lc.exe";
             }
         }
 

@@ -292,7 +292,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return NativeMethodsShared.IsWindows ? "AL.exe" : "al";
+                return "al.exe";
             }
         }
 
