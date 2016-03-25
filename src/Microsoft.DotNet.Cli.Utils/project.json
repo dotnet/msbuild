@@ -20,11 +20,11 @@
         }
       }
     },
-    "netstandard1.3": {
+    "netstandard1.5": {
       "imports": "dnxcore50",
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-23911",
-        "System.Diagnostics.Process": "4.1.0-rc2-23911"
+        "NETStandard.Library": "1.5.0-rc2-23924",
+        "System.Diagnostics.Process": "4.1.0-rc2-23924"
       }
     }
   }

@@ -1,13 +1,12 @@
 {
   "version": "1.0.0-*",
-
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23911",
-
+    "NETStandard.Library": "1.5.0-rc2-23924",
+    "System.Linq.Expressions": "4.0.11-rc2-23924",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23924",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-91790-12"
   },
-
   "frameworks": {
     "netstandardapp1.5": {
       "imports": [
@@ -16,6 +15,5 @@
       ]
     }
   },
-
   "testRunner": "xunit"
 }

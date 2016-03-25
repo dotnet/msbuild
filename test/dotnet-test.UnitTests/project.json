@@ -2,12 +2,12 @@
   "version": "1.0.0-*",
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
-    "NETStandard.Library": "1.5.0-rc2-23911",
+    "NETStandard.Library": "1.5.0-rc2-23924",
     "dotnet": {
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-23911",
+      "version": "4.0.0-rc2-23924",
       "exclude": "Compile"
     },
     "xunit": "2.1.0",

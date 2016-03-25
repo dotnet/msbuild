@@ -11,10 +11,10 @@
   "licenseUrl": "",
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "NETStandard.Library": "1.5.0-rc2-23911"
+    "NETStandard.Library": "1.5.0-rc2-23924"
   },
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.5": {
       "imports": "dnxcore50"
     }
   }
