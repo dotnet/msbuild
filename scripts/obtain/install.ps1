@@ -23,7 +23,7 @@
     - lkg - last known good version on specific channel
     Note: LKG work is in progress. Once the work is finished, this will become new default
 .PARAMETER InstallDir
-    Default: %LocalAppData%\Microsoft\.dotnet
+    Default: %LocalAppData%\Microsoft\dotnet
     Path to where to install dotnet. Note that binaries will be placed directly in a given directory.
 .PARAMETER Architecture
     Default: <auto> - this value represents currently running OS architecture
@@ -169,7 +169,7 @@ function Get-User-Share-Path() {
 
     $InstallRoot = $env:DOTNET_INSTALL_DIR
     if (!$InstallRoot) {
-        $InstallRoot = "$env:LocalAppData\Microsoft\.dotnet"
+        $InstallRoot = "$env:LocalAppData\Microsoft\dotnet"
     }
     return $InstallRoot
 }
