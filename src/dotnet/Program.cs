@@ -117,22 +117,47 @@ namespace Microsoft.DotNet.Cli
                 ["test"] = TestCommand.Run
             };
 
+            int exitCode = 100;
+            
+            string arguments = string.Empty;
+
+
             Func<string[], int> builtIn;
             if (builtIns.TryGetValue(command, out builtIn))
             {
-                return builtIn(appArgs.ToArray());
+                exitCode = builtIn(appArgs.ToArray());
+                
+                appArgs.ToList().ForEach(a => { arguments += a + " "; });
+
+            }
+            else
+            {
+                CommandResult result = Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .Execute();
+                arguments = result.StartInfo.Arguments;
+                exitCode = result.ExitCode;
             }
 
-            return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute()
-                .ExitCode;
+            Telemetry.TrackCommand(
+                command,
+                new Dictionary<string, string>
+                {
+                    ["Arguments"] = arguments
+                },
+                new Dictionary<string, double>
+                {
+                    ["ExitCode"] = exitCode
+                });
+
+            return exitCode;
+
         }
 
-        private static void PrintVersion()
+private static void PrintVersion()
         {
-            Reporter.Output.WriteLine(HelpCommand.ProductVersion);
+            Reporter.Output.WriteLine(Product.Version);
         }
 
         private static void PrintInfo()
@@ -142,7 +167,7 @@ namespace Microsoft.DotNet.Cli
             var commitSha = GetCommitSha() ?? "N/A";
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Product Information:");
-            Reporter.Output.WriteLine($" Version:     {HelpCommand.ProductVersion}");
+            Reporter.Output.WriteLine($" Version:     {Product.Version}");
             Reporter.Output.WriteLine($" Commit Sha:  {commitSha}");
             Reporter.Output.WriteLine();
             var runtimeEnvironment = PlatformServices.Default.Runtime;

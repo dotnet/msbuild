@@ -8,7 +8,6 @@ namespace Microsoft.DotNet.Tools.Help
 {
     public class HelpCommand
     {
-        private const string ProductLongName = ".NET Command Line Tools";
         private const string UsageText = @"Usage: dotnet [common-options] [command] [arguments]
 
 Arguments:
@@ -29,13 +28,6 @@ Common Commands:
   test          Executes tests in a test project
   repl          Launch an interactive session (read, eval, print, loop)
   pack          Creates a NuGet package";
-        public static readonly string ProductVersion = GetProductVersion();
-
-        private static string GetProductVersion()
-        {
-            var attr = typeof(HelpCommand).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-            return attr?.InformationalVersion;
-        }
 
         public static int Run(string[] args)
         {
@@ -58,10 +50,10 @@ Common Commands:
 
         public static void PrintVersionHeader()
         {
-            var versionString = string.IsNullOrEmpty(ProductVersion) ?
+            var versionString = string.IsNullOrEmpty(Product.Version) ?
                 string.Empty :
-                $" ({ProductVersion})";
-            Reporter.Output.WriteLine(ProductLongName + versionString);
+                $" ({Product.Version})";
+            Reporter.Output.WriteLine(Product.LongName + versionString);
         }
     }
 }
