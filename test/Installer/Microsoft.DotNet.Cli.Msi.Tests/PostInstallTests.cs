@@ -45,12 +45,5 @@ namespace Dotnet.Cli.Msi.Tests
             Assert.Equal(_fixture.InstallLocation, regKey.GetValue("InstallDir"));
             Assert.NotNull(regKey.GetValue("Version"));
         }
-
-        [Fact]
-        public void UpgradeCodeTest()
-        {
-            // magic number found in https://github.com/dotnet/cli/blob/master/packaging/windows/variables.wxi
-            Assert.Equal("{7D73E4F7-71E2-4236-8CF5-1C499BA3FF50}", _msiMgr.UpgradeCode);
-        }
     }
 }
