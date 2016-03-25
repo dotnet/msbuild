@@ -26,7 +26,7 @@ function RunCandle
         -out "$WixObjRoot\" `
         -ext WixDependencyExtension.dll `
         -dHostSrc="$SharedHostPublishRoot" `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$RepoRoot\packaging\osx\clisdk\resources\en.lproj\eula.rtf" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
         -arch $Architecture `

@@ -59,7 +59,7 @@ function RunCandle
     .\candle.exe -nologo `
         -out "$WixObjRoot\" `
         -dSharedFrameworkSource="$SharedFrameworkPublishRoot" `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
         -dFrameworkName="$SharedFrameworkNugetName" `
         -dFrameworkDisplayVersion="$SharedFrameworkNugetVersion" `
         -dFrameworkComponentVersion="$SharedFrameworkComponentVersion" `
