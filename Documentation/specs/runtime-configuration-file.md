@@ -30,14 +30,13 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
             "System.GC.Server": true,
             "System.GC.Concurrent": true,
             "System.Threading.ThreadPool.MinThreads": 4,
-            "System.Threading.ThreadPool.MaxThreads": 8,
-            "System.Threading.Thread.UseAllCpuGroups": true,
+            "System.Threading.ThreadPool.MaxThreads": 8
         },
 
         "framework": {
             "name": "Microsoft.DotNetCore",
             "version": "1.0.1",
-            "rollForward": false,
+            "rollForward": false
         }
     }
 }
