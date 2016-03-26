@@ -104,20 +104,32 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 allArgs.Add($"--out:{outputName}");
             }
 
-            //debug info (only windows pdb supported, not portablepdb)
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            //let's pass debugging type only if options.DebugType is specified, until 
+            //portablepdb are confirmed to work.
+            //so it's possibile to test portable pdb without breaking existing build
+            if (string.IsNullOrEmpty(commonOptions.DebugType))
             {
-                allArgs.Add("--debug");
-                //TODO check if full or pdbonly
-                allArgs.Add("--debug:pdbonly");
+                //debug info (only windows pdb supported, not portablepdb)
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    allArgs.Add("--debug");
+                    //TODO check if full or pdbonly
+                    allArgs.Add("--debug:pdbonly");
+                }
+                else
+                    allArgs.Add("--debug-");
             }
             else
-                allArgs.Add("--debug-");
+            {
+                allArgs.Add("--debug");
+                allArgs.Add($"--debug:{commonOptions.DebugType}");
+            }
 
             // Default options
             allArgs.Add("--noframework");
             allArgs.Add("--nologo");
             allArgs.Add("--simpleresolution");
+            allArgs.Add("--nocopyfsharpcore");
 
             // project.json compilationOptions
             if (commonOptions.Defines != null)
