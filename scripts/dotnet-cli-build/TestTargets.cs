@@ -13,11 +13,19 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class TestTargets
     {
-        public static readonly string[] TestPackageProjects = new[]
+        public static readonly dynamic[] TestPackageProjects = new[]
         {
-            "dotnet-hello/v1/dotnet-hello",
-            "dotnet-hello/v2/dotnet-hello",
-            "dotnet-portable"
+            new { Name = "Microsoft.DotNet.Cli.Utils", IsTool = false, Path = "src/Microsoft.DotNet.Cli.Utils", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "Microsoft.DotNet.ProjectModel", IsTool = false, Path = "src/Microsoft.DotNet.ProjectModel", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "Microsoft.DotNet.Compiler.Common", IsTool = false, Path = "src/Microsoft.DotNet.Compiler.Common", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "Microsoft.Extensions.DependencyModel", IsTool = false, Path = "src/Microsoft.Extensions.DependencyModel", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "Microsoft.DotNet.Files", IsTool = false, Path = "src/Microsoft.DotNet.Files", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "Microsoft.DotNet.InternalAbstractions", IsTool = false, Path = "src/Microsoft.DotNet.InternalAbstractions", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "dotnet-hello", IsTool = true, Path = "TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello", IsApplicable = new Func<bool>(() => true) }, 
+            new { Name = "dotnet-hello", IsTool = true, Path = "TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "dotnet-portable", IsTool = true, Path = "TestAssets/TestPackages/dotnet-portable", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "dotnet-dependency-tool-invoker", IsTool = true, Path = "TestAssets/TestPackages/dotnet-dependency-tool-invoker", IsApplicable = new Func<bool>(() => true) }, 
+            new { Name = "dotnet-desktop-and-portable", IsTool = true, Path = "TestAssets/TestPackages/dotnet-desktop-and-portable", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) } 
         };
 
         public static readonly string[] TestProjects = new[]
@@ -103,9 +111,9 @@ namespace Microsoft.DotNet.Cli.Build
             Rmdir(Dirs.TestPackages);
             Mkdirp(Dirs.TestPackages);
 
-            foreach (var relativePath in TestPackageProjects)
+            foreach (var relativePath in TestPackageProjects.Where(p => p.IsApplicable()).Select(p => p.Path))
             {
-                var fullPath = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages", relativePath.Replace('/', Path.DirectorySeparatorChar));
+                var fullPath = Path.Combine(c.BuildContext.BuildDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar));
                 c.Info($"Packing: {fullPath}");
                 dotnet.Pack("--output", Dirs.TestPackages)
                     .WorkingDirectory(fullPath)
@@ -119,9 +127,14 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
         {
-            Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-hello"));
-            Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-portable"));
-            Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", "dotnet-portable"));
+            foreach (var packageProject in TestPackageProjects.Where(p => p.IsApplicable()))
+            {
+                Rmdir(Path.Combine(Dirs.NuGetPackages, packageProject.Name));
+                if(packageProject.IsTool)
+                {
+                    Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", packageProject.Name));
+                }
+            }            
 
             return c.Success();
         }

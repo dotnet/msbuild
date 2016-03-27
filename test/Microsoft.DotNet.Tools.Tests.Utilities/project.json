@@ -14,7 +14,7 @@
     "Microsoft.DotNet.TestFramework": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-20100",
     "Microsoft.DotNet.InternalAbstractions": {
       "target": "project",
       "version": "1.0.0-*"
