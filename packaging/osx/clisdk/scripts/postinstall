@@ -9,6 +9,6 @@ INSTALL_DESTINATION=$2
 
 
 # A temporary fix for the permissions issue(s)
-chmod -R 755 $INSTALL_DESTINATIONs
+chmod -R 755 $INSTALL_DESTINATION
 
 exit 0
