@@ -1,8 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using NuGet.Frameworks;
-
 namespace Microsoft.DotNet.ProjectModel.Server.Models
 {
     internal class ProjectReferenceDescription
@@ -12,7 +10,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
         public FrameworkData Framework { get; set; }
         public string Name { get; set; }
         public string Path { get; set; }
-        public string WrappedProjectPath { get; set; }
+        public string MSBuildProjectPath { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -20,36 +18,43 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
             return other != null &&
                    string.Equals(Name, other.Name) &&
                    string.Equals(Path, other.Path) &&
-                   string.Equals(WrappedProjectPath, other.WrappedProjectPath);
+                   string.Equals(MSBuildProjectPath, other.MSBuildProjectPath);
         }
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
-        
-        public static ProjectReferenceDescription Create(ProjectDescription description)
+
+        /// <summary>
+        /// Create a ProjectReferenceDescription from given LibraryDescription. If the library doesn't 
+        /// represent a project reference returns null.
+        /// </summary>
+        public static ProjectReferenceDescription Create(LibraryDescription library)
         {
-            var targetFrameworkInformation = description.TargetFrameworkInfo;
-
-            string wrappedProjectPath = null;
-            if (!string.IsNullOrEmpty(targetFrameworkInformation?.WrappedProject) &&
-                description.Project != null)
+            if (library is ProjectDescription)
             {
-                wrappedProjectPath = System.IO.Path.Combine(
-                    description.Project.ProjectDirectory,
-                    targetFrameworkInformation.WrappedProject);
-
-                wrappedProjectPath = System.IO.Path.GetFullPath(wrappedProjectPath);
+                return new ProjectReferenceDescription
+                {
+                    Framework = library.Framework.ToPayload(),
+                    Name = library.Identity.Name,
+                    Path = library.Path
+                };
             }
-
-            return new ProjectReferenceDescription
+            else if (library is MSBuildProjectDescription)
             {
-                Framework = description.Framework.ToPayload(),
-                Name = description.Identity.Name,
-                Path = description.Path,
-                WrappedProjectPath = wrappedProjectPath,
-            };
+                return new ProjectReferenceDescription
+                {
+                    Framework = library.Framework.ToPayload(),
+                    Name = library.Identity.Name,
+                    Path = library.Path,
+                    MSBuildProjectPath = ((MSBuildProjectDescription)library).ProjectLibrary.MSBuildProject
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
