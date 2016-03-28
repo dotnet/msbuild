@@ -24,7 +24,8 @@
   "content": [
     "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
     "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
-    "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
+    "../../TestAssets/TestProjects/AppWithToolDependency/**/*",
+    "../../TestAssets/TestProjects/AppWithDirectDependencyDesktopAndPortable/**/*"
   ],
   "testRunner": "xunit"
 }

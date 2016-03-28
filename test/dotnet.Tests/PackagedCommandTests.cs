@@ -48,6 +48,36 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
+        [Theory]
+        [InlineData(".NETStandardApp,Version=v1.5")]
+        [InlineData(".NETFramework,Version=v4.5.1")]
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework)
+        {
+            var appDirectory = Path.Combine(_testProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
+
+            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            var currentDirectory = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(appDirectory);
+
+            try
+            {
+                CommandResult result = new DependencyToolInvokerCommand()
+                    .ExecuteWithCapturedOutput(framework);
+
+                result.Should().HaveStdOutContaining(framework);
+                result.Should().NotHaveStdErr();
+                result.Should().Pass();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(currentDirectory);
+            }
+        }
+
         [Fact]
         public void TestProjectDependencyIsNotAvailableThroughDriver()
         {
@@ -111,6 +141,26 @@ namespace Microsoft.DotNet.Tests
             public override CommandResult ExecuteWithCapturedOutput(string args = "")
             {
                 args = $"portable {args}";
+                return base.ExecuteWithCapturedOutput(args);
+            }
+        }
+
+        class DependencyToolInvokerCommand : TestCommand
+        {
+            public DependencyToolInvokerCommand()
+                : base("dotnet")
+            {
+            }
+
+            public override CommandResult Execute(string framework)
+            {
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework}";
+                return base.Execute(args);
+            }
+
+            public override CommandResult ExecuteWithCapturedOutput(string framework)
+            {
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework}";
                 return base.ExecuteWithCapturedOutput(args);
             }
         }
