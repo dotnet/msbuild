@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public interface IPackagedCommandSpecFactory
     {
-        CommandSpec CreateCommandSpecFromRuntimeAssembly(
+        CommandSpec CreateCommandSpecFromLibrary(
             LockFileTargetLibrary toolLibrary,
             string commandName,
             IEnumerable<string> commandArguments,

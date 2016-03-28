@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var depsFileRoot = Path.GetDirectoryName(lockFile.LockFilePath);
             var depsFilePath = GetToolDepsFilePath(toolLibraryRange, lockFile, depsFileRoot);
             
-            return _packagedCommandSpecFactory.CreateCommandSpecFromRuntimeAssembly(
+            return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                     toolLibrary,
                     commandName,
                     args,

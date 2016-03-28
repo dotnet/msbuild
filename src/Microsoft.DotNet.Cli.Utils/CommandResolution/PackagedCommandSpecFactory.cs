@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class PackagedCommandSpecFactory : IPackagedCommandSpecFactory
     {
-        public CommandSpec CreateCommandSpecFromRuntimeAssembly(
+        public CommandSpec CreateCommandSpecFromLibrary(
             LockFileTargetLibrary toolLibrary,
             string commandName,
             IEnumerable<string> commandArguments,
@@ -35,9 +35,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var isPortable = DetermineIfPortableApp(commandPath);
+            var isPortable = IsPortableApp(commandPath);
 
-            return CreateCommandSpecWrappingWithCorehostfDll(
+            return CreateCommandSpecWrappingWithCorehostIfDll(
                 commandPath, 
                 commandArguments, 
                 depsFilePath, 
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return filePath;
         }
 
-        private CommandSpec CreateCommandSpecWrappingWithCorehostfDll(
+        private CommandSpec CreateCommandSpecWrappingWithCorehostIfDll(
             string commandPath, 
             IEnumerable<string> commandArguments, 
             string depsFilePath,
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return new CommandSpec(commandPath, escapedArgs, commandResolutionStrategy);
         }
 
-        private bool DetermineIfPortableApp(string commandPath)
+        private bool IsPortableApp(string commandPath)
         {
             var commandDir = Path.GetDirectoryName(commandPath);
 

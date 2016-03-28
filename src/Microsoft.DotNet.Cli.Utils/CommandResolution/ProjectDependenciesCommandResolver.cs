@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> commandArguments,
             ProjectContext projectContext)
         {
-            return _packagedCommandSpecFactory.CreateCommandSpecFromRuntimeAssembly(
+            return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                         toolLibrary,
                         commandName,
                         commandArguments,
