@@ -4,7 +4,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23925",
+    "NETStandard.Library": "1.5.0-rc2-23928",
     "System.CommandLine": "0.1.0-e160323-1",
     "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160202-02",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
