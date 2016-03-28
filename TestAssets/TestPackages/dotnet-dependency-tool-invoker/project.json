@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-23925"
+    },
+    "Microsoft.DotNet.Cli.Utils":"1.0.0-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
+    "Microsoft.Extensions.CommandLineUtils.Sources": {
+      "type": "build",
+      "version": "1.0.0-rc2-16453"
+    },
+    "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
+      "version": "1.0.0-rc2-16453",
+      "type": "build"
+    },
+    "Microsoft.Dnx.Runtime.Sources": {
+      "version": "1.0.0-rc2-16453",
+      "type": "build"
+    },
+    "System.CommandLine": "0.1.0-e160323-1"
+  },
+  "frameworks": {
+    "netstandard1.5": {
+      "imports": [
+        "portable-net45+win8",
+        "dnxcore50"
+      ]
+    }
+  }
+}
