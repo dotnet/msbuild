@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using System.Runtime.InteropServices;
 using Xunit;
 using FluentAssertions;
 
@@ -48,11 +49,17 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
+        // need conditional theories so we can skip on non-Windows
         [Theory]
         [InlineData(".NETStandardApp,Version=v1.5")]
         [InlineData(".NETFramework,Version=v4.5.1")]
         public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework)
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+            
             var appDirectory = Path.Combine(_testProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
