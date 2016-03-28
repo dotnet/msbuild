@@ -15,7 +15,7 @@
         "portable-net45+wp80+win8"
       ],
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-23925"
+        "NETStandard.Library": "1.5.0-rc2-23928"
       }
     }
   }

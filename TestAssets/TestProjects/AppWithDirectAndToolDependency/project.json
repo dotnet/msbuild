@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23925",
+    "NETStandard.Library": "1.5.0-rc2-23928",
     "dotnet-hello": {
       "version": "1.0.0",
       "target": "package"
