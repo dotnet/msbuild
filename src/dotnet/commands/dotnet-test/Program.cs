@@ -14,7 +14,14 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public class TestCommand
     {
-        public static int Run(string[] args)
+        private readonly IDotnetTestRunnerFactory _dotnetTestRunnerFactory;
+
+        public TestCommand(IDotnetTestRunnerFactory testRunnerFactory)
+        {
+            _dotnetTestRunnerFactory = testRunnerFactory;
+        }
+
+        public int DoRun(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -24,6 +31,11 @@ namespace Microsoft.DotNet.Tools.Test
 
             try
             {
+                if (dotnetTestParams.Help)
+                {
+                    return 0;
+                }
+
                 // Register for parent process's exit event
                 if (dotnetTestParams.ParentProcessId.HasValue)
                 {
@@ -36,11 +48,7 @@ namespace Microsoft.DotNet.Tools.Test
 
                 var testRunner = projectContext.ProjectFile.TestRunner;
 
-                IDotnetTestRunner dotnetTestRunner = new ConsoleTestRunner();
-                if (dotnetTestParams.Port.HasValue)
-                {
-                    dotnetTestRunner = new DesignTimeRunner();
-                }
+                IDotnetTestRunner dotnetTestRunner = _dotnetTestRunnerFactory.Create(dotnetTestParams.Port);
 
                 return dotnetTestRunner.RunTests(projectContext, dotnetTestParams);
             }
@@ -54,6 +62,13 @@ namespace Microsoft.DotNet.Tools.Test
                 TestHostTracing.Source.TraceEvent(TraceEventType.Error, 0, ex.ToString());
                 return -2;
             }
+        }
+
+        public static int Run(string[] args)
+        {
+            var testCommand = new TestCommand(new DotnetTestRunnerFactory());
+
+            return testCommand.DoRun(args);
         }
 
         private static void RegisterForParentProcessExit(int id)

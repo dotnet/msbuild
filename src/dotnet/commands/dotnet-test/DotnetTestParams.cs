@@ -47,6 +47,8 @@ namespace Microsoft.DotNet.Tools.Test
 
         public bool NoBuild { get; set; }
 
+        public bool Help { get; set; }
+
         public DotnetTestParams()
         {
             _app = new CommandLineApplication(false)
@@ -57,6 +59,8 @@ namespace Microsoft.DotNet.Tools.Test
             };
 
             AddDotnetTestParameters();
+
+            Help = true;
         }
 
         public void Parse(string[] args)
@@ -108,6 +112,8 @@ namespace Microsoft.DotNet.Tools.Test
 
                 RemainingArguments = _app.RemainingArguments;
 
+                Help = false;
+
                 return 0;
             });
 
@@ -150,7 +156,7 @@ namespace Microsoft.DotNet.Tools.Test
                 _app.Option("--no-build", "Do not build project before testing", CommandOptionType.NoValue);
             _projectPath = _app.Argument(
                 "<PROJECT>",
-                "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");            
+                "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");
         }
     }
 }

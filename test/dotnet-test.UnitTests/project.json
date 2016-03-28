@@ -23,5 +23,8 @@
       ]
     }
   },
+  "content": [
+    "../../TestAssets/TestProjects/ProjectWithTests/project.json"
+  ],
   "testRunner": "xunit"
 }
