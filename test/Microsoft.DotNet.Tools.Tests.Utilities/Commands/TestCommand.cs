@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         protected string _command;
 
+        public string WorkingDirectory { get; set; }
+
         public Dictionary<string, string> Environment { get; } = new Dictionary<string, string>();
 
         public TestCommand(string command)
@@ -53,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             return RunProcess(commandPath, args, stdOut, stdErr);
         }
-
+        
         private void ResolveCommand(ref string executable, ref string args)
         {
             if (executable.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
@@ -89,9 +91,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 psi.Environment[item.Key] = item.Value;
             }
 
+            if (!string.IsNullOrWhiteSpace(WorkingDirectory))
+            {
+                psi.WorkingDirectory = WorkingDirectory;
+            }
+
             var process = new Process
             {
-                StartInfo = psi,
+                StartInfo = psi
             };
 
             process.EnableRaisingEvents = true;

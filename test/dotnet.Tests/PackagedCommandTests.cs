@@ -32,21 +32,12 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .Pass();
 
-            var currentDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(appDirectory);
+            CommandResult result = new PortableCommand { WorkingDirectory = appDirectory }
+                .ExecuteWithCapturedOutput();
 
-            try
-            {
-                CommandResult result = new PortableCommand().ExecuteWithCapturedOutput();
-
-                result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
-                result.Should().NotHaveStdErr();
-                result.Should().Pass();
-            }
-            finally
-            {
-                Directory.SetCurrentDirectory(currentDirectory);
-            }
+            result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
         }
 
         // need conditional theories so we can skip on non-Windows
@@ -67,22 +58,12 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .Pass();
 
-            var currentDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(appDirectory);
-
-            try
-            {
-                CommandResult result = new DependencyToolInvokerCommand()
+            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
                     .ExecuteWithCapturedOutput(framework);
 
                 result.Should().HaveStdOutContaining(framework);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
-            }
-            finally
-            {
-                Directory.SetCurrentDirectory(currentDirectory);
-            }
         }
 
         [Fact]
