@@ -22,21 +22,16 @@ namespace Dotnet.Cli.Msi.Tests
             _msiMgr = new MsiManager(msiFile);
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData(@"%SystemDrive%\dotnet")]
-        public void InstallTest(string installLocation)
+        [Fact]
+        public void InstallTest()
         {
-            installLocation = Environment.ExpandEnvironmentVariables(installLocation);
-            string expectedInstallLocation = string.IsNullOrEmpty(installLocation) ?
-                Environment.ExpandEnvironmentVariables(@"%ProgramFiles%\dotnet") :
-                installLocation;
+            string expectedInstallLocation = Environment.ExpandEnvironmentVariables(@"%ProgramFiles%\dotnet");
 
             // make sure that the msi is not already installed, if so the machine is in a bad state
             Assert.False(_msiMgr.IsInstalled, "The dotnet CLI msi is already installed");
             Assert.False(Directory.Exists(expectedInstallLocation));
 
-            _msiMgr.Install(installLocation);
+            _msiMgr.Install();
             Assert.True(_msiMgr.IsInstalled);
             Assert.True(Directory.Exists(expectedInstallLocation));
 
