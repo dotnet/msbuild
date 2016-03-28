@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
                 {
                     var exitCode = commandFactory.Create(
                             $"dotnet-{dotnetParams.Command}",
-                            Enumerable.Empty<string>(),
+                            dotnetParams.RemainingArguments,
                             projectContext.TargetFramework,
                             dotnetParams.Config)
                         .ForwardStdErr()

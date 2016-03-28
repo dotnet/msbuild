@@ -42,9 +42,9 @@ namespace Microsoft.DotNet.Tests
 
         // need conditional theories so we can skip on non-Windows
         [Theory]
-        [InlineData(".NETStandardApp,Version=v1.5")]
-        [InlineData(".NETFramework,Version=v4.5.1")]
-        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework)
+        [InlineData(".NETStandardApp,Version=v1.5", "CoreFX")]
+        [InlineData(".NETFramework,Version=v4.5.1", "NetFX")]
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -59,9 +59,10 @@ namespace Microsoft.DotNet.Tests
                 .Pass();
 
             CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
-                    .ExecuteWithCapturedOutput(framework);
+                    .ExecuteWithCapturedOutput(framework, args);
 
                 result.Should().HaveStdOutContaining(framework);
+                result.Should().HaveStdOutContaining(args);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
         }
@@ -140,15 +141,15 @@ namespace Microsoft.DotNet.Tests
             {
             }
 
-            public override CommandResult Execute(string framework)
+            public CommandResult Execute(string framework, string additionalArgs)
             {
-                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework}";
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
                 return base.Execute(args);
             }
 
-            public override CommandResult ExecuteWithCapturedOutput(string framework)
+            public CommandResult ExecuteWithCapturedOutput(string framework, string additionalArgs)
             {
-                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework}";
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
                 return base.ExecuteWithCapturedOutput(args);
             }
         }

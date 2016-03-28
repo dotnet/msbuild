@@ -48,6 +48,11 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-test.UnitTests",
             "dotnet-test.Tests"
         };
+        
+        public static readonly dynamic[] ConditionalTestAssets = new[]
+        {
+            new { Path = "AppWithDirectDependencyDesktopAndPortable", Skip = new Func<bool>(() => !CurrentPlatform.IsWindows) } 
+        };
 
         [Target(nameof(PrepareTargets.Init), nameof(SetupTests), nameof(RestoreTests), nameof(BuildTests), nameof(RunTests), nameof(ValidateDependencies))]
         public static BuildTargetResult Test(BuildTargetContext c) => c.Success();
@@ -55,7 +60,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(SetupTestPackages), nameof(SetupTestProjects))]
         public static BuildTargetResult SetupTests(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
+        [Target(nameof(RestoreTestAssetPackages), nameof(RestoreDesktopTestAssetProjects), nameof(BuildTestAssetPackages))]
         public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
 
         [Target(nameof(RestoreTestAssetProjects), nameof(BuildTestAssetProjects))]
@@ -98,6 +103,19 @@ namespace Microsoft.DotNet.Cli.Build
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthUpdateSearchPathSample"))
                 .Execute();
 
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Windows)]
+        public static BuildTargetResult RestoreDesktopTestAssetProjects(BuildTargetContext c)
+        {
+            var dotnet = DotNetCli.Stage2;
+
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--fallbacksource", Dirs.TestPackages)
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
+                .Execute().EnsureSuccessful();
+                
             return c.Success();
         }
 
@@ -148,6 +166,7 @@ namespace Microsoft.DotNet.Cli.Build
             var nobuildFileName = ".noautobuild";
             string testProjectsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
             var projects = Directory.GetFiles(testProjectsRoot, "project.json", SearchOption.AllDirectories)
+                                    .Where(p => !ConditionalTestAssets.Where(s => !s.Skip() && p.EndsWith(Path.Combine(s.Path, "project.json"))).Any())
                                     .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), nobuildFileName)));
 
             foreach (var project in projects)
