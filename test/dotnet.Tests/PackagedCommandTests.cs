@@ -14,10 +14,12 @@ namespace Microsoft.DotNet.Tests
     public class PackagedCommandTests : TestBase
     {
         private readonly string _testProjectsRoot;
+        private readonly string _desktopTestProjectsRoot;
 
         public PackagedCommandTests()
         {
             _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
+            _desktopTestProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "DesktopTestProjects");
         }
 
         [Theory]
@@ -51,7 +53,7 @@ namespace Microsoft.DotNet.Tests
                 return;
             }
             
-            var appDirectory = Path.Combine(_testProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
+            var appDirectory = Path.Combine(_desktopTestProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
                 .Execute()
