@@ -169,8 +169,7 @@ namespace Microsoft.DotNet.Cli
         
         private static string GetCommitSha()
         {
-            // The CLI ships with a .version file that stores the commit information
-            var versionFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".version"));
+            var versionFile = DotnetFiles.VersionFile;
             
             if (File.Exists(versionFile))
             {

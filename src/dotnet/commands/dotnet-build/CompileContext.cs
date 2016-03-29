@@ -53,17 +53,23 @@ namespace Microsoft.DotNet.Tools.Build
 
         private bool CompileRootProject(bool incremental)
         {
-            if (incremental && !NeedsRebuilding(_rootProject, _rootProjectDependencies))
+            try
             {
-                // todo: what if the previous build had errors / warnings and nothing changed? Need to propagate them in case of incremental
-                return true;
+                if (incremental && !NeedsRebuilding(_rootProject, _rootProjectDependencies))
+                {
+                    return true;
+                }
+
+                var success = InvokeCompileOnRootProject();
+
+                PrintSummary(success);
+
+                return success;
             }
-
-            var success = InvokeCompileOnRootProject();
-
-            PrintSummary(success);
-
-            return success;
+            finally
+            {
+                StampProjectWithSDKVersion(_rootProject);
+            }
         }
 
         private bool CompileDependencies(bool incremental)
@@ -75,28 +81,37 @@ namespace Microsoft.DotNet.Tools.Build
 
             foreach (var dependency in Sort(_rootProjectDependencies.ProjectDependenciesWithSources))
             {
-                if (incremental && !DependencyNeedsRebuilding(dependency))
-                {
-                    continue;
-                }
+                var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework, new[] { _rootProject.RuntimeIdentifier });
 
-                if (!InvokeCompileOnDependency(dependency))
+                try
                 {
-                    return false;
+                    if (incremental && !NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
+                    {
+                        continue;
+                    }
+
+                    if (!InvokeCompileOnDependency(dependency))
+                    {
+                        return false;
+                    }
+                }
+                finally
+                {
+                    StampProjectWithSDKVersion(dependencyProjectContext);
                 }
             }
 
             return true;
         }
 
-        private bool DependencyNeedsRebuilding(ProjectDescription dependency)
-        {
-            var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework, new[] { _rootProject.RuntimeIdentifier });
-            return NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue));
-        }
-
         private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies)
         {
+            if (CLIChangedSinceLastCompilation(project))
+            {
+                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because the CLI changed");
+                return true;
+            }
+            
             var compilerIO = GetCompileIO(project, dependencies);
 
             // rebuild if empty inputs / outputs
@@ -173,6 +188,48 @@ namespace Microsoft.DotNet.Tools.Build
             Reporter.Verbose.WriteLine(); ;
 
             return true;
+        }
+        
+        private bool CLIChangedSinceLastCompilation(ProjectContext project)
+        {
+            var currentVersionFile = DotnetFiles.VersionFile;
+            var versionFileFromLastCompile = project.GetSDKVersionFile(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
+
+            if (!File.Exists(currentVersionFile))
+            {
+                // this CLI does not have a version file; cannot tell if CLI changed
+                return false;
+            }
+
+            if (!File.Exists(versionFileFromLastCompile))
+            {
+                // this is the first compilation; cannot tell if CLI changed
+                return false;
+            }
+
+            var versionsAreEqual = string.Equals(File.ReadAllText(currentVersionFile), File.ReadAllText(versionFileFromLastCompile), StringComparison.OrdinalIgnoreCase);
+
+            return !versionsAreEqual;
+        }
+
+        private void StampProjectWithSDKVersion(ProjectContext project)
+        {
+            if (File.Exists(DotnetFiles.VersionFile))
+            {
+                var projectVersionFile = project.GetSDKVersionFile(_args.ConfigValue, _args.BuildBasePathValue,_args.OutputValue);
+                var parentDirectory = Path.GetDirectoryName(projectVersionFile);
+
+                if (!Directory.Exists(parentDirectory))
+                {
+                    Directory.CreateDirectory(parentDirectory);
+                }
+
+                File.Copy(DotnetFiles.VersionFile, projectVersionFile, true);
+            }
+            else
+            {
+                Reporter.Verbose.WriteLine($"Project {project.GetDisplayName()} was not stamped with a CLI version because the version file does not exist: {DotnetFiles.VersionFile}");
+            }
         }
 
         private void PrintSummary(bool success)
