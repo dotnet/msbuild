@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "dotnet-desktop-and-portable": "1.0.0"  
+  },
+  "frameworks": {
+    "netstandardapp1.5": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0-rc2-23928"
+        }
+      },
+      "imports": [
+        "portable-net45+win8",
+        "dnxcore50"
+      ]
+    },
+    "net451":{}
+  },
+  "tools": {
+      "dotnet-dependency-tool-invoker": {
+          "version": "1.0.0-*",
+          "imports": [
+            "dnxcore50",
+            "portable-net45+win8"
+          ]
+      }
+  }
+}

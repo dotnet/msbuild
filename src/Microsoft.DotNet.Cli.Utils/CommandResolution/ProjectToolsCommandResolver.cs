@@ -95,28 +95,29 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private CommandSpec ResolveCommandSpecFromToolLibrary(
-            LibraryRange toolLibrary,
+            LibraryRange toolLibraryRange,
             string commandName,
             IEnumerable<string> args,
             ProjectContext projectContext)
         {
             var nugetPackagesRoot = projectContext.PackagesDirectory;
+            
+            var lockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
 
-            var lockFile = GetToolLockFile(toolLibrary, nugetPackagesRoot);
-            var lockFilePackageLibrary = lockFile.PackageLibraries.FirstOrDefault(l => l.Name == toolLibrary.Name);
+            var toolLibrary = lockFile.Targets
+                .FirstOrDefault(t => t.TargetFramework.GetShortFolderName().Equals(s_toolPackageFramework.GetShortFolderName()))
+                ?.Libraries.FirstOrDefault(l => l.Name == toolLibraryRange.Name);
 
+            if (toolLibrary == null)
+            {
+                return null;
+            }
+            
             var depsFileRoot = Path.GetDirectoryName(lockFile.LockFilePath);
-            var depsFilePath = GetToolDepsFilePath(toolLibrary, lockFile, depsFileRoot);
-
-            var toolProjectContext = new ProjectContextBuilder()
-                    .WithLockFile(lockFile)
-                    .WithTargetFramework(s_toolPackageFramework.ToString())
-                    .Build();
-
-            var exporter = toolProjectContext.CreateExporter(Constants.DefaultConfiguration);
-
+            var depsFilePath = GetToolDepsFilePath(toolLibraryRange, lockFile, depsFileRoot);
+            
             return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
-                    lockFilePackageLibrary,
+                    toolLibrary,
                     commandName,
                     args,
                     _allowedCommandExtensions,

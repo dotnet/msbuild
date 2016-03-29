@@ -13,11 +13,19 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class TestTargets
     {
-        public static readonly string[] TestPackageProjects = new[]
+        public static readonly dynamic[] TestPackageProjects = new[]
         {
-            "dotnet-hello/v1/dotnet-hello",
-            "dotnet-hello/v2/dotnet-hello",
-            "dotnet-portable"
+            new { Name = "Microsoft.DotNet.Cli.Utils", IsTool = false, Path = "src/Microsoft.DotNet.Cli.Utils", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
+            new { Name = "Microsoft.DotNet.ProjectModel", IsTool = false, Path = "src/Microsoft.DotNet.ProjectModel", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
+            new { Name = "Microsoft.DotNet.Compiler.Common", IsTool = false, Path = "src/Microsoft.DotNet.Compiler.Common", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
+            new { Name = "Microsoft.Extensions.DependencyModel", IsTool = false, Path = "src/Microsoft.Extensions.DependencyModel", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
+            new { Name = "Microsoft.DotNet.Files", IsTool = false, Path = "src/Microsoft.DotNet.Files", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
+            new { Name = "Microsoft.DotNet.InternalAbstractions", IsTool = false, Path = "src/Microsoft.DotNet.InternalAbstractions", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
+            new { Name = "dotnet-dependency-tool-invoker", IsTool = true, Path = "TestAssets/TestPackages/dotnet-dependency-tool-invoker", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) }, 
+            new { Name = "dotnet-desktop-and-portable", IsTool = true, Path = "TestAssets/TestPackages/dotnet-desktop-and-portable", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
+            new { Name = "dotnet-hello", IsTool = true, Path = "TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello", IsApplicable = new Func<bool>(() => true) }, 
+            new { Name = "dotnet-hello", IsTool = true, Path = "TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello", IsApplicable = new Func<bool>(() => true) },
+            new { Name = "dotnet-portable", IsTool = true, Path = "TestAssets/TestPackages/dotnet-portable", IsApplicable = new Func<bool>(() => true) }
         };
 
         public static readonly string[] TestProjects = new[]
@@ -40,6 +48,11 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-test.UnitTests",
             "dotnet-test.Tests"
         };
+        
+        public static readonly dynamic[] ConditionalTestAssets = new[]
+        {
+            new { Path = "AppWithDirectDependencyDesktopAndPortable", Skip = new Func<bool>(() => !CurrentPlatform.IsWindows) } 
+        };
 
         [Target(nameof(PrepareTargets.Init), nameof(SetupTests), nameof(RestoreTests), nameof(BuildTests), nameof(RunTests), nameof(ValidateDependencies))]
         public static BuildTargetResult Test(BuildTargetContext c) => c.Success();
@@ -50,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
         public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(RestoreTestAssetProjects), nameof(BuildTestAssetProjects))]
+        [Target(nameof(RestoreTestAssetProjects), nameof(RestoreDesktopTestAssetProjects), nameof(BuildTestAssetProjects))]
         public static BuildTargetResult SetupTestProjects(BuildTargetContext c) => c.Success();
 
         [Target]
@@ -93,6 +106,19 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        [Target]
+        [BuildPlatforms(BuildPlatform.Windows)]
+        public static BuildTargetResult RestoreDesktopTestAssetProjects(BuildTargetContext c)
+        {
+            var dotnet = DotNetCli.Stage2;
+
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--fallbacksource", Dirs.TestPackages)
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
+                .Execute().EnsureSuccessful();
+                
+            return c.Success();
+        }
+
         [Target(nameof(CleanTestPackages))]
         public static BuildTargetResult BuildTestAssetPackages(BuildTargetContext c)
         {
@@ -103,9 +129,9 @@ namespace Microsoft.DotNet.Cli.Build
             Rmdir(Dirs.TestPackages);
             Mkdirp(Dirs.TestPackages);
 
-            foreach (var relativePath in TestPackageProjects)
+            foreach (var relativePath in TestPackageProjects.Where(p => p.IsApplicable()).Select(p => p.Path))
             {
-                var fullPath = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages", relativePath.Replace('/', Path.DirectorySeparatorChar));
+                var fullPath = Path.Combine(c.BuildContext.BuildDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar));
                 c.Info($"Packing: {fullPath}");
                 dotnet.Pack("--output", Dirs.TestPackages)
                     .WorkingDirectory(fullPath)
@@ -119,9 +145,14 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
         {
-            Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-hello"));
-            Rmdir(Path.Combine(Dirs.NuGetPackages, "dotnet-portable"));
-            Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", "dotnet-portable"));
+            foreach (var packageProject in TestPackageProjects.Where(p => p.IsApplicable()))
+            {
+                Rmdir(Path.Combine(Dirs.NuGetPackages, packageProject.Name));
+                if(packageProject.IsTool)
+                {
+                    Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", packageProject.Name));
+                }
+            }            
 
             return c.Success();
         }
@@ -135,6 +166,7 @@ namespace Microsoft.DotNet.Cli.Build
             var nobuildFileName = ".noautobuild";
             string testProjectsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
             var projects = Directory.GetFiles(testProjectsRoot, "project.json", SearchOption.AllDirectories)
+                                    .Where(p => !ConditionalTestAssets.Where(s => !s.Skip() && p.EndsWith(Path.Combine(s.Path, "project.json"))).Any())
                                     .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), nobuildFileName)));
 
             foreach (var project in projects)

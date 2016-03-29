@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using System.Runtime.InteropServices;
 using Xunit;
 using FluentAssertions;
 
@@ -13,10 +14,12 @@ namespace Microsoft.DotNet.Tests
     public class PackagedCommandTests : TestBase
     {
         private readonly string _testProjectsRoot;
+        private readonly string _desktopTestProjectsRoot;
 
         public PackagedCommandTests()
         {
             _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
+            _desktopTestProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "DesktopTestProjects");
         }
 
         [Theory]
@@ -31,21 +34,39 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .Pass();
 
-            var currentDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(appDirectory);
+            CommandResult result = new PortableCommand { WorkingDirectory = appDirectory }
+                .ExecuteWithCapturedOutput();
 
-            try
+            result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
+        }
+
+        // need conditional theories so we can skip on non-Windows
+        [Theory]
+        [InlineData(".NETStandardApp,Version=v1.5", "CoreFX")]
+        [InlineData(".NETFramework,Version=v4.5.1", "NetFX")]
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                CommandResult result = new PortableCommand().ExecuteWithCapturedOutput();
+                return;
+            }
+            
+            var appDirectory = Path.Combine(_desktopTestProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
 
-                result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
+            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
+                    .ExecuteWithCapturedOutput(framework, args);
+
+                result.Should().HaveStdOutContaining(framework);
+                result.Should().HaveStdOutContaining(args);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
-            }
-            finally
-            {
-                Directory.SetCurrentDirectory(currentDirectory);
-            }
         }
 
         [Fact]
@@ -111,6 +132,26 @@ namespace Microsoft.DotNet.Tests
             public override CommandResult ExecuteWithCapturedOutput(string args = "")
             {
                 args = $"portable {args}";
+                return base.ExecuteWithCapturedOutput(args);
+            }
+        }
+
+        class DependencyToolInvokerCommand : TestCommand
+        {
+            public DependencyToolInvokerCommand()
+                : base("dotnet")
+            {
+            }
+
+            public CommandResult Execute(string framework, string additionalArgs)
+            {
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
+                return base.Execute(args);
+            }
+
+            public CommandResult ExecuteWithCapturedOutput(string framework, string additionalArgs)
+            {
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
                 return base.ExecuteWithCapturedOutput(args);
             }
         }
