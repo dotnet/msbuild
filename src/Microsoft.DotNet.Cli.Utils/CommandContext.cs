@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Cli.Utils
             public static readonly string AnsiPassThru = Prefix + "ANSI_PASS_THRU";
         }
 
-        private static Lazy<bool> _verbose = new Lazy<bool>(() => Env.GetBool(Variables.Verbose));
-        private static Lazy<bool> _ansiPassThru = new Lazy<bool>(() => Env.GetBool(Variables.AnsiPassThru));
+        private static Lazy<bool> _verbose = new Lazy<bool>(() => Env.GetEnvironmentVariableAsBool(Variables.Verbose));
+        private static Lazy<bool> _ansiPassThru = new Lazy<bool>(() => Env.GetEnvironmentVariableAsBool(Variables.AnsiPassThru));
 
         public static bool IsVerbose()
         {

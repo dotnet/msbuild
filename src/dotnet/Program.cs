@@ -117,18 +117,13 @@ namespace Microsoft.DotNet.Cli
                 ["test"] = TestCommand.Run
             };
 
-            int exitCode = 100;
-            
-            string arguments = string.Empty;
-
-
+            int exitCode;            
+            var arguments = string.Empty;
             Func<string[], int> builtIn;
             if (builtIns.TryGetValue(command, out builtIn))
             {
                 exitCode = builtIn(appArgs.ToArray());
-                
-                appArgs.ToList().ForEach(a => { arguments += a + " "; });
-
+                arguments = string.Join(" ", appArgs);
             }
             else
             {
@@ -140,7 +135,9 @@ namespace Microsoft.DotNet.Cli
                 exitCode = result.ExitCode;
             }
 
-            Telemetry.TrackCommand(
+            Telemetry telemetryClient = new Telemetry();
+
+            telemetryClient.TrackCommand(
                 command,
                 new Dictionary<string, string>
                 {
@@ -155,7 +152,7 @@ namespace Microsoft.DotNet.Cli
 
         }
 
-private static void PrintVersion()
+        private static void PrintVersion()
         {
             Reporter.Output.WriteLine(Product.Version);
         }
