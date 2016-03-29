@@ -36,6 +36,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 "PortableAppWithNative.deps.json"
             });
 
+            // Prior to `type:platform` trimming, this would have been published.
+            publishDir.Should().NotHaveFile("System.Linq.dll");
+
             var runtimesOutput = publishDir.Sub("runtimes");
 
             runtimesOutput.Should().Exist();
@@ -49,6 +52,27 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 nativeDir.Should().Exist();
                 nativeDir.Should().HaveFile(output.Item2);
             }
+        }
+
+        [Fact]
+        public void PortableAppWithIntentionalDowngradePublishesDowngradedManagedCode()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
+                .WithLockFiles();
+
+            var publishCommand = new PublishCommand(Path.Combine(testInstance.TestRoot, "PortableAppWithIntentionalManagedDowngrade"));
+            var publishResult = publishCommand.Execute();
+
+            publishResult.Should().Pass();
+
+            var publishDir = publishCommand.GetOutputDirectory(portable: true);
+            publishDir.Should().HaveFiles(new[]
+            {
+                "PortableAppWithIntentionalManagedDowngrade.dll",
+                "PortableAppWithIntentionalManagedDowngrade.deps",
+                "PortableAppWithIntentionalManagedDowngrade.deps.json",
+                "System.Linq.dll"
+            });
         }
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.DotNet.Files;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.ProjectModel.Utilities;
+using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -153,7 +155,14 @@ namespace Microsoft.DotNet.Tools.Publish
             var exporter = context.CreateExporter(configuration);
 
             var isPortable = string.IsNullOrEmpty(context.RuntimeIdentifier);
-            foreach (var export in exporter.GetAllExports())
+
+            // Collect all exports and organize them
+            var exports = exporter.GetAllExports()
+                .Where(e => e.Library.Identity.Type.Equals(LibraryType.Package))
+                .ToDictionary(e => e.Library.Identity.Name);
+            var collectExclusionList = isPortable ? GetExclusionList(context, exports) : new HashSet<string>();
+
+            foreach (var export in exporter.GetAllExports().Where(e => !collectExclusionList.Contains(e.Library.Identity.Name)))
             {
                 Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
@@ -196,6 +205,40 @@ namespace Microsoft.DotNet.Tools.Publish
             Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
 
             return true;
+        }
+
+        private HashSet<string> GetExclusionList(ProjectContext context, Dictionary<string, LibraryExport> exports)
+        {
+            var exclusionList = new HashSet<string>();
+            var redistPackages = context.RootProject.Dependencies
+                .Where(r => r.Type.Equals(LibraryDependencyType.Platform))
+                .ToList();
+            if (redistPackages.Count == 0)
+            {
+                return exclusionList;
+            }
+            else if (redistPackages.Count > 1)
+            {
+                throw new InvalidOperationException("Multiple packages with type: \"platform\" were specified!");
+            }
+            var redistExport = exports[redistPackages[0].Name];
+
+            exclusionList.Add(redistExport.Library.Identity.Name);
+            CollectDependencies(exports, redistExport.Library.Dependencies, exclusionList);
+            return exclusionList;
+        }
+
+        private void CollectDependencies(Dictionary<string, LibraryExport> exports, IEnumerable<LibraryRange> dependencies, HashSet<string> exclusionList)
+        {
+            foreach (var dependency in dependencies)
+            {
+                var export = exports[dependency.Name];
+                if(export.Library.Identity.Version.Equals(dependency.VersionRange.MinVersion))
+                {
+                    exclusionList.Add(export.Library.Identity.Name);
+                    CollectDependencies(exports, export.Library.Dependencies, exclusionList);
+                }
+            }
         }
 
         private static void PublishRefs(LibraryExport export, string outputPath)
