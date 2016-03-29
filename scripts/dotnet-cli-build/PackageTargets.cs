@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli.Build
             var outputVersionSvg = c.BuildContext.Get<string>("VersionBadge");
 
             var versionSvgContent = File.ReadAllText(versionSvg);
-            versionSvgContent = versionSvgContent.Replace("ver_number", buildVersion.SimpleVersion);
+            versionSvgContent = versionSvgContent.Replace("ver_number", buildVersion.NuGetVersion);
             File.WriteAllText(outputVersionSvg, versionSvgContent);
 
             return c.Success();
