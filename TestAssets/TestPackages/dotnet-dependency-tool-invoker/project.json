@@ -6,9 +6,9 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-23928"
+      "version": "1.0.0-rc2-23929"
     },
-    "Microsoft.DotNet.Cli.Utils":"1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils.Sources": {

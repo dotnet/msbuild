@@ -5,11 +5,10 @@
   },
   "frameworks": {
     "netstandard1.5": {
-      
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc2-23928"
+          "version": "1.0.0-rc2-23929"
         }
       },
       "imports": [
