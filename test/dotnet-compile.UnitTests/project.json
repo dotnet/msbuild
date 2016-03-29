@@ -1,7 +1,13 @@
 {
   "version": "1.0.0-*",
+  "compilationOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Compiler.Common": {
       "target": "project"
     },
     "dotnet": {
