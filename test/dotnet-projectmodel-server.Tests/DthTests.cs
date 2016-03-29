@@ -436,7 +436,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 {
                     dependencies.RetrieveDependency(each)
                                 .AssertProperty("Type", LibraryType.MSBuildProject.ToString())
-                                .AssertProperty("MSBuildProjectPath", Path.Combine("..", "..", each, $"{each}.csproj"))
+                                .AssertProperty("MSBuildProjectPath", AssertPathsEqual(Path.Combine("..", "..", each, $"{each}.csproj")))
                                 .AssertProperty<bool>("Resolved", true)
                                 .AssertProperty("Name", each)
                                 .AssertProperty<JArray>("Errors", array => array.Count == 0)
@@ -455,18 +455,36 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                     
                     Assert.True(classLibraries.Contains(name));
                     projectRef.AssertProperty<string>("Path", path => path.Contains(Path.Combine("BasicCase01", name)))
-                              .AssertProperty("MSBuildProjectPath", Path.Combine("..", "..", name, $"{name}.csproj"));                    
+                              .AssertProperty("MSBuildProjectPath", AssertPathsEqual(Path.Combine("..", "..", name, $"{name}.csproj")));                    
                 }
                 
                 var fileReferences = references.RetrievePropertyAs<JArray>("FileReferences")
                                                .Select(each => each.Value<string>())
                                                .ToArray();
-                Assert.Equal(3, fileReferences.Length);
+                Assert.Equal(7, fileReferences.Length);
                 foreach (var each in classLibraries)
                 {
                     fileReferences.Contains(Path.Combine("BasicCase01", "ClassLibrary1", "bin", "Debug", $"{each}.dll"));
                 }
             }
+        }
+
+        private static Func<string, bool> AssertPathsEqual(string expectedString)
+        {
+            return
+                (string t) =>
+                {
+                    if (t.Contains('/'))
+                    {
+                        t = t.Replace('/', Path.DirectorySeparatorChar);
+                    }
+                    else if (t.Contains('\\'))
+                    {
+                        t = t.Replace('\\', Path.DirectorySeparatorChar);
+                    }
+
+                    return string.Equals(t, expectedString);
+                };
         }
     }
 }
