@@ -477,7 +477,7 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(compilersRuntimeConfig);
 
             // Copy AppDeps
-            result = CopyAppDeps(c, outputDir);
+            var result = CopyAppDeps(c, outputDir);
             if (!result.Success)
             {
                 return result;
