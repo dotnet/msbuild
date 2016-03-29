@@ -60,15 +60,25 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(PrepareTargets.Init), nameof(CompileCoreHost), nameof(CompileStage1), nameof(CompileStage2))]
+        [Target(nameof(PrepareTargets.Init), nameof(PackageCoreHost), nameof(CompileStage1), nameof(CompileStage2))]
         public static BuildTargetResult Compile(BuildTargetContext c)
         {
             return c.Success();
         }
 
+        private static string HostVer = "1.0.1";
+        private static string HostPolicyVer = "1.0.1";
+        private static string HostFxrVer = "1.0.1";
+
         [Target]
         public static BuildTargetResult CompileCoreHost(BuildTargetContext c)
         {
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            var versionTag = buildVersion.ReleaseSuffix;
+            var buildMajor = buildVersion.CommitCountString;
+
+            var hostPolicyFullVer = $"{HostPolicyVer}-{versionTag}-{buildMajor}";
+
             // Generate build files
             var cmakeOut = Path.Combine(Dirs.Corehost, "cmake");
 
@@ -79,6 +89,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Run the build
             string rid = GetRuntimeId();
+            string corehostSrcDir = Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
@@ -86,11 +97,17 @@ namespace Microsoft.DotNet.Cli.Build
                 var visualStudio = IsWinx86 ? "Visual Studio 14 2015" : "Visual Studio 14 2015 Win64";
                 var archMacro = IsWinx86 ? "-DCLI_CMAKE_PLATFORM_ARCH_I386=1" : "-DCLI_CMAKE_PLATFORM_ARCH_AMD64=1";
                 var ridMacro = $"-DCLI_CMAKE_RUNTIME_ID:STRING={rid}";
+                var arch = IsWinx86 ? "x86" : "x64";
+                var baseSupportedRid = $"win7-{arch}";
+                var cmakeHostPolicyVer = $"-DCLI_CMAKE_HOST_POLICY_VER:STRING={hostPolicyFullVer}";
+                var cmakeBaseRid = $"-DCLI_CMAKE_PKG_RID:STRING={baseSupportedRid}";
 
                 ExecIn(cmakeOut, "cmake",
-                    Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost"),
+                    corehostSrcDir,
                     archMacro,
                     ridMacro,
+                    cmakeHostPolicyVer,
+                    cmakeBaseRid,
                     "-G",
                     visualStudio);
 
@@ -109,8 +126,10 @@ namespace Microsoft.DotNet.Cli.Build
                     $"/p:Configuration={configuration}");
 
                 // Copy the output out
-                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "corehost.exe"), Path.Combine(Dirs.Corehost, "corehost.exe"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "corehost.pdb"), Path.Combine(Dirs.Corehost, "corehost.pdb"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.exe"), Path.Combine(Dirs.Corehost, "corehost.exe"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.pdb"), Path.Combine(Dirs.Corehost, "corehost.pdb"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.exe"), Path.Combine(Dirs.Corehost, "dotnet.exe"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.pdb"), Path.Combine(Dirs.Corehost, "dotnet.pdb"), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.dll"), Path.Combine(Dirs.Corehost, "hostpolicy.dll"), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.pdb"), Path.Combine(Dirs.Corehost, "hostpolicy.pdb"), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "fxr", configuration, "hostfxr.dll"), Path.Combine(Dirs.Corehost, "hostfxr.dll"), overwrite: true);
@@ -120,16 +139,78 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"),
                         "--arch",
-                        "amd64",
+                        "x64",
+                        "--policyver",
+                        hostPolicyFullVer,
                         "--rid",
                         rid);
 
                 // Copy the output out
-                File.Copy(Path.Combine(cmakeOut, "cli", "corehost"), Path.Combine(Dirs.Corehost, CoreHostBaseName), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dotnet"), Path.Combine(Dirs.Corehost, "dotnet"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dotnet"), Path.Combine(Dirs.Corehost, CoreHostBaseName), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "dll", HostPolicyBaseName), Path.Combine(Dirs.Corehost, HostPolicyBaseName), overwrite: true);
                 File.Copy(Path.Combine(cmakeOut, "cli", "fxr", DotnetHostFxrBaseName), Path.Combine(Dirs.Corehost, DotnetHostFxrBaseName), overwrite: true);
             }
+            return c.Success();
+        }
 
+        [Target(nameof(CompileCoreHost))]
+        public static BuildTargetResult PackageCoreHost(BuildTargetContext c)
+        {
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            var versionTag = buildVersion.ReleaseSuffix;
+            var buildMajor = buildVersion.CommitCountString;
+            var arch = IsWinx86 ? "x86" : "x64";
+
+            var version = buildVersion.NuGetVersion;
+            var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
+            File.WriteAllText(Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "packaging", "version.txt"), content);
+            string corehostSrcDir = Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Command.Create(Path.Combine(corehostSrcDir, "packaging", "pack.cmd"))
+                    // Workaround to arg escaping adding backslashes for arguments to .cmd scripts.
+                    .Environment("__WorkaroundCliCoreHostBuildArch", arch)
+                    .Environment("__WorkaroundCliCoreHostBinDir", Dirs.Corehost)
+                    .Environment("__WorkaroundCliCoreHostPolicyVer", HostPolicyVer)
+                    .Environment("__WorkaroundCliCoreHostFxrVer", HostFxrVer)
+                    .Environment("__WorkaroundCliCoreHostVer", HostVer)
+                    .Environment("__WorkaroundCliCoreHostBuildMajor", buildMajor)
+                    .Environment("__WorkaroundCliCoreHostVersionTag", versionTag)
+                    .ForwardStdOut()
+                    .ForwardStdErr()
+                    .Execute()
+                    .EnsureSuccessful();
+            }
+            else
+            {
+                Exec(Path.Combine(corehostSrcDir, "packaging", "pack.sh"),
+                    "--arch",
+                    "x64",
+                    "--hostbindir",
+                    Dirs.Corehost,
+                    "--policyver",
+                    HostPolicyVer,
+                    "--fxrver",
+                    HostFxrVer,
+                    "--hostver",
+                    HostVer,
+                    "--build",
+                    buildMajor,
+                    "--vertag",
+                    versionTag);
+            }
+            int runtimeCount = 0;
+            foreach (var file in Directory.GetFiles(Path.Combine(corehostSrcDir, "packaging", "bin", "packages"), "*.nupkg"))
+            {
+                var fileName = Path.GetFileName(file);
+                File.Copy(file, Path.Combine(Dirs.Corehost, fileName));
+                runtimeCount += (fileName.StartsWith("runtime.") ? 1 : 0);
+            }
+            if (runtimeCount < 3)
+            {
+                throw new BuildFailureException("Not all corehost nupkgs were successfully created");
+            }
             return c.Success();
         }
 
