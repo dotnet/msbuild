@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
 {
     public class DependencyDescription
     {
-        protected DependencyDescription() { }
+        private DependencyDescription() { }
 
         public string Name { get; private set; }
 
