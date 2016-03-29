@@ -4,7 +4,7 @@ This section describes placeholders used inside this spec.
 | Placeholder | Description |
 | ---: | :--- |
 | `<Channel>` | `(future|preview|production)`. [See more info](#channels) |
-| `<Version>` | 4-part-number version |
+| `<Version>` | version string |
 | `<OSName>`  | `(win|ubuntu|rhel|osx|debian)` - code for OS name |
 | `<LowestSupportedOSVersion>` | Lowest supported OS Version |
 | `<Architecture>` | Processor architecture related to binaries produced |
@@ -95,10 +95,10 @@ WIP: Exact script action description.
 
 ### Script arguments description
 
-| PowerShell script | Bash script | Default | Description |
+| PowerShell/Bash script | Bash script only | Default | Description |
 | --- | --- | --- | --- |
 | -Channel | --channel | production | Which [channel](#channels) to install from. Possible values: `future`, `preview`, `production` |
-| -Version | --version | `global.json` or `latest` | |
+| -Version | --version | `global.json` or `latest` | `global.json` currently not supported |
 | -InstallDir | --prefix | Windows: `%LocalAppData%\Microsoft\.dotnet` | Path to where install dotnet. Note that binaries will be placed directly in a given directory. |
 | -Architecture | ~~--architecture~~ | auto | Possible values: `auto`, `x64`, `x86`. `auto` refers to currently running OS architecture. This switch is currently not supported in bash scripts. |
 | -DebugSymbols | --debug-symbols | `<not set>` | If switch present, installation will include debug symbol |
