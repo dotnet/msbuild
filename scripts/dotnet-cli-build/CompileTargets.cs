@@ -18,8 +18,6 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
         public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
-        public static readonly List<string> AssembliesToCrossGen = GetAssembliesToCrossGen();
-
         public static readonly string[] BinariesForCoreHost = new[]
         {
             "csi",
@@ -478,13 +476,6 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(compilersDeps);
             File.Delete(compilersRuntimeConfig);
 
-            // Crossgen Roslyn
-            var result = CrossgenCliSdk(c, outputDir);
-            if (!result.Success)
-            {
-                return result;
-            }
-
             // Copy AppDeps
             result = CopyAppDeps(c, outputDir);
             if (!result.Success)
@@ -547,62 +538,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        private static BuildTargetResult CrossgenCliSdk(BuildTargetContext c, string outputDir)
-        {
-            // Check if we need to skip crossgen
-            if (string.Equals(Environment.GetEnvironmentVariable("DOTNET_BUILD_SKIP_CROSSGEN"), "1"))
-            {
-                c.Warn("Skipping crossgen for Cli Sdk because DOTNET_BUILD_SKIP_CROSSGEN is set");
-                return c.Success();
-            }
-
-            // Find crossgen
-            var crossGenExePath = Microsoft.DotNet.Cli.Build.Crossgen.GetCrossgenPathForVersion(CoreCLRVersion);
-
-            if (string.IsNullOrEmpty(crossGenExePath))
-            {
-                return c.Failed("Unsupported OS Platform");
-            }
-
-            // We have to copy crossgen next to mscorlib
-            var crossgen = Path.Combine(outputDir, $"crossgen{Constants.ExeSuffix}");
-            File.Copy(crossGenExePath, crossgen, overwrite: true);
-            Chmod(crossgen, "a+x");
-
-            // And if we have mscorlib.ni.dll, we need to rename it to mscorlib.dll
-            if (File.Exists(Path.Combine(outputDir, "mscorlib.ni.dll")))
-            {
-                File.Copy(Path.Combine(outputDir, "mscorlib.ni.dll"), Path.Combine(outputDir, "mscorlib.dll"), overwrite: true);
-            }
-
-            foreach (var assemblyToCrossgen in AssembliesToCrossGen)
-            {
-                c.Info($"Crossgenning {assemblyToCrossgen}");
-                ExecInSilent(outputDir, 
-                    crossgen, 
-                    "-readytorun",
-                    "-nologo",
-                    "-platform_assemblies_paths",
-                    $"{outputDir}{Path.PathSeparator}{c.BuildContext["SharedFrameworkPath"]}",
-                    assemblyToCrossgen);
-            }
-
-            c.Info("Crossgen complete");
-
-            // Check if csc/vbc.ni.exe exists, and overwrite the dll with it just in case
-            if (File.Exists(Path.Combine(outputDir, "csc.ni.exe")) && !File.Exists(Path.Combine(outputDir, "csc.ni.dll")))
-            {
-                File.Move(Path.Combine(outputDir, "csc.ni.exe"), Path.Combine(outputDir, "csc.ni.dll"));
-            }
-
-            if (File.Exists(Path.Combine(outputDir, "vbc.ni.exe")) && !File.Exists(Path.Combine(outputDir, "vbc.ni.dll")))
-            {
-                File.Move(Path.Combine(outputDir, "vbc.ni.exe"), Path.Combine(outputDir, "vbc.ni.dll"));
-            }
-
-            return c.Success();
-        }
-
         public static BuildTargetResult CrossgenSharedFx(BuildTargetContext c, string pathToAssemblies)
         {
             // Check if we need to skip crossgen
@@ -660,20 +595,6 @@ namespace Microsoft.DotNet.Cli.Build
             catch (BadImageFormatException) { }
 
             return false;
-        }
-
-        private static List<string> GetAssembliesToCrossGen()
-        {
-            return new List<string>
-            {
-                "System.Collections.Immutable.dll",
-                "System.Reflection.Metadata.dll",
-                "Microsoft.CodeAnalysis.dll",
-                "Microsoft.CodeAnalysis.CSharp.dll",
-                "Microsoft.CodeAnalysis.VisualBasic.dll",
-                "csc.dll",
-                "vbc.dll"
-            };
         }
     }
 }
