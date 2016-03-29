@@ -1,0 +1,26 @@
+{
+    "version": "1.0.0-*",
+
+    "dependencies": {
+        "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24008",
+        "xunit": "2.1.0",
+        "dotnet-test-xunit": "1.0.0-dev-140469-38"
+    },
+
+    "testRunner":  "xunit",
+
+    "frameworks": {
+        "netcoreapp1.0": {
+            "dependencies": {
+                "Microsoft.NETCore.App": {
+                    "type": "platform",
+                    "version": "1.0.0-rc3-004312"
+                }
+            },
+            "imports": [
+                "dotnet5.4",
+                "portable-net451+win8"
+            ]
+        }
+    }
+}
