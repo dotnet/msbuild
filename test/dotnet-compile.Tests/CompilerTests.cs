@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             new DirectoryInfo(outputDir).Should().HaveFiles(
                 new [] { "MyApp.dll", "MyApp" + buildCommand.GetExecutableExtension(),
-                    "MyApp.runtimeconfig.json", "MyApp.deps", "MyApp.deps.json" });
+                    "MyApp.runtimeconfig.json", "MyApp.deps.json" });
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

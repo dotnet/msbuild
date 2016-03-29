@@ -201,11 +201,6 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         {
             Directory.CreateDirectory(_runtimeOutputPath);
 
-            var depsFilePath = Path.Combine(_runtimeOutputPath, _compilerOptions.OutputName + FileNameSuffixes.Deps);
-            File.WriteAllLines(depsFilePath, exporter
-                .GetDependencies(LibraryType.Package)
-                .SelectMany(GenerateLines));
-
             var includeCompile = _compilerOptions.PreserveCompilationContext == true;
 
             var exports = exporter.GetAllExports().ToArray();
@@ -252,26 +247,6 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             {
                 appConfig.Save(stream);
             }
-        }
-
-        private static IEnumerable<string> GenerateLines(LibraryExport export)
-        {
-            return GenerateLines(export, export.RuntimeAssemblyGroups.GetDefaultAssets(), "runtime")
-                .Union(GenerateLines(export, export.NativeLibraryGroups.GetDefaultAssets(), "native"));
-        }
-
-        private static IEnumerable<string> GenerateLines(LibraryExport export, IEnumerable<LibraryAsset> items, string type)
-        {
-            return items.Select(i => DepsFormatter.EscapeRow(new[]
-            {
-                export.Library.Identity.Type.Value,
-                export.Library.Identity.Name,
-                export.Library.Identity.Version.ToNormalizedString(),
-                export.Library.Hash,
-                type,
-                i.Name,
-                i.RelativePath
-            }));
         }
     }
 }

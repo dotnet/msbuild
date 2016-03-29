@@ -7,15 +7,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class BuildPortableTests : TestBase
     {
-        [Fact]
-        public void BuildingAPortableProjectProducesDepsFile()
-        {
-            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests").WithLockFiles();
-
-            var netstandardappOutput = Build(testInstance);
-
-            netstandardappOutput.Should().Exist().And.HaveFile("PortableApp.deps");
-        }
+  
 
         [Fact]
         public void BuildingAPortableProjectProducesDepsJsonFile()

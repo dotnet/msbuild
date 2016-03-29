@@ -44,14 +44,6 @@ namespace Microsoft.DotNet.ProjectModel
             }
         }
 
-        public string Deps
-        {
-            get
-            {
-                return Path.ChangeExtension(Assembly, FileNameSuffixes.Deps);
-            }
-        }
-
         public string DepsJson
         {
             get
@@ -84,7 +76,6 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 if (!Framework.IsDesktop())
                 {
-                    yield return Deps;
                     yield return DepsJson;
                     yield return RuntimeConfigJson;
                 }
