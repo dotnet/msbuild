@@ -42,20 +42,5 @@ namespace Microsoft.DotNet.ProjectModel
         {
             return items.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a));
         }
-
-        public override IEnumerable<string> GetSharedSources()
-        {
-            return PackageLibrary
-                .Files
-                .Where(path => path.StartsWith("shared" + System.IO.Path.DirectorySeparatorChar));
-        }
-
-        public override IEnumerable<string> GetAnalyzerReferences()
-        {
-            return PackageLibrary
-                .Files
-                .Where(path => path.StartsWith("analyzers" + System.IO.Path.DirectorySeparatorChar) &&
-                               path.EndsWith(".dll"));
-        }
     }
 }

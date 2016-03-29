@@ -39,15 +39,5 @@ namespace Microsoft.DotNet.ProjectModel
         public LockFileProjectLibrary ProjectLibrary { get; }
 
         public Project ProjectFile { get; }
-
-        public override IEnumerable<string> GetSharedSources()
-        {
-            return Enumerable.Empty<string>();
-        }
-
-        public override IEnumerable<string> GetAnalyzerReferences()
-        {
-            return Enumerable.Empty<string>();
-        }
     }
 }

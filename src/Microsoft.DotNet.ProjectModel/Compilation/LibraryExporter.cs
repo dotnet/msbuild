@@ -161,8 +161,12 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             builder.AddNativeLibraryGroup(new LibraryAssetGroup(PopulateAssets(library, library.NativeLibraries)));
             builder.AddRuntimeAssemblyGroup(new LibraryAssetGroup(PopulateAssets(library, library.RuntimeAssemblies)));
             builder.WithCompilationAssemblies(PopulateAssets(library, library.CompileTimeAssemblies));
-            builder.WithSourceReferences(GetSharedSources(library));
-            builder.WithAnalyzerReference(GetAnalyzerReferences(library));
+
+            if (library.Identity.Type.Equals(LibraryType.Package))
+            {
+                builder.WithSourceReferences(GetSharedSources((PackageDescription) library));
+                builder.WithAnalyzerReference(GetAnalyzerReferences((PackageDescription) library));
+            }
 
             if (library.ContentFiles.Any())
             {
@@ -340,14 +344,23 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             return builder.Build();
         }
 
-        private IEnumerable<LibraryAsset> GetSharedSources(TargetLibraryWithAssets library)
+        private IEnumerable<LibraryAsset> GetSharedSources(PackageDescription package)
         {
-            return library.GetSharedSources().Select(path => LibraryAsset.CreateFromRelativePath(library.Path, path));
+            return package
+                .PackageLibrary
+                .Files
+                .Where(path => path.StartsWith("shared" + Path.DirectorySeparatorChar))
+                .Select(path => LibraryAsset.CreateFromRelativePath(package.Path, path));
         }
 
-        private IEnumerable<AnalyzerReference> GetAnalyzerReferences(TargetLibraryWithAssets package)
+        private IEnumerable<AnalyzerReference> GetAnalyzerReferences(PackageDescription package)
         {
-            var analyzers = package.GetAnalyzerReferences();
+            var analyzers = package
+                .PackageLibrary
+                .Files
+                .Where(path => path.StartsWith("analyzers" + Path.DirectorySeparatorChar) &&
+                               path.EndsWith(".dll"));
+
 
             var analyzerRefs = new List<AnalyzerReference>();
             // See https://docs.nuget.org/create/analyzers-conventions for the analyzer
