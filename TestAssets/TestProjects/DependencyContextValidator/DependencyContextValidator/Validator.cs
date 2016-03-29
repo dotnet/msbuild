@@ -55,11 +55,15 @@ namespace Microsoft.Extensions.DependencyModel
             foreach (var runtimeLibrary in context.RuntimeLibraries)
             {
                 CheckMetadata(runtimeLibrary);
+                foreach (var assembly in runtimeLibrary.GetDefaultNativeAssets(context)) {}
+                foreach (var native in runtimeLibrary.GetDefaultAssemblyNames(context)) {}
             }
+
+            foreach (var native in context.GetDefaultNativeAssets()) {}
 
             foreach (var name in context.GetDefaultAssemblyNames())
             {
-                var assembly = Assembly.Load(new AssemblyName(name));
+                var assembly = Assembly.Load(name);
             }
         }
     }
