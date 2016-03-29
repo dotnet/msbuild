@@ -12,6 +12,7 @@
     <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
          copying its dependencies (which are in the GAC). -->
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
+    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
   </PropertyGroup>
 
    <!-- Compiler config -->
