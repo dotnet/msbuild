@@ -28,13 +28,14 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var resolvers = scriptCommandResolver.OrderedCommandResolvers;
 
-            resolvers.Should().HaveCount(4);
+            resolvers.Should().HaveCount(5);
 
             resolvers.Select(r => r.GetType())
                 .Should()
                 .ContainInOrder(
                     new []{
                         typeof(RootedCommandResolver),
+                        typeof(MuxerCommandResolver),
                         typeof(ProjectPathCommandResolver),
                         typeof(AppBaseCommandResolver),
                         typeof(PathCommandResolver)

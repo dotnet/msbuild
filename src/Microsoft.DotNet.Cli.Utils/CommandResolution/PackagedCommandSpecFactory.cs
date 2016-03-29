@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             else
             {
-                host = CoreHost.LocalHostExePath;
+                host = CoreHost.HostExePath;
             }
 
             arguments.Add(commandPath);
