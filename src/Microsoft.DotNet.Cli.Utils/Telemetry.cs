@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private static Dictionary<string, string> _commonProperties = null;
         private static Dictionary<string, double> _commonMeasurements = null;
 
+        //readonly instead of const to to avoid inlining in case we need to change the instrumentation key
         private static readonly string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
 
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
