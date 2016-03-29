@@ -54,7 +54,6 @@ namespace Microsoft.DotNet.Cli.Build
             nameof(PublishTargets.PublishDebFilesToDebianRepo),
             nameof(PublishTargets.PublishLatestCliVersionTextFile),
             nameof(PublishTargets.PublishLatestSharedFrameworkVersionTextFile),
-            nameof(PublishTargets.PublishCoreHostPackages),
             nameof(PublishTargets.PublishCliVersionBadge))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c) => c.Success();
 
@@ -90,18 +89,6 @@ namespace Microsoft.DotNet.Cli.Build
 
             AzurePublisherTool.PublishFile(versionBadgeBlob, versionBadge);
             AzurePublisherTool.PublishFile(latestVersionBadgeBlob, versionBadge);
-            return c.Success();
-        }
-
-        [Target]
-        public static BuildTargetResult PublishCoreHostPackages(BuildTargetContext c)
-        {
-            foreach (var file in Directory.GetFiles(Path.Combine(Dirs.Corehost, "*.nupkg")))
-            {
-                var hostBlob = $"{Channel}/Binaries/{CliNuGetVersion}/{Path.GetFileName(file)}";
-                AzurePublisherTool.PublishFile(hostBlob, file);
-            }
-
             return c.Success();
         }
 
