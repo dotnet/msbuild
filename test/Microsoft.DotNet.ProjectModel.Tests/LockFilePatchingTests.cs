@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         private static string ExportFilesRoot=> Path.Combine(RepoRoot, "TestAssets", "LockFiles", "ExportFiles");
 
         [Fact]
-        public void TestValidPatching()
+        public void TestExportFileIsParsed()
         {
             var lockFilePath = GetLockFilePath("valid");
             var lockFile = LockFileReader.Read(lockFilePath);
@@ -35,8 +35,13 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 export.TargetFramework.Should().NotBeNull();
                 AssertTargetLibrary(export);
             }
+        }
 
-            lockFile.Targets.Count.Should().Be(3);
+        [Fact]
+        public void TestLockFileIsPatchedWithExportData()
+        {
+            var lockFilePath = GetLockFilePath("valid");
+            var lockFile = LockFileReader.Read(lockFilePath);
 
             // check lock file structure is similar to export structure
             foreach (var target in lockFile.Targets)
