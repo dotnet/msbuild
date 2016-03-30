@@ -9,17 +9,19 @@ namespace Microsoft.DotNet.ProjectModel
 {
     /// <summary>
     /// Represents an MSBuild project.
-    /// It has been invisibly built by MSBuild, so it behaves like a package: can provide all assets up front
+    /// It has been built by MSBuild, so it behaves like a package: can provide all assets up front
+    /// 
+    /// The Path represents the path to the project.json, if there is one near the csproj file.
     /// </summary>
     public class MSBuildProjectDescription : TargetLibraryWithAssets
     {
         public MSBuildProjectDescription(
-            string path,
-            LockFileProjectLibrary projectLibrary,
-            LockFileTargetLibrary lockFileLibrary,
-            Project projectFile,
-            IEnumerable<LibraryRange> dependencies,
-            bool compatible,
+            string path, 
+            string msbuildProjectPath, 
+            LockFileProjectLibrary projectLibrary, 
+            LockFileTargetLibrary lockFileLibrary, 
+            IEnumerable<LibraryRange> dependencies, 
+            bool compatible, 
             bool resolved)
             : base(
                   new LibraryIdentity(projectLibrary.Name, projectLibrary.Version, LibraryType.MSBuildProject),
@@ -31,12 +33,11 @@ namespace Microsoft.DotNet.ProjectModel
                   compatible: compatible,
                   framework: null)
         {
-            ProjectFile = projectFile;
             ProjectLibrary = projectLibrary;
+            MsbuildProjectPath = msbuildProjectPath;
         }
 
         public LockFileProjectLibrary ProjectLibrary { get; }
-
-        public Project ProjectFile { get; }
+        public string MsbuildProjectPath { get; set; }
     }
 }
