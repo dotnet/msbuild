@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.Extensions.Internal;
@@ -138,6 +139,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public ProjectContext Build()
         {
+            var diagnostics = new List<DiagnosticMessage>();
+
             ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
 
             if (GlobalSettings == null && ProjectDirectory != null)
@@ -159,7 +162,7 @@ namespace Microsoft.DotNet.ProjectModel
             LockFileLookup lockFileLookup = null;
             EnsureProjectLoaded();
 
-            LockFile = LockFile ?? LockFileResolver(ProjectDirectory);
+            ReadLockFile(diagnostics);
 
             var validLockFile = true;
             string lockFileValidationMessage = null;
@@ -193,7 +196,7 @@ namespace Microsoft.DotNet.ProjectModel
                 if (target != null)
                 {
                     var nugetPackageResolver = new PackageDependencyProvider(PackagesDirectory, frameworkReferenceResolver);
-                    var msbuildProjectResolver = new MSBuildDependencyProvider(Project ,ProjectResolver);
+                    var msbuildProjectResolver = new MSBuildDependencyProvider(Project, ProjectResolver);
                     ScanLibraries(target, lockFileLookup, libraries, msbuildProjectResolver, nugetPackageResolver, projectResolver);
                 }
             }
@@ -203,8 +206,6 @@ namespace Microsoft.DotNet.ProjectModel
 
             // Resolve the dependencies
             ResolveDependencies(libraries, referenceAssemblyDependencyResolver, out requiresFrameworkAssemblies);
-
-            var diagnostics = new List<DiagnosticMessage>();
 
             // REVIEW: Should this be in NuGet (possibly stored in the lock file?)
             if (LockFile == null)
@@ -268,6 +269,45 @@ namespace Microsoft.DotNet.ProjectModel
                 PackagesDirectory,
                 libraryManager,
                 LockFile);
+        }
+
+        private void ReadLockFile(ICollection<DiagnosticMessage> diagnostics)
+        {
+            try
+            {
+                LockFile = LockFile ?? LockFileResolver(ProjectDirectory);
+            }
+            catch (FileFormatException e)
+            {
+                var lockFilePath = "";
+                if (LockFile != null)
+                {
+                    lockFilePath = LockFile.LockFilePath;
+                }
+                else if (Project != null)
+                {
+                    lockFilePath = Path.Combine(Project.ProjectDirectory, LockFile.FileName);
+                }
+
+                diagnostics.Add(new DiagnosticMessage(
+                    ErrorCodes.DOTNET1014,
+                    ComposeMessageFromInnerExceptions(e),
+                    lockFilePath,
+                    DiagnosticMessageSeverity.Error));
+            }
+        }
+
+        private static string ComposeMessageFromInnerExceptions(Exception exception)
+        {
+            var sb = new StringBuilder();
+
+            while (exception != null)
+            {
+                sb.AppendLine(exception.Message);
+                exception = exception.InnerException;
+            }
+
+            return sb.ToString();
         }
 
         private void ResolveDependencies(Dictionary<LibraryKey, LibraryDescription> libraries,
