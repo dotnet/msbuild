@@ -420,9 +420,9 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var testProject = Path.Combine(RepoRoot, "TestAssets",
                                                      "ProjectModelServer",
                                                      "MSBuildReferencesProjects", 
-                                                     "BasicCase01",
+                                                     "ValidCase01",
                                                      "src",
-                                                     "ConsoleApp13");
+                                                     "MainApp");
 
             using (var server = new DthTestServer(_loggerFactory))
             using (var client = new DthTestClient(server, _loggerFactory))
@@ -454,7 +454,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                     var name = projectRef["Name"].Value<string>();
                     
                     Assert.True(classLibraries.Contains(name));
-                    projectRef.AssertProperty<string>("Path", path => path.Contains(Path.Combine("BasicCase01", name)))
+                    projectRef.AssertProperty<string>("Path", path => path.Contains(Path.Combine("ValidCase01", name)))
                               .AssertProperty("MSBuildProjectPath", AssertPathsEqual(Path.Combine("..", "..", name, $"{name}.csproj")));                    
                 }
                 
@@ -464,7 +464,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 Assert.Equal(3, fileReferences.Length);
                 foreach (var each in classLibraries)
                 {
-                    fileReferences.Contains(Path.Combine("BasicCase01", "ClassLibrary1", "bin", "Debug", $"{each}.dll"));
+                    fileReferences.Contains(Path.Combine("ValidCase01", "ClassLibrary1", "bin", "Debug", $"{each}.dll"));
                 }
             }
         }
