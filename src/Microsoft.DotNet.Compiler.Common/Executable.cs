@@ -110,6 +110,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         {
             WriteDeps(exporter);
             WriteRuntimeConfig(exporter);
+            WriteDevRuntimeConfig(exporter);
 
             var projectExports = exporter.GetDependencies(LibraryType.Project);
             CopyAssemblies(projectExports);
@@ -165,6 +166,35 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                     json.WriteTo(writer);
                 }
             }
+        }
+
+        private void WriteDevRuntimeConfig(LibraryExporter exporter)
+        {
+            if (_context.TargetFramework.IsDesktop())
+            {
+                return;
+            }
+
+            var json = new JObject();
+            var runtimeOptions = new JObject();
+            json.Add("runtimeOptions", runtimeOptions);
+
+            AddAdditionalProbingPaths(runtimeOptions);
+
+            var runtimeConfigDevJsonFile =
+                    Path.Combine(_runtimeOutputPath, _compilerOptions.OutputName + FileNameSuffixes.RuntimeConfigDevJson);
+
+            using (var writer = new JsonTextWriter(new StreamWriter(File.Create(runtimeConfigDevJsonFile))))
+            {
+                writer.Formatting = Formatting.Indented;
+                json.WriteTo(writer);
+            }
+        }
+
+        private void AddAdditionalProbingPaths(JObject runtimeOptions)
+        {
+            var additionalProbingPaths = new JArray(_context.PackagesDirectory);
+            runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
         }
 
         public void WriteDeps(LibraryExporter exporter)
