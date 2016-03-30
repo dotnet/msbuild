@@ -183,7 +183,6 @@ namespace Microsoft.DotNet.Tools.Publish
                 var buildOutputPaths = context.GetOutputPaths(configuration, buildBasePath);
                 PublishFiles(
                     new[] {
-                        buildOutputPaths.RuntimeFiles.Deps,
                         buildOutputPaths.RuntimeFiles.DepsJson,
                         buildOutputPaths.RuntimeFiles.RuntimeConfigJson
                     },
