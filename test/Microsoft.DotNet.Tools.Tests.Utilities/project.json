@@ -10,7 +10,7 @@
     "System.Collections.Immutable": "1.2.0-rc2-23929",
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-91790-12",
+    "dotnet-test-xunit": "1.0.0-dev-128011-22",
     "Microsoft.DotNet.TestFramework": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
