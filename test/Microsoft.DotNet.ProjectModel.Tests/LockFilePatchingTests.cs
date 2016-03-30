@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
     public class LockFilePatchingTests : TestBase
     {
 
-        private string ExportFilesRoot=> Path.Combine(RepoRoot, "TestAssets", "LockFileSamples", "ExportFileSamples");
+        private string ExportFilesRoot=> Path.Combine(RepoRoot, "TestAssets", "LockFiles", "ExportFiles");
 
         [Fact]
         public void TestValidPatching()
