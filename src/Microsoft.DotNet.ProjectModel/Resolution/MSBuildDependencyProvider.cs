@@ -36,12 +36,12 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var projectFile = projectLibrary.Path == null ? null : _projectResolver(projectLibrary.Path);
 
             var msbuildPackageDescription = new MSBuildProjectDescription(
-                projectLibrary.Path,
                 msbuildProjectPath,
                 projectLibrary,
                 targetLibrary,
-                dependencies, 
-                compatible, 
+                projectFile,
+                dependencies,
+                compatible,
                 resolved: compatible && exists);
 
             return msbuildPackageDescription;
