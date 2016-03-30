@@ -1,19 +1,21 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel.Tests
 {
     public class LockFilePatchingTests : TestBase
     {
 
-        private string ExportFilesRoot=> Path.Combine(RepoRoot, "TestAssets", "LockFiles", "ExportFiles");
+        private static string ExportFilesRoot=> Path.Combine(RepoRoot, "TestAssets", "LockFiles", "ExportFiles");
 
         [Fact]
         public void TestValidPatching()
@@ -28,13 +30,10 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             exportFile.Exports.Should().OnlyHaveUniqueItems();
 
             // check export structure
-            for (int i = 0; i < 3; i++)
+            foreach (var export in exportFile.Exports)
             {
-                var export = exportFile.Exports.ToList().ElementAt(i);
-
                 export.TargetFramework.Should().NotBeNull();
-
-                AssertTargetLibrary(i + 1, export);
+                AssertTargetLibrary(export);
             }
 
             lockFile.Targets.Count.Should().Be(3);
@@ -44,10 +43,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             {
                 target.Libraries.Count.Should().Be(3);
 
-                for (int i = 0; i < 3; i++)
+                foreach (var library in target.Libraries)
                 {
-                    var targetLibrary = target.Libraries.ElementAt(i);
-                    AssertTargetLibrary(i + 1, targetLibrary);
+                    AssertTargetLibrary(library);
                 }
             }
         }
@@ -91,24 +89,32 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath));
         }
 
-        private static void AssertTargetLibrary(int i, LockFileTargetLibrary export)
+        private static int LibraryNumberFromName(Microsoft.DotNet.ProjectModel.Graph.LockFileTargetLibrary library)
         {
-            export.Type.Should().Be("project");
-
-            export.Name.Should().Be("ClassLibrary" + i);
-            export.Version.ToNormalizedString().Should().Be("1.0.0");
-
-            var dll = $"bin/Debug/ClassLibrary{i}.dll";
-            dll = dll.Replace('/', Path.DirectorySeparatorChar);
-
-            export.CompileTimeAssemblies.Count.Should().Be(1);
-            export.CompileTimeAssemblies.ElementAt(0).Path.Should().Be(dll);
-
-            export.RuntimeAssemblies.Count.Should().Be(1);
-            export.RuntimeAssemblies.ElementAt(0).Path.Should().Be(dll);
+            var libraryName = library.Name;
+            return (int)char.GetNumericValue(libraryName[libraryName.Length - 1]);
         }
 
-        private string GetLockFilePath(string exportSample)
+        private static void AssertTargetLibrary(Microsoft.DotNet.ProjectModel.Graph.LockFileTargetLibrary library)
+        {
+            var libraryNumber = LibraryNumberFromName(library);
+
+            library.Type.Should().Be("project");
+
+            library.Name.Should().Be("ClassLibrary" + libraryNumber);
+            library.Version.ToNormalizedString().Should().Be("1.0.0");
+
+            var dll = $"bin/Debug/ClassLibrary{libraryNumber}.dll";
+            dll = dll.Replace('/', Path.DirectorySeparatorChar);
+
+            library.CompileTimeAssemblies.Count.Should().Be(1);
+            library.CompileTimeAssemblies.ElementAt(0).Path.Should().Be(dll);
+
+            library.RuntimeAssemblies.Count.Should().Be(1);
+            library.RuntimeAssemblies.ElementAt(0).Path.Should().Be(dll);
+        }
+
+        private static string GetLockFilePath(string exportSample)
         {
             return Path.Combine(ExportFilesRoot, exportSample, "project.lock.json");
         }
