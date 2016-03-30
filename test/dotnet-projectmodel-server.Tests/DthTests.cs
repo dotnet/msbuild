@@ -461,7 +461,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 var fileReferences = references.RetrievePropertyAs<JArray>("FileReferences")
                                                .Select(each => each.Value<string>())
                                                .ToArray();
-                Assert.Equal(7, fileReferences.Length);
+                Assert.Equal(3, fileReferences.Length);
                 foreach (var each in classLibraries)
                 {
                     fileReferences.Contains(Path.Combine("BasicCase01", "ClassLibrary1", "bin", "Debug", $"{each}.dll"));
