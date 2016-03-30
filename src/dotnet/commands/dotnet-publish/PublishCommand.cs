@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.Tools.Publish
             return true;
         }
 
-        private Boolean InvokeBuildOnProject(ProjectContext context, String buildBasePath, String configuration)
+        private bool InvokeBuildOnProject(ProjectContext context, string buildBasePath, string configuration)
         {
             var args = new List<string>()
             {
