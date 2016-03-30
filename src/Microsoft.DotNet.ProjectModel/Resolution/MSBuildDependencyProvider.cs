@@ -30,13 +30,16 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary, targetFramework);
 
-            var msbuildProjectPath = GetMSbuildProjectPath(projectLibrary);
-            var exists = Directory.Exists(msbuildProjectPath);
+            var msbuildProjectFilePath = GetMSBuildProjectFilePath(projectLibrary);
+            var msbuildProjectDirectoryPath = Path.GetDirectoryName(msbuildProjectFilePath);
+
+            var exists = Directory.Exists(msbuildProjectDirectoryPath);
 
             var projectFile = projectLibrary.Path == null ? null : _projectResolver(projectLibrary.Path);
 
             var msbuildPackageDescription = new MSBuildProjectDescription(
-                msbuildProjectPath,
+                msbuildProjectDirectoryPath,
+                msbuildProjectFilePath,
                 projectLibrary,
                 targetLibrary,
                 projectFile,
@@ -47,7 +50,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             return msbuildPackageDescription;
         }
 
-        private string GetMSbuildProjectPath(LockFileProjectLibrary projectLibrary)
+        private string GetMSBuildProjectFilePath(LockFileProjectLibrary projectLibrary)
         {
             if (_rootProject == null)
             {
@@ -56,9 +59,8 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
             var rootProjectPath = Path.GetDirectoryName(_rootProject.ProjectFilePath);
             var msbuildProjectFilePath = Path.Combine(rootProjectPath, projectLibrary.MSBuildProject);
-            var msbuildProjectPath = Path.GetDirectoryName(Path.GetFullPath(msbuildProjectFilePath));
 
-            return msbuildProjectPath;
+            return Path.GetFullPath(msbuildProjectFilePath);
         }
 
         private void PopulateDependencies(

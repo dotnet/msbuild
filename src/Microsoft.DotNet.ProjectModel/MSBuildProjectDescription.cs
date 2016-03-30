@@ -10,11 +10,15 @@ namespace Microsoft.DotNet.ProjectModel
     /// <summary>
     /// Represents an MSBuild project.
     /// It has been invisibly built by MSBuild, so it behaves like a package: can provide all assets up front
+    /// 
+    /// Path points to the project's directory
+    /// MSBuildPRojectPath points to the csproj file
     /// </summary>
     public class MSBuildProjectDescription : TargetLibraryWithAssets
     {
         public MSBuildProjectDescription(
             string path,
+            string msbuildProjectPath,
             LockFileProjectLibrary projectLibrary,
             LockFileTargetLibrary lockFileLibrary,
             Project projectFile,
@@ -31,11 +35,14 @@ namespace Microsoft.DotNet.ProjectModel
                   compatible: compatible,
                   framework: null)
         {
+            MSBuildProjectPath = msbuildProjectPath;
             ProjectFile = projectFile;
             ProjectLibrary = projectLibrary;
         }
 
         public LockFileProjectLibrary ProjectLibrary { get; }
+
+        public string MSBuildProjectPath { get; set; }
 
         public Project ProjectFile { get; }
     }
