@@ -149,8 +149,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                      .AssertJArrayCount(1)
                                      .RetrieveArraryElementAs<JObject>(0)
                                      .AssertProperty("Name", expectedUnresolvedDependency)
-                                     .AssertProperty("Path", expectedUnresolvedProjectPath)
-                                     .AssertProperty<JToken>("MSBuildProjectPath", prop => !prop.HasValues);
+                                     .AssertProperty("Path", expectedUnresolvedProjectPath);
                 }
                 else if (referenceType == "Package")
                 {
@@ -432,11 +431,12 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 
                 var classLibraries = new HashSet<string>(new string[] { "ClassLibrary1", "ClassLibrary2", "ClassLibrary3" });
                 var dependencies = messages.RetrieveSingleMessage(MessageTypes.Dependencies);
+                var testProjectRoot = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "MSBuildReferencesProjects", "ValidCase01");
                 foreach (var classLibrary in classLibraries)
-                {
+                {                    
                     dependencies.RetrieveDependency(classLibrary)
                                 .AssertProperty("Type", LibraryType.MSBuildProject.ToString())
-                                .AssertProperty("MSBuildProjectPath", AssertPathsEqual(Path.Combine("..", "..", classLibrary, $"{classLibrary}.csproj")))
+                                .AssertProperty("Path", NormalizePathString(Path.Combine(testProjectRoot, classLibrary, $"{classLibrary}.csproj")))
                                 .AssertProperty<bool>("Resolved", true)
                                 .AssertProperty("Name", classLibrary)
                                 .AssertProperty<JArray>("Errors", array => array.Count == 0)
@@ -454,8 +454,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                     var name = projectRef["Name"].Value<string>();
                     
                     Assert.True(classLibraries.Contains(name));
-                    projectRef.AssertProperty<string>("Path", path => path.Contains(Path.Combine("ValidCase01", name)))
-                              .AssertProperty("MSBuildProjectPath", AssertPathsEqual(Path.Combine("..", "..", name, $"{name}.csproj")));                    
+                    projectRef.AssertProperty("Path", NormalizePathString(Path.Combine(testProjectRoot, name, $"{name}.csproj")));
                 }
                 
                 var fileReferences = references.RetrievePropertyAs<JArray>("FileReferences")
@@ -468,22 +467,9 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             }
         }
 
-        private static Func<string, bool> AssertPathsEqual(string expectedString)
+        private static string NormalizePathString(string original)
         {
-            return
-                (string t) =>
-                {
-                    if (t.Contains('/'))
-                    {
-                        t = t.Replace('/', Path.DirectorySeparatorChar);
-                    }
-                    else if (t.Contains('\\'))
-                    {
-                        t = t.Replace('\\', Path.DirectorySeparatorChar);
-                    }
-
-                    return string.Equals(t, expectedString);
-                };
+            return original.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
         }
     }
 }

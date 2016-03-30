@@ -24,8 +24,6 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
 
         public bool Resolved { get; private set; }
         
-        public string MSBuildProjectPath { get; private set; }
-
         public IEnumerable<DependencyItem> Dependencies { get; private set; }
 
         public IEnumerable<DiagnosticMessageView> Errors { get; private set; }
@@ -72,13 +70,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
                 Warnings = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Warning)
                                       .Select(d => new DiagnosticMessageView(d))
             };
-            
+
             var msbuildLibrary = library as MSBuildProjectDescription;
             if (msbuildLibrary != null)
             {
-                result.MSBuildProjectPath = msbuildLibrary.ProjectLibrary.MSBuildProject;
+                result.Path = msbuildLibrary.MSBuildProjectPath;
             }
-            
+
             return result;
         }
 

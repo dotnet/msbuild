@@ -10,15 +10,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
         public FrameworkData Framework { get; set; }
         public string Name { get; set; }
         public string Path { get; set; }
-        public string MSBuildProjectPath { get; set; }
 
         public override bool Equals(object obj)
         {
             var other = obj as ProjectReferenceDescription;
             return other != null &&
                    string.Equals(Name, other.Name) &&
-                   string.Equals(Path, other.Path) &&
-                   string.Equals(MSBuildProjectPath, other.MSBuildProjectPath);
+                   string.Equals(Path, other.Path);
         }
 
         public override int GetHashCode()
@@ -47,8 +45,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
                 {
                     Framework = library.Framework.ToPayload(),
                     Name = library.Identity.Name,
-                    Path = library.Path,
-                    MSBuildProjectPath = ((MSBuildProjectDescription)library).ProjectLibrary.MSBuildProject
+                    Path = ((MSBuildProjectDescription)library).MSBuildProjectPath,
                 };
             }
             else
