@@ -6,7 +6,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-23929"
+      "version": "1.0.0-rc2-23930"
     },
     "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160321-04",
     "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160321-04",
