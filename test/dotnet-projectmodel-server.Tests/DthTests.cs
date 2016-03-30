@@ -432,13 +432,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 
                 var classLibraries = new HashSet<string>(new string[] { "ClassLibrary1", "ClassLibrary2", "ClassLibrary3" });
                 var dependencies = messages.RetrieveSingleMessage(MessageTypes.Dependencies);
-                foreach (var each in classLibraries)
+                foreach (var classLibrary in classLibraries)
                 {
-                    dependencies.RetrieveDependency(each)
+                    dependencies.RetrieveDependency(classLibrary)
                                 .AssertProperty("Type", LibraryType.MSBuildProject.ToString())
-                                .AssertProperty("MSBuildProjectPath", AssertPathsEqual(Path.Combine("..", "..", each, $"{each}.csproj")))
+                                .AssertProperty("MSBuildProjectPath", AssertPathsEqual(Path.Combine("..", "..", classLibrary, $"{classLibrary}.csproj")))
                                 .AssertProperty<bool>("Resolved", true)
-                                .AssertProperty("Name", each)
+                                .AssertProperty("Name", classLibrary)
                                 .AssertProperty<JArray>("Errors", array => array.Count == 0)
                                 .AssertProperty<JArray>("Warnings", array => array.Count == 0);
                 }
