@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
         {
             var exportFilePath = GetExportFilePath(_lockFile.LockFilePath);
 
-            if (File.Exists(exportFilePath))
+            if (File.Exists(exportFilePath) && _msbuildTargetLibraries.Any())
             {
                 var exportFile = LockFileReader.ReadExportFile(exportFilePath);
                 PatchLockWithExport(exportFile);

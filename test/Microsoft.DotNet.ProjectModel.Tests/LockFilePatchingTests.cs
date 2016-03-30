@@ -53,6 +53,21 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
+        public void TestFragmentExistsButNoHolesInLockFile()
+        {
+            var lockFilePath = GetLockFilePath("valid_staleFragment");
+            var lockFile = LockFileReader.Read(lockFilePath);
+
+            var exportFile = lockFile.ExportFile;
+
+            exportFile.Should().BeNull();
+
+            lockFile.Targets.Count.Should().Be(1);
+
+            lockFile.Targets[0].Libraries.Count.Should().Be(0);
+        }
+
+        [Fact]
         public void TestMissingExportFileThrows()
         {
             var lockFilePath = GetLockFilePath("invalid_nofragment");
