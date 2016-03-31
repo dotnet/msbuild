@@ -1,13 +1,13 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-23930",
+    "Microsoft.NETCore.App": "1.0.0-rc2-23931",
     "Newtonsoft.Json": "7.0.1",
     "dotnet": {
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-23930",
+      "version": "4.0.0-rc2-23931",
       "exclude": "Compile"
     },
     "xunit": "2.1.0",

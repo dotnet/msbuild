@@ -14,7 +14,7 @@
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-23930",
+      "version": "4.0.0-rc2-23931",
       "exclude": "Compile"
     },
     "Microsoft.DotNet.ProjectModel": {

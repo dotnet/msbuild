@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23930",
+    "NETStandard.Library": "1.5.0-rc2-23931",
     "Microsoft.Extensions.DependencyModel": {
       "target": "project",
       "version": "1.0.0-*"
