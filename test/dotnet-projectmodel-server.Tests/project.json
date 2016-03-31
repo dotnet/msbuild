@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-23930",
+    "Microsoft.NETCore.App": "1.0.0-rc2-23931",
     "dotnet": {
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-23930",
+      "version": "4.0.0-rc2-23931",
       "exclude": "Compile"
     },
     "Microsoft.DotNet.Tools.Tests.Utilities": {
@@ -16,7 +16,7 @@
     },
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-128011-22",
-    "System.Net.NameResolution": "4.0.0-rc2-23930"
+    "System.Net.NameResolution": "4.0.0-rc2-23931"
   },
   "frameworks": {
     "netstandardapp1.5": {

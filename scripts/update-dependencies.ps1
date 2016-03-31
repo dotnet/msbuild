@@ -35,7 +35,7 @@ $appPath = "$PSScriptRoot\update-dependencies"
 # Restore the build scripts
 Write-Host "Restoring Build Script projects..."
 pushd $PSScriptRoot
-dotnet restore
+dotnet restore --infer-runtimes
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 popd
 
