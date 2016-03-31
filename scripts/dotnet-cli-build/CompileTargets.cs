@@ -155,6 +155,10 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(CompileCoreHost))]
         public static BuildTargetResult PackageCoreHost(BuildTargetContext c)
         {
+            if (!string.Equals(Environment.GetEnvironmentVariable("BUILD_COREHOST_PACKAGES"), "1"))
+            {
+                return c.Success();
+            }
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             var versionTag = buildVersion.ReleaseSuffix;
             var buildMajor = buildVersion.CommitCountString;
