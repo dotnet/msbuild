@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.ApplicationInsights;
 using Microsoft.Extensions.PlatformAbstractions;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -13,9 +14,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private static Dictionary<string, string> _commonProperties = null;
         private static Dictionary<string, double> _commonMeasurements = null;
 
-        //readonly instead of const to to avoid inlining in case we need to change the instrumentation key
-        private static readonly string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
-
+        private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
         private const string OSVersion = "OS Version";
         private const string OSPlatform = "OS Platform";
@@ -50,7 +49,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
                 _isInitialized = true;
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                // we dont want to fail the tool if telemetry fais. We should be able to detect abnormalities from data 
+                // at the server end
+            }
         }
 
         public void TrackCommand(string command, IDictionary<string, string> properties = null, IDictionary<string, double> measurements = null)
@@ -68,6 +71,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             catch (Exception) { }
         }
+
 
         private Dictionary<string, double> GetEventMeasures(IDictionary<string, double> measurements)
         {

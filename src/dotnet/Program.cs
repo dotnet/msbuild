@@ -139,10 +139,6 @@ namespace Microsoft.DotNet.Cli
 
             telemetryClient.TrackCommand(
                 command,
-                new Dictionary<string, string>
-                {
-                    ["Arguments"] = arguments
-                },
                 new Dictionary<string, double>
                 {
                     ["ExitCode"] = exitCode
