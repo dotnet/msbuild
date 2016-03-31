@@ -77,6 +77,15 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath, designTime: false));
         }
+        
+        [Fact]
+        public void TestMissingExportUnderDesignTime()
+        {
+            var lockFilePath = GetLockFilePath("invalid_nofragment");
+
+            // not throw under design time scenario
+            Assert.NotNull(LockFileReader.Read(lockFilePath, designTime: true));            
+        }
 
         [Fact]
         public void TestMissingExportsThrow()
@@ -87,11 +96,28 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
+        public void TestMissingExportsUnderDesignTime()
+        {
+            var lockFilePath = GetLockFilePath("invalid_missing-exports");
+
+            // not throw under design time scenario
+            Assert.NotNull(LockFileReader.Read(lockFilePath, designTime: true));
+        }
+
+        [Fact]
         public void TestMissmatchingFileVersionsThrows()
         {
             var lockFilePath = GetLockFilePath("invalid_missmatching-versions");
 
             Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath, designTime: false));
+        }
+
+        [Fact]
+        public void TestMissmatchingFileVersionsUnderDesignTime()
+        {
+            var lockFilePath = GetLockFilePath("invalid_missmatching-versions");
+
+            Assert.NotNull(LockFileReader.Read(lockFilePath, designTime: true));
         }
 
         private static int LibraryNumberFromName(Microsoft.DotNet.ProjectModel.Graph.LockFileTargetLibrary library)
