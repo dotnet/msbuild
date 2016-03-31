@@ -300,11 +300,17 @@ namespace Microsoft.DotNet.ProjectModel
         private static string ComposeMessageFromInnerExceptions(Exception exception)
         {
             var sb = new StringBuilder();
+            var messages = new HashSet<string>();
 
             while (exception != null)
             {
-                sb.AppendLine(exception.Message);
+                messages.Add(exception.Message);
                 exception = exception.InnerException;
+            }
+
+            foreach (var message in messages)
+            {
+                sb.AppendLine(message);
             }
 
             return sb.ToString();
