@@ -13,20 +13,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class TestTargets
     {
-        public static readonly dynamic[] TestPackageProjects = new[]
-        {
-            new { Name = "Microsoft.DotNet.Cli.Utils", IsTool = false, Path = "src/Microsoft.DotNet.Cli.Utils", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
-            new { Name = "Microsoft.DotNet.ProjectModel", IsTool = false, Path = "src/Microsoft.DotNet.ProjectModel", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
-            new { Name = "Microsoft.DotNet.Compiler.Common", IsTool = false, Path = "src/Microsoft.DotNet.Compiler.Common", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
-            new { Name = "Microsoft.Extensions.DependencyModel", IsTool = false, Path = "src/Microsoft.Extensions.DependencyModel", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
-            new { Name = "Microsoft.DotNet.Files", IsTool = false, Path = "src/Microsoft.DotNet.Files", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
-            new { Name = "Microsoft.DotNet.InternalAbstractions", IsTool = false, Path = "src/Microsoft.DotNet.InternalAbstractions", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
-            new { Name = "dotnet-dependency-tool-invoker", IsTool = true, Path = "TestAssets/TestPackages/dotnet-dependency-tool-invoker", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) }, 
-            new { Name = "dotnet-desktop-and-portable", IsTool = true, Path = "TestAssets/TestPackages/dotnet-desktop-and-portable", IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows) },
-            new { Name = "dotnet-hello", IsTool = true, Path = "TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello", IsApplicable = new Func<bool>(() => true) }, 
-            new { Name = "dotnet-hello", IsTool = true, Path = "TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello", IsApplicable = new Func<bool>(() => true) },
-            new { Name = "dotnet-portable", IsTool = true, Path = "TestAssets/TestPackages/dotnet-portable", IsApplicable = new Func<bool>(() => true) }
-        };
+        private static string s_testPackageBuildVersionSuffix = "<buildversion>";
 
         public static readonly string[] TestProjects = new[]
         {
@@ -35,6 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-publish.Tests",
             "dotnet-compile.Tests",
             "dotnet-compile.UnitTests",
+            "dotnet-compile-fsc.Tests",
             "dotnet-build.Tests",
             "dotnet-pack.Tests",
             "dotnet-projectmodel-server.Tests",
@@ -54,7 +42,13 @@ namespace Microsoft.DotNet.Cli.Build
             new { Path = "AppWithDirectDependencyDesktopAndPortable", Skip = new Func<bool>(() => !CurrentPlatform.IsWindows) } 
         };
 
-        [Target(nameof(PrepareTargets.Init), nameof(SetupTests), nameof(RestoreTests), nameof(BuildTests), nameof(RunTests), nameof(ValidateDependencies))]
+        [Target(
+            nameof(PrepareTargets.Init), 
+            nameof(SetupTests), 
+            nameof(RestoreTests), 
+            nameof(BuildTests), 
+            nameof(RunTests),
+            nameof(ValidateDependencies))]
         public static BuildTargetResult Test(BuildTargetContext c) => c.Success();
 
         [Target(nameof(SetupTestPackages), nameof(SetupTestProjects))]
@@ -75,7 +69,10 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore("--verbosity", "verbose", "--infer-runtimes", "--disable-parallel").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages")).Execute().EnsureSuccessful();
+            dotnet.Restore("--verbosity", "verbose", "--infer-runtimes", "--disable-parallel")
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"))
+                .Execute()
+                .EnsureSuccessful();
 
             return c.Success();
         }
@@ -89,17 +86,26 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes", "--fallbacksource", Dirs.TestPackages)
+            dotnet.Restore(
+                "--verbosity", "verbose", 
+                "--disable-parallel", 
+                "--infer-runtimes",
+                "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
                 .Execute().EnsureSuccessful();
 
             // The 'ProjectModelServer' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes")
+            dotnet.Restore(
+                "--verbosity", "verbose", 
+                "--disable-parallel", 
+                "--infer-runtimes")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthTestProjects"))
                 .Execute();
 
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes")
+            dotnet.Restore(
+                "--verbosity", "verbose", 
+                "--disable-parallel", 
+                "--infer-runtimes")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthUpdateSearchPathSample"))
                 .Execute();
 
@@ -112,14 +118,16 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var dotnet = DotNetCli.Stage2;
 
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes", "--fallbacksource", Dirs.TestPackages)
+            dotnet.Restore("--verbosity", "verbose", 
+                "--disable-parallel", "--infer-runtimes",
+                "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
                 .Execute().EnsureSuccessful();
                 
             return c.Success();
         }
 
-        [Target(nameof(CleanTestPackages))]
+        [Target(nameof(CleanTestPackages), nameof(CleanProductPackages))]
         public static BuildTargetResult BuildTestAssetPackages(BuildTargetContext c)
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"));
@@ -129,12 +137,62 @@ namespace Microsoft.DotNet.Cli.Build
             Rmdir(Dirs.TestPackages);
             Mkdirp(Dirs.TestPackages);
 
-            foreach (var relativePath in TestPackageProjects.Where(p => p.IsApplicable()).Select(p => p.Path))
+            foreach (var testPackageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable()))
             {
+                var relativePath = testPackageProject.Path;
+
+                var versionSuffix = testPackageProject.VersionSuffix;
+                if (versionSuffix.Equals(s_testPackageBuildVersionSuffix))
+                {
+                    versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").VersionSuffix;
+                }
+                
                 var fullPath = Path.Combine(c.BuildContext.BuildDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar));
                 c.Info($"Packing: {fullPath}");
-                dotnet.Pack("--output", Dirs.TestPackages)
-                    .WorkingDirectory(fullPath)
+
+                // build and ignore failure, so net451 fail on non-windows doesn't crash the build
+                var packageBuildFrameworks = new List<string>()
+                {
+                    "netstandard1.5",
+                    "netstandard1.3",
+                    "netstandardapp1.5"
+                };
+
+                if (CurrentPlatform.IsWindows)
+                {
+                    packageBuildFrameworks.Add("net451");
+                }
+
+                foreach (var packageBuildFramework in packageBuildFrameworks)
+                {
+                    var buildArgs = new List<string>();
+                    buildArgs.Add("-f");
+                    buildArgs.Add(packageBuildFramework);
+                    buildArgs.Add("--build-base-path");
+                    buildArgs.Add(Dirs.TestPackagesBuild);
+                    buildArgs.Add(fullPath);
+
+                    Mkdirp(Dirs.TestPackagesBuild);
+                    var packBuildResult = DotNetCli.Stage1.Build(buildArgs.ToArray())
+                        .Execute();
+                }
+                
+
+                var projectJson = Path.Combine(fullPath, "project.json");
+                var dotnetPackArgs = new List<string> { 
+                    projectJson,
+                    "--no-build",
+                    "--build-base-path", Dirs.TestPackagesBuild,
+                    "--output", Dirs.TestPackages 
+                };
+
+                if (!string.IsNullOrEmpty(versionSuffix))
+                {
+                    dotnetPackArgs.Add("--version-suffix");
+                    dotnetPackArgs.Add(versionSuffix);
+                }
+
+                dotnet.Pack(dotnetPackArgs.ToArray())
                     .Execute()
                     .EnsureSuccessful();
             }
@@ -143,9 +201,20 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
+        public static BuildTargetResult CleanProductPackages(BuildTargetContext c)
+        {
+            foreach (var packageName in PackageTargets.ProjectsToPack)
+            {
+                Rmdir(Path.Combine(Dirs.NuGetPackages, packageName));
+            }            
+
+            return c.Success();
+        }
+
+        [Target]
         public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
         {
-            foreach (var packageProject in TestPackageProjects.Where(p => p.IsApplicable()))
+            foreach (var packageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable() && p.Clean))
             {
                 Rmdir(Path.Combine(Dirs.NuGetPackages, packageProject.Name));
                 if(packageProject.IsTool)

@@ -24,5 +24,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public IEnumerable<string> InferredExtensions { get; set; }
 
         public string BuildBasePath { get; set; }
+
+        public string DepsJsonFile { get; set; }
     }
 }

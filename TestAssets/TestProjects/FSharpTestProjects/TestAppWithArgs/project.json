@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "compilerName": "fsc",
+    "compileFiles": [
+        "Program.fs"
+    ],
+    "dependencies": {
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
+        "NETStandard.Library": "1.5.0-rc2-23931"
+    },
+
+    "tools": {
+        "dotnet-compile-fsc": {
+            "version": "1.0.0-*",
+            "imports": [
+                "dnxcore50",
+                "portable-net45+win81",
+                "netstandard1.3"
+            ]
+        }
+    },
+
+    "frameworks": {
+        "netstandardapp1.5": {
+            "imports": "dnxcore50"
+        }
+    }
+}

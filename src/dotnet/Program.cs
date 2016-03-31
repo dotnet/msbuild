@@ -13,7 +13,6 @@ using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
-using Microsoft.DotNet.Tools.Compiler.Fsc;
 using Microsoft.DotNet.Tools.Compiler.Native;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.New;

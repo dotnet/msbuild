@@ -14,6 +14,11 @@
       "version": "1.0.0-rc2-23931"
     }
   },
+
+  "tools": {
+       "dotnet-compile-fsc": "1.0.0-*"
+   },
+
   "frameworks": {
     "netstandard1.5": {
       "imports": [

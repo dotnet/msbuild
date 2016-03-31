@@ -12,15 +12,16 @@ using System.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Resolution;
 using NuGet.Frameworks;
+using System.Reflection;
 
 namespace Microsoft.DotNet.Tools.Compiler.Fsc
 {
     public class CompileFscCommand
     {
         private const int ExitFailed = 1;
-
-        public static int Run(string[] args)
+        public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -80,19 +81,24 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 return returnCode;
             }
 
-
             // TODO less hacky
             bool targetNetCore = 
                 commonOptions.Defines.Contains("DNXCORE50") ||
                 commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARDAPP1_")).Any() ||
                 commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARD1_")).Any();
 
+            // Get FSC Path upfront to use it for win32manifest path
+            var fscCommandSpec = ResolveFsc(null, tempOutDir);
+            var fscExeFile = fscCommandSpec.FscExeFile;
+            var fscExeDir = fscCommandSpec.FscExeDir;
+
             // FSC arguments
             var allArgs = new List<string>();
 
             //HACK fsc raise error FS0208 if target exe doesnt have extension .exe
             bool hackFS0208 = targetNetCore && commonOptions.EmitEntryPoint == true;
-            string originalOutputName = outputName;
+
+            var originalOutputName = outputName;
 
             if (outputName != null)
             {
@@ -168,11 +174,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 allArgs.Add("--target:exe");
 
                 //HACK we need default.win32manifest for exe
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    var win32manifestPath = Path.Combine(AppContext.BaseDirectory, "default.win32manifest");
-                    allArgs.Add($"--win32manifest:{win32manifestPath}");
-                }
+                var win32manifestPath = Path.Combine(fscExeDir, "..", "..", "runtimes", "any", "native", "default.win32manifest");
+                allArgs.Add($"--win32manifest:{win32manifestPath}");
             }
 
             if (commonOptions.SuppressWarnings != null)
@@ -227,13 +230,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             //source files + assemblyInfo
             allArgs.AddRange(GetSourceFiles(sources, assemblyInfo).ToArray());
 
-            //TODO check the switch enabled in fsproj in RELEASE and DEBUG configuration 
+            //TODO check the switch enabled in fsproj in RELEASE and DEBUG configuration
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-fsc.rsp");
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 
             // Execute FSC!
-            var result = RunFsc(new List<string> { $"@{rsp}" })
+            var result = RunFsc(new List<string> { $"@{rsp}" }, tempOutDir)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -257,26 +260,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             return result.ExitCode;
         }
 
-        private static Command RunFsc(List<string> fscArgs)
-        {
-            var fscExe = Environment.GetEnvironmentVariable("DOTNET_FSC_PATH")
-                      ?? Path.Combine(AppContext.BaseDirectory, "fsc.exe");
-
-            var exec = Environment.GetEnvironmentVariable("DOTNET_FSC_EXEC")?.ToUpper() ?? "COREHOST";
-
-            switch (exec)
-            {
-                case "RUN":
-                    return Command.Create(fscExe, fscArgs.ToArray());
-
-                case "COREHOST":
-                default:
-                    var corehost = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-                    return Command.Create(corehost, new[] { fscExe }.Concat(fscArgs).ToArray());
-            }
-
-        }
-
         // The assembly info must be in the last minus 1 position because:
         // - assemblyInfo should be in the end to override attributes
         // - assemblyInfo cannot be in the last position, because last file contains the main
@@ -295,5 +278,97 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
 
             yield return sourceFiles.Last();
         }
+
+        private static Command RunFsc(List<string> fscArgs, string temp)
+        {
+            var fscEnvExe = Environment.GetEnvironmentVariable("DOTNET_FSC_PATH");
+            var exec = Environment.GetEnvironmentVariable("DOTNET_FSC_EXEC")?.ToUpper() ?? "COREHOST";
+            
+            var muxer = new Muxer();
+
+            if (fscEnvExe != null)
+            {
+                switch (exec)
+                {
+                    case "RUN":
+                        return Command.Create(fscEnvExe, fscArgs.ToArray());
+
+                    case "COREHOST":
+                    default:
+                        var host = muxer.MuxerPath;
+                        return Command.Create(host, new[] { fscEnvExe }.Concat(fscArgs).ToArray());
+                }
+            }
+            else
+            {
+                var fscCommandSpec =  ResolveFsc(fscArgs, temp)?.Spec;
+                return Command.Create(fscCommandSpec);
+            }
+        }
+
+        private static FscCommandSpec ResolveFsc(List<string> fscArgs, string temp)
+        {
+            var nugetPackagesRoot = PackageDependencyProvider.ResolvePackagesPath(null, null);
+            var depsFile = Path.Combine(AppContext.BaseDirectory, "dotnet-compile-fsc" + FileNameSuffixes.DepsJson);
+
+            var depsJsonCommandResolver = new DepsJsonCommandResolver(nugetPackagesRoot);
+            var dependencyContext = depsJsonCommandResolver.LoadDependencyContextFromFile(depsFile);
+            var fscPath = depsJsonCommandResolver.GetCommandPathFromDependencyContext("fsc", dependencyContext);
+
+
+            var commandResolverArgs = new CommandResolverArguments()
+            {
+                CommandName = "fsc",
+                CommandArguments = fscArgs,
+                DepsJsonFile = depsFile
+            };
+
+            var fscCommandSpec = depsJsonCommandResolver.Resolve(commandResolverArgs);
+
+            var runtimeConfigFile = Path.Combine(
+                Path.GetDirectoryName(typeof(CompileFscCommand).GetTypeInfo().Assembly.Location)
+                , "dotnet-compile-fsc" + FileNameSuffixes.RuntimeConfigJson);
+
+
+            CopyRuntimeConfigForFscExe(runtimeConfigFile, "fsc", depsFile, nugetPackagesRoot, fscPath);
+
+            return new FscCommandSpec
+            {
+                Spec = fscCommandSpec,
+                FscExeDir = Path.GetDirectoryName(fscPath),
+                FscExeFile = fscPath
+            };
+        }
+
+        private static void CopyRuntimeConfigForFscExe(
+            string runtimeConfigFile,
+            string commandName,
+            string depsJsonFile,
+            string nugetPackagesRoot,
+            string fscPath)
+        {   
+            var newFscRuntimeConfigDir = Path.GetDirectoryName(fscPath);
+            var newFscRuntimeConfigFile = Path.Combine(
+                newFscRuntimeConfigDir, 
+                Path.GetFileNameWithoutExtension(fscPath) + FileNameSuffixes.RuntimeConfigJson);
+        
+            try
+            {
+                File.Copy(runtimeConfigFile, newFscRuntimeConfigFile, true);
+            }
+            catch(Exception e)
+            {
+                Reporter.Error.WriteLine("Failed to copy fsc runtimeconfig.json");
+                throw e;
+            }
+        }
+
+        private class FscCommandSpec
+        {
+            public CommandSpec Spec { get; set; }
+            public string FscExeDir { get; set; }
+            public string FscExeFile { get; set; }
+        }
     }
 }
+
