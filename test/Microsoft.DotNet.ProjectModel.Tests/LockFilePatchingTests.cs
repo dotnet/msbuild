@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         public void TestExportFileIsParsed()
         {
             var lockFilePath = GetLockFilePath("valid");
-            var lockFile = LockFileReader.Read(lockFilePath);
+            var lockFile = LockFileReader.Read(lockFilePath, designTime: false);
 
             var exportFile = lockFile.ExportFile;
 
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         public void TestLockFileIsPatchedWithExportData()
         {
             var lockFilePath = GetLockFilePath("valid");
-            var lockFile = LockFileReader.Read(lockFilePath);
+            var lockFile = LockFileReader.Read(lockFilePath, designTime: false);
 
             // check lock file structure is similar to export structure
             foreach (var target in lockFile.Targets)
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         public void TestFragmentExistsButNoHolesInLockFile()
         {
             var lockFilePath = GetLockFilePath("valid_staleFragment");
-            var lockFile = LockFileReader.Read(lockFilePath);
+            var lockFile = LockFileReader.Read(lockFilePath, designTime: false);
 
             var exportFile = lockFile.ExportFile;
 
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         {
             var lockFilePath = GetLockFilePath("invalid_nofragment");
 
-            Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath));
+            Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath, designTime: false));
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         {
             var lockFilePath = GetLockFilePath("invalid_missing-exports");
 
-            Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath));
+            Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath, designTime: false));
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         {
             var lockFilePath = GetLockFilePath("invalid_missmatching-versions");
 
-            Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath));
+            Assert.Throws<FileFormatException>(() => LockFileReader.Read(lockFilePath, designTime: false));
         }
 
         private static int LibraryNumberFromName(Microsoft.DotNet.ProjectModel.Graph.LockFileTargetLibrary library)

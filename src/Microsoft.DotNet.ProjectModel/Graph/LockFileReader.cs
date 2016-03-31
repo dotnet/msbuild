@@ -14,14 +14,14 @@ using NuGet.Versioning;
 namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public static class LockFileReader
-    {
-        public static LockFile Read(string lockFilePath, bool patchWithExportFile = true)
+    {        
+        public static LockFile Read(string lockFilePath, bool designTime)
         {
             using (var stream = ResilientFileStreamOpener.OpenFile(lockFilePath))
             {
                 try
                 {
-                    return Read(lockFilePath, stream, patchWithExportFile);
+                    return Read(lockFilePath, stream, designTime);
                 }
                 catch (FileFormatException ex)
                 {
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             }
         }
 
-        public static LockFile Read(string lockFilePath, Stream stream, bool patchWithExportFile = true)
+        public static LockFile Read(string lockFilePath, Stream stream, bool designTime)
         {
             try
             {
@@ -47,16 +47,11 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 }
 
                 var lockFile = ReadLockFile(lockFilePath, jobject);
-
-                var patcher = new LockFilePatcher(lockFile);
-
-                if (patchWithExportFile)
+                
+                if (!designTime)
                 {
-                    patcher.PatchIfNecessary();
-                }
-                else
-                {
-                    patcher.ThrowIfAnyMsbuildLibrariesPresent();
+                    var patcher = new LockFilePatcher(lockFile);
+                    patcher.Patch();
                 }
 
                 return lockFile;

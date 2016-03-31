@@ -21,11 +21,17 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             _projectResolver = projectResolver;
         }
 
-        public MSBuildProjectDescription GetDescription(NuGetFramework targetFramework, LockFileProjectLibrary projectLibrary, LockFileTargetLibrary targetLibrary)
+        public MSBuildProjectDescription GetDescription(NuGetFramework targetFramework,
+                                                        LockFileProjectLibrary projectLibrary,
+                                                        LockFileTargetLibrary targetLibrary,
+                                                        bool isDesignTime)
         {
+            // During design time fragment file could be missing. When fragment file is missing none of the
+            // assets can be found but it is acceptable during design time.
             var compatible = targetLibrary.FrameworkAssemblies.Any() ||
                              targetLibrary.CompileTimeAssemblies.Any() ||
-                             targetLibrary.RuntimeAssemblies.Any();
+                             targetLibrary.RuntimeAssemblies.Any() ||
+                             isDesignTime;
 
             var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary, targetFramework);

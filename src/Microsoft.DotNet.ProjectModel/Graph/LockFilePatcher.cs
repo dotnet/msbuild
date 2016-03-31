@@ -22,14 +22,13 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             _msbuildTargetLibraries = msbuildProjectLibraries.ToDictionary(GetProjectLibraryKey, l => GetTargetsForLibrary(_lockFile, l));
         }
 
-        public void PatchIfNecessary()
+        public void Patch()
         {
             var exportFilePath = GetExportFilePath(_lockFile.LockFilePath);
-
             if (File.Exists(exportFilePath) && _msbuildTargetLibraries.Any())
             {
                 var exportFile = LockFileReader.ReadExportFile(exportFilePath);
-                PatchLockWithExport(exportFile);
+                PatchLockWithExport(exportFile);   
             }
             else
             {
