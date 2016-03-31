@@ -95,4 +95,4 @@ For any and all feedback, please use the Issues on this repository.
 License
 --------------------
 
-By downloading the .zip you are agreeing to the terms in the project [EULA](https://github.com/dotnet/cli/blob/master/packaging/osx/sharedframework/resources/en.lproj/eula.rtf).
+By downloading the .zip you are agreeing to the terms in the project [EULA](http://aka.ms/dotnet-cli-eula).
