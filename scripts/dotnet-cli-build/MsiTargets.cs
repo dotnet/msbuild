@@ -32,7 +32,9 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkBundle { get; set; }
 
-        private static string Engine { get; set; }
+        private static string SdkEngine { get; set; }
+
+        private static string SharedFrameworkEngine { get; set; }
 
         private static string MsiVersion { get; set; }
 
@@ -68,11 +70,12 @@ namespace Microsoft.DotNet.Cli.Build
         {
             SdkBundle = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
             SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
-            Engine = Path.Combine(Path.GetDirectoryName(SdkBundle), ENGINE);
+            SdkEngine = GetEngineName(SdkBundle);
 
             SharedFrameworkBundle = c.BuildContext.Get<string>("CombinedFrameworkHostInstallerFile");
             SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
             SharedFrameworkMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), "msi");
+            SharedFrameworkEngine = GetEngineName(SharedFrameworkBundle);
 
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             MsiVersion = buildVersion.GenerateMsiVersion();
@@ -199,9 +202,8 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult ExtractEngineFromBundle(BuildTargetContext c)
         {
-            Cmd($"{WixRoot}\\insignia.exe", "-ib", SdkBundle, "-o", Engine)
-                    .Execute()
-                    .EnsureSuccessful();
+            ExtractEngineFromBundleHelper(SdkBundle, SdkEngine);
+            ExtractEngineFromBundleHelper(SharedFrameworkBundle, SharedFrameworkEngine);
             return c.Success();
         }
 
@@ -209,10 +211,31 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult ReattachEngineToBundle(BuildTargetContext c)
         {
-            Cmd($"{WixRoot}\\insignia.exe", "-ab", Engine, SdkBundle, "-o", SdkBundle)
+            ReattachEngineToBundleHelper(SdkBundle, SdkEngine);
+            ReattachEngineToBundleHelper(SharedFrameworkBundle, SharedFrameworkEngine);
+            return c.Success();
+        }
+
+        private static string GetEngineName(string bundle)
+        {
+            var engine = $"{Path.GetFileNameWithoutExtension(bundle)}-{ENGINE}";
+            return Path.Combine(Path.GetDirectoryName(bundle), engine);
+        }
+
+        private static void ExtractEngineFromBundleHelper(string bundle, string engine)
+        {
+            Cmd($"{WixRoot}\\insignia.exe", "-ib", bundle, "-o", engine)
                     .Execute()
                     .EnsureSuccessful();
-            return c.Success();
+        }
+
+        private static void ReattachEngineToBundleHelper(string bundle, string engine)
+        {
+            Cmd($"{WixRoot}\\insignia.exe", "-ab", engine, bundle, "-o", bundle)
+                    .Execute()
+                    .EnsureSuccessful();
+
+            File.Delete(engine);
         }
     }
 }

@@ -68,7 +68,8 @@ namespace Microsoft.DotNet.Cli.Build
             string formattedDistContents =
                 distTemplate.Replace("{SharedFxComponentId}", SharedFxComponentId)
                 .Replace("{SharedHostComponentId}", SharedHostComponentId)
-                .Replace("{CLISdkComponentId}", CLISdkComponentId);
+                .Replace("{CLISdkComponentId}", CLISdkComponentId)
+                .Replace("{CLISdkNugetVersion}", CLISdkNugetVersion);
             File.WriteAllText(distributionPath, formattedDistContents);
 
             Cmd("productbuild",
@@ -122,7 +123,9 @@ namespace Microsoft.DotNet.Cli.Build
             string distributionPath = Path.Combine(PkgsIntermediateDir, "shared-framework-formatted-distribution.xml");
             string formattedDistContents =
                 distTemplate.Replace("{SharedFxComponentId}", SharedFxComponentId)
-                .Replace("{SharedHostComponentId}", SharedHostComponentId);
+                .Replace("{SharedHostComponentId}", SharedHostComponentId)
+                .Replace("{SharedFrameworkNugetName}", Monikers.SharedFrameworkName)
+                .Replace("{SharedFrameworkNugetVersion}", SharedFrameworkNugetVersion);
             File.WriteAllText(distributionPath, formattedDistContents);
 
             Cmd("productbuild",

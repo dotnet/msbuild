@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WixLocalization Culture="en-us" Language="1033" xmlns="http://schemas.microsoft.com/wix/2006/localization">
   <String Id="Caption">[WixBundleName] Setup</String>
-  <String Id="Title">Microsoft .Net CLI for Windows</String>
+  <String Id="Title">Microsoft .Net Core for Windows</String>
   <String Id="Motto">You just need a shell, a text editor and 10 minutes of your time.
 
 Ready? Set? Let's go!</String>
