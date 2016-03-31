@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Run.Tests
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(RunTestsBase, "TestAppFullClr"))
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
-            new RunCommand(instance.TestRoot).Execute().Should().Pass();
+            new RunCommand(instance.TestRoot).ExecuteWithCapturedOutput().Should().Pass().And.HaveStdOutContaining("NET451, ARGS: 0");
         }
 
         [Fact]

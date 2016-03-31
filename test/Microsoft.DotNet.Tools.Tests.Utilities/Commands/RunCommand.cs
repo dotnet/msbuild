@@ -78,6 +78,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             args = $"run {BuildArgs()} {args}";
             return base.Execute(args);
         }
+        public override CommandResult ExecuteWithCapturedOutput(string args = "")
+        {
+            args = $"run {BuildArgs()} {args}";
+            return base.ExecuteWithCapturedOutput(args);
+        }
 
         private string BuildArgs()
         {
