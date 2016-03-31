@@ -8,7 +8,7 @@
 
 
 ## Environment data
-`dotnet --version` output:
+`dotnet --info` output:
 
 
 
