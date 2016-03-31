@@ -1,10 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Extensions.JsonParser.Sources;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -42,27 +44,11 @@ namespace Microsoft.DotNet.ProjectModel
                 globalJsonPath = Path.Combine(path, FileName);
             }
 
-            globalSettings = new GlobalSettings();
-
             try
             {
                 using (var fs = File.OpenRead(globalJsonPath))
                 {
-                    var reader = new StreamReader(fs);
-                    var jobject = JsonDeserializer.Deserialize(reader) as JsonObject;
-
-                    if (jobject == null)
-                    {
-                        throw new InvalidOperationException("The JSON file can't be deserialized to a JSON object.");
-                    }
-
-                    var projectSearchPaths = jobject.ValueAsStringArray("projects") ??
-                                             jobject.ValueAsStringArray("sources") ??
-                                             new string[] { };
-
-                    globalSettings.ProjectSearchPaths = new List<string>(projectSearchPaths);
-                    globalSettings.PackagesPath = jobject.ValueAsString("packages");
-                    globalSettings.FilePath = globalJsonPath;
+                    globalSettings = GetGlobalSettings(fs, globalJsonPath);
                 }
             }
             catch (Exception ex)
@@ -71,6 +57,41 @@ namespace Microsoft.DotNet.ProjectModel
             }
 
             return true;
+        }
+
+        public static GlobalSettings GetGlobalSettings(Stream fs, string globalJsonPath)
+        {
+            var globalSettings = new GlobalSettings();
+
+            var reader = new StreamReader(fs);
+            JObject jobject;
+            try
+            {
+                jobject = JObject.Parse(reader.ReadToEnd());
+            }
+            catch (JsonReaderException)
+            {
+                throw new InvalidOperationException("The JSON file can't be deserialized to a JSON object.");
+            }
+
+            IEnumerable<string> projectSearchPaths = Enumerable.Empty<string>();
+            JToken projectSearchPathsToken;
+            if (jobject.TryGetValue("projects", out projectSearchPathsToken) &&
+                projectSearchPathsToken.Type == JTokenType.Array)
+            {
+                projectSearchPaths = projectSearchPathsToken.Values<string>();
+            }
+            else if (jobject.TryGetValue("sources", out projectSearchPathsToken) &&
+                     projectSearchPathsToken.Type == JTokenType.Array)
+            {
+                projectSearchPaths = projectSearchPathsToken.Values<string>();
+            }
+
+            globalSettings.ProjectSearchPaths = new List<string>(projectSearchPaths);
+            globalSettings.PackagesPath = jobject.Value<string>("packages");
+            globalSettings.FilePath = globalJsonPath;
+
+            return globalSettings;
         }
 
         public static bool HasGlobalFile(string path)
