@@ -13,5 +13,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         // Multiple libraries marked as "platform"
         public static readonly string DOTNET1013 = nameof(DOTNET1013);
+
+        // Failed to read lock file
+        public static readonly string DOTNET1014 = nameof(DOTNET1014);
     }
 }

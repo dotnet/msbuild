@@ -1,0 +1,3 @@
+# Negates the lock file
+# MSBuiild references' project model server tests requires these lock files, since they can't be created without VS tooling.
+!project.lock.json

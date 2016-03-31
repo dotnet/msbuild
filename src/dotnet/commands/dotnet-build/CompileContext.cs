@@ -603,6 +603,11 @@ namespace Microsoft.DotNet.Tools.Build
             }
 
             compilerIO.Inputs.Add(project.LockFile.LockFilePath);
+
+            if (project.LockFile.ExportFile != null)
+            {
+                compilerIO.Inputs.Add(project.LockFile.ExportFile.ExportFilePath);
+            }
         }
 
         private static void AddDependencies(ProjectDependenciesFacade dependencies, CompilerIO compilerIO)

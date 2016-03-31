@@ -177,6 +177,31 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
+        public void PublishFailsWhenProjectNotBuiltAndNoBuildFlagSet()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppCompilationContext")
+                                                     .WithLockFiles();
+
+            var testProject = _getProjectJson(instance.TestRoot, "TestApp");
+            var publishCommand = new PublishCommand(testProject, noBuild: true);
+
+            publishCommand.Execute().Should().Fail();
+        }
+
+        [Fact]
+        public void PublishSucceedsWhenProjectPreviouslyCompiledAndNoBuildFlagSet()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppCompilationContext")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+
+            var testProject = _getProjectJson(instance.TestRoot, "TestApp");
+            var publishCommand = new PublishCommand(testProject, noBuild: true);
+
+            publishCommand.Execute().Should().Pass();
+        }
+
+        [Fact]
         public void PublishScriptsRun()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithScripts")

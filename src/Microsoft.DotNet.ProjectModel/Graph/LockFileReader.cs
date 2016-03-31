@@ -15,13 +15,13 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public static class LockFileReader
     {
-        public static LockFile Read(string lockFilePath)
+        public static LockFile Read(string lockFilePath, bool patchWithExportFile = true)
         {
             using (var stream = ResilientFileStreamOpener.OpenFile(lockFilePath))
             {
                 try
                 {
-                    return Read(lockFilePath, stream);
+                    return Read(lockFilePath, stream, patchWithExportFile);
                 }
                 catch (FileFormatException ex)
                 {
@@ -34,21 +34,36 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             }
         }
 
-        public static LockFile Read(string lockFilePath, Stream stream)
+        public static LockFile Read(string lockFilePath, Stream stream, bool patchWithExportFile = true)
         {
             try
             {
                 var reader = new StreamReader(stream);
                 var jobject = JsonDeserializer.Deserialize(reader) as JsonObject;
 
-                if (jobject != null)
-                {
-                    return ReadLockFile(lockFilePath, jobject);
-                }
-                else
+                if (jobject == null)
                 {
                     throw new InvalidDataException();
                 }
+
+                var lockFile = ReadLockFile(lockFilePath, jobject);
+
+                var patcher = new LockFilePatcher(lockFile);
+
+                if (patchWithExportFile)
+                {
+                    patcher.PatchIfNecessary();
+                }
+                else
+                {
+                    patcher.ThrowIfAnyMsbuildLibrariesPresent();
+                }
+
+                return lockFile;
+            }
+            catch (LockFilePatchingException)
+            {
+                throw;
             }
             catch
             {
@@ -57,6 +72,36 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 {
                     Version = int.MinValue
                 };
+            }
+        }
+
+        public static ExportFile ReadExportFile(string fragmentLockFilePath)
+        {
+            using (var stream = ResilientFileStreamOpener.OpenFile(fragmentLockFilePath))
+            {
+                try
+                {
+                    var rootJObject = JsonDeserializer.Deserialize(new StreamReader(stream)) as JsonObject;
+
+                    if (rootJObject == null)
+                    {
+                        throw new InvalidDataException();
+                    }
+
+                    var version = ReadInt(rootJObject, "version", defaultValue: int.MinValue);
+                    var exports = ReadObject(rootJObject.ValueAsJsonObject("exports"), ReadTargetLibrary);
+
+                    return new ExportFile(fragmentLockFilePath, version, exports);
+
+                }
+                catch (FileFormatException ex)
+                {
+                    throw ex.WithFilePath(fragmentLockFilePath);
+                }
+                catch (Exception ex)
+                {
+                    throw FileFormatException.Create(ex, fragmentLockFilePath);
+                }
             }
         }
 
@@ -105,12 +150,19 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 }
                 else if (type == "project")
                 {
-                    lockFile.ProjectLibraries.Add(new LockFileProjectLibrary
+                    var projectLibrary = new LockFileProjectLibrary
                     {
                         Name = name,
-                        Version = version,
-                        Path = ReadString(value.Value("path"))
-                    });
+                        Version = version
+                    };
+
+                    var pathValue = value.Value("path");
+                    projectLibrary.Path = pathValue == null ? null : ReadString(pathValue);
+
+                    var buildTimeDependencyValue = value.Value("msbuildProject");
+                    projectLibrary.MSBuildProject = buildTimeDependencyValue == null ? null : ReadString(buildTimeDependencyValue);
+
+                    lockFile.ProjectLibraries.Add(projectLibrary);
                 }
             }
         }

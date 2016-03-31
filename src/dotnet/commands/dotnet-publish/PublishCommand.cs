@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Tools.Publish
         public string VersionSuffix { get; set; }
         public int NumberOfProjects { get; private set; }
         public int NumberOfPublishedProjects { get; private set; }
+        public bool ShouldBuild { get; set; }
 
         public bool TryPrepareForPublish()
         {
@@ -119,34 +120,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var args = new List<string>() {
-                "--framework",
-                $"{context.TargetFramework.DotNetFrameworkName}",
-                "--configuration",
-                configuration,
-                context.ProjectFile.ProjectDirectory
-            };
-
-            if (!string.IsNullOrEmpty(context.RuntimeIdentifier))
-            {
-                args.Insert(0, context.RuntimeIdentifier);
-                args.Insert(0, "--runtime");
-            }
-
-            if (!string.IsNullOrEmpty(VersionSuffix))
-            {
-                args.Add("--version-suffix");
-                args.Add(VersionSuffix);
-            }
-
-            if (!string.IsNullOrEmpty(buildBasePath))
-            {
-                args.Add("--build-base-path");
-                args.Add(buildBasePath);
-            }
-
-            var result = Build.BuildCommand.Run(args.ToArray());
-            if (result != 0)
+            if (ShouldBuild && !InvokeBuildOnProject(context, buildBasePath, configuration))
             {
                 return false;
             }
@@ -204,6 +178,40 @@ namespace Microsoft.DotNet.Tools.Publish
             Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
 
             return true;
+        }
+
+        private bool InvokeBuildOnProject(ProjectContext context, string buildBasePath, string configuration)
+        {
+            var args = new List<string>()
+            {
+                "--framework",
+                $"{context.TargetFramework.DotNetFrameworkName}",
+                "--configuration",
+                configuration,
+                context.ProjectFile.ProjectDirectory
+            };
+
+            if (!string.IsNullOrEmpty(context.RuntimeIdentifier))
+            {
+                args.Insert(0, context.RuntimeIdentifier);
+                args.Insert(0, "--runtime");
+            }
+
+            if (!string.IsNullOrEmpty(VersionSuffix))
+            {
+                args.Add("--version-suffix");
+                args.Add(VersionSuffix);
+            }
+
+            if (!string.IsNullOrEmpty(buildBasePath))
+            {
+                args.Add("--build-base-path");
+                args.Add(buildBasePath);
+            }
+
+            var result = Build.BuildCommand.Run(args.ToArray());
+
+            return result == 0;
         }
 
         private HashSet<string> GetExclusionList(ProjectContext context, Dictionary<string, LibraryExport> exports)

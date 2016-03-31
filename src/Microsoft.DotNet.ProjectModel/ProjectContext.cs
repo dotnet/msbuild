@@ -151,7 +151,11 @@ namespace Microsoft.DotNet.ProjectModel
                 .Where(t => t.TargetFramework.Equals(TargetFramework))
                 .Any(t => !string.IsNullOrEmpty(t.RuntimeIdentifier));
 
-            var context = Create(ProjectFile.ProjectFilePath, TargetFramework, standalone ? runtimeIdentifiers : Enumerable.Empty<string>());
+            var context = CreateBuilder(ProjectFile.ProjectFilePath, TargetFramework)
+                .WithRuntimeIdentifiers(standalone ? runtimeIdentifiers : Enumerable.Empty<string>())
+                .WithLockFile(LockFile)
+                .Build();
+
             if (standalone && context.RuntimeIdentifier == null)
             {
                 // We are standalone, but don't support this runtime

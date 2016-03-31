@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -148,8 +149,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                      .AssertJArrayCount(1)
                                      .RetrieveArraryElementAs<JObject>(0)
                                      .AssertProperty("Name", expectedUnresolvedDependency)
-                                     .AssertProperty("Path", expectedUnresolvedProjectPath)
-                                     .AssertProperty<JToken>("WrappedProjectPath", prop => !prop.HasValues);
+                                     .AssertProperty("Path", expectedUnresolvedProjectPath);
                 }
                 else if (referenceType == "Package")
                 {
@@ -411,6 +411,65 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                     messages.ContainsMessage(MessageTypes.Error);
                 }
             }
+        }
+        
+        [Fact]
+        public void MSBuildReferenceTest()
+        {
+            var testProject = Path.Combine(RepoRoot, "TestAssets",
+                                                     "ProjectModelServer",
+                                                     "MSBuildReferencesProjects", 
+                                                     "ValidCase01",
+                                                     "src",
+                                                     "MainApp");
+
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server, _loggerFactory))
+            {
+                client.Initialize(testProject);
+                var messages = client.DrainAllMessages();
+                
+                var classLibraries = new HashSet<string>(new string[] { "ClassLibrary1", "ClassLibrary2", "ClassLibrary3" });
+                var dependencies = messages.RetrieveSingleMessage(MessageTypes.Dependencies);
+                var testProjectRoot = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "MSBuildReferencesProjects", "ValidCase01");
+                foreach (var classLibrary in classLibraries)
+                {                    
+                    dependencies.RetrieveDependency(classLibrary)
+                                .AssertProperty("Type", LibraryType.MSBuildProject.ToString())
+                                .AssertProperty("Path", NormalizePathString(Path.Combine(testProjectRoot, classLibrary, $"{classLibrary}.csproj")))
+                                .AssertProperty<bool>("Resolved", true)
+                                .AssertProperty("Name", classLibrary)
+                                .AssertProperty<JArray>("Errors", array => array.Count == 0)
+                                .AssertProperty<JArray>("Warnings", array => array.Count == 0);
+                }
+                
+                var references = messages.RetrieveSingleMessage(MessageTypes.References)
+                                         .RetrievePayloadAs<JObject>();
+                                         
+                var projectReferences = references.RetrievePropertyAs<JArray>("ProjectReferences");
+                Assert.Equal(3, projectReferences.Count);
+                for (int i = 0; i < 3; ++i)
+                {
+                    var projectRef = projectReferences.RetrieveArraryElementAs<JObject>(i);
+                    var name = projectRef["Name"].Value<string>();
+                    
+                    Assert.True(classLibraries.Contains(name));
+                    projectRef.AssertProperty("Path", NormalizePathString(Path.Combine(testProjectRoot, name, $"{name}.csproj")));
+                }
+                
+                var fileReferences = references.RetrievePropertyAs<JArray>("FileReferences")
+                                               .Select(each => each.Value<string>())
+                                               .ToArray();
+                foreach (var each in classLibraries)
+                {
+                    fileReferences.Contains(Path.Combine("ValidCase01", "ClassLibrary1", "bin", "Debug", $"{each}.dll"));
+                }
+            }
+        }
+
+        private static string NormalizePathString(string original)
+        {
+            return original.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
         }
     }
 }
