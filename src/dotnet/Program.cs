@@ -26,14 +26,13 @@ namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
-
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
             try
             {
-                return ProcessArgs(args);
+                return new Program().ProcessArgs(args, new Telemetry());
             }
             catch (CommandUnknownException e)
             {
@@ -44,7 +43,7 @@ namespace Microsoft.DotNet.Cli
 
         }
 
-        private static int ProcessArgs(string[] args)
+        public int ProcessArgs(string[] args, ITelemetry telemetryClient)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
@@ -135,10 +134,9 @@ namespace Microsoft.DotNet.Cli
                 exitCode = result.ExitCode;
             }
 
-            Telemetry telemetryClient = new Telemetry();
-
-            telemetryClient.TrackCommand(
+            telemetryClient.TrackEvent(
                 command,
+                null,
                 new Dictionary<string, double>
                 {
                     ["ExitCode"] = exitCode

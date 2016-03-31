@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class Telemetry
+    public class Telemetry : ITelemetry
     {
         private static bool _isInitialized = false;
         private static TelemetryClient _client = null;
@@ -23,13 +23,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public Telemetry()
         {
-            if (_isInitialized)
-                return;
-
             bool optout = Env.GetEnvironmentVariableAsBool(TelemetryOptout);
 
             if (optout)
+            {
                 return;
+            }
 
             try
             {
@@ -56,17 +55,19 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
-        public void TrackCommand(string command, IDictionary<string, string> properties = null, IDictionary<string, double> measurements = null)
+        public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             if (!_isInitialized)
+            {
                 return;
+            }
 
             Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
             Dictionary<string, string> eventProperties = GetEventProperties(properties);
 
             try
             {
-                _client.TrackEvent(command, eventProperties, eventMeasurements);
+                _client.TrackEvent(eventName, eventProperties, eventMeasurements);
                 _client.Flush();
             }
             catch (Exception) { }
@@ -78,12 +79,16 @@ namespace Microsoft.DotNet.Cli.Utils
             Dictionary<string, double> eventMeasurements = new Dictionary<string, double>(_commonMeasurements);
             if (measurements != null)
             {
-                foreach (var m in measurements)
+                foreach (var measurement in measurements)
                 {
-                    if (eventMeasurements.ContainsKey(m.Key))
-                        eventMeasurements[m.Key] = m.Value;
+                    if (eventMeasurements.ContainsKey(measurement.Key))
+                    {
+                        eventMeasurements[measurement.Key] = measurement.Value;
+                    }
                     else
-                        eventMeasurements.Add(m.Key, m.Value);
+                    {
+                        eventMeasurements.Add(measurement.Key, measurement.Value);
+                    }
                 }
             }
             return eventMeasurements;
@@ -94,12 +99,16 @@ namespace Microsoft.DotNet.Cli.Utils
             Dictionary<string, string> eventProperties = new Dictionary<string, string>(_commonProperties);
             if (properties != null)
             {
-                foreach (var p in properties)
+                foreach (var property in properties)
                 {
-                    if (eventProperties.ContainsKey(p.Key))
-                        eventProperties[p.Key] = p.Value;
+                    if (eventProperties.ContainsKey(property.Key))
+                    {
+                        eventProperties[property.Key] = property.Value;
+                    }
                     else
-                        eventProperties.Add(p.Key, p.Value);
+                    {
+                        eventProperties.Add(property.Key, property.Value);
+                    }
                 }
             }
             return eventProperties;
