@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public override CommandResult Execute(string args="")
         {
-            args = $"restore {args}";
+            args = $"restore {args} --infer-runtimes";
             return base.Execute(args);
         }
     }
