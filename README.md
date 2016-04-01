@@ -22,10 +22,15 @@ Build Status
 |:------:|:------:|:------:|:------:|:------:|:------:|
 |![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/601/badge)|![](https://mseng.visualstudio.com/DefaultCollection/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/3022/badge)|![](https://mseng.visualstudio.com/DefaultCollection/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/3071/badge)|![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/600/badge) |![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/597/badge) |![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/897/badge) |
 
-SDK Installers
-----------
+Installers and Binaries
+-----------------------
 
-|         |Version |.NET Core Installers|.NET Core Cli Installers|.NET Core Binaries|.NET Core Cli Binaries|
+You can download .NET Core as either an installer (MSI, PKG) or a zip (zip, gzip). You can download the product in two flavours:
+
+- .NET Core - .NET Core runtime and framework
+- .NET Core SDK - .NET Core + CLI tools
+
+|         |Version |.NET Core Installer|.NET Core SDK Installer|.NET Core Binaries|.NET Core SDK Binaries|
 |---------|:------:|:------:|:------:|:------:|:------:|
 |**Windows x64**|[![](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/Windows_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/beta/dnvm/latest.win.x64.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-win-x64.latest.exe)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-dev-win-x64.latest.exe)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-win-x64.latest.zip)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-dev-win-x64.latest.zip)|
 |**Windows x86**|[![](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/Windows_x86_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/beta/dnvm/latest.win.x86.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-win-x86.latest.exe)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-dev-win-x86.latest.exe)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-win-x86.latest.zip)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/Latest/dotnet-dev-win-x86.latest.zip)|
