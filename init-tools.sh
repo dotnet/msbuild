@@ -5,11 +5,10 @@ __init_tools_log=$__scriptpath/init-tools.log
 __PACKAGES_DIR=$__scriptpath/packages
 __TOOLRUNTIME_DIR=$__scriptpath/Tools
 __DOTNET_PATH=$__TOOLRUNTIME_DIR/dotnetcli
-__DOTNET_CMD=$__DOTNET_PATH/bin/dotnet
+__DOTNET_CMD=$__DOTNET_PATH/dotnet
 if [ -z "$__BUILDTOOLS_SOURCE" ]; then __BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json; fi
 __BUILD_TOOLS_PACKAGE_VERSION=$(cat $__scriptpath/BuildToolsVersion.txt)
 __DOTNET_TOOLS_VERSION=$(cat $__scriptpath/DotnetCLIVersion.txt)
-__DOTNET_SEMAPHORE=$__DOTNET_PATH/dotnetcli.$__DOTNET_TOOLS_VERSION.completed
 __BUILD_TOOLS_PATH=$__PACKAGES_DIR/Microsoft.DotNet.BuildTools/$__BUILD_TOOLS_PACKAGE_VERSION/lib
 __PROJECT_JSON_PATH=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION
 __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
@@ -19,34 +18,34 @@ OSName=$(uname -s)
 case $OSName in
     Darwin)
         OS=OSX
-        __DOTNET_PKG=dotnet-osx-x64
+        __DOTNET_PKG=dotnet-dev-osx-x64
+        ulimit -n 2048
         ;;
 
     Linux)
         OS=Linux
         source /etc/os-release
         if [ "$ID" == "centos" -o "$ID" == "rhel" ]; then
-            __DOTNET_PKG=dotnet-centos-x64
+            __DOTNET_PKG=dotnet-dev-centos-x64
         elif [ "$ID" == "ubuntu" -o "$ID" == "debian" ]; then
-            __DOTNET_PKG=dotnet-ubuntu-x64
+            __DOTNET_PKG=dotnet-dev-ubuntu-x64
         else
             echo "Unsupported Linux distribution '$ID' detected. Downloading ubuntu-x64 tools."
-            __DOTNET_PKG=dotnet-ubuntu-x64
+            __DOTNET_PKG=dotnet-dev-ubuntu-x64
         fi
         ;;
 
     *)
         echo "Unsupported OS '$OSName' detected. Downloading ubuntu-x64 tools."
         OS=Linux
-        __DOTNET_PKG=dotnet-ubuntu-x64
+        __DOTNET_PKG=dotnet-dev-ubuntu-x64
         ;;
 esac
 
-if [ ! -e $__PROJECT_JSON_FILE -o ! -e $__DOTNET_SEMAPHORE ]; then
+if [ ! -e $__PROJECT_JSON_FILE ]; then
     if [ -e $__TOOLRUNTIME_DIR ]; then rm -rf -- $__TOOLRUNTIME_DIR; fi
     echo "Running: $__scriptpath/init-tools.sh" > $__init_tools_log
-    if [ ! -e $__DOTNET_PATH  -o ! -e $__DOTNET_SEMAPHORE ]; then
-        if [ -e $__DOTNET_PATH ]; then rm -rf -- $__DOTNET_PATH; fi
+    if [ ! -e $__DOTNET_PATH ]; then
         echo "Installing dotnet cli..."
         __DOTNET_LOCATION="https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
         # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
@@ -66,8 +65,6 @@ if [ ! -e $__PROJECT_JSON_FILE -o ! -e $__DOTNET_SEMAPHORE ]; then
             cp -R $BUILDTOOLS_OVERRIDE_RUNTIME/* $__DOTNET_PATH/bin/dnx
             cp -R $BUILDTOOLS_OVERRIDE_RUNTIME/* $__DOTNET_PATH/runtime/coreclr
         fi
-        
-        echo $__DOTNET_TOOLS_VERSION > "$__DOTNET_SEMAPHORE"
 
         cd $__scriptpath
     fi

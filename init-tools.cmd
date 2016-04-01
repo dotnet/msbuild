@@ -1,4 +1,4 @@
-@echo off
+@if "%_echo%" neq "on" echo off
 setlocal
 
 REM Workaround https://github.com/dotnet/coreclr/issues/2153
@@ -8,9 +8,7 @@ set INIT_TOOLS_LOG=%~dp0init-tools.log
 if [%PACKAGES_DIR%]==[] set PACKAGES_DIR=%~dp0packages\
 if [%TOOLRUNTIME_DIR%]==[] set TOOLRUNTIME_DIR=%~dp0Tools
 set DOTNET_PATH=%TOOLRUNTIME_DIR%\dotnetcli\
-set /p DOTNET_VERSION=< %~dp0DotnetCLIVersion.txt
-set DOTNET_SEMAPHORE=%DOTNET_PATH%dotnetcli.%DOTNET_VERSION%.completed
-if [%DOTNET_CMD%]==[] set DOTNET_CMD=%DOTNET_PATH%bin\dotnet.exe
+if [%DOTNET_CMD%]==[] set DOTNET_CMD=%DOTNET_PATH%dotnet.exe
 if [%BUILDTOOLS_SOURCE%]==[] set BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
 set /P BUILDTOOLS_VERSION=< %~dp0BuildToolsVersion.txt
 set BUILD_TOOLS_PATH=%PACKAGES_DIR%Microsoft.DotNet.BuildTools\%BUILDTOOLS_VERSION%\lib\
@@ -26,7 +24,7 @@ if [%1]==[force] (
 )
 
 :: If sempahore exists do nothing
-if exist "%BUILD_TOOLS_SEMAPHORE%" IF exist "%DOTNET_SEMAPHORE%" (
+if exist "%BUILD_TOOLS_SEMAPHORE%" (
   echo Tools are already initialized.
   goto :EOF
 )
@@ -41,7 +39,8 @@ if exist "%DOTNET_CMD%" goto :afterdotnetrestore
 
 echo Installing dotnet cli...
 if NOT exist "%DOTNET_PATH%" mkdir "%DOTNET_PATH%"
-set DOTNET_ZIP_NAME=dotnet-win-x64.%DOTNET_VERSION%.zip
+set /p DOTNET_VERSION=< %~dp0DotnetCLIVersion.txt
+set DOTNET_ZIP_NAME=dotnet-dev-win-x64.%DOTNET_VERSION%.zip
 set DOTNET_REMOTE_PATH=https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/%DOTNET_VERSION%/%DOTNET_ZIP_NAME%
 set DOTNET_LOCAL_PATH=%DOTNET_PATH%%DOTNET_ZIP_NAME%
 echo Installing '%DOTNET_REMOTE_PATH%' to '%DOTNET_LOCAL_PATH%' >> %INIT_TOOLS_LOG%
@@ -50,8 +49,6 @@ if NOT exist "%DOTNET_LOCAL_PATH%" (
   echo ERROR: Could not install dotnet cli correctly. See '%INIT_TOOLS_LOG%' for more details.
   goto :EOF
 )
-
-echo %DOTNET_VERSION% > %DOTNET_SEMAPHORE%
 
 :afterdotnetrestore
 
