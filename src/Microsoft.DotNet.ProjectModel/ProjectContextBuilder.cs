@@ -32,6 +32,8 @@ namespace Microsoft.DotNet.ProjectModel
         private string PackagesDirectory { get; set; }
 
         private string ReferenceAssembliesPath { get; set; }
+        
+        private bool IsDesignTime { get; set; }
 
         private Func<string, Project> ProjectResolver { get; set; }
 
@@ -114,6 +116,12 @@ namespace Microsoft.DotNet.ProjectModel
         public ProjectContextBuilder WithReaderSettings(ProjectReaderSettings settings)
         {
             Settings = settings;
+            return this;
+        }
+        
+        public ProjectContextBuilder AsDesignTime()
+        {
+            IsDesignTime = true;
             return this;
         }
 
@@ -389,7 +397,12 @@ namespace Microsoft.DotNet.ProjectModel
             }
         }
 
-        private void ScanLibraries(LockFileTarget target, LockFileLookup lockFileLookup, Dictionary<LibraryKey, LibraryDescription> libraries, MSBuildDependencyProvider msbuildResolver, PackageDependencyProvider packageResolver, ProjectDependencyProvider projectResolver)
+        private void ScanLibraries(LockFileTarget target,
+                                   LockFileLookup lockFileLookup,
+                                   Dictionary<LibraryKey, LibraryDescription> libraries,
+                                   MSBuildDependencyProvider msbuildResolver,
+                                   PackageDependencyProvider packageResolver,
+                                   ProjectDependencyProvider projectResolver)
         {
             foreach (var library in target.Libraries)
             {
@@ -404,7 +417,7 @@ namespace Microsoft.DotNet.ProjectModel
                     {
                         if (MSBuildDependencyProvider.IsMSBuildProjectLibrary(projectLibrary))
                         {
-                            description = msbuildResolver.GetDescription(TargetFramework, projectLibrary, library);
+                            description = msbuildResolver.GetDescription(TargetFramework, projectLibrary, library, IsDesignTime);
                             type = LibraryType.MSBuildProject;
                         }
                         else
@@ -483,7 +496,7 @@ namespace Microsoft.DotNet.ProjectModel
         {
             var projectLockJsonPath = Path.Combine(projectDir, LockFile.FileName);
             return File.Exists(projectLockJsonPath) ?
-                        LockFileReader.Read(Path.Combine(projectDir, LockFile.FileName)) :
+                        LockFileReader.Read(Path.Combine(projectDir, LockFile.FileName), designTime: false) :
                         null;
         }
 
