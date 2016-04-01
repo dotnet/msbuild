@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
