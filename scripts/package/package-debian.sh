@@ -171,6 +171,10 @@ copy_files_to_debian_layout(){
 
     # Copy Manpages
     cp -a "$MANPAGE_DIR/sdk/." "$PACKAGE_LAYOUT_DIR/docs"
+
+    # Append Version to all manpage files
+    for manpage in "$PACKAGE_LAYOUT_DIR/docs/"*.1; do mv "$manpage" "${manpage%.1}"; done
+    for manpage in "$PACKAGE_LAYOUT_DIR/docs/"*; do mv "$manpage" "${manpage}-${DOTNET_CLI_VERSION}.1"; done
 }
 
 create_debian_package(){
