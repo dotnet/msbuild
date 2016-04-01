@@ -8,8 +8,8 @@
       "type": "platform",
       "version": "1.0.0-rc2-23931"
     },
-    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160321-04",
-    "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160321-04",
+    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160329-01",
+    "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160329-01",
     "Microsoft.DiaSymReader.Native": "1.3.3"
   },
   "frameworks": {
