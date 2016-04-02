@@ -205,8 +205,8 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var dotnet = DotNetCli.Stage0;
 
-            dotnet.Restore("--verbosity", "verbose").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "src")).Execute().EnsureSuccessful();
-            dotnet.Restore("--verbosity", "verbose", "--infer-runtimes").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools")).Execute().EnsureSuccessful();
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "src")).Execute().EnsureSuccessful();
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools")).Execute().EnsureSuccessful();
 
             return c.Success();
         }

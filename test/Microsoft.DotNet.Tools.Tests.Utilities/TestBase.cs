@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string.Equals("on", val, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected void TestExecutable(string outputDir,
+        protected CommandResult TestExecutable(string outputDir,
             string executableName,
             string expectedOutput)
         {
@@ -123,9 +123,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             var result = executableCommand.ExecuteWithCapturedOutput(string.Join(" ", args));
 
-            result.Should().HaveStdOut(expectedOutput);
+            if (!string.IsNullOrEmpty(expectedOutput))
+            { 
+                result.Should().HaveStdOut(expectedOutput);
+            }
             result.Should().NotHaveStdErr();
             result.Should().Pass();
+            return result;
         }
 
         protected void TestOutputExecutable(

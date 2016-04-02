@@ -424,7 +424,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private IEnumerable<LibraryAsset> PopulateAssets(TargetLibraryWithAssets library, IEnumerable<LockFileItem> section)
         {
-            foreach (var assemblyPath in section)
+            foreach (var assemblyPath in section.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a.Path)))
             {
                 yield return LibraryAsset.CreateFromRelativePath(library.Path, assemblyPath.Path);
             }

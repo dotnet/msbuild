@@ -42,6 +42,7 @@ pushd "$Stage2Dir"
 
 try {
     .\dotnet restore `
+        --infer-runtimes `
         $testDir `
         -f https://www.myget.org/F/dotnet-buildtools/api/v3/index.json | Out-Host
 

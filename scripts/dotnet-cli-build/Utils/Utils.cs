@@ -96,8 +96,24 @@ namespace Microsoft.DotNet.Cli.Build
                     File.SetAttributes(file, FileAttributes.Normal);
                     File.Delete(file);
                 }
-                System.Threading.Thread.Sleep(1); 
-                Directory.Delete(path, true);
+                var retry = 5;
+                while (retry >= 0)
+                {
+                    try
+                    {
+                        Directory.Delete(path, true);
+                        return;
+                    }
+                    catch (IOException ex)
+                    {
+                        if (retry == 0)
+                        {
+                            throw;
+                        }
+                        System.Threading.Thread.Sleep(200);
+                        retry--;
+                    }
+                }
             }
         }
 

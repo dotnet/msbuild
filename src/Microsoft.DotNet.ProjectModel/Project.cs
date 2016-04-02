@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
@@ -91,7 +92,7 @@ namespace Microsoft.DotNet.ProjectModel
         public string RawRuntimeOptions { get; set; }
 
         public bool IsTestProject => !string.IsNullOrEmpty(TestRunner);
-
+        
         public IEnumerable<TargetFrameworkInformation> GetTargetFrameworks()
         {
             return _targetFrameworks.Values;
