@@ -158,6 +158,7 @@ create_empty_debian_layout(){
     mkdir "$PACKAGE_LAYOUT_DIR/package_root"
     mkdir "$PACKAGE_LAYOUT_DIR/samples"
     mkdir "$PACKAGE_LAYOUT_DIR/docs"
+    mkdir "$PACKAGE_LAYOUT_DIR/DEBIAN"
 }
 
 copy_files_to_debian_layout(){
@@ -175,6 +176,11 @@ copy_files_to_debian_layout(){
     # Append Version to all manpage files
     for manpage in "$PACKAGE_LAYOUT_DIR/docs/"*.1; do mv "$manpage" "${manpage%.1}"; done
     for manpage in "$PACKAGE_LAYOUT_DIR/docs/"*; do mv "$manpage" "${manpage}-${DOTNET_CLI_VERSION}.1"; done
+
+    # Copy postinstall
+    cp "$PACKAGING_ROOT/postinst" "$PACKAGE_LAYOUT_DIR/$"
+    #cp "$PACKAGING_ROOT/postinst" "PACKAGE_LAYOUT_DIR/package_root"
+    #cp "$PACKAGING_ROOT/postinst" "$PACKAGE_LAYOUT_DIR/DEBIAN/postinst"
 }
 
 create_debian_package(){
