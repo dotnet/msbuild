@@ -218,6 +218,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             projectToolsCommandResolver.GenerateDepsJsonFile(lockFile, depsJsonFile);
 
             File.ReadAllText(depsJsonFile).Should().Be("temp");
+            File.Delete(depsJsonFile);
         }
 
         private ProjectToolsCommandResolver SetupProjectToolsCommandResolver(

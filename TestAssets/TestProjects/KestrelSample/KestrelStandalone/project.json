@@ -12,9 +12,9 @@
     "../src/*.cs"
   ],
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "dependencies": {
-        "Microsoft.NETCore.App": "1.0.0-rc2-24008"
+        "Microsoft.NETCore.App": "1.0.0-rc2-3002306"
       },
       "imports": [
         "dnxcore50",

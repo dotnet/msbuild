@@ -422,6 +422,9 @@ namespace Microsoft.DotNet.Cli.Build
             File.Copy(
                 Path.Combine(Dirs.Corehost, HostPolicyBaseName),
                 Path.Combine(SharedFrameworkNameAndVersionRoot, HostPolicyBaseName), true);
+            File.Copy(
+                Path.Combine(Dirs.Corehost, DotnetHostFxrBaseName),
+                Path.Combine(SharedFrameworkNameAndVersionRoot, DotnetHostFxrBaseName), true);
 
             if (File.Exists(Path.Combine(SharedFrameworkNameAndVersionRoot, "mscorlib.ni.dll")))
             {
