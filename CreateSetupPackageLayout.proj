@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="dir.props" />
+  <Import Project="$(MicroBuildDir)MicroBuild.Core.props" />
 
   <PropertyGroup>
       <SetupPackageLayoutDir>$(BinDir)Setup\</SetupPackageLayoutDir>
@@ -78,6 +79,17 @@
     <PkgDef Include="$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef" />
   </ItemGroup>
 
+  <!-- Needed for the MicroBuild signing plugin -->
+  <ItemGroup>
+    <SigningTarget Include="$(SetupPackageOutputFile)"/>
+    <FilesToSign Include="@(SigningTarget)">
+      <Authenticode>Vsix</Authenticode>
+    </FilesToSign>
+  </ItemGroup>
+  <PropertyGroup>
+    <OutDir>$(SetupPackageLayoutDir)</OutDir>
+  </PropertyGroup>
+
   <Target Name="Build">
     <Error Text="FopCreator.exe not found (MS internal only tool)."
            Condition="!Exists('$(PackagesDir)\VS.Tools.Setup.FopCreator.1.0.16022601\FopCreator.exe')" />
@@ -87,11 +99,18 @@
     
     <!-- Copy our binaries -->
     <Copy SourceFiles="@(BinX86Output)"
-          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\15.1\Bin" />
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin" />
 
     <Copy SourceFiles="@(PkgDef)"
           DestinationFolder="$(SetupPackageLayoutDir)Common7\IDE\CommonExtensions\MSBuild" />
 
     <Exec Command="$(PackagesDir)\VS.Tools.Setup.FopCreator.1.0.16022601\FopCreator.exe /layoutdir $(SetupPackageLayoutDir) /outputfopx $(SetupPackageOutputFile)" />
+
+    <CallTarget Targets="AfterBuild" />
   </Target>
+
+  <!-- MicroBuild signing plugin needs an AfterBuild target to run -->
+  <Target Name="AfterBuild" />
+
+  <Import Project="$(MicroBuildDir)MicroBuild.Core.targets" />
 </Project>
