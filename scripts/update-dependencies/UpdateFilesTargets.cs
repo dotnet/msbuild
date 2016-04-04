@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Scripts
             const string coreFxIdPattern = @"^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore.*)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))$";
             const string coreFxIdExclusionPattern = @"System.CommandLine";
 
-            List<DependencyInfo> dependencyInfos = c.GetDependencyInfo();
+            List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
             dependencyInfos.Add(new DependencyInfo()
             {
                 Name = "CoreFx",
@@ -46,25 +46,6 @@ namespace Microsoft.DotNet.Scripts
             return c.Success();
         }
 
-        private static List<DependencyInfo> GetDependencyInfo(this BuildTargetContext c)
-        {
-            const string propertyName = "DependencyInfo";
-
-            List<DependencyInfo> dependencyInfos;
-            object dependencyInfosObj;
-            if (c.BuildContext.Properties.TryGetValue(propertyName, out dependencyInfosObj))
-            {
-                dependencyInfos = (List<DependencyInfo>)dependencyInfosObj;
-            }
-            else
-            {
-                dependencyInfos = new List<DependencyInfo>();
-                c.BuildContext[propertyName] = dependencyInfos;
-            }
-
-            return dependencyInfos;
-        }
-
         [Target(nameof(ReplaceProjectJson), nameof(ReplaceCrossGen))]
         public static BuildTargetResult ReplaceVersions(BuildTargetContext c) => c.Success();
 
@@ -74,7 +55,7 @@ namespace Microsoft.DotNet.Scripts
         [Target]
         public static BuildTargetResult ReplaceProjectJson(BuildTargetContext c)
         {
-            List<DependencyInfo> dependencyInfos = c.GetDependencyInfo();
+            List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
             IEnumerable<string> projectJsonFiles = Enumerable.Union(
                 Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
@@ -157,6 +138,9 @@ namespace Microsoft.DotNet.Scripts
                                 dependencyProperty.Value = newVersion;
                             }
 
+                            // mark the DependencyInfo as updated so we can tell which dependencies were updated
+                            dependencyInfo.IsUpdated = true;
+
                             return true;
                         }
                     }
@@ -194,21 +178,13 @@ namespace Microsoft.DotNet.Scripts
                 .SelectMany(o => o.Children<JProperty>());
         }
 
-        private class DependencyInfo
-        {
-            public string Name { get; set; }
-            public string IdPattern { get; set; }
-            public string IdExclusionPattern { get; set; }
-            public string NewReleaseVersion { get; set; }
-        }
-
         /// <summary>
         /// Replaces version number that is hard-coded in the CrossGen script.
         /// </summary>
         [Target]
         public static BuildTargetResult ReplaceCrossGen(BuildTargetContext c)
         {
-            DependencyInfo coreFXInfo = c.GetDependencyInfo().Single(d => d.Name == "CoreFx");
+            DependencyInfo coreFXInfo = c.GetDependencyInfos().Single(d => d.Name == "CoreFx");
 
             string compileTargetsPath = Path.Combine(Dirs.RepoRoot, @"scripts\dotnet-cli-build\CompileTargets.cs");
             string compileTargetsContent = File.ReadAllText(compileTargetsPath);
