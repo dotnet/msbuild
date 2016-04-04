@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Models
 {
@@ -23,7 +24,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
         public string Type { get; private set; }
 
         public bool Resolved { get; private set; }
-        
+
         public IEnumerable<DependencyItem> Dependencies { get; private set; }
 
         public IEnumerable<DiagnosticMessageView> Errors { get; private set; }
@@ -60,7 +61,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
             {
                 Name = library.Identity.Name,
                 DisplayName = library.Identity.Name,
-                Version = library.Identity.Version?.ToNormalizedString(),
+                Version = (library.Identity.Version ?? new NuGetVersion("1.0.0")).ToNormalizedString(),
                 Type = library.Identity.Type.Value,
                 Resolved = library.Resolved,
                 Path = library.Path,

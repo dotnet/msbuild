@@ -438,12 +438,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 client.Initialize(projectPath);
                 var messages = client.DrainAllMessages();
                 messages.AssertDoesNotContain(MessageTypes.Error);
+                // PrintAllMessages(new[] { messages.RetrieveSingleMessage(MessageTypes.Dependencies) });
                 messages.RetrieveSingleMessage(MessageTypes.Dependencies)
                         .RetrieveDependency("ClassLibrary4")
                         .AssertProperty<object>(
                             "Version",
                             v => !string.IsNullOrEmpty(v.ToString()),
-                            v => "Version string shouldn't be empty.");
+                            v => $"Version string shouldn't be empty. Value [{v.ToString()}]");
             }
         }
 
