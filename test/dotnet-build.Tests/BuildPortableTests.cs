@@ -2,13 +2,13 @@
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using Microsoft.DotNet.TestFramework;
+using Newtonsoft.Json.Linq;
+using FluentAssertions;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class BuildPortableTests : TestBase
     {
-  
-
         [Fact]
         public void BuildingAPortableProjectProducesDepsJsonFile()
         {
@@ -47,6 +47,30 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var netstandardappOutput = Build(testInstance);
 
             netstandardappOutput.Should().Exist().And.HaveFile("PortableApp.runtimeconfig.json");
+        }
+
+        [Fact]
+        public void TheRuntimeOptionsGetsCopiedFromProjectJsonToRuntimeConfigJson()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
+                .WithLockFiles();
+
+            var netstandardappOutput = Build(testInstance);
+
+            var runtimeConfigJsonPath = Path.Combine(netstandardappOutput.FullName, "PortableApp.runtimeconfig.json");
+
+            using (var stream = new FileStream(runtimeConfigJsonPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var reader = new StreamReader(stream);
+
+                var rawProject = JObject.Parse(reader.ReadToEnd());
+                var runtimeOptions = rawProject["runtimeOptions"];
+
+                runtimeOptions["somethingString"].Value<string>().Should().Be("anything");
+                runtimeOptions["somethingBoolean"].Value<bool>().Should().BeTrue();
+                runtimeOptions["someArray"].ToObject<string[]>().Should().Contain("one", "two");
+                runtimeOptions["someObject"].Value<JObject>()["someProperty"].Value<string>().Should().Be("someValue");
+            }
         }
 
         [Fact]

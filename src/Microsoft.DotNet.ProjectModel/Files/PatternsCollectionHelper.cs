@@ -1,11 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.JsonParser.Sources;
 
 namespace Microsoft.DotNet.ProjectModel.Files
 {
@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
     {
         private static readonly char[] PatternSeparator = new[] { ';' };
 
-        public static IEnumerable<string> GetPatternsCollection(JsonObject rawProject,
+        public static IEnumerable<string> GetPatternsCollection(JObject rawProject,
                                                                 string projectDirectory,
                                                                 string projectFilePath,
                                                                 string propertyName,
@@ -24,29 +24,29 @@ namespace Microsoft.DotNet.ProjectModel.Files
 
             try
             {
-                if (!rawProject.Keys.Contains(propertyName))
+                JToken propertyNameToken;
+                if (!rawProject.TryGetValue(propertyName, out propertyNameToken))
                 {
                     return CreateCollection(projectDirectory, propertyName, defaultPatterns, literalPath);
                 }
 
-                var valueInString = rawProject.ValueAsString(propertyName);
-                if (valueInString != null)
+                if (propertyNameToken.Type == JTokenType.String)
                 {
-                    return CreateCollection(projectDirectory, propertyName, new string[] { valueInString }, literalPath);
+                    return CreateCollection(projectDirectory, propertyName, new string[] { propertyNameToken.Value<string>() }, literalPath);
                 }
 
-                var valuesInArray = rawProject.ValueAsStringArray(propertyName);
-                if (valuesInArray != null)
+                if (propertyNameToken.Type == JTokenType.Array)
                 {
+                    var valuesInArray = propertyNameToken.Values<string>();
                     return CreateCollection(projectDirectory, propertyName, valuesInArray.Select(s => s.ToString()), literalPath);
                 }
             }
             catch (Exception ex)
             {
-                throw FileFormatException.Create(ex, rawProject.Value(propertyName), projectFilePath);
+                throw FileFormatException.Create(ex, rawProject.Value<JToken>(propertyName), projectFilePath);
             }
 
-            throw FileFormatException.Create("Value must be either string or array.", rawProject.Value(propertyName), projectFilePath);
+            throw FileFormatException.Create("Value must be either string or array.", rawProject.Value<JToken>(propertyName), projectFilePath);
         }
 
         private static IEnumerable<string> CreateCollection(string projectDirectory, string propertyName, IEnumerable<string> patternsStrings, bool literalPath)

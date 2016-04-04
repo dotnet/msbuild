@@ -8,6 +8,8 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
 using System.Linq;
 using Microsoft.DotNet.TestFramework;
+using Newtonsoft.Json.Linq;
+using FluentAssertions;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
 {
@@ -22,6 +24,41 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var netstandardappOutput = Build(testInstance);
 
             netstandardappOutput.Should().Exist().And.HaveFile("StandaloneApp.runtimeconfig.dev.json");
+        }
+
+        [Fact]
+        public void BuildingAStandAloneProjectProducesARuntimeConfigJsonFile()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
+                .WithLockFiles();
+
+            var netstandardappOutput = Build(testInstance);
+
+            netstandardappOutput.Should().Exist().And.HaveFile("StandaloneApp.runtimeconfig.json");
+        }
+
+        [Fact]
+        public void TheRuntimeOptionsGetsCopiedFromProjectJsonToRuntimeConfigJson()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
+                .WithLockFiles();
+
+            var netstandardappOutput = Build(testInstance);
+
+            var runtimeConfigJsonPath = Path.Combine(netstandardappOutput.FullName, "StandaloneApp.runtimeconfig.json");
+
+            using (var stream = new FileStream(runtimeConfigJsonPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var reader = new StreamReader(stream);
+
+                var rawProject = JObject.Parse(reader.ReadToEnd());
+                var runtimeOptions = rawProject["runtimeOptions"];
+
+                runtimeOptions["somethingString"].Value<string>().Should().Be("anything");
+                runtimeOptions["somethingBoolean"].Value<bool>().Should().BeTrue();
+                runtimeOptions["someArray"].ToObject<string[]>().Should().Contain("one", "two");
+                runtimeOptions["someObject"].Value<JObject>()["someProperty"].Value<string>().Should().Be("someValue");
+            }
         }
 
         public DirectoryInfo Build(TestInstance testInstance)

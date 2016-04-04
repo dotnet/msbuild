@@ -16,5 +16,14 @@
         }
       }
     }
+  },
+
+  "runtimeOptions": {
+    "somethingString": "anything",
+    "somethingBoolean": true,
+    "someArray": ["one", "two"],
+    "someObject": {
+      "someProperty": "someValue"
+    }
   }
 }

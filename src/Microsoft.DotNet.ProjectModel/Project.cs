@@ -88,6 +88,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IDictionary<string, IEnumerable<string>> Scripts { get; } = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
 
+        public string RawRuntimeOptions { get; set; }
+
         public bool IsTestProject => !string.IsNullOrEmpty(TestRunner);
 
         public IEnumerable<TargetFrameworkInformation> GetTargetFrameworks()

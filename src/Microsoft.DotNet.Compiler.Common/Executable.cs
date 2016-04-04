@@ -131,31 +131,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 var runtimeOptions = new JObject();
                 json.Add("runtimeOptions", runtimeOptions);
 
-                var redistPackage = _context.RootProject.Dependencies
-                    .Where(r => r.Type.Equals(LibraryDependencyType.Platform))
-                    .ToList();
-                if(redistPackage.Count > 0)
-                {
-                    if(redistPackage.Count > 1)
-                    {
-                        throw new InvalidOperationException("Multiple packages with type: \"platform\" were specified!");
-                    }
-                    var packageName = redistPackage.Single().Name;
-
-                    var redistExport = exporter.GetAllExports()
-                        .FirstOrDefault(e => e.Library.Identity.Name.Equals(packageName));
-                    if (redistExport == null)
-                    {
-                        throw new InvalidOperationException($"Platform package '{packageName}' was not present in the graph.");
-                    }
-                    else
-                    {
-                        var framework = new JObject(
-                            new JProperty("name", redistExport.Library.Identity.Name),
-                            new JProperty("version", redistExport.Library.Identity.Version.ToNormalizedString()));
-                        runtimeOptions.Add("framework", framework);
-                    }
-                }
+                WriteFramework(runtimeOptions, exporter);
+                WriteRuntimeOptions(runtimeOptions);
 
                 var runtimeConfigJsonFile =
                     Path.Combine(_runtimeOutputPath, _compilerOptions.OutputName + FileNameSuffixes.RuntimeConfigJson);
@@ -165,6 +142,49 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                     writer.Formatting = Formatting.Indented;
                     json.WriteTo(writer);
                 }
+            }
+        }
+
+        private void WriteFramework(JObject runtimeOptions, LibraryExporter exporter)
+        {
+            var redistPackage = _context.RootProject.Dependencies
+                      .Where(r => r.Type.Equals(LibraryDependencyType.Platform))
+                      .ToList();
+            if (redistPackage.Count > 0)
+            {
+                if (redistPackage.Count > 1)
+                {
+                    throw new InvalidOperationException("Multiple packages with type: \"platform\" were specified!");
+                }
+                var packageName = redistPackage.Single().Name;
+
+                var redistExport = exporter.GetAllExports()
+                    .FirstOrDefault(e => e.Library.Identity.Name.Equals(packageName));
+                if (redistExport == null)
+                {
+                    throw new InvalidOperationException($"Platform package '{packageName}' was not present in the graph.");
+                }
+                else
+                {
+                    var framework = new JObject(
+                        new JProperty("name", redistExport.Library.Identity.Name),
+                        new JProperty("version", redistExport.Library.Identity.Version.ToNormalizedString()));
+                    runtimeOptions.Add("framework", framework);
+                }
+            }
+        }
+
+        private void WriteRuntimeOptions(JObject runtimeOptions)
+        {
+            if (string.IsNullOrEmpty(_context.ProjectFile.RawRuntimeOptions))
+            {
+                return;
+            }
+
+            var runtimeOptionsFromProjectJson = JObject.Parse(_context.ProjectFile.RawRuntimeOptions);
+            foreach (var runtimeOption in runtimeOptionsFromProjectJson)
+            {
+                runtimeOptions.Add(runtimeOption.Key, runtimeOption.Value);
             }
         }
 

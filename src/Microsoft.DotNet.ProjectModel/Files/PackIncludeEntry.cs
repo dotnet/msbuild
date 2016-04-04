@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Microsoft.Extensions.JsonParser.Sources;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectModel.Files
 {
@@ -13,9 +14,14 @@ namespace Microsoft.DotNet.ProjectModel.Files
         public int Line { get; }
         public int Column { get; }
 
-        internal PackIncludeEntry(string target, JsonValue json)
-            : this(target, ExtractValues(json), json.Line, json.Column)
+        internal PackIncludeEntry(string target, JToken json)
         {
+            Target = target;
+            SourceGlobs = ExtractValues(json);
+
+            var lineInfo = (IJsonLineInfo)json;
+            Line = lineInfo.LineNumber;
+            Column = lineInfo.LinePosition;
         }
 
         public PackIncludeEntry(string target, string[] sourceGlobs, int line, int column)
@@ -26,18 +32,16 @@ namespace Microsoft.DotNet.ProjectModel.Files
             Column = column;
         }
 
-        private static string[] ExtractValues(JsonValue json)
+        private static string[] ExtractValues(JToken json)
         {
-            var valueAsString = json as JsonString;
-            if (valueAsString != null)
+            if (json.Type == JTokenType.String)
             {
-                return new string[] { valueAsString.Value };
+                return new string[] { json.Value<string>() };
             }
 
-            var valueAsArray = json as JsonArray;
-            if(valueAsArray != null)
+            if(json.Type == JTokenType.Array)
             {
-                return valueAsArray.Values.Select(v => v.ToString()).ToArray();
+                return json.Select(v => v.ToString()).ToArray();
             }
             return new string[0];
         }

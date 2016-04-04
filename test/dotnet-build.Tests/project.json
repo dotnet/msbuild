@@ -9,6 +9,8 @@
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },
+    "Newtonsoft.Json": "7.0.1",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23929",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-128011-22"
   },

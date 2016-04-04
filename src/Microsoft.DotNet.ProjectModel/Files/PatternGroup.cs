@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Extensions.JsonParser.Sources;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectModel.Files
 {
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
             _matcher.AddExcludePatterns(ExcludePatterns);
         }
 
-        internal static PatternGroup Build(JsonObject rawProject,
+        internal static PatternGroup Build(JObject rawProject,
                                            string projectDirectory,
                                            string projectFilePath,
                                            string name,
