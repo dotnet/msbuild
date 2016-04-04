@@ -117,12 +117,10 @@ namespace Microsoft.DotNet.Cli
             };
 
             int exitCode;            
-            var arguments = string.Empty;
             Func<string[], int> builtIn;
             if (builtIns.TryGetValue(command, out builtIn))
             {
                 exitCode = builtIn(appArgs.ToArray());
-                arguments = string.Join(" ", appArgs);
             }
             else
             {
@@ -130,7 +128,6 @@ namespace Microsoft.DotNet.Cli
                     .ForwardStdErr()
                     .ForwardStdOut()
                     .Execute();
-                arguments = result.StartInfo.Arguments;
                 exitCode = result.ExitCode;
             }
 

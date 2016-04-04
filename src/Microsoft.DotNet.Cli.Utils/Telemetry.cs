@@ -8,11 +8,11 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class Telemetry : ITelemetry
     {
-        private static bool _isInitialized = false;
-        private static TelemetryClient _client = null;
+        private bool _isInitialized = false;
+        private TelemetryClient _client = null;
 
-        private static Dictionary<string, string> _commonProperties = null;
-        private static Dictionary<string, double> _commonMeasurements = null;
+        private Dictionary<string, string> _commonProperties = null;
+        private Dictionary<string, double> _commonMeasurements = null;
 
         private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
@@ -52,6 +52,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 // we dont want to fail the tool if telemetry fais. We should be able to detect abnormalities from data 
                 // at the server end
+                Debug.Fail("Exception during telemetry initialization");
             }
         }
 
@@ -70,7 +71,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 _client.TrackEvent(eventName, eventProperties, eventMeasurements);
                 _client.Flush();
             }
-            catch (Exception) { }
+            catch (Exception) 
+            {
+                Debug.Fail("Exception during TrackEvent");
+            }
         }
 
 
@@ -96,9 +100,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private Dictionary<string, string> GetEventProperties(IDictionary<string, string> properties)
         {
-            Dictionary<string, string> eventProperties = new Dictionary<string, string>(_commonProperties);
             if (properties != null)
             {
+                var eventProperties = new Dictionary<string, string>(_commonProperties);
                 foreach (var property in properties)
                 {
                     if (eventProperties.ContainsKey(property.Key))
@@ -110,8 +114,12 @@ namespace Microsoft.DotNet.Cli.Utils
                         eventProperties.Add(property.Key, property.Value);
                     }
                 }
+                return eventProperties;
             }
-            return eventProperties;
+            else 
+            {
+                return _commonProperties;    
+            }
         }
     }
 }
