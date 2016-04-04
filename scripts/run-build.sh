@@ -103,7 +103,7 @@ fi
 echo "Restoring Build Script projects..."
 (
     cd $DIR
-    dotnet restore --disable-parallel --infer-runtimes
+    dotnet restore --infer-runtimes
 )
 
 # Build the builder

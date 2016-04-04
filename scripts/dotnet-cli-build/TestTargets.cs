@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore("--verbosity", "verbose", "--infer-runtimes", "--disable-parallel")
+            dotnet.Restore("--verbosity", "verbose", "--infer-runtimes")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"))
                 .Execute()
                 .EnsureSuccessful();
@@ -87,8 +87,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var dotnet = DotNetCli.Stage2;
             dotnet.Restore(
-                "--verbosity", "verbose", 
-                "--disable-parallel", 
+                "--verbosity", "verbose",
                 "--infer-runtimes",
                 "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
@@ -96,15 +95,13 @@ namespace Microsoft.DotNet.Cli.Build
 
             // The 'ProjectModelServer' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
             dotnet.Restore(
-                "--verbosity", "verbose", 
-                "--disable-parallel", 
+                "--verbosity", "verbose",
                 "--infer-runtimes")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthTestProjects"))
                 .Execute();
 
             dotnet.Restore(
-                "--verbosity", "verbose", 
-                "--disable-parallel", 
+                "--verbosity", "verbose",
                 "--infer-runtimes")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthUpdateSearchPathSample"))
                 .Execute();
@@ -119,7 +116,7 @@ namespace Microsoft.DotNet.Cli.Build
             var dotnet = DotNetCli.Stage2;
 
             dotnet.Restore("--verbosity", "verbose", 
-                "--disable-parallel", "--infer-runtimes",
+                "--infer-runtimes",
                 "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
                 .Execute().EnsureSuccessful();
@@ -257,7 +254,7 @@ namespace Microsoft.DotNet.Cli.Build
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
 
             CleanNuGetTempCache();
-            DotNetCli.Stage2.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes","--fallbacksource", Dirs.TestPackages)
+            DotNetCli.Stage2.Restore("--verbosity", "verbose", "--infer-runtimes", "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test"))
                 .Execute()
                 .EnsureSuccessful();
