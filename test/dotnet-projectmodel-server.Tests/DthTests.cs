@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -410,6 +411,39 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 {
                     messages.ContainsMessage(MessageTypes.Error);
                 }
+            }
+        }
+
+        [Fact]
+        public void AddMSBuildReferenceBeforeRestore()
+        {
+            var tam = new TestAssetsManager(
+                Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "MSBuildReferencesProjects"));
+
+            // var appName = "EmptyNetCoreApp";
+            var projectPath = tam.CreateTestInstance("ValidCase01").WithLockFiles().TestRoot;
+            projectPath = Path.Combine(projectPath, "src", "MainApp");
+
+            var projectFilePath = Path.Combine(projectPath, Project.FileName);
+            var projectJson = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(projectFilePath));
+
+            ((JObject)projectJson["frameworks"]["net46"]["dependencies"])
+                .Add("ClassLibrary4", JToken.FromObject(new { target = "project" }));
+
+            File.WriteAllText(projectFilePath, JsonConvert.SerializeObject(projectJson));
+
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server, _loggerFactory))
+            {
+                client.Initialize(projectPath);
+                var messages = client.DrainAllMessages();
+                messages.AssertDoesNotContain(MessageTypes.Error);
+                messages.RetrieveSingleMessage(MessageTypes.Dependencies)
+                        .RetrieveDependency("ClassLibrary4")
+                        .AssertProperty<object>(
+                            "Version",
+                            v => !string.IsNullOrEmpty(v.ToString()),
+                            v => "Version string shouldn't be empty.");
             }
         }
 
