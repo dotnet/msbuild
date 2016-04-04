@@ -26,7 +26,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 :: Rebuild with bootstrapped msbuild
 set MSBUILDLOGPATH=%~dp0msbuild_local.log
-set MSBUILDCUSTOMPATH="%~dp0\bin\Bootstrap\15.0\Bin\MSBuild.exe"
+set MSBUILDCUSTOMPATH="%~dp0\bin\Bootstrap\15.1\Bin\MSBuild.exe"
 "%~dp0build.cmd" /t:RebuildAndTest /p:BootstrappedMSBuild=true
 if %ERRORLEVEL% NEQ 0 (
     echo.

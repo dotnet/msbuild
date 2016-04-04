@@ -87,7 +87,7 @@
     
     <!-- Copy our binaries -->
     <Copy SourceFiles="@(BinX86Output)"
-          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\15.0\Bin" />
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\15.1\Bin" />
 
     <Copy SourceFiles="@(PkgDef)"
           DestinationFolder="$(SetupPackageLayoutDir)Common7\IDE\CommonExtensions\MSBuild" />
