@@ -47,4 +47,4 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo ** Packaging complete.
-echo ** MSBuild = %~dp0\bin\bootstrap\15.0\MSBuild.exe
+echo ** MSBuild = %~dp0\bin\bootstrap\15.1\MSBuild.exe

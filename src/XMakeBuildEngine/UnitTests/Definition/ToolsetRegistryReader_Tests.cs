@@ -523,7 +523,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void GetDefaultOverrideToolsVersionFromRegistry_Basic()
         {
-            _currentVersionRegistryKey.SetValue("DefaultOverrideToolsVersion", "15.0");
+            _currentVersionRegistryKey.SetValue("DefaultOverrideToolsVersion", "15.1");
 
             ToolsetReader reader = GetStandardRegistryReader();
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -532,7 +532,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Equal("15.0", defaultOverrideToolsVersion);
+            Assert.Equal("15.1", defaultOverrideToolsVersion);
         }
 
         /// <summary>

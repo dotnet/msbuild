@@ -20,7 +20,7 @@ namespace Microsoft.Build.Shared
         /// The most current Visual Studio Version known to this version of MSBuild. 
         /// </summary>
 #if STANDALONEBUILD
-        internal const string CurrentVisualStudioVersion = "15.0";
+        internal const string CurrentVisualStudioVersion = "15.1";
 #else
         internal const string CurrentVisualStudioVersion = Microsoft.VisualStudio.Internal.BrandNames.VSGeneralVersion;
 #endif
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Shared
         /// The most current VSGeneralAssemblyVersion known to this version of MSBuild. 
         /// </summary>
 #if STANDALONEBUILD
-        internal const string CurrentAssemblyVersion = "15.0.0.0";
+        internal const string CurrentAssemblyVersion = "15.1.0.0";
 #else
         internal const string CurrentAssemblyVersion = Microsoft.VisualStudio.Internal.BrandNames.VSGeneralAssemblyVersion;
 #endif
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Shared
             get
             {
 #if STANDALONEBUILD
-                return "15.0";
+                return "15.1";
 #else
                 Version thisAssemblyVersion = new Version(ThisAssembly.Version);
                 // "12.0.0.0" --> "12.0"
