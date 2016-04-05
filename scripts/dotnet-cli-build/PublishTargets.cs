@@ -68,7 +68,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(
             nameof(PublishTargets.PublishCombinedHostFrameworkArchiveToAzure),
-            nameof(PublishTargets.PublishCombinedHostFrameworkSdkArchiveToAzure))]
+            nameof(PublishTargets.PublishCombinedHostFrameworkSdkArchiveToAzure),
+            nameof(PublishTargets.PublishSDKSymbolsArchiveToAzure))]
         public static BuildTargetResult PublishArchivesToAzure(BuildTargetContext c) => c.Success();
 
         [Target(
@@ -170,6 +171,17 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var version = CliNuGetVersion;
             var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile");
+
+            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
+
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishSDKSymbolsArchiveToAzure(BuildTargetContext c)
+        {
+            var version = CliNuGetVersion;
+            var archiveFile = c.BuildContext.Get<string>("SdkSymbolsCompressedFile");
 
             AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
 

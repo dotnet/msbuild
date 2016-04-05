@@ -243,6 +243,9 @@ namespace Microsoft.DotNet.Cli.Build
                 outputDir: Dirs.Stage1);
 
             CleanOutputDir(Path.Combine(Dirs.Stage1, "sdk"));
+            FS.CopyRecursive(Dirs.Stage1, Dirs.Stage1Symbols);
+
+            RemovePdbsFromDir(Path.Combine(Dirs.Stage1, "sdk"));
 
             return result;
         }
@@ -293,13 +296,23 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             CleanOutputDir(Path.Combine(Dirs.Stage2, "sdk"));
+            FS.CopyRecursive(Dirs.Stage2, Dirs.Stage2Symbols);
+
+            RemovePdbsFromDir(Path.Combine(Dirs.Stage2, "sdk"));
 
             return c.Success();
         }
 
         private static void CleanOutputDir(string directory)
         {
-            FS.RmFilesInDirRecursive(directory, "vbc.exe");
+            foreach (var file in FilesToClean)
+            {
+                FS.RmFilesInDirRecursive(directory, file);
+            }
+        }
+
+        private static void RemovePdbsFromDir(string directory)
+        {
             FS.RmFilesInDirRecursive(directory, "*.pdb");
         }
 
