@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                return new Program().ProcessArgs(args, new Telemetry());
+                return Program.ProcessArgs(args, new Telemetry());
             }
             catch (CommandUnknownException e)
             {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
 
         }
 
-        internal int ProcessArgs(string[] args, ITelemetry telemetryClient)
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 

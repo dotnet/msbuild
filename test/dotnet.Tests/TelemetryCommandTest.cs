@@ -27,10 +27,9 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void TestProjectDependencyIsNotAvailableThroughDriver()
         {
-            Program program = new Program();
             MockTelemetry mockTelemetry = new MockTelemetry();
             string[] args = { "help" };
-            program.ProcessArgs(args, mockTelemetry);
+            Program.ProcessArgs(args, mockTelemetry);
             Assert.Equal(mockTelemetry.EventName, args[0]);
         }
     }
