@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Fact]
-        public void TheRuntimeOptionsGetsCopiedFromProjectJsonToRuntimeConfigJson()
+        public void RuntimeOptionsGetsCopiedToRuntimeConfigJsonForAStandaloneApp()
         {
             var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
                 .WithLockFiles();
