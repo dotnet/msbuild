@@ -12,8 +12,6 @@ using Xunit;
 using System.Threading.Tasks;
 using FluentAssertions;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
-
 namespace Microsoft.DotNet.Kestrel.Tests
 {
     public class DotnetTest : TestBase
