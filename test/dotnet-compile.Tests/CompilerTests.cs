@@ -148,26 +148,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         }
 
         [Fact]
-        public void EmbeddedDependencyContextIsValidOnBuild()
-        {
-            var testProjectPath = Path.Combine(RepoRoot, "TestAssets", "TestProjects", "DependencyContextValidator", "TestApp");
-            var testProject = Path.Combine(testProjectPath, "project.json");
-
-            var runCommand = new RunCommand(testProject);
-            runCommand.Execute().Should().Pass();
-        }
-
-        [Fact]
-        public void DepsDependencyContextIsValidOnBuild()
-        {
-                var testProjectPath = Path.Combine(RepoRoot, "TestAssets", "TestProjects", "DependencyContextValidator", "TestAppDeps");
-                var testProject = Path.Combine(testProjectPath, "project.json");
-
-                var runCommand = new RunCommand(testProject);
-                runCommand.Execute().Should().Pass();
-        }
-
-        [Fact]
         public void CanSetOutputAssemblyNameForLibraries()
         {
             var testInstance =

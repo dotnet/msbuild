@@ -145,11 +145,8 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 return this;
             }
-
-            // Check if there are any runtime targets (i.e. are we portable)
-            var standalone = LockFile.Targets
-                .Where(t => t.TargetFramework.Equals(TargetFramework))
-                .Any(t => !string.IsNullOrEmpty(t.RuntimeIdentifier));
+            
+            var standalone = !ProjectFile.Dependencies.Any(d => d.Type.Equals(LibraryDependencyType.Platform));
 
             var context = CreateBuilder(ProjectFile.ProjectFilePath, TargetFramework)
                 .WithRuntimeIdentifiers(standalone ? runtimeIdentifiers : Enumerable.Empty<string>())

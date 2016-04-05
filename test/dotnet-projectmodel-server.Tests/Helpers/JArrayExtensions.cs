@@ -70,6 +70,21 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             return array;
         }
 
+        public static JArray AssertJArrayNotContains<T>(this JArray array, Func<T, bool> critiera)
+        {
+            foreach (var element in array)
+            {
+                var value = element.Value<T>();
+
+                if (critiera(value))
+                {
+                    Assert.True(false, "JArray contains unexpected element.");
+                }
+            }
+
+            return array;
+        }
+
         public static T RetrieveArraryElementAs<T>(this JArray json, int index)
             where T : JToken
         {

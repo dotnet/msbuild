@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -9,6 +10,8 @@ using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 using System.Text.RegularExpressions;
 using System.Reflection.PortableExecutable;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -243,6 +246,9 @@ namespace Microsoft.DotNet.Cli.Build
                 outputDir: Dirs.Stage1);
 
             CleanOutputDir(Path.Combine(Dirs.Stage1, "sdk"));
+            FS.CopyRecursive(Dirs.Stage1, Dirs.Stage1Symbols);
+
+            RemovePdbsFromDir(Path.Combine(Dirs.Stage1, "sdk"));
 
             return result;
         }
@@ -293,13 +299,23 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             CleanOutputDir(Path.Combine(Dirs.Stage2, "sdk"));
+            FS.CopyRecursive(Dirs.Stage2, Dirs.Stage2Symbols);
+
+            RemovePdbsFromDir(Path.Combine(Dirs.Stage2, "sdk"));
 
             return c.Success();
         }
 
         private static void CleanOutputDir(string directory)
         {
-            FS.RmFilesInDirRecursive(directory, "vbc.exe");
+            foreach (var file in FilesToClean)
+            {
+                FS.RmFilesInDirRecursive(directory, file);
+            }
+        }
+
+        private static void RemovePdbsFromDir(string directory)
+        {
             FS.RmFilesInDirRecursive(directory, "*.pdb");
         }
 
@@ -352,6 +368,7 @@ namespace Microsoft.DotNet.Cli.Build
             // Rename the .deps file
             var destinationDeps = Path.Combine(SharedFrameworkNameAndVersionRoot, $"{SharedFrameworkName}.deps.json");
             File.Move(Path.Combine(SharedFrameworkNameAndVersionRoot, "framework.deps.json"), destinationDeps);
+            ChangeEntryPointLibraryName(destinationDeps, null);
 
             // Generate RID fallback graph
             string runtimeGraphGeneratorRuntime = null;
@@ -445,7 +462,7 @@ namespace Microsoft.DotNet.Cli.Build
                     "--output",
                     outputDir,
                     "--framework",
-                    "netstandard1.5") 
+                    "netstandard1.5")
                     .Execute()
                     .EnsureSuccessful();
 
@@ -468,6 +485,7 @@ namespace Microsoft.DotNet.Cli.Build
                     File.Delete(Path.Combine(binaryToCorehostifyOutDir, $"{binaryToCorehostify}.exe"));
                     File.Copy(compilersDeps, Path.Combine(outputDir, binaryToCorehostify + ".deps.json"));
                     File.Copy(compilersRuntimeConfig, Path.Combine(outputDir, binaryToCorehostify + ".runtimeconfig.json"));
+                    ChangeEntryPointLibraryName(Path.Combine(outputDir, binaryToCorehostify + ".deps.json"), binaryToCorehostify);
                 }
                 catch (Exception ex)
                 {
@@ -575,6 +593,42 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return c.Success();
+        }
+
+        private static void ChangeEntryPointLibraryName(string depsFile, string newName)
+        {
+            JToken deps;
+            using (var file = File.OpenText(depsFile))
+            using (JsonTextReader reader = new JsonTextReader(file))
+            {
+                deps = JObject.ReadFrom(reader);
+            }
+
+            var target = deps["targets"][deps["runtimeTarget"]["name"].Value<string>()];
+            var library = target.Children<JProperty>().First();
+            var version = library.Name.Substring(library.Name.IndexOf('/') + 1);
+            if (newName == null)
+            {
+                library.Remove();
+            }
+            else
+            {
+                library.Replace(new JProperty(newName + '/' + version, library.Value));
+            }
+            library = deps["libraries"].Children<JProperty>().First();
+            if (newName == null)
+            {
+                library.Remove();
+            }
+            else
+            {
+                library.Replace(new JProperty(newName + '/' + version, library.Value));
+            }
+            using (var file = File.CreateText(depsFile))
+            using (var writer = new JsonTextWriter(file) { Formatting = Formatting.Indented})
+            {
+                deps.WriteTo(writer);
+            }
         }
 
         private static void DeleteMainPublishOutput(string path, string name)

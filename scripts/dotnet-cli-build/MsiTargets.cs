@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -14,11 +15,13 @@ namespace Microsoft.DotNet.Cli.Build
     {
         private const string ENGINE = "engine.exe";
 
+        private const string WixVersion = "3.10.2";
+
         private static string WixRoot
         {
             get
             {
-                return Path.Combine(Dirs.Output, "WixTools");
+                return Path.Combine(Dirs.Output, $"WixTools.{WixVersion}");
             }
         }
 
@@ -54,14 +57,24 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(WixRoot);
 
             c.Info("Downloading WixTools..");
-            // Download Wix version 3.10.2 - https://wix.codeplex.com/releases/view/619491
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                $"Invoke-WebRequest -Uri https://wix.codeplex.com/downloads/get/1540241 -Method Get -OutFile {WixRoot}\\WixTools.zip")
-                    .Execute()
-                    .EnsureSuccessful();
+
+            DownloadFile($"https://dotnetcli.blob.core.windows.net/build/wix/wix.{WixVersion}.zip", Path.Combine(WixRoot, "WixTools.zip"));
 
             c.Info("Extracting WixTools..");
-            ZipFile.ExtractToDirectory($"{WixRoot}\\WixTools.zip", WixRoot);
+            ZipFile.ExtractToDirectory(Path.Combine(WixRoot, "WixTools.zip"), WixRoot);
+        }
+
+        private static void DownloadFile(string uri, string destinationPath)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var getTask = httpClient.GetStreamAsync(uri);
+
+                using (var outStream = File.OpenWrite(destinationPath))
+                {
+                    getTask.Result.CopyTo(outStream);
+                }
+            }
         }
 
         [Target]
