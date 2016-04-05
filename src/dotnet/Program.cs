@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
 
         }
 
-        public int ProcessArgs(string[] args, ITelemetry telemetryClient)
+        internal int ProcessArgs(string[] args, ITelemetry telemetryClient)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
