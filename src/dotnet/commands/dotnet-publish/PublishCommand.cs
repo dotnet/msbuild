@@ -131,22 +131,26 @@ namespace Microsoft.DotNet.Tools.Publish
             var isPortable = string.IsNullOrEmpty(context.RuntimeIdentifier);
 
             // Collect all exports and organize them
-            var exports = exporter.GetAllExports()
+            var packageExports = exporter.GetAllExports()
                 .Where(e => e.Library.Identity.Type.Equals(LibraryType.Package))
                 .ToDictionary(e => e.Library.Identity.Name);
-            var collectExclusionList = isPortable ? GetExclusionList(context, exports) : new HashSet<string>();
+            var collectExclusionList = isPortable ? GetExclusionList(context, packageExports) : new HashSet<string>();
 
-            foreach (var export in exporter.GetAllExports().Where(e => !collectExclusionList.Contains(e.Library.Identity.Name)))
+            var exports = exporter.GetAllExports();
+            foreach (var export in exports.Where(e => !collectExclusionList.Contains(e.Library.Identity.Name)))
             {
                 Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
                 PublishAssetGroups(export.RuntimeAssemblyGroups, outputPath, nativeSubdirectories: false, includeRuntimeGroups: isPortable);
                 PublishAssetGroups(export.NativeLibraryGroups, outputPath, nativeSubdirectories, includeRuntimeGroups: isPortable);
                 export.RuntimeAssets.StructuredCopyTo(outputPath, outputPaths.IntermediateOutputDirectoryPath);
+            }
 
-                if (options.PreserveCompilationContext.GetValueOrDefault())
+            if (options.PreserveCompilationContext.GetValueOrDefault())
+            {
+                foreach (var export in exports)
                 {
-                    PublishRefs(export, outputPath);
+                    PublishRefs(export, outputPath, !collectExclusionList.Contains(export.Library.Identity.Name));
                 }
             }
 
@@ -248,19 +252,19 @@ namespace Microsoft.DotNet.Tools.Publish
             }
         }
 
-        private static void PublishRefs(LibraryExport export, string outputPath)
+        private static void PublishRefs(LibraryExport export, string outputPath, bool deduplicate)
         {
             var refsPath = Path.Combine(outputPath, "refs");
             if (!Directory.Exists(refsPath))
             {
                 Directory.CreateDirectory(refsPath);
             }
-
+ 
             // Do not copy compilation assembly if it's in runtime assemblies
             var runtimeAssemblies = new HashSet<LibraryAsset>(export.RuntimeAssemblyGroups.GetDefaultAssets());
             foreach (var compilationAssembly in export.CompilationAssemblies)
             {
-                if (!runtimeAssemblies.Contains(compilationAssembly))
+                if (!deduplicate || !runtimeAssemblies.Contains(compilationAssembly))
                 {
                     var destFileName = Path.Combine(refsPath, Path.GetFileName(compilationAssembly.ResolvedPath));
                     File.Copy(compilationAssembly.ResolvedPath, destFileName, overwrite: true);
@@ -358,67 +362,16 @@ namespace Microsoft.DotNet.Tools.Publish
 
         private IEnumerable<ProjectContext> SelectContexts(string projectPath, NuGetFramework framework, string runtime)
         {
-            var allContexts = ProjectContext.CreateContextForEachTarget(projectPath).ToList();
-            var frameworks = framework == null ?
-                allContexts.Select(c => c.TargetFramework).Distinct().ToArray() :
-                new[] { framework };
+            var allContexts = framework == null ?
+                ProjectContext.CreateContextForEachFramework(projectPath) :
+                new[] { ProjectContext.Create(projectPath, framework) };
 
-            if (string.IsNullOrEmpty(runtime))
-            {
-                // For each framework, find the best matching RID item
-                var candidates = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
-                return frameworks.Select(f => FindBestTarget(f, allContexts, candidates));
-            }
-            else
-            {
-                return frameworks.SelectMany(f => allContexts.Where(c =>
-                    Equals(c.TargetFramework, f) &&
-                    string.Equals(c.RuntimeIdentifier, runtime, StringComparison.Ordinal)));
-            }
+            var runtimes = !string.IsNullOrEmpty(runtime) ? 
+                new [] {runtime} :
+                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
+            return allContexts.Select(c => c.CreateRuntimeContext(runtimes));
         }
-
-        private ProjectContext FindBestTarget(NuGetFramework f, List<ProjectContext> allContexts, IEnumerable<string> candidates)
-        {
-            foreach (var candidate in candidates)
-            {
-                var target = allContexts.FirstOrDefault(c =>
-                    Equals(c.TargetFramework, f) &&
-                    string.Equals(c.RuntimeIdentifier, candidate, StringComparison.Ordinal));
-                if (target != null)
-                {
-                    return target;
-                }
-            }
-
-            // No RID-specific target found, use the RID-less target and publish portable
-            return allContexts.FirstOrDefault(c =>
-                Equals(c.TargetFramework, f) &&
-                string.IsNullOrEmpty(c.RuntimeIdentifier));
-        }
-
-        /// <summary>
-        /// Return the matching framework/runtime ProjectContext.
-        /// If 'framework' or 'runtimeIdentifier' is null or empty then it matches with any.
-        /// </summary>
-        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetFramework framework, string runtimeIdentifier)
-        {
-            foreach (var context in contexts)
-            {
-                if (context.TargetFramework == null || string.IsNullOrEmpty(context.RuntimeIdentifier))
-                {
-                    continue;
-                }
-
-                if (string.IsNullOrEmpty(runtimeIdentifier) || string.Equals(runtimeIdentifier, context.RuntimeIdentifier, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (framework == null || framework.Equals(context.TargetFramework))
-                    {
-                        yield return context;
-                    }
-                }
-            }
-        }
-
+        
         private static void CopyContents(ProjectContext context, string outputPath)
         {
             var contentFiles = context.ProjectFile.Files.GetContentFiles();

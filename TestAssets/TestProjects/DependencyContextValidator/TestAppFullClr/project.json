@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+  "dependencies": {
+    "DependencyContextValidator": "1.0.0-*"
+  },
+  "frameworks": {
+    "net451": {
+    }
+  }
+}

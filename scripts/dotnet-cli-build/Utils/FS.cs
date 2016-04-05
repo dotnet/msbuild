@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli.Build
                 if (string.Equals(Path.GetFileName(candidate), "bin") ||
                     string.Equals(Path.GetFileName(candidate), "obj"))
                 {
-                    Directory.Delete(candidate, recursive: true);
+                    Utils.DeleteDirectory(candidate);
                 }
                 else
                 {

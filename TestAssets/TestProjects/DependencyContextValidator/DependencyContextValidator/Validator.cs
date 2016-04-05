@@ -44,6 +44,7 @@ namespace Microsoft.Extensions.DependencyModel
                     var resolvedPaths = compilationLibrary.ResolveReferencePaths();
                     foreach (var resolvedPath in resolvedPaths)
                     {
+                        Console.WriteLine($"Compilation {compilationLibrary.Name}:{Path.GetFileName(resolvedPath)}");
                         if (!File.Exists(resolvedPath))
                         {
                             Error($"Compilataion library resolved to non existent path {resolvedPath}");
@@ -55,8 +56,10 @@ namespace Microsoft.Extensions.DependencyModel
             foreach (var runtimeLibrary in context.RuntimeLibraries)
             {
                 CheckMetadata(runtimeLibrary);
-                foreach (var assembly in runtimeLibrary.GetDefaultNativeAssets(context)) {}
-                foreach (var native in runtimeLibrary.GetDefaultAssemblyNames(context)) {}
+                foreach (var native in runtimeLibrary.GetDefaultNativeAssets(context)) {}
+                foreach (var assembly in runtimeLibrary.GetDefaultAssemblyNames(context)) {
+                    Console.WriteLine($"Runtime {runtimeLibrary.Name}:{assembly.Name}");
+                }
             }
 
             foreach (var native in context.GetDefaultNativeAssets()) {}
