@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli.Utils;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -60,10 +61,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public RunCommand(
             string projectPath,
-            string framework="",
-            string configuration="",
-            bool preserveTemporary=false,
-            string appArgs="")
+            string framework = "",
+            string configuration = "",
+            bool preserveTemporary = false,
+            string appArgs = "")
             : base("dotnet")
         {
             _projectPath = projectPath;
@@ -78,10 +79,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             args = $"run {BuildArgs()} {args}";
             return base.Execute(args);
         }
+
         public override CommandResult ExecuteWithCapturedOutput(string args = "")
         {
             args = $"run {BuildArgs()} {args}";
             return base.ExecuteWithCapturedOutput(args);
+        }
+
+        public override Task<CommandResult> ExecuteAsync(string args = "")
+        {
+            args = $"run {BuildArgs()} {args}";
+            return base.ExecuteAsync(args);
         }
 
         private string BuildArgs()
