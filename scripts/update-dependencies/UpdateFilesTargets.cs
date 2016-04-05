@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Scripts
             return c.Success();
         }
 
-        [Target(nameof(ReplaceProjectJson), nameof(ReplaceCrossGen))]
+        [Target(nameof(ReplaceProjectJson), nameof(ReplaceCrossGen), nameof(ReplaceCoreHostPackaging))]
         public static BuildTargetResult ReplaceVersions(BuildTargetContext c) => c.Success();
 
         /// <summary>
@@ -184,26 +184,62 @@ namespace Microsoft.DotNet.Scripts
         [Target]
         public static BuildTargetResult ReplaceCrossGen(BuildTargetContext c)
         {
-            DependencyInfo coreFXInfo = c.GetDependencyInfos().Single(d => d.Name == "CoreFx");
+            ReplaceFileContents(@"scripts\dotnet-cli-build\CompileTargets.cs", compileTargetsContent =>
+            {
+                DependencyInfo coreFXInfo = c.GetCoreFXDependency();
+                Regex regex = new Regex(@"CoreCLRVersion = ""(?<version>\d.\d.\d)-(?<release>.*)"";");
 
-            string compileTargetsPath = Path.Combine(Dirs.RepoRoot, @"scripts\dotnet-cli-build\CompileTargets.cs");
-            string compileTargetsContent = File.ReadAllText(compileTargetsPath);
+                return regex.ReplaceGroupValue(compileTargetsContent, "release", coreFXInfo.NewReleaseVersion);
+            });
 
-            Regex regex = new Regex(@"CoreCLRVersion = ""(?<version>\d.\d.\d)-(?<release>.*)"";");
-            compileTargetsContent = regex.Replace(compileTargetsContent, m =>
+            return c.Success();
+        }
+
+        /// <summary>
+        /// Replaces version number that is hard-coded in the corehost packaging dir.props file.
+        /// </summary>
+        [Target]
+        public static BuildTargetResult ReplaceCoreHostPackaging(BuildTargetContext c)
+        {
+            ReplaceFileContents(@"src\corehost\packaging\dir.props", contents =>
+            {
+                DependencyInfo coreFXInfo = c.GetCoreFXDependency();
+                Regex regex = new Regex(@"Microsoft\.NETCore\.Platforms\\(?<version>\d\.\d\.\d)-(?<release>.*)\\runtime\.json");
+
+                return regex.ReplaceGroupValue(contents, "release", coreFXInfo.NewReleaseVersion);
+            });
+
+            return c.Success();
+        }
+
+        private static DependencyInfo GetCoreFXDependency(this BuildTargetContext c)
+        {
+            return c.GetDependencyInfos().Single(d => d.Name == "CoreFx");
+        }
+
+        private static void ReplaceFileContents(string repoRelativePath, Func<string, string> replacement)
+        {
+            string fullPath = Path.Combine(Dirs.RepoRoot, repoRelativePath);
+            string contents = File.ReadAllText(fullPath);
+
+            contents = replacement(contents);
+
+            File.WriteAllText(fullPath, contents, Encoding.UTF8);
+        }
+
+        private static string ReplaceGroupValue(this Regex regex, string input, string groupName, string newValue)
+        {
+            return regex.Replace(input, m =>
             {
                 string replacedValue = m.Value;
-                Group releaseGroup = m.Groups["release"];
+                Group group = m.Groups[groupName];
+                int startIndex = group.Index - m.Index;
 
-                replacedValue = replacedValue.Remove(releaseGroup.Index - m.Index, releaseGroup.Length);
-                replacedValue = replacedValue.Insert(releaseGroup.Index - m.Index, coreFXInfo.NewReleaseVersion);
+                replacedValue = replacedValue.Remove(startIndex, group.Length);
+                replacedValue = replacedValue.Insert(startIndex, newValue);
 
                 return replacedValue;
             });
-
-            File.WriteAllText(compileTargetsPath, compileTargetsContent, Encoding.UTF8);
-
-            return c.Success();
         }
     }
 }
