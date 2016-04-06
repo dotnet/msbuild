@@ -253,7 +253,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var version = SharedFrameworkNugetVersion;
 
-            var packageName = Monikers.GetSdkDebianPackageName(c);
+            var packageName = Monikers.GetDebianSharedFrameworkPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
@@ -271,7 +271,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var version = CliNuGetVersion;
 
-            var packageName = Monikers.GetSdkDebianPackageName(c);
+            var packageName = Monikers.GetDebianSharedHostPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
