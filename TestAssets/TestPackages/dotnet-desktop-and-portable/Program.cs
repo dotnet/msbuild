@@ -11,6 +11,7 @@ namespace ConsoleApplication
 #elif NETSTANDARD1_5
             Console.WriteLine($"Hello {string.Join(" ", args)} From .NETStandardApp,Version=v1.5");
 #endif
+            Console.WriteLine($"Base Directory - {AppContext.BaseDirectory}");
         }
     }
 }
