@@ -142,6 +142,10 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetRun()
         {
+            var restoreCommand = new TestCommand("dotnet");
+            restoreCommand.Execute($"restore {TestProject}")
+                .Should()
+                .Pass();
             var runCommand = new RunCommand(TestProject);
 
             runCommand.Execute()
