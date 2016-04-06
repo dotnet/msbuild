@@ -16,8 +16,15 @@
   },
 
   "tools": {
-       "dotnet-compile-fsc": "1.0.0-*"
-   },
+    "dotnet-compile-fsc": {
+      "version": "1.0.0-*",
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win81",
+        "netstandard1.3"
+      ]
+    }
+  },
 
   "frameworks": {
     "netstandard1.5": {
