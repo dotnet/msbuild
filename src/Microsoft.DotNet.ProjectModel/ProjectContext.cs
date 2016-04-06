@@ -145,8 +145,9 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 return this;
             }
-            
-            var standalone = !ProjectFile.Dependencies.Any(d => d.Type.Equals(LibraryDependencyType.Platform));
+
+            var standalone = !RootProject.Dependencies
+                .Any(d => d.Type.Equals(LibraryDependencyType.Platform));
 
             var context = CreateBuilder(ProjectFile.ProjectFilePath, TargetFramework)
                 .WithRuntimeIdentifiers(standalone ? runtimeIdentifiers : Enumerable.Empty<string>())
