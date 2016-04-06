@@ -63,6 +63,7 @@
     <!-- <BinX86Output Include="$(OutputPath)System.IO.FileSystem.dll" /> -->
     <!-- <BinX86Output Include="$(OutputPath)System.IO.FileSystem.Primitives.dll" /> -->
     <!-- <BinX86Output Include="$(OutputPath)System.Reflection.Metadata.dll" /> -->
+    <BinX86Output Include="$(OutputPath)System.Threading.Tasks.Dataflow.dll" />
     <!-- <BinX86Output Include="$(OutputPath)Tracker.exe" /> -->
     <!-- <BinX86Output Include="$(OutputPath)vbc.exe" /> -->
     <!-- <BinX86Output Include="$(OutputPath)vbc.exe.config" /> -->
