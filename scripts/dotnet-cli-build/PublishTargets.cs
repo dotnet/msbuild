@@ -101,6 +101,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 var hostBlob = $"{Channel}/Binaries/{CliNuGetVersion}/{Path.GetFileName(file)}";
                 AzurePublisherTool.PublishFile(hostBlob, file);
+                Console.WriteLine($"Publishing package {hostBlob} to Azure.");
             }
 
             return c.Success();
@@ -114,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Build
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
 
             AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
-            
+
             return c.Success();
         }
 
@@ -126,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Build
             var installerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
 
             AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
-            
+
             return c.Success();
         }
 
@@ -219,10 +220,10 @@ namespace Microsoft.DotNet.Cli.Build
             var osname = Monikers.GetOSShortName();
             var latestSharedFXVersionBlob = $"{Channel}/dnvm/latest.sharedfx.{osname}.{CurrentArchitecture.Current}.version";
             var latestSharedFXVersionFile = Path.Combine(
-                Dirs.Stage2, 
-                "shared", 
-                CompileTargets.SharedFrameworkName, 
-                version, 
+                Dirs.Stage2,
+                "shared",
+                CompileTargets.SharedFrameworkName,
+                version,
                 ".version");
 
             AzurePublisherTool.PublishFile(latestSharedFXVersionBlob, latestSharedFXVersionFile);
@@ -240,8 +241,8 @@ namespace Microsoft.DotNet.Cli.Build
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
             DebRepoPublisherTool.PublishDebFileToDebianRepo(
-                packageName, 
-                version, 
+                packageName,
+                version,
                 uploadUrl);
 
             return c.Success();
@@ -258,8 +259,8 @@ namespace Microsoft.DotNet.Cli.Build
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
             DebRepoPublisherTool.PublishDebFileToDebianRepo(
-                packageName, 
-                version, 
+                packageName,
+                version,
                 uploadUrl);
 
             return c.Success();
@@ -276,8 +277,8 @@ namespace Microsoft.DotNet.Cli.Build
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
             DebRepoPublisherTool.PublishDebFileToDebianRepo(
-                packageName, 
-                version, 
+                packageName,
+                version,
                 uploadUrl);
 
             return c.Success();
