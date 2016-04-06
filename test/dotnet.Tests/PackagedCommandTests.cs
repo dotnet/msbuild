@@ -44,9 +44,9 @@ namespace Microsoft.DotNet.Tests
 
         // need conditional theories so we can skip on non-Windows
         [Theory]
-        [InlineData(".NETStandardApp,Version=v1.5", "CoreFX")]
-        [InlineData(".NETFramework,Version=v4.5.1", "NetFX")]
-        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args)
+        [InlineData(".NETStandardApp,Version=v1.5", "CoreFX", @"lib\netstandard1.5\dotnet-desktop-and-portable.dll")]
+        [InlineData(".NETFramework,Version=v4.5.1", "NetFX", @"AppWithDirectDependencyDesktopAndPortable\bin\Debug\net451\win7-x64\dotnet-desktop-and-portable.exe")]
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args, string expectedDependencyToolPath)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -65,6 +65,7 @@ namespace Microsoft.DotNet.Tests
 
                 result.Should().HaveStdOutContaining(framework);
                 result.Should().HaveStdOutContaining(args);
+                result.Should().HaveStdOutContaining(expectedDependencyToolPath);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
         }

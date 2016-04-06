@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace ConsoleApplication
 {
@@ -11,7 +12,8 @@ namespace ConsoleApplication
 #elif NETSTANDARD1_5
             Console.WriteLine($"Hello {string.Join(" ", args)} From .NETStandardApp,Version=v1.5");
 #endif
-            Console.WriteLine($"Base Directory - {AppContext.BaseDirectory}");
+            var currentAssemblyPath = typeof(ConsoleApplication.Program).GetTypeInfo().Assembly.Location;
+            Console.WriteLine($"Current Assembly Directory - {currentAssemblyPath}");
         }
     }
 }
