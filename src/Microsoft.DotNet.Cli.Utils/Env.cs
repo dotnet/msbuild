@@ -33,5 +33,10 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return _environment.GetCommandPathFromRootPath(rootPath, commandName, extensions);
         }
+
+        public static bool GetEnvironmentVariableAsBool(string name, bool defaultValue = false)
+        {
+            return _environment.GetEnvironmentVariableAsBool(name, defaultValue);
+        }
     }
 }

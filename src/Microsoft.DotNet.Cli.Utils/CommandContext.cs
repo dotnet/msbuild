@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Cli.Utils
             public static readonly string AnsiPassThru = Prefix + "ANSI_PASS_THRU";
         }
 
-        private static Lazy<bool> _verbose = new Lazy<bool>(() => GetBool(Variables.Verbose));
-        private static Lazy<bool> _ansiPassThru = new Lazy<bool>(() => GetBool(Variables.AnsiPassThru));
+        private static Lazy<bool> _verbose = new Lazy<bool>(() => Env.GetEnvironmentVariableAsBool(Variables.Verbose));
+        private static Lazy<bool> _ansiPassThru = new Lazy<bool>(() => Env.GetEnvironmentVariableAsBool(Variables.AnsiPassThru));
 
         public static bool IsVerbose()
         {
@@ -25,29 +25,6 @@ namespace Microsoft.DotNet.Cli.Utils
         public static bool ShouldPassAnsiCodesThrough()
         {
             return _ansiPassThru.Value;
-        }
-
-        private static bool GetBool(string name, bool defaultValue = false)
-        {
-            var str = Environment.GetEnvironmentVariable(name);
-            if (string.IsNullOrEmpty(str))
-            {
-                return defaultValue;
-            }
-
-            switch (str.ToLowerInvariant())
-            {
-                case "true":
-                case "1":
-                case "yes":
-                    return true;
-                case "false":
-                case "0":
-                case "no":
-                    return false;
-                default:
-                    return defaultValue;
-            }
-        }
+        }        
     }
 }

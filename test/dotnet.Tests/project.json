@@ -6,6 +6,9 @@
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
+    "dotnet": {
+      "target": "project"
+    },
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project",
       "type": "build"
