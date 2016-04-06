@@ -103,11 +103,16 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version140,
 
+        /// <summary>
+        /// Visual Studio Dev15
+        /// </summary>
+        Version150,
+
         // keep this up-to-date; always point to the last entry.
         /// <summary>
         /// The latest version available at the time of release
         /// </summary>
-        VersionLatest = Version140
+        VersionLatest = Version150
     }
 
     /// <summary>
@@ -1793,6 +1798,9 @@ namespace Microsoft.Build.Utilities
 
                 case VisualStudioVersion.Version140:
                     return FrameworkLocationHelper.visualStudioVersion140;
+
+                case VisualStudioVersion.Version150:
+                    return FrameworkLocationHelper.visualStudioVersion150;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedVisualStudioVersion", version);

@@ -64,9 +64,10 @@ namespace Microsoft.Build.Shared
         internal static readonly Version visualStudioVersion110 = new Version(11, 0);
         internal static readonly Version visualStudioVersion120 = new Version(12, 0);
         internal static readonly Version visualStudioVersion140 = new Version(14, 0);
+        internal static readonly Version visualStudioVersion150 = new Version(15, 0);
 
         // keep this up-to-date; always point to the latest visual studio version.
-        internal static readonly Version visualStudioVersionLatest = visualStudioVersion140;
+        internal static readonly Version visualStudioVersionLatest = visualStudioVersion150;
 
         private const string dotNetFrameworkRegistryPath = "SOFTWARE\\Microsoft\\.NETFramework";
         private const string dotNetFrameworkSetupRegistryPath = "SOFTWARE\\Microsoft\\NET Framework Setup\\NDP";
@@ -250,6 +251,19 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion46,
                 dotNetFrameworkVersion461
             }),
+
+            // VS15
+            new VisualStudioSpec(visualStudioVersion150, "NETFXSDK\\{0}", "v8.1", "InstallationFolder", new []
+            {
+                dotNetFrameworkVersion11,
+                dotNetFrameworkVersion20,
+                dotNetFrameworkVersion35,
+                dotNetFrameworkVersion40,
+                dotNetFrameworkVersion45,
+                dotNetFrameworkVersion451,
+                dotNetFrameworkVersion46,
+                dotNetFrameworkVersion461,
+            }),
         };
 
         /// <summary>
@@ -270,7 +284,12 @@ namespace Microsoft.Build.Shared
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion140) },
             { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
             { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140) },
-        };
+
+            // VS15
+            { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150) },
+       };
 
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
         private static readonly IReadOnlyDictionary<Version, VisualStudioSpec> s_visualStudioSpecDict;
