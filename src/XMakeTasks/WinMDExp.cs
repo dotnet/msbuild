@@ -288,7 +288,7 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(pathToTool) || !File.Exists(pathToTool))
             {
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolName, Log, true);
+                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             }
 
             return pathToTool;
