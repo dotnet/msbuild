@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "dependencies": {    
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20113",
-    "Microsoft.AspNet.Hosting": "1.0.0-rc2-16253",
+    "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254"
   },
   "compilationOptions": {
