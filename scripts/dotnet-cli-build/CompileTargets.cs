@@ -195,6 +195,8 @@ namespace Microsoft.DotNet.Cli.Build
                 var fileName = Path.GetFileName(file);
                 File.Copy(file, Path.Combine(Dirs.Corehost, fileName), true);
                 runtimeCount += (fileName.StartsWith("runtime.") ? 1 : 0);
+
+                Console.WriteLine($"Copying package {fileName} to artifacts directory {Dirs.Corehost}.");
             }
             if (runtimeCount < 3)
             {
