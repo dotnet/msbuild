@@ -96,3 +96,8 @@ Questions & Comments
 --------------------
 
 For any and all feedback, please use the Issues on this repository. 
+
+License
+--------------------
+
+By downloading the .zip you are agreeing to the terms in the project [EULA](https://aka.ms/dotnet-cli-eula).
