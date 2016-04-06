@@ -207,6 +207,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             catch(Exception) {}
 
             Directory.CreateDirectory(RestoredTestProjectDirectory);
+            WriteNuGetConfig(RestoredTestProjectDirectory);
 
             var currentDirectory = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(RestoredTestProjectDirectory);
@@ -241,6 +242,24 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             }
 
             return isSupported;
+        }
+
+        // Todo: this is a hack until corefx is on nuget.org remove this After RC 2 Release
+        private static void WriteNuGetConfig(string directory)
+        {
+            var contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+<packageSources>
+<!--To inherit the global NuGet package sources remove the <clear/> line below -->
+<clear />
+<add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
+<add key=""api.nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+</packageSources>
+</configuration>";
+
+            var path = Path.Combine(directory, "NuGet.config");
+
+            File.WriteAllText(path, contents);
         }
 
         private static DateTime GetLastWriteTimeUtcOfDirectoryFiles(string outputDirectory)
