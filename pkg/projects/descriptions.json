@@ -19,4 +19,9 @@
         "Description": "Provides an executable implementation of the Microsoft DotNet Framework and SDK launcher module",
         "CommonTypes": [ ]
     },
+    {
+        "Name": "Microsoft.NETCore.App",
+        "Description": "A set of .NET API's that are included in the default .NET Core application model.",
+        "CommonTypes": [ ]
+    },
 ]

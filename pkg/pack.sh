@@ -55,27 +55,27 @@ while [ "$1" != "" ]; do
             shift
             __build_arch=$1
             ;;
-        --hostbindir) 
+        --hostbindir)
             shift
             __dotnet_host_bin_dir=$1
             ;;
-        --hostver) 
+        --hostver)
             shift
             __host_ver=$1
             ;;
-        --fxrver) 
+        --fxrver)
             shift
             __fxr_ver=$1
             ;;
-        --policyver) 
+        --policyver)
             shift
             __policy_ver=$1
             ;;
-        --build) 
+        --build)
             shift
             __build_major=$1
             ;;
-        --vertag) 
+        --vertag)
             shift
             __version_tag=$1
             ;;
@@ -118,9 +118,7 @@ fi
 
 __common_parameters="/p:Platform=$__build_arch /p:DotNetHostBinDir=$__dotnet_host_bin_dir /p:$__targets_param /p:DistroName=$__distro_name /p:HostVersion=$__host_ver /p:HostResolverVersion=$__fxr_ver /p:HostPolicyVersion=$__policy_ver /p:BuildNumberMajor=$__build_major /p:PreReleaseLabel=$__version_tag /verbosity:minimal"
 
-$__corerun $__msbuild $__project_dir/projects/Microsoft.NETCore.DotNetHostPolicy.builds $__common_parameters || exit 1
-$__corerun $__msbuild $__project_dir/projects/Microsoft.NETCore.DotNetHostResolver.builds $__common_parameters || exit 1
-$__corerun $__msbuild $__project_dir/projects/Microsoft.NETCore.DotNetHost.builds $__common_parameters || exit 1
+$__corerun $__msbuild $__project_dir/projects/packages.builds $__common_parameters || exit 1
 
 cp -rf "$__project_dir/bin/packages" "$__dotnet_host_bin_dir"
 
