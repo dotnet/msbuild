@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (framework.IsDesktop())
             {
-                var platformCommandSpecFactory = default(IPlatformCommandSpecFactory);
+                IPlatformCommandSpecFactory platformCommandSpecFactory = null;
                 if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
                 {
                     platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();

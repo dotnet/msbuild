@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.PlatformAbstractions;
 using System.Runtime.InteropServices;
 using Xunit;
 using FluentAssertions;
@@ -44,8 +46,7 @@ namespace Microsoft.DotNet.Tests
 
         // need conditional theories so we can skip on non-Windows
         [Theory]
-        [InlineData(".NETStandardApp,Version=v1.5", "CoreFX", @"lib\netstandard1.5\dotnet-desktop-and-portable.dll")]
-        [InlineData(".NETFramework,Version=v4.5.1", "NetFX", @"AppWithDirectDependencyDesktopAndPortable\bin\Debug\net451\win7-x64\dotnet-desktop-and-portable.exe")]
+        [MemberData("DependencyToolArguments")]
         public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args, string expectedDependencyToolPath)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -68,6 +69,20 @@ namespace Microsoft.DotNet.Tests
                 result.Should().HaveStdOutContaining(expectedDependencyToolPath);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
+        }
+
+        public static IEnumerable<object[]> DependencyToolArguments
+        {
+            get
+            {
+                var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+                var projectOutputPath  = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
+                return new[]
+                {
+                    new object[] { ".NETStandardApp,Version=v1.5", "CoreFX", "lib\\netstandard1.5\\dotnet-desktop-and-portable.dll" },
+                    new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath }
+                };
+            }
         }
 
         [Fact]
