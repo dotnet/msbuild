@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Run
             {
                 var defaultFrameworks = new[]
                 {
-                    FrameworkConstants.FrameworkIdentifiers.DnxCore,
+                    FrameworkConstants.FrameworkIdentifiers.NetCoreApp,
                     FrameworkConstants.FrameworkIdentifiers.NetStandardApp,
                 };
 
