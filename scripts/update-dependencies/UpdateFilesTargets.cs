@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Scripts
             coreFxLkgVersion = coreFxLkgVersion.Trim();
 
             const string coreFxIdPattern = @"^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore.*)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))$";
-            const string coreFxIdExclusionPattern = @"System.CommandLine";
+            const string coreFxIdExclusionPattern = @"System.CommandLine|Microsoft.NETCore.App";
 
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
             dependencyInfos.Add(new DependencyInfo()
@@ -57,9 +57,7 @@ namespace Microsoft.DotNet.Scripts
         {
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
-            IEnumerable<string> projectJsonFiles = Enumerable.Union(
-                Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
-                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.template", SearchOption.AllDirectories));
+            IEnumerable<string> projectJsonFiles = Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories);
 
             JObject projectRoot;
             foreach (string projectJsonFile in projectJsonFiles)

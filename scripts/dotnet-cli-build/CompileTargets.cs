@@ -49,7 +49,9 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(PrepareTargets.Init), nameof(PackagePkgProjects), nameof(CompileStage1), nameof(CompileStage2))]
+        // Moving PrepareTargets.RestorePackages after PackagePkgProjects because managed code depends on the 
+        // Microsoft.NETCore.App package that is created during PackagePkgProjects.
+        [Target(nameof(PrepareTargets.Init), nameof(PackagePkgProjects), nameof(PrepareTargets.RestorePackages), nameof(CompileStage1), nameof(CompileStage2))]
         public static BuildTargetResult Compile(BuildTargetContext c)
         {
             return c.Success();
@@ -330,8 +332,25 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static void PublishSharedFramework(BuildTargetContext c, string outputDir, DotNetCli dotnetCli)
         {
-            string SharedFrameworkSourceRoot = Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework");
+            string SharedFrameworkTemplateSourceRoot = Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework");
             string SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+
+            string sharedFrameworkRid;
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            {
+                sharedFrameworkRid = $"win7-{PlatformServices.Default.Runtime.RuntimeArchitecture}";
+            }
+            else
+            {
+                sharedFrameworkRid = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+            }
+
+            string SharedFrameworkSourceRoot = GenerateSharedFrameworkProject(c, SharedFrameworkTemplateSourceRoot, sharedFrameworkRid);
+            
+            dotnetCli.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes", "--fallbacksource", Dirs.Corehost)
+                .WorkingDirectory(SharedFrameworkSourceRoot)
+                .Execute()
+                .EnsureSuccessful();
 
             // We publish to a sub folder of the PublishRoot so tools like heat and zip can generate folder structures easier.
             string SharedFrameworkNameAndVersionRoot = Path.Combine(outputDir, "shared", SharedFrameworkName, SharedFrameworkNugetVersion);
@@ -343,19 +362,10 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             string publishFramework = "dnxcore50"; // Temporary, use "netcoreapp" when we update nuget.
-            string publishRuntime;
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
-            {
-                publishRuntime = $"win7-{PlatformServices.Default.Runtime.RuntimeArchitecture}";
-            }
-            else
-            {
-                publishRuntime = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
-            }
 
             dotnetCli.Publish(
                 "--output", SharedFrameworkNameAndVersionRoot,
-                "-r", publishRuntime,
+                "-r", sharedFrameworkRid,
                 "-f", publishFramework,
                 SharedFrameworkSourceRoot).Execute().EnsureSuccessful();
 
@@ -426,6 +436,30 @@ namespace Microsoft.DotNet.Cli.Build
             var version = SharedFrameworkNugetVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(SharedFrameworkNameAndVersionRoot, ".version"), content);
+        }
+
+        /// <summary>
+        /// Generates the real shared framework project that will get published.
+        /// </summary>
+        /// <param name="sharedFrameworkTemplatePath">The "sharedFramework" source template folder.</param>
+        private static string GenerateSharedFrameworkProject(BuildTargetContext c, string sharedFrameworkTemplatePath, string rid)
+        {
+            string sharedFrameworkProjectPath = Path.Combine(Dirs.Intermediate, "sharedFramework", "framework");
+            Utils.DeleteDirectory(sharedFrameworkProjectPath);
+            CopyRecursive(sharedFrameworkTemplatePath, sharedFrameworkProjectPath, true);
+
+            string templateFile = Path.Combine(sharedFrameworkProjectPath, "project.json.template");
+            JObject sharedFrameworkProject = JsonUtils.ReadProject(templateFile);
+            sharedFrameworkProject["dependencies"]["Microsoft.NETCore.App"] = c.BuildContext.Get<BuildVersion>("BuildVersion").NetCoreAppVersion;
+            ((JObject)sharedFrameworkProject["runtimes"]).RemoveAll();
+            sharedFrameworkProject["runtimes"][rid] = new JObject();
+
+            string projectJsonPath = Path.Combine(sharedFrameworkProjectPath, "project.json");
+            JsonUtils.WriteProject(sharedFrameworkProject, projectJsonPath);
+
+            Rm(templateFile);
+
+            return sharedFrameworkProjectPath;
         }
 
         private static BuildTargetResult CompileCliSdk(BuildTargetContext c, DotNetCli dotnet, string outputDir)

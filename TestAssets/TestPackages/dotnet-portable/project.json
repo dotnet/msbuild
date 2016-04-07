@@ -12,7 +12,7 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc2-24008"
+          "version": "1.0.0-rc2-*"
         }
       }
     }
