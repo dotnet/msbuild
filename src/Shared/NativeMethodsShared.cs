@@ -317,6 +317,14 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static int MAX_PATH = 260;
 
+        /// <summary>
+        /// OS name that can be used for the msbuildExtensionsPathSearchPaths element
+        /// for a toolset
+        /// </summary>
+        internal static string GetOSNameForExtensionsPath()
+        {
+            return IsOSX ? "osx" : (IsUnix ? "unix" : "windows");
+        }
         #endregion
 
         #region Set Error Mode (copied from BCL)
