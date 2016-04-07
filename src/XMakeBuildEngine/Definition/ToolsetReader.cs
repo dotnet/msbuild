@@ -516,7 +516,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
                 toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion);
-                toolset.MSBuildExtensionsPathSearchPathsTable = GetMSBuildExtensionPathsSearchPathsTable(toolsVersion.Name, GetOSNameForExtensionsPath());
+                toolset.MSBuildExtensionsPathSearchPathsTable = GetMSBuildExtensionPathsSearchPathsTable(toolsVersion.Name, NativeMethodsShared.GetOSNameForExtensionsPath());
             }
             catch (ArgumentException e)
             {
@@ -524,25 +524,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             return toolset;
-        }
-
-        /// <summary>
-        /// OS name that can be used for the msbuildExtensionsPathSearchPaths element
-        /// for a toolset
-        /// </summary>
-        private static string GetOSNameForExtensionsPath()
-        {
-            if (NativeMethodsShared.IsWindows)
-            {
-                return "windows";
-            }
-
-            if (NativeMethodsShared.IsOSX)
-            {
-                return "osx";
-            }
-
-            return "unix";
         }
 
         /// <summary>
