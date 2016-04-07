@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        // Moving PrepareTargets.RestorePackages after PackagePkgProjects because managed code depends on the 
+        // Moving PrepareTargets.RestorePackages after PackagePkgProjects because managed code depends on the
         // Microsoft.NETCore.App package that is created during PackagePkgProjects.
         [Target(nameof(PrepareTargets.Init), nameof(CompileCoreHost), nameof(PackagePkgProjects), nameof(PrepareTargets.RestorePackages), nameof(CompileStage1), nameof(CompileStage2))]
         public static BuildTargetResult Compile(BuildTargetContext c)
@@ -565,7 +565,7 @@ namespace Microsoft.DotNet.Cli.Build
                 // in CompileTargets and the one in the shared library project.json match and are updated in lock step, but long term
                 // we need to be able to look at the project.lock.json file and figure out what version of Microsoft.NETCore.Runtime.CoreCLR
                 // was used, and then select that version.
-                ExecSilent(Crossgen.GetCrossgenPathForVersion(CompileTargets.CoreCLRVersion),
+                ExecSilent(Crossgen.GetCrossgenPathForVersion(CoreCLRVersion),
                     "-readytorun", "-in", file, "-out", tempPathName, "-platform_assemblies_paths", pathToAssemblies);
 
                 File.Delete(file);
