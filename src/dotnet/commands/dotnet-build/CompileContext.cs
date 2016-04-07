@@ -489,7 +489,10 @@ namespace Microsoft.DotNet.Tools.Build
 
         private void MakeRunnable()
         {
-            var runtimeContext = _rootProject.CreateRuntimeContext(_args.GetRuntimes());
+            var runtimeContext = _rootProject.ProjectFile.HasRuntimeOutput(_args.ConfigValue) ?
+                _rootProject.CreateRuntimeContext(_args.GetRuntimes()) :
+                _rootProject;
+
             var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
             var libraryExporter = runtimeContext.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
 
