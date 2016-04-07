@@ -49,8 +49,6 @@ cat "$PSScriptRoot\..\branchinfo.txt" | ForEach-Object {
     }
 }
 
-$env:CHANNEL=$env:RELEASE_SUFFIX
-
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 if (!$env:DOTNET_INSTALL_DIR)
 {
