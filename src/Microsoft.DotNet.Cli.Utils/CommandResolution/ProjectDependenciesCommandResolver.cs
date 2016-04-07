@@ -78,25 +78,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var depsFilePath =
                 projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.DepsJson;
 
+            var runtimeConfigPath = 
+                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.RuntimeConfigJson;
+
             var toolLibrary = GetToolLibraryForContext(projectContext, commandName);
 
-            return ResolveFromDependencyLibrary(
-                toolLibrary,
-                depsFilePath,
-                commandName,
-                allowedExtensions,
-                commandArguments,
-                projectContext);
-        }
-
-        private CommandSpec ResolveFromDependencyLibrary(
-            LockFileTargetLibrary toolLibrary,
-            string depsFilePath,
-            string commandName,
-            IEnumerable<string> allowedExtensions,
-            IEnumerable<string> commandArguments,
-            ProjectContext projectContext)
-        {
             return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                         toolLibrary,
                         commandName,
@@ -104,7 +90,8 @@ namespace Microsoft.DotNet.Cli.Utils
                         allowedExtensions,
                         projectContext.PackagesDirectory,
                         s_commandResolutionStrategy,
-                        depsFilePath);
+                        depsFilePath,
+                        runtimeConfigPath);
         }
 
         private LockFileTargetLibrary GetToolLibraryForContext(

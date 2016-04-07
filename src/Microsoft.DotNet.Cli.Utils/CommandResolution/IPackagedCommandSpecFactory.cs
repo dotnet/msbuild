@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> allowedExtensions,
             string nugetPackagesRoot,
             CommandResolutionStrategy commandResolutionStrategy,
-            string depsFilePath);
+            string depsFilePath,
+            string runtimeConfigPath);
         
     }
 }

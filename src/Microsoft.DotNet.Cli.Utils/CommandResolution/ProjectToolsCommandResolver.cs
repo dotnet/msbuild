@@ -123,7 +123,8 @@ namespace Microsoft.DotNet.Cli.Utils
                     _allowedCommandExtensions,
                     projectContext.PackagesDirectory,
                     s_commandResolutionStrategy,
-                    depsFilePath);
+                    depsFilePath,
+                    null);
         }
 
         private LockFile GetToolLockFile(

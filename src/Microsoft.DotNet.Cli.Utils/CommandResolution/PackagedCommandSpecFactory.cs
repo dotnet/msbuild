@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> allowedExtensions,
             string nugetPackagesRoot,
             CommandResolutionStrategy commandResolutionStrategy,
-            string depsFilePath)
+            string depsFilePath,
+            string runtimeConfigPath)
         {
 
             var toolAssembly = toolLibrary?.RuntimeAssemblies
@@ -35,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var isPortable = IsPortableApp(commandPath);
+            var isPortable = IsPortableApp(commandPath, runtimeConfigPath);
 
             return CreateCommandSpecWrappingWithCorehostIfDll(
                 commandPath, 
@@ -43,7 +44,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 depsFilePath, 
                 commandResolutionStrategy,
                 nugetPackagesRoot,
-                isPortable);
+                isPortable,
+                runtimeConfigPath);
         }
 
         private string GetCommandFilePath(string nugetPackagesRoot, LockFileTargetLibrary toolLibrary, LockFileItem runtimeAssembly)
@@ -62,7 +64,8 @@ namespace Microsoft.DotNet.Cli.Utils
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
-            bool isPortable)
+            bool isPortable,
+            string runtimeConfigPath)
         {
             var commandExtension = Path.GetExtension(commandPath);
 
@@ -74,7 +77,8 @@ namespace Microsoft.DotNet.Cli.Utils
                     depsFilePath, 
                     commandResolutionStrategy,
                     nugetPackagesRoot,
-                    isPortable);
+                    isPortable,
+                    runtimeConfigPath);
             }
             
             return CreateCommandSpec(commandPath, commandArguments, commandResolutionStrategy);
@@ -86,7 +90,8 @@ namespace Microsoft.DotNet.Cli.Utils
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
-            bool isPortable)
+            bool isPortable,
+            string runtimeConfigPath)
         {
             var host = string.Empty;
             var arguments = new List<string>();
@@ -109,6 +114,12 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             arguments.Add(commandPath);
+
+            if (runtimeConfigPath != null)
+            {
+                arguments.Add("--runtimeconfig");
+                arguments.Add(runtimeConfigPath);
+            }
 
             if (depsFilePath != null)
             {
@@ -134,13 +145,14 @@ namespace Microsoft.DotNet.Cli.Utils
             return new CommandSpec(commandPath, escapedArgs, commandResolutionStrategy);
         }
 
-        private bool IsPortableApp(string commandPath)
+        private bool IsPortableApp(string commandPath, string runtimeConfigPath)
         {
             var commandDir = Path.GetDirectoryName(commandPath);
 
-            var runtimeConfigPath = Directory.EnumerateFiles(commandDir)
-                .FirstOrDefault(x => x.EndsWith("runtimeconfig.json"));
-
+            runtimeConfigPath = string.IsNullOrEmpty(runtimeConfigPath)
+                ? Directory.EnumerateFiles(commandDir).FirstOrDefault(x => x.EndsWith("runtimeconfig.json"))
+                : runtimeConfigPath;
+    
             if (runtimeConfigPath == null)
             {
                 return false;
