@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult UpdateTemplateVersions(BuildTargetContext c)
         {
             IEnumerable<string> templateFiles = Directory.GetFiles(
-                Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"),
+                Path.Combine(Dirs.RepoRoot, "src", "dotnet", "commands", "dotnet-new"),
                 "project.json.pretemplate",
                 SearchOption.AllDirectories);
 

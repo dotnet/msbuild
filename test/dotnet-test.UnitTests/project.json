@@ -1,7 +1,10 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-*",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
     "Newtonsoft.Json": "7.0.1",
     "dotnet": {
       "target": "project"
@@ -16,8 +19,9 @@
     "FluentAssertions": "4.2.2"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": [
+        "netstandardapp1.5",
         "dnxcore50",
         "portable-net45+win8"
       ]

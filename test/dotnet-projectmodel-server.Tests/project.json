@@ -1,6 +1,9 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-*",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
     "dotnet": {
       "target": "project"
     },
@@ -19,8 +22,9 @@
     "System.Net.NameResolution": "4.0.0-rc2-24008"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": [
+        "netstandardapp1.5",
         "dnxcore50",
         "portable-net45+win8"
       ]
