@@ -367,7 +367,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                        <property name=""MSBuildToolsPath"" value="".""/>
                        <property name=""MSBuildBinPath"" value=""" + /*v4Folder*/"." + @"""/>
                        <msbuildExtensionsPathSearchPaths>
-                         <searchPaths os=""osx"">
+                         <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
                            <property name=""MSBuildExtensionsPath"" value=""{0}"" />
                            <property name=""MSBuildExtensionsPath32"" value=""{1}"" />
                            <property name=""MSBuildExtensionsPath64"" value=""{2}"" />
@@ -494,7 +494,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                        <property name=""MSBuildToolsPath"" value=""."" />
                        <property name=""MSBuildBinPath"" value=""."" />
                        <msbuildExtensionsPathSearchPaths>
-                         <searchPaths os=""osx"">
+                         <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
                            <property name=""" + extnPathPropertyName + @""" value=""" + combinedExtnDirs + @""" />
                          </searchPaths>
                        </msbuildExtensionsPathSearchPaths>
