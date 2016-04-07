@@ -17,7 +17,7 @@
       "type": "build"
     },
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-128011-22"
+    "dotnet-test-xunit": "1.0.0-dev-140469-38"
   },
   "frameworks": {
     "netcoreapp1.0": {

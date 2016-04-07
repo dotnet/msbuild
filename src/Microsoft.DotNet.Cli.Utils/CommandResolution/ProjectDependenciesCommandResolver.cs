@@ -132,17 +132,11 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var projectContext = ProjectContext.Create(
+            return ProjectContext.Create(
                 projectRootPath, 
                 framework, 
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
 
-            if (projectContext.RuntimeIdentifier == null)
-            {
-                return null;
-            }
-
-            return projectContext;
         }
 
         private IEnumerable<string> GetAllowedCommandExtensionsFromEnvironment(IEnvironmentProvider environment)
