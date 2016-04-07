@@ -13,19 +13,19 @@
     "net46": {
       "dependencies": {}
     },
-    "dnxcore50": {
+    "netstandard1.3": {
       "dependencies": {
-        "System.Net.NetworkInformation": "4.1.0-rc2-23712",
-        "Microsoft.NETCore": "5.0.1-rc2-23712",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-rc2-23712",
-        "System.Collections.NonGeneric": "4.0.1-rc2-23712",
-        "System.Console": "4.0.0-rc2-23712",
-        "Microsoft.NETCore.Runtime": "1.0.1-rc2-23712",
-        "Microsoft.NETCore.TestHost": "1.0.0-rc2-23712",
-        "Microsoft.Win32.Primitives": "4.0.1-rc2-23712",
+        "System.Net.NetworkInformation": "4.1.0-rc3-23908",
+        "Microsoft.NETCore": "5.0.1-rc3-23908",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-rc3-23908",
+        "System.Collections.NonGeneric": "4.0.1-rc3-23908",
+        "System.Console": "4.0.0-rc3-23908",
+        "Microsoft.NETCore.Runtime": "1.0.1-rc3-23908",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc3-23908",
+        "Microsoft.Win32.Primitives": "4.0.1-rc3-23908",
         "xunit.console.netcore": "1.0.2-prerelease-00096"
       },
-      "imports": "portable-net451+win81"
+      "imports": [ "portable-net451+win81", "dnxcore50" ]
     }
   }
 }

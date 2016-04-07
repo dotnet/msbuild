@@ -20,6 +20,9 @@
           Condition="'$(NetCoreBuild)' == 'true' 
                       and Exists('$(CSharpPortableTargetsFallback)')
                       and !Exists('$(CSharpPortableTargets)')"/>
+  
+  <Import Project="$(RepoRoot)\targets\OverrideGetReferenceAssemblyPaths.targets"
+          Condition="'$(NetCoreBuild)' == 'true'"/>
 
   <!-- OSS sign assemblies after compile runs. -->
   <Import Condition="Exists('$(ToolsDir)\sign.targets')" Project="$(ToolsDir)\sign.targets" />
@@ -48,7 +51,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
+    <NuGetTargetMoniker>.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
 
 </Project>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Override the GetReferenceAssemblyPaths target from Microsoft.Common.CurrentVersion.targets, since there is no reference assembly folder
+       when targeting .NET Core, and that target otherwise will generate an error saying reference assemblies couldn't be found.  This is in
+       an entirely separate targets file so that it can be conditionally imported and the target will only be overridden when building for
+       .NET Core -->
+  <Target Name="GetReferenceAssemblyPaths">
+  </Target>
+</Project>

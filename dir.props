@@ -15,6 +15,10 @@
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <SerializeProjects>false</SerializeProjects>
+  </PropertyGroup>
+
   <!-- Tool versions -->
   <PropertyGroup>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
@@ -52,12 +56,13 @@
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
 
-    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(RepoRoot)/Tools/dotnetcli/bin/</DotnetCliPath>
+    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/</DotnetCliPath>
+
     <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'=='Windows_NT'">$(DotnetCliPath)dotnet.exe</DotnetToolCommand>
     <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'!='Windows_NT'">$(DotnetCliPath)dotnet</DotnetToolCommand>
 
     <DnuToolPath>$(DotnetToolCommand)</DnuToolPath>
-    <DnuCoreRestoreCommand>&quot;$(DnuToolPath)&quot; restore --parallel</DnuCoreRestoreCommand>
+    <DnuCoreRestoreCommand>&quot;$(DnuToolPath)&quot; restore</DnuCoreRestoreCommand>
     <DnuCoreRestoreCommand Condition="'$(OsEnvironment)'=='OSX'">ulimit -n 2500 ; $(DnuCoreRestoreCommand)</DnuCoreRestoreCommand>
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
@@ -127,14 +132,14 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">portable</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">portable</DebugType>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
 
@@ -162,11 +167,6 @@
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true'">.NETFramework,Version=v4.6</NuGetTargetMoniker>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(OS)' != 'Windows_NT' and '$(MonoBuild)' != 'true'">
-    <DebugType/>
-    <DebugSymbols>false</DebugSymbols>
-  </PropertyGroup>
-
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
        the .NET Core surface area.  This way we can build a binary to run ApiPort on to measure progress. -->
   <PropertyGroup Condition="'$(Configuration)' == 'Port-Progress'">
@@ -185,8 +185,8 @@
 
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <TargetFrameworkIdentifier>DNXCore</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
 
     <!-- Setting this to false stops the AppX targets, which aren't supported on .NET Core, from beeing imported -->
@@ -199,8 +199,8 @@
   <!-- csharp targets locations -->
   <PropertyGroup>
     <CSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</CSharpTargets>
-    <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
-    <CSharpPortableTargetsFallback>$(ToolsDir)extensions\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
+    <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
+    <CSharpPortableTargetsFallback>$(ToolsDir)extensions\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">

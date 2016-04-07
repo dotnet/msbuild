@@ -733,7 +733,16 @@ namespace Microsoft.Build.Tasks
         {
             string fullSourcePath = Path.GetFullPath(source);
             string fullDestinationPath = Path.GetFullPath(destination);
-            return (0 == String.Compare(fullSourcePath, fullDestinationPath, StringComparison.OrdinalIgnoreCase));
+            StringComparison filenameComparison;
+            if (NativeMethodsShared.IsWindows)
+            {
+                filenameComparison = StringComparison.OrdinalIgnoreCase;
+            }
+            else
+            {
+                filenameComparison = StringComparison.Ordinal;
+            }
+            return (0 == String.Compare(fullSourcePath, fullDestinationPath, filenameComparison));
         }
 
         #endregion

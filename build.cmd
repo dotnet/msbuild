@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set MSBUILD_ARGS="%~dp0build.proj" /verbosity:minimal /fileloggerparameters:Verbosity=diag;LogFile="%~dp0msbuild.log" %*
+set MSBUILD_ARGS="%~dp0build.proj" /m /verbosity:minimal /fileloggerparameters:Verbosity=diag;LogFile="%~dp0msbuild.log" %*
 
 :: Check for a custom MSBuild path. If not defined, default to the one in your path.
 if not defined MSBUILD_CUSTOM_PATH (

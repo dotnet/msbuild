@@ -21,11 +21,19 @@
 
   <Import Project="..\dir.traversal.targets" />
 
+  <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />
+  <Import Project="$(ToolsDir)CommitBuildValues.targets" Condition="Exists('$(ToolsDir)CommitBuildValues.targets')" />
+
+  <Import Project="$(ToolsDir)BuildVersion.targets" Condition="Exists('$(ToolsDir)BuildVersion.targets')" />
+  <Import Project="$(ToolsDir)versioning.targets" Condition="Exists('$(ToolsDir)versioning.targets')" />
+
+  <PropertyGroup>
+    <SkipVersionGeneration>true</SkipVersionGeneration>
+    <BuildNumberMajor>$(RevisionNumber)</BuildNumberMajor>
+    <BuildNumberMinor>$([System.DateTime]::Now.ToString(`yMMdd`))</BuildNumberMinor>
+  </PropertyGroup>
+
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
-  
-  <!-- TODO: Use UpdateBuildValues target from BuildTools > version 206
-  <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />-->
-  <Import Project="$(RepoRoot)\targets\UpdateBuildValues.targets" Condition="Exists('$(RepoRoot)\targets\UpdateBuildValues.targets')" />
 
   <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
     <TraversalBuildDependsOn>
