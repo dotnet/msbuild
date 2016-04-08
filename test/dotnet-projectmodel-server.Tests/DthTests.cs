@@ -595,6 +595,21 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 afterDependencies.RetrieveDependency("ClassLibrary3");
             }
         }
+        
+        [Fact]
+        public void TestMscorlibLibraryDuplication()
+        {
+            var projectPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "MscorlibLibraryDuplication");
+            
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server, _loggerFactory))
+            {
+                client.Initialize(projectPath);
+
+                var messages = client.DrainAllMessages();
+                messages.AssertDoesNotContain(MessageTypes.Error);
+            }
+        }
 
         private static string NormalizePathString(string original)
         {

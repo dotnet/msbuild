@@ -44,31 +44,26 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         {
             // This never returns null
             var targetFrameworkInfo = project.GetTargetFramework(targetFramework);
-            var dependencies = new List<LibraryRange>(targetFrameworkInfo.Dependencies);            
+            var dependencies = new List<LibraryRange>(targetFrameworkInfo.Dependencies);
 
             // Add all of the project's dependencies
             dependencies.AddRange(project.Dependencies);
 
             if (targetFramework != null && targetFramework.IsDesktop())
             {
-                dependencies.Add(new LibraryRange("mscorlib", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
-
-                dependencies.Add(new LibraryRange("System", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                AddIfMissing(dependencies, "mscorlib");
+                AddIfMissing(dependencies, "System");
 
                 if (targetFramework.Version >= new Version(3, 5))
                 {
-                    dependencies.Add(new LibraryRange("System.Core", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
-
+                    AddIfMissing(dependencies, "System.Core");
                     if (targetFramework.Version >= new Version(4, 0))
                     {
-                        if (!dependencies.Any(dep => string.Equals(dep.Name, "Microsoft.CSharp", StringComparison.OrdinalIgnoreCase)))
-                        {
-                            dependencies.Add(new LibraryRange("Microsoft.CSharp", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
-                        }
+                        AddIfMissing(dependencies, "Microsoft.CSharp");
                     }
                 }
             }
-            
+
             if (targetLibrary != null)
             {
                 // The lock file entry might have a filtered set of dependencies
@@ -88,6 +83,14 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 dependencies,
                 targetFrameworkInfo,
                 !unresolved);
+        }
+
+        private static void AddIfMissing(List<LibraryRange> dependencies, string dependencyName)
+        {
+            if (!dependencies.Any(dep => string.Equals(dep.Name, dependencyName, StringComparison.OrdinalIgnoreCase)))
+            {
+                dependencies.Add(new LibraryRange(dependencyName, LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+            }
         }
     }
 }
