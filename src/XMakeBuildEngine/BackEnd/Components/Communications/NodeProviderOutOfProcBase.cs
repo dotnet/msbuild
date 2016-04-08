@@ -317,7 +317,7 @@ namespace Microsoft.Build.BackEnd
         private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-#if !FEATURE_PIPE_SECURITY
+#if FEATURE_PIPE_SECURITY
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
 #else
             var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
