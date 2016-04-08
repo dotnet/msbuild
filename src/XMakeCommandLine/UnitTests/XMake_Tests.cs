@@ -1002,6 +1002,7 @@ namespace Microsoft.Build.UnitTests
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-windows-failing")]
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1048,6 +1049,7 @@ namespace Microsoft.Build.UnitTests
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-windows-failing")]
         public void ProjectDirectoryIsMSBuildExeDirectory()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));

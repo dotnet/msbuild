@@ -405,6 +405,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void SaveReadOnly4()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);

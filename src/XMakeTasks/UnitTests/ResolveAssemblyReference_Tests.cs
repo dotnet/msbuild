@@ -5560,6 +5560,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     {
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void AutoUnifyUsesMinimumIO()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -5756,6 +5757,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void HigherVersionButSpecificVersionInDirect()
         {
             MockEngine e = new MockEngine();
@@ -5819,6 +5821,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void HigherVersionInDirectIgnoreMismatch()
         {
             MockEngine e = new MockEngine();
@@ -7812,6 +7815,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void Basic()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -8748,6 +8752,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [Trait("Category", "mono-windows-failing")]
         public void VerifyProcessArchitectureMismatchWarning()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8773,6 +8778,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [Trait("Category", "mono-windows-failing")]
         public void VerifyProcessArchitectureMismatchWarningDefault()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8797,6 +8803,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [Trait("Category", "mono-windows-failing")]
         public void VerifyProcessArchitectureMismatchError()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11410,6 +11417,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void SpecificVersionFalse()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12920,6 +12928,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void Regress46599_BogusInGACValueForAssemblyInRedistList()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12972,6 +12981,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void VerifyFrameworkFileMetadataFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();

@@ -41,6 +41,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests the /keycontainer: switch
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-windows-failing")]
         public void KeyContainer()
         {
             if (!NativeMethodsShared.IsWindows)

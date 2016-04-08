@@ -16,6 +16,7 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]
+    [Trait("Category", "mono-windows-failing")]
     sealed public class RequiredTransformations
     {
         /// <summary>
@@ -1854,6 +1855,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact(Skip = "Does not support strongly typed resources on netcore")]
 #endif
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1904,6 +1906,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact(Skip = "Does not support strongly typed resources on netcore")]
 #endif
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -2007,6 +2010,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void SourceItemMissing()
         {
             string txtFile = null;

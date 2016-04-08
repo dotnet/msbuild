@@ -702,6 +702,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void SaveUnmodifiedWithNewEncoding()
         {
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"

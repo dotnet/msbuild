@@ -322,6 +322,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void GetGoodSDKs()
         {
             try
@@ -403,6 +404,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void GetGoodSDKs2()
         {
             try
