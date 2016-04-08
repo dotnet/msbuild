@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     }
                     catch (Exception)
                     {
+                        Thread.Sleep(100);
                         return false;
                     }
                 }

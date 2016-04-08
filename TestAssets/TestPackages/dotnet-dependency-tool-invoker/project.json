@@ -15,14 +15,6 @@
       "type": "build",
       "version": "1.0.0-rc2-16453"
     },
-    "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
-      "version": "1.0.0-rc2-16453",
-      "type": "build"
-    },
-    "Microsoft.Dnx.Runtime.Sources": {
-      "version": "1.0.0-rc2-16453",
-      "type": "build"
-    },
     "System.CommandLine": "0.1.0-e160323-1"
   },
   "frameworks": {
