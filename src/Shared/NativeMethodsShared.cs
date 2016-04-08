@@ -323,8 +323,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetOSNameForExtensionsPath()
         {
+#if XPLAT
             return IsOSX ? "osx" : (IsUnix ? "unix" : "windows");
+#else
+            return "windows";
+#endif
         }
+
         #endregion
 
         #region Set Error Mode (copied from BCL)

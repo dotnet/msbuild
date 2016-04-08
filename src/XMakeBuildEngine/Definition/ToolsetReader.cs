@@ -402,16 +402,19 @@ namespace Microsoft.Build.Evaluation
             string root,
             string toolsPath)
         {
+#if XPLAT
             // Create standard properties. On Mono they are well known
             if (!NativeMethodsShared.IsMono)
+#endif
             {
                 return null;
             }
-
+#if XPLAT
             PropertyDictionary<ProjectPropertyInstance> buildProperties =
                 new PropertyDictionary<ProjectPropertyInstance>();
             AppendStandardProperties(buildProperties, globalProperties, version, root, toolsPath);
             return buildProperties;
+#endif
         }
 
         /// <summary>
@@ -425,6 +428,7 @@ namespace Microsoft.Build.Evaluation
             string root,
             string toolsPath)
         {
+#if XPLAT
             if (NativeMethodsShared.IsMono)
             {
                 var v4Dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current)
@@ -486,6 +490,7 @@ namespace Microsoft.Build.Evaluation
                     properties.Set(ProjectPropertyInstance.Create("SDK40ToolsPath", v4Dir, true, false));
                 }
             }
+#endif
         }
 
         /// <summary>
