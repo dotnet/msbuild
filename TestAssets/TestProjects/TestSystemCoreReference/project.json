@@ -2,6 +2,11 @@
   "version": "1.0.0-*",
   "dependencies": {},
   "frameworks": {
+    "netstandardapp1.5": {
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-rc2-23931"
+      }
+    },
     "net451": {
       "frameworkAssemblies": {
         "System": ""
