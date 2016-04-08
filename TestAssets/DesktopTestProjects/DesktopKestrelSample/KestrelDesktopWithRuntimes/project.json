@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20113",
+    "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254"
+  },
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "compile": [
+    "../../../TestProjects/KestrelSample/src/*.cs"
+  ],
+  "frameworks": {
+    "net451": { }
+  },
+  "runtimes": {
+      "win7-x64": {},
+      "osx.10.11-x64": {}
+  }
+}

@@ -9,16 +9,46 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using NuGet.Frameworks;
+using NuGet.RuntimeModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
+    class RuntimeGraphCollector
+    {
+        private const string RuntimeJsonFileName = "runtime.json";
+
+        public static RuntimeGraph Collect(IEnumerable<LibraryDescription> libraries)
+        {
+            var graph = RuntimeGraph.Empty;
+            foreach (var library in libraries)
+            {
+                if (library.Identity.Type == LibraryType.Package)
+                {
+                    var runtimeJson = ((PackageDescription)library).PackageLibrary.Files.FirstOrDefault(f => f == RuntimeJsonFileName);
+                    if (runtimeJson != null)
+                    {
+                        var runtimeJsonFullName = Path.Combine(library.Path, runtimeJson);
+                        graph = RuntimeGraph.Merge(graph, JsonRuntimeFormat.ReadRuntimeGraph(runtimeJsonFullName));
+                    }
+                }
+            }
+            return graph;
+        }
+    }
+
     public class ProjectContext
     {
+        private string[] _runtimeFallbacks;
+
         public GlobalSettings GlobalSettings { get; }
 
         public ProjectDescription RootProject { get; }
 
         public NuGetFramework TargetFramework { get; }
+
+        public LibraryDescription PlatformLibrary { get; }
+
+        public bool IsPortable { get; }
 
         public string RuntimeIdentifier { get; }
 
@@ -37,7 +67,9 @@ namespace Microsoft.DotNet.ProjectModel
         internal ProjectContext(
             GlobalSettings globalSettings,
             ProjectDescription rootProject,
+            LibraryDescription platformLibrary,
             NuGetFramework targetFramework,
+            bool isPortable,
             string runtimeIdentifier,
             string packagesDirectory,
             LibraryManager libraryManager,
@@ -45,16 +77,29 @@ namespace Microsoft.DotNet.ProjectModel
         {
             GlobalSettings = globalSettings;
             RootProject = rootProject;
+            PlatformLibrary = platformLibrary;
             TargetFramework = targetFramework;
             RuntimeIdentifier = runtimeIdentifier;
             PackagesDirectory = packagesDirectory;
             LibraryManager = libraryManager;
             LockFile = lockfile;
+            IsPortable = isPortable;
         }
 
         public LibraryExporter CreateExporter(string configuration, string buildBasePath = null)
         {
-            return new LibraryExporter(RootProject, LibraryManager, configuration, RuntimeIdentifier, buildBasePath, RootDirectory);
+            if (IsPortable && RuntimeIdentifier != null && _runtimeFallbacks == null)
+            {
+                var graph = RuntimeGraphCollector.Collect(LibraryManager.GetLibraries());
+                _runtimeFallbacks = graph.ExpandRuntime(RuntimeIdentifier).ToArray();
+            }
+            return new LibraryExporter(RootProject,
+                LibraryManager,
+                configuration,
+                RuntimeIdentifier,
+                _runtimeFallbacks,
+                buildBasePath,
+                RootDirectory);
         }
 
         /// <summary>
@@ -146,15 +191,12 @@ namespace Microsoft.DotNet.ProjectModel
                 return this;
             }
 
-            var standalone = !RootProject.Dependencies
-                .Any(d => d.Type.Equals(LibraryDependencyType.Platform));
-
             var context = CreateBuilder(ProjectFile.ProjectFilePath, TargetFramework)
-                .WithRuntimeIdentifiers(standalone ? runtimeIdentifiers : Enumerable.Empty<string>())
+                .WithRuntimeIdentifiers(runtimeIdentifiers)
                 .WithLockFile(LockFile)
                 .Build();
 
-            if (standalone && context.RuntimeIdentifier == null)
+            if (!context.IsPortable && context.RuntimeIdentifier == null)
             {
                 // We are standalone, but don't support this runtime
                 var rids = string.Join(", ", runtimeIdentifiers);

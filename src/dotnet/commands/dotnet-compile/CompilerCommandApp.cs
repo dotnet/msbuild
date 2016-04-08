@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     Debug.Assert(targets.Count == 1);
                 }
 
-                Debug.Assert(targets.All(t => string.IsNullOrEmpty(t.RuntimeIdentifier)));
+             //Debug.Assert(targets.All(t => string.IsNullOrEmpty(t.RuntimeIdentifier)));
 
                 var success = execute(targets, this);
 

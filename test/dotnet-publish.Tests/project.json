@@ -10,8 +10,13 @@
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
-    "Microsoft.DotNet.Cli.Utils": {
-      "target": "project"
+    "frameworks": {
+        "netstandardapp1.5": {
+            "imports": [
+                "dnxcore50",
+                "portable-net45+win8"
+            ]
+        }
     },
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-00206",
