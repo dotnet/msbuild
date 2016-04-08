@@ -504,6 +504,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalFalse()
         {
             MockEngine engine = new MockEngine();

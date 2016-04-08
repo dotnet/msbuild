@@ -540,6 +540,15 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// OS name that can be used for the msbuildExtensionsPathSearchPaths element
+        /// for a toolset
+        /// </summary>
+        internal static string GetOSNameForExtensionsPath()
+        {
+            return IsOSX ? "osx" : (IsUnix ? "unix" : "windows");
+        }
+
+        /// <summary>
         /// The base directory for all framework paths in Mono
         /// </summary>
         private static string s_frameworkBasePath;

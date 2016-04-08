@@ -370,6 +370,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-windows-failing")]
         public void RemoteTaskItem()
         {
             AppDomain appDomain = null;
