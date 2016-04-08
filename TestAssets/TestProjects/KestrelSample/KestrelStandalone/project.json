@@ -11,11 +11,10 @@
   "compile": [
     "../src/*.cs"
   ],
-  
   "frameworks": {
     "netstandardapp1.5": {
       "dependencies": {
-        "Microsoft.NETCore.App": "1.0.0-rc2-23931"
+        "Microsoft.NETCore.App": "1.0.0-rc2-24008"
       },
       "imports": [
         "dnxcore50",

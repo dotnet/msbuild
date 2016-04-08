@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-*",
-  "dependencies": {    
+  "dependencies": {
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20113",
     "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254"
@@ -11,13 +11,12 @@
   "compile": [
     "../src/*.cs"
   ],
-  
   "frameworks": {
     "netstandard1.5": {
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc2-23931"
+          "version": "1.0.0-rc2-24008"
         }
       },
       "imports": [
