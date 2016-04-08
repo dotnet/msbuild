@@ -9,33 +9,9 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using NuGet.Frameworks;
-using NuGet.RuntimeModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
-    class RuntimeGraphCollector
-    {
-        private const string RuntimeJsonFileName = "runtime.json";
-
-        public static RuntimeGraph Collect(IEnumerable<LibraryDescription> libraries)
-        {
-            var graph = RuntimeGraph.Empty;
-            foreach (var library in libraries)
-            {
-                if (library.Identity.Type == LibraryType.Package)
-                {
-                    var runtimeJson = ((PackageDescription)library).PackageLibrary.Files.FirstOrDefault(f => f == RuntimeJsonFileName);
-                    if (runtimeJson != null)
-                    {
-                        var runtimeJsonFullName = Path.Combine(library.Path, runtimeJson);
-                        graph = RuntimeGraph.Merge(graph, JsonRuntimeFormat.ReadRuntimeGraph(runtimeJsonFullName));
-                    }
-                }
-            }
-            return graph;
-        }
-    }
-
     public class ProjectContext
     {
         private string[] _runtimeFallbacks;

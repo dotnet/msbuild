@@ -209,6 +209,8 @@ namespace Microsoft.DotNet.ProjectModel
             bool isPortable = platformDependency != null || TargetFramework.IsDesktop();
 
             LockFileTarget target = null;
+            LibraryDescription platformLibrary = null;
+
             if (lockFileLookup != null)
             {
                 target = SelectTarget(LockFile, isPortable);
@@ -217,6 +219,11 @@ namespace Microsoft.DotNet.ProjectModel
                     var nugetPackageResolver = new PackageDependencyProvider(PackagesDirectory, frameworkReferenceResolver);
                     var msbuildProjectResolver = new MSBuildDependencyProvider(Project, ProjectResolver);
                     ScanLibraries(target, lockFileLookup, libraries, msbuildProjectResolver, nugetPackageResolver, projectResolver);
+
+                    if (platformDependency != null)
+                    {
+                        platformLibrary = libraries[new LibraryKey(platformDependency.Value.Name)];
+                    }
                 }
             }
 
@@ -236,12 +243,6 @@ namespace Microsoft.DotNet.ProjectModel
             else
             {
                 runtime = target?.RuntimeIdentifier;
-            }
-
-            LibraryDescription platformLibrary = null;
-            if(platformDependency != null)
-            {
-                platformLibrary = libraries[new LibraryKey(platformDependency.Value.Name)];
             }
 
             var referenceAssemblyDependencyResolver = new ReferenceAssemblyDependencyResolver(frameworkReferenceResolver);

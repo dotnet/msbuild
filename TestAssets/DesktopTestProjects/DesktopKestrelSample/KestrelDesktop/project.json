@@ -9,7 +9,7 @@
     "emitEntryPoint": true
   },
   "compile": [
-    "../../../TestProjects/KestrelSample/src/*.cs"
+    "../src/*.cs"
   ],
   "frameworks": {
     "net451": { }
