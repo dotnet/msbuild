@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -326,12 +328,87 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init), nameof(InitPublish))]
         public static BuildTargetResult PullNupkgFilesFromBlob(BuildTargetContext c)
         {
-            var hostBlob = $"{Channel}/Binaries/{CliNuGetVersion}/";
+            var pathToPublish = Environment.GetEnvironmentVariable("BLOB_VIRTUAL_PATH_TO_PUBLISH");
+            if (string.IsNullOrEmpty(pathToPublish))
+                pathToPublish = FindLatestCompleteBuild();
 
-            Directory.CreateDirectory(Dirs.Packages);
-            AzurePublisherTool.DownloadFiles(hostBlob, ".nupkg", Dirs.Packages);
+            if (string.IsNullOrEmpty(pathToPublish))
+            {
+                Console.WriteLine("Didn't find a directory with all the necessary runtime packages!");
+                return c.Failed();
+            }
+
+            Directory.CreateDirectory(Dirs.PackagesNoRID);
+            AzurePublisherTool.DownloadFiles(pathToPublish, ".nupkg", Dirs.PackagesNoRID);
 
             return c.Success();
+        }
+
+        private static string FindLatestCompleteBuild()
+        {
+            var hostBlob = $"{Channel}/Binaries/";
+
+            Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+-[^-]+-\d{6})/$");
+
+            List<string> buildVersions = new List<string>();
+            foreach (string file in AzurePublisherTool.ListBlobs(hostBlob))
+            {
+                var match = buildVersionRegex.Match(file);
+                if (match.Success)
+                {
+                    buildVersions.Add(match.Groups["version"].Value);
+                }
+            }
+
+            buildVersions.Sort();
+            buildVersions.Reverse();
+
+            Dictionary<string, bool> runtimes = new Dictionary<string, bool>()
+            {
+                {"win7", false },
+                {"osx.10.10", false },
+                {"rhel.7", false },
+                {"ubuntu.14.04", false },
+
+            };
+
+            foreach (var bv in buildVersions)
+            {
+                Console.WriteLine($"Version: {bv}");
+
+                var buildFiles = AzurePublisherTool.ListBlobs(hostBlob + bv);
+
+                foreach (var bf in buildFiles)
+                {
+                    string buildFile = Path.GetFileName(bf);
+
+                    foreach (var runtime in runtimes.Keys)
+                    {
+                        if (buildFile.StartsWith($"runtime.{runtime}"))
+                        {
+                            runtimes[runtime] = true;
+                            break;
+                        }
+                    }
+                }
+
+                bool missingRuntime = false;
+                foreach (var runtime in runtimes)
+                {
+                    if (!runtime.Value)
+                    {
+                        missingRuntime = true;
+                        Console.WriteLine($"Version {bv} is missing packages for runtime {runtime.Key}");
+                    }
+                }
+
+                if (!missingRuntime)
+                {
+                    return hostBlob + bv;
+                }
+            }
+
+            return null;
         }
     }
 }

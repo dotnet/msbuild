@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Cli.Build
             PlatformServices.Default.Runtime.GetRuntimeIdentifier());
 
         public static readonly string PackagesIntermediate = Path.Combine(Output, "packages/intermediate");
+        public static readonly string PackagesNoRID = Path.Combine(RepoRoot, "artifacts", "packages");
         public static readonly string Packages = Path.Combine(Output, "packages");
         public static readonly string Stage1 = Path.Combine(Output, "stage1");
         public static readonly string Stage1Compilation = Path.Combine(Output, "stage1compilation");

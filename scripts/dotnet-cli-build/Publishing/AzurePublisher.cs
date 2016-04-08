@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -94,7 +95,7 @@ namespace Microsoft.DotNet.Cli.Build
             return $"{channel}/Binaries/{version}/{Path.GetFileName(archiveFile)}";
         }
 
-        public async void DownloadFiles(string blobVirtualDirectory, string fileExtension, string downloadPath)
+        public void DownloadFiles(string blobVirtualDirectory, string fileExtension, string downloadPath)
         {
             CloudBlobDirectory blobDir = _blobContainer.GetDirectoryReference(blobVirtualDirectory);
             BlobContinuationToken continuationToken = new BlobContinuationToken();
@@ -110,6 +111,16 @@ namespace Microsoft.DotNet.Cli.Build
                     blobFile.DownloadToFileAsync(localBlobFile, FileMode.Create).Wait();
                 }
             }
+        }
+
+        public IEnumerable<string> ListBlobs(string blobVirtualDirectory)
+        {
+            CloudBlobDirectory blobDir = _blobContainer.GetDirectoryReference(blobVirtualDirectory);
+            BlobContinuationToken continuationToken = new BlobContinuationToken();
+
+            var blobFiles = blobDir.ListBlobsSegmentedAsync(continuationToken).Result;
+
+            return blobFiles.Results.Select(bf => bf.Uri.AbsoluteUri);
         }
     }
 }
