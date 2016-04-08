@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 ? Directory.EnumerateFiles(commandDir).FirstOrDefault(x => x.EndsWith("runtimeconfig.json"))
                 : runtimeConfigPath;
     
-            if (runtimeConfigPath == null)
+            if (runtimeConfigPath == null || !File.Exists(runtimeConfigPath))
             {
                 return false;
             }
