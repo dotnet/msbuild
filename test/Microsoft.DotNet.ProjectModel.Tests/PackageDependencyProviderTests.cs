@@ -42,15 +42,25 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             Assert.Empty(p2.RuntimeAssemblies);
         }
 
-        [Fact]
-        public void SingleMicrosoftCSharpReference()
+        [Theory]
+        [InlineDataAttribute("TestMscorlibReference", true)]
+        [InlineDataAttribute("TestMscorlibReference", false)]
+        [InlineDataAttribute("TestMicrosoftCSharpReference", true)]
+        [InlineDataAttribute("TestMicrosoftCSharpReference", false)]
+        [InlineDataAttribute("TestSystemReference", true)]
+        [InlineDataAttribute("TestSystemReference", false)]
+        [InlineDataAttribute("TestSystemCoreReference", true)]
+        [InlineDataAttribute("TestSystemCoreReference", false)]
+        public void TestDuplicateDefaultDesktopReferences(string sampleName, bool withLockFile)
         {
-            // https://github.com/dotnet/cli/issues/1602
-            var instance = TestAssetsManager.CreateTestInstance("TestMicrosoftCSharpReference")
-                                            .WithLockFiles();
+            var instance = TestAssetsManager.CreateTestInstance(sampleName);
+            if (withLockFile)
+            {
+                instance = instance.WithLockFiles();
+            }
 
             var context = new ProjectContextBuilder().WithProjectDirectory(instance.TestRoot)
-                                                     .WithTargetFramework("dnx451")
+                                                     .WithTargetFramework("net451")
                                                      .Build();
 
             Assert.Equal(4, context.RootProject.Dependencies.Count());
