@@ -322,5 +322,16 @@ namespace Microsoft.DotNet.Cli.Build
             }
             return c.Success();
         }
+
+        [Target(nameof(PrepareTargets.Init), nameof(InitPublish))]
+        public static BuildTargetResult PullNupkgFilesFromBlob(BuildTargetContext c)
+        {
+            var hostBlob = $"{Channel}/Binaries/{CliNuGetVersion}/";
+
+            Directory.CreateDirectory(Dirs.Packages);
+            AzurePublisherTool.DownloadFiles(hostBlob, ".nupkg", Dirs.Packages);
+
+            return c.Success();
+        }
     }
 }
