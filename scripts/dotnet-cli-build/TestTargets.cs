@@ -37,17 +37,17 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-test.Tests",
             "Kestrel.Tests"
         };
-        
+
         public static readonly dynamic[] ConditionalTestAssets = new[]
         {
-            new { Path = "AppWithDirectDependencyDesktopAndPortable", Skip = new Func<bool>(() => !CurrentPlatform.IsWindows) } 
+            new { Path = "AppWithDirectDependencyDesktopAndPortable", Skip = new Func<bool>(() => !CurrentPlatform.IsWindows) }
         };
 
         [Target(
-            nameof(PrepareTargets.Init), 
-            nameof(SetupTests), 
-            nameof(RestoreTests), 
-            nameof(BuildTests), 
+            nameof(PrepareTargets.Init),
+            nameof(SetupTests),
+            nameof(RestoreTests),
+            nameof(BuildTests),
             nameof(RunTests),
             nameof(ValidateDependencies))]
         public static BuildTargetResult Test(BuildTargetContext c) => c.Success();
@@ -128,13 +128,13 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var dotnet = DotNetCli.Stage2;
 
-            dotnet.Restore("--verbosity", "verbose", 
+            dotnet.Restore("--verbosity", "verbose",
                 "--infer-runtimes",
                 "--fallbacksource", Dirs.TestPackages,
                 "--fallbacksource", Dirs.Corehost)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
                 .Execute().EnsureSuccessful();
-                
+
             return c.Success();
         }
 
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Cli.Build
                 {
                     versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").VersionSuffix;
                 }
-                
+
                 var fullPath = Path.Combine(c.BuildContext.BuildDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar));
                 c.Info($"Packing: {fullPath}");
 
@@ -187,14 +187,14 @@ namespace Microsoft.DotNet.Cli.Build
                     var packBuildResult = DotNetCli.Stage1.Build(buildArgs.ToArray())
                         .Execute();
                 }
-                
+
 
                 var projectJson = Path.Combine(fullPath, "project.json");
-                var dotnetPackArgs = new List<string> { 
+                var dotnetPackArgs = new List<string> {
                     projectJson,
                     "--no-build",
                     "--build-base-path", Dirs.TestPackagesBuild,
-                    "--output", Dirs.TestPackages 
+                    "--output", Dirs.TestPackages
                 };
 
                 if (!string.IsNullOrEmpty(versionSuffix))
@@ -217,7 +217,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var packageName in PackageTargets.ProjectsToPack)
             {
                 Rmdir(Path.Combine(Dirs.NuGetPackages, packageName));
-            }            
+            }
 
             return c.Success();
         }
@@ -232,7 +232,7 @@ namespace Microsoft.DotNet.Cli.Build
                 {
                     Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", packageProject.Name));
                 }
-            }            
+            }
 
             return c.Success();
         }

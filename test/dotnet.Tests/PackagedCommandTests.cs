@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tests
             {
                 return;
             }
-            
+
             var appDirectory = Path.Combine(_desktopTestProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
@@ -69,6 +69,17 @@ namespace Microsoft.DotNet.Tests
                 result.Should().HaveStdOutContaining(expectedDependencyToolPath);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
+        }
+
+        [Fact]
+        public void ToolsCanAccessDependencyContextProperly()
+        {
+            var appDirectory = Path.Combine(_testProjectsRoot, "DependencyContextFromTool");
+
+            CommandResult result = new DependencyContextTestCommand() { WorkingDirectory = appDirectory }
+                .Execute(Path.Combine(appDirectory, "project.json"));
+
+            result.Should().Pass();
         }
 
         public static IEnumerable<object[]> DependencyToolArguments
@@ -148,6 +159,26 @@ namespace Microsoft.DotNet.Tests
             public override CommandResult ExecuteWithCapturedOutput(string args = "")
             {
                 args = $"portable {args}";
+                return base.ExecuteWithCapturedOutput(args);
+            }
+        }
+
+        class DependencyContextTestCommand : TestCommand
+        {
+            public DependencyContextTestCommand()
+                : base("dotnet")
+            {
+            }
+
+            public override CommandResult Execute(string path)
+            {
+                var args = $"dependency-context-test {path}";
+                return base.Execute(args);
+            }
+
+            public override CommandResult ExecuteWithCapturedOutput(string path)
+            {
+                var args = $"dependency-context-test {path}";
                 return base.ExecuteWithCapturedOutput(args);
             }
         }
