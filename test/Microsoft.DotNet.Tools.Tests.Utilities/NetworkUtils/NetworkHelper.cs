@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     public class NetworkHelper
     {
         // in milliseconds
-        private const int Timeout = 20000;
+        private const int Timeout = 50000;
 
         public static string Localhost { get; } = "http://localhost";
 
