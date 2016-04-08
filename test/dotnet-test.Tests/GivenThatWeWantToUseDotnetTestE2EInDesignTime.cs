@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System.IO;
 using FluentAssertions;
@@ -18,15 +19,16 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
         public GivenThatWeWantToUseDotnetTestE2EInDesignTime()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("ProjectWithTests").WithLockFiles();
+            var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets"));
+            var testInstance = testAssetManager.CreateTestInstance("ProjectWithTests").WithLockFiles();
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(
                 _projectFilePath,
                 null,
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
-            var runtime = contexts.FirstOrDefault(c => !string.IsNullOrEmpty(c.RuntimeIdentifier))?.RuntimeIdentifier;
-            _outputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, runtime);
+
+            _outputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "netcoreapp1.0");
             var buildCommand = new BuildCommand(_projectFilePath);
             var result = buildCommand.Execute();
 

@@ -5,7 +5,11 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-24008",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
+    "System.Diagnostics.TraceSource": "4.0.0-rc2-24008",
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
@@ -15,11 +19,12 @@
     "FluentAssertions": "4.0.0",
     "moq.netcore": "4.4.0-beta8",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-128011-22"
+    "dotnet-test-xunit": "1.0.0-dev-140469-38"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": [
+        "netstandardapp1.5",
         "dnxcore50",
         "portable-net45+win8"
       ]

@@ -248,6 +248,7 @@ int fx_muxer_t::parse_args_and_execute(const pal::string_t& own_dir, int argoff,
     if (exec_mode)
     {
         known_opts.push_back(_X("--depsfile"));
+        known_opts.push_back(_X("--runtimeconfig"));
     }
 
     // Parse the known muxer arguments if any.
@@ -304,15 +305,28 @@ int fx_muxer_t::parse_args_and_execute(const pal::string_t& own_dir, int argoff,
 
     pal::string_t opts_deps_file = _X("--depsfile");
     pal::string_t opts_probe_path = _X("--additionalprobingpath");
+    pal::string_t opts_runtime_config = _X("--runtimeconfig");
+
     pal::string_t deps_file = get_last_known_arg(opts, opts_deps_file, _X(""));
+    pal::string_t runtime_config = get_last_known_arg(opts, opts_runtime_config, _X(""));
     std::vector<pal::string_t> probe_paths = opts.count(opts_probe_path) ? opts[opts_probe_path] : std::vector<pal::string_t>();
 
     trace::verbose(_X("Current argv is %s"), app_candidate.c_str());
 
     pal::string_t app_or_deps = deps_file.empty() ? app_candidate : deps_file;
-    pal::string_t no_json = app_candidate;
-    pal::string_t dev_config_file;
-    auto config_file = get_runtime_config_from_file(no_json, &dev_config_file);
+    pal::string_t config_file, dev_config_file;
+
+    if(runtime_config.empty())
+    {
+        trace::verbose(_X("Finding runtimeconfig.json from [%s]"), app_candidate.c_str());
+        get_runtime_config_paths_from_app(app_candidate, &config_file, &dev_config_file);   
+    }
+    else
+    {
+        trace::verbose(_X("Finding runtimeconfig.json from [%s]"), runtime_config.c_str());
+        get_runtime_config_paths_from_arg(runtime_config, &config_file, &dev_config_file);   
+    }
+
     runtime_config_t config(config_file, dev_config_file);
     for (const auto& path : config.get_probe_paths())
     {

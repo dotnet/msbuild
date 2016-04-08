@@ -41,7 +41,7 @@
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-24008",
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-24008"
+      "version": "1.0.0-rc2-*"
     },
     "System.Diagnostics.TraceSource": "4.0.0-rc2-24008",
     "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-24008",

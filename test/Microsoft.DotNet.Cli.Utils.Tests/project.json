@@ -4,7 +4,11 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-24008",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
+    "System.Diagnostics.TraceSource": "4.0.0-rc2-24008",
     "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24008",
     "NuGet.Versioning": "3.5.0-beta-1130",
     "NuGet.Packaging": "3.5.0-beta-1130",
@@ -21,11 +25,12 @@
     },
     "moq.netcore": "4.4.0-beta8",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-128011-22"
+    "dotnet-test-xunit": "1.0.0-dev-140469-38"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": [
+        "netstandardapp1.5",
         "dnxcore50",
         "portable-net45+win8"
       ]

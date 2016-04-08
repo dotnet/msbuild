@@ -1,7 +1,10 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-24008",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
     "Microsoft.Extensions.Testing.Abstractions": {
       "target": "project"
     },
@@ -11,13 +14,14 @@
       "target": "project"
     },
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-128011-22",
+    "dotnet-test-xunit": "1.0.0-dev-140469-38",
     "FluentAssertions": "4.2.2",
     "moq.netcore": "4.4.0-beta8"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": [
+        "netstandardapp1.5",
         "dnxcore50",
         "netstandard1.3",
         "portable-net45+win8"

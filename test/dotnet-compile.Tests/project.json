@@ -1,7 +1,10 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-24008",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
     "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24008",
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
@@ -10,11 +13,12 @@
       "target": "project"
     },
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-128011-22"
+    "dotnet-test-xunit": "1.0.0-dev-140469-38"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": [
+        "netstandardapp1.5",
         "dnxcore50",
         "portable-net451+win8"
       ]

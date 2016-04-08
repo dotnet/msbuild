@@ -4,6 +4,10 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },
@@ -21,13 +25,14 @@
       "target": "project"
     },
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-128011-22",
+    "dotnet-test-xunit": "1.0.0-dev-140469-38",
     "moq.netcore": "4.4.0-beta8",
     "FluentAssertions": "4.2.2"
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": [
+        "netstandardapp1.5",
         "dnxcore50",
         "portable-net451+win8"
       ]
