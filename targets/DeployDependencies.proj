@@ -155,10 +155,12 @@
      <Copy
         SourceFiles="$(DeploymentDir)\corerun"
         DestinationFiles="$(DeploymentDir)\corerun.exe"
+        Condition="'$(MonoBuild)' != 'true'"
         />
     <Copy
         SourceFiles="$(TestDeploymentDir)\corerun"
         DestinationFiles="$(TestDeploymentDir)\corerun.exe"
+        Condition="'$(MonoBuild)' != 'true'"
         />        
         
   </Target>
