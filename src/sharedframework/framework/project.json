@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-23931"
+    "Microsoft.NETCore.App": "1.0.0-rc2-24008"
   },
   "runtimes": {
     "win7-x64": {},

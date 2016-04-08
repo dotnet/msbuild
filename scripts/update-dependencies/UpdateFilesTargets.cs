@@ -201,7 +201,7 @@ namespace Microsoft.DotNet.Scripts
         [Target]
         public static BuildTargetResult ReplaceCoreHostPackaging(BuildTargetContext c)
         {
-            ReplaceFileContents(@"src\corehost\packaging\dir.props", contents =>
+            ReplaceFileContents(@"pkg\dir.props", contents =>
             {
                 DependencyInfo coreFXInfo = c.GetCoreFXDependency();
                 Regex regex = new Regex(@"Microsoft\.NETCore\.Platforms\\(?<version>\d\.\d\.\d)-(?<release>.*)\\runtime\.json");

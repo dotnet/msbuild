@@ -11,10 +11,9 @@
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160316",
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-23931"
+      "version": "1.0.0-rc2-24008"
     }
   },
-
   "tools": {
     "dotnet-compile-fsc": {
       "version": "1.0.0-*",
@@ -25,7 +24,6 @@
       ]
     }
   },
-
   "frameworks": {
     "netstandard1.5": {
       "imports": [

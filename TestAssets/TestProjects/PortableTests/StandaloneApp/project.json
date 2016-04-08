@@ -9,7 +9,7 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "Microsoft.NETCore.App": "1.0.0-rc2-23931"
+        "Microsoft.NETCore.App": "1.0.0-rc2-24008"
       }
     }
   },
@@ -23,11 +23,13 @@
     "rhel.7.2-x64": {},
     "debian.8.2-x64": {}
   },
-
   "runtimeOptions": {
     "somethingString": "anything",
     "somethingBoolean": true,
-    "someArray": ["one", "two"],
+    "someArray": [
+      "one",
+      "two"
+    ],
     "someObject": {
       "someProperty": "someValue"
     }

@@ -25,8 +25,8 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "System.Resources.ResourceManager": "4.0.1-rc2-23931",
-        "System.Reflection.TypeExtensions": "4.1.0-rc2-23931"
+        "System.Resources.ResourceManager": "4.0.1-rc2-24008",
+        "System.Reflection.TypeExtensions": "4.1.0-rc2-24008"
       }
     }
   },

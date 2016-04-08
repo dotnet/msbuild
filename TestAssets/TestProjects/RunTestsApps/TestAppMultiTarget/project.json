@@ -8,7 +8,7 @@
       "imports": "dnxcore50",
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version":"1.0.0-rc2-23931",
+          "version": "1.0.0-rc2-24008",
           "type": "platform"
         }
       }
