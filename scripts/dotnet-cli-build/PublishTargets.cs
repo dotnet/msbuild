@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -325,32 +326,28 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        private const string PackagePushedSemaphoreFileName = "packages.pushed";
+
         [Target(nameof(PrepareTargets.Init), nameof(InitPublish))]
         public static BuildTargetResult PullNupkgFilesFromBlob(BuildTargetContext c)
         {
-            var pathToPublish = Environment.GetEnvironmentVariable("BLOB_VIRTUAL_PATH_TO_PUBLISH");
-            if (string.IsNullOrEmpty(pathToPublish))
-                pathToPublish = FindLatestCompleteBuild();
+            Directory.CreateDirectory(Dirs.PackagesNoRID);
 
-            if (string.IsNullOrEmpty(pathToPublish))
+            var hostBlob = $"{Channel}/Binaries/";
+
+            string forcePushBuild = Environment.GetEnvironmentVariable("FORCE_PUBLISH_BLOB_BUILD_VERSION");
+
+            if (!string.IsNullOrEmpty(forcePushBuild))
             {
-                Console.WriteLine("Didn't find a directory with all the necessary runtime packages!");
-                return c.Failed();
+                Console.WriteLine($"Forcing all nupkg packages for build version {forcePushBuild}.");
+                DownloadPackagesForPush(hostBlob + forcePushBuild);
+                return c.Success();
             }
 
-            Directory.CreateDirectory(Dirs.PackagesNoRID);
-            AzurePublisherTool.DownloadFiles(pathToPublish, ".nupkg", Dirs.PackagesNoRID);
-
-            return c.Success();
-        }
-
-        private static string FindLatestCompleteBuild()
-        {
-            var hostBlob = $"{Channel}/Binaries/";
+            List<string> buildVersions = new List<string>();
 
             Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+-[^-]+-\d{6})/$");
 
-            List<string> buildVersions = new List<string>();
             foreach (string file in AzurePublisherTool.ListBlobs(hostBlob))
             {
                 var match = buildVersionRegex.Match(file);
@@ -360,55 +357,81 @@ namespace Microsoft.DotNet.Cli.Build
                 }
             }
 
+            // Sort decending
             buildVersions.Sort();
             buildVersions.Reverse();
 
-            Dictionary<string, bool> runtimes = new Dictionary<string, bool>()
+            // Try to publish the last 10 builds
+            foreach (var bv in buildVersions.Take(10))
             {
-                {"win7", false },
-                {"osx.10.10", false },
-                {"rhel.7", false },
-                {"ubuntu.14.04", false },
+                Console.WriteLine($"Checking drop version: {bv}");
 
-            };
-
-            foreach (var bv in buildVersions)
-            {
-                Console.WriteLine($"Version: {bv}");
-
-                var buildFiles = AzurePublisherTool.ListBlobs(hostBlob + bv);
-
-                foreach (var bf in buildFiles)
+                if (ShouldDownloadAndPush(hostBlob, bv))
                 {
-                    string buildFile = Path.GetFileName(bf);
-
-                    foreach (var runtime in runtimes.Keys)
-                    {
-                        if (buildFile.StartsWith($"runtime.{runtime}"))
-                        {
-                            runtimes[runtime] = true;
-                            break;
-                        }
-                    }
-                }
-
-                bool missingRuntime = false;
-                foreach (var runtime in runtimes)
-                {
-                    if (!runtime.Value)
-                    {
-                        missingRuntime = true;
-                        Console.WriteLine($"Version {bv} is missing packages for runtime {runtime.Key}");
-                    }
-                }
-
-                if (!missingRuntime)
-                {
-                    return hostBlob + bv;
+                    DownloadPackagesForPush(hostBlob + bv);
                 }
             }
 
-            return null;
+            return c.Success();
+        }
+
+        private static bool ShouldDownloadAndPush(string hostBlob, string buildVersion)
+        {
+            // Set of runtime ids to look for to act as the signal that the build
+            // as finished each of these legs of the build.
+            Dictionary<string, bool> runtimes = new Dictionary<string, bool>()
+            {
+                {"win7-x64", false },
+                {"win7-x86", false },
+                {"osx.10.10-x64", false },
+                {"rhel.7-x64", false },
+                {"ubuntu.14.04-x64", false },
+            };
+
+            var buildFiles = AzurePublisherTool.ListBlobs(hostBlob + buildVersion);
+
+            foreach (var bf in buildFiles)
+            {
+                string buildFile = Path.GetFileName(bf);
+
+                if (buildFile == PackagePushedSemaphoreFileName)
+                {
+                    Console.WriteLine($"Found '{PackagePushedSemaphoreFileName}' for build version {buildVersion} so skipping this drop.");
+                    // Nothing to do because the latest build is uploaded.
+                    return false;
+                }
+
+                foreach (var runtime in runtimes.Keys)
+                {
+                    if (buildFile.StartsWith($"runtime.{runtime}"))
+                    {
+                        runtimes[runtime] = true;
+                        break;
+                    }
+                }
+            }
+
+            bool missingRuntime = false;
+            foreach (var runtime in runtimes)
+            {
+                if (!runtime.Value)
+                {
+                    missingRuntime = true;
+                    Console.WriteLine($"Version {buildVersion} missing packages for runtime {runtime.Key}");
+                }
+            }
+
+            Console.WriteLine($"Build version {buildVersion} is missing some runtime packages so not pushing this drop.");
+            return !missingRuntime;
+        }
+
+        private static void DownloadPackagesForPush(string pathToDownload)
+        {
+            AzurePublisherTool.DownloadFiles(pathToDownload, ".nupkg", Dirs.PackagesNoRID);
+
+            string pushedSemaphore = Path.Combine(Dirs.PackagesNoRID, PackagePushedSemaphoreFileName);
+            File.WriteAllText(pushedSemaphore, $"Packages pushed for build {pathToDownload}");
+            AzurePublisherTool.PublishFile(pathToDownload + "/" + PackagePushedSemaphoreFileName, pushedSemaphore);
         }
     }
 }
