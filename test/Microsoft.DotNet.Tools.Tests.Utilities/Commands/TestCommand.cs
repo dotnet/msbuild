@@ -6,12 +6,18 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public class TestCommand
     {
         protected string _command;
+
+        public string WorkingDirectory { get; set; }
+
+        public Process CurrentProcess { get; set; }
 
         public Dictionary<string, string> Environment { get; } = new Dictionary<string, string>();
 
@@ -36,13 +42,29 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return RunProcess(commandPath, args, stdOut, stdErr);
         }
 
+        public virtual Task<CommandResult> ExecuteAsync(string args = "")
+        {
+            var commandPath = _command;
+            ResolveCommand(ref commandPath, ref args);
+
+            Console.WriteLine($"Executing - {commandPath} {args}");
+
+            var stdOut = new StreamForwarder();
+            var stdErr = new StreamForwarder();
+
+            stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
+            stdErr.ForwardTo(writeLine: Reporter.Output.WriteLine);
+
+            return RunProcessAsync(commandPath, args, stdOut, stdErr);
+        }
+
         public virtual CommandResult ExecuteWithCapturedOutput(string args = "")
         {
             var command = _command;
             ResolveCommand(ref command, ref args);
             var commandPath = Env.GetCommandPath(command, ".exe", ".cmd", "") ??
                 Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, command, ".exe", ".cmd", "");
-                
+
             Console.WriteLine($"Executing (Captured Output) - {commandPath} {args}");
 
             var stdOut = new StreamForwarder();
@@ -52,6 +74,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             stdErr.Capture();
 
             return RunProcess(commandPath, args, stdOut, stdErr);
+        }
+
+        public void KillTree()
+        {
+            if (CurrentProcess == null)
+            {
+                throw new InvalidOperationException("No process is available to be killed");
+            }
+
+            CurrentProcess.KillTree();
         }
 
         private void ResolveCommand(ref string executable, ref string args)
@@ -76,12 +108,54 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private CommandResult RunProcess(string executable, string args, StreamForwarder stdOut, StreamForwarder stdErr)
         {
+            CurrentProcess = StartProcess(executable, args);
+            var threadOut = stdOut.BeginRead(CurrentProcess.StandardOutput);
+            var threadErr = stdErr.BeginRead(CurrentProcess.StandardError);
+
+            CurrentProcess.WaitForExit();
+            threadOut.Join();
+            threadErr.Join();
+
+            var result = new CommandResult(
+                CurrentProcess.StartInfo,
+                CurrentProcess.ExitCode,
+                stdOut.CapturedOutput,
+                stdErr.CapturedOutput);
+
+            return result;
+        }
+
+        private Task<CommandResult> RunProcessAsync(string executable, string args, StreamForwarder stdOut, StreamForwarder stdErr)
+        {
+            CurrentProcess = StartProcess(executable, args);
+            var threadOut = stdOut.BeginRead(CurrentProcess.StandardOutput);
+            var threadErr = stdErr.BeginRead(CurrentProcess.StandardError);
+
+            var tcs = new TaskCompletionSource<CommandResult>();
+            CurrentProcess.Exited += (sender, arg) =>
+            {
+                threadOut.Join();
+                threadErr.Join();
+                var result = new CommandResult(
+                                    CurrentProcess.StartInfo,
+                                    CurrentProcess.ExitCode,
+                                    stdOut.CapturedOutput,
+                                    stdErr.CapturedOutput);
+                tcs.SetResult(result);
+            };
+
+            return tcs.Task;
+        }
+
+        private Process StartProcess(string executable, string args)
+        {
             var psi = new ProcessStartInfo
             {
                 FileName = executable,
                 Arguments = args,
                 RedirectStandardError = true,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true
             };
 
             foreach (var item in Environment)
@@ -89,28 +163,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 psi.Environment[item.Key] = item.Value;
             }
 
+            if (!string.IsNullOrWhiteSpace(WorkingDirectory))
+            {
+                psi.WorkingDirectory = WorkingDirectory;
+            }
+
             var process = new Process
             {
-                StartInfo = psi,
+                StartInfo = psi
             };
 
             process.EnableRaisingEvents = true;
             process.Start();
-
-            var threadOut = stdOut.BeginRead(process.StandardOutput);
-            var threadErr = stdErr.BeginRead(process.StandardError);
-
-            process.WaitForExit();
-            threadOut.Join();
-            threadErr.Join();
-
-            var result = new CommandResult(
-                process.StartInfo,
-                process.ExitCode,
-                stdOut.CapturedOutput,
-                stdErr.CapturedOutput);
-
-            return result;
+            return process;
         }
     }
 }

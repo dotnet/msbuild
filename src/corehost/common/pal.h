@@ -13,6 +13,7 @@
 #include <cstdarg>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <algorithm>
 #include <cassert>
@@ -22,7 +23,6 @@
 #define NOMINMAX
 #include <windows.h>
 
-#define HOST_EXE_NAME L"corehost.exe"
 #define xerr std::wcerr
 #define xout std::wcout
 #define DIR_SEPARATOR L'\\'
@@ -65,6 +65,10 @@
 #define LIBCORECLR_FILENAME (LIB_PREFIX _X("coreclr"))
 #define LIBCORECLR_NAME MAKE_LIBNAME("coreclr")
 
+
+#define LIBHOSTPOLICY_FILENAME (LIB_PREFIX _X("hostpolicy"))
+#define LIBHOSTPOLICY_NAME MAKE_LIBNAME("hostpolicy")
+
 #if !defined(PATH_MAX) && !defined(_WIN32)
 #define PATH_MAX    4096
 #endif
@@ -94,6 +98,10 @@ namespace pal
     typedef HRESULT hresult_t;
     typedef HMODULE dll_t;
     typedef FARPROC proc_t;
+
+    inline string_t exe_suffix() { return _X(".exe"); }
+    inline bool need_api_sets() { return true; }
+    void setup_api_sets(const std::unordered_set<pal::string_t>& api_sets);
 
     pal::string_t to_string(int value);
 
@@ -134,6 +142,10 @@ namespace pal
     typedef void* dll_t;
     typedef void* proc_t;
 
+    inline string_t exe_suffix() { return _X(""); }
+    inline bool need_api_sets() { return false; }
+    inline void setup_api_sets(const std::unordered_set<pal::string_t>& api_sets) { }
+
     pal::string_t to_string(int value);
 
     bool getcwd(pal::string_t* recv);
@@ -152,14 +164,16 @@ namespace pal
     inline void to_palstring(const char* str, pal::string_t* out) { out->assign(str); }
     inline void to_stdstring(const char_t* str, std::string* out) { out->assign(str); }
 #endif
+
     bool realpath(string_t* path);
     bool file_exists(const string_t& path);
     inline bool directory_exists(const string_t& path) { return file_exists(path); }
+    void readdir(const string_t& path, const string_t& pattern, std::vector<pal::string_t>* list);
     void readdir(const string_t& path, std::vector<pal::string_t>* list);
 
     bool get_own_executable_path(string_t* recv);
     bool getenv(const char_t* name, string_t* recv);
-    bool get_default_packages_directory(string_t* recv);
+    bool get_default_extensions_directory(string_t* recv);
     bool is_path_rooted(const string_t& path);
 
     int xtoi(const char_t* input);

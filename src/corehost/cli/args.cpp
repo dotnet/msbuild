@@ -13,21 +13,12 @@ arguments_t::arguments_t() :
     app_argc(0),
     app_argv(nullptr),
     dotnet_packages_cache(_X("")),
-    dotnet_servicing(_X("")),
+    dotnet_extensions(_X("")),
     deps_path(_X(""))
 {
 }
 
-void display_help()
-{
-    xerr <<
-        _X("Usage: " HOST_EXE_NAME " [ASSEMBLY] [ARGUMENTS]\n")
-        _X("Execute the specified managed assembly with the passed in arguments\n\n")
-        _X("The Host's behavior can be altered using the following environment variables:\n")
-        _X(" COREHOST_TRACE          Set to affect trace levels (0 = Errors only (default), 1 = Warnings, 2 = Info, 3 = Verbose)\n");
-}
-
-bool parse_arguments(const pal::string_t& deps_path, const pal::string_t& probe_dir, host_mode_t mode,
+bool parse_arguments(const pal::string_t& deps_path, const std::vector<pal::string_t>& probe_paths, host_mode_t mode,
     const int argc, const pal::char_t* argv[], arguments_t* arg_out)
 {
     arguments_t& args = *arg_out;
@@ -46,7 +37,6 @@ bool parse_arguments(const pal::string_t& deps_path, const pal::string_t& probe_
         // corerun mode. First argument is managed app
         if (argc < 2)
         {
-            display_help();
             return false;
         }
         args.managed_application = pal::string_t(argv[1]);
@@ -77,7 +67,7 @@ bool parse_arguments(const pal::string_t& deps_path, const pal::string_t& probe_
         args.app_argc = argc - 1;
     }
 
-    std::unordered_map<pal::string_t, pal::string_t> opts;
+    std::unordered_map<pal::string_t, std::vector<pal::string_t>> opts;
     std::vector<pal::string_t> known_opts = { _X("--depsfile"), _X("--additionalprobingpath") };
     int num_args = 0;
     if (!parse_known_args(args.app_argc, args.app_argv, known_opts, &opts, &num_args))
@@ -89,8 +79,14 @@ bool parse_arguments(const pal::string_t& deps_path, const pal::string_t& probe_
     args.app_argv += num_args;
     pal::string_t opts_deps_file = _X("--depsfile");
     pal::string_t opts_probe_path = _X("--additionalprobingpath");
-    pal::string_t deps_file = opts.count(opts_deps_file) ? opts[opts_deps_file] : deps_path;
-    pal::string_t probe_path = opts.count(opts_probe_path) ? opts[opts_probe_path] : probe_dir;
+    pal::string_t deps_file = get_last_known_arg(opts, opts_deps_file, deps_path);
+    if (opts.count(opts_probe_path))
+    {
+        for (const auto& str : opts[opts_probe_path])
+        {
+            args.probe_paths.push_back(str);
+        }
+    }
 
     if (!deps_file.empty())
     {
@@ -98,7 +94,10 @@ bool parse_arguments(const pal::string_t& deps_path, const pal::string_t& probe_
         args.app_dir = get_directory(args.deps_path);
     }
 
-    args.probe_dir = probe_path;
+    for (const auto& probe : probe_paths)
+    {
+        args.probe_paths.push_back(probe);
+    }
     
     if (args.deps_path.empty())
     {
@@ -112,7 +111,8 @@ bool parse_arguments(const pal::string_t& deps_path, const pal::string_t& probe_
         args.deps_path.append(_X(".deps.json"));
     }
 
-    pal::getenv(_X("DOTNET_PACKAGES_CACHE"), &args.dotnet_packages_cache);
-    pal::getenv(_X("DOTNET_SERVICING"), &args.dotnet_servicing);
+    pal::getenv(_X("DOTNET_HOSTING_OPTIMIZATION_CACHE"), &args.dotnet_packages_cache);
+    pal::get_default_extensions_directory(&args.dotnet_extensions);
+
     return true;
 }

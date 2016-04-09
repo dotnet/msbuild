@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.PlatformAbstractions;
+using System.Runtime.InteropServices;
 using Xunit;
 using FluentAssertions;
 
@@ -13,10 +16,12 @@ namespace Microsoft.DotNet.Tests
     public class PackagedCommandTests : TestBase
     {
         private readonly string _testProjectsRoot;
+        private readonly string _desktopTestProjectsRoot;
 
         public PackagedCommandTests()
         {
             _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
+            _desktopTestProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "DesktopTestProjects");
         }
 
         [Theory]
@@ -31,20 +36,63 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .Pass();
 
-            var currentDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(appDirectory);
+            CommandResult result = new PortableCommand { WorkingDirectory = appDirectory }
+                .ExecuteWithCapturedOutput();
 
-            try
+            result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
+        }
+
+        // need conditional theories so we can skip on non-Windows
+        [Theory]
+        [MemberData("DependencyToolArguments")]
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args, string expectedDependencyToolPath)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                CommandResult result = new PortableCommand().ExecuteWithCapturedOutput();
+                return;
+            }
 
-                result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
+            var appDirectory = Path.Combine(_desktopTestProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
+
+            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
+                    .ExecuteWithCapturedOutput(framework, args);
+
+                result.Should().HaveStdOutContaining(framework);
+                result.Should().HaveStdOutContaining(args);
+                result.Should().HaveStdOutContaining(expectedDependencyToolPath);
                 result.Should().NotHaveStdErr();
                 result.Should().Pass();
-            }
-            finally
+        }
+
+        [Fact]
+        public void ToolsCanAccessDependencyContextProperly()
+        {
+            var appDirectory = Path.Combine(_testProjectsRoot, "DependencyContextFromTool");
+
+            CommandResult result = new DependencyContextTestCommand() { WorkingDirectory = appDirectory }
+                .Execute(Path.Combine(appDirectory, "project.json"));
+
+            result.Should().Pass();
+        }
+
+        public static IEnumerable<object[]> DependencyToolArguments
+        {
+            get
             {
-                Directory.SetCurrentDirectory(currentDirectory);
+                var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+                var projectOutputPath  = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
+                return new[]
+                {
+                    new object[] { ".NETStandard,Version=v1.5", "CoreFX", "lib\\netstandard1.5\\dotnet-desktop-and-portable.dll" },
+                    new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath }
+                };
             }
         }
 
@@ -67,7 +115,7 @@ namespace Microsoft.DotNet.Tests
                 CommandResult result = new HelloCommand().ExecuteWithCapturedOutput();
 
                 result.StdOut.Should().Contain("No executable found matching command");
-                result.Should().NotPass();
+                result.Should().Fail();
             }
             finally
             {
@@ -111,6 +159,46 @@ namespace Microsoft.DotNet.Tests
             public override CommandResult ExecuteWithCapturedOutput(string args = "")
             {
                 args = $"portable {args}";
+                return base.ExecuteWithCapturedOutput(args);
+            }
+        }
+
+        class DependencyContextTestCommand : TestCommand
+        {
+            public DependencyContextTestCommand()
+                : base("dotnet")
+            {
+            }
+
+            public override CommandResult Execute(string path)
+            {
+                var args = $"dependency-context-test {path}";
+                return base.Execute(args);
+            }
+
+            public override CommandResult ExecuteWithCapturedOutput(string path)
+            {
+                var args = $"dependency-context-test {path}";
+                return base.ExecuteWithCapturedOutput(args);
+            }
+        }
+
+        class DependencyToolInvokerCommand : TestCommand
+        {
+            public DependencyToolInvokerCommand()
+                : base("dotnet")
+            {
+            }
+
+            public CommandResult Execute(string framework, string additionalArgs)
+            {
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
+                return base.Execute(args);
+            }
+
+            public CommandResult ExecuteWithCapturedOutput(string framework, string additionalArgs)
+            {
+                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
                 return base.ExecuteWithCapturedOutput(args);
             }
         }

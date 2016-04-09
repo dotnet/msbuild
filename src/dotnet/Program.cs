@@ -13,7 +13,6 @@ using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
-using Microsoft.DotNet.Tools.Compiler.Fsc;
 using Microsoft.DotNet.Tools.Compiler.Native;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.New;
@@ -27,14 +26,13 @@ namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
-
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
             try
             {
-                return ProcessArgs(args);
+                return Program.ProcessArgs(args, new Telemetry());
             }
             catch (CommandUnknownException e)
             {
@@ -45,7 +43,7 @@ namespace Microsoft.DotNet.Cli
 
         }
 
-        private static int ProcessArgs(string[] args)
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
@@ -108,35 +106,46 @@ namespace Microsoft.DotNet.Cli
             {
                 ["build"] = BuildCommand.Run,
                 ["compile-csc"] = CompileCscCommand.Run,
-                ["compile-fsc"] = CompileFscCommand.Run,
-                ["compile-native"] = CompileNativeCommand.Run,
                 ["help"] = HelpCommand.Run,
                 ["new"] = NewCommand.Run,
                 ["pack"] = PackCommand.Run,
                 ["projectmodel-server"] = ProjectModelServerCommand.Run,
                 ["publish"] = PublishCommand.Run,
-                ["repl"] = ReplCommand.Run,
                 ["restore"] = RestoreCommand.Run,
                 ["run"] = RunCommand.Run,
                 ["test"] = TestCommand.Run
             };
 
+            int exitCode;            
             Func<string[], int> builtIn;
             if (builtIns.TryGetValue(command, out builtIn))
             {
-                return builtIn(appArgs.ToArray());
+                exitCode = builtIn(appArgs.ToArray());
+            }
+            else
+            {
+                CommandResult result = Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .Execute();
+                exitCode = result.ExitCode;
             }
 
-            return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute()
-                .ExitCode;
+            telemetryClient.TrackEvent(
+                command,
+                null,
+                new Dictionary<string, double>
+                {
+                    ["ExitCode"] = exitCode
+                });
+
+            return exitCode;
+
         }
 
         private static void PrintVersion()
         {
-            Reporter.Output.WriteLine(HelpCommand.ProductVersion);
+            Reporter.Output.WriteLine(Product.Version);
         }
 
         private static void PrintInfo()
@@ -146,7 +155,7 @@ namespace Microsoft.DotNet.Cli
             var commitSha = GetCommitSha() ?? "N/A";
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Product Information:");
-            Reporter.Output.WriteLine($" Version:     {HelpCommand.ProductVersion}");
+            Reporter.Output.WriteLine($" Version:     {Product.Version}");
             Reporter.Output.WriteLine($" Commit Sha:  {commitSha}");
             Reporter.Output.WriteLine();
             var runtimeEnvironment = PlatformServices.Default.Runtime;
@@ -169,8 +178,7 @@ namespace Microsoft.DotNet.Cli
         
         private static string GetCommitSha()
         {
-            // The CLI ships with a .version file that stores the commit information
-            var versionFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".version"));
+            var versionFile = DotnetFiles.VersionFile;
             
             if (File.Exists(versionFile))
             {

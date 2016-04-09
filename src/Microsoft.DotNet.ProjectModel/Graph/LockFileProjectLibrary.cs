@@ -12,5 +12,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
         public NuGetVersion Version { get; set; }
 
         public string Path { get; set; }
+
+        public string MSBuildProject { get; set; }
     }
 }

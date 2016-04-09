@@ -23,7 +23,7 @@ namespace Dotnet.Cli.Msi.Tests
             Assert.False(Utils.ExistsOnPath("dotnet.exe"), "After uninstallation dotnet tools must not be on path");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/2073")]
         public void DotnetRegKeysTest()
         {
             Assert.True(_msiMgr.IsInstalled);

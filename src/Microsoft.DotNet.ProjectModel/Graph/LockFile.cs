@@ -4,9 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Microsoft.DotNet.ProjectModel.Utilities;
-using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Graph
 {
@@ -22,6 +19,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
         public IList<LockFilePackageLibrary> PackageLibraries { get; set; } = new List<LockFilePackageLibrary>();
         public IList<LockFileProjectLibrary> ProjectLibraries { get; set; } = new List<LockFileProjectLibrary>();
         public IList<LockFileTarget> Targets { get; set; } = new List<LockFileTarget>();
+        public ExportFile ExportFile { get; set; }
 
         public LockFile(string lockFilePath)
         {

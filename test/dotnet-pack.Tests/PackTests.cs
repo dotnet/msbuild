@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             outputDir.Should().Exist();
             outputDir.Should().HaveFiles(new[] { "TestLibrary.1.0.0.nupkg", "TestLibrary.1.0.0.symbols.nupkg" });
         }
-        
+
         [Fact]
         public void SettingVersionSuffixFlag_ShouldStampAssemblyInfoInOutputAssemblyAndPackage()
         {
@@ -71,10 +71,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, "TestLibraryWithConfiguration.dll");
             var informationalVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyInformationalVersionAttribute");
-            
+
             informationalVersion.Should().NotBeNull();
             informationalVersion.Should().BeEquivalentTo("1.0.0-85");
-            
+
             var outputPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "TestLibraryWithConfiguration.1.0.0-85.nupkg");
             File.Exists(outputPackage).Should().BeTrue(outputPackage);
         }
@@ -93,6 +93,29 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
             zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/TestLibraryWithConfiguration.dll");
+        }
+
+        [Fact]
+        public void PackAddsCorrectFilesForProjectsWithOutputNameSpecified()
+        {
+            var testInstance =
+                TestAssetsManager
+                    .CreateTestInstance("LibraryWithOutputAssemblyName")
+                    .WithLockFiles();
+
+            var cmd = new PackCommand(Path.Combine(testInstance.TestRoot, Project.FileName));
+            cmd.Execute().Should().Pass();
+
+            var outputPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "LibraryWithOutputAssemblyName.1.0.0.nupkg");
+            File.Exists(outputPackage).Should().BeTrue(outputPackage);
+            var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/MyLibrary.dll");
+
+            var symbolsPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "LibraryWithOutputAssemblyName.1.0.0.symbols.nupkg");
+            File.Exists(symbolsPackage).Should().BeTrue(symbolsPackage);
+            zip = ZipFile.Open(symbolsPackage, ZipArchiveMode.Read);
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/MyLibrary.dll");
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/MyLibrary.pdb");
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

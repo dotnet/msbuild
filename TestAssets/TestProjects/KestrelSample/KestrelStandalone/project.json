@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20113",
+    "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254"
+  },
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "compile": [
+    "../src/*.cs"
+  ],
+  "frameworks": {
+    "netstandardapp1.5": {
+      "dependencies": {
+        "Microsoft.NETCore.App": "1.0.0-rc2-24008"
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

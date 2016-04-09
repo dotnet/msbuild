@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
         
-        [Target]
+        [Target(nameof(InstallSharedHost))]
         public static BuildTargetResult InstallSharedFramework(BuildTargetContext c)
         {
             InstallPackage(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"));
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
         
-        [Target]
+        [Target(nameof(InstallSharedFramework))]
         public static BuildTargetResult InstallSDK(BuildTargetContext c)
         {
             InstallPackage(c.BuildContext.Get<string>("SdkInstallerFile"));

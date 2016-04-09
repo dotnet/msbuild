@@ -148,26 +148,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         }
 
         [Fact]
-        public void EmbeddedDependencyContextIsValidOnBuild()
-        {
-            var testProjectPath = Path.Combine(RepoRoot, "TestAssets", "TestProjects", "DependencyContextValidator", "TestApp");
-            var testProject = Path.Combine(testProjectPath, "project.json");
-
-            var runCommand = new RunCommand(testProject);
-            runCommand.Execute().Should().Pass();
-        }
-
-        [Fact]
-        public void DepsDependencyContextIsValidOnBuild()
-        {
-                var testProjectPath = Path.Combine(RepoRoot, "TestAssets", "TestProjects", "DependencyContextValidator", "TestAppDeps");
-                var testProject = Path.Combine(testProjectPath, "project.json");
-
-                var runCommand = new RunCommand(testProject);
-                runCommand.Execute().Should().Pass();
-        }
-
-        [Fact]
         public void CanSetOutputAssemblyNameForLibraries()
         {
             var testInstance =
@@ -202,7 +182,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             new DirectoryInfo(outputDir).Should().HaveFiles(
                 new [] { "MyApp.dll", "MyApp" + buildCommand.GetExecutableExtension(),
-                    "MyApp.runtimeconfig.json", "MyApp.deps", "MyApp.deps.json" });
+                    "MyApp.runtimeconfig.json", "MyApp.deps.json" });
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

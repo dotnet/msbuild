@@ -75,7 +75,12 @@ namespace Microsoft.DotNet.Tools.Compiler
             PopulateDependencies(context);
 
             var inputFolder = ArtifactPathsCalculator.InputPathForContext(context);
-            var outputName = GetProjectOutputName(context.TargetFramework);
+
+            var compilationOptions = Project.GetCompilerOptions(context.TargetFramework, Configuration);
+            var outputName = compilationOptions.OutputName;
+            var outputExtension =
+                context.TargetFramework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault()
+                    ? ".exe" : ".dll";
 
             var resourceCultures = context.ProjectFile.Files.ResourceFiles
                     .Select(resourceFile => ResourceUtility.GetResourceCultureName(resourceFile.Key))
@@ -88,13 +93,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                     continue;
                 }
 
-                var resourceFilePath = Path.Combine(culture, $"{Project.Name}.resources.dll");
+                var resourceFilePath = Path.Combine(culture, $"{outputName}.resources.dll");
                 TryAddOutputFile(context, inputFolder, resourceFilePath);
             }
 
-            TryAddOutputFile(context, inputFolder, outputName);
-            TryAddOutputFile(context, inputFolder, $"{Project.Name}.xml");
-            TryAddOutputFile(context, inputFolder, $"{Project.Name}.runtimeconfig.json");
+            TryAddOutputFile(context, inputFolder, outputName + outputExtension);
+            TryAddOutputFile(context, inputFolder, $"{outputName}.xml");
+            TryAddOutputFile(context, inputFolder, $"{outputName}.runtimeconfig.json");
         }
 
         protected virtual bool GeneratePackage(string nupkg, List<DiagnosticMessage> packDiagnostics)
@@ -310,19 +315,6 @@ namespace Microsoft.DotNet.Tools.Compiler
         protected virtual string GetPackageName()
         {
             return $"{Project.Name}.{Project.Version}";
-        }
-
-        private string GetProjectOutputName(NuGetFramework framework)
-        {
-            var compilationOptions = Project.GetCompilerOptions(framework, Configuration);
-            var outputExtension = ".dll";
-
-            if (framework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
-            {
-                outputExtension = ".exe";
-            }
-
-            return Project.Name + outputExtension;
         }
 
         private static string GetDefaultRootOutputPath(Project project, string outputOptionValue)

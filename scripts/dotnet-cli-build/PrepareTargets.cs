@@ -1,23 +1,24 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-
+using System.Text.RegularExpressions;
+using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Utils;
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
-using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Cli.Build
 {
     public class PrepareTargets
     {
-        [Target(nameof(Init), nameof(RestorePackages))]
+        [Target(nameof(Init))]
         public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
 
         [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c) => c.Success();
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
-        [Target(nameof(GenerateVersions), nameof(CheckPrereqs), nameof(LocateStage0), nameof(ExpectedBuildArtifacts))]
+        [Target(nameof(GenerateVersions), nameof(UpdateTemplateVersions), nameof(CheckPrereqs), nameof(LocateStage0), nameof(ExpectedBuildArtifacts))]
         public static BuildTargetResult Init(BuildTargetContext c)
         {
             var runtimeInfo = PlatformServices.Default.Runtime;
@@ -82,10 +83,31 @@ namespace Microsoft.DotNet.Cli.Build
             };
             c.BuildContext["BuildVersion"] = buildVersion;
             c.BuildContext["CommitHash"] = commitHash;
-            c.BuildContext["SharedFrameworkNugetVersion"] = GetVersionFromProjectJson(Path.Combine(Dirs.RepoRoot, "src", "sharedframework", "framework", "project.json"));
+            c.BuildContext["SharedFrameworkNugetVersion"] = buildVersion.NetCoreAppVersion;
 
             c.Info($"Building Version: {buildVersion.SimpleVersion} (NuGet Packages: {buildVersion.NuGetVersion})");
             c.Info($"From Commit: {commitHash}");
+
+            return c.Success();
+        }
+
+        /// <summary>
+        /// Updates the Microsoft.NETCore.App version number in the `dotnet new` project.json.template files.
+        /// </summary>
+        [Target]
+        public static BuildTargetResult UpdateTemplateVersions(BuildTargetContext c)
+        {
+            IEnumerable<string> templateFiles = Directory.GetFiles(
+                Path.Combine(Dirs.RepoRoot, "src", "dotnet", "commands", "dotnet-new"),
+                "project.json.pretemplate",
+                SearchOption.AllDirectories);
+
+            foreach (string templateFile in templateFiles)
+            {
+                JObject projectRoot = JsonUtils.ReadProject(templateFile);
+                projectRoot["dependencies"]["Microsoft.NETCore.App"]["version"] = c.BuildContext.Get<BuildVersion>("BuildVersion").NetCoreAppVersion;
+                JsonUtils.WriteProject(projectRoot, Path.ChangeExtension(templateFile, "template"));
+            }
 
             return c.Success();
         }
@@ -130,6 +152,7 @@ namespace Microsoft.DotNet.Cli.Build
             AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
             AddInstallerArtifactToContext(c, "dotnet-dev", "CombinedFrameworkSDKHost", cliVersion);
             AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);
+            AddInstallerArtifactToContext(c, "dotnet-sdk-debug", "SdkSymbols", cliVersion);
 
             return c.Success();
         }
@@ -205,8 +228,14 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var dotnet = DotNetCli.Stage0;
 
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "src")).Execute().EnsureSuccessful();
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel").WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools")).Execute().EnsureSuccessful();
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes", "--fallbacksource", Dirs.Corehost)
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "src"))
+                .Execute()
+                .EnsureSuccessful();
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes")
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools"))
+                .Execute()
+                .EnsureSuccessful();
 
             return c.Success();
         }
@@ -343,17 +372,6 @@ cmake is required to build the native host 'corehost'";
             }
 
             throw new InvalidOperationException("Unable to match the version name from " + pathToProjectJson);
-        }
-
-        private static bool AptPackageIsInstalled(string packageName)
-        {
-            var result = Command.Create("dpkg", "-s", packageName)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .QuietBuildReporter()
-                .Execute();
-
-            return result.ExitCode == 0;
         }
 
         private static IDictionary<string, string> ReadBranchInfo(BuildTargetContext c, string path)

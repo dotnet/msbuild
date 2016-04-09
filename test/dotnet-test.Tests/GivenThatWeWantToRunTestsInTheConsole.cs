@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -18,8 +19,9 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
         public GivenThatWeWantToRunTestsInTheConsole()
         {
+            var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets"));
             var testInstance =
-                TestAssetsManager.CreateTestInstance("ProjectWithTests", identifier: "ConsoleTests").WithLockFiles();
+                testAssetManager.CreateTestInstance("ProjectWithTests", identifier: "ConsoleTests").WithLockFiles();
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(
@@ -27,8 +29,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 null,
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
 
-            var runtime = contexts.FirstOrDefault(c => !string.IsNullOrEmpty(c.RuntimeIdentifier))?.RuntimeIdentifier;
-            _defaultOutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, runtime);
+            _defaultOutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "netcoreapp1.0");
         }
 
         //ISSUE https://github.com/dotnet/cli/issues/1935
@@ -55,7 +56,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var testCommand = new DotnetTestCommand();
             var result = testCommand.Execute(
-                $"{_projectFilePath} -o {Path.Combine(AppContext.BaseDirectory, "output")} -f netstandardapp1.5");
+                $"{_projectFilePath} -o {Path.Combine(AppContext.BaseDirectory, "output")} -f netcoreapp1.0");
             result.Should().Pass();
         }
 

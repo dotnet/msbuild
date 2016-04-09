@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25029.0
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ED2FE3E2-F7E7-4389-8231-B65123F2076F}"
 EndProject
@@ -94,6 +94,12 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.Testing.Abstractions.Tests", "test\TestingAbstractions\Microsoft.Extensions.Testing.Abstractions.Tests\Microsoft.Extensions.Testing.Abstractions.Tests.xproj", "{09C61BD7-C6DB-4F89-85BF-4EB3C196049D}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.Testing.Abstractions.UnitTests", "test\TestingAbstractions\Microsoft.Extensions.Testing.Abstractions.UnitTests\Microsoft.Extensions.Testing.Abstractions.UnitTests.xproj", "{DEB3AB06-FCD8-4119-B8CA-B7AA6CE2F22D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestAssets", "TestAssets", "{ADA7052B-884B-4776-8B8D-D04191D0AA70}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestPackages", "TestPackages", "{1AB5B24B-B317-4142-A5D1-A6E84F15BA34}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "dotnet-dependency-tool-invoker", "TestAssets\TestPackages\dotnet-dependency-tool-invoker\dotnet-dependency-tool-invoker.xproj", "{C26A48BB-193F-450C-AB09-4D3324C78188}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -683,6 +689,22 @@ Global
 		{DEB3AB06-FCD8-4119-B8CA-B7AA6CE2F22D}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
 		{DEB3AB06-FCD8-4119-B8CA-B7AA6CE2F22D}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
 		{DEB3AB06-FCD8-4119-B8CA-B7AA6CE2F22D}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Debug|x64.Build.0 = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.MinSizeRel|Any CPU.ActiveCfg = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.MinSizeRel|Any CPU.Build.0 = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.MinSizeRel|x64.ActiveCfg = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.MinSizeRel|x64.Build.0 = Debug|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Release|x64.ActiveCfg = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.Release|x64.Build.0 = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{C26A48BB-193F-450C-AB09-4D3324C78188}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -727,5 +749,8 @@ Global
 		{7B0EFBB4-4669-4B83-B47C-7F3E6DB07AF9} = {EB0F5F8C-0991-49AC-B188-A9869476C7DF}
 		{09C61BD7-C6DB-4F89-85BF-4EB3C196049D} = {EB0F5F8C-0991-49AC-B188-A9869476C7DF}
 		{DEB3AB06-FCD8-4119-B8CA-B7AA6CE2F22D} = {EB0F5F8C-0991-49AC-B188-A9869476C7DF}
+		{ADA7052B-884B-4776-8B8D-D04191D0AA70} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
+		{1AB5B24B-B317-4142-A5D1-A6E84F15BA34} = {ADA7052B-884B-4776-8B8D-D04191D0AA70}
+		{C26A48BB-193F-450C-AB09-4D3324C78188} = {1AB5B24B-B317-4142-A5D1-A6E84F15BA34}
 	EndGlobalSection
 EndGlobal

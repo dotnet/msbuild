@@ -124,5 +124,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             return executablePath;
         }
+
+        protected string GetIntermediaryOutputPath()
+        {
+            var executablePath = Path.Combine(TestProjectRoot, "obj", "Debug", "netstandardapp1.5");
+
+            return executablePath;
+        }
     }
 }

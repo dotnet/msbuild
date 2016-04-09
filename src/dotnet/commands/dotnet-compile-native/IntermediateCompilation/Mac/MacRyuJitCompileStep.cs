@@ -72,6 +72,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var ilcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
             argsList.AddRange(_ilcSdkLibs.Select(lib => Path.Combine(ilcSdkLibPath, lib)));
 
+            // Optional linker script
+            var linkerScriptFile = Path.Combine(ilcSdkLibPath, "linkerscript");
+            if (File.Exists(linkerScriptFile))
+            {
+                argsList.Add(linkerScriptFile);
+            }
+
             // AppDep Libs
             var baseAppDepLibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10", config.Architecture.ToString());
             argsList.AddRange(appdeplibs.Select(lib => Path.Combine(baseAppDepLibPath, lib)));

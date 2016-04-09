@@ -44,7 +44,7 @@ bool fx_ver_t::operator >(const fx_ver_t& b) const
     return compare(*this, b) > 0;
 }
 
-pal::string_t fx_ver_t::as_str()
+pal::string_t fx_ver_t::as_str() const
 {
     pal::stringstream_t stream;
     stream << m_major << _X(".") << m_minor << _X(".") << m_patch;
@@ -56,6 +56,20 @@ pal::string_t fx_ver_t::as_str()
     {
         stream << _X("+") << m_build;
     }
+    return stream.str();
+}
+
+pal::string_t fx_ver_t::prerelease_glob() const
+{
+    pal::stringstream_t stream;
+    stream << m_major << _X(".") << m_minor << _X(".") << m_patch << _X("-*");
+    return stream.str();
+}
+
+pal::string_t fx_ver_t::patch_glob() const
+{
+    pal::stringstream_t stream;
+    stream << m_major << _X(".") << m_minor << _X(".*");
     return stream.str();
 }
 

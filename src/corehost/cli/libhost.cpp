@@ -6,18 +6,42 @@
 #include "trace.h"
 #include "libhost.h"
 
-pal::string_t get_runtime_config_from_file(const pal::string_t& file)
+void get_runtime_config_paths_from_app(const pal::string_t& app, pal::string_t* cfg, pal::string_t* dev_cfg)
 {
-    auto name = get_filename_without_ext(file);
+    auto name = get_filename_without_ext(app);
+
     auto json_name = name + _X(".runtimeconfig.json");
-    auto json_path = get_directory(file);
+    auto dev_json_name = name + _X(".runtimeconfig.dev.json");
+
+    auto json_path = get_directory(app);
+    auto dev_json_path = json_path;
 
     append_path(&json_path, json_name.c_str());
-    if (pal::file_exists(json_path))
-    {
-        return json_path;
-    }
-    return pal::string_t();
+    append_path(&dev_json_path, dev_json_name.c_str());
+
+    trace::verbose(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
+
+    dev_cfg->assign(dev_json_path);
+    cfg -> assign(json_path);
+}
+
+void get_runtime_config_paths_from_arg(const pal::string_t& arg, pal::string_t* cfg, pal::string_t* dev_cfg)
+{
+    auto name = get_filename_without_ext(arg);
+
+    auto json_name = name + _X(".json");
+    auto dev_json_name = name + _X(".dev.json");
+
+    auto json_path = get_directory(arg);
+    auto dev_json_path = json_path;
+
+    append_path(&json_path, json_name.c_str());
+    append_path(&dev_json_path, dev_json_name.c_str());
+
+    trace::verbose(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
+
+    dev_cfg->assign(dev_json_path);
+    cfg -> assign(json_path);
 }
 
 host_mode_t detect_operating_mode(const int argc, const pal::char_t* argv[], pal::string_t* p_own_dir)
@@ -36,7 +60,7 @@ host_mode_t detect_operating_mode(const int argc, const pal::char_t* argv[], pal
         p_own_dir->assign(own_dir);
     }
 
-    pal::string_t own_dll_filename = strip_file_ext(own_name) + _X(".dll");
+    pal::string_t own_dll_filename = get_executable(own_name) + _X(".dll");
     pal::string_t own_dll = own_dir;
     append_path(&own_dll, own_dll_filename.c_str());
     trace::info(_X("Own DLL path=[%s]"), own_dll.c_str());
@@ -59,3 +83,72 @@ host_mode_t detect_operating_mode(const int argc, const pal::char_t* argv[], pal
     }
 }
 
+void try_patch_roll_forward_in_dir(const pal::string_t& cur_dir, const fx_ver_t& start_ver, pal::string_t* max_str)
+{
+    pal::string_t path = cur_dir;
+
+    if (trace::is_enabled())
+    {
+        pal::string_t start_str = start_ver.as_str();
+        trace::verbose(_X("Reading patch roll forward candidates in dir [%s] for version [%s]"), path.c_str(), start_str.c_str());
+    }
+
+    pal::string_t maj_min_star = start_ver.patch_glob();
+
+    std::vector<pal::string_t> list;
+    pal::readdir(path, maj_min_star, &list);
+
+    fx_ver_t max_ver = start_ver;
+    fx_ver_t ver(-1, -1, -1);
+    for (const auto& str : list)
+    {
+        trace::verbose(_X("Considering patch roll forward candidate version [%s]"), str.c_str());
+        if (fx_ver_t::parse(str, &ver, true))
+        {
+            max_ver = std::max(ver, max_ver);
+        }
+    }
+    max_str->assign(max_ver.as_str());
+
+    if (trace::is_enabled())
+    {
+        pal::string_t start_str = start_ver.as_str();
+        trace::verbose(_X("Patch roll forwarded [%s] -> [%s] in [%s]"), start_str.c_str(), max_str->c_str(), path.c_str());
+    }
+}
+
+
+void try_prerelease_roll_forward_in_dir(const pal::string_t& cur_dir, const fx_ver_t& start_ver, pal::string_t* max_str)
+{
+    pal::string_t path = cur_dir;
+
+    if (trace::is_enabled())
+    {
+        pal::string_t start_str = start_ver.as_str();
+        trace::verbose(_X("Reading prerelease roll forward candidates in dir [%s] for version [%s]"), path.c_str(), start_str.c_str());
+    }
+
+    pal::string_t maj_min_pat_star = start_ver.prerelease_glob();
+
+    std::vector<pal::string_t> list;
+    pal::readdir(path, maj_min_pat_star, &list);
+
+    fx_ver_t max_ver = start_ver;
+    fx_ver_t ver(-1, -1, -1);
+    for (const auto& str : list)
+    {
+        trace::verbose(_X("Considering prerelease roll forward candidate version [%s]"), str.c_str());
+        if (fx_ver_t::parse(str, &ver, false)
+            && ver.is_prerelease()) // Pre-release can roll forward to only pre-release
+        {
+            max_ver = std::max(ver, max_ver);
+        }
+    }
+    max_str->assign(max_ver.as_str());
+
+    if (trace::is_enabled())
+    {
+        pal::string_t start_str = start_ver.as_str();
+        trace::verbose(_X("Prerelease roll forwarded [%s] -> [%s] in [%s]"), start_str.c_str(), max_str->c_str(), path.c_str());
+    }
+}

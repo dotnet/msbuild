@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "$(NetCoreAppVersion)"
+    }
+  },
+  "frameworks": {
+    "netcoreapp1.0": {}
+  }
+}

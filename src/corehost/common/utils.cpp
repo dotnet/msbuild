@@ -60,15 +60,21 @@ void append_path(pal::string_t* path1, const pal::char_t* path2)
 
 pal::string_t get_executable(const pal::string_t& filename)
 {
-    pal::string_t result(filename);
-
-    if (ends_with(result, _X(".exe"), false))
+    pal::string_t exe_suffix = pal::exe_suffix();
+    if (exe_suffix.empty())
     {
-        // We need to strip off the old extension
-        result.erase(result.size() - 4);
+        return filename;
     }
 
-    return result;
+    if (ends_with(filename, exe_suffix, false))
+    {
+        // We need to strip off the old extension
+        pal::string_t result(filename);
+        result.erase(result.size() - exe_suffix.size());
+        return result;
+    }
+
+    return filename;
 }
 
 pal::string_t strip_file_ext(const pal::string_t& path)
@@ -150,18 +156,34 @@ const pal::char_t* get_arch()
 #endif
 }
 
+pal::string_t get_last_known_arg(
+    const std::unordered_map<pal::string_t, std::vector<pal::string_t>>& opts,
+    const pal::string_t& opt_key,
+    const pal::string_t& de_fault)
+{
+    if (opts.count(opt_key))
+    {
+        const auto& val = opts.find(opt_key)->second;
+        return val[val.size() - 1];
+    }
+    return de_fault;
+}
+
 bool parse_known_args(
     const int argc,
     const pal::char_t* argv[],
     const std::vector<pal::string_t>& known_opts,
-    std::unordered_map<pal::string_t, pal::string_t>* opts,
+    // Although multimap would provide this functionality the order of kv, values are
+    // not preserved in C++ < C++0x
+    std::unordered_map<pal::string_t, std::vector<pal::string_t>>* opts,
     int* num_args)
 {
     int arg_i = *num_args;
     while (arg_i < argc)
     {
         pal::string_t arg = argv[arg_i];
-        if (std::find(known_opts.begin(), known_opts.end(), pal::to_lower(arg)) == known_opts.end())
+        pal::string_t arg_lower = pal::to_lower(arg);
+        if (std::find(known_opts.begin(), known_opts.end(), arg_lower) == known_opts.end())
         {
             // Unknown argument.
             break;
@@ -174,7 +196,7 @@ bool parse_known_args(
         }
 
         trace::verbose(_X("Parsed known arg %s = %s"), arg.c_str(), argv[arg_i + 1]);
-        (*opts)[arg] = argv[arg_i + 1];
+        (*opts)[arg_lower].push_back(argv[arg_i + 1]);
 
         // Increment for both the option and its value.
         arg_i += 2;
@@ -185,3 +207,30 @@ bool parse_known_args(
     return true;
 }
 
+// Try to match 0xEF 0xBB 0xBF byte sequence (no endianness here.)
+bool skip_utf8_bom(pal::ifstream_t* stream)
+{
+    if (stream->eof() || !stream->good())
+    {
+        return false;
+    }
+
+    int peeked = stream->peek();
+    if (peeked == EOF || ((peeked & 0xFF) != 0xEF))
+    {
+        return false;
+    }
+
+    unsigned char bytes[3];
+    stream->read((char*) bytes, 3);
+    if ((stream->gcount() < 3) ||
+            (bytes[1] != 0xBB) || 
+            (bytes[2] != 0xBF))
+    {
+        // Reset to 0 if returning false.
+        stream->seekg(0, stream->beg);
+        return false;
+    }
+
+    return true;
+}

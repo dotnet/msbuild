@@ -192,5 +192,20 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             _emptyDotnetTestParams.NoBuild.Should().BeFalse();
         }
+
+        [Fact]
+        public void It_sets_Help_to_false_when_help_is_not_passed_in()
+        {
+            _dotnetTestFullParams.Help.Should().BeFalse();
+        }
+
+        [Fact]
+        public void It_sets_Help_to_true_when_help_is_passed_in()
+        {
+            var dotnetTestParams = new DotnetTestParams();
+            dotnetTestParams.Parse(new[] { "--help" });
+
+            dotnetTestParams.Help.Should().BeTrue();
+        }
     }
 }

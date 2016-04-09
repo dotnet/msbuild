@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -77,6 +78,40 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             buildResult = BuildProject(expectBuildFailure: true);
             Assert.Contains("does not have a lock file", buildResult.StdErr);
+        }
+
+        [Fact]
+        public void TestModifiedVersionFile()
+        {
+            CreateTestInstance();
+            BuildProject().Should().HaveCompiledProject(MainProject);
+
+            //change version file
+            var versionFile = Path.Combine(GetIntermediaryOutputPath(), ".SDKVersion");
+            File.Exists(versionFile).Should().BeTrue();
+            File.AppendAllText(versionFile, "text");
+
+            //assert rebuilt
+            BuildProject().Should().HaveCompiledProject(MainProject);
+        }
+
+        [Fact]
+        public void TestNoVersionFile()
+        {
+            CreateTestInstance();
+            BuildProject().Should().HaveCompiledProject(MainProject);
+
+            //delete version file
+            var versionFile = Path.Combine(GetIntermediaryOutputPath(), ".SDKVersion");
+            File.Exists(versionFile).Should().BeTrue();
+            File.Delete(versionFile);
+            File.Exists(versionFile).Should().BeFalse();
+
+            //assert build skipped due to no version file
+            BuildProject().Should().HaveSkippedProjectCompilation(MainProject);
+
+            //the version file should have been regenerated during the build, even if compilation got skipped
+            File.Exists(versionFile).Should().BeTrue();
         }
 
         [Fact]

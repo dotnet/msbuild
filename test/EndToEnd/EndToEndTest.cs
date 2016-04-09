@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 {
     public class EndToEndTest : TestBase
     {
-        private static readonly string NetStandardTfm = "netstandard1.5";
+        private static readonly string NetCoreAppTfm = "netcoreapp1.0";
         private static readonly string s_expectedOutput = "Hello World!" + Environment.NewLine;
         private static readonly string s_testdirName = "e2etestroot";
         private static readonly string s_outputdirName = "test space/bin";
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuild()
         {
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, framework: NetStandardTfm);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, framework: NetCoreAppTfm);
 
             buildCommand.Execute().Should().Pass();
 
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         public void TestDotnetIncrementalBuild()
         {
             // first build
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, framework: NetStandardTfm);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, framework: NetCoreAppTfm);
             buildCommand.Execute().Should().Pass();
             TestOutputExecutable(OutputDirectory, buildCommand.GetPortableOutputName(), s_expectedOutput);
 
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 return;
             }
 
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, framework: NetStandardTfm);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, framework: NetCoreAppTfm);
 
             buildCommand.Execute().Should().Pass();
 
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 return;
             }
 
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true, framework: NetStandardTfm);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true, framework: NetCoreAppTfm);
 
             buildCommand.Execute().Should().Pass();
 
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             }
 
             // first build
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true, framework: NetStandardTfm);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true, framework: NetCoreAppTfm);
             var binariesOutputDirectory = GetCompilationOutputPath(OutputDirectory, false);
 
             buildCommand.Execute().Should().Pass();
@@ -142,6 +142,10 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetRun()
         {
+            var restoreCommand = new TestCommand("dotnet");
+            restoreCommand.Execute($"restore {TestProject}")
+                .Should()
+                .Pass();
             var runCommand = new RunCommand(TestProject);
 
             runCommand.Execute()
@@ -207,6 +211,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             catch(Exception) {}
 
             Directory.CreateDirectory(RestoredTestProjectDirectory);
+            WriteNuGetConfig(RestoredTestProjectDirectory);
 
             var currentDirectory = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(RestoredTestProjectDirectory);
@@ -241,6 +246,24 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             }
 
             return isSupported;
+        }
+
+        // Todo: this is a hack until corefx is on nuget.org remove this After RC 2 Release
+        private static void WriteNuGetConfig(string directory)
+        {
+            var contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+<packageSources>
+<!--To inherit the global NuGet package sources remove the <clear/> line below -->
+<clear />
+<add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
+<add key=""api.nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+</packageSources>
+</configuration>";
+
+            var path = Path.Combine(directory, "NuGet.config");
+
+            File.WriteAllText(path, contents);
         }
 
         private static DateTime GetLastWriteTimeUtcOfDirectoryFiles(string outputDirectory)

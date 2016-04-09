@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 {
     public class SymbolPackageGenerator: PackageGenerator
     {
-        public SymbolPackageGenerator(Project project, string configuration, ArtifactPathsCalculator artifactPathsCalculator) 
+        public SymbolPackageGenerator(Project project, string configuration, ArtifactPathsCalculator artifactPathsCalculator)
             : base(project, configuration, artifactPathsCalculator)
         {
         }
@@ -26,8 +26,10 @@ namespace Microsoft.DotNet.Tools.Compiler
             base.ProcessContext(context);
 
             var inputFolder = ArtifactPathsCalculator.InputPathForContext(context);
-            TryAddOutputFile(context, inputFolder, $"{Project.Name}.pdb");
-            TryAddOutputFile(context, inputFolder, $"{Project.Name}.mdb");
+            var ouptutName =  Project.GetCompilerOptions(context.TargetFramework, Configuration).OutputName;
+
+            TryAddOutputFile(context, inputFolder, $"{ouptutName}.pdb");
+            TryAddOutputFile(context, inputFolder, $"{ouptutName}.mdb");
         }
 
         protected override bool GeneratePackage(string nupkg, List<DiagnosticMessage> packDiagnostics)

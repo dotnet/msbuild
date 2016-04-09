@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
-using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.Extensions.PlatformAbstractions;
-using NuGet.Frameworks;
 using NuGet.Packaging;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -15,68 +11,61 @@ namespace Microsoft.DotNet.Cli.Utils
     public class PackagedCommandSpecFactory : IPackagedCommandSpecFactory
     {
         public CommandSpec CreateCommandSpecFromLibrary(
-            LockFilePackageLibrary library,
+            LockFileTargetLibrary toolLibrary,
             string commandName,
             IEnumerable<string> commandArguments,
             IEnumerable<string> allowedExtensions,
             string nugetPackagesRoot,
             CommandResolutionStrategy commandResolutionStrategy,
-            string depsFilePath)
+            string depsFilePath,
+            string runtimeConfigPath)
         {
-            var packageDirectory = GetPackageDirectoryFullPath(library, nugetPackagesRoot);
 
-            if (!Directory.Exists(packageDirectory))
+            var toolAssembly = toolLibrary?.RuntimeAssemblies
+                    .FirstOrDefault(r => Path.GetFileNameWithoutExtension(r.Path) == commandName);
+
+            if (toolAssembly == null)
+            {
+                return null;
+            }
+            
+            var commandPath = GetCommandFilePath(nugetPackagesRoot, toolLibrary, toolAssembly);
+
+            if (!File.Exists(commandPath))
             {
                 return null;
             }
 
-            var commandFile = GetCommandFileRelativePath(library, commandName, allowedExtensions);
+            var isPortable = IsPortableApp(commandPath, runtimeConfigPath);
 
-            if (commandFile == null)
-            {
-                return null;
-            }
-
-            var commandPath = Path.Combine(packageDirectory, commandFile);
-
-            var isPortable = DetermineIfPortableApp(commandPath);
-
-            return CreateCommandSpecWrappingWithCorehostfDll(
+            return CreateCommandSpecWrappingWithCorehostIfDll(
                 commandPath, 
                 commandArguments, 
                 depsFilePath, 
                 commandResolutionStrategy,
                 nugetPackagesRoot,
-                isPortable);
+                isPortable,
+                runtimeConfigPath);
         }
 
-        private string GetPackageDirectoryFullPath(LockFilePackageLibrary library, string nugetPackagesRoot)
+        private string GetCommandFilePath(string nugetPackagesRoot, LockFileTargetLibrary toolLibrary, LockFileItem runtimeAssembly)
         {
             var packageDirectory = new VersionFolderPathResolver(nugetPackagesRoot)
-                .GetInstallPath(library.Name, library.Version);
+                .GetInstallPath(toolLibrary.Name, toolLibrary.Version);
 
-            return packageDirectory;
+            var filePath = Path.Combine(packageDirectory, runtimeAssembly.Path);
+
+            return filePath;
         }
 
-        private string GetCommandFileRelativePath(
-            LockFilePackageLibrary library, 
-            string commandName, 
-            IEnumerable<string> allowedExtensions)
-        {
-            // TODO: Should command names be case sensitive?
-            return library.Files
-                    .Where(f => Path.GetFileNameWithoutExtension(f) == commandName)
-                    .Where(e => allowedExtensions.Contains(Path.GetExtension(e)))
-                    .FirstOrDefault();
-        }
-
-        private CommandSpec CreateCommandSpecWrappingWithCorehostfDll(
+        private CommandSpec CreateCommandSpecWrappingWithCorehostIfDll(
             string commandPath, 
             IEnumerable<string> commandArguments, 
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
-            bool isPortable)
+            bool isPortable,
+            string runtimeConfigPath)
         {
             var commandExtension = Path.GetExtension(commandPath);
 
@@ -88,7 +77,8 @@ namespace Microsoft.DotNet.Cli.Utils
                     depsFilePath, 
                     commandResolutionStrategy,
                     nugetPackagesRoot,
-                    isPortable);
+                    isPortable,
+                    runtimeConfigPath);
             }
             
             return CreateCommandSpec(commandPath, commandArguments, commandResolutionStrategy);
@@ -100,9 +90,10 @@ namespace Microsoft.DotNet.Cli.Utils
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
-            bool isPortable)
+            bool isPortable,
+            string runtimeConfigPath)
         {
-            string host = string.Empty;
+            var host = string.Empty;
             var arguments = new List<string>();
 
             if (isPortable)
@@ -116,22 +107,45 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
 
                 arguments.Add("exec");
+
+                if (runtimeConfigPath != null)
+                {
+                    arguments.Add("--runtimeconfig");
+                    arguments.Add(runtimeConfigPath);
+                }
+
+                if (depsFilePath != null)
+                {
+                    arguments.Add("--depsfile");
+                    arguments.Add(depsFilePath);
+                }
+
+                arguments.Add("--additionalprobingpath");
+                arguments.Add(nugetPackagesRoot);
+
+                arguments.Add(commandPath);
             }
             else
             {
-                host = CoreHost.LocalHostExePath;
+                host = CoreHost.HostExePath;
+
+                arguments.Add(commandPath);
+
+                if (runtimeConfigPath != null)
+                {
+                    arguments.Add("--runtimeconfig");
+                    arguments.Add(runtimeConfigPath);
+                }
+
+                if (depsFilePath != null)
+                {
+                    arguments.Add("--depsfile");
+                    arguments.Add(depsFilePath);
+                }
+
+                arguments.Add("--additionalprobingpath");
+                arguments.Add(nugetPackagesRoot);
             }
-
-            arguments.Add(commandPath);
-
-            if (depsFilePath != null)
-            {
-                arguments.Add("--depsfile");
-                arguments.Add(depsFilePath);
-            }
-
-            arguments.Add("--additionalprobingpath");
-            arguments.Add(nugetPackagesRoot);
 
             arguments.AddRange(commandArguments);
 
@@ -148,14 +162,15 @@ namespace Microsoft.DotNet.Cli.Utils
             return new CommandSpec(commandPath, escapedArgs, commandResolutionStrategy);
         }
 
-        private bool DetermineIfPortableApp(string commandPath)
+        private bool IsPortableApp(string commandPath, string runtimeConfigPath)
         {
             var commandDir = Path.GetDirectoryName(commandPath);
 
-            var runtimeConfigPath = Directory.EnumerateFiles(commandDir)
-                .FirstOrDefault(x => x.EndsWith("runtimeconfig.json"));
-
-            if (runtimeConfigPath == null)
+            runtimeConfigPath = string.IsNullOrEmpty(runtimeConfigPath)
+                ? Directory.EnumerateFiles(commandDir).FirstOrDefault(x => x.EndsWith("runtimeconfig.json"))
+                : runtimeConfigPath;
+    
+            if (runtimeConfigPath == null || !File.Exists(runtimeConfigPath))
             {
                 return false;
             }

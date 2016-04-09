@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Run
             {
                 var defaultFrameworks = new[]
                 {
-                    FrameworkConstants.FrameworkIdentifiers.DnxCore,
+                    FrameworkConstants.FrameworkIdentifiers.NetCoreApp,
                     FrameworkConstants.FrameworkIdentifiers.NetStandardApp,
                 };
 
@@ -124,11 +124,14 @@ namespace Microsoft.DotNet.Tools.Run
                 return result;
             }
 
-            // Add Nuget Packages Probing Path
-            var nugetPackagesRoot = _context.PackagesDirectory;
-            var probingPathArg = "--additionalprobingpath";
-            _args.Insert(0, nugetPackagesRoot);
-            _args.Insert(0, probingPathArg);
+            if (!_context.TargetFramework.IsDesktop())
+            {
+                // Add Nuget Packages Probing Path
+                var nugetPackagesRoot = _context.PackagesDirectory;
+                var probingPathArg = "--additionalprobingpath";
+                _args.Insert(0, nugetPackagesRoot);
+                _args.Insert(0, probingPathArg);
+            }
 
             // Now launch the output and give it the results
             var outputPaths = _context.GetOutputPaths(Configuration);

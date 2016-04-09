@@ -13,7 +13,7 @@
 #include <pwd.h>
 #include <unistd.h>
 
-#include <unistd.h>
+#include <fnmatch.h>
 
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
@@ -112,25 +112,11 @@ bool pal::is_path_rooted(const pal::string_t& path)
     return path.front() == '/';
 }
 
-bool pal::get_default_packages_directory(pal::string_t* recv)
+bool pal::get_default_extensions_directory(string_t* recv)
 {
     recv->clear();
-    pal::string_t dir;
-    if (!pal::getenv("HOME", &dir))
-    {
-        struct passwd* pw = getpwuid(getuid());
-        if (pw && pw->pw_dir)
-        {
-            dir.assign(pw->pw_dir);
-        }
-    }
-    if (dir.empty())
-    {
-        return false;
-    }
-    append_path(&dir, _X(".nuget"));
-    append_path(&dir, _X("packages"));
-    recv->assign(dir);
+    append_path(recv, _X("opt"));
+    append_path(recv, _X("dotnetextensions"));
     return true;
 }
 
@@ -200,7 +186,7 @@ bool pal::file_exists(const pal::string_t& path)
     return (::stat(path.c_str(), &buffer) == 0);
 }
 
-void pal::readdir(const pal::string_t& path, std::vector<pal::string_t>* list)
+void pal::readdir(const string_t& path, const string_t& pattern, std::vector<pal::string_t>* list)
 {
     assert(list != nullptr);
 
@@ -210,8 +196,13 @@ void pal::readdir(const pal::string_t& path, std::vector<pal::string_t>* list)
     if (dir != nullptr)
     {
         struct dirent* entry = nullptr;
-        while((entry = readdir(dir)) != nullptr)
+        while ((entry = readdir(dir)) != nullptr)
         {
+            if (fnmatch(pattern.c_str(), entry->d_name, FNM_PATHNAME) != 0)
+            {
+                continue;
+            }
+             
             // We are interested in files only
             switch (entry->d_type)
             {
@@ -249,4 +240,9 @@ void pal::readdir(const pal::string_t& path, std::vector<pal::string_t>* list)
             files.push_back(pal::string_t(entry->d_name));
         }
     }
+}
+
+void pal::readdir(const pal::string_t& path, std::vector<pal::string_t>* list)
+{
+    readdir(path, _X("*"), list);
 }

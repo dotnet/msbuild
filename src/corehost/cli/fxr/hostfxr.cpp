@@ -5,9 +5,11 @@
 #include "trace.h"
 #include "pal.h"
 #include "utils.h"
-#include "libhost.h"
+#include "fx_ver.h"
 #include "fx_muxer.h"
 #include "error_codes.h"
+#include "libhost.h"
+#include "runtime_config.h"
 
 typedef int(*corehost_load_fn) (const corehost_init_t* init);
 typedef int(*corehost_main_fn) (const int argc, const pal::char_t* argv[]);
@@ -21,7 +23,7 @@ int load_host_library(
     corehost_unload_fn* unload_fn)
 {
     pal::string_t host_path;
-    if (!library_exists_in_dir(lib_dir, LIBHOST_NAME, &host_path))
+    if (!library_exists_in_dir(lib_dir, LIBHOSTPOLICY_NAME, &host_path))
     {
         return StatusCode::CoreHostLibMissingFailure;
     }
@@ -58,7 +60,14 @@ int execute_app(
 
     if (code != StatusCode::Success)
     {
-        trace::error(_X("Could not load host policy library [%s]"), impl_dll_dir.c_str());
+        trace::error(_X("Could not load host policy library from [%s]"), impl_dll_dir.c_str());
+        if (init->fx_dir() == impl_dll_dir)
+        {
+            pal::string_t name = init->runtime_config()->get_fx_name();
+            pal::string_t version = init->runtime_config()->get_fx_version();
+            trace::error(_X("This may be because the targeted framework [%s %s] was not found."),
+                name.c_str(), version.c_str());
+        }
         return code;
     }
 
@@ -75,25 +84,48 @@ int execute_app(
 
 bool hostpolicy_exists_in_svc(pal::string_t* resolved_dir)
 {
-#ifdef COREHOST_PACKAGE_SERVICING
     pal::string_t svc_dir;
-    if (!pal::getenv(_X("DOTNET_SERVICING"), &svc_dir))
+    pal::get_default_extensions_directory(&svc_dir);
+
+    pal::string_t version = _STRINGIFY(HOST_POLICY_PKG_VER);
+
+    fx_ver_t lib_ver(-1, -1, -1);
+    if (!fx_ver_t::parse(version, &lib_ver, false))
     {
         return false;
     }
 
+    pal::string_t rel_dir = _STRINGIFY(HOST_POLICY_PKG_REL_DIR);
+    if (DIR_SEPARATOR != '/')
+    {
+        replace_char(&rel_dir, '/', DIR_SEPARATOR);
+    }
+    
     pal::string_t path = svc_dir;
-    append_path(&path, COREHOST_PACKAGE_NAME);
-    append_path(&path, COREHOST_PACKAGE_VERSION);
-    append_path(&path, COREHOST_PACKAGE_COREHOST_RELATIVE_DIR);
-    if (library_exists_in_dir(path, LIBHOST_NAME))
+    append_path(&path, _STRINGIFY(HOST_POLICY_PKG_NAME));
+
+    pal::string_t max_ver;
+    if (lib_ver.is_prerelease())
+    {
+        try_prerelease_roll_forward_in_dir(path, lib_ver, &max_ver);
+    }
+    else
+    {
+        try_patch_roll_forward_in_dir(path, lib_ver, &max_ver);
+    }
+    
+    
+    append_path(&path, max_ver.c_str());
+    append_path(&path, rel_dir.c_str());
+
+    if (library_exists_in_dir(path, LIBHOSTPOLICY_NAME, nullptr))
     {
         resolved_dir->assign(path);
+        trace::verbose(_X("[%s] exists in servicing [%s]"), LIBHOSTPOLICY_NAME, path.c_str());
+        return true;
     }
-    return true;
-#else
+    trace::verbose(_X("[%s] doesn't exist in servicing [%s]"), LIBHOSTPOLICY_NAME, path.c_str());
     return false;
-#endif
 }
 
 SHARED_API int hostfxr_main(const int argc, const pal::char_t* argv[])
@@ -115,7 +147,7 @@ SHARED_API int hostfxr_main(const int argc, const pal::char_t* argv[])
     case split_fx:
         {
             trace::info(_X("Host operating in split mode; own dir=[%s]"), own_dir.c_str());
-            corehost_init_t init(_X(""), _X(""), own_dir, host_mode_t::split_fx, nullptr);
+            corehost_init_t init(_X(""), std::vector<pal::string_t>(), own_dir, host_mode_t::split_fx, nullptr);
             return execute_app(own_dir, &init, argc, argv);
         }
 
@@ -124,7 +156,7 @@ SHARED_API int hostfxr_main(const int argc, const pal::char_t* argv[])
             trace::info(_X("Host operating from standalone app dir %s"), own_dir.c_str());
 
             pal::string_t svc_dir;
-            corehost_init_t init(_X(""), _X(""), _X(""), host_mode_t::standalone, nullptr);
+            corehost_init_t init(_X(""), std::vector<pal::string_t>(), _X(""), host_mode_t::standalone, nullptr);
             return execute_app(
                 hostpolicy_exists_in_svc(&svc_dir) ? svc_dir : own_dir, &init, argc, argv);
         }

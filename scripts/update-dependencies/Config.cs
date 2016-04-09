@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Scripts
     /// GITHUB_UPSTREAM_OWNER - The owner of the GitHub base repo to create the PR to. (ex. "dotnet")
     /// GITHUB_PROJECT - The repo name under the ORIGIN and UPSTREAM owners. (ex. "cli")
     /// GITHUB_UPSTREAM_BRANCH - The branch in the GitHub base repo to create the PR to. (ex. "rel/1.0.0")
+    /// GITHUB_PULL_REQUEST_NOTIFICATIONS - A semi-colon ';' separated list of GitHub users to notify on the PR.
     /// </remarks>
     public class Config
     {
@@ -36,6 +37,7 @@ namespace Microsoft.DotNet.Scripts
         public string GitHubUpstreamOwner { get; set; }
         public string GitHubProject { get; set; }
         public string GitHubUpstreamBranch { get; set; }
+        public string[] GitHubPullRequestNotifications { get; set; }
 
         private static Config Read()
         {
@@ -52,18 +54,20 @@ namespace Microsoft.DotNet.Scripts
                 GitHubUpstreamOwner = GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"),
                 GitHubProject = GetEnvironmentVariable("GITHUB_PROJECT", "cli"),
                 GitHubUpstreamBranch = GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", "rel/1.0.0"),
+                GitHubPullRequestNotifications = GetEnvironmentVariable("GITHUB_PULL_REQUEST_NOTIFICATIONS", "")
+                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
             };
         }
 
         private static string GetEnvironmentVariable(string name, string defaultValue = null)
         {
             string value = Environment.GetEnvironmentVariable(name);
-            if (string.IsNullOrEmpty(value))
+            if (value == null)
             {
                 value = defaultValue;
             }
 
-            if (string.IsNullOrEmpty(value))
+            if (value == null)
             {
                 throw new BuildFailureException($"Can't find environment variable '{name}'.");
             }

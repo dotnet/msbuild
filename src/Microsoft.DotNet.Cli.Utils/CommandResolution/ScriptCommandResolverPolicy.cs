@@ -37,10 +37,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var compositeCommandResolver = new CompositeCommandResolver();
 
             compositeCommandResolver.AddCommandResolver(new RootedCommandResolver());
+            compositeCommandResolver.AddCommandResolver(new MuxerCommandResolver());
             compositeCommandResolver.AddCommandResolver(new ProjectPathCommandResolver(environment, platformCommandSpecFactory));
             compositeCommandResolver.AddCommandResolver(new AppBaseCommandResolver(environment, platformCommandSpecFactory));
             compositeCommandResolver.AddCommandResolver(new PathCommandResolver(environment, platformCommandSpecFactory));
-        
+
             return compositeCommandResolver;
         }
     }

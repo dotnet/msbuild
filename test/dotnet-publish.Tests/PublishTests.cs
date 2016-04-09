@@ -125,7 +125,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.pdb");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll.config");
-            publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryLesser.deps");
             publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryLesser.deps.json");
 
             // dependencies should also be copied
@@ -138,7 +137,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.pdb");
             publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryLesser.dll.config");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.deps");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.deps.json");
 
             // dependencies should also be copied
@@ -176,6 +174,31 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var publishCommand = new PublishCommand(testProject);
 
             publishCommand.Execute().Should().Fail();
+        }
+
+        [Fact]
+        public void PublishFailsWhenProjectNotBuiltAndNoBuildFlagSet()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppCompilationContext")
+                                                     .WithLockFiles();
+
+            var testProject = _getProjectJson(instance.TestRoot, "TestApp");
+            var publishCommand = new PublishCommand(testProject, noBuild: true);
+
+            publishCommand.Execute().Should().Fail();
+        }
+
+        [Fact]
+        public void PublishSucceedsWhenProjectPreviouslyCompiledAndNoBuildFlagSet()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppCompilationContext")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+
+            var testProject = _getProjectJson(instance.TestRoot, "TestApp");
+            var publishCommand = new PublishCommand(testProject, noBuild: true);
+
+            publishCommand.Execute().Should().Pass();
         }
 
         [Fact]

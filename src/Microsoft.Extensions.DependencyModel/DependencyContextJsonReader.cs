@@ -141,7 +141,8 @@ namespace Microsoft.Extensions.DependencyModel
             }
 
             return new CompilationOptions(
-                compilationOptionsObject[DependencyContextStrings.DefinesPropertyName]?.Values<string>() ?? Enumerable.Empty<string>(),
+                compilationOptionsObject[DependencyContextStrings.DefinesPropertyName]?.Values<string>().ToArray() ?? Enumerable.Empty<string>(),
+                // ToArray is here to prevent IEnumerable<string> holding to json object graph
                 compilationOptionsObject[DependencyContextStrings.LanguageVersionPropertyName]?.Value<string>(),
                 compilationOptionsObject[DependencyContextStrings.PlatformPropertyName]?.Value<string>(),
                 compilationOptionsObject[DependencyContextStrings.AllowUnsafePropertyName]?.Value<bool>(),
@@ -194,7 +195,8 @@ namespace Microsoft.Extensions.DependencyModel
                 var nativeLibraryGroups = new List<RuntimeAssetGroup>();
                 foreach (var ridGroup in entries.GroupBy(e => e.Rid))
                 {
-                    var groupRuntimeAssemblies = entries.Where(e => e.Type == DependencyContextStrings.RuntimeAssetType)
+                    var groupRuntimeAssemblies = ridGroup
+                        .Where(e => e.Type == DependencyContextStrings.RuntimeAssetType)
                         .Select(e => e.Path)
                         .ToArray();
 
@@ -205,7 +207,8 @@ namespace Microsoft.Extensions.DependencyModel
                             groupRuntimeAssemblies.Where(a => Path.GetFileName(a) != "_._")));
                     }
 
-                    var groupNativeLibraries = entries.Where(e => e.Type == DependencyContextStrings.NativeAssetType)
+                    var groupNativeLibraries = ridGroup
+                        .Where(e => e.Type == DependencyContextStrings.NativeAssetType)
                         .Select(e => e.Path)
                         .ToArray();
 

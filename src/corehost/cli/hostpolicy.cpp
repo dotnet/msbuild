@@ -18,7 +18,7 @@ corehost_init_t* g_init = nullptr;
 int run(const corehost_init_t* init, const runtime_config_t& config, const arguments_t& args)
 {
     // Load the deps resolver
-    deps_resolver_t resolver(init->fx_dir(), &config, args);
+    deps_resolver_t resolver(init, config, args);
 
     if (!resolver.valid())
     {
@@ -26,15 +26,7 @@ int run(const corehost_init_t* init, const runtime_config_t& config, const argum
         return StatusCode::ResolverInitFailure;
     }
 
-    // Add packages directory
-    pal::string_t packages_dir = init->probe_dir();
-    if (packages_dir.empty() || !pal::directory_exists(packages_dir))
-    {
-        (void)pal::get_default_packages_directory(&packages_dir);
-    }
-    trace::info(_X("Package directory: %s"), packages_dir.empty() ? _X("not specified") : packages_dir.c_str());
-
-    pal::string_t clr_path = resolver.resolve_coreclr_dir(args.app_dir, packages_dir, args.dotnet_packages_cache);
+    pal::string_t clr_path = resolver.resolve_coreclr_dir();
     if (clr_path.empty() || !pal::realpath(&clr_path))
     {
         trace::error(_X("Could not resolve coreclr path"));
@@ -46,7 +38,7 @@ int run(const corehost_init_t* init, const runtime_config_t& config, const argum
     }
 
     probe_paths_t probe_paths;
-    if (!resolver.resolve_probe_paths(args.app_dir, packages_dir, args.dotnet_packages_cache, clr_path, &probe_paths))
+    if (!resolver.resolve_probe_paths(clr_path, &probe_paths))
     {
         return StatusCode::ResolverResolveFailure;
     }
@@ -103,6 +95,9 @@ int run(const corehost_init_t* init, const runtime_config_t& config, const argum
 
     size_t property_size = property_keys.size();
     assert(property_keys.size() == property_values.size());
+
+    // Add API sets to the process DLL search
+    pal::setup_api_sets(resolver.get_api_sets());
 
     // Bind CoreCLR
     if (!coreclr::bind(clr_path))
@@ -196,18 +191,30 @@ int run(const corehost_init_t* init, const runtime_config_t& config, const argum
 SHARED_API int corehost_load(corehost_init_t* init)
 {
     g_init = init;
+
+    trace::setup();
+
+    if (g_init->version() != corehost_init_t::s_version)
+    {
+        trace::error(_X("Error loading hostpolicy %s; interface mismatch between hostpolicy [%d] and hostfxr [%d]"),
+                _STRINGIFY(HOST_POLICY_PKG_VER), corehost_init_t::s_version, g_init->version());
+        trace::error(_X("Specifically, the structure of corehost_init_t has changed, do not know how to interpret it"));
+        return StatusCode::LibHostInitFailure;
+    }
     return 0;
 }
 
 SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
 {
-    trace::setup();
-
     assert(g_init);
 
     if (trace::is_enabled())
     {
-        trace::info(_X("--- Invoked policy main = {"));
+        trace::info(_X("--- Invoked policy [%s/%s/%s] main = {"),
+            _STRINGIFY(HOST_POLICY_PKG_NAME),
+            _STRINGIFY(HOST_POLICY_PKG_VER),
+            _STRINGIFY(HOST_POLICY_PKG_REL_DIR));
+
         for (int i = 0; i < argc; ++i)
         {
             trace::info(_X("%s"), argv[i]);
@@ -216,12 +223,15 @@ SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
 
         trace::info(_X("Host mode: %d"), g_init->host_mode());
         trace::info(_X("Deps file: %s"), g_init->deps_file().c_str());
-        trace::info(_X("Probe dir: %s"), g_init->probe_dir().c_str());
+        for (const auto& probe : g_init->probe_paths())
+        {
+            trace::info(_X("Additional probe dir: %s"), probe.c_str());
+        }
     }
 
     // Take care of arguments
     arguments_t args;
-    if (!parse_arguments(g_init->deps_file(), g_init->probe_dir(), g_init->host_mode(), argc, argv, &args))
+    if (!parse_arguments(g_init->deps_file(), g_init->probe_paths(), g_init->host_mode(), argc, argv, &args))
     {
         return StatusCode::LibHostInvalidArgs;
     }
@@ -236,13 +246,18 @@ SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
     }
     else
     {
-        auto config_path = get_runtime_config_from_file(args.managed_application);
-        runtime_config_t config(config_path);
+        pal::string_t config_file, dev_config_file;
+        
+        get_runtime_config_paths_from_app(args.managed_application, &config_file, &dev_config_file);
+        runtime_config_t config(config_file, dev_config_file);
+
         if (!config.is_valid())
         {
-            trace::error(_X("Invalid runtimeconfig.json [%s]"), config.get_path().c_str());
+            trace::error(_X("Invalid runtimeconfig.json [%s] [%s]"), config.get_path().c_str(), config.get_dev_path().c_str());
             return StatusCode::InvalidConfigFile;
         }
+        // TODO: This is ugly. The whole runtime config/probe paths business should all be resolved by and come from the hostfxr.cpp.
+        args.probe_paths.insert(args.probe_paths.end(), config.get_probe_paths().begin(), config.get_probe_paths().end());
         return run(g_init, config, args);
     }
 }

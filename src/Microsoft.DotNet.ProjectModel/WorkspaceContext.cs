@@ -211,7 +211,7 @@ namespace Microsoft.DotNet.ProjectModel
                     {
                         try
                         {
-                            currentEntry.Model = LockFileReader.Read(currentEntry.FilePath, fs);
+                            currentEntry.Model = LockFileReader.Read(currentEntry.FilePath, fs, designTime: true);
                             currentEntry.UpdateLastWriteTimeUtc();
                         }
                         catch (FileFormatException ex)
@@ -257,7 +257,8 @@ namespace Microsoft.DotNet.ProjectModel
                         .WithProjectResolver(path => GetProject(path).Model)
                         .WithLockFileResolver(path => GetLockFile(path))
                         .WithProject(project)
-                        .WithTargetFramework(framework.FrameworkName);
+                        .WithTargetFramework(framework.FrameworkName)
+                        .AsDesignTime();
 
                     currentEntry.ProjectContexts.Add(builder.Build());
                 }

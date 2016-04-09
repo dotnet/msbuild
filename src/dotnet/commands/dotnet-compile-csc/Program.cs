@@ -243,7 +243,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
         private static Command RunCsc(string[] cscArgs)
         {
             // Locate CoreRun
-            return Command.Create("csc", cscArgs);
+            return Command.Create("csc.dll", cscArgs);
         }
     }
 }

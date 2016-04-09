@@ -35,13 +35,7 @@ namespace Microsoft.DotNet.Tools.Restore
             // "--verbosity" switch that goes BEFORE the command
             var quiet = args.Any(s => s.Equals("--quiet", StringComparison.OrdinalIgnoreCase));
             args = args.Where(s => !s.Equals("--quiet", StringComparison.OrdinalIgnoreCase)).ToArray();
-
-            // Always infer runtimes in dotnet-restore (for now).
-            if (!args.Any(s => s.Equals("--infer-runtimes", StringComparison.OrdinalIgnoreCase)))
-            {
-                args = Enumerable.Concat(new [] { "--infer-runtimes" }, args).ToArray();
-            }
-
+            
             app.OnExecute(() =>
             {
                 try

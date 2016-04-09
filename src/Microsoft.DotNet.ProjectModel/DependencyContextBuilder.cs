@@ -115,7 +115,7 @@ namespace Microsoft.Extensions.DependencyModel
         {
             var type = export.Library.Identity.Type;
 
-            var serviceable = (export.Library as PackageDescription)?.Library.IsServiceable ?? false;
+            var serviceable = (export.Library as PackageDescription)?.PackageLibrary.IsServiceable ?? false;
             var libraryDependencies = new HashSet<Dependency>();
 
             foreach (var libraryDependency in export.Library.Dependencies)

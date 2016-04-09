@@ -49,8 +49,6 @@ cat "$PSScriptRoot\..\branchinfo.txt" | ForEach-Object {
     }
 }
 
-$env:CHANNEL=$env:RELEASE_SUFFIX
-
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 if (!$env:DOTNET_INSTALL_DIR)
 {
@@ -72,7 +70,7 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Restore the build scripts
 Write-Host "Restoring Build Script projects..."
 pushd $PSScriptRoot
-dotnet restore --disable-parallel
+dotnet restore --infer-runtimes
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 popd
 

@@ -34,6 +34,15 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
+        public static void RmFilesInDirRecursive(string dir, string filePattern)
+        {
+            var files = Directory.EnumerateFiles(dir, filePattern, SearchOption.AllDirectories);
+            foreach (var file in files)
+            {
+                FS.Rm(file);
+            }
+        }
+
         public static void Chmod(string file, string mode, bool recursive = false)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -102,7 +111,7 @@ namespace Microsoft.DotNet.Cli.Build
                 if (string.Equals(Path.GetFileName(candidate), "bin") ||
                     string.Equals(Path.GetFileName(candidate), "obj"))
                 {
-                    Directory.Delete(candidate, recursive: true);
+                    Utils.DeleteDirectory(candidate);
                 }
                 else
                 {

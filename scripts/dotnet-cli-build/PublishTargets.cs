@@ -54,6 +54,7 @@ namespace Microsoft.DotNet.Cli.Build
             nameof(PublishTargets.PublishDebFilesToDebianRepo),
             nameof(PublishTargets.PublishLatestCliVersionTextFile),
             nameof(PublishTargets.PublishLatestSharedFrameworkVersionTextFile),
+            nameof(PublishTargets.PublishCoreHostPackages),
             nameof(PublishTargets.PublishCliVersionBadge))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c) => c.Success();
 
@@ -67,7 +68,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(
             nameof(PublishTargets.PublishCombinedHostFrameworkArchiveToAzure),
-            nameof(PublishTargets.PublishCombinedHostFrameworkSdkArchiveToAzure))]
+            nameof(PublishTargets.PublishCombinedHostFrameworkSdkArchiveToAzure),
+            nameof(PublishTargets.PublishSDKSymbolsArchiveToAzure))]
         public static BuildTargetResult PublishArchivesToAzure(BuildTargetContext c) => c.Success();
 
         [Target(
@@ -93,6 +95,19 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
+        public static BuildTargetResult PublishCoreHostPackages(BuildTargetContext c)
+        {
+            foreach (var file in Directory.GetFiles(Dirs.Corehost, "*.nupkg"))
+            {
+                var hostBlob = $"{Channel}/Binaries/{CliNuGetVersion}/{Path.GetFileName(file)}";
+                AzurePublisherTool.PublishFile(hostBlob, file);
+                Console.WriteLine($"Publishing package {hostBlob} to Azure.");
+            }
+
+            return c.Success();
+        }
+
+        [Target]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSharedHostInstallerFileToAzure(BuildTargetContext c)
         {
@@ -100,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Build
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
 
             AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
-            
+
             return c.Success();
         }
 
@@ -112,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Build
             var installerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
 
             AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
-            
+
             return c.Success();
         }
 
@@ -164,6 +179,17 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
+        public static BuildTargetResult PublishSDKSymbolsArchiveToAzure(BuildTargetContext c)
+        {
+            var version = CliNuGetVersion;
+            var archiveFile = c.BuildContext.Get<string>("SdkSymbolsCompressedFile");
+
+            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
+
+            return c.Success();
+        }
+
+        [Target]
         public static BuildTargetResult PublishCombinedHostFrameworkArchiveToAzure(BuildTargetContext c)
         {
             var version = SharedFrameworkNugetVersion;
@@ -194,10 +220,10 @@ namespace Microsoft.DotNet.Cli.Build
             var osname = Monikers.GetOSShortName();
             var latestSharedFXVersionBlob = $"{Channel}/dnvm/latest.sharedfx.{osname}.{CurrentArchitecture.Current}.version";
             var latestSharedFXVersionFile = Path.Combine(
-                Dirs.Stage2, 
-                "shared", 
-                CompileTargets.SharedFrameworkName, 
-                version, 
+                Dirs.Stage2,
+                "shared",
+                CompileTargets.SharedFrameworkName,
+                version,
                 ".version");
 
             AzurePublisherTool.PublishFile(latestSharedFXVersionBlob, latestSharedFXVersionFile);
@@ -215,8 +241,8 @@ namespace Microsoft.DotNet.Cli.Build
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
             DebRepoPublisherTool.PublishDebFileToDebianRepo(
-                packageName, 
-                version, 
+                packageName,
+                version,
                 uploadUrl);
 
             return c.Success();
@@ -228,13 +254,13 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var version = SharedFrameworkNugetVersion;
 
-            var packageName = Monikers.GetSdkDebianPackageName(c);
+            var packageName = Monikers.GetDebianSharedFrameworkPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
             DebRepoPublisherTool.PublishDebFileToDebianRepo(
-                packageName, 
-                version, 
+                packageName,
+                version,
                 uploadUrl);
 
             return c.Success();
@@ -246,13 +272,13 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var version = CliNuGetVersion;
 
-            var packageName = Monikers.GetSdkDebianPackageName(c);
+            var packageName = Monikers.GetDebianSharedHostPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
             DebRepoPublisherTool.PublishDebFileToDebianRepo(
-                packageName, 
-                version, 
+                packageName,
+                version,
                 uploadUrl);
 
             return c.Success();
