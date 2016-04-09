@@ -421,7 +421,9 @@ namespace Microsoft.DotNet.Cli.Build
                 }
             }
 
-            Console.WriteLine($"Build version {buildVersion} is missing some runtime packages so not pushing this drop.");
+            if (missingRuntime)
+                Console.WriteLine($"Build version {buildVersion} is missing some runtime packages so not pushing this drop.");
+
             return !missingRuntime;
         }
 
