@@ -2826,6 +2826,36 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal((~-43).ToString(), result);
         }
 
+        private void CheckOSPlatform(Func<string, bool> isOSPlatform, bool isWindows, bool isOSX, bool isUnix)
+        {
+            Assert.Equal(isWindows, isOSPlatform("Windows"));
+            Assert.Equal(isOSX, isOSPlatform("OSX"));
+            Assert.Equal(isUnix, isOSPlatform("Unix"));
+        }
+
+        [Fact]
+        public void PropertyFunctionStaticMethodIntrinsicIsOSPlatform()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            Func<string, bool> isOSPlatform = os => bool.Parse(expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::IsOSPlatform(" + os + "))",
+                                                                 ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+            if (NativeMethodsShared.IsWindows)
+            {
+                CheckOSPlatform(isOSPlatform, isWindows:true, isOSX:false, isUnix:false);
+            }
+            else if (NativeMethodsShared.IsOSX)
+            {
+                CheckOSPlatform(isOSPlatform, isWindows:false, isOSX:true, isUnix:true);
+            }
+            else
+            {
+                CheckOSPlatform(isOSPlatform, isWindows:false, isOSX:false, isUnix:true);
+            }
+        }
+
         /// <summary>
         /// Expand a property reference that has whitespace around the property name (should result in empty)
         /// </summary>
