@@ -17,7 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Security;
-#if FEATURE_SECURITY_PERMISSIONS
+#if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
 using System.Security.Principal;
