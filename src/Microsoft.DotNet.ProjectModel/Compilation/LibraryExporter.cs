@@ -119,6 +119,9 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 var builder = LibraryExportBuilder.Create(library);
                 if (_runtime != null && _runtimeFallbacks != null)
                 {
+                    // For portable apps that are built with runtime trimming we replace RuntimeAssemblyGroups and NativeLibraryGroups
+                    // with single default group that contains asset specific to runtime we are trimming for
+                    // based on runtime fallback list
                     builder.WithRuntimeAssemblyGroups(TrimAssetGroups(libraryExport.RuntimeAssemblyGroups, _runtimeFallbacks));
                     builder.WithNativeLibraryGroups(TrimAssetGroups(libraryExport.NativeLibraryGroups, _runtimeFallbacks));
                 }
