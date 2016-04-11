@@ -27,19 +27,35 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             "TestApp" + FileNameSuffixes.DotNet.ProgramDatabase,
             "TestApp" + FileNameSuffixes.CurrentPlatform.Exe,
             "TestApp" + FileNameSuffixes.DepsJson,
+            "TestApp" + FileNameSuffixes.RuntimeConfigJson,
             "TestLibrary" + FileNameSuffixes.DotNet.DynamicLib,
             "TestLibrary" + FileNameSuffixes.DotNet.ProgramDatabase
         };
+
+        private readonly string[] _runtimeExcludeFiles =
+        {
+            "TestLibrary" + FileNameSuffixes.RuntimeConfigJson,
+            "TestLibrary" + FileNameSuffixes.RuntimeConfigDevJson
+        };
+
         private readonly string[] _appCompileFiles =
         {
             "TestApp" + FileNameSuffixes.DotNet.DynamicLib,
             "TestApp" + FileNameSuffixes.DotNet.ProgramDatabase
         };
+
         private readonly string[] _libCompileFiles =
         {
             "TestLibrary" + FileNameSuffixes.DotNet.DynamicLib,
             "TestLibrary" + FileNameSuffixes.DotNet.ProgramDatabase
         };
+
+        private readonly string[] _libCompileExcludeFiles =
+        {
+            "TestLibrary" + FileNameSuffixes.RuntimeConfigJson,
+            "TestLibrary" + FileNameSuffixes.RuntimeConfigDevJson
+        };
+
 
         private void GetProjectInfo(string testRoot)
         {
@@ -71,7 +87,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         //[InlineData(false, "out", null, "TestLibrary/bin/debug/{fw}", "TestApp/bin/debug/{fw}", "out")]
         //[InlineData(false, null, "build", "build/TestLibrary/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}/{rid}")]
         //[InlineData(false, "out", "build", "build/TestLibrary/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}", "out")]
-        public void DefaultPaths(string testIdentifer, bool global, string outputValue, string baseValue, string expectedLibCompile, string expectedAppCompile, string expectedAppRuntime)
+        public void AppDefaultPaths(string testIdentifer, bool global, string outputValue, string baseValue, string expectedLibCompile, string expectedAppCompile, string expectedAppRuntime)
         {
             var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary", identifier: testIdentifer)
                                                 .WithLockFiles();
@@ -79,7 +95,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             new BuildCommand(GetProjectPath(_testAppDirDirInfo),
                 output: outputValue != null ? Path.Combine(_testProjectsRoot, outputValue) : string.Empty,
-                buidBasePath: baseValue != null ? Path.Combine(_testProjectsRoot, baseValue) : string.Empty,
+                buildBasePath: baseValue != null ? Path.Combine(_testProjectsRoot, baseValue) : string.Empty,
                 framework: DefaultFramework)
                 .ExecuteWithCapturedOutput().Should().Pass();
 
@@ -87,9 +103,37 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var appdebug = _rootDirInfo.Sub(FormatPath(expectedAppCompile, DefaultFramework, _runtime));
             var appruntime = _rootDirInfo.Sub(FormatPath(expectedAppRuntime, DefaultFramework, _runtime));
 
-            libdebug.Should().Exist().And.HaveFiles(_libCompileFiles);
+            libdebug.Should().Exist()
+                .And.HaveFiles(_libCompileFiles)
+                .And.NotHaveFiles(_libCompileExcludeFiles);
             appdebug.Should().Exist().And.HaveFiles(_appCompileFiles);
-            appruntime.Should().Exist().And.HaveFiles(_runtimeFiles);
+            appruntime.Should().Exist()
+                .And.HaveFiles(_runtimeFiles)
+                .And.NotHaveFiles(_runtimeExcludeFiles);
+        }
+
+        [Theory]
+        [InlineData("1", true, null, null, "TestLibrary/bin/Debug/{fw}", "TestLibrary/bin/Debug/{fw}/{rid}")]
+        [InlineData("2", true, "out", null, "TestLibrary/bin/Debug/{fw}", "out")]
+        [InlineData("3", true, null, "build", "build/TestLibrary/bin/Debug/{fw}", "build/TestLibrary/bin/Debug/{fw}/{rid}")]
+        [InlineData("4", true, "out", "build", "build/TestLibrary/bin/Debug/{fw}", "out")]
+        public void LibDefaultPaths(string testIdentifer, bool global, string outputValue, string baseValue, string expectedLibCompile, string expectedLibOutput)
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary", identifier: testIdentifer)
+                                                .WithLockFiles();
+            GetProjectInfo(testInstance.TestRoot);
+
+            new BuildCommand(GetProjectPath(_testLibDirInfo),
+                output: outputValue != null ? Path.Combine(_testProjectsRoot, outputValue) : string.Empty,
+                buildBasePath: baseValue != null ? Path.Combine(_testProjectsRoot, baseValue) : string.Empty,
+                framework: DefaultFramework)
+                .ExecuteWithCapturedOutput().Should().Pass();
+
+            var libdebug = _rootDirInfo.Sub(FormatPath(expectedLibCompile, DefaultFramework, _runtime));
+
+            libdebug.Should().Exist()
+                .And.HaveFiles(_libCompileFiles)
+                .And.NotHaveFiles(_libCompileExcludeFiles);
         }
 
         [Fact]
