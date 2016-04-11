@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.ApplicationInsights;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.Diagnostics;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli
 {
     public class Telemetry : ITelemetry
     {
