@@ -150,6 +150,191 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Collection of all the search paths for MSBuildExtensionsPath*, per OS
+        /// </summary>
+        [ConfigurationProperty("msbuildExtensionsPathSearchPaths")]
+        public ExtensionsPathsElementCollection AllMSBuildExtensionPathsSearchPaths
+        {
+            get
+            {
+                return (ExtensionsPathsElementCollection)base["msbuildExtensionsPathSearchPaths"];
+            }
+        }
+
+        /// <summary>
+        /// Class representing all the per-OS search paths for MSBuildExtensionsPath*
+        /// </summary>
+        internal sealed class ExtensionsPathsElementCollection : ConfigurationElementCollection
+        {
+            /// <summary>
+            /// We use this dictionary to track whether or not we've seen a given
+            /// searchPaths definition before, since the .NET configuration classes
+            /// won't perform this check without respect for case.
+            /// </summary>
+            private Dictionary<string, string> _previouslySeenOS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            /// <summary>
+            /// Type of the collection
+            /// This has to be public as cannot change access modifier when overriding
+            /// </summary>
+            public override ConfigurationElementCollectionType CollectionType
+            {
+                get
+                {
+                    return ConfigurationElementCollectionType.BasicMap;
+                }
+            }
+
+            /// <summary>
+            /// Throw exception if an element with a duplicate key is added to the collection
+            /// </summary>
+            protected override bool ThrowOnDuplicate
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
+            /// <summary>
+            /// Name of the element
+            /// </summary>
+            protected override string ElementName
+            {
+                get
+                {
+                    return "searchPaths";
+                }
+            }
+
+            /// <summary>
+            /// Gets an element with the specified name
+            /// </summary>
+            /// <param name="os">OS of the element</param>
+            /// <returns>element</returns>
+            public ExtensionsPathElement GetElement(string os)
+            {
+                return (ExtensionsPathElement)this.BaseGet(os);
+            }
+
+            /// <summary>
+            /// Gets an element based at the specified position
+            /// </summary>
+            /// <param name="index">position</param>
+            /// <returns>element</returns>
+            public ExtensionsPathElement GetElement(int index)
+            {
+                return (ExtensionsPathElement)this.BaseGet(index);
+            }
+
+            /// <summary>
+            /// Returns the key value for the given element
+            /// </summary>
+            /// <param name="element">element whose key is returned</param>
+            /// <returns>key</returns>
+            protected override object GetElementKey(ConfigurationElement element)
+            {
+                return ((ExtensionsPathElement)element).OS;
+            }
+
+            /// <summary>
+            /// Creates a new element of the collection
+            /// </summary>
+            /// <returns>Created element</returns>
+            protected override ConfigurationElement CreateNewElement()
+            {
+                return new ExtensionsPathElement();
+            }
+
+            /// <summary>
+            /// overridden so we can track previously seen elements
+            /// </summary>
+            protected override void BaseAdd(int index, ConfigurationElement element)
+            {
+                UpdateOSMap(element);
+
+                base.BaseAdd(index, element);
+            }
+
+            /// <summary>
+            /// overridden so we can track previously seen elements
+            /// </summary>
+            protected override void BaseAdd(ConfigurationElement element)
+            {
+                UpdateOSMap(element);
+
+                base.BaseAdd(element);
+            }
+
+            /// <summary>
+            /// Stores the name of the OS in a case-insensitive map
+            /// so we can detect if it is specified more than once but with
+            /// different case
+            /// </summary>
+            private void UpdateOSMap(ConfigurationElement element)
+            {
+                string os = GetElementKey(element).ToString();
+
+                if (_previouslySeenOS.ContainsKey(os))
+                {
+                    string locationString = String.Empty;
+                    if (!String.IsNullOrEmpty(element.ElementInformation.Source))
+                    {
+                        if (element.ElementInformation.LineNumber != 0)
+                        {
+                            locationString = String.Format("{0} ({1})", element.ElementInformation.Source, element.ElementInformation.LineNumber);
+                        }
+                        else
+                        {
+                            locationString = element.ElementInformation.Source;
+                        }
+                    }
+
+                    string message = ResourceUtilities.FormatResourceString("MultipleDefinitionsForSameExtensionsPathOS", os, locationString);
+
+                    throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
+                }
+
+                _previouslySeenOS.Add(os, string.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Class representing searchPaths element for a single OS
+        /// </summary>
+        internal sealed class ExtensionsPathElement : ConfigurationElement
+        {
+            /// <summary>
+            /// OS attribute of the element
+            /// </summary>
+            [ConfigurationProperty("os", IsKey = true, IsRequired = true)]
+            public string OS
+            {
+                get
+                {
+                    return (string)base["os"];
+                }
+
+                set
+                {
+                    base["os"] = value;
+                }
+            }
+
+            /// <summary>
+            /// Property element collection
+            /// </summary>
+            [ConfigurationProperty("", IsDefaultCollection = true)]
+            public PropertyElementCollection PropertyElements
+            {
+                get
+                {
+                    return (PropertyElementCollection)base[""];
+                }
+            }
+        }
+
+        /// <summary>
         /// Class representing collection of property elements
         /// </summary>
         internal sealed class PropertyElementCollection : ConfigurationElementCollection
