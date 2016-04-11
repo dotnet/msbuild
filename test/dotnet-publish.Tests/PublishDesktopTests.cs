@@ -13,6 +13,26 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
     public class PublishDesktopTests : TestBase
     {
         [WindowsOnlyTheory]
+        [InlineData(null, "the-win-x64-version.txt")]
+        [InlineData("win7-x64", "the-win-x64-version.txt")]
+        [InlineData("win7-x86", "the-win-x86-version.txt")]
+        public async Task DesktopApp_WithDependencyOnNativePackage_ProducesExpectedOutput(string runtime, string expectedOutputName)
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance(Path.Combine("..", "DesktopTestProjects", "DesktopAppWithNativeDep"))
+                .WithLockFiles();
+
+            var publishCommand = new PublishCommand(testInstance.TestRoot, runtime: runtime);
+            var result = await publishCommand.ExecuteAsync();
+
+            result.Should().Pass();
+
+            // Test the output
+            var outputDir = publishCommand.GetOutputDirectory(portable: false);
+            outputDir.Should().HaveFile(expectedOutputName);
+            outputDir.Should().HaveFile(publishCommand.GetOutputExecutable());
+        }
+
+        [WindowsOnlyTheory]
         [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20201", null, "libuv.dll", true)]
         [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20202", "win7-x64", "libuv.dll", true)]
         [InlineData("KestrelDesktop", "http://localhost:20204", null, "libuv.dll", true)]

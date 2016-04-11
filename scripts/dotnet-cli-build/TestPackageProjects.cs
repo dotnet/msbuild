@@ -27,6 +27,15 @@ namespace Microsoft.DotNet.Cli.Build
         {
             new
             {
+                Name = "PackageWithFakeNativeDep",
+                IsTool = false,
+                Path = "TestAssets/TestPackages/PackageWithFakeNativeDep",
+                IsApplicable = new Func<bool>(() => true),
+                VersionSuffix = s_testPackageBuildVersionSuffix,
+                Clean = true
+            },
+            new
+            {
                 Name = "dotnet-dependency-context-test",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-dependency-context-test",

@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+      "PackageWithFakeNativeDep": "1.0.0-*"
+  },
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "frameworks": {
+    "net451": { }
+  }
+}
