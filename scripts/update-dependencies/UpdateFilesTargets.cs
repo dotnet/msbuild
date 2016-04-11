@@ -57,7 +57,9 @@ namespace Microsoft.DotNet.Scripts
         {
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
-            IEnumerable<string> projectJsonFiles = Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories);
+            IEnumerable<string> projectJsonFiles = Enumerable.Union(
+                Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
+                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.pretemplate", SearchOption.AllDirectories));
 
             JObject projectRoot;
             foreach (string projectJsonFile in projectJsonFiles)
