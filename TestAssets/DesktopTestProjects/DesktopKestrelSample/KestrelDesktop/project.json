@@ -3,7 +3,8 @@
   "dependencies": {
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20113",
     "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254"
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254",
+    "Microsoft.NETCore.Platforms": "1.0.0-rc2-24008"
   },
   "compilationOptions": {
     "emitEntryPoint": true

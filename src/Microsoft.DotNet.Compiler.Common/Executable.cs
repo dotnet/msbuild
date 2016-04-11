@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Reflection.PortableExecutable;
 
 namespace Microsoft.Dotnet.Cli.Compiler.Common
 {

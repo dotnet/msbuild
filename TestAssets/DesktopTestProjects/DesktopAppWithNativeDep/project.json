@@ -1,7 +1,8 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-      "PackageWithFakeNativeDep": "1.0.0-*"
+      "PackageWithFakeNativeDep": "1.0.0-*",
+      "Microsoft.NETCore.Platforms": "1.0.0-rc2-24008"
   },
   "compilationOptions": {
     "emitEntryPoint": true
