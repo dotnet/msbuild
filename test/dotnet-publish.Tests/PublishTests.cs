@@ -133,6 +133,21 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
+        public void PublishesWhenPrebuildWithBuildBasePath()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary")
+                                                     .WithLockFiles();
+
+            string basePath = Path.Combine(instance.TestRoot, "build");
+            string testProject = _getProjectJson(instance.TestRoot, "TestApp");
+            var buildCommand = new BuildCommand(testProject, buildBasePath: basePath);
+            buildCommand.Execute().Should().Pass();
+
+            var publishCommand = new PublishCommand(testProject, buildBasePath: basePath, noBuild: true);
+            publishCommand.Execute().Should().Pass();
+        }
+
+        [Fact]
         public void LibraryPublishTest()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary"))
