@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
             else if (CurrentPlatform.IsDebian)
             {
-                packageId = "runtime.debian.8.2-x64.Microsoft.NETCore.Runtime.CoreCLR";
+                packageId = "runtime.debian.8-x64.Microsoft.NETCore.Runtime.CoreCLR";
             }
             else
             {
