@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static readonly string ResponseFileSuffix = ".rsp";
 
+        public static readonly string PublishedHostExecutableName = "dotnet";
         public static readonly string HostExecutableName = "corehost" + ExeSuffix;
         public static readonly string[] HostBinaryNames = new string[] {
             HostExecutableName,
