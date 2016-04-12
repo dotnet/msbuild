@@ -80,6 +80,43 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             }
         }
 
+        [Fact]
+        public void DependencyDiagnsoticsAfterDependencies()
+        {
+            var projectPath = Path.Combine(_testAssetsManager.AssetsRoot, "EmptyConsoleApp");
+            Assert.NotNull(projectPath);
+
+            using (var server = new DthTestServer(_loggerFactory))
+            using (var client = new DthTestClient(server, _loggerFactory))
+            {
+                client.Initialize(projectPath);
+                var messages = client.DrainAllMessages()
+                                     .Select(message => message.MessageType)
+                                     .ToArray();
+
+                var expectDependencies = true;
+                var expectDependencyDiagnostics = false;
+                for (var i = 0; i < messages.Length; ++i)
+                {
+                    if (messages[i] == MessageTypes.Dependencies)
+                    {
+                        Assert.True(expectDependencies);
+                        expectDependencies = false;
+                        expectDependencyDiagnostics = true;
+                    }
+                    else if (messages[i] == MessageTypes.DependencyDiagnostics)
+                    {
+                        Assert.True(expectDependencyDiagnostics);
+                        expectDependencyDiagnostics = false;
+                        break;
+                    }
+                }
+
+                Assert.False(expectDependencies);
+                Assert.False(expectDependencyDiagnostics);
+            }
+        }
+
         [Theory]
         [InlineData(4, 4)]
         [InlineData(5, 4)]
@@ -195,19 +232,19 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
 
                 client.Initialize(movedProjectPath);
 
-                client.DrainTillFirst("DependencyDiagnostics")
-                      .RetrieveDependencyDiagnosticsCollection()
-                      .RetrieveDependencyDiagnosticsErrorAt(0)
-                      .AssertProperty<string>("FormattedMessage", message => message.Contains("error NU1002"))
-                      .RetrievePropertyAs<JObject>("Source")
-                      .AssertProperty("Name", "EmptyLibrary");
-
                 client.DrainTillFirst("Dependencies")
                       .RetrieveDependency("EmptyLibrary")
                       .AssertProperty<JArray>("Errors", errorsArray => errorsArray.Count == 1)
                       .AssertProperty<JArray>("Warnings", warningsArray => warningsArray.Count == 0)
                       .AssertProperty("Name", "EmptyLibrary")
                       .AssertProperty("Resolved", false);
+
+                client.DrainTillFirst("DependencyDiagnostics")
+                      .RetrieveDependencyDiagnosticsCollection()
+                      .RetrieveDependencyDiagnosticsErrorAt(0)
+                      .AssertProperty<string>("FormattedMessage", message => message.Contains("error NU1002"))
+                      .RetrievePropertyAs<JObject>("Source")
+                      .AssertProperty("Name", "EmptyLibrary");
             }
         }
 
@@ -230,16 +267,16 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                       .RetrievePropertyAs<JArray>("ProjectSearchPaths")
                       .AssertJArrayCount(2);
 
-                client.DrainTillFirst("DependencyDiagnostics")
-                      .RetrievePayloadAs<JObject>()
-                      .AssertProperty<JArray>("Errors", array => array.Count == 0)
-                      .AssertProperty<JArray>("Warnings", array => array.Count == 0);
-
                 client.DrainTillFirst("Dependencies")
                       .RetrieveDependency("Newtonsoft.Json")
                       .AssertProperty("Type", "Project")
                       .AssertProperty("Resolved", true)
                       .AssertProperty<JArray>("Errors", array => array.Count == 0, _ => "Dependency shouldn't contain any error.");
+
+                client.DrainTillFirst("DependencyDiagnostics")
+                      .RetrievePayloadAs<JObject>()
+                      .AssertProperty<JArray>("Errors", array => array.Count == 0)
+                      .AssertProperty<JArray>("Warnings", array => array.Count == 0);
 
                 // Overwrite the global.json to remove search path to ext
                 File.WriteAllText(
@@ -254,11 +291,6 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                       .AssertJArrayCount(1)
                       .AssertJArrayElement(0, Path.Combine(projectPath, "home", "src"));
 
-                client.DrainTillFirst("DependencyDiagnostics")
-                      .RetrieveDependencyDiagnosticsCollection()
-                      .RetrieveDependencyDiagnosticsErrorAt<JObject>(0)
-                      .AssertProperty("ErrorCode", "NU1010");
-
                 client.DrainTillFirst("Dependencies")
                       .RetrieveDependency("Newtonsoft.Json")
                       .AssertProperty("Type", "")
@@ -266,6 +298,11 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                       .RetrievePropertyAs<JArray>("Errors")
                       .AssertJArrayCount(1)
                       .RetrieveArraryElementAs<JObject>(0)
+                      .AssertProperty("ErrorCode", "NU1010");
+
+                client.DrainTillFirst("DependencyDiagnostics")
+                      .RetrieveDependencyDiagnosticsCollection()
+                      .RetrieveDependencyDiagnosticsErrorAt<JObject>(0)
                       .AssertProperty("ErrorCode", "NU1010");
             }
         }
