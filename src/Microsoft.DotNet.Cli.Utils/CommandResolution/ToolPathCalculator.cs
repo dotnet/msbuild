@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.IO;
 using System.Collections.Generic;
 using NuGet.Frameworks;
@@ -19,15 +20,39 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public string GetBestLockFilePath(string packageId, VersionRange versionRange, NuGetFramework framework)
         {
+            if (versionRange == null)
+            {
+                throw new ArgumentNullException(nameof(versionRange));
+            }
+
+            if (framework == null)
+            {
+                throw new ArgumentNullException(nameof(framework));
+            }
+
             var availableToolVersions = GetAvailableToolVersions(packageId);
 
             var bestVersion = versionRange.FindBestMatch(availableToolVersions);
+            if (bestVersion == null)
+            {
+                throw new GracefulException($"Version for package `{packageId}` could not be resolved.");
+            }
 
             return GetLockFilePath(packageId, bestVersion, framework);
         }
 
         public string GetLockFilePath(string packageId, NuGetVersion version, NuGetFramework framework)
         {
+            if (version == null)
+            {
+                throw new ArgumentNullException(nameof(version));
+            }
+
+            if (framework == null)
+            {
+                throw new ArgumentNullException(nameof(framework));
+            }
+
             return Path.Combine(
                 GetBaseToolPath(packageId),
                 version.ToNormalizedString(),
