@@ -1,11 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
-using System.Text;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Files;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
@@ -32,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
         public int Execute()
         {
-            if (_project.Files.SourceFiles.Any())
+            if (HasSourceFiles())
             {
                 var argsBuilder = new List<string>();
                 argsBuilder.Add("--configuration");
@@ -58,6 +57,21 @@ namespace Microsoft.DotNet.Tools.Pack
             }
 
             return 0;
+        }
+
+        private bool HasSourceFiles()
+        {
+            var compilerOptions = _project.GetCompilerOptions(
+                _project.GetTargetFramework(targetFramework: null).FrameworkName, _configuration);
+
+            if (compilerOptions.CompileInclude == null)
+            {
+                return _project.Files.SourceFiles.Any();
+            }
+
+            var includeFiles = IncludeFilesResolver.GetIncludeFiles(compilerOptions.CompileInclude, "/", diagnostics: null);
+
+            return includeFiles.Any();
         }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Files;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Build
@@ -67,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Build
             }
 
             var context = projectNode.ProjectContext;
-            if (!context.ProjectFile.Files.SourceFiles.Any())
+            if (!HasSourceFiles(context))
             {
                 return CompilationResult.IncrementalSkip;
             }
@@ -81,6 +82,20 @@ namespace Microsoft.DotNet.Tools.Build
                 ProjectSkiped(projectNode);
                 return CompilationResult.IncrementalSkip;
             }
+        }
+
+        private static bool HasSourceFiles(ProjectContext context)
+        {
+            var compilerOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, null);
+
+            if (compilerOptions.CompileInclude == null)
+            {
+                return context.ProjectFile.Files.SourceFiles.Any();
+            }
+
+            var includeFiles = IncludeFilesResolver.GetIncludeFiles(compilerOptions.CompileInclude, "/", diagnostics: null);
+
+            return includeFiles.Any();
         }
     }
 }

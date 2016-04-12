@@ -96,6 +96,24 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         }
 
         [Fact]
+        public void HasIncludedFiles()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("EndToEndTestApp")
+                                                   .WithLockFiles()
+                                                   .WithBuildArtifacts();
+
+            var cmd = new PackCommand(Path.Combine(testInstance.TestRoot, Project.FileName));
+            cmd.Execute().Should().Pass();
+
+            var outputPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "EndToEndTestApp.1.0.0.nupkg");
+            File.Exists(outputPackage).Should().BeTrue(outputPackage);
+
+            var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
+            zip.Entries.Should().Contain(e => e.FullName == "pack1.txt");
+            zip.Entries.Should().Contain(e => e.FullName == "newpath/pack2.txt");
+        }
+
+        [Fact]
         public void PackAddsCorrectFilesForProjectsWithOutputNameSpecified()
         {
             var testInstance =

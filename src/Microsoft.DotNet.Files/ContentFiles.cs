@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Files
@@ -58,6 +59,29 @@ namespace Microsoft.DotNet.Files
             }
 
             RemoveAttributeFromFiles(pathMap.Values, FileAttributes.ReadOnly);
+        }
+
+        public void StructuredCopyTo(string targetDirectory, IEnumerable<IncludeEntry> includeEntries)
+        {
+            if (includeEntries == null)
+            {
+                return;
+            }
+
+            foreach (var targetDir in includeEntries
+                .Select(f => Path.GetDirectoryName(f.TargetPath))
+                .Distinct()
+                .Where(t => !Directory.Exists(t)))
+            {
+                Directory.CreateDirectory(targetDir);
+            }
+
+            foreach (var file in includeEntries)
+            {
+                File.Copy(file.SourcePath, file.TargetPath, overwrite: true);
+            }
+
+            RemoveAttributeFromFiles(includeEntries.Select(f => f.TargetPath), FileAttributes.ReadOnly);
         }
 
         private static void RemoveAttributeFromFiles(IEnumerable<string> files, FileAttributes attribute)

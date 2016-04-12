@@ -117,6 +117,21 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
+        public void ProjectWithPublishOptionsTest()
+        {
+            var instance = TestAssetsManager.CreateTestInstance("EndToEndTestApp")
+                                            .WithLockFiles()
+                                            .WithBuildArtifacts();
+
+            var testProject = _getProjectJson(instance.TestRoot, "EndToEndTestApp");
+
+            var publishCommand = new PublishCommand(testProject);
+
+            publishCommand.Execute().Should().Pass();
+            publishCommand.GetOutputDirectory().Should().HaveFile("testpublishfile.txt");
+        }
+
+        [Fact]
         public void FailWhenNoRestoreTest()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary");
