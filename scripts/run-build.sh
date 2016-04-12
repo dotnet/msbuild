@@ -84,7 +84,7 @@ done < "$DIR/../branchinfo.txt"
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$DIR/../.dotnet_stage0/$(uname)
 [ -d $DOTNET_INSTALL_DIR ] || mkdir -p $DOTNET_INSTALL_DIR
 
-$DIR/obtain/install.sh --channel $CHANNEL --verbose
+$DIR/obtain/dotnet-install.sh --channel $CHANNEL --verbose
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"

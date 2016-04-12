@@ -25,7 +25,7 @@ if (!$env:DOTNET_INSTALL_DIR)
 
 # Install a stage 0
 Write-Host "Installing .NET Core CLI Stage 0"
-& "$PSScriptRoot\obtain\install.ps1" -Architecture x64
+& "$PSScriptRoot\obtain\dotnet-install.ps1" -Architecture x64
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
