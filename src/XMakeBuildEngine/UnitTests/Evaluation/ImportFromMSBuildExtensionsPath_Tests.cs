@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_SYSTEM_CONFIGURATION
-
 using System.Configuration;
 using Microsoft.Win32;
 using Microsoft.Build.Collections;
@@ -349,14 +347,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>
                 ";
 
-            string v2Folder = NativeMethodsShared.IsWindows
-                                  ? @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret"
-                                  : Path.Combine(NativeMethodsShared.FrameworkBasePath, "2.0");
-
-            string v4Folder = NativeMethodsShared.IsWindows
-                                  ? @"D:\windows\Microsoft.NET\Framework\v4.0.x86ret"
-                                  : Path.Combine(NativeMethodsShared.FrameworkBasePath, "4.0");
-
             var configFileContents = @"
                  <configuration>
                    <configSections>
@@ -420,6 +410,129 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {
                     FileUtilities.DeleteDirectoryNoThrow(extnDir3, recursive: true);
                 }
+            }
+        }
+
+        // Fall-back path that has a property in it: $(FallbackExpandDir1)
+        [Fact]
+        public void ExpandExtensionsPathFallback()
+        {
+            string extnTargetsFileContentTemplate = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Target Name='FromExtn'>
+                        <Message Text='Running FromExtn'/>
+                    </Target>
+                    <Import Project='$(MSBuildExtensionsPath)\\foo\\extn.proj' Condition=""Exists('$(MSBuildExtensionsPath)\foo\extn.proj')"" />
+                </Project>";
+
+            var configFileContents = @"
+                 <configuration>
+                   <configSections>
+                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
+                   </configSections>
+                   <msbuildToolsets default=""14.1"">
+                     <toolset toolsVersion=""14.1"">
+                       <property name=""MSBuildToolsPath"" value="".""/>
+                       <property name=""MSBuildBinPath"" value="".""/>
+                       <msbuildExtensionsPathSearchPaths>
+                         <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
+                           <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1)"" />
+                         </searchPaths>
+                       </msbuildExtensionsPathSearchPaths>
+                      </toolset>
+                   </msbuildToolsets>
+                 </configuration>";
+
+            string extnDir1 = null;
+            string mainProjectPath = null;
+
+            try
+            {
+                extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"),
+                    extnTargetsFileContentTemplate);
+
+                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj",
+                    GetMainTargetFileContent());
+
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
+                var reader = GetStandardConfigurationReader();
+
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> {["FallbackExpandDir1"] = extnDir1});
+
+                projectCollection.ResetToolsetsForTests(reader);
+                var logger = new MockLogger();
+                projectCollection.RegisterLogger(logger);
+
+                var project = projectCollection.LoadProject(mainProjectPath);
+                Assert.True(project.Build("Main"));
+                logger.AssertLogContains("Running FromExtn");
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(mainProjectPath);
+                FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
+            }
+        }
+
+        // Fall-back path that has a property in it: $(FallbackExpandDir1)
+        [Fact]
+        public void ExpandExtensionsPathFallbackInErrorMessage()
+        {
+            string extnTargetsFileContentTemplate = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Target Name='FromExtn'>
+                        <Message Text='Running FromExtn'/>
+                    </Target>
+                    <Import Project='$(MSBuildExtensionsPath)\\foo\\extn2.proj' Condition=""Exists('$(MSBuildExtensionsPath)\foo\extn.proj')"" />
+                </Project>";
+
+            var configFileContents = @"
+                 <configuration>
+                   <configSections>
+                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
+                   </configSections>
+                   <msbuildToolsets default=""14.1"">
+                     <toolset toolsVersion=""14.1"">
+                       <property name=""MSBuildToolsPath"" value="".""/>
+                       <property name=""MSBuildBinPath"" value="".""/>
+                       <msbuildExtensionsPathSearchPaths>
+                         <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
+                           <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1)"" />
+                         </searchPaths>
+                       </msbuildExtensionsPathSearchPaths>
+                      </toolset>
+                   </msbuildToolsets>
+                 </configuration>";
+
+            string extnDir1 = null;
+            string mainProjectPath = null;
+
+            try
+            {
+                extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"),
+                    extnTargetsFileContentTemplate);
+
+                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj",
+                    GetMainTargetFileContent());
+
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
+                var reader = GetStandardConfigurationReader();
+
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+
+                projectCollection.ResetToolsetsForTests(reader);
+                var logger = new MockLogger();
+                projectCollection.RegisterLogger(logger);
+
+                Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+
+                // Expanded $(FallbackExpandDir) will appear in quotes in the log
+                logger.AssertLogContains("\"" + extnDir1 + "\"");
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(mainProjectPath);
+                FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
             }
         }
 
@@ -570,4 +683,3 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
     }
 }
-#endif
