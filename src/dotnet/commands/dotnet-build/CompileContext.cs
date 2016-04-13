@@ -547,7 +547,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         private class ProjectComparer : IEqualityComparer<ProjectDescription>
         {
-            public bool Equals(ProjectDescription x, ProjectDescription y) => string.Equals(x.Identity.Name, y.Identity.Name);
+            public bool Equals(ProjectDescription x, ProjectDescription y) => string.Equals(x.Identity.Name, y.Identity.Name, StringComparison.Ordinal);
             public int GetHashCode(ProjectDescription obj) => obj.Identity.Name.GetHashCode();
         }
 
