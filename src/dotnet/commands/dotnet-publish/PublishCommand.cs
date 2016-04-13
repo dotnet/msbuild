@@ -1,21 +1,20 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Compilation;
-using NuGet.Frameworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Compiler.Common;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Files;
-using Microsoft.DotNet.Tools.Common;
-using Microsoft.DotNet.ProjectModel.Utilities;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
-using NuGet.Versioning;
+using Microsoft.DotNet.ProjectModel.Utilities;
+using Microsoft.DotNet.Tools.Common;
+using Microsoft.Extensions.PlatformAbstractions;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -134,6 +133,10 @@ namespace Microsoft.DotNet.Tools.Publish
                 .ToDictionary(e => e.Library.Identity.Name);
             var collectExclusionList = context.IsPortable ? GetExclusionList(context, packageExports) : new HashSet<string>();
 
+            // Get the output paths used by the call to `dotnet build` above (since we didn't pass `--output`, they will be different from
+            // our current output paths)
+            var buildOutputPaths = context.GetOutputPaths(configuration, buildBasePath);
+
             var exports = exporter.GetAllExports();
             foreach (var export in exports.Where(e => !collectExclusionList.Contains(e.Library.Identity.Name)))
             {
@@ -141,6 +144,19 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 PublishAssetGroups(export.RuntimeAssemblyGroups, outputPath, nativeSubdirectories: false, includeRuntimeGroups: context.IsPortable);
                 PublishAssetGroups(export.NativeLibraryGroups, outputPath, nativeSubdirectories, includeRuntimeGroups: context.IsPortable);
+
+                var runtimeAssetsToCopy = export.RuntimeAssets.Where(a => ShouldCopyExportRuntimeAsset(context, buildOutputPaths, export, a));
+                runtimeAssetsToCopy.StructuredCopyTo(outputPath, outputPaths.IntermediateOutputDirectoryPath);
+            }
+
+            if (context.ProjectFile.HasRuntimeOutput(configuration) && !context.TargetFramework.IsDesktop())
+            {
+                PublishFiles(
+                    new[] {
+                        buildOutputPaths.RuntimeFiles.DepsJson,
+                        buildOutputPaths.RuntimeFiles.RuntimeConfigJson
+                    },
+                    outputPath);
             }
 
             if (options.PreserveCompilationContext.GetValueOrDefault())
@@ -150,9 +166,6 @@ namespace Microsoft.DotNet.Tools.Publish
                     PublishRefs(export, outputPath, !collectExclusionList.Contains(export.Library.Identity.Name));
                 }
             }
-
-            var buildOutputPaths = context.GetOutputPaths(configuration, buildBasePath, null);
-            PublishBuildOutputFiles(buildOutputPaths, context, outputPath, Configuration);
 
             var contentFiles = new ContentFiles(context);
             contentFiles.StructuredCopyTo(outputPath);
@@ -171,59 +184,26 @@ namespace Microsoft.DotNet.Tools.Publish
             return true;
         }
 
-        private void PublishBuildOutputFiles(OutputPaths buildOutputPaths, ProjectContext context, string outputPath, string configuration)
+        /// <summary>
+        /// Filters which export's RuntimeAssets should get copied to the output path.
+        /// </summary>
+        /// <returns>
+        /// True if the asset should be copied to the output path; otherwise, false.
+        /// </returns>
+        private static bool ShouldCopyExportRuntimeAsset(ProjectContext context, OutputPaths buildOutputPaths, LibraryExport export, LibraryAsset asset)
         {
-            List<string> filesToPublish = new List<string>();
+            // The current project has the host .exe in its runtime assets, but it shouldn't be copied
+            // to the output path during publish. The host will come from the export that has the real host in it.
 
-            string[]  buildOutputFiles = null;
-
-            if (context.ProjectFile.HasRuntimeOutput(configuration))
+            if (context.RootProject.Identity == export.Library.Identity)
             {
-                Reporter.Verbose.WriteLine($"publish: using runtime build output files");
-
-                buildOutputFiles = new string[] 
+                if (asset.ResolvedPath == buildOutputPaths.RuntimeFiles.Executable)
                 {
-                    buildOutputPaths.RuntimeFiles.DepsJson,
-                    buildOutputPaths.RuntimeFiles.RuntimeConfigJson,
-                    buildOutputPaths.RuntimeFiles.Config,
-                    buildOutputPaths.RuntimeFiles.Assembly,
-                    buildOutputPaths.RuntimeFiles.PdbPath,
-                    Path.ChangeExtension(buildOutputPaths.RuntimeFiles.Assembly, "xml")
-                };
-
-                filesToPublish.AddRange(buildOutputPaths.RuntimeFiles.Resources());
-            }
-            else
-            {
-                Reporter.Verbose.WriteLine($"publish: using compilation build output files");
-
-                buildOutputFiles = new string[] 
-                {
-                    buildOutputPaths.CompilationFiles.Assembly,
-                    buildOutputPaths.CompilationFiles.PdbPath,
-                    Path.ChangeExtension(buildOutputPaths.CompilationFiles.Assembly, "xml")
-                };
-
-                filesToPublish.AddRange(buildOutputPaths.CompilationFiles.Resources());
-            }
-
-            foreach (var buildOutputFile in buildOutputFiles)
-            {
-                if (File.Exists(buildOutputFile))
-                {
-                    filesToPublish.Add(buildOutputFile);
-                }
-                else
-                {
-                    Reporter.Verbose.WriteLine($"publish: build output file not found {buildOutputFile} ");
+                    return false;
                 }
             }
-            
-            Reporter.Verbose.WriteLine($"publish: Copying build output files:\n {string.Join("\n", filesToPublish)}");
 
-            PublishFiles(
-                filesToPublish,
-                outputPath);
+            return true;
         }
 
         private bool InvokeBuildOnProject(ProjectContext context, string buildBasePath, string configuration)
