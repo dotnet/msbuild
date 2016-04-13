@@ -4,7 +4,6 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Microsoft.Extensions.JsonParser.Sources;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -76,22 +75,6 @@ namespace Microsoft.DotNet.ProjectModel
             return result;
         }
 
-        internal static FileFormatException Create(string message, JsonValue jsonValue)
-        {
-            var result = new FileFormatException(message)
-                .WithLineInfo(jsonValue);
-
-            return result;
-        }
-
-        internal static FileFormatException Create(Exception exception, JsonValue jsonValue)
-        {
-            var result = new FileFormatException(exception.Message, exception)
-                .WithLineInfo(jsonValue);
-
-            return result;
-        }
-
         internal FileFormatException WithFilePath(string path)
         {
             if (path == null)
@@ -106,28 +89,10 @@ namespace Microsoft.DotNet.ProjectModel
 
         private FileFormatException WithLineInfo(Exception exception)
         {
-            if (exception is JsonDeserializerException)
-            {
-                WithLineInfo((JsonDeserializerException) exception);
-            }
-
             if (exception is JsonReaderException)
             {
                 WithLineInfo((JsonReaderException) exception);
             }
-
-            return this;
-        }
-
-        private FileFormatException WithLineInfo(JsonDeserializerException exception)
-        {
-            if (exception == null)
-            {
-                throw new ArgumentNullException(nameof(exception));
-            }
-
-            Line = exception.Line;
-            Column = exception.Column;
 
             return this;
         }
@@ -141,19 +106,6 @@ namespace Microsoft.DotNet.ProjectModel
 
             Line = exception.LineNumber;
             Column = exception.LinePosition;
-
-            return this;
-        }
-
-        private FileFormatException WithLineInfo(JsonValue value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            Line = value.Line;
-            Column = value.Column;
 
             return this;
         }
