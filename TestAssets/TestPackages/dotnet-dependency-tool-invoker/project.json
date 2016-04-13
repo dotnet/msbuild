@@ -18,7 +18,7 @@
     "System.CommandLine": "0.1.0-e160323-1"
   },
   "frameworks": {
-    "netstandard1.5": {
+    "netcoreapp1.0": {
       "imports": [
         "portable-net45+win8",
         "dnxcore50"

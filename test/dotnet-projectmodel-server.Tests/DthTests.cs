@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                             .AssertJArrayCount(2)
                                                             .Select(f => f["ShortName"].Value<string>());
 
-                Assert.Contains("netstandardapp1.5", frameworkShortNames);
+                Assert.Contains("netcoreapp1.0", frameworkShortNames);
                 Assert.Contains("dnx451", frameworkShortNames);
             }
         }

@@ -6,11 +6,9 @@
   },
   "dependencies": {
     "TestLibrary": "1.0.0-*",
-    "NETStandard.Library": "1.5.0-rc2-24018"
+    "Microsoft.NETCore.App": "1.0.0-rc2-*"
   },
   "frameworks": {
-    "netstandardapp1.5": {
-      "imports": "dnxcore50"
-    }
+    "netcoreapp1.0": { }
   }
 }

@@ -27,17 +27,17 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                                                 .WithLockFiles();
             TestProjectRoot = testInstance.TestRoot;
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
-            buildResult.Should().HaveCompiledProject(TestLibraryWithAppDependency);
-            buildResult.Should().HaveCompiledProject(AppProject);
-            buildResult.Should().HaveCompiledProject(LibraryProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
+            buildResult.Should().HaveCompiledProject(TestLibraryWithAppDependency, _appFrameworkFullName);
+            buildResult.Should().HaveCompiledProject(AppProject, _appFrameworkFullName);
+            buildResult.Should().HaveCompiledProject(LibraryProject, _appFrameworkFullName);
 
             buildResult = BuildProject();
 
-            buildResult.Should().HaveSkippedProjectCompilation(MainProject);
-            buildResult.Should().HaveSkippedProjectCompilation(TestLibraryWithAppDependency);
-            buildResult.Should().HaveSkippedProjectCompilation(AppProject);
-            buildResult.Should().HaveSkippedProjectCompilation(LibraryProject);
+            buildResult.Should().HaveSkippedProjectCompilation(MainProject, _appFrameworkFullName);
+            buildResult.Should().HaveSkippedProjectCompilation(TestLibraryWithAppDependency, _appFrameworkFullName);
+            buildResult.Should().HaveSkippedProjectCompilation(AppProject, _appFrameworkFullName);
+            buildResult.Should().HaveSkippedProjectCompilation(LibraryProject, _appFrameworkFullName);
         }
 
         protected override string GetProjectDirectory(string projectName)

@@ -1,22 +1,22 @@
 {
   "version": "1.0.0-*",
+
   "testRunner": "xunit",
+
   "dependencies": {
-    "Newtonsoft.Json": "6.0.0",
+    "Newtonsoft.Json": "6.0.1",
     "TestLibraryGreater": {
       "target": "project"
     }
   },
+
   "frameworks": {
     "net451": {},
-    "netstandardapp1.5": {
-      "imports": [
-        "dnxcore50",
-        "portable-net45+wp80+win8"
-      ],
+    "netstandard1.5": {
       "dependencies": {
         "NETStandard.Library": "1.5.0-rc2-24018"
-      }
+      },
+      "imports": "portable-net45+win8"
     }
   }
 }

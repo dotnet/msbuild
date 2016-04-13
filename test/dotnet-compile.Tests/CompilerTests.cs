@@ -35,12 +35,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             // run compile
             var outputDir = Path.Combine(testLibDir.Path, "bin");
             var testProject = GetProjectPath(testLibDir);
-            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultLibraryFramework);
             var result = buildCommand.ExecuteWithCapturedOutput();
             result.Should().Pass();
 
             // verify the output xml file
-            var outputXml = Path.Combine(outputDir, "Debug", DefaultFramework, "TestLibrary.xml");
+            var outputXml = Path.Combine(outputDir, "Debug", DefaultLibraryFramework, "TestLibrary.xml");
             Console.WriteLine("OUTPUT XML PATH: " + outputXml);
             Assert.True(File.Exists(outputXml));
             Assert.Contains("Gets the message from the helper", File.ReadAllText(outputXml));
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             // run compile
             var outputDir = Path.Combine(testLibDir.Path, "bin");
             var testProject = GetProjectPath(testLibDir);
-            var buildCmd = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var buildCmd = new BuildCommand(testProject, output: outputDir, framework: DefaultLibraryFramework);
             var result = buildCmd.ExecuteWithCapturedOutput();
             result.Should().Pass();
 
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var root = testInstance.TestRoot;
             var outputDir = Path.Combine(root, "bin");
             var testProject = ProjectUtils.GetProjectJson(root, "LibraryWithOutputAssemblyName");
-            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultLibraryFramework);
             var result = buildCommand.ExecuteWithCapturedOutput();
             result.Should().Pass();
 

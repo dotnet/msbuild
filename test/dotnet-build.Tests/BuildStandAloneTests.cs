@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             result.Should().Pass();
 
             var outputBase = new DirectoryInfo(
-                Path.Combine(testInstance.TestRoot, "StandaloneApp", "bin", "Debug", "netstandardapp1.5"));
+                Path.Combine(testInstance.TestRoot, "StandaloneApp", "bin", "Debug", "netcoreapp1.0"));
 
             return outputBase.Sub(runtime);
         }

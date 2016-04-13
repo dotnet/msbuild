@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             _contexts = new List<ProjectContext>
             {
-                ProjectContext.Create(_projectJson, NuGetFramework.Parse("netstandardapp1.5"))
+                ProjectContext.Create(_projectJson, NuGetFramework.Parse("netcoreapp1.0"))
             };
 
             _args = new CompilerCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");

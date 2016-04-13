@@ -12,11 +12,11 @@
     "../src/*.cs"
   ],
   "frameworks": {
-    "netstandard1.5": {
+    "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc2-24008"
+          "version": "1.0.0-rc2-*"
         }
       },
       "imports": [

@@ -13,6 +13,7 @@
         public string VersionSuffix => $"{ReleaseSuffix}-{CommitCountString}";
         public string NuGetVersion => $"{Major}.{Minor}.{Patch}-{VersionSuffix}";
         public string NetCoreAppVersion => $"{Major}.{Minor}.{Patch}-rc2-3{CommitCountString}";
+        public string HostNuGetPackageVersion => $"{Major}.{Minor}.1-rc2-{CommitCountString}-00";
         public string ProductionVersion => $"{Major}.{Minor}.{Patch}";
 
         public string GenerateMsiVersion()

@@ -14,9 +14,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             var testInstance = TestAssetsManager.CreateTestInstance("PortableTests").WithLockFiles();
 
-            var netstandardappOutput = Build(testInstance);
+            var netcoreAppOutput = Build(testInstance);
 
-            netstandardappOutput.Should().Exist().And.HaveFile("PortableApp.deps.json");
+            netcoreAppOutput.Should().Exist().And.HaveFile("PortableApp.deps.json");
         }
 
         [Fact]
@@ -24,9 +24,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             var testInstance = TestAssetsManager.CreateTestInstance("PortableTests").WithLockFiles();
 
-            var netstandardappOutput = Build(testInstance);
+            var netcoreAppOutput = Build(testInstance);
 
-            netstandardappOutput.Should().Exist().And.HaveFile("PortableApp.dll");
+            netcoreAppOutput.Should().Exist().And.HaveFile("PortableApp.dll");
         }
 
         [Fact]
@@ -34,9 +34,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             var testInstance = TestAssetsManager.CreateTestInstance("PortableTests").WithLockFiles();
 
-            var netstandardappOutput = Build(testInstance);
+            var netcoreAppOutput = Build(testInstance);
 
-            netstandardappOutput.Should().Exist().And.HaveFile("PortableApp.pdb");
+            netcoreAppOutput.Should().Exist().And.HaveFile("PortableApp.pdb");
         }
 
         [Fact]
@@ -44,9 +44,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             var testInstance = TestAssetsManager.CreateTestInstance("PortableTests").WithLockFiles();
 
-            var netstandardappOutput = Build(testInstance);
+            var netcoreAppOutput = Build(testInstance);
 
-            netstandardappOutput.Should().Exist().And.HaveFile("PortableApp.runtimeconfig.json");
+            netcoreAppOutput.Should().Exist().And.HaveFile("PortableApp.runtimeconfig.json");
         }
 
         [Fact]
@@ -55,9 +55,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var testInstance = TestAssetsManager.CreateTestInstance("PortableTests")
                 .WithLockFiles();
 
-            var netstandardappOutput = Build(testInstance);
+            var netcoreAppOutput = Build(testInstance);
 
-            var runtimeConfigJsonPath = Path.Combine(netstandardappOutput.FullName, "PortableApp.runtimeconfig.json");
+            var runtimeConfigJsonPath = Path.Combine(netcoreAppOutput.FullName, "PortableApp.runtimeconfig.json");
 
             using (var stream = new FileStream(runtimeConfigJsonPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -78,9 +78,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             var testInstance = TestAssetsManager.CreateTestInstance("PortableTests").WithLockFiles();
 
-            var netstandardappOutput = Build(testInstance);
+            var netcoreAppOutput = Build(testInstance);
 
-            netstandardappOutput.Should().Exist().And.HaveFile("PortableApp.runtimeconfig.dev.json");
+            netcoreAppOutput.Should().Exist().And.HaveFile("PortableApp.runtimeconfig.dev.json");
         }
 
         private DirectoryInfo Build(TestInstance testInstance)
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             var outputBase = new DirectoryInfo(Path.Combine(testInstance.TestRoot, "PortableApp", "bin", "Debug"));
 
-            return outputBase.Sub("netstandard1.5");
+            return outputBase.Sub("netcoreapp1.0");
         }
     }
 }

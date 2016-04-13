@@ -31,8 +31,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             CopyProjectToTempDir(sourceTestLibDir, testLibDir);
 
             var testProject = GetProjectPath(testLibDir);
-            var buildCommand = new PackCommand(testProject, configuration: "Test");
-            var result = buildCommand.Execute();
+            var packCommand = new PackCommand(testProject, configuration: "Test");
+            var result = packCommand.Execute();
             result.Should().Pass();
 
             var outputDir = new DirectoryInfo(Path.Combine(testLibDir.Path, "bin", "Test"));
@@ -52,8 +52,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             var outputDir = new DirectoryInfo(Path.Combine(testLibDir.Path, "bin2"));
             var testProject = GetProjectPath(testLibDir);
-            var buildCommand = new PackCommand(testProject, output: outputDir.FullName);
-            var result = buildCommand.Execute();
+            var packCommand = new PackCommand(testProject, output: outputDir.FullName);
+            var result = packCommand.Execute();
             result.Should().Pass();
 
             outputDir.Should().Exist();
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var cmd = new PackCommand(Path.Combine(testInstance.TestRoot, Project.FileName),  versionSuffix: "85");
             cmd.Execute().Should().Pass();
 
-            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, "TestLibraryWithConfiguration.dll");
+            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultLibraryFramework, "TestLibraryWithConfiguration.dll");
             var informationalVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyInformationalVersionAttribute");
 
             informationalVersion.Should().NotBeNull();
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             File.Exists(outputPackage).Should().BeTrue(outputPackage);
 
             var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
-            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/TestLibraryWithConfiguration.dll");
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandard1.5/TestLibraryWithConfiguration.dll");
         }
 
         [Fact]
@@ -109,13 +109,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var outputPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "LibraryWithOutputAssemblyName.1.0.0.nupkg");
             File.Exists(outputPackage).Should().BeTrue(outputPackage);
             var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
-            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/MyLibrary.dll");
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandard1.5/MyLibrary.dll");
 
             var symbolsPackage = Path.Combine(testInstance.TestRoot, "bin", "Debug", "LibraryWithOutputAssemblyName.1.0.0.symbols.nupkg");
             File.Exists(symbolsPackage).Should().BeTrue(symbolsPackage);
             zip = ZipFile.Open(symbolsPackage, ZipArchiveMode.Read);
-            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/MyLibrary.dll");
-            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandardapp1.5/MyLibrary.pdb");
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandard1.5/MyLibrary.dll");
+            zip.Entries.Should().Contain(e => e.FullName == "lib/netstandard1.5/MyLibrary.pdb");
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

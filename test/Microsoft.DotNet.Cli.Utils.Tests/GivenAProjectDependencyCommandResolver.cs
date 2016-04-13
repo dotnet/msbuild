@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = new string[] {""},
                 ProjectDirectory = "/some/directory",
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = new string[] {""},
                 ProjectDirectory = null,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = new string[] {""},
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = null,
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = null,
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = null,
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -156,7 +156,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = new [] { "arg with space"},
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = null,
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -196,13 +196,13 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = null,
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 OutputPath = AppContext.BaseDirectory
             };
 
             var projectContext = ProjectContext.Create(
                 s_liveProjectDirectory,
-                FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
 
             var depsFilePath =
@@ -225,13 +225,13 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = null,
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 BuildBasePath = AppContext.BaseDirectory
             };
 
             var projectContext = ProjectContext.Create(
                 s_liveProjectDirectory,
-                FrameworkConstants.CommonFrameworks.NetStandardApp15,
+                FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
 
             var depsFilePath =
@@ -254,7 +254,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandArguments = null,
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
-                Framework = FrameworkConstants.CommonFrameworks.NetStandardApp15
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);

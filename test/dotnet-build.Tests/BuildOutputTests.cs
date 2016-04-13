@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 framework: DefaultFramework)
                 .ExecuteWithCapturedOutput().Should().Pass();
 
-            var libdebug = _rootDirInfo.Sub(FormatPath(expectedLibCompile, DefaultFramework, _runtime));
+            var libdebug = _rootDirInfo.Sub(FormatPath(expectedLibCompile, DefaultLibraryFramework, _runtime));
             var appdebug = _rootDirInfo.Sub(FormatPath(expectedAppCompile, DefaultFramework, _runtime));
             var appruntime = _rootDirInfo.Sub(FormatPath(expectedAppRuntime, DefaultFramework, _runtime));
 
@@ -128,10 +128,10 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             new BuildCommand(GetProjectPath(_testLibDirInfo),
                 output: outputValue != null ? Path.Combine(_testProjectsRoot, outputValue) : string.Empty,
                 buildBasePath: baseValue != null ? Path.Combine(_testProjectsRoot, baseValue) : string.Empty,
-                framework: DefaultFramework)
+                framework: DefaultLibraryFramework)
                 .ExecuteWithCapturedOutput().Should().Pass();
 
-            var libdebug = _rootDirInfo.Sub(FormatPath(expectedLibCompile, DefaultFramework, _runtime));
+            var libdebug = _rootDirInfo.Sub(FormatPath(expectedLibCompile, DefaultLibraryFramework, _runtime));
 
             libdebug.Should().Exist()
                 .And.HaveFiles(_libCompileFiles)
@@ -144,12 +144,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithConfiguration")
                                                 .WithLockFiles();
 
-            var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: DefaultFramework);
+            var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: DefaultLibraryFramework);
             cmd.Environment["DOTNET_BUILD_VERSION"] = "85";
             cmd.Environment["DOTNET_ASSEMBLY_FILE_VERSION"] = "345";
             cmd.ExecuteWithCapturedOutput().Should().Pass();
 
-            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, "TestLibraryWithConfiguration.dll");
+            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultLibraryFramework, "TestLibraryWithConfiguration.dll");
             var informationalVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyInformationalVersionAttribute");
             var fileVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyFileVersionAttribute");
 
@@ -166,10 +166,10 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithConfiguration")
                                                 .WithLockFiles();
 
-            var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: DefaultFramework, versionSuffix: "85");
+            var cmd = new BuildCommand(Path.Combine(testInstance.TestRoot, Project.FileName), framework: DefaultLibraryFramework, versionSuffix: "85");
             cmd.ExecuteWithCapturedOutput().Should().Pass();
 
-            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultFramework, "TestLibraryWithConfiguration.dll");
+            var output = Path.Combine(testInstance.TestRoot, "bin", "Debug", DefaultLibraryFramework, "TestLibraryWithConfiguration.dll");
             var informationalVersion = PeReaderUtils.GetAssemblyAttributeValue(output, "AssemblyInformationalVersionAttribute");
 
             informationalVersion.Should().NotBeNull();
@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 //        [InlineData("net20", false, true)]
 //        [InlineData("net40", true, true)]
 //        [InlineData("net461", true, true)]
-        [InlineData("netstandardapp1.5", true, false)]
+        [InlineData("netstandard1.5", true, false)]
         public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute, bool windowsOnly)
         {
             var framework = NuGetFramework.Parse(frameworkName);
@@ -274,7 +274,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             new BuildCommand(GetProjectPath(_testAppDirDirInfo), framework: DefaultFramework)
                 .ExecuteWithCapturedOutput().Should().Pass();
 
-            var libdebug = _testLibDirInfo.Sub("bin/Debug").Sub(DefaultFramework);
+            var libdebug = _testLibDirInfo.Sub("bin/Debug").Sub(DefaultLibraryFramework);
             var appdebug = _testAppDirDirInfo.Sub("bin/Debug").Sub(DefaultFramework);
             var appruntime = appdebug.Sub(_runtime);
 

@@ -19,8 +19,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
         public GivenThatWeWantToUseDotnetTestE2EInDesignTime()
         {
-            var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets"));
-            var testInstance = testAssetManager.CreateTestInstance("ProjectWithTests");
+            var testInstance = TestAssetsManager.CreateTestInstance("ProjectWithTests");
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(

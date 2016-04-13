@@ -85,6 +85,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             bool targetNetCore = 
                 commonOptions.Defines.Contains("DNXCORE50") ||
                 commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARDAPP1_")).Any() ||
+                commonOptions.Defines.Where(d => d.StartsWith("NETCOREAPP1_")).Any() ||
                 commonOptions.Defines.Where(d => d.StartsWith("NETSTANDARD1_")).Any();
 
             // Get FSC Path upfront to use it for win32manifest path

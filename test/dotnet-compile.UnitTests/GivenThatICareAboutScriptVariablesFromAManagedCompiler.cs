@@ -28,14 +28,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         public void It_passes_a_FullTargetFramework_variable_to_the_pre_compile_scripts()
         {
             _fixture.PreCompileScriptVariables.Should().ContainKey("compile:FullTargetFramework");
-            _fixture.PreCompileScriptVariables["compile:FullTargetFramework"].Should().Be(".NETStandardApp,Version=v1.5");
+            _fixture.PreCompileScriptVariables["compile:FullTargetFramework"].Should().Be(".NETCoreApp,Version=v1.0");
         }
 
         [Fact]
         public void It_passes_a_TargetFramework_variable_to_the_pre_compile_scripts()
         {
             _fixture.PreCompileScriptVariables.Should().ContainKey("compile:TargetFramework");
-            _fixture.PreCompileScriptVariables["compile:TargetFramework"].Should().Be("netstandardapp1.5");
+            _fixture.PreCompileScriptVariables["compile:TargetFramework"].Should().Be("netcoreapp1.0");
         }
 
         [Fact]
@@ -80,14 +80,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         public void It_passes_a_FullTargetFramework_variable_to_the_post_compile_scripts()
         {
             _fixture.PostCompileScriptVariables.Should().ContainKey("compile:FullTargetFramework");
-            _fixture.PostCompileScriptVariables["compile:FullTargetFramework"].Should().Be(".NETStandardApp,Version=v1.5");
+            _fixture.PostCompileScriptVariables["compile:FullTargetFramework"].Should().Be(".NETCoreApp,Version=v1.0");
         }
 
         [Fact]
         public void It_passes_a_TargetFramework_variable_to_the_post_compile_scripts()
         {
             _fixture.PostCompileScriptVariables.Should().ContainKey("compile:TargetFramework");
-            _fixture.PostCompileScriptVariables["compile:TargetFramework"].Should().Be("netstandardapp1.5");
+            _fixture.PostCompileScriptVariables["compile:TargetFramework"].Should().Be("netcoreapp1.0");
         }
 
         [Fact]
@@ -138,6 +138,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
     public class ScriptVariablesFixture
     {
+        public readonly NuGetFramework TestAssetFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
         public const string ConfigValue = "Debug";
 
         public static string TestAssetPath = Path.Combine(
@@ -151,7 +152,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             TestAssetPath,
             "bin",
             ConfigValue,
-            "netstandardapp1.5");
+            "netcoreapp1.0");
 
         public string RuntimeOutputDir { get; private set; }
 
@@ -161,7 +162,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             TestAssetPath,
             "obj",
             ConfigValue,
-            "netstandardapp1.5",
+            "netcoreapp1.0",
             "dotnet-compile.rsp");
 
         public Dictionary<string, string> PreCompileScriptVariables { get; private set; }
@@ -218,7 +219,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                 rids.Add(rid);
             }
 
-            var context = ProjectContext.Create(projectJson, new NuGetFramework(".NETStandardApp", new Version(1, 5)), rids);
+            var context = ProjectContext.Create(projectJson, TestAssetFramework, rids);
             managedCompiler.Compile(context, _args);
 
             RuntimeOutputDir = Path.Combine(OutputPath, rid);

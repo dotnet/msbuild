@@ -31,9 +31,9 @@ namespace Microsoft.DotNet.Kestrel.Tests
 
             var outputBase = new DirectoryInfo(Path.Combine(testRoot, "bin", "Debug"));
 
-            var netstandardappOutput = outputBase.Sub("netstandard1.5");
+            var netcoreAppOutput = outputBase.Sub("netcoreapp1.0");
 
-            netstandardappOutput.Should()
+            netcoreAppOutput.Should()
                 .Exist().And
                 .OnlyHaveFiles(new[]
                 {
