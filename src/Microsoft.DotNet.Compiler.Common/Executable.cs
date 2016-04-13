@@ -26,6 +26,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         private readonly LibraryExporter _exporter;
 
+        private readonly string _configuration;
+
         private readonly OutputPaths _outputPaths;
 
         private readonly string _runtimeOutputPath;
@@ -41,6 +43,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             _runtimeOutputPath = outputPaths.RuntimeOutputPath;
             _intermediateOutputPath = outputPaths.IntermediateOutputDirectoryPath;
             _exporter = exporter;
+            _configuration = configuration;
             _compilerOptions = _context.ProjectFile.GetCompilerOptions(_context.TargetFramework, configuration);
         }
 
@@ -110,8 +113,11 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
         {
             WriteDeps(exporter);
-            WriteRuntimeConfig(exporter);
-            WriteDevRuntimeConfig(exporter);
+            if (_context.ProjectFile.HasRuntimeOutput(_configuration))
+            {
+                WriteRuntimeConfig(exporter);
+                WriteDevRuntimeConfig(exporter);
+            }
 
             var projectExports = exporter.GetDependencies(LibraryType.Project);
             CopyAssemblies(projectExports);

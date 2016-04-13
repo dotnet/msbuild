@@ -56,6 +56,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> NotHaveFiles(IEnumerable<string> expectedFiles)
+        {
+            foreach (var expectedFile in expectedFiles)
+            {
+                NotHaveFile(expectedFile);
+            }
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> HaveDirectory(string expectedDir)
         {
             var dir = _dirInfo.EnumerateDirectories(expectedDir, SearchOption.TopDirectoryOnly).SingleOrDefault();
