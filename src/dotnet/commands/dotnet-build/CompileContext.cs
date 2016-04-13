@@ -12,6 +12,7 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.ProjectModel.Compilation;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -79,7 +80,7 @@ namespace Microsoft.DotNet.Tools.Build
                 return true;
             }
 
-            foreach (var dependency in Sort(_rootProjectDependencies.ProjectDependenciesWithSources))
+            foreach (var dependency in Sort(_rootProjectDependencies))
             {
                 var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework, new[] { _rootProject.RuntimeIdentifier });
 
@@ -514,31 +515,40 @@ namespace Microsoft.DotNet.Tools.Build
             executable.MakeCompilationOutputRunnable();
         }
 
-        private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)
+        private static IEnumerable<ProjectDescription> Sort(ProjectDependenciesFacade dependencies)
         {
-            var outputs = new HashSet<ProjectDescription>();
+            var outputs = new List<ProjectDescription>();
 
-            foreach (var pair in projects)
+            foreach (var pair in dependencies.Dependencies)
             {
-                Sort(pair.Value, projects, outputs);
+                Sort(pair.Value, dependencies, outputs);
             }
 
-            return outputs;
+            return outputs.Distinct(new ProjectComparer());
         }
 
-        private static void Sort(ProjectDescription project, Dictionary<string, ProjectDescription> projects, ISet<ProjectDescription> outputs)
+        private static void Sort(LibraryExport node, ProjectDependenciesFacade dependencies, IList<ProjectDescription> outputs)
         {
             // Sorts projects in dependency order so that we only build them once per chain
-            foreach (var dependency in project.Dependencies)
+            ProjectDescription projectDependency;
+            foreach (var dependency in node.Library.Dependencies)
             {
-                ProjectDescription projectDependency;
-                if (projects.TryGetValue(dependency.Name, out projectDependency))
-                {
-                    Sort(projectDependency, projects, outputs);
-                }
+                // Sort the children
+                Sort(dependencies.Dependencies[dependency.Name], dependencies, outputs);
             }
 
-            outputs.Add(project);
+            // Add this node to the list if it is a project
+            if (dependencies.ProjectDependenciesWithSources.TryGetValue(node.Library.Identity.Name, out projectDependency))
+            {
+                // Add to the list of projects to build
+                outputs.Add(projectDependency);
+            }
+        }
+
+        private class ProjectComparer : IEqualityComparer<ProjectDescription>
+        {
+            public bool Equals(ProjectDescription x, ProjectDescription y) => string.Equals(x.Identity.Name, y.Identity.Name);
+            public int GetHashCode(ProjectDescription obj) => obj.Identity.Name.GetHashCode();
         }
 
         public struct CompilerIO
