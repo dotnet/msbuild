@@ -328,7 +328,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             }
 
             var libraryManager = new LibraryManager(new[] { description }, new DiagnosticMessage[] { }, "");
-            var allExports = new LibraryExporter(rootProjectDescription, libraryManager, "config", "runtime", "basepath", "solutionroot").GetAllExports();
+            var allExports = new LibraryExporter(rootProjectDescription, libraryManager, "config", "runtime", null, "basepath", "solutionroot").GetAllExports();
             var export = allExports.Single();
             return export;
         }

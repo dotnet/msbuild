@@ -7,6 +7,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -40,6 +41,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _config = config;
             _noBuild = noBuild;
             _buidBasePathDirectory = buildBasePath;
+        }
+
+        public override Task<CommandResult> ExecuteAsync(string args = "")
+        {
+            args = $"publish {BuildArgs()} {args}";
+            return base.ExecuteAsync(args);
         }
 
         public override CommandResult Execute(string args = "")

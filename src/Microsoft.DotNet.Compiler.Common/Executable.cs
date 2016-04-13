@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Reflection.PortableExecutable;
 
 namespace Microsoft.Dotnet.Cli.Compiler.Common
 {
@@ -147,16 +148,10 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         private void WriteFramework(JObject runtimeOptions, LibraryExporter exporter)
         {
-            var redistPackage = _context.RootProject.Dependencies
-                      .Where(r => r.Type.Equals(LibraryDependencyType.Platform))
-                      .ToList();
-            if (redistPackage.Count > 0)
+            var redistPackage = _context.PlatformLibrary;
+            if (redistPackage != null)
             {
-                if (redistPackage.Count > 1)
-                {
-                    throw new InvalidOperationException("Multiple packages with type: \"platform\" were specified!");
-                }
-                var packageName = redistPackage.Single().Name;
+                var packageName = redistPackage.Identity.Name;
 
                 var redistExport = exporter.GetAllExports()
                     .FirstOrDefault(e => e.Library.Identity.Name.Equals(packageName));

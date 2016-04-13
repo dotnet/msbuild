@@ -200,7 +200,6 @@ namespace Microsoft.DotNet.Cli.Build
                         .Execute();
                 }
 
-
                 var projectJson = Path.Combine(fullPath, "project.json");
                 var dotnetPackArgs = new List<string> {
                     projectJson,
@@ -245,7 +244,6 @@ namespace Microsoft.DotNet.Cli.Build
                     Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", packageProject.Name));
                 }
             }
-
             return c.Success();
         }
 
