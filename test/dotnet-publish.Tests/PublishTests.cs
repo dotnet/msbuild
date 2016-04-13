@@ -92,6 +92,61 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.Execute().Should().Fail();
         }
 
+        [Theory]
+        [InlineData("centos.7-x64", "", new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" })]
+        [InlineData("rhel.7.2-x64", "", new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" })]
+        [InlineData("ubuntu.14.04-x64", "", new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" })]
+        [InlineData("win7-x64", ".exe", new string[] { "hostfxr.dll", "coreclr.dll", "hostpolicy.dll" })]
+        [InlineData("osx.10.11-x64", "", new string[] { "libhostfxr.dylib", "libcoreclr.dylib", "libhostpolicy.dylib" })]
+        public void CrossPublishingSucceedsAndHasExpectedArtifacts(string rid, string hostExtension, string[] expectedArtifacts)
+        {
+            var testNugetCache = "packages_cross_publish_test";
+            TestInstance instance = GetTestGroupTestAssetsManager("CrossPublishTestProjects")
+                .CreateTestInstance("StandaloneAppCrossPublish");
+                
+            var testProject = Path.Combine(instance.TestRoot, "project.json");
+
+            var restoreCommand = new RestoreCommand();
+
+            restoreCommand.WorkingDirectory = Path.GetDirectoryName(testProject);
+            restoreCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
+            restoreCommand.Execute().Should().Pass();
+
+            var buildCommand = new BuildCommand(testProject, runtime: rid);
+
+            buildCommand.WorkingDirectory = Path.GetDirectoryName(testProject);
+            buildCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
+            buildCommand.Execute().Should().Pass();
+
+            var publishCommand = new PublishCommand(testProject, runtime: rid, noBuild: true);
+            publishCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
+            publishCommand.WorkingDirectory = Path.GetDirectoryName(testProject);
+            publishCommand.Execute().Should().Pass();
+
+            var publishedDir = publishCommand.GetOutputDirectory();
+            publishedDir.Should().HaveFile("StandaloneAppCrossPublish"+ hostExtension);
+
+            foreach (var artifact in expectedArtifacts)
+            {
+                publishedDir.Should().HaveFile(artifact);
+            }
+        }
+
+        [Fact]
+        public void PublishesWhenPrebuildWithBuildBasePath()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary")
+                                                     .WithLockFiles();
+
+            string basePath = Path.Combine(instance.TestRoot, "build");
+            string testProject = _getProjectJson(instance.TestRoot, "TestApp");
+            var buildCommand = new BuildCommand(testProject, buildBasePath: basePath);
+            buildCommand.Execute().Should().Pass();
+
+            var publishCommand = new PublishCommand(testProject, buildBasePath: basePath, noBuild: true);
+            publishCommand.Execute().Should().Pass();
+        }
+
         [Fact]
         public void LibraryPublishTest()
         {

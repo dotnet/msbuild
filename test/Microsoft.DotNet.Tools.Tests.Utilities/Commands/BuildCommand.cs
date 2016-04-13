@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private Project _project;
         private readonly string _projectPath;
         private readonly string _outputDirectory;
-        private readonly string _buidBasePathDirectory;
+        private readonly string _buildBasePathDirectory;
         private readonly string _configuration;
         private readonly string _framework;
         private readonly string _versionSuffix;
@@ -44,9 +44,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             get
             {
-                return _buidBasePathDirectory == string.Empty ?
+                return _buildBasePathDirectory == string.Empty ?
                                            "" :
-                                           $"-b {_buidBasePathDirectory}";
+                                           $"-b {_buildBasePathDirectory}";
             }
         }
 
@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public BuildCommand(
             string projectPath,
             string output="",
-            string buidBasePath="",
+            string buildBasePath = "",
             string configuration="",
             string framework="",
             string runtime="",
@@ -224,7 +224,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _project = ProjectReader.GetProject(projectPath);
 
             _outputDirectory = output;
-            _buidBasePathDirectory = buidBasePath;
+            _buildBasePathDirectory = buildBasePath;
             _configuration = configuration;
             _versionSuffix = versionSuffix;
             _framework = framework;
