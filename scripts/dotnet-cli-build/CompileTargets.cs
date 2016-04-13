@@ -18,7 +18,6 @@ namespace Microsoft.DotNet.Cli.Build
     public class CompileTargets
     {
         public static readonly string CoreCLRVersion = "1.0.2-rc2-24008";
-        public static readonly string AppDepSdkVersion = "1.0.6-prerelease-00003";
         public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
         public static readonly string[] BinariesForCoreHost = new[]
@@ -533,64 +532,10 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(compilersDeps);
             File.Delete(compilersRuntimeConfig);
 
-            // Copy AppDeps
-            var result = CopyAppDeps(c, outputDir);
-            if (!result.Success)
-            {
-                return result;
-            }
-
             // Generate .version file
             var version = buildVersion.NuGetVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(outputDir, ".version"), content);
-
-            return c.Success();
-        }
-
-        private static BuildTargetResult CopyAppDeps(BuildTargetContext c, string outputDir)
-        {
-            var appDepOutputDir = Path.Combine(outputDir, "appdepsdk");
-            Rmdir(appDepOutputDir);
-            Mkdirp(appDepOutputDir);
-
-            // Find toolchain package
-            string packageId;
-
-            if (CurrentPlatform.IsWindows)
-            {
-                if (CurrentArchitecture.Isx86)
-                {
-                    // https://github.com/dotnet/cli/issues/1550
-                    c.Warn("Native compilation is not yet working on Windows x86");
-                    return c.Success();
-                }
-
-                packageId = "toolchain.win7-x64.Microsoft.DotNet.AppDep";
-            }
-            else if (CurrentPlatform.IsUbuntu)
-            {
-                packageId = "toolchain.ubuntu.14.04-x64.Microsoft.DotNet.AppDep";
-            }
-            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL || CurrentPlatform.IsDebian)
-            {
-                c.Warn($"Native compilation is not yet working on {CurrentPlatform.Current}");
-                return c.Success();
-            }
-            else if (CurrentPlatform.IsOSX)
-            {
-                packageId = "toolchain.osx.10.10-x64.Microsoft.DotNet.AppDep";
-            }
-            else
-            {
-                return c.Failed("Unsupported OS Platform");
-            }
-
-            var appDepPath = Path.Combine(
-                Dirs.NuGetPackages,
-                packageId,
-                AppDepSdkVersion);
-            CopyRecursive(appDepPath, appDepOutputDir, overwrite: true);
 
             return c.Success();
         }
