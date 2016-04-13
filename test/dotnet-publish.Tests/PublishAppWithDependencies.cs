@@ -16,13 +16,18 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithContentPackage")
                 .WithLockFiles();
 
-            var publishDir = Publish(testInstance);
+            var publishCommand = new PublishCommand(testInstance.TestRoot);
+            var publishResult = publishCommand.Execute();
+
+            publishResult.Should().Pass();
+
+            var publishDir = publishCommand.GetOutputDirectory(portable: false);
 
             publishDir.Should().HaveFiles(new[]
             {
-                "TestAppWithContentPackage.exe",
-                "TestAppWithContentPackage.dll",
-                "TestAppWithContentPackage.deps.json"
+                $"AppWithContentPackage{publishCommand.GetExecutableExtension()}",
+                "AppWithContentPackage.dll",
+                "AppWithContentPackage.deps.json"
             });
 
             // these files come from the contentFiles of the SharedContentA dependency
@@ -36,16 +41,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishDir
                 .Should()
                 .HaveFile("config.xml");
-        }
-
-        private DirectoryInfo Publish(TestInstance testInstance)
-        {
-            var publishCommand = new PublishCommand(testInstance.TestRoot);
-            var publishResult = publishCommand.Execute();
-
-            publishResult.Should().Pass();
-
-            return publishCommand.GetOutputDirectory(portable: false);
         }
     }
 }
