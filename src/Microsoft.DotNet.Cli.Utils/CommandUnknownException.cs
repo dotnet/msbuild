@@ -2,7 +2,7 @@
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class CommandUnknownException : Exception
+    public class CommandUnknownException : GracefulException
     {
         public CommandUnknownException()
         {
