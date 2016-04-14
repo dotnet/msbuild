@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "packInclude": {
+      "runtimes/": "runtimes/"
+  },
+  "frameworks": {
+      "net45": {}
+  }
+}

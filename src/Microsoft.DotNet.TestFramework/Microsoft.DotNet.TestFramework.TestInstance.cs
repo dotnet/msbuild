@@ -44,9 +44,9 @@ namespace Microsoft.DotNet.TestFramework
                                  .Where(dir =>
                                  {
                                      dir = dir.ToLower();
-                                     return !dir.EndsWith($"{Path.DirectorySeparatorChar}bin") 
+                                     return !dir.EndsWith($"{Path.DirectorySeparatorChar}bin")
                                             && !dir.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")
-                                            && !dir.EndsWith($"{Path.DirectorySeparatorChar}obj") 
+                                            && !dir.EndsWith($"{Path.DirectorySeparatorChar}obj")
                                             && !dir.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}");
                                  });
 

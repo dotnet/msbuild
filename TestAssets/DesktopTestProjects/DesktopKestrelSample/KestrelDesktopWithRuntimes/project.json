@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20113",
+    "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254",
+    "Microsoft.NETCore.Platforms": "1.0.0-rc2-24008"
+  },
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "compile": [
+    "../src/*.cs"
+  ],
+  "frameworks": {
+    "net451": { }
+  },
+  "runtimes": {
+      "win7-x86": {},
+      "win7-x64": {},
+      "osx.10.11-x64": {}
+  }
+}

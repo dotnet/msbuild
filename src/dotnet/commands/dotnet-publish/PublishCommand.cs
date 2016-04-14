@@ -128,21 +128,19 @@ namespace Microsoft.DotNet.Tools.Publish
             // Use a library exporter to collect publish assets
             var exporter = context.CreateExporter(configuration, buildBasePath);
 
-            var isPortable = string.IsNullOrEmpty(context.RuntimeIdentifier);
-
             // Collect all exports and organize them
             var packageExports = exporter.GetAllExports()
                 .Where(e => e.Library.Identity.Type.Equals(LibraryType.Package))
                 .ToDictionary(e => e.Library.Identity.Name);
-            var collectExclusionList = isPortable ? GetExclusionList(context, packageExports) : new HashSet<string>();
+            var collectExclusionList = context.IsPortable ? GetExclusionList(context, packageExports) : new HashSet<string>();
 
             var exports = exporter.GetAllExports();
             foreach (var export in exports.Where(e => !collectExclusionList.Contains(e.Library.Identity.Name)))
             {
                 Reporter.Verbose.WriteLine($"publish: Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
-                PublishAssetGroups(export.RuntimeAssemblyGroups, outputPath, nativeSubdirectories: false, includeRuntimeGroups: isPortable);
-                PublishAssetGroups(export.NativeLibraryGroups, outputPath, nativeSubdirectories, includeRuntimeGroups: isPortable);
+                PublishAssetGroups(export.RuntimeAssemblyGroups, outputPath, nativeSubdirectories: false, includeRuntimeGroups: context.IsPortable);
+                PublishAssetGroups(export.NativeLibraryGroups, outputPath, nativeSubdirectories, includeRuntimeGroups: context.IsPortable);
             }
 
             if (options.PreserveCompilationContext.GetValueOrDefault())
@@ -152,7 +150,7 @@ namespace Microsoft.DotNet.Tools.Publish
                     PublishRefs(export, outputPath, !collectExclusionList.Contains(export.Library.Identity.Name));
                 }
             }
-            
+
             var buildOutputPaths = context.GetOutputPaths(configuration, buildBasePath, null);
             PublishBuildOutputFiles(buildOutputPaths, context, outputPath, Configuration);
 

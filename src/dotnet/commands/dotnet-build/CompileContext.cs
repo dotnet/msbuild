@@ -108,10 +108,10 @@ namespace Microsoft.DotNet.Tools.Build
         {
             if (CLIChangedSinceLastCompilation(project))
             {
-                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because the CLI changed");
+                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because the version or bitness of the CLI changed since the last build");
                 return true;
             }
-            
+
             var compilerIO = GetCompileIO(project, dependencies);
 
             // rebuild if empty inputs / outputs
@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             return true;
         }
-        
+
         private bool CLIChangedSinceLastCompilation(ProjectContext project)
         {
             var currentVersionFile = DotnetFiles.VersionFile;
@@ -207,7 +207,9 @@ namespace Microsoft.DotNet.Tools.Build
                 return false;
             }
 
-            var versionsAreEqual = string.Equals(File.ReadAllText(currentVersionFile), File.ReadAllText(versionFileFromLastCompile), StringComparison.OrdinalIgnoreCase);
+            var currentContent = ComputeCurrentVersionFileData();
+
+            var versionsAreEqual = string.Equals(currentContent, File.ReadAllText(versionFileFromLastCompile), StringComparison.OrdinalIgnoreCase);
 
             return !versionsAreEqual;
         }
@@ -216,7 +218,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             if (File.Exists(DotnetFiles.VersionFile))
             {
-                var projectVersionFile = project.GetSDKVersionFile(_args.ConfigValue, _args.BuildBasePathValue,_args.OutputValue);
+                var projectVersionFile = project.GetSDKVersionFile(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
                 var parentDirectory = Path.GetDirectoryName(projectVersionFile);
 
                 if (!Directory.Exists(parentDirectory))
@@ -224,12 +226,22 @@ namespace Microsoft.DotNet.Tools.Build
                     Directory.CreateDirectory(parentDirectory);
                 }
 
-                File.Copy(DotnetFiles.VersionFile, projectVersionFile, true);
+                string content = ComputeCurrentVersionFileData();
+
+                File.WriteAllText(projectVersionFile, content);
             }
             else
             {
                 Reporter.Verbose.WriteLine($"Project {project.GetDisplayName()} was not stamped with a CLI version because the version file does not exist: {DotnetFiles.VersionFile}");
             }
+        }
+
+        private static string ComputeCurrentVersionFileData()
+        {
+            var content = File.ReadAllText(DotnetFiles.VersionFile);
+            content += Environment.NewLine;
+            content += PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+            return content;
         }
 
         private void PrintSummary(bool success)

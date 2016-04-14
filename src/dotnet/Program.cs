@@ -34,13 +34,11 @@ namespace Microsoft.DotNet.Cli
             {
                 return Program.ProcessArgs(args, new Telemetry());
             }
-            catch (CommandUnknownException e)
+            catch (GracefulException e)
             {
-                Console.WriteLine(e.Message);
-
+                Console.WriteLine(e.Message.Red().Bold());
                 return 1;
             }
-
         }
 
         internal static int ProcessArgs(string[] args, ITelemetry telemetryClient)

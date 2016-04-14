@@ -16,4 +16,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
     }
+
+    public class WindowsOnlyTheoryAttribute : TheoryAttribute
+    {
+        public WindowsOnlyTheoryAttribute()
+        {
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform != Platform.Windows)
+            {
+                this.Skip = "This test requires windows to run";
+            }
+        }
+    }
 }

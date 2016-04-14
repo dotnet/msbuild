@@ -9,6 +9,7 @@ using System.Text;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.ProjectModel
         private string PackagesDirectory { get; set; }
 
         private string ReferenceAssembliesPath { get; set; }
-        
+
         private bool IsDesignTime { get; set; }
 
         private Func<string, Project> ProjectResolver { get; set; }
@@ -118,7 +119,7 @@ namespace Microsoft.DotNet.ProjectModel
             Settings = settings;
             return this;
         }
-        
+
         public ProjectContextBuilder AsDesignTime()
         {
             IsDesignTime = true;
@@ -197,16 +198,51 @@ namespace Microsoft.DotNet.ProjectModel
                 libraries.Add(new LibraryKey(mainProject.Identity.Name), mainProject);
             }
 
+            LibraryRange? platformDependency = null;
+            if (mainProject != null)
+            {
+                platformDependency = mainProject.Dependencies
+                    .Where(d =>  d.Type.Equals(LibraryDependencyType.Platform))
+                    .Cast<LibraryRange?>()
+                    .FirstOrDefault();
+            }
+            bool isPortable = platformDependency != null || TargetFramework.IsDesktop();
+
             LockFileTarget target = null;
+            LibraryDescription platformLibrary = null;
+
             if (lockFileLookup != null)
             {
-                target = SelectTarget(LockFile);
+                target = SelectTarget(LockFile, isPortable);
                 if (target != null)
                 {
                     var nugetPackageResolver = new PackageDependencyProvider(PackagesDirectory, frameworkReferenceResolver);
                     var msbuildProjectResolver = new MSBuildDependencyProvider(Project, ProjectResolver);
                     ScanLibraries(target, lockFileLookup, libraries, msbuildProjectResolver, nugetPackageResolver, projectResolver);
+
+                    if (platformDependency != null)
+                    {
+                        platformLibrary = libraries[new LibraryKey(platformDependency.Value.Name)];
+                    }
                 }
+            }
+
+            string runtime;
+            if (TargetFramework.IsDesktop())
+            {
+                var legacyRuntime = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+                if (RuntimeIdentifiers.Contains(legacyRuntime))
+                {
+                    runtime = legacyRuntime;
+                }
+                else
+                {
+                    runtime = RuntimeIdentifiers.FirstOrDefault();
+                }
+            }
+            else
+            {
+                runtime = target?.RuntimeIdentifier;
             }
 
             var referenceAssemblyDependencyResolver = new ReferenceAssemblyDependencyResolver(frameworkReferenceResolver);
@@ -272,8 +308,10 @@ namespace Microsoft.DotNet.ProjectModel
             return new ProjectContext(
                 GlobalSettings,
                 mainProject,
+                platformLibrary,
                 TargetFramework,
-                target?.RuntimeIdentifier,
+                isPortable,
+                runtime,
                 PackagesDirectory,
                 libraryManager,
                 LockFile);
@@ -454,15 +492,18 @@ namespace Microsoft.DotNet.ProjectModel
             }
         }
 
-        private LockFileTarget SelectTarget(LockFile lockFile)
+        private LockFileTarget SelectTarget(LockFile lockFile, bool isPortable)
         {
-            foreach (var runtimeIdentifier in RuntimeIdentifiers)
+            if (!isPortable)
             {
-                foreach (var scanTarget in lockFile.Targets)
+                foreach (var runtimeIdentifier in RuntimeIdentifiers)
                 {
-                    if (Equals(scanTarget.TargetFramework, TargetFramework) && string.Equals(scanTarget.RuntimeIdentifier, runtimeIdentifier, StringComparison.Ordinal))
+                    foreach (var scanTarget in lockFile.Targets)
                     {
-                        return scanTarget;
+                        if (Equals(scanTarget.TargetFramework, TargetFramework) && string.Equals(scanTarget.RuntimeIdentifier, runtimeIdentifier, StringComparison.Ordinal))
+                        {
+                            return scanTarget;
+                        }
                     }
                 }
             }
