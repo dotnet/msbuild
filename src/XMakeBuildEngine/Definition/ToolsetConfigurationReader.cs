@@ -294,6 +294,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
+            var msbuildExeConfig = FileUtilities.CurrentExecutableConfigurationFilePath;
+
+            // When running in VS, try to open MSBuild.exe.config first (if it exists)
+            if (FileUtilities.RunningInVisualStudio && File.Exists(msbuildExeConfig))
+            {
+                var configFile = new ExeConfigurationFileMap { ExeConfigFilename = msbuildExeConfig };
+                return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
+            }
+
             return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
         }
     }
