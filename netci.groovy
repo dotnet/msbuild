@@ -59,7 +59,7 @@ def project = GithubProject
                 break;
         }
         
-        Utilities.setMachineAffinity(newJob, osName)
+        Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
         Utilities.standardJobSetup(newJob, project, isPR, branch)
         // Add archiving of logs
         Utilities.addArchival(newJob, 'msbuild*.log')
