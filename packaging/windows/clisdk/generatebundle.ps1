@@ -10,8 +10,7 @@ param(
     [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
     [Parameter(Mandatory=$true)][string]$DotnetCLIVersion,
     [Parameter(Mandatory=$true)][string]$UpgradeCode,
-    [Parameter(Mandatory=$true)][string]$Architecture,
-    [Parameter(Mandatory=$true)][string]$ReleaseSuffix
+    [Parameter(Mandatory=$true)][string]$Architecture
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -30,7 +29,6 @@ function RunCandleForBundle
         -dMicrosoftEula="$RepoRoot\packaging\osx\clisdk\resources\en.lproj\eula.rtf" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
-        -dReleaseSuffix="$ReleaseSuffix" `
         -dCLISDKMsiSourcePath="$CLISDKMSIFile" `
         -dUpgradeCode="$UpgradeCode" `
         -dSharedFXMsiSourcePath="$SharedFxMSIFile" `

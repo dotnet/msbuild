@@ -8,8 +8,7 @@ param(
     [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
     [Parameter(Mandatory=$true)][string]$DotnetCLIVersion,
     [Parameter(Mandatory=$true)][string]$UpgradeCode,
-    [Parameter(Mandatory=$true)][string]$Architecture,
-    [Parameter(Mandatory=$true)][string]$ReleaseSuffix
+    [Parameter(Mandatory=$true)][string]$Architecture
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -51,13 +50,11 @@ function RunCandle
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
         -dUpgradeCode="$UpgradeCode" `
-        -dReleaseSuffix="$ReleaseSuffix" `
         -arch "$Architecture" `
         -ext WixDependencyExtension.dll `
         "$AuthWsxRoot\dotnet.wxs" `
         "$AuthWsxRoot\provider.wxs" `
         "$AuthWsxRoot\registrykeys.wxs" `
-        "$AuthWsxRoot\checkbuildtype.wxs" `
         $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
@@ -84,7 +81,6 @@ function RunLight
         dotnet.wixobj `
         provider.wixobj `
         registrykeys.wixobj `
-        checkbuildtype.wixobj `
         $InstallFilesWixobj `
         -b "$inputDir" `
         -b "$AuthWsxRoot" `

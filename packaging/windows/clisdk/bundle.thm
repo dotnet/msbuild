@@ -23,7 +23,6 @@
         <Text X="0" Y="0" Width="620" Height="75" FontId="1" />
 
         <Text Name="InstallVersion" X="11" Y="80" Width="135" Height="30" FontId="2" DisablePrefix="yes" HideWhenDisabled="yes">v[DisplayVersion]</Text>
-        <Text X="11" Y="110" Width="135" Height="30" FontId="2" DisablePrefix="yes">[ReleaseSuffix] [BuildType]</Text>
         <Text X="11" Y="145" Width="135" Height="100" FontId="5" DisablePrefix="yes">#(loc.Motto)</Text>
 
         <Text X="155" Y="80" Width="-11" Height="-70" TabStop="no" FontId="2" HexStyle="0x800000" DisablePrefix="yes" />

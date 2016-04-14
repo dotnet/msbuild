@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatemsi.ps1"),
-                cliSdkRoot, SdkMsi, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch, Channel)
+                cliSdkRoot, SdkMsi, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),
-                SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch, Channel)
+                SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch)
                     .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
                     .Execute()
                     .EnsureSuccessful();
