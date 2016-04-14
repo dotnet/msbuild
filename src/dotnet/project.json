@@ -17,10 +17,10 @@
   ],
   "dependencies": {
     "NuGet.Commands": {
-      "version": "3.5.0-beta-1130",
+      "version": "3.5.0-beta-1160",
       "exclude": "compile"
     },
-    "NuGet.CommandLine.XPlat": "3.5.0-beta-1130",
+    "NuGet.CommandLine.XPlat": "3.5.0-beta-1160",
     "Newtonsoft.Json": "7.0.1",
     "System.Text.Encoding.CodePages": "4.0.1-rc2-24008",
     "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24008",
@@ -55,13 +55,13 @@
     }
   },
   "frameworks": {
-    "netstandard1.5": {
-      "imports": [
-        "dnxcore50",
-        "netstandardapp1.5",
-        "portable-net45+win8",
-        "portable-net45+wp80+win8+wpa81+dnxcore50"
-      ]
+    "netcoreapp1.0": {
+        "imports": [
+            "dnxcore50",
+            "netstandardapp1.5",
+            "portable-net45+win8",
+            "portable-net45+wp80+win8+wpa81+dnxcore50"
+        ]
     }
   }
 }
