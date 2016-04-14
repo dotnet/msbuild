@@ -20,7 +20,7 @@
     },
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-00206",
-    "dotnet-test-xunit": "1.0.0-dev-140469-38"
+    "dotnet-test-xunit": "1.0.0-rc2-162081-13"
   },
   "frameworks": {
     "netcoreapp1.0": {

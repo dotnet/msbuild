@@ -10,24 +10,24 @@ namespace Microsoft.DotNet.Tools.Test
     {
         public int RunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
         {
-            var result = BuildTestProject(dotnetTestParams);
+            var result = BuildTestProject(projectContext, dotnetTestParams);
 
             return result == 0 ? DoRunTests(projectContext, dotnetTestParams) : result;
         }
 
         internal abstract int DoRunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams);
 
-        private int BuildTestProject(DotnetTestParams dotnetTestParams)
+        private int BuildTestProject(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
         {
             if (dotnetTestParams.NoBuild)
             {
                 return 0;
             }
 
-            return DoBuildTestProject(dotnetTestParams);
+            return DoBuildTestProject(projectContext, dotnetTestParams);
         }
 
-        private int DoBuildTestProject(DotnetTestParams dotnetTestParams)
+        private int DoBuildTestProject(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
         {
             var strings = new List<string>
             {
@@ -36,11 +36,10 @@ namespace Microsoft.DotNet.Tools.Test
                 $"{dotnetTestParams.ProjectPath}"
             };
 
-            if (dotnetTestParams.Framework != null)
-            {
-                strings.Add("--framework");
-                strings.Add($"{dotnetTestParams.Framework}");
-            }
+            // Build the test specifically for the target framework \ rid of the ProjectContext. This avoids building the project
+            // for tfms that the user did not request.
+            strings.Add("--framework");
+            strings.Add(projectContext.TargetFramework.ToString());
 
             if (!string.IsNullOrEmpty(dotnetTestParams.BuildBasePath))
             {
@@ -54,10 +53,10 @@ namespace Microsoft.DotNet.Tools.Test
                 strings.Add(dotnetTestParams.Output);
             }
 
-            if (!string.IsNullOrEmpty(dotnetTestParams.Runtime))
+            if (!string.IsNullOrEmpty(projectContext.RuntimeIdentifier))
             {
                 strings.Add("--runtime");
-                strings.Add(dotnetTestParams.Runtime);
+                strings.Add(projectContext.RuntimeIdentifier);
             }
 
             var result = Build.BuildCommand.Run(strings.ToArray());

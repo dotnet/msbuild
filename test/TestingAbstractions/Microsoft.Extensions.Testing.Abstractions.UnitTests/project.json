@@ -14,7 +14,7 @@
       "target": "project"
     },
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-140469-38",
+    "dotnet-test-xunit": "1.0.0-rc2-162081-13",
     "FluentAssertions": "4.2.2",
     "moq.netcore": "4.4.0-beta8"
   },

@@ -19,7 +19,7 @@
     "System.Net.Sockets": "4.1.0-rc2-24022",
     "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24022",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-140469-38"
+    "dotnet-test-xunit": "1.0.0-rc2-162081-13"
   },
   "frameworks": {
     "netcoreapp1.0": {
@@ -30,7 +30,7 @@
     }
   },
   "content": [
-    "../../TestAssets/TestProjects/ProjectWithTests/**/*",
+    "../../TestAssets/TestProjects/ProjectsWithTests/**/*",
     "../../TestAssets/TestProjects/global.json"
   ],
   "testRunner": "xunit"
