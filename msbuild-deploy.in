@@ -1,0 +1,4 @@
+#!/bin/sh
+ABSOLUTE_PATH=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)/`basename "${BASH_SOURCE[0]}"`
+MSBUILD_SRC_DIR=`dirname $ABSOLUTE_PATH`
+mono $MONO_OPTIONS $MSBUILD_SRC_DIR/MSBuild.exe $*
