@@ -2099,12 +2099,14 @@ namespace Microsoft.Build.Evaluation
             // 2. 1 or more project files *found* but ignored (like circular, self imports)
             foreach (var extensionPath in fallbackExtensionPaths)
             {
-                if (!Directory.Exists(extensionPath))
+                string extensionPathExpanded = _data.ExpandString(extensionPath);
+
+                if (!Directory.Exists(extensionPathExpanded))
                 {
                     continue;
                 }
 
-                var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPath);
+                var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPathExpanded);
                 if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
                             _projectRootElementCache))
                 {
@@ -2112,9 +2114,9 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 var newExpandedImportPath = importElement.Project;
-                newExpandedImportPath = newExpandedImportPath.Replace(extensionPropertyRefAsString, extensionPath);
+                newExpandedImportPath = newExpandedImportPath.Replace(extensionPropertyRefAsString, extensionPathExpanded);
 
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPath);
+                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
 
                 List<ProjectRootElement> projects;
                 var result = ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, newExpandedImportPath,
@@ -2523,10 +2525,13 @@ namespace Microsoft.Build.Evaluation
 
             string relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
 
-            var onlyFallbackSearchPaths = _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject);
+            var onlyFallbackSearchPaths =
+                _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject)
+                    .Select(s => _data.ExpandString(s))
+                    .ToList();
+
             string stringifiedListOfSearchPaths = StringifyList(onlyFallbackSearchPaths);
 
-#if FEATURE_SYSTEM_CONFIGURATION
             string configLocation = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
 
             ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation, "ImportedProjectFromExtensionsPathNotFoundFromAppConfig",
@@ -2535,13 +2540,6 @@ namespace Microsoft.Build.Evaluation
                                                         refKindInProject.MSBuildPropertyName,
                                                         stringifiedListOfSearchPaths,
                                                         configLocation);
-#else
-            ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation, "ImportedProjectFromExtensionsPathNotFound",
-                                                        importExpandedWithDefaultPath,
-                                                        relativeProjectPath,
-                                                        refKindInProject.MSBuildPropertyName,
-                                                        stringifiedListOfSearchPaths);
-#endif
         }
 
         /// <summary>
