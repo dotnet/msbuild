@@ -20,13 +20,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         public GivenThatWeWantToUseDotnetTestE2EInDesignTime()
         {
             var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets"));
-            var testInstance = testAssetManager.CreateTestInstance("ProjectWithTests").WithLockFiles();
+            var testInstance = testAssetManager.CreateTestInstance("ProjectWithTests");
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(
                 _projectFilePath,
                 null,
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+
+            // Restore the project again in the destination to resolve projects
+            // Since the lock file has project relative paths in it, those will be broken
+            // unless we re-restore
+            new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }.Execute().Should().Pass();
 
             _outputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "netcoreapp1.0");
             var buildCommand = new BuildCommand(_projectFilePath);

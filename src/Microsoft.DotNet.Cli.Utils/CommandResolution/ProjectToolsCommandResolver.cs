@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class ProjectToolsCommandResolver : ICommandResolver
     {
-        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetStandardApp15;
+        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
         
         private static readonly CommandResolutionStrategy s_commandResolutionStrategy = 
             CommandResolutionStrategy.ProjectToolsPackage;

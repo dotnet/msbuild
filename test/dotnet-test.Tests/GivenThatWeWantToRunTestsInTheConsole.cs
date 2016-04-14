@@ -21,13 +21,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets"));
             var testInstance =
-                testAssetManager.CreateTestInstance("ProjectWithTests", identifier: "ConsoleTests").WithLockFiles();
+                testAssetManager.CreateTestInstance("ProjectWithTests", identifier: "ConsoleTests");
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(
                 _projectFilePath,
                 null,
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+
+            // Restore the project again in the destination to resolve projects
+            // Since the lock file has project relative paths in it, those will be broken
+            // unless we re-restore
+            new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }.Execute().Should().Pass();
 
             _defaultOutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "netcoreapp1.0");
         }
