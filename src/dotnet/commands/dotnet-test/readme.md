@@ -1,5 +1,9 @@
+% DOTNET-TEST(1)
+% Microsoft Corporation dotnetclifeedback@microsoft.com
+% April 2016
+
 Dotnet Test, Adapters and Test Runners
-===============
+======================================
 
 This document covers the interactions between dotnet test, a potential adapter (like VS) and
 test runners (like [xunit](https://github.com/dotnet/coreclr.xunit)).

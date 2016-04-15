@@ -1,5 +1,5 @@
 % DOTNET(1)
-% Zlatko Knezevic zlakne@microsoft.com
+% Microsoft Corporation dotnetclifeedback@microsoft.com
 % January 2016
 
 # NAME
