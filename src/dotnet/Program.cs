@@ -6,26 +6,37 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test;
-using Microsoft.Extensions.PlatformAbstractions;
-using NuGet.Frameworks;
 using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
-using Microsoft.DotNet.Tools.Compiler.Native;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.Publish;
-using Microsoft.DotNet.Tools.Repl;
-using Microsoft.DotNet.Tools.Resgen;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.Run;
+using Microsoft.DotNet.Tools.Test;
+using Microsoft.Extensions.PlatformAbstractions;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
+        private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
+        {
+            ["build"] = BuildCommand.Run,
+            ["compile-csc"] = CompileCscCommand.Run,
+            ["help"] = HelpCommand.Run,
+            ["new"] = NewCommand.Run,
+            ["pack"] = PackCommand.Run,
+            ["projectmodel-server"] = ProjectModelServerCommand.Run,
+            ["publish"] = PublishCommand.Run,
+            ["restore"] = RestoreCommand.Run,
+            ["run"] = RunCommand.Run,
+            ["test"] = TestCommand.Run
+        };
+
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -100,23 +111,9 @@ namespace Microsoft.DotNet.Cli
                 command = "help";
             }
 
-            var builtIns = new Dictionary<string, Func<string[], int>>
-            {
-                ["build"] = BuildCommand.Run,
-                ["compile-csc"] = CompileCscCommand.Run,
-                ["help"] = HelpCommand.Run,
-                ["new"] = NewCommand.Run,
-                ["pack"] = PackCommand.Run,
-                ["projectmodel-server"] = ProjectModelServerCommand.Run,
-                ["publish"] = PublishCommand.Run,
-                ["restore"] = RestoreCommand.Run,
-                ["run"] = RunCommand.Run,
-                ["test"] = TestCommand.Run
-            };
-
             int exitCode;            
             Func<string[], int> builtIn;
-            if (builtIns.TryGetValue(command, out builtIn))
+            if (s_builtIns.TryGetValue(command, out builtIn))
             {
                 exitCode = builtIn(appArgs.ToArray());
             }
@@ -139,6 +136,11 @@ namespace Microsoft.DotNet.Cli
 
             return exitCode;
 
+        }
+
+        internal static bool TryGetBuiltInCommand(string commandName, out Func<string[], int> builtInCommand)
+        {
+            return s_builtIns.TryGetValue(commandName, out builtInCommand);
         }
 
         private static void PrintVersion()
