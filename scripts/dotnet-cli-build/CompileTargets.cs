@@ -37,6 +37,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
 
+        public static Crossgen CrossgenUtil = new Crossgen(CoreCLRVersion);
+
         private static string CoreHostBaseName => $"corehost{Constants.ExeSuffix}";
         private static string DotnetHostFxrBaseName => $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}";
         private static string HostPolicyBaseName => $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}";
@@ -343,7 +345,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             string SharedFrameworkSourceRoot = GenerateSharedFrameworkProject(c, SharedFrameworkTemplateSourceRoot, sharedFrameworkRid);
-            
+
             dotnetCli.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes", "--fallbacksource", Dirs.Corehost)
                 .WorkingDirectory(SharedFrameworkSourceRoot)
                 .Execute()
@@ -430,7 +432,7 @@ namespace Microsoft.DotNet.Cli.Build
                 File.Delete(Path.Combine(SharedFrameworkNameAndVersionRoot, "mscorlib.dll"));
             }
 
-            CrossgenSharedFx(c, SharedFrameworkNameAndVersionRoot);
+            CrossgenUtil.CrossgenDirectory(c, SharedFrameworkNameAndVersionRoot);
 
             // Generate .version file for sharedfx
             var version = SharedFrameworkNugetVersion;
@@ -530,45 +532,12 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(compilersDeps);
             File.Delete(compilersRuntimeConfig);
 
+            CrossgenUtil.CrossgenDirectory(c, outputDir);
+
             // Generate .version file
             var version = buildVersion.NuGetVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(outputDir, ".version"), content);
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CrossgenSharedFx(BuildTargetContext c, string pathToAssemblies)
-        {
-            // Check if we need to skip crossgen
-            if (string.Equals(Environment.GetEnvironmentVariable("DONT_CROSSGEN_SHAREDFRAMEWORK"), "1"))
-            {
-                c.Warn("Skipping crossgen for SharedFx because DONT_CROSSGEN_SHAREDFRAMEWORK is set to 1");
-                return c.Success();
-            }
-
-            foreach (var file in Directory.GetFiles(pathToAssemblies))
-            {
-                string fileName = Path.GetFileName(file);
-
-                if (fileName == "mscorlib.dll" || fileName == "mscorlib.ni.dll" || !HasMetadata(file))
-                {
-                    continue;
-                }
-
-                string tempPathName = Path.ChangeExtension(file, "readytorun");
-
-                // This is not always correct. The version of crossgen we need to pick up is whatever one was restored as part
-                // of the Microsoft.NETCore.Runtime.CoreCLR package that is part of the shared library. For now, the version hardcoded
-                // in CompileTargets and the one in the shared library project.json match and are updated in lock step, but long term
-                // we need to be able to look at the project.lock.json file and figure out what version of Microsoft.NETCore.Runtime.CoreCLR
-                // was used, and then select that version.
-                ExecSilent(Crossgen.GetCrossgenPathForVersion(CoreCLRVersion),
-                    "-readytorun", "-in", file, "-out", tempPathName, "-platform_assemblies_paths", pathToAssemblies);
-
-                File.Delete(file);
-                File.Move(tempPathName, file);
-            }
 
             return c.Success();
         }
@@ -603,7 +572,7 @@ namespace Microsoft.DotNet.Cli.Build
                 library.Replace(new JProperty(newName + '/' + version, library.Value));
             }
             using (var file = File.CreateText(depsFile))
-            using (var writer = new JsonTextWriter(file) { Formatting = Formatting.Indented})
+            using (var writer = new JsonTextWriter(file) { Formatting = Formatting.Indented })
             {
                 deps.WriteTo(writer);
             }
@@ -614,23 +583,6 @@ namespace Microsoft.DotNet.Cli.Build
             File.Delete(Path.Combine(path, $"{name}{Constants.ExeSuffix}"));
             File.Delete(Path.Combine(path, $"{name}.dll"));
             File.Delete(Path.Combine(path, $"{name}.pdb"));
-        }
-
-        private static bool HasMetadata(string pathToFile)
-        {
-            try
-            {
-                using (var inStream = File.OpenRead(pathToFile))
-                {
-                    using (var peReader = new PEReader(inStream))
-                    {
-                        return peReader.HasMetadata;
-                    }
-                }
-            }
-            catch (BadImageFormatException) { }
-
-            return false;
         }
     }
 }
