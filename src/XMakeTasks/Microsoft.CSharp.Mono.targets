@@ -1,0 +1,36 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.CSharp.Mono.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process specific for C# .NET projects.
+For example, it contains the step that actually calls the C# compiler.  The remainder
+of the build process is defined in Microsoft.Common.targets, which is imported by 
+this file.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!-- Using _CscToolExeTmp instead of CscToolExe directly here, as we don't want to override it
+             for !mono case -->
+        <_CscToolExeTmp Condition="'$(CscToolExe)' != ''">$(CscToolExe)</_CscToolExeTmp>
+        <_CscToolExeTmp Condition="'$(CscToolExeTmp)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">mcs.exe</_CscToolExeTmp>
+
+        <CscDebugFileExt Condition="'$(CscDebugFileExt)' == '' and ('$(_CscToolExeTmp)' == 'mcs' or '$(_CscToolExeTmp)' == 'mcs.exe')">.mdb</CscDebugFileExt>
+        <_DebugFileExt Condition="'$(CscDebugFileExt)' != ''">$(CscDebugFileExt)</_DebugFileExt>
+
+        <!-- Select a default C# compiler here, if unspecified, instead of in the Csc task, so that we can also
+             decide on the debug extension to be used. Don't do this for the roslyn/csc case as it depends on the
+             default being "unset".
+             -->
+        <CscToolExe Condition="'$(CscToolExe)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">mcs.exe</CscToolExe>
+
+        <UseSharedCompilation Condition="'$(UseSharedCompilation)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">false</UseSharedCompilation>
+    </PropertyGroup>
+</Project>
