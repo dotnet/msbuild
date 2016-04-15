@@ -9,7 +9,7 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24008"
+        "NETStandard.Library": "1.5.0-rc2-24015"
       }
     }
   },

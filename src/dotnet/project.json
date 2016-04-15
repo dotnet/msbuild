@@ -22,8 +22,8 @@
     },
     "NuGet.CommandLine.XPlat": "3.5.0-beta-1160",
     "Newtonsoft.Json": "7.0.1",
-    "System.Text.Encoding.CodePages": "4.0.1-rc2-24008",
-    "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24008",
+    "System.Text.Encoding.CodePages": "4.0.1-rc2-24015",
+    "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24015",
     "System.CommandLine": "0.1.0-e160323-1",
     "Microsoft.ApplicationInsights": "2.0.0",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
@@ -38,30 +38,30 @@
       "version": "1.0.0-rc2-20221"
     },
     "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
-    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24008",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-24008",
+    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24015",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-24015",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0-rc2-*"
     },
-    "System.Diagnostics.TraceSource": "4.0.0-rc2-24008",
-    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-24008",
-    "System.Resources.ReaderWriter": "4.0.0-rc2-24008",
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24008",
-    "System.Private.DataContractSerialization": "4.1.1-rc2-24008",
+    "System.Diagnostics.TraceSource": "4.0.0-rc2-24015",
+    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-24015",
+    "System.Resources.ReaderWriter": "4.0.0-rc2-24015",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24015",
+    "System.Private.DataContractSerialization": "4.1.1-rc2-24015",
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-24008",
+      "version": "4.0.0-rc2-24015",
       "exclude": "compile"
     }
   },
   "frameworks": {
     "netcoreapp1.0": {
-        "imports": [
-            "dnxcore50",
-            "netstandardapp1.5",
-            "portable-net45+win8",
-            "portable-net45+wp80+win8+wpa81+dnxcore50"
-        ]
+      "imports": [
+        "dnxcore50",
+        "netstandardapp1.5",
+        "portable-net45+win8",
+        "portable-net45+wp80+win8+wpa81+dnxcore50"
+      ]
     }
   }
 }
