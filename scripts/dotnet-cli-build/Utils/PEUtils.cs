@@ -5,7 +5,7 @@ using System.Reflection.PortableExecutable;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class PEUtils
+    public static class PEUtils
     {
         public static bool HasMetadata(string pathToFile)
         {

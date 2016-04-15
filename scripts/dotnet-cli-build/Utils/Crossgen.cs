@@ -73,6 +73,26 @@ namespace Microsoft.DotNet.Cli.Build
                 return;
             }
 
+            string sharedFxPath = c.BuildContext.Get<string>("SharedFrameworkPath");
+
+            // HACK
+            // The input directory can be a portable FAT app (example the CLI itself).
+            // In that case there can be RID specific managed dependencies which are not right next to the app binary (example System.Diagnostics.TraceSource).
+            // We need those dependencies during crossgen. For now we just pass all subdirectories of the input directory as input to crossgen.
+            // The right fix -
+            // If the assembly has deps.json then parse the json file to get all the dependencies, pass these dependencies as input to crossgen.
+            // else pass the current directory of assembly as input to crossgen.
+            var addtionalPaths = Directory.GetDirectories(pathToAssemblies, "*", SearchOption.AllDirectories).ToList();
+            var paths = new List<string>() { sharedFxPath, pathToAssemblies };
+            paths.AddRange(addtionalPaths);
+            var platformAssembliesPaths = string.Join(Path.PathSeparator.ToString(), paths.Distinct());
+
+            var env = new Dictionary<string, string>()
+            {
+                // disable partial ngen
+                { "COMPLUS_ZapDisable", "0" }
+            };
+
             foreach (var file in Directory.GetFiles(pathToAssemblies))
             {
                 string fileName = Path.GetFileName(file);
@@ -83,30 +103,12 @@ namespace Microsoft.DotNet.Cli.Build
                 }
 
                 string tempPathName = Path.ChangeExtension(file, "readytorun");
-                string sharedFxPath = c.BuildContext.Get<string>("SharedFrameworkPath");
-
-                // HACK
-                // The input directory can be a portable FAT app (example the CLI itself).
-                // In that case there can be RID specific managed dependencies which are not right next to the app binary (example System.Diagnostics.TraceSource).
-                // We need those dependencies during crossgen. For now we just pass all subdirectories of the input directory as input to crossgen.
-                // The right fix -
-                // If the assembly has deps.json then parse the json file to get all the dependencies. Pass these dependencies as input to crossgen.
-                // else pass the current directory of assembly as input to crossgen.
-                var addtionalPaths = Directory.GetDirectories(pathToAssemblies, "*", SearchOption.AllDirectories).ToList();
-                var paths = new List<string>() { sharedFxPath, pathToAssemblies };
-                paths.AddRange(addtionalPaths);
-                var platformAssembliesPaths = string.Join(";", paths.Distinct());
 
                 IList<string> crossgenArgs = new List<string> {
                     "-readytorun", "-in", file, "-out", tempPathName,
                     "-platform_assemblies_paths", platformAssembliesPaths
                 };
 
-                var env = new Dictionary<string, string>()
-                {
-                    // disable partial ngen
-                    { "COMPLUS_ZapDisable", "0" }
-                };
                 ExecSilent(_crossGenPath, crossgenArgs, env);
 
                 File.Delete(file);

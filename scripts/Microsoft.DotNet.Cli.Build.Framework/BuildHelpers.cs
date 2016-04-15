@@ -36,11 +36,6 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                 cmd.CaptureStdErr().CaptureStdOut();
             }
 
-            if (env == null)
-            {
-                env = new Dictionary<string, string>();
-            }
-
             var result = cmd.Environment(env).Execute();
 
             result.EnsureSuccessful();
