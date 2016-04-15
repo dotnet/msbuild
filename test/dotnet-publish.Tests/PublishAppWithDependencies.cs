@@ -42,5 +42,45 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 .Should()
                 .HaveFile("config.xml");
         }
+
+        [Fact]
+        public void PublishTestAppWithReferencesToResources()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("ResourcesTests")
+                .WithLockFiles();
+
+            var projectRoot = Path.Combine(testInstance.TestRoot, "TestApp");
+
+            var publishCommand = new PublishCommand(projectRoot);
+            var publishResult = publishCommand.Execute();
+
+            publishResult.Should().Pass();
+
+            var publishDir = publishCommand.GetOutputDirectory(portable: true);
+
+            publishDir.Should().HaveFiles(new[]
+            {
+                "TestApp.dll",
+                "TestApp.deps.json"
+            });
+
+            foreach (var culture in new[] { "de", "es", "fr", "it", "ja", "ko", "ru", "zh-Hans", "zh-Hant" })
+            {
+                var cultureDir = publishDir.Sub(culture);
+
+                // Provided by packages
+                cultureDir.Should().HaveFiles(new[] {
+                    "Microsoft.Data.Edm.resources.dll",
+                    "Microsoft.Data.OData.resources.dll",
+                    "System.Spatial.resources.dll"
+                });
+
+                // Check for the project-to-project one
+                if (culture == "fr")
+                {
+                    cultureDir.Should().HaveFile("TestLibraryWithResources.resources.dll");
+                }
+            }
+        }
     }
 }

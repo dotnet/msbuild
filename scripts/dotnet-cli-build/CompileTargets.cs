@@ -343,7 +343,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             string SharedFrameworkSourceRoot = GenerateSharedFrameworkProject(c, SharedFrameworkTemplateSourceRoot, sharedFrameworkRid);
-            
+
             dotnetCli.Restore("--verbosity", "verbose", "--disable-parallel", "--infer-runtimes", "--fallbacksource", Dirs.Corehost)
                 .WorkingDirectory(SharedFrameworkSourceRoot)
                 .Execute()
@@ -358,12 +358,9 @@ namespace Microsoft.DotNet.Cli.Build
                 Utils.DeleteDirectory(SharedFrameworkNameAndVersionRoot);
             }
 
-            string publishFramework = "dnxcore50"; // Temporary, use "netcoreapp" when we update nuget.
-
             dotnetCli.Publish(
                 "--output", SharedFrameworkNameAndVersionRoot,
                 "-r", sharedFrameworkRid,
-                "-f", publishFramework,
                 SharedFrameworkSourceRoot).Execute().EnsureSuccessful();
 
             // Clean up artifacts that dotnet-publish generates which we don't need

@@ -147,6 +147,16 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 var runtimeAssetsToCopy = export.RuntimeAssets.Where(a => ShouldCopyExportRuntimeAsset(context, buildOutputPaths, export, a));
                 runtimeAssetsToCopy.StructuredCopyTo(outputPath, outputPaths.IntermediateOutputDirectoryPath);
+
+                foreach(var resourceAsset in export.ResourceAssemblies)
+                {
+                    var dir = Path.Combine(outputPath, resourceAsset.Locale);
+                    if(!Directory.Exists(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                    File.Copy(resourceAsset.Asset.ResolvedPath, Path.Combine(dir, resourceAsset.Asset.FileName), overwrite: true);
+                }
             }
 
             if (context.ProjectFile.HasRuntimeOutput(configuration) && !context.TargetFramework.IsDesktop())
@@ -281,7 +291,7 @@ namespace Microsoft.DotNet.Tools.Publish
             {
                 Directory.CreateDirectory(refsPath);
             }
- 
+
             // Do not copy compilation assembly if it's in runtime assemblies
             var runtimeAssemblies = new HashSet<LibraryAsset>(export.RuntimeAssemblyGroups.GetDefaultAssets());
             foreach (var compilationAssembly in export.CompilationAssemblies)
@@ -343,7 +353,7 @@ namespace Microsoft.DotNet.Tools.Publish
                     return hostFile;
                 }
             }
-            
+
             Reporter.Verbose.WriteLine($"failed to resolve published host in: {outputPath}");
             return null;
         }
@@ -416,12 +426,12 @@ namespace Microsoft.DotNet.Tools.Publish
                 ProjectContext.CreateContextForEachFramework(projectPath) :
                 new[] { ProjectContext.Create(projectPath, framework) };
 
-            var runtimes = !string.IsNullOrEmpty(runtime) ? 
+            var runtimes = !string.IsNullOrEmpty(runtime) ?
                 new [] {runtime} :
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
             return allContexts.Select(c => c.CreateRuntimeContext(runtimes));
         }
-        
+
         private static void CopyContents(ProjectContext context, string outputPath)
         {
             var contentFiles = context.ProjectFile.Files.GetContentFiles();

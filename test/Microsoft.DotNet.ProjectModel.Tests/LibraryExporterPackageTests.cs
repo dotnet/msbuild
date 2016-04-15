@@ -127,6 +127,34 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
+        public void ExportsPackageResourceAssemblies()
+        {
+            var description = CreateDescription(
+                new LockFileTargetLibrary()
+                {
+                    ResourceAssemblies = new List<LockFileItem>()
+                    {
+                        new LockFileItem("resources/en-US/Res.dll", new Dictionary<string, string>() { { "locale", "en-US"} }),
+                        new LockFileItem("resources/ru-RU/Res.dll", new Dictionary<string, string>() { { "locale", "ru-RU" } }),
+                    }
+                });
+
+            var result = ExportSingle(description);
+            result.ResourceAssemblies.Should().HaveCount(2);
+            var asset = result.ResourceAssemblies.Should().Contain(g => g.Locale == "en-US").Subject.Asset;
+            asset.Name.Should().Be("Res");
+            asset.Transform.Should().BeNull();
+            asset.RelativePath.Should().Be("resources/en-US/Res.dll");
+            asset.ResolvedPath.Should().Be(Path.Combine(PackagePath, "resources/en-US/Res.dll"));
+
+            asset = result.ResourceAssemblies.Should().Contain(g => g.Locale == "ru-RU").Subject.Asset;
+            asset.Name.Should().Be("Res");
+            asset.Transform.Should().BeNull();
+            asset.RelativePath.Should().Be("resources/ru-RU/Res.dll");
+            asset.ResolvedPath.Should().Be(Path.Combine(PackagePath, "resources/ru-RU/Res.dll"));
+        }
+
+        [Fact]
         public void ExportsSources()
         {
             var description = CreateDescription(

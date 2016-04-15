@@ -97,6 +97,16 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             {
                 libraryExport.RuntimeAssemblyGroups.GetDefaultAssets().CopyTo(_runtimeOutputPath);
                 libraryExport.NativeLibraryGroups.GetDefaultAssets().CopyTo(_runtimeOutputPath);
+
+                foreach(var group in libraryExport.ResourceAssemblies.GroupBy(r => r.Locale))
+                {
+                    var localeSpecificDir = Path.Combine(_runtimeOutputPath, group.Key);
+                    if(!Directory.Exists(localeSpecificDir))
+                    {
+                        Directory.CreateDirectory(localeSpecificDir);
+                    }
+                    group.Select(r => r.Asset).CopyTo(localeSpecificDir);
+                }
             }
         }
 

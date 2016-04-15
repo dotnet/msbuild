@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,6 +9,7 @@ using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
 using Xunit;
 
@@ -208,6 +210,41 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 else
                 {
                     targetFramework.Should().BeNull();
+                }
+            }
+        }
+
+        [Fact]
+        public void PackageReferenceWithResourcesTest()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("ResourcesTests")
+                                                .WithLockFiles();
+
+            var projectRoot = Path.Combine(testInstance.TestRoot, "TestApp");
+
+            var cmd = new BuildCommand(projectRoot);
+            var result = cmd.Execute();
+            result.Should().Pass();
+
+            var outputDir = new DirectoryInfo(Path.Combine(projectRoot, "bin", "Debug", "netcoreapp1.0"));
+
+            outputDir.Should().HaveFile("TestLibraryWithResources.dll");
+            outputDir.Sub("fr").Should().HaveFile("TestLibraryWithResources.resources.dll");
+
+            var depsJson = JObject.Parse(File.ReadAllText(Path.Combine(outputDir.FullName, $"{Path.GetFileNameWithoutExtension(cmd.GetOutputExecutableName())}.deps.json")));
+
+            foreach (var library in new[] { Tuple.Create("Microsoft.Data.OData", "5.6.4"), Tuple.Create("TestLibraryWithResources", "1.0.0") })
+            {
+                var resources = depsJson["targets"][".NETCoreApp,Version=v1.0"][library.Item1 + "/" + library.Item2]["resources"];
+
+                resources.Should().NotBeNull();
+
+                foreach (var item in resources.Children<JProperty>())
+                {
+                    var locale = item.Value["locale"];
+                    locale.Should().NotBeNull();
+
+                    item.Name.Should().EndWith($"{locale}/{library.Item1}.resources.dll");
                 }
             }
         }

@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public string OutputExtension { get; }
 
-        public virtual IEnumerable<string> Resources()
+        public virtual IEnumerable<ResourceFile> Resources()
         {
             var resourceNames = Project.Files.ResourceFiles
                 .Select(f => ResourceUtility.GetResourceCultureName(f.Key))
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             foreach (var resourceName in resourceNames)
             {
-                yield return Path.Combine(BasePath, resourceName, Project.Name + ".resources" + FileNameSuffixes.DotNet.DynamicLib);
+                yield return new ResourceFile(Path.Combine(BasePath, resourceName, Project.Name + ".resources" + FileNameSuffixes.DotNet.DynamicLib), resourceName);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
             foreach (var resource in Resources())
             {
-                yield return resource;
+                yield return resource.Path;
             }
         }
     }
