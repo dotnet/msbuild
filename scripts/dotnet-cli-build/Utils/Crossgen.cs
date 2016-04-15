@@ -99,7 +99,12 @@ namespace Microsoft.DotNet.Cli.Build
                     "-platform_assemblies_paths", $"{sharedFxPath};{pathToAssemblies};{addtionalPaths}"
                 };
 
-                ExecSilent(_crossGenPath, crossgenArgs);
+                var env = new Dictionary<string, string>()
+                {
+                    // disable partial ngen
+                    { "COMPLUS_ZapDisable", "0" }
+                };
+                ExecSilent(_crossGenPath, crossgenArgs, env);
 
                 File.Delete(file);
                 File.Move(tempPathName, file);
