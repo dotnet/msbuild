@@ -11,8 +11,7 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetName,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetVersion,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkUpgradeCode,
-    [Parameter(Mandatory=$true)][string]$Architecture,
-    [Parameter(Mandatory=$true)][string]$ReleaseSuffix
+    [Parameter(Mandatory=$true)][string]$Architecture
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -30,7 +29,6 @@ function RunCandleForBundle
         -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
-        -dReleaseSuffix="$ReleaseSuffix" `
         -dSharedFXMsiSourcePath="$SharedFxMSIFile" `
         -dSharedHostMsiSourcePath="$SharedHostMSIFile" `
         -dFrameworkName="$SharedFrameworkNugetName" `

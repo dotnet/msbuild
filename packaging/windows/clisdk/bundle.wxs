@@ -23,10 +23,6 @@
 
     <swid:Tag Regid="microsoft.com" InstallPath="[DOTNETHOME]" />
 
-    <Variable Name="BuildType" Value="$(var.BuildType)" />
-    <Variable Name="DisplayVersion" Value="$(var.DisplayVersion)" />
-    <Variable Name="ReleaseSuffix" Value="$(var.ReleaseSuffix)" />
-
     <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles6432Folder]dotnet" bal:Overridable="yes" />
 
     <util:RegistrySearch Id="PreviousInstallFolderSearch" Root="HKLM" Key="SOFTWARE\dotnet\Setup" Value="InstallDir" Variable="PreviousInstallFolder" />

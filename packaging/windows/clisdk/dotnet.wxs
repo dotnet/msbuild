@@ -28,8 +28,6 @@
         <UIRef Id="WixUI_InstallDir" />
 
         <CustomActionRef Id="WixBroadcastEnvironmentChange" />
-
-        <PropertyRef Id="INSTALLEDCLIBUILDTYPE"/>
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">

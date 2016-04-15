@@ -10,7 +10,6 @@
           <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
           <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
           <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
-          <RegistryValue Action="write" Name="BuildType" Type="string" Value="$(var.BuildType)" />
         </RegistryKey>
       </Component>
       <?endif?>
@@ -21,7 +20,6 @@
           <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
           <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
           <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
-          <RegistryValue Action="write" Name="BuildType" Type="string" Value="$(var.BuildType)" />
         </RegistryKey>
       </Component>
     </ComponentGroup>
