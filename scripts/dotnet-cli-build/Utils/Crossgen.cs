@@ -92,11 +92,14 @@ namespace Microsoft.DotNet.Cli.Build
                 // The right fix -
                 // If the assembly has deps.json then parse the json file to get all the dependencies. Pass these dependencies as input to crossgen.
                 // else pass the current directory of assembly as input to crossgen.
-                string addtionalPaths = string.Join(";", Directory.GetDirectories(pathToAssemblies, "*", SearchOption.AllDirectories));
+                var addtionalPaths = Directory.GetDirectories(pathToAssemblies, "*", SearchOption.AllDirectories).ToList();
+                var paths = new List<string>() { sharedFxPath, pathToAssemblies };
+                paths.AddRange(addtionalPaths);
+                var platformAssembliesPaths = string.Join(";", paths.Distinct());
 
                 IList<string> crossgenArgs = new List<string> {
                     "-readytorun", "-in", file, "-out", tempPathName,
-                    "-platform_assemblies_paths", $"{sharedFxPath};{pathToAssemblies};{addtionalPaths}"
+                    "-platform_assemblies_paths", platformAssembliesPaths
                 };
 
                 var env = new Dictionary<string, string>()
