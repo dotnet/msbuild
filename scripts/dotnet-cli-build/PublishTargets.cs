@@ -386,6 +386,7 @@ namespace Microsoft.DotNet.Cli.Build
                 {"osx.10.10-x64", false },
                 {"rhel.7-x64", false },
                 {"ubuntu.14.04-x64", false },
+                {"debian.8-x64", false },
             };
 
             var buildFiles = AzurePublisherTool.ListBlobs(hostBlob + buildVersion);
