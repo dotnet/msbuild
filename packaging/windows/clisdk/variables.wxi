@@ -4,10 +4,10 @@
   <?define Servicing_Key_SPIndex   =   "0" ?>
   <?define Servicing_Key_SPName   =   "Beta" ?>
   <?define Dotnet_ProductVersion   =   "$(var.BuildVersion)" ?>
-  <?define Dotnet_DisplayVersion   =   "1.0" ?>
+  <?define Dotnet_DisplayVersion   =   "$(var.DisplayVersion)" ?>
   <?define Dotnet_BuildVersion   =   "$(var.BuildVersion)" ?>
   <?define Manufacturer     =   "Microsoft Corporation" ?>
-  <?define ProductName      =   "Microsoft .NET Core CLI for Windows ($(var.DisplayVersion))" ?>
+  <?define ProductName      =   "Microsoft .NET Core CLI for Windows ($(var.NugetVersion))" ?>
   <?define ProductLanguage  =   "1033" ?>
   <?define ProductVersion   =   "$(var.Dotnet_ProductVersion)" ?>
   <?define ProductFamily    =   "dotnet" ?>
