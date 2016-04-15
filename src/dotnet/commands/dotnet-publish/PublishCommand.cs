@@ -412,6 +412,16 @@ namespace Microsoft.DotNet.Tools.Publish
 
         private IEnumerable<ProjectContext> SelectContexts(string projectPath, NuGetFramework framework, string runtime)
         {
+            if (projectPath.EndsWith("project.json"))
+            {
+                if (File.Exists(projectPath) == false)
+                    throw new InvalidProjectException($"'{projectPath}' does not exist");
+            }
+            else if (File.Exists(Path.Combine(projectPath, "project.json")) == false)
+            {
+                throw new InvalidProjectException($"'{projectPath}' does not contain a project.json file");
+            }
+
             var allContexts = framework == null ?
                 ProjectContext.CreateContextForEachFramework(projectPath) :
                 new[] { ProjectContext.Create(projectPath, framework) };
