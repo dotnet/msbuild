@@ -5,12 +5,12 @@
     "netstandardapp1.5": {
       "imports": "dnxcore50",
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24008"
+        "NETStandard.Library": "1.5.0-rc2-24015"
       }
     },
     "net451": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.1-rc2-24008"
+        "Microsoft.CSharp": "4.0.1-rc2-24015"
       }
     }
   }

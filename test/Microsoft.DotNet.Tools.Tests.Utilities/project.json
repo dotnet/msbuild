@@ -9,9 +9,9 @@
       "type": "platform",
       "version": "1.0.0-rc2-*"
     },
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24008",
-    "System.Collections.Immutable": "1.2.0-rc2-24008",
-    "System.Net.NetworkInformation": "4.1.0-rc2-24008",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24015",
+    "System.Collections.Immutable": "1.2.0-rc2-24015",
+    "System.Net.NetworkInformation": "4.1.0-rc2-24015",
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-140469-38",

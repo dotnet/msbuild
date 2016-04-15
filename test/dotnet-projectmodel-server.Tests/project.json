@@ -8,7 +8,7 @@
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-24008",
+      "version": "4.0.0-rc2-24015",
       "exclude": "Compile"
     },
     "Microsoft.DotNet.Tools.Tests.Utilities": {
@@ -19,7 +19,7 @@
     },
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-dev-140469-38",
-    "System.Net.NameResolution": "4.0.0-rc2-24008"
+    "System.Net.NameResolution": "4.0.0-rc2-24015"
   },
   "frameworks": {
     "netcoreapp1.0": {
