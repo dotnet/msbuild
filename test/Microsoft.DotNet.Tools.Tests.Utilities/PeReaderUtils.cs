@@ -13,12 +13,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         public static bool IsCrossgened(this PEReader peReader)
         {
+            const int CROSSGEN_FLAG = 4;
             bool isCrossgened = false;
 
             if (peReader.HasMetadata)
             {
                 // 4 is the magic numbers that is set in the CLR header's flags when crossgened.
-                isCrossgened = (int)peReader.PEHeaders.CorHeader.Flags == 4;
+                isCrossgened = ((int)peReader.PEHeaders.CorHeader.Flags & CROSSGEN_FLAG) == CROSSGEN_FLAG;
             }
 
             return isCrossgened;
