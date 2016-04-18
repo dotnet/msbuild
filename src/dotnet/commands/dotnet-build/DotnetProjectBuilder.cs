@@ -21,14 +21,17 @@ namespace Microsoft.DotNet.Tools.Build
         private readonly CompilerIOManager _compilerIOManager;
         private readonly ScriptRunner _scriptRunner;
         private readonly DotNetCommandFactory _commandFactory;
+        private readonly IncrementalManager _incrementalManager;
 
         public DotNetProjectBuilder(BuildCommandApp args)
         {
             _args = args;
+
             _preconditionManager = new IncrementalPreconditionManager(
                 args.ShouldPrintIncrementalPreconditions,
                 args.ShouldNotUseIncrementality,
                 args.ShouldSkipDependencies);
+
             _compilerIOManager = new CompilerIOManager(
                 args.ConfigValue,
                 args.OutputValue,
@@ -36,7 +39,19 @@ namespace Microsoft.DotNet.Tools.Build
                 args.GetRuntimes(),
                 args.Workspace
                 );
+
+            _incrementalManager = new IncrementalManager(
+                this,
+                _compilerIOManager,
+                _preconditionManager,
+                _args.ShouldSkipDependencies,
+                _args.ConfigValue,
+                _args.BuildBasePathValue,
+                _args.OutputValue
+                );
+
             _scriptRunner = new ScriptRunner();
+
             _commandFactory = new DotNetCommandFactory();
         }
 
@@ -52,7 +67,7 @@ namespace Microsoft.DotNet.Tools.Build
                     Directory.CreateDirectory(parentDirectory);
                 }
 
-                string content = ComputeCurrentVersionFileData();
+                string content = DotnetFiles.ReadAndInterpretVersionFile();
 
                 File.WriteAllText(projectVersionFile, content);
             }
@@ -60,14 +75,6 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 Reporter.Verbose.WriteLine($"Project {project.GetDisplayName()} was not stamped with a CLI version because the version file does not exist: {DotnetFiles.VersionFile}");
             }
-        }
-
-        private static string ComputeCurrentVersionFileData()
-        {
-            var content = File.ReadAllText(DotnetFiles.VersionFile);
-            content += Environment.NewLine;
-            content += PlatformServices.Default.Runtime.GetRuntimeIdentifier();
-            return content;
         }
 
         private void PrintSummary(ProjectGraphNode projectNode, bool success)
@@ -83,17 +90,6 @@ namespace Microsoft.DotNet.Tools.Build
             Reporter.Output.WriteLine();
         }
 
-        private void CreateOutputDirectories()
-        {
-            if (!string.IsNullOrEmpty(_args.OutputValue))
-            {
-                Directory.CreateDirectory(_args.OutputValue);
-            }
-            if (!string.IsNullOrEmpty(_args.BuildBasePathValue))
-            {
-                Directory.CreateDirectory(_args.BuildBasePathValue);
-            }
-        }
 
         private void CopyCompilationOutput(OutputPaths outputPaths)
         {
@@ -151,118 +147,47 @@ namespace Microsoft.DotNet.Tools.Build
             finally
             {
                 StampProjectWithSDKVersion(projectNode.ProjectContext);
+                _incrementalManager.CacheIncrementalState(projectNode);
             }
         }
 
         protected override void ProjectSkiped(ProjectGraphNode projectNode)
         {
             StampProjectWithSDKVersion(projectNode.ProjectContext);
-        }
-
-        private bool CLIChangedSinceLastCompilation(ProjectContext project)
-        {
-            var currentVersionFile = DotnetFiles.VersionFile;
-            var versionFileFromLastCompile = project.GetSDKVersionFile(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
-
-            if (!File.Exists(currentVersionFile))
-            {
-                // this CLI does not have a version file; cannot tell if CLI changed
-                return false;
-            }
-
-            if (!File.Exists(versionFileFromLastCompile))
-            {
-                // this is the first compilation; cannot tell if CLI changed
-                return false;
-            }
-
-            var currentContent = ComputeCurrentVersionFileData();
-
-            var versionsAreEqual = string.Equals(currentContent, File.ReadAllText(versionFileFromLastCompile), StringComparison.OrdinalIgnoreCase);
-
-            return !versionsAreEqual;
+            _incrementalManager.CacheIncrementalState(projectNode);
         }
 
         protected override bool NeedsRebuilding(ProjectGraphNode graphNode)
         {
-            var project = graphNode.ProjectContext;
-            if (_args.ShouldNotUseIncrementality)
-            {
-                return true;
-            }
-            if (!_args.ShouldSkipDependencies &&
-                graphNode.Dependencies.Any(d => GetCompilationResult(d) != CompilationResult.IncrementalSkip))
-            {
-                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because some of it's dependencies changed");
-                return true;
-            }
-            var preconditions = _preconditionManager.GetIncrementalPreconditions(graphNode);
-            if (preconditions.PreconditionsDetected())
-            {
-                return true;
-            }
+            var result = _incrementalManager.NeedsRebuilding(graphNode);
 
-            if (CLIChangedSinceLastCompilation(project))
+            PrintIncrementalResult(graphNode.ProjectContext.GetDisplayName(), result);
+
+            return result.NeedsRebuilding;
+        }
+
+        private void PrintIncrementalResult(string projectName, IncrementalResult result)
+        {
+            if (result.NeedsRebuilding)
             {
-                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because the version or bitness of the CLI changed since the last build");
-                return true;
+                Reporter.Output.WriteLine($"Project {projectName} will be compiled because {result.Reason}");
+                PrintIncrementalItems(result);
             }
-
-            var compilerIO = _compilerIOManager.GetCompileIO(graphNode);
-
-            // rebuild if empty inputs / outputs
-            if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
+            else
             {
-                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because it either has empty inputs or outputs");
-                return true;
+                Reporter.Output.WriteLine($"Project {projectName} was previously compiled. Skipping compilation.");
             }
+        }
 
-            //rebuild if missing inputs / outputs
-            if (_compilerIOManager.AnyMissingIO(project, compilerIO.Outputs, "outputs") || _compilerIOManager.AnyMissingIO(project, compilerIO.Inputs, "inputs"))
+        private static void PrintIncrementalItems(IncrementalResult result)
+        {
+            if (Reporter.IsVerbose)
             {
-                return true;
-            }
-
-            // find the output with the earliest write time
-            var minOutputPath = compilerIO.Outputs.First();
-            var minDateUtc = File.GetLastWriteTimeUtc(minOutputPath);
-
-            foreach (var outputPath in compilerIO.Outputs)
-            {
-                if (File.GetLastWriteTimeUtc(outputPath) >= minDateUtc)
+                foreach (var item in result.Items)
                 {
-                    continue;
+                    Reporter.Verbose.WriteLine($"\t{item}");
                 }
-
-                minDateUtc = File.GetLastWriteTimeUtc(outputPath);
-                minOutputPath = outputPath;
             }
-
-            // find inputs that are older than the earliest output
-            var newInputs = compilerIO.Inputs.FindAll(p => File.GetLastWriteTimeUtc(p) >= minDateUtc);
-
-            if (!newInputs.Any())
-            {
-                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} was previously compiled. Skipping compilation.");
-                return false;
-            }
-
-            Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because some of its inputs were newer than its oldest output.");
-            Reporter.Verbose.WriteLine();
-            Reporter.Verbose.WriteLine($" Oldest output item:");
-            Reporter.Verbose.WriteLine($"  {minDateUtc.ToLocalTime()}: {minOutputPath}");
-            Reporter.Verbose.WriteLine();
-
-            Reporter.Verbose.WriteLine($" Inputs newer than the oldest output item:");
-
-            foreach (var newInput in newInputs)
-            {
-                Reporter.Verbose.WriteLine($"  {File.GetLastWriteTime(newInput)}: {newInput}");
-            }
-
-            Reporter.Verbose.WriteLine();
-
-            return true;
         }
     }
 }

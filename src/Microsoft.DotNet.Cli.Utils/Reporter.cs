@@ -37,11 +37,13 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 Output = new Reporter(AnsiConsole.GetOutput());
                 Error = new Reporter(AnsiConsole.GetError());
-                Verbose = CommandContext.IsVerbose() ?
+                Verbose = IsVerbose ?
                     new Reporter(AnsiConsole.GetOutput()) :
                     NullReporter;
             }
         }
+
+        public static bool IsVerbose => CommandContext.IsVerbose();
 
         public void WriteLine(string message)
         {
