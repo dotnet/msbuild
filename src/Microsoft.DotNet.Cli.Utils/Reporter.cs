@@ -14,16 +14,34 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private readonly AnsiConsole _console;
 
+        static Reporter()
+        {
+            Reset();
+        }
+
         private Reporter(AnsiConsole console)
         {
             _console = console;
         }
 
-        public static Reporter Output { get; } = new Reporter(AnsiConsole.GetOutput());
-        public static Reporter Error { get; } = new Reporter(AnsiConsole.GetError());
-        public static Reporter Verbose { get; } = CommandContext.IsVerbose() ? 
-            new Reporter(AnsiConsole.GetOutput()) : 
-            NullReporter;
+        public static Reporter Output { get; private set; }
+        public static Reporter Error { get; private set; }
+        public static Reporter Verbose { get; private set; }
+
+        /// <summary>
+        /// Resets the Reporters to write to the current Console Out/Error.
+        /// </summary>
+        public static void Reset()
+        {
+            lock (_lock)
+            {
+                Output = new Reporter(AnsiConsole.GetOutput());
+                Error = new Reporter(AnsiConsole.GetError());
+                Verbose = CommandContext.IsVerbose() ?
+                    new Reporter(AnsiConsole.GetOutput()) :
+                    NullReporter;
+            }
+        }
 
         public void WriteLine(string message)
         {
