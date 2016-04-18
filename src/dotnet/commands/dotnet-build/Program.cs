@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-
-using Microsoft.DotNet.Cli.Utils;
+using System.Threading.Tasks;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Compiler;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -36,11 +36,10 @@ namespace Microsoft.DotNet.Tools.Build
 
         private static bool OnExecute(List<ProjectContext> contexts, CompilerCommandApp args)
         {
-            var compileContexts = contexts.Select(context => new CompileContext(context, (BuilderCommandApp)args)).ToList();
-
-            var incrementalSafe = compileContexts.All(c => c.IsSafeForIncrementalCompilation);
-
-            return compileContexts.All(c => c.Compile(incrementalSafe));
+            var graphCollector = new ProjectGraphCollector((project, target) => ProjectContext.Create(project, target));
+            var graph = graphCollector.Collect(contexts).ToArray();
+            var builder = new DotNetProjectBuilder((BuilderCommandApp) args);
+            return builder.Build(graph).All(r => r != CompilationResult.Failure);
         }
     }
 }

@@ -18,7 +18,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Reflection.PortableExecutable;
 
-namespace Microsoft.Dotnet.Cli.Compiler.Common
+namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     public class Executable
     {
