@@ -11,6 +11,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public static class PeReaderUtils
     {
+        public static bool IsCrossgened(this PEReader peReader)
+        {
+            bool isCrossgened = false;
+
+            if (peReader.HasMetadata)
+            {
+                // 4 is the magic numbers that is set in the CLR header's flags when crossgened.
+                isCrossgened = (int)peReader.PEHeaders.CorHeader.Flags == 4;
+            }
+
+            return isCrossgened;
+        }
+
         public static string GetAssemblyAttributeValue(string assemblyPath, string attributeName)
         {
             if (!File.Exists(assemblyPath))
