@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-*"
+  },
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "frameworks": {
+    "net451": {}
+  }
+}
