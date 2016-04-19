@@ -296,13 +296,14 @@ namespace Microsoft.Build.Evaluation
         {
             var msbuildExeConfig = FileUtilities.CurrentExecutableConfigurationFilePath;
 
-            // When running in VS, try to open MSBuild.exe.config first (if it exists)
-            if (FileUtilities.RunningInVisualStudio && File.Exists(msbuildExeConfig))
+            // When running from the command-line or from VS, use the msbuild.exe.config file
+            if (!FileUtilities.RunningTests && File.Exists(msbuildExeConfig))
             {
                 var configFile = new ExeConfigurationFileMap { ExeConfigFilename = msbuildExeConfig };
                 return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
             }
 
+            // When running tests or the expected config file doesn't exist, fall-back to default
             return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
         }
     }
