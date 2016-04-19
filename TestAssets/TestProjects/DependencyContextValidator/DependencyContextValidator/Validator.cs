@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.DependencyModel
                         Console.WriteLine($"Compilation {compilationLibrary.Name}:{Path.GetFileName(resolvedPath)}");
                         if (!File.Exists(resolvedPath))
                         {
-                            Error($"Compilataion library resolved to non existent path {resolvedPath}");
+                            Error($"Compilation library resolved to non existent path {resolvedPath}");
                         }
                     }
                 }

@@ -112,16 +112,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                        $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"; ;
         }
 		
-		public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject)
+		public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject, string frameworkFullName)
         {
-            _commandResult.StdOut.Should().Contain($"Project {skippedProject} (.NETStandardApp,Version=v1.5) was previously compiled. Skipping compilation.");
+            _commandResult.StdOut.Should().Contain($"Project {skippedProject} ({frameworkFullName}) was previously compiled. Skipping compilation.");
 
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
-        public AndConstraint<CommandResultAssertions> HaveCompiledProject(string compiledProject)
+        public AndConstraint<CommandResultAssertions> HaveCompiledProject(string compiledProject, string frameworkFullName)
         {
-            _commandResult.StdOut.Should().Contain($"Project {compiledProject} (.NETStandardApp,Version=v1.5) will be compiled");
+            _commandResult.StdOut.Should().Contain($"Project {compiledProject} ({frameworkFullName}) will be compiled");
 
             return new AndConstraint<CommandResultAssertions>(this);
         }

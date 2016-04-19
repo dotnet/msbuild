@@ -18,7 +18,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     /// </summary>
     public abstract class TestBase : IDisposable
     {
-        protected const string DefaultFramework = "netstandardapp1.5";
+        protected const string DefaultFramework = "netcoreapp1.0";
+        protected const string DefaultLibraryFramework = "netstandard1.5";
         private TempRoot _temp;
         private static TestAssetsManager s_testsAssetsMgr;
         private static string s_repoRoot;

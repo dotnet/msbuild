@@ -4,18 +4,16 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-24018",
+    "Microsoft.NETCore.App": "1.0.0-rc2-*",
     "dotnet-hello": {
       "version": "1.0.0",
       "target": "package"
     }
   },
   "frameworks": {
-    "netstandardapp1.5": {
-      "imports": "dnxcore50"
-    }
+    "netcoreapp1.0": { }
   },
-  "testRunner": "must-be-specified-to-generate-deps",
+
   "tools": {
     "dotnet-portable": {
       "version": "1.0.0",

@@ -19,9 +19,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
         public GivenThatWeWantToRunTestsInTheConsole()
         {
-            var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets"));
             var testInstance =
-                testAssetManager.CreateTestInstance("ProjectWithTests", identifier: "ConsoleTests");
+                TestAssetsManager.CreateTestInstance("ProjectWithTests", identifier: "ConsoleTests");
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(

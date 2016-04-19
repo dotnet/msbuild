@@ -23,6 +23,40 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             _testProjectsRoot = Path.Combine(RepoRoot, "TestAssets", "TestProjects");
         }
 
+        private static readonly dynamic[] CrossPublishTestData = new[]
+        {
+            new 
+            { 
+                Rid="centos.7-x64",
+                HostExtension="", 
+                ExpectedArtifacts=new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" } 
+            }, 
+            new 
+            { 
+                Rid="rhel.7.2-x64",
+                HostExtension="", 
+                ExpectedArtifacts=new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" } 
+            }, 
+            new 
+            { 
+                Rid="ubuntu.14.04-x64",
+                HostExtension="", 
+                ExpectedArtifacts=new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" } 
+            }, 
+            new 
+            { 
+                Rid="win7-x64",
+                HostExtension=".exe", 
+                ExpectedArtifacts=new string[] { "hostfxr.dll", "coreclr.dll", "hostpolicy.dll" } 
+            }, 
+            new 
+            { 
+                Rid="osx.10.11-x64",
+                HostExtension="", 
+                ExpectedArtifacts=new string[] { "libhostfxr.dylib", "libcoreclr.dylib", "libhostpolicy.dylib" } 
+            }
+        };
+
         public static IEnumerable<object[]> PublishOptions
         {
             get
@@ -30,12 +64,12 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 return new[]
                 {
                     new object[] { "1", "", "", "", "" },
-                    new object[] { "2", "netstandardapp1.5", "", "", "" },
+                    new object[] { "2", "netcoreapp1.0", "", "", "" },
                     new object[] { "3", "", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "", "" },
                     new object[] { "4", "", "", "Release", "" },
                     new object[] { "5", "", "", "", "some/dir"},
                     new object[] { "6", "", "", "", "some/dir/with spaces" },
-                    new object[] { "7", "netstandardapp1.5", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
+                    new object[] { "7", "netcoreapp1.0", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
                 };
             }
         }
@@ -92,19 +126,13 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.Execute().Should().Fail();
         }
 
-        [Theory]
-        [InlineData("centos.7-x64", "", new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" })]
-        [InlineData("rhel.7.2-x64", "", new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" })]
-        [InlineData("ubuntu.14.04-x64", "", new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" })]
-        [InlineData("win7-x64", ".exe", new string[] { "hostfxr.dll", "coreclr.dll", "hostpolicy.dll" })]
-        [InlineData("osx.10.11-x64", "", new string[] { "libhostfxr.dylib", "libcoreclr.dylib", "libhostpolicy.dylib" })]
-        public void CrossPublishingSucceedsAndHasExpectedArtifacts(string rid, string hostExtension, string[] expectedArtifacts)
+        [Fact]
+        public void CrossPublishingSucceedsAndHasExpectedArtifacts()
         {
             var testNugetCache = "packages_cross_publish_test";
-            TestInstance instance = GetTestGroupTestAssetsManager("CrossPublishTestProjects")
-                .CreateTestInstance("StandaloneAppCrossPublish");
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("PortableTests"));
                 
-            var testProject = Path.Combine(instance.TestRoot, "project.json");
+            var testProject = Path.Combine(instance.TestRoot, "StandaloneApp", "project.json");
 
             var restoreCommand = new RestoreCommand();
 
@@ -112,23 +140,26 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             restoreCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
             restoreCommand.Execute().Should().Pass();
 
-            var buildCommand = new BuildCommand(testProject, runtime: rid);
-
-            buildCommand.WorkingDirectory = Path.GetDirectoryName(testProject);
-            buildCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
-            buildCommand.Execute().Should().Pass();
-
-            var publishCommand = new PublishCommand(testProject, runtime: rid, noBuild: true);
-            publishCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
-            publishCommand.WorkingDirectory = Path.GetDirectoryName(testProject);
-            publishCommand.Execute().Should().Pass();
-
-            var publishedDir = publishCommand.GetOutputDirectory();
-            publishedDir.Should().HaveFile("StandaloneAppCrossPublish"+ hostExtension);
-
-            foreach (var artifact in expectedArtifacts)
+            foreach (var testData in CrossPublishTestData)
             {
-                publishedDir.Should().HaveFile(artifact);
+                var buildCommand = new BuildCommand(testProject, runtime: testData.Rid);
+
+                buildCommand.WorkingDirectory = Path.GetDirectoryName(testProject);
+                buildCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
+                buildCommand.Execute().Should().Pass();
+
+                var publishCommand = new PublishCommand(testProject, runtime: testData.Rid, noBuild: true);
+                publishCommand.Environment["NUGET_PACKAGES"] = testNugetCache;
+                publishCommand.WorkingDirectory = Path.GetDirectoryName(testProject);
+                publishCommand.Execute().Should().Pass();
+
+                var publishedDir = publishCommand.GetOutputDirectory();
+                publishedDir.Should().HaveFile("StandaloneApp"+ testData.HostExtension);
+
+                foreach (var artifact in testData.ExpectedArtifacts)
+                {
+                    publishedDir.Should().HaveFile(artifact);
+                }
             }
         }
 
@@ -147,12 +178,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.Execute().Should().Pass();
         }
 
-        [Fact]
-        public void LibraryPublishTest()
+        [Fact(Skip="https://github.com/dotnet/cli/issues/2536")]
+        public void PublishedLibraryShouldOutputDependenciesAndNoHost()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary"))
-                                                     .WithLockFiles()
-                                                     .WithBuildArtifacts();
+                                                     .WithLockFiles();
 
             var testProject = _getProjectJson(instance.TestRoot, "TestLibrary");
             var publishCommand = new PublishCommand(testProject);
@@ -165,7 +195,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("System.Runtime.dll");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/2536")]
         public void TestLibraryBindingRedirectGeneration()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestBindingRedirectGeneration")
@@ -186,7 +216,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
             publishCommand.GetOutputDirectory().Delete(true);
 
-            publishCommand = new PublishCommand(lesserTestProject, "netstandardapp1.5", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier());
+            publishCommand = new PublishCommand(lesserTestProject, "netstandard1.5", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier());
             publishCommand.Execute().Should().Pass();
 
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");

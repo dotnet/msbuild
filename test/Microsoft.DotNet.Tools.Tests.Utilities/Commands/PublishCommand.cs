@@ -69,6 +69,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string config = string.IsNullOrEmpty(_config) ? "Debug" : _config;
             string framework = string.IsNullOrEmpty(_framework) ?
                 _project.GetTargetFrameworks().First().FrameworkName.GetShortFolderName() : _framework;
+            
             if (!portable)
             {
                 var runtime = string.IsNullOrEmpty(_runtime) ? PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier() : _runtime;

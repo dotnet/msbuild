@@ -14,7 +14,7 @@
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
-        "Microsoft.NETCore.App": "1.0.0-rc2-3002306"
+        "Microsoft.NETCore.App": "1.0.0-rc2-*"
       },
       "imports": [
         "dnxcore50",

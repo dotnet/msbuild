@@ -16,6 +16,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         private static readonly string ProjectJsonPath = Path.Combine(
                 AppContext.BaseDirectory,
                 "TestAssets",
+                "TestProjects",
                 "ProjectWithTests",
                 "project.json");
 

@@ -14,7 +14,6 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class IncrementalTests : IncrementalTestBase
     {
-
         public IncrementalTests()
         {
             MainProject = "TestSimpleIncrementalApp";
@@ -36,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             CreateTestInstance();
 
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             buildResult = BuildProject(noIncremental: true);
             Assert.Contains("[Forced Unsafe]", buildResult.StdOut);
@@ -68,7 +67,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             CreateTestInstance();
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             var lockFile = Path.Combine(TestProjectRoot, "project.lock.json");
             Assert.True(File.Exists(lockFile));
@@ -84,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         public void TestModifiedVersionFile()
         {
             CreateTestInstance();
-            BuildProject().Should().HaveCompiledProject(MainProject);
+            BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             //change version file
             var versionFile = Path.Combine(GetIntermediaryOutputPath(), ".SDKVersion");
@@ -92,14 +91,14 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             File.AppendAllText(versionFile, "text");
 
             //assert rebuilt
-            BuildProject().Should().HaveCompiledProject(MainProject);
+            BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
         }
 
         [Fact]
         public void TestNoVersionFile()
         {
             CreateTestInstance();
-            BuildProject().Should().HaveCompiledProject(MainProject);
+            BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             //delete version file
             var versionFile = Path.Combine(GetIntermediaryOutputPath(), ".SDKVersion");
@@ -108,7 +107,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             File.Exists(versionFile).Should().BeFalse();
 
             //assert build skipped due to no version file
-            BuildProject().Should().HaveSkippedProjectCompilation(MainProject);
+            BuildProject().Should().HaveSkippedProjectCompilation(MainProject, _appFrameworkFullName);
 
             //the version file should have been regenerated during the build, even if compilation got skipped
             File.Exists(versionFile).Should().BeTrue();
@@ -119,13 +118,13 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             CreateTestInstance();
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             var lockFile = Path.Combine(TestProjectRoot, "project.lock.json");
             TouchFile(lockFile);
 
             buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
         }
 
         [Fact]
@@ -133,12 +132,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             CreateTestInstance();
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             TouchFile(GetProjectFile(MainProject));
 
             buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
         }
 
         // regression for https://github.com/dotnet/cli/issues/965
@@ -147,7 +146,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             CreateTestInstance();
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             var outputTimestamp = SetAllOutputItemsToSameTime();
 
@@ -157,7 +156,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             File.SetLastWriteTime(GetProjectFile(MainProject), outputTimestamp);
 
             buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
         }
 
         private DateTime SetAllOutputItemsToSameTime()
@@ -174,7 +173,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
 
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             Reporter.Verbose.WriteLine($"Files in {GetBinRoot()}");
             foreach (var file in Directory.EnumerateFiles(GetBinRoot()))
@@ -198,7 +197,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             // second build; should get rebuilt since we deleted an output item
             buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
         }
     }
 }

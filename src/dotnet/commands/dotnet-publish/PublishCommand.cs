@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Publish
         }
 
         /// <summary>
-        /// Publish the project for given 'framework (ex - netstandardapp1.5)' and 'runtimeID (ex - win7-x64)'
+        /// Publish the project for given 'framework (ex - netcoreapp1.0)' and 'runtimeID (ex - win7-x64)'
         /// </summary>
         /// <param name="context">project that is to be published</param>
         /// <param name="baseOutputPath">Location of published files</param>
