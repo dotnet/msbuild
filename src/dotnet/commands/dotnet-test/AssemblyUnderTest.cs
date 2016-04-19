@@ -26,15 +26,7 @@ namespace Microsoft.DotNet.Tools.Test
                     _dotentTestParams.BuildBasePath,
                     _dotentTestParams.Output);
 
-                var assemblyUnderTest = outputPaths.CompilationFiles.Assembly;
-
-                if (!string.IsNullOrEmpty(_dotentTestParams.Output) ||
-                    !string.IsNullOrEmpty(_dotentTestParams.BuildBasePath))
-                {
-                    assemblyUnderTest = outputPaths.RuntimeFiles.Assembly;
-                }
-
-                return assemblyUnderTest;
+                return outputPaths.RuntimeFiles.Assembly;
             }
         }
     }

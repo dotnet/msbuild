@@ -7,8 +7,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.Dnx.Runtime.Common.CommandLine;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Test
 {
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Test
                     RegisterForParentProcessExit(dotnetTestParams.ParentProcessId.Value);
                 }
 
-                var projectContexts = CreateProjectContexts(dotnetTestParams.ProjectPath);
+                var projectContexts = CreateProjectContexts(dotnetTestParams.ProjectPath, dotnetTestParams.Runtime);
 
                 var projectContext = projectContexts.First();
 
@@ -98,7 +99,7 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
-        private static IEnumerable<ProjectContext> CreateProjectContexts(string projectPath)
+        private static IEnumerable<ProjectContext> CreateProjectContexts(string projectPath, string runtime)
         {
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
 
@@ -112,7 +113,11 @@ namespace Microsoft.DotNet.Tools.Test
                 throw new InvalidOperationException($"{projectPath} does not exist.");
             }
 
-            return ProjectContext.CreateContextForEachFramework(projectPath);
+            var runtimeIdentifiers = !string.IsNullOrEmpty(runtime) ?
+                new[] { runtime } :
+                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
+
+            return ProjectContext.CreateContextForEachFramework(projectPath).Select(context => context.CreateRuntimeContext(runtimeIdentifiers));
         }
     }
 }
