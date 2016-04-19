@@ -7,7 +7,7 @@
     "Microsoft.Data.OData": "5.6.4",
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-24008"
+      "version": "1.0.0-rc2-*"
     },
     "TestLibraryWithResources": { "target": "project" }
   },
