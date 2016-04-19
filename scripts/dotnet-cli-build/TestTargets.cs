@@ -59,7 +59,10 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
         public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(RestoreTestAssetProjects), nameof(RestoreDesktopTestAssetProjects), nameof(BuildTestAssetProjects))]
+        [Target(nameof(RestoreTestAssetProjects), 
+            nameof(RestoreDesktopTestAssetProjects), 
+            nameof(BuildTestAssetProjects), 
+            nameof(BuildDesktopTestAssetProjects))]
         public static BuildTargetResult SetupTestProjects(BuildTargetContext c) => c.Success();
 
         [Target]
@@ -236,25 +239,22 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult BuildTestAssetProjects(BuildTargetContext c)
         {
-            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"));
-
+            var testAssetsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
             var dotnet = DotNetCli.Stage2;
-            var nobuildFileName = ".noautobuild";
-            string testProjectsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
-            var projects = Directory.GetFiles(testProjectsRoot, "project.json", SearchOption.AllDirectories)
-                                    .Where(p => !ConditionalTestAssets.Where(s => !s.Skip() && p.EndsWith(Path.Combine(s.Path, "project.json"))).Any())
-                                    .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), nobuildFileName)));
+            var framework = "netcoreapp1.0";
 
-            foreach (var project in projects)
-            {
-                c.Info($"Building: {project}");
-                dotnet.Build("--framework", "netcoreapp1.0")
-                    .WorkingDirectory(Path.GetDirectoryName(project))
-                    .Execute()
-                    .EnsureSuccessful();
-            }
+            return BuildTestAssets(c, testAssetsRoot, dotnet, framework);
+        }
 
-            return c.Success();
+        [Target]
+        [BuildPlatforms(BuildPlatform.Windows)]
+        public static BuildTargetResult BuildDesktopTestAssetProjects(BuildTargetContext c)
+        {
+            var testAssetsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects");
+            var dotnet = DotNetCli.Stage2;
+            var framework = "net451";
+
+            return BuildTestAssets(c, testAssetsRoot, dotnet, framework);
         }
 
         [Target]
@@ -355,6 +355,28 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd(validator, Path.Combine(c.BuildContext.BuildDirectory, "src"))
                 .Execute();
+
+            return c.Success();
+        }
+
+        private static BuildTargetResult BuildTestAssets(BuildTargetContext c, string testAssetsRoot, DotNetCli dotnet, string framework)
+        {
+            CleanBinObj(c, testAssetsRoot);
+
+            var nobuildFileName = ".noautobuild";
+
+            var projects = Directory.GetFiles(testAssetsRoot, "project.json", SearchOption.AllDirectories)
+                                    .Where(p => !ConditionalTestAssets.Where(s => !s.Skip() && p.EndsWith(Path.Combine(s.Path, "project.json"))).Any())
+                                    .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), nobuildFileName)));
+
+            foreach (var project in projects)
+            {
+                c.Info($"Building: {project}");
+                dotnet.Build("--framework", framework)
+                    .WorkingDirectory(Path.GetDirectoryName(project))
+                    .Execute()
+                    .EnsureSuccessful();
+            }
 
             return c.Success();
         }
