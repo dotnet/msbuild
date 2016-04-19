@@ -34,27 +34,46 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private static SHA1 Sha1 { get; } = SHA1.Create();
 
-        public static XDocument GenerateBindingRedirects(this IEnumerable<LibraryExport> dependencies, XDocument document)
+        public static void GenerateBindingRedirects(this IEnumerable<LibraryExport> dependencies, IEnumerable<string> configFiles)
         {
             var redirects = CollectRedirects(dependencies);
 
             if (!redirects.Any())
             {
                 // No redirects required
-                return document;
+                return;
             }
-            document = document ?? new XDocument();
 
-            var configuration = GetOrAddElement(document, ConfigurationElementName);
+            foreach (var configFile in configFiles)
+            {
+                GenerateBindingRedirects(configFile, redirects);
+            }
+        }
+
+        internal static void GenerateBindingRedirects(string configFile, AssemblyRedirect[] bindingRedirects)
+        {
+            XDocument configRoot = null;
+
+            if (File.Exists(configFile))
+            {
+                configRoot = XDocument.Load(configFile);
+            }
+
+            configRoot = configRoot ?? new XDocument();
+
+            var configuration = GetOrAddElement(configRoot, ConfigurationElementName);
             var runtime = GetOrAddElement(configuration, RuntimeElementName);
             var assemblyBindings = GetOrAddElement(runtime, AssemblyBindingElementName);
 
-            foreach (var redirect in redirects)
+            foreach (var redirect in bindingRedirects)
             {
                 AddDependentAssembly(redirect, assemblyBindings);
             }
 
-            return document;
+            using (var fileStream = File.Open(configFile, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                configRoot.Save(fileStream);
+            }
         }
 
         private static void AddDependentAssembly(AssemblyRedirect redirect, XElement assemblyBindings)
