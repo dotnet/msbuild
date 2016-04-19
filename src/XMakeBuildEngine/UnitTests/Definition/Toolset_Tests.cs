@@ -95,6 +95,10 @@ namespace Microsoft.Build.UnitTests.Definition
             subToolsets.Add("dogfood", new SubToolset("dogfood", subToolsetProperties));
 
             Toolset t = new Toolset("4.0", "c:\\bar", buildProperties, environmentProperties, globalProperties, subToolsets, "c:\\foo", "4.0");
+            t.MSBuildExtensionsPathSearchPathsTable = new Dictionary<string, List<string>>
+            {
+                ["MSBuildExtensionsPath"] = new List<string> {@"c:\foo"}
+            };
 
             ((INodePacketTranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             Toolset t2 = Toolset.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -135,6 +139,10 @@ namespace Microsoft.Build.UnitTests.Definition
             }
 
             Assert.Equal(t.DefaultOverrideToolsVersion, t2.DefaultOverrideToolsVersion);
+
+            Assert.NotNull(t2.MSBuildExtensionsPathSearchPathsTable);
+            Assert.Equal(1, t2.MSBuildExtensionsPathSearchPathsTable.Count);
+            Assert.Equal(@"c:\foo", t2.GetMSBuildExtensionsPathSearchPathsFor("MSBuildExtensionsPath")[0]);
         }
 
         [Fact]

@@ -205,6 +205,11 @@ namespace Microsoft.Build.Evaluation
         private string _defaultSubToolsetVersion;
 
         /// <summary>
+        /// Map of MSBuildExtensionsPath properties to their list of fallback search paths
+        /// </summary>
+        private Dictionary<string, List<string>> _msBuildSearchPathsTable;
+
+        /// <summary>
         /// Constructor taking only tools version and a matching tools path
         /// </summary>
         /// <param name="toolsVersion">Name of the toolset</param>
@@ -349,17 +354,21 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns a copy of the list of search paths for a MSBuildExtensionsPath* property kind.
+        /// Returns a copy of the list of search paths for a MSBuildExtensionsPath* property.
+        /// <returns>List of search paths, else null</returns>
         /// </summary>
-        internal IList<string> GetMSBuildExtensionsPathSearchPathsFor(MSBuildExtensionsPathReferenceKind refKind)
+        internal List<string> GetMSBuildExtensionsPathSearchPathsFor(string refKind)
         {
-            IList<string> paths;
+            if (string.IsNullOrEmpty(refKind))
+                return null;
+
+            List<string> paths;
             if (MSBuildExtensionsPathSearchPathsTable != null && MSBuildExtensionsPathSearchPathsTable.TryGetValue(refKind, out paths))
             {
                 return new List<string>(paths);
             }
 
-            return new List<string>();
+            return null;
         }
 
         /// <summary>
@@ -573,9 +582,10 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Map of MSBuildExtensionsPath properties to their list of fallback search paths
         /// </summary>
-        internal Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> MSBuildExtensionsPathSearchPathsTable
+        internal Dictionary<string, List<string>> MSBuildExtensionsPathSearchPathsTable
         {
-            get; set;
+            get { return _msBuildSearchPathsTable; }
+            set { _msBuildSearchPathsTable = value; }
         }
 
         /// <summary>
@@ -591,6 +601,12 @@ namespace Microsoft.Build.Evaluation
             translator.TranslateDictionary(ref _subToolsets, StringComparer.OrdinalIgnoreCase, SubToolset.FactoryForDeserialization);
             translator.Translate(ref _overrideTasksPath);
             translator.Translate(ref _defaultOverrideToolsVersion);
+            translator.TranslateDictionaryList(ref _msBuildSearchPathsTable, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private void ListTranslate(List<string> list, INodePacketTranslator translator)
+        {
+            translator.Translate(ref list);
         }
 
         /// <summary>

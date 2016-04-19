@@ -2031,14 +2031,16 @@ namespace Microsoft.Build.Evaluation
         private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, ProjectImportElement importElement)
         {
             var refKindInProject = MSBuildExtensionsPathReferenceKind.FindIn(importElement.Project);
-            var fallbackExtensionPaths = _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject);
+            var fallbackExtensionPaths = _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject.StringRepresentation);
 
             // no reference or we need to lookup only the default path,
             // so, use the Import path
-            if (fallbackExtensionPaths.Count == 0)
+            if (refKindInProject.Equals(MSBuildExtensionsPathReferenceKind.None) || fallbackExtensionPaths == null ||
+                fallbackExtensionPaths.Count == 0)
             {
                 List<ProjectRootElement> projects;
-                var result = ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, importElement.Project, out projects);
+                var result = ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile,
+                    importElement, importElement.Project, out projects);
                 return projects;
             }
 
@@ -2084,7 +2086,8 @@ namespace Microsoft.Build.Evaluation
             //
 
             // Adding the value of $(MSBuildExtensionsPath*) property to the list of search paths
-            fallbackExtensionPaths.Insert(0, _data.GetProperty(refKindInProject.StringRepresentation).EvaluatedValue);
+            var prop = _data.GetProperty(refKindInProject.StringRepresentation);
+            fallbackExtensionPaths.Insert(0, prop.EvaluatedValue);
 
             string extensionPropertyRefAsString = refKindInProject.MSBuildPropertyName;
 
@@ -2147,7 +2150,7 @@ namespace Microsoft.Build.Evaluation
             // was a wildcard and it resolved to zero files!
             if (atleastOneExactFilePathWasLookedAtAndNotFound && (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
-                ThrowForImportedProjectFromExtensionsPathNotFound(refKindInProject, importElement);
+                ThrowForImportedProjectFromExtensionsPathNotFound(refKindInProject.StringRepresentation, importElement);
             }
 
             return new List<ProjectRootElement>();
@@ -2515,12 +2518,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="refKindInProject">MSBuildExtensionsPath reference kind found in the Project attribute of the Import element</param>
         /// <param name="importElement">The importing element for this import</param>
         /// </summary>
-        private void ThrowForImportedProjectFromExtensionsPathNotFound(MSBuildExtensionsPathReferenceKind refKindInProject, ProjectImportElement importElement)
+        private void ThrowForImportedProjectFromExtensionsPathNotFound(string refKindInProject, ProjectImportElement importElement)
         {
-            string extensionsPathPropValue = _data.GetProperty(refKindInProject.StringRepresentation).EvaluatedValue;
+            string extensionsPathPropValue = _data.GetProperty(refKindInProject).EvaluatedValue;
 
             string importExpandedWithDefaultPath = _expander.ExpandIntoStringLeaveEscaped(
-                                                                    importElement.Project.Replace(refKindInProject.MSBuildPropertyName, extensionsPathPropValue),
+                                                                    importElement.Project.Replace($"$({refKindInProject})", extensionsPathPropValue),
                                                                     ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
 
             string relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
@@ -2537,7 +2540,7 @@ namespace Microsoft.Build.Evaluation
             ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation, "ImportedProjectFromExtensionsPathNotFoundFromAppConfig",
                                                         importExpandedWithDefaultPath,
                                                         relativeProjectPath,
-                                                        refKindInProject.MSBuildPropertyName,
+                                                        $"$({refKindInProject})",
                                                         stringifiedListOfSearchPaths,
                                                         configLocation);
         }
