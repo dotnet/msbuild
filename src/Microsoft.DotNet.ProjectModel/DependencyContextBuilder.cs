@@ -115,7 +115,9 @@ namespace Microsoft.Extensions.DependencyModel
         {
             var type = export.Library.Identity.Type;
 
-            var serviceable = (export.Library as PackageDescription)?.PackageLibrary.IsServiceable ?? false;
+            // TEMPORARY: All packages are serviceable in RC2
+            // See https://github.com/dotnet/cli/issues/2569
+            var serviceable = (export.Library as PackageDescription) != null;
             var libraryDependencies = new HashSet<Dependency>();
 
             foreach (var libraryDependency in export.Library.Dependencies)
