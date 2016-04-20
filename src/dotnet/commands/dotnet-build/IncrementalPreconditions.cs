@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Compiler;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         public void AddForceUnsafePrecondition()
         {
-            _preconditions.Add($"[Forced Unsafe] The build was marked as unsafe. Remove the {BuilderCommandApp.NoIncrementalFlag} flag to enable incremental compilation");
+            _preconditions.Add($"[Forced Unsafe] The build was marked as unsafe. Remove the {BuildCommandApp.NoIncrementalFlag} flag to enable incremental compilation");
         }
 
         public bool PreconditionsDetected()
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             if (PreconditionsDetected())
             {
-                return _isProfile ? PreconditionsMessage().Yellow() : $"(The compilation time can be improved. Run \"dotnet build {BuilderCommandApp.BuildProfileFlag}\" for more information)";
+                return _isProfile ? PreconditionsMessage().Yellow() : $"(The compilation time can be improved. Run \"dotnet build {BuildCommandApp.BuildProfileFlag}\" for more information)";
             }
 
             return "";

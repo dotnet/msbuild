@@ -7,6 +7,6 @@ namespace Microsoft.DotNet.Tools.Compiler
 {
     public interface ICompiler
     {
-        bool Compile(ProjectContext context, CompilerCommandApp args);
+        bool Compile(ProjectContext context, BuildCommandApp args);
     }
 }

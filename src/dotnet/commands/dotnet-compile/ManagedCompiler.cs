@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             _commandFactory = commandFactory;
         }
 
-        public override bool Compile(ProjectContext context, CompilerCommandApp args)
+        public override bool Compile(ProjectContext context, BuildCommandApp args)
         {
             // Set up Output Paths
             var outputPaths = context.GetOutputPaths(args.ConfigValue, args.BuildBasePathValue);

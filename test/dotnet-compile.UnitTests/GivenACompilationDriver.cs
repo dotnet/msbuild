@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         private Mock<ICompiler> _managedCompilerMock;
         private Mock<ICompiler> _nativeCompilerMock;
         private List<ProjectContext> _contexts;
-        private CompilerCommandApp _args;
+        private BuildCommandApp _args;
 
         public GivenACompilationDriverController()
         {
@@ -27,11 +27,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                 Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestAppWithLibrary", "TestApp", "project.json");
             _managedCompilerMock = new Mock<ICompiler>();
             _managedCompilerMock.Setup(c => c
-                .Compile(It.IsAny<ProjectContext>(), It.IsAny<CompilerCommandApp>()))
+                .Compile(It.IsAny<ProjectContext>(), It.IsAny<BuildCommandApp>()))
                 .Returns(true);
             _nativeCompilerMock = new Mock<ICompiler>();
             _nativeCompilerMock.Setup(c => c
-                .Compile(It.IsAny<ProjectContext>(), It.IsAny<CompilerCommandApp>()))
+                .Compile(It.IsAny<ProjectContext>(), It.IsAny<BuildCommandApp>()))
                 .Returns(true);
 
             _contexts = new List<ProjectContext>
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                 ProjectContext.Create(_projectJson, NuGetFramework.Parse("netcoreapp1.0"))
             };
 
-            _args = new CompilerCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");
+            _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");
         }
 
         [Fact]
@@ -47,8 +47,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         {
             var compiledProjectContexts = new List<ProjectContext>();
             _managedCompilerMock.Setup(c => c
-                .Compile(It.IsAny<ProjectContext>(), It.IsAny<CompilerCommandApp>()))
-                .Callback<ProjectContext, CompilerCommandApp>((p, c) => compiledProjectContexts.Add(p))
+                .Compile(It.IsAny<ProjectContext>(), It.IsAny<BuildCommandApp>()))
+                .Callback<ProjectContext, BuildCommandApp>((p, c) => compiledProjectContexts.Add(p))
                 .Returns(true);
 
             var compilerController = new CompilationDriver(_managedCompilerMock.Object, _nativeCompilerMock.Object);
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             compilerController.Compile(_contexts, _args);
 
-            _nativeCompilerMock.Verify(c => c.Compile(It.IsAny<ProjectContext>(), It.IsAny<CompilerCommandApp>()), Times.Never);
+            _nativeCompilerMock.Verify(c => c.Compile(It.IsAny<ProjectContext>(), It.IsAny<BuildCommandApp>()), Times.Never);
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             compilerController.Compile(_contexts, _args);
 
-            _nativeCompilerMock.Verify(c => c.Compile(It.IsAny<ProjectContext>(), It.IsAny<CompilerCommandApp>()), Times.Once);
+            _nativeCompilerMock.Verify(c => c.Compile(It.IsAny<ProjectContext>(), It.IsAny<BuildCommandApp>()), Times.Once);
         }
     }
 }

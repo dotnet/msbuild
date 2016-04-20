@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
-using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;

@@ -489,6 +489,11 @@ namespace Microsoft.DotNet.ProjectModel
             if (Project == null && ProjectDirectory != null)
             {
                 Project = ProjectResolver(ProjectDirectory);
+                if (Project == null)
+                {
+                    throw new InvalidOperationException($"Could not resolve project at: {ProjectDirectory}. " +
+                                                        $"This could happen when project.lock.json was moved after restore.");
+                }
             }
         }
 

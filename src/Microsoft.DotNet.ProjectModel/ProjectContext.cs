@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.ProjectModel
     {
         private string[] _runtimeFallbacks;
 
+        public ProjectContextIdentity Identity { get; }
+
         public GlobalSettings GlobalSettings { get; }
 
         public ProjectDescription RootProject { get; }
@@ -51,6 +53,7 @@ namespace Microsoft.DotNet.ProjectModel
             LibraryManager libraryManager,
             LockFile lockfile)
         {
+            Identity = new ProjectContextIdentity(rootProject?.Path, targetFramework);
             GlobalSettings = globalSettings;
             RootProject = rootProject;
             PlatformLibrary = platformLibrary;
