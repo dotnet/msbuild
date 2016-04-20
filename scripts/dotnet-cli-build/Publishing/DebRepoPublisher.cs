@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class DebRepoPublisher
     {
+        private const string _debianRevisionNumber = "1";
         private string _repoID;
         private string _uploadJsonDirectory;
 
@@ -41,7 +42,7 @@ namespace Microsoft.DotNet.Cli.Build
                 {
                     sw.WriteLine("{");
                     sw.WriteLine($"  \"name\":\"{packageName}\",");
-                    sw.WriteLine($"  \"version\":\"{packageVersion}\",");
+                    sw.WriteLine($"  \"version\":\"{packageVersion}-{_debianRevisionNumber}\",");
                     sw.WriteLine($"  \"repositoryId\":\"{_repoID}\",");
                     sw.WriteLine($"  \"sourceUrl\":\"{uploadUrl}\"");
                     sw.WriteLine("}");
