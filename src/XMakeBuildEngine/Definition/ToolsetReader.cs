@@ -279,7 +279,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
         /// </summary>
-        protected abstract Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os);
+        protected abstract Dictionary<string, List<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os);
 
         /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
@@ -642,7 +642,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal struct MSBuildExtensionsPathReferenceKind
     {
-
         /// <summary>
         /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath"
         /// </summary>
@@ -671,7 +670,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// String representation of the property reference - eg. "MSBuildExtensionsPath32"
         /// </summary>
-        public string StringRepresentation { get; private set; }
+        public string StringRepresentation { get; }
 
         /// <summary>
         /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
@@ -683,22 +682,22 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public static MSBuildExtensionsPathReferenceKind FindIn(string expression)
         {
-            if (expression.IndexOf("$(MSBuildExtensionsPath)") >= 0)
+            if (expression.IndexOf(Default.MSBuildPropertyName, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                return MSBuildExtensionsPathReferenceKind.Default;
+                return Default;
             }
 
-            if (expression.IndexOf("$(MSBuildExtensionsPath32)") >= 0)
+            if (expression.IndexOf(Path32.MSBuildPropertyName, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                return MSBuildExtensionsPathReferenceKind.Path32;
+                return Path32;
             }
 
-            if (expression.IndexOf("$(MSBuildExtensionsPath64)") >= 0)
+            if (expression.IndexOf(Path64.MSBuildPropertyName, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                return MSBuildExtensionsPathReferenceKind.Path64;
+                return Path64;
             }
 
-            return MSBuildExtensionsPathReferenceKind.None;
+            return None;
         }
      }
 }
