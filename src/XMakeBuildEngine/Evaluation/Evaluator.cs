@@ -2016,38 +2016,31 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// If the project import references a $(MSBuildExtensionsPath*)
-        /// then this tries to find project files corresponding to that, using various search
-        /// paths. It relies on the ExpandAndLoadImportsFromUnescapedImportExpressionConditioned
-        /// to do the actual loading and parsing.
-        /// This is explained in detail in a comment with the method code.
-        ///
-        /// If the project import does not reference the $(MSBuildExtensionsPath*) property, then
-        /// it falls back to the default behavior.
-        ///
-        /// Caches the parsed import into the provided collection, so future
-        /// requests can be satisfied without re-parsing it.
+        /// Expands and loads project imports.
+        /// <remarks>
+        /// Imports may contain references to "projectImportSearchPaths" defined in the app.config 
+        /// toolset section. If this is the case, this method will search for the imported project
+        /// in those additional paths if the default fails.
+        /// </remarks>
         /// </summary>
         private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, ProjectImportElement importElement)
         {
-            var refKindInProject = MSBuildExtensionsPathReferenceKind.FindIn(importElement.Project);
-            var fallbackExtensionPaths = _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject.StringRepresentation);
+            var fallbackSearchPathMatch = _data.Toolset.GetProjectImportSearchPaths(importElement.Project);
 
             // no reference or we need to lookup only the default path,
             // so, use the Import path
-            if (refKindInProject.Equals(MSBuildExtensionsPathReferenceKind.None) || fallbackExtensionPaths == null ||
-                fallbackExtensionPaths.Count == 0)
+            if (fallbackSearchPathMatch.Equals(ProjectImportPathMatch.None))
             {
                 List<ProjectRootElement> projects;
-                var result = ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile,
-                    importElement, importElement.Project, out projects);
+                ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, importElement.Project, out projects);
                 return projects;
             }
 
-            // $(MSBuildExtensionsPath*) usually resolves to a single value, single default path. This can be overridden
-            // by the usual property overriding techniques.
+            // Note: Any property defined in the <projectImportSearchPaths> section can be replaced, MSBuildExtensionsPath
+            // is used here as an example of behavior.
+            // $(MSBuildExtensionsPath*) usually resolves to a single value, single default path
             //
-            // Eg. <Import Project='$(MSBuildExtensionsPath)\foo\extn.proj' />
+            //     Eg. <Import Project='$(MSBuildExtensionsPath)\foo\extn.proj' />
             //
             // But this feature allows that when it is used in an Import element, it will behave as a "search path", meaning
             // that the relative project path "foo\extn.proj" will be searched for, in more than one location.
@@ -2058,17 +2051,17 @@ namespace Microsoft.Build.Evaluation
             //
             // 1. The value of the MSBuildExtensionsPath* property
             //
-            // 2. Search paths available in the current toolset (via toolset.MSBuildExtensionsPathSearchPathsTable).
+            // 2. Search paths available in the current toolset (via toolset.ImportPropertySearchPathsTable).
             //    That may be loaded from app.config with a definition like:
             //
             //    <toolset .. >
-            //      <msbuildExtensionsPathSearchPaths>
+            //      <projectImportSearchPaths>
             //          <searchPaths os="osx">
             //              <property name="MSBuildExtensionsPath" value="/Library/Frameworks/Mono.framework/External/xbuild/;/tmp/foo"/>
             //              <property name="MSBuildExtensionsPath32" value="/Library/Frameworks/Mono.framework/External/xbuild/"/>
             //              <property name="MSBuildExtensionsPath64" value="/Library/Frameworks/Mono.framework/External/xbuild/"/>
             //          </searchPaths>
-            //      </msbuildExtensionsPathSearchPaths>
+            //      </projectImportSearchPaths>
             //    </toolset>
             //
             // This is available only when used in an Import element and it's Condition. So, the following common pattern
@@ -2077,7 +2070,7 @@ namespace Microsoft.Build.Evaluation
             //      <Import Project="$(MSBuildExtensionsPath)\foo\extn.proj" Condition="'Exists('$(MSBuildExtensionsPath)\foo\extn.proj')'" />
             //
             // The value of the MSBuildExtensionsPath* property, will always be "visible" with it's default value, example, when read or
-            // referenced anywhere else. This is a very limited support, so, it doesn't come in to effect if the explcit reference to
+            // referenced anywhere else. This is a very limited support, so, it doesn't come in to effect if the explicit reference to
             // the $(MSBuildExtensionsPath) property is not present in the Project attribute of the Import element. So, the following is
             // not supported:
             //
@@ -2086,21 +2079,26 @@ namespace Microsoft.Build.Evaluation
             //
 
             // Adding the value of $(MSBuildExtensionsPath*) property to the list of search paths
-            var prop = _data.GetProperty(refKindInProject.StringRepresentation);
-            fallbackExtensionPaths.Insert(0, prop.EvaluatedValue);
+            var prop = _data.GetProperty(fallbackSearchPathMatch.PropertyName);
 
-            string extensionPropertyRefAsString = refKindInProject.MSBuildPropertyName;
+            var pathsToSearch =
+                // The actual value of the property, with no fallbacks
+                new[] {prop.EvaluatedValue}
+                // The list of fallbacks, in order
+                .Concat(fallbackSearchPathMatch.SearchPaths).ToList();
+
+            string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
             _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
-                                        String.Join(Path.PathSeparator.ToString(), fallbackExtensionPaths));
+                                        String.Join(Path.PathSeparator.ToString(), pathsToSearch));
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
             // 2. 1 or more project files *found* but ignored (like circular, self imports)
-            foreach (var extensionPath in fallbackExtensionPaths)
+            foreach (var extensionPath in pathsToSearch)
             {
                 string extensionPathExpanded = _data.ExpandString(extensionPath);
 
@@ -2150,7 +2148,7 @@ namespace Microsoft.Build.Evaluation
             // was a wildcard and it resolved to zero files!
             if (atleastOneExactFilePathWasLookedAtAndNotFound && (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
-                ThrowForImportedProjectFromExtensionsPathNotFound(refKindInProject.StringRepresentation, importElement);
+                ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
             }
 
             return new List<ProjectRootElement>();
@@ -2514,35 +2512,33 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Throws InvalidProjectException because we failed to import a project from $(MSBuildExtensionsPath*)
-        /// <param name="refKindInProject">MSBuildExtensionsPath reference kind found in the Project attribute of the Import element</param>
+        /// Throws InvalidProjectException because we failed to import a project which contained a ProjectImportSearchPath fall-back.
+        /// <param name="searchPathMatch">MSBuildExtensionsPath reference kind found in the Project attribute of the Import element</param>
         /// <param name="importElement">The importing element for this import</param>
         /// </summary>
-        private void ThrowForImportedProjectFromExtensionsPathNotFound(string refKindInProject, ProjectImportElement importElement)
+        private void ThrowForImportedProjectWithSearchPathsNotFound(ProjectImportPathMatch searchPathMatch, ProjectImportElement importElement)
         {
-            string extensionsPathPropValue = _data.GetProperty(refKindInProject).EvaluatedValue;
+            string extensionsPathPropValue = _data.GetProperty(searchPathMatch.PropertyName).EvaluatedValue;
 
             string importExpandedWithDefaultPath = _expander.ExpandIntoStringLeaveEscaped(
-                                                                    importElement.Project.Replace($"$({refKindInProject})", extensionsPathPropValue),
+                                                                    importElement.Project.Replace(searchPathMatch.MsBuildPropertyFormat, extensionsPathPropValue),
                                                                     ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
 
             string relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
 
-            var onlyFallbackSearchPaths =
-                _data.Toolset.GetMSBuildExtensionsPathSearchPathsFor(refKindInProject)
-                    .Select(s => _data.ExpandString(s))
-                    .ToList();
+            var onlyFallbackSearchPaths = searchPathMatch.SearchPaths.Select(s => _data.ExpandString(s)).ToList();
 
             string stringifiedListOfSearchPaths = StringifyList(onlyFallbackSearchPaths);
 
             string configLocation = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
 
-            ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation, "ImportedProjectFromExtensionsPathNotFoundFromAppConfig",
-                                                        importExpandedWithDefaultPath,
-                                                        relativeProjectPath,
-                                                        $"$({refKindInProject})",
-                                                        stringifiedListOfSearchPaths,
-                                                        configLocation);
+            ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation,
+                "ImportedProjectFromExtensionsPathNotFoundFromAppConfig",
+                importExpandedWithDefaultPath,
+                relativeProjectPath,
+                searchPathMatch.MsBuildPropertyFormat,
+                stringifiedListOfSearchPaths,
+                configLocation);
         }
 
         /// <summary>
@@ -2559,7 +2555,7 @@ namespace Microsoft.Build.Evaluation
                 if (i > 0)
                 {
                     sb.Append(", ");
-                 }
+                }
 
                 sb.Append($"\"{strings[i]}\"");
             }

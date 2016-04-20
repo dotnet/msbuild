@@ -149,6 +149,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
+    <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
     <Compile Include="Evaluation\ProjectChangedEventArgs.cs" />

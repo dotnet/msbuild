@@ -318,7 +318,7 @@ namespace Microsoft.Build.Shared
         internal static int MAX_PATH = 260;
 
         /// <summary>
-        /// OS name that can be used for the msbuildExtensionsPathSearchPaths element
+        /// OS name that can be used for the projectImportSearchPaths element
         /// for a toolset
         /// </summary>
         internal static string GetOSNameForExtensionsPath()

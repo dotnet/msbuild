@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value,
                                    @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\");
 
-            Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).AllMSBuildExtensionPathsSearchPaths.Count, 0);
+            Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths.Count, 0);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value,
                                    @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\");
 
-            Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).AllMSBuildExtensionPathsSearchPaths.Count, 0);
+            Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths.Count, 0);
         }
         #endregion
 
@@ -516,7 +516,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      <toolset toolsVersion=""2.0"">
                        <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v2.0.x86ret\""/>
                        <property name=""MSBuildToolsPath"" value=""D:\windows\Microsoft.NET\Framework\v2.0.x86ret\""/>
-                       <msbuildExtensionsPathSearchPaths>
+                       <projectImportSearchPaths>
                          <searchPaths os=""windows"">
                             <property name=""MSBuildExtensionsPath"" value=""c:\foo""/>
                             <property name=""MSBuildExtensionsPath64"" value=""c:\foo64;c:\bar64""/>
@@ -528,7 +528,7 @@ namespace Microsoft.Build.UnitTests.Definition
                          <searchPaths os=""unix"">
                             <property name=""MSBuildExtensionsPath"" value=""/tmp/bar""/>
                          </searchPaths>
-                       </msbuildExtensionsPathSearchPaths>
+                       </projectImportSearchPaths>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>"));
@@ -544,8 +544,8 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value,
                                    @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\");
 
-            Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).AllMSBuildExtensionPathsSearchPaths.Count, 3);
-            var allPaths = msbuildToolsetSection.Toolsets.GetElement(0).AllMSBuildExtensionPathsSearchPaths;
+            Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths.Count, 3);
+            var allPaths = msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths;
             Assert.Equal(allPaths.GetElement(0).OS, "windows");
             Assert.Equal(allPaths.GetElement(0).PropertyElements.Count, 2);
             Assert.Equal(allPaths.GetElement(0).PropertyElements.GetElement("MSBuildExtensionsPath").Value, @"c:\foo");
@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(toolsets, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Dictionary<string, List<string>> pathsTable = toolsets["2.0"].MSBuildExtensionsPathSearchPathsTable;
+            Dictionary<string, List<string>> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;
 #if XPLAT
             if (NativeMethodsShared.IsWindows)
 #endif
@@ -577,12 +577,12 @@ namespace Microsoft.Build.UnitTests.Definition
 #if XPLAT
             else if (NativeMethodsShared.IsOSX)
             {
-                CheckPathsTable(pathsTable, MSBuildExtensionsPathReferenceKind.Default, new string[] {"/tmp/foo"});
-                CheckPathsTable(pathsTable, MSBuildExtensionsPathReferenceKind.Path32, new string[] {"/tmp/foo32", "/tmp/bar32"});
+                CheckPathsTable(pathsTable, ProjectImportPathMatch.Default, new string[] {"/tmp/foo"});
+                CheckPathsTable(pathsTable, ProjectImportPathMatch.Path32, new string[] {"/tmp/foo32", "/tmp/bar32"});
             }
             else
             {
-                CheckPathsTable(pathsTable, MSBuildExtensionsPathReferenceKind.Default, new string[] {"/tmp/bar"});
+                CheckPathsTable(pathsTable, ProjectImportPathMatch.Default, new string[] {"/tmp/bar"});
             }
 #endif
         }
@@ -616,14 +616,14 @@ namespace Microsoft.Build.UnitTests.Definition
                      <toolset ToolsVersion=""2.0"">
                        <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v3.5.x86ret\""/>
 
-                       <msbuildExtensionsPathSearchPaths>
+                       <projectImportSearchPaths>
                          <searchPaths os=""windows"">
                             <property name=""MSBuildExtensionsPath"" value=""c:\foo""/>
                          </searchPaths>
                          <searchPaths os=""windows"">
                             <property name=""MSBuildExtensionsPath"" value=""c:\bar""/>
                          </searchPaths>
-                       </msbuildExtensionsPathSearchPaths>
+                       </projectImportSearchPaths>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>"));
@@ -652,12 +652,12 @@ namespace Microsoft.Build.UnitTests.Definition
                      <toolset ToolsVersion=""2.0"">
                        <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v3.5.x86ret\""/>
 
-                       <msbuildExtensionsPathSearchPaths>
+                       <projectImportSearchPaths>
                          <searchPaths os=""windows"">
                             <property name=""MSBuildExtensionsPath"" value=""c:\foo""/>
                             <property name=""MSBuildExtensionsPath"" value=""c:\bar""/>
                          </searchPaths>
-                       </msbuildExtensionsPathSearchPaths>
+                       </projectImportSearchPaths>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>"));
@@ -671,8 +671,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
-                ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
+            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
         #endregion
 
