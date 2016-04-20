@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         private static readonly NuGetFramework s_desktopTestFramework = FrameworkConstants.CommonFrameworks.Net451;  
         
         [WindowsOnlyFact]
-        public void It_resolves_desktop_apps_from_the_output_directory_using_Debug_configuration_when_configuration_is_null()
+        public void It_resolves_desktop_apps_defaulting_to_Debug_Configuration()
         {
             var configuration = "Debug";
 
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [WindowsOnlyFact]
-        public void It_resolves_desktop_apps_from_the_output_directory_when_configuration_is_Debug()
+        public void It_resolves_desktop_apps_when_configuration_is_Debug()
         {
             var configuration = "Debug";
 
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [WindowsOnlyFact]
-        public void It_resolves_desktop_apps_from_the_output_directory_when_configuration_is_Release()
+        public void It_resolves_desktop_apps_when_configuration_is_Release()
         {
             var configuration = "Release";
 
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [WindowsOnlyFact]
-        public void It_resolves_desktop_apps_from_the_output_directory_using_configuration_passed_to_create_over_configuration_passed_to_the_constructor()
+        public void It_resolves_desktop_apps_using_configuration_passed_to_create()
         {
             var configuration = "Release";
 
