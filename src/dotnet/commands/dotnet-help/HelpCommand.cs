@@ -25,8 +25,7 @@ Common Commands:
   build         Builds a .NET project
   publish       Publishes a .NET project for deployment (including the runtime)
   run           Compiles and immediately executes a .NET project
-  test          Executes tests in a test project
-  repl          Launch an interactive session (read, eval, print, loop)
+  test          Runs unit tests using the test runner specified in the project
   pack          Creates a NuGet package";
 
         public static int Run(string[] args)
