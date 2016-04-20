@@ -1262,6 +1262,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
+                        expandedParameterValue = FileUtilities.FixFilePath(expandedParameterValue);
                         success = SetValueParameter(parameter, parameterType, expandedParameterValue, parameterLocation);
                         taskParameterSet = true;
                     }
