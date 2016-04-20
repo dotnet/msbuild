@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             _nativeCompiler = nativeCompiler;
         }
 
-        public bool Compile(IEnumerable<ProjectContext> contexts, CompilerCommandApp args)
+        public bool Compile(IEnumerable<ProjectContext> contexts, BuildCommandApp args)
         {
             var success = true;
 

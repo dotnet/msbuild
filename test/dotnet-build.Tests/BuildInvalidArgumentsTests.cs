@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 .ExecuteWithCapturedOutput();
 
             result.Should().Fail();
-            result.Should().HaveStdErrContaining("Project does not support framework: Silverlight,Version=v4.0.");
+            result.Should().HaveStdErrMatching("Project '.*?' does not support framework: Silverlight,Version=v4\\.0\\.");
         }
 
         [Fact]

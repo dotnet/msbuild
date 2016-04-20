@@ -18,12 +18,14 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .CreateTestInstance("DesktopAppWhichCallsDotnet")
                 .WithLockFiles()
                 .WithBuildArtifacts();
+            // project was moved to another location and needs it's relative path to Utils project restored
+            new RestoreCommand().Execute(testInstance.TestRoot).Should().Pass();
 
             var testProjectAssetManager = GetTestGroupTestAssetsManager("TestProjects");
             var testInstanceToBuild = testProjectAssetManager
                 .CreateTestInstance("TestAppSimple")
                 .WithLockFiles();
-                
+
             var testProject = Path.Combine(testInstance.TestRoot, "project.json");
             var testProjectToBuild = Path.Combine(testInstanceToBuild.TestRoot, "project.json");
 

@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,17 +14,17 @@ using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Build
 {
-    class DotNetProjectBuilder : ProjectBuilder
+    internal class DotNetProjectBuilder : ProjectBuilder
     {
-        private readonly BuilderCommandApp _args;
+        private readonly BuildCommandApp _args;
         private readonly IncrementalPreconditionManager _preconditionManager;
         private readonly CompilerIOManager _compilerIOManager;
         private readonly ScriptRunner _scriptRunner;
         private readonly DotNetCommandFactory _commandFactory;
 
-        public DotNetProjectBuilder(BuilderCommandApp args) : base(args.ShouldSkipDependencies)
+        public DotNetProjectBuilder(BuildCommandApp args)
         {
-            _args = (BuilderCommandApp)args.ShallowCopy();
+            _args = args;
             _preconditionManager = new IncrementalPreconditionManager(
                 args.ShouldPrintIncrementalPreconditions,
                 args.ShouldNotUseIncrementality,

@@ -14,8 +14,6 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private IList<LibraryAsset> _compilationAssemblies;
 
-        private IList<LibraryAsset> _compilationAssets;
-
         private IList<LibraryAsset> _sourceReferences;
 
         private IList<LibraryAssetGroup> _nativeLibraryGroups;
@@ -33,8 +31,6 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         public IEnumerable<LibraryAsset> RuntimeAssets => _runtimeAssets;
 
         public IEnumerable<LibraryAsset> CompilationAssemblies => _compilationAssemblies;
-
-        public IEnumerable<LibraryAsset> CompilationAssets => _compilationAssets;
 
         public IEnumerable<LibraryAsset> SourceReferences => _sourceReferences;
 

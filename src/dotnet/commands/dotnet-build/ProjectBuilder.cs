@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,27 +9,14 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Build
 {
-    internal enum CompilationResult
-    {
-        IncrementalSkip, Success, Failure
-    }
-
     internal abstract class ProjectBuilder
     {
-        private readonly bool _skipDependencies;
-
-        public ProjectBuilder(bool skipDependencies)
-        {
-            _skipDependencies = skipDependencies;
-        }
-
         private Dictionary<ProjectContextIdentity, CompilationResult> _compilationResults = new Dictionary<ProjectContextIdentity, CompilationResult>();
 
         public IEnumerable<CompilationResult> Build(IEnumerable<ProjectGraphNode> roots)
         {
             foreach (var projectNode in roots)
             {
-                Console.WriteLine(projectNode.ProjectContext.Identity.TargetFramework);
                 yield return Build(projectNode);
             }
         }
@@ -67,20 +57,18 @@ namespace Microsoft.DotNet.Tools.Build
 
         private CompilationResult CompileWithDependencies(ProjectGraphNode projectNode)
         {
-            if (!_skipDependencies)
+            foreach (var dependency in projectNode.Dependencies)
             {
-                foreach (var dependency in projectNode.Dependencies)
+                var context = dependency.ProjectContext;
+                if (!context.ProjectFile.Files.SourceFiles.Any())
                 {
-                    var context = dependency.ProjectContext;
-                    if (!context.ProjectFile.Files.SourceFiles.Any())
-                    {
-                        continue;
-                    }
-                    var result = Build(dependency);
-                    if (result == CompilationResult.Failure)
-                    {
-                        return CompilationResult.Failure;
-                    }
+                    continue;
+                }
+
+                var result = Build(dependency);
+                if (result == CompilationResult.Failure)
+                {
+                    return CompilationResult.Failure;
                 }
             }
             if (NeedsRebuilding(projectNode))

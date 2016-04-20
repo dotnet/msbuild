@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using NuGet.Frameworks;
@@ -8,12 +11,15 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Build
 {
-    public class ProjectGraphCollector
+    internal class ProjectGraphCollector
     {
+        private readonly bool _collectDependencies;
         private readonly Func<string, NuGetFramework, ProjectContext> _projectContextFactory;
 
-        public ProjectGraphCollector(Func<string, NuGetFramework, ProjectContext> projectContextFactory)
+        public ProjectGraphCollector(bool collectDependencies,
+            Func<string, NuGetFramework, ProjectContext> projectContextFactory)
         {
+            _collectDependencies = collectDependencies;
             _projectContextFactory = projectContextFactory;
         }
 
@@ -24,24 +30,27 @@ namespace Microsoft.DotNet.Tools.Build
                 var libraries = context.LibraryManager.GetLibraries();
                 var lookup = libraries.ToDictionary(l => l.Identity.Name);
                 var root = lookup[context.ProjectFile.Name];
-                yield return TraverseProject((ProjectDescription)root, lookup, context);
+                yield return TraverseProject((ProjectDescription) root, lookup, context);
             }
         }
 
         private ProjectGraphNode TraverseProject(ProjectDescription project, IDictionary<string, LibraryDescription> lookup, ProjectContext context = null)
         {
             var deps = new List<ProjectGraphNode>();
-            foreach (var dependency in project.Dependencies)
+            if (_collectDependencies)
             {
-                var libraryDescription = lookup[dependency.Name];
+                foreach (var dependency in project.Dependencies)
+                {
+                    var libraryDescription = lookup[dependency.Name];
 
-                if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
-                {
-                    deps.Add(TraverseProject((ProjectDescription)libraryDescription, lookup));
-                }
-                else
-                {
-                    deps.AddRange(TraverseNonProject(libraryDescription, lookup));
+                    if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
+                    {
+                        deps.Add(TraverseProject((ProjectDescription)libraryDescription, lookup));
+                    }
+                    else
+                    {
+                        deps.AddRange(TraverseNonProject(libraryDescription, lookup));
+                    }
                 }
             }
             var task = context != null ? Task.FromResult(context) : Task.Run(() => _projectContextFactory(project.Path, project.Framework));

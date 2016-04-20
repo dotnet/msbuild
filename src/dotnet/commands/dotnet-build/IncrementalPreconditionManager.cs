@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +12,7 @@ using Microsoft.DotNet.ProjectModel.Utilities;
 
 namespace Microsoft.DotNet.Tools.Build
 {
-    class IncrementalPreconditionManager
+    internal class IncrementalPreconditionManager
     {
         private readonly bool _printPreconditions;
         private readonly bool _forceNonIncremental;
@@ -41,32 +44,12 @@ namespace Microsoft.DotNet.Tools.Build
                 preconditions.AddForceUnsafePrecondition();
             }
 
-            var projectsToCheck = GetProjectsToCheck(projectNode);
-
-            foreach (var project in projectsToCheck)
-            {
-                CollectScriptPreconditions(project, preconditions);
-                CollectCompilerNamePreconditions(project, preconditions);
-                CollectCheckPathProbingPreconditions(project, preconditions);
-            }
+            var project = projectNode.ProjectContext;
+            CollectScriptPreconditions(project, preconditions);
+            CollectCompilerNamePreconditions(project, preconditions);
+            CollectCheckPathProbingPreconditions(project, preconditions);
             _preconditions[projectNode.ProjectContext.Identity] = preconditions;
             return preconditions;
-        }
-
-        private List<ProjectContext> GetProjectsToCheck(ProjectGraphNode projectNode)
-        {
-            if (_skipDependencies)
-            {
-                return new List<ProjectContext>(1) { projectNode.ProjectContext };
-            }
-
-            // include initial root project
-            var contextsToCheck = new List<ProjectContext>(1 + projectNode.Dependencies.Count) { projectNode.ProjectContext };
-
-            // TODO: not traversing deeper than 1 level of dependencies
-            contextsToCheck.AddRange(projectNode.Dependencies.Select(n => n.ProjectContext));
-
-            return contextsToCheck;
         }
 
         private void CollectCheckPathProbingPreconditions(ProjectContext project, IncrementalPreconditions preconditions)

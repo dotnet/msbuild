@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                     It.IsAny<string>()))
                 .Returns(command.Object);
 
-            var _args = new CompilerCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");
+            var _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");
             _args.ConfigValue = ConfigValue;
 
             PreCompileScriptVariables = new Dictionary<string, string>();
