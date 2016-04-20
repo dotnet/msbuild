@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         private static readonly NuGetFramework Dnx46 = new NuGetFramework(
             FrameworkConstants.FrameworkIdentifiers.Dnx,
             new Version(4, 6));
-            
+
         private static FrameworkReferenceResolver _default;
 
         private readonly IDictionary<NuGetFramework, FrameworkInformation> _cache = new Dictionary<NuGetFramework, FrameworkInformation>();
@@ -30,14 +30,14 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             { FrameworkConstants.CommonFrameworks.Dnx451, new [] { FrameworkConstants.CommonFrameworks.Net451 } },
             { Dnx46, new [] { FrameworkConstants.CommonFrameworks.Net46 } }
         };
-        
+
         public FrameworkReferenceResolver(string referenceAssembliesPath)
         {
             ReferenceAssembliesPath = referenceAssembliesPath;
         }
-        
+
         public string ReferenceAssembliesPath { get; }
-        
+
         public static FrameworkReferenceResolver Default
         {
             get
@@ -46,11 +46,11 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 {
                     _default = new FrameworkReferenceResolver(GetDefaultReferenceAssembliesPath());
                 }
-                
+
                 return _default;
             }
         }
-        
+
         public static string GetDefaultReferenceAssembliesPath()
         {
             // Allow setting the reference assemblies path via an environment variable
@@ -210,7 +210,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             // Check for legacy frameworks
             if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows &&
                 targetFramework.IsDesktop() &&
-                targetFramework.Version <= new Version(3, 5))
+                targetFramework.Version <= new Version(3, 5, 0, 0))
             {
                 return GetLegacyFrameworkInformation(targetFramework, referenceAssembliesPath);
             }

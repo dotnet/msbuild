@@ -5,11 +5,28 @@
   },
   "dependencies": {},
   "frameworks": {
-    "net20": {},
-    "net35": {},
-    "net40": {},
-    "net461": {},
+    "net20": {
+        "frameworkAssemblies": {
+            "System.Xml": {}
+        }
+    },
+    "net35": {
+        "frameworkAssemblies": {
+            "System.Xml": {}
+        }
+    },
+    "net40": {
+        "frameworkAssemblies": {
+            "System.Xml": {}
+        }
+    },
+    "net461": {
+        "frameworkAssemblies": {
+            "System.Xml": {}
+        }
+    },
     "netstandard1.5": {
+      "imports": "dnxcore50",
       "dependencies": {
         "NETStandard.Library": "1.5.0-rc2-24018"
       }
