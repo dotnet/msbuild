@@ -27,6 +27,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             app.Name = "dotnet compile-fsc";
             app.FullName = ".NET F# Compiler";
             app.Description = "F# Compiler for the .NET Platform";
+            app.HandleResponseFiles = true;
             app.HelpOption("-h|--help");
 
             CommonCompilerOptionsCommandLine commonCompilerCommandLine = CommonCompilerOptionsCommandLine.AddOptions(app);

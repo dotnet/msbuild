@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             app.Name = "dotnet compile-csc";
             app.FullName = ".NET C# Compiler";
             app.Description = "C# Compiler for the .NET Platform";
+            app.HandleResponseFiles = true;
             app.HelpOption("-h|--help");
 
             CommonCompilerOptionsCommandLine commonCompilerCommandLine = CommonCompilerOptionsCommandLine.AddOptions(app);

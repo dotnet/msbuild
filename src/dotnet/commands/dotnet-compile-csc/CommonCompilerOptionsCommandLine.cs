@@ -9,8 +9,6 @@ namespace Microsoft.DotNet.Tools.Compiler
 {
     internal class CommonCompilerOptionsCommandLine
     {
-        private const string ArgTemplate = "<arg>";
-
         public CommandOption DefineOption { get; set; }
         public CommandOption SuppressWarningOption { get; set; }
         public CommandOption LanguageVersionOption { get; set; }
@@ -32,51 +30,59 @@ namespace Microsoft.DotNet.Tools.Compiler
             CommonCompilerOptionsCommandLine commandLineOptions = new CommonCompilerOptionsCommandLine();
 
             commandLineOptions.DefineOption =
-                app.Option($"{DefineOptionName} {ArgTemplate}...", "Preprocessor definitions", CommandOptionType.MultipleValue);
+                AddOption(app, DefineOptionName, "Preprocessor definitions", CommandOptionType.MultipleValue);
 
             commandLineOptions.SuppressWarningOption =
-                app.Option($"{SuppressWarningOptionName} {ArgTemplate}...", "Suppresses the specified warning", CommandOptionType.MultipleValue);
+                AddOption(app, SuppressWarningOptionName, "Suppresses the specified warning", CommandOptionType.MultipleValue);
 
             commandLineOptions.LanguageVersionOption =
-                app.Option($"{LanguageVersionOptionName} {ArgTemplate}", "The version of the language used to compile", CommandOptionType.SingleValue);
+                AddOption(app, LanguageVersionOptionName, "The version of the language used to compile", CommandOptionType.SingleValue);
 
             commandLineOptions.PlatformOption =
-                app.Option($"{PlatformOptionName} {ArgTemplate}", "The target platform", CommandOptionType.SingleValue);
+                AddOption(app, PlatformOptionName, "The target platform", CommandOptionType.SingleValue);
 
             commandLineOptions.AllowUnsafeOption =
-                app.Option($"{AllowUnsafeOptionName} {ArgTemplate}", "Allow unsafe code", CommandOptionType.SingleValue);
+                AddOption(app, AllowUnsafeOptionName, "Allow unsafe code", CommandOptionType.BoolValue);
 
             commandLineOptions.WarningsAsErrorsOption =
-                app.Option($"{WarningsAsErrorsOptionName} {ArgTemplate}", "Turn all warnings into errors", CommandOptionType.SingleValue);
+                AddOption(app, WarningsAsErrorsOptionName, "Turn all warnings into errors", CommandOptionType.BoolValue);
 
             commandLineOptions.OptimizeOption =
-                app.Option($"{OptimizeOptionName} {ArgTemplate}", "Enable compiler optimizations", CommandOptionType.SingleValue);
+                AddOption(app, OptimizeOptionName, "Enable compiler optimizations", CommandOptionType.BoolValue);
 
             commandLineOptions.KeyFileOption =
-                app.Option($"{KeyFileOptionName} {ArgTemplate}", "Path to file containing the key to strong-name sign the output assembly", CommandOptionType.SingleValue);
+                AddOption(app, KeyFileOptionName, "Path to file containing the key to strong-name sign the output assembly", CommandOptionType.SingleValue);
 
             commandLineOptions.DelaySignOption =
-                app.Option($"{DelaySignOptionName} {ArgTemplate}", "Delay-sign the output assembly", CommandOptionType.SingleValue);
+                AddOption(app, DelaySignOptionName, "Delay-sign the output assembly", CommandOptionType.BoolValue);
 
             commandLineOptions.PublicSignOption =
-                app.Option($"{PublicSignOptionName} {ArgTemplate}", "Public-sign the output assembly", CommandOptionType.SingleValue);
+                AddOption(app, PublicSignOptionName, "Public-sign the output assembly", CommandOptionType.BoolValue);
 
             commandLineOptions.DebugTypeOption =
-                app.Option($"{DebugTypeOptionName} {ArgTemplate}", "The type of PDB to emit: portable or full", CommandOptionType.SingleValue);
+                AddOption(app, DebugTypeOptionName, "The type of PDB to emit: portable or full", CommandOptionType.SingleValue);
 
             commandLineOptions.EmitEntryPointOption =
-                app.Option($"{EmitEntryPointOptionName} {ArgTemplate}", "Output an executable console program", CommandOptionType.SingleValue);
+                AddOption(app, EmitEntryPointOptionName, "Output an executable console program", CommandOptionType.BoolValue);
 
             commandLineOptions.GenerateXmlDocumentationOption =
-                app.Option($"{GenerateXmlDocumentationOptionName} {ArgTemplate}", "Generate XML documentation file", CommandOptionType.SingleValue);
+                AddOption(app, GenerateXmlDocumentationOptionName, "Generate XML documentation file", CommandOptionType.BoolValue);
 
             commandLineOptions.AdditionalArgumentsOption =
-                app.Option($"{AdditionalArgumentsOptionName} {ArgTemplate}...", "Pass the additional argument directly to the compiler", CommandOptionType.MultipleValue);
+                AddOption(app, AdditionalArgumentsOptionName, "Pass the additional argument directly to the compiler", CommandOptionType.MultipleValue);
 
             commandLineOptions.OutputNameOption =
-                app.Option($"{OutputNameOptionName} {ArgTemplate}", "Output assembly name", CommandOptionType.SingleValue);
+                AddOption(app, OutputNameOptionName, "Output assembly name", CommandOptionType.SingleValue);
 
             return commandLineOptions;
+        }
+
+        private static CommandOption AddOption(CommandLineApplication app, string optionName, string description, CommandOptionType optionType)
+        {
+            string argSuffix = optionType == CommandOptionType.MultipleValue ? "..." : null;
+            string argString = optionType == CommandOptionType.BoolValue ? null : $" <arg>{argSuffix}";
+
+            return app.Option($"--{optionName}{argString}", description, optionType);
         }
 
         public CommonCompilerOptions GetOptionValues()
@@ -87,15 +93,15 @@ namespace Microsoft.DotNet.Tools.Compiler
                 SuppressWarnings = SuppressWarningOption.Values,
                 LanguageVersion = LanguageVersionOption.Value(),
                 Platform = PlatformOption.Value(),
-                AllowUnsafe = bool.Parse(AllowUnsafeOption.Value()),
-                WarningsAsErrors = bool.Parse(WarningsAsErrorsOption.Value()),
-                Optimize = bool.Parse(OptimizeOption.Value()),
+                AllowUnsafe = AllowUnsafeOption.BoolValue,
+                WarningsAsErrors = WarningsAsErrorsOption.BoolValue,
+                Optimize = OptimizeOption.BoolValue,
                 KeyFile = KeyFileOption.Value(),
-                DelaySign = bool.Parse(DelaySignOption.Value()),
-                PublicSign = bool.Parse(PublicSignOption.Value()),
+                DelaySign = DelaySignOption.BoolValue,
+                PublicSign = PublicSignOption.BoolValue,
                 DebugType = DebugTypeOption.Value(),
-                EmitEntryPoint = bool.Parse(EmitEntryPointOption.Value()),
-                GenerateXmlDocumentation = bool.Parse(GenerateXmlDocumentationOption.Value()),
+                EmitEntryPoint = EmitEntryPointOption.BoolValue,
+                GenerateXmlDocumentation = GenerateXmlDocumentationOption.BoolValue,
                 AdditionalArguments = AdditionalArgumentsOption.Values,
                 OutputName = OutputNameOption.Value(),
             };

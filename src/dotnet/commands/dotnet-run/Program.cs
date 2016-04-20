@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Tools.Run
             app.Name = "dotnet run";
             app.FullName = ".NET Run Command";
             app.Description = "Command used to run .NET apps";
+            app.HandleResponseFiles = true;
             app.HelpOption("-h|--help");
 
             CommandOption framework = app.Option("-f|--framework", "Compile a specific framework", CommandOptionType.SingleValue);
@@ -38,6 +39,7 @@ namespace Microsoft.DotNet.Tools.Run
 
                 return runCmd.Start();
             });
+
             try
             {
                 return app.Execute(args);

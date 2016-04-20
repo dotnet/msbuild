@@ -9,8 +9,6 @@ namespace Microsoft.DotNet.Tools.Compiler
 {
     internal class AssemblyInfoOptionsCommandLine
     {
-        private const string ArgTemplate = "<arg>";
-
         public CommandOption VersionOption { get; set; }
         public CommandOption TitleOption { get; set; }
         public CommandOption DescriptionOption { get; set; }
@@ -25,34 +23,30 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             AssemblyInfoOptionsCommandLine commandLineOptions = new AssemblyInfoOptionsCommandLine();
 
-            commandLineOptions.VersionOption =
-                app.Option($"{AssemblyVersionOptionName} {ArgTemplate}", "Assembly version", CommandOptionType.SingleValue);
+            commandLineOptions.VersionOption = AddOption(app, AssemblyVersionOptionName, "Assembly version");
 
-            commandLineOptions.TitleOption =
-                app.Option($"{TitleOptionName} {ArgTemplate}", "Assembly title", CommandOptionType.SingleValue);
+            commandLineOptions.TitleOption = AddOption(app, TitleOptionName, "Assembly title");
 
-            commandLineOptions.DescriptionOption =
-                app.Option($"{DescriptionOptionName} {ArgTemplate}", "Assembly description", CommandOptionType.SingleValue);
+            commandLineOptions.DescriptionOption = AddOption(app, DescriptionOptionName, "Assembly description");
 
-            commandLineOptions.CopyrightOption =
-                app.Option($"{CopyrightOptionName} {ArgTemplate}", "Assembly copyright", CommandOptionType.SingleValue);
+            commandLineOptions.CopyrightOption = AddOption(app, CopyrightOptionName, "Assembly copyright");
 
-            commandLineOptions.NeutralCultureOption =
-                app.Option($"{NeutralCultureOptionName} {ArgTemplate}", "Assembly neutral culture", CommandOptionType.SingleValue);
+            commandLineOptions.NeutralCultureOption = AddOption(app, NeutralCultureOptionName, "Assembly neutral culture");
 
-            commandLineOptions.CultureOption =
-                app.Option($"{CultureOptionName} {ArgTemplate}", "Assembly culture", CommandOptionType.SingleValue);
+            commandLineOptions.CultureOption = AddOption(app, CultureOptionName, "Assembly culture");
 
-            commandLineOptions.InformationalVersionOption =
-                app.Option($"{InformationalVersionOptionName} {ArgTemplate}", "Assembly informational version", CommandOptionType.SingleValue);
+            commandLineOptions.InformationalVersionOption = AddOption(app, InformationalVersionOptionName, "Assembly informational version");
 
-            commandLineOptions.FileVersionOption =
-                app.Option($"{AssemblyFileVersionOptionName} {ArgTemplate}", "Assembly file version", CommandOptionType.SingleValue);
+            commandLineOptions.FileVersionOption = AddOption(app, AssemblyFileVersionOptionName, "Assembly file version");
 
-            commandLineOptions.TargetFrameworkOption =
-                app.Option($"{TargetFrameworkOptionName} {ArgTemplate}", "Assembly target framework", CommandOptionType.SingleValue);
+            commandLineOptions.TargetFrameworkOption = AddOption(app, TargetFrameworkOptionName, "Assembly target framework");
 
             return commandLineOptions;
+        }
+
+        private static CommandOption AddOption(CommandLineApplication app, string optionName, string description)
+        {
+            return app.Option($"--{optionName} <arg>", description, CommandOptionType.SingleValue);
         }
 
         public AssemblyInfoOptions GetOptionValues()
@@ -73,6 +67,11 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static string UnescapeNewlines(string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+
             return text.Replace("\\r", "\r").Replace("\\n", "\n");
         }
     }
