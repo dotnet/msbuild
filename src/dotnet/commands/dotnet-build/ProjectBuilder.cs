@@ -59,18 +59,19 @@ namespace Microsoft.DotNet.Tools.Build
         {
             foreach (var dependency in projectNode.Dependencies)
             {
-                var context = dependency.ProjectContext;
-                if (!context.ProjectFile.Files.SourceFiles.Any())
-                {
-                    continue;
-                }
-
                 var result = Build(dependency);
                 if (result == CompilationResult.Failure)
                 {
                     return CompilationResult.Failure;
                 }
             }
+
+            var context = projectNode.ProjectContext;
+            if (!context.ProjectFile.Files.SourceFiles.Any())
+            {
+                return CompilationResult.IncrementalSkip;
+            }
+
             if (NeedsRebuilding(projectNode))
             {
                 return RunCompile(projectNode);

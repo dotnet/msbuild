@@ -41,15 +41,17 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 foreach (var dependency in project.Dependencies)
                 {
-                    var libraryDescription = lookup[dependency.Name];
-
-                    if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
+                    LibraryDescription libraryDescription;
+                    if (lookup.TryGetValue(dependency.Name, out libraryDescription))
                     {
-                        deps.Add(TraverseProject((ProjectDescription)libraryDescription, lookup));
-                    }
-                    else
-                    {
-                        deps.AddRange(TraverseNonProject(libraryDescription, lookup));
+                        if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
+                        {
+                            deps.Add(TraverseProject((ProjectDescription)libraryDescription, lookup));
+                        }
+                        else
+                        {
+                            deps.AddRange(TraverseNonProject(libraryDescription, lookup));
+                        }
                     }
                 }
             }
@@ -59,20 +61,33 @@ namespace Microsoft.DotNet.Tools.Build
 
         private IEnumerable<ProjectGraphNode> TraverseNonProject(LibraryDescription root, IDictionary<string, LibraryDescription> lookup)
         {
-            foreach (var dependency in root.Dependencies)
+            Stack<LibraryDescription> libraries = new Stack<LibraryDescription>();
+            libraries.Push(root);
+            while (libraries.Count > 0)
             {
-                var libraryDescription = lookup[dependency.Name];
-
-                if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
+                var current = libraries.Pop();
+                bool foundProject = false;
+                foreach (var dependency in current.Dependencies)
                 {
-                    yield return TraverseProject((ProjectDescription)libraryDescription, lookup);
-                }
-                else
-                {
-                    foreach(var node in TraverseNonProject(libraryDescription, lookup))
+                    LibraryDescription libraryDescription;
+                    if (lookup.TryGetValue(dependency.Name, out libraryDescription))
                     {
-                        yield return node;
+                        if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
+                        {
+                            foundProject = true;
+                            yield return TraverseProject((ProjectDescription) libraryDescription, lookup);
+                        }
+                        else
+                        {
+                            libraries.Push(libraryDescription);
+                        }
                     }
+                }
+                // if package didn't have any project dependencies inside remove it from lookup
+                // and do not traverse anymore
+                if (!foundProject)
+                {
+                    lookup.Remove(current.Identity.Name);
                 }
             }
         }

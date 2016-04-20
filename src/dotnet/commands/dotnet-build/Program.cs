@@ -54,6 +54,7 @@ namespace Microsoft.DotNet.Tools.Build
             BuildCommandApp args)
         {
 
+            List<Task<ProjectContext>> tasks = new List<Task<ProjectContext>>();
             // Set defaults based on the environment
             var settings = ProjectReaderSettings.ReadFromEnvironment();
 
@@ -90,13 +91,14 @@ namespace Microsoft.DotNet.Tools.Build
 
                 foreach (var framework in selectedFrameworks)
                 {
-                    yield return new ProjectContextBuilder()
+                    tasks.Add(Task.Run(() => new ProjectContextBuilder()
                         .WithProjectDirectory(Path.GetDirectoryName(file))
                         .WithTargetFramework(framework)
                         .WithReaderSettings(settings)
-                        .Build();
+                        .Build()));
                 }
             }
+            return Task.WhenAll(tasks).GetAwaiter().GetResult();
         }
     }
 }
