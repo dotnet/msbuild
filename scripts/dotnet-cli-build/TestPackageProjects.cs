@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Build
                 Name = "dotnet-dependency-tool-invoker",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-dependency-tool-invoker",
-                IsApplicable = CurrentPlatform.IsWindows,
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = true,
                 Frameworks = new [] { "netcoreapp1.0" }
@@ -101,6 +101,16 @@ namespace Microsoft.DotNet.Cli.Build
                 Name = "dotnet-portable",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-portable",
+                IsApplicable = true,
+                VersionSuffix = string.Empty,
+                Clean = true,
+                Frameworks = new [] { "netcoreapp1.0" }
+            },
+            new TestPackageProject()
+            {
+                Name = "ToolWithOutputName",
+                IsTool = true,
+                Path = "TestAssets/TestPackages/ToolWithOutputName",
                 IsApplicable = true,
                 VersionSuffix = string.Empty,
                 Clean = true,

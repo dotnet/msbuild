@@ -44,6 +44,43 @@ namespace Microsoft.DotNet.Tests
             result.Should().Pass();
         }
 
+        [Fact]
+        public void CanInvokeToolWhosePackageNameIsDifferentFromDllName()
+        {
+            var appDirectory = Path.Combine(_testProjectsRoot, "AppWithDependencyOnToolWithOutputName");
+
+            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            CommandResult result = new GenericCommand("tool-with-output-name") { WorkingDirectory = appDirectory }
+                .ExecuteWithCapturedOutput();
+
+            result.Should().HaveStdOutContaining("Tool with output name!");
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
+        }
+
+        [Fact]
+        public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
+        {
+            var appDirectory = Path.Combine(_testProjectsRoot, "AppWithDirectDependencyWithOutputName");
+            const string framework = ".NETCoreApp,Version=v1.0";
+
+            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
+                    .ExecuteWithCapturedOutput("tool-with-output-name", framework, string.Empty);
+
+                result.Should().HaveStdOutContaining("Tool with output name!");
+                result.Should().NotHaveStdErr();
+                result.Should().Pass();
+        }
+
         // need conditional theories so we can skip on non-Windows
         [Theory]
         [MemberData("DependencyToolArguments")]
@@ -62,7 +99,7 @@ namespace Microsoft.DotNet.Tests
                 .Pass();
 
             CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
-                    .ExecuteWithCapturedOutput(framework, args);
+                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, args);
 
                 result.Should().HaveStdOutContaining(framework);
                 result.Should().HaveStdOutContaining(args);
@@ -163,6 +200,29 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
+        class GenericCommand : TestCommand
+        {
+            private readonly string _commandName;
+
+            public GenericCommand(string commandName)
+                : base("dotnet")
+            {
+                _commandName = commandName;
+            }
+
+            public override CommandResult Execute(string args = "")
+            {
+                args = $"{_commandName} {args}";
+                return base.Execute(args);
+            }
+
+            public override CommandResult ExecuteWithCapturedOutput(string args = "")
+            {
+                args = $"{_commandName} {args}";
+                return base.ExecuteWithCapturedOutput(args);
+            }
+        }
+
         class DependencyContextTestCommand : TestCommand
         {
             public DependencyContextTestCommand()
@@ -190,15 +250,15 @@ namespace Microsoft.DotNet.Tests
             {
             }
 
-            public CommandResult Execute(string framework, string additionalArgs)
+            public CommandResult Execute(string commandName, string framework, string additionalArgs)
             {
-                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
+                var args = $"dependency-tool-invoker {commandName} --framework {framework} {additionalArgs}";
                 return base.Execute(args);
             }
 
-            public CommandResult ExecuteWithCapturedOutput(string framework, string additionalArgs)
+            public CommandResult ExecuteWithCapturedOutput(string commandName, string framework, string additionalArgs)
             {
-                var args = $"dependency-tool-invoker desktop-and-portable --framework {framework} {additionalArgs}";
+                var args = $"dependency-tool-invoker {commandName} --framework {framework} {additionalArgs}";
                 return base.ExecuteWithCapturedOutput(args);
             }
         }
