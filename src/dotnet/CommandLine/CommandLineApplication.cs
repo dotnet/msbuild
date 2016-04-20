@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public Func<string> LongVersionGetter { get; set; }
         public Func<string> ShortVersionGetter { get; set; }
         public List<CommandLineApplication> Commands { get; private set; }
+        public bool HandleResponseFiles { get; set; }
 
         public CommandLineApplication Command(string name, Action<CommandLineApplication> configuration,
             bool throwOnUnexpectedArg = true)
@@ -102,6 +104,11 @@ namespace Microsoft.DotNet.Cli.CommandLine
             CommandOption option = null;
             IEnumerator<CommandArgument> arguments = null;
 
+            if (HandleResponseFiles)
+            {
+                args = ExpandResponseFiles(args).ToArray();
+            }
+
             for (var index = 0; index < args.Length; index++)
             {
                 var arg = args[index];
@@ -151,7 +158,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                             }
                             option = null;
                         }
-                        else if (option.OptionType == CommandOptionType.NoValue)
+                        else if (option.OptionType == CommandOptionType.NoValue || option.OptionType == CommandOptionType.BoolValue)
                         {
                             // No value is needed for this option
                             option.TryParse(null);
@@ -196,7 +203,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                             }
                             option = null;
                         }
-                        else if (option.OptionType == CommandOptionType.NoValue)
+                        else if (option.OptionType == CommandOptionType.NoValue || option.OptionType == CommandOptionType.BoolValue)
                         {
                             // No value is needed for this option
                             option.TryParse(null);
@@ -477,6 +484,50 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 // All remaining arguments are stored for further use
                 command.RemainingArguments.AddRange(new ArraySegment<string>(args, index, args.Length - index));
             }
+        }
+
+        private IEnumerable<string> ExpandResponseFiles(IEnumerable<string> args)
+        {
+            foreach (var arg in args)
+            {
+                if (!arg.StartsWith("@", StringComparison.Ordinal))
+                {
+                    yield return arg;
+                }
+                else
+                {
+                    var fileName = arg.Substring(1);
+
+                    var responseFileArguments = ParseResponseFile(fileName);
+
+                    // ParseResponseFile can suppress expanding this response file by
+                    // returning null. In that case, we'll treat the response
+                    // file token as a regular argument.
+
+                    if (responseFileArguments == null)
+                    {
+                        yield return arg;
+                    }
+                    else
+                    {
+                        foreach (var responseFileArgument in responseFileArguments)
+                            yield return responseFileArgument.Trim();
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<string> ParseResponseFile(string fileName)
+        {
+            if (!HandleResponseFiles)
+                return null;
+
+            if (!File.Exists(fileName))
+            {
+                throw new InvalidOperationException($"Response file '{fileName}' doesn't exist.");
+            }
+
+            return File.ReadLines(fileName);
         }
 
         private class CommandArgumentEnumerator : IEnumerator<CommandArgument>

@@ -8,6 +8,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
     {
         MultipleValue,
         SingleValue,
+        BoolValue,
         NoValue
     }
 }

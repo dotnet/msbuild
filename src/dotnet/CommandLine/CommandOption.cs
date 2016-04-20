@@ -39,8 +39,12 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 {
                     ValueName = part.Substring(1, part.Length - 2);
                 }
-                else
+                else if (optionType == CommandOptionType.MultipleValue && part.StartsWith("<") && part.EndsWith(">..."))
                 {
+                    ValueName = part.Substring(1, part.Length - 5);
+                }
+                else
+                { 
                     throw new ArgumentException($"Invalid template pattern '{template}'", nameof(template));
                 }
             }
@@ -58,6 +62,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public string ValueName { get; set; }
         public string Description { get; set; }
         public List<string> Values { get; private set; }
+        public bool? BoolValue { get; private set; }
         public CommandOptionType OptionType { get; private set; }
 
         public bool TryParse(string value)
@@ -73,6 +78,30 @@ namespace Microsoft.DotNet.Cli.CommandLine
                         return false;
                     }
                     Values.Add(value);
+                    break;
+                case CommandOptionType.BoolValue:
+                    if (Values.Any())
+                    {
+                        return false;
+                    }
+
+                    if (value == null)
+                    {
+                        // add null to indicate that the option was present, but had no value
+                        Values.Add(null);
+                        BoolValue = true;
+                    }
+                    else
+                    {
+                        bool boolValue;
+                        if (!bool.TryParse(value, out boolValue))
+                        {
+                            return false;
+                        }
+
+                        Values.Add(value);
+                        BoolValue = boolValue;
+                    }
                     break;
                 case CommandOptionType.NoValue:
                     if (value != null)
