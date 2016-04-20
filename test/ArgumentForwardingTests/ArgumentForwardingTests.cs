@@ -51,6 +51,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <param name="testUserArgument"></param>
         [Theory]
         [InlineData(@"""abc"" d e")]
+        [InlineData(@"""ábc"" d é")]
         [InlineData(@"""abc""      d e")]
         [InlineData("\"abc\"\t\td\te")]
         [InlineData(@"a\\b d""e f""g h")]
