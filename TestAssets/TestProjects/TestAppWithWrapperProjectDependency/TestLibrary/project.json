@@ -1,7 +1,6 @@
 {
   "frameworks": {
-    "netstandardapp1.5": {
-      "imports": "dnxcore50",
+    "netcoreapp1.0": {
       "bin": {
         "assembly": "bin.keep\\{configuration}\\dnxcore50\\TestLibrary.dll",
         "pdb": "bin.keep\\{configuration}\\dnxcore50\\TestLibrary.pdb"

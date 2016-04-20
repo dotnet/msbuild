@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Build
     {
         // projectName -> ProjectDescription
         public Dictionary<string, ProjectDescription> ProjectDependenciesWithSources { get; }
-        public List<LibraryExport> Dependencies { get; }
+        public Dictionary<string, LibraryExport> Dependencies { get; }
 
         public ProjectDependenciesFacade(ProjectContext rootProject, string configValue)
         {
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Build
             // Build project references
             foreach (var dependency in Dependencies)
             {
-                var projectDependency = dependency.Library as ProjectDescription;
+                var projectDependency = dependency.Value.Library as ProjectDescription;
 
                 if (projectDependency != null && projectDependency.Resolved && projectDependency.Project.Files.SourceFiles.Any())
                 {
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Build
         }
 
         // todo make extension of ProjectContext?
-        private static List<LibraryExport> GetProjectDependencies(ProjectContext projectContext, string configuration)
+        private static Dictionary<string, LibraryExport> GetProjectDependencies(ProjectContext projectContext, string configuration)
         {
             // Create the library exporter
             var exporter = projectContext.CreateExporter(configuration);
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Build
             // Gather exports for the project
             var dependencies = exporter.GetDependencies().ToList();
 
-            return dependencies;
+            return dependencies.ToDictionary(d => d.Library.Identity.Name);
         }
     }
 

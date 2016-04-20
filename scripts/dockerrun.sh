@@ -61,6 +61,9 @@ if [ -z "$DOCKERFILE" ]; then
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             echo "Detected current OS as CentOS, using 'centos' image"
             export DOCKERFILE=scripts/docker/centos
+        elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
+            echo "Detected current OS as Debian, using 'debian' image"
+            export DOCKERFILE=scripts/docker/debian
         else
             echo "Unknown Linux Distro. Using 'ubuntu' image"
             export DOCKERFILE=scripts/docker/ubuntu

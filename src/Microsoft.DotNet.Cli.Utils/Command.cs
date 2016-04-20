@@ -27,7 +27,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 FileName = commandSpec.Path,
                 Arguments = commandSpec.Args,
                 RedirectStandardError = true,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                UseShellExecute = false
             };
 
             _stdOut = new StreamForwarder();

@@ -124,13 +124,14 @@ namespace Microsoft.DotNet.Tools.Run
                 return result;
             }
 
+            List<string> hostArgs = new List<string>();
             if (!_context.TargetFramework.IsDesktop())
             {
                 // Add Nuget Packages Probing Path
                 var nugetPackagesRoot = _context.PackagesDirectory;
                 var probingPathArg = "--additionalprobingpath";
-                _args.Insert(0, nugetPackagesRoot);
-                _args.Insert(0, probingPathArg);
+                hostArgs.Insert(0, nugetPackagesRoot);
+                hostArgs.Insert(0, probingPathArg);
             }
 
             // Now launch the output and give it the results
@@ -161,11 +162,13 @@ namespace Microsoft.DotNet.Tools.Run
                 // The executable is a ".dll", we need to call it through dotnet.exe
                 var muxer = new Muxer();
 
-                command = Command.Create(muxer.MuxerPath, Enumerable.Concat(new[] { "exec", outputName }, _args));
+                command = Command.Create(muxer.MuxerPath, Enumerable.Concat(
+                            Enumerable.Concat(new string[] { "exec" }, hostArgs),
+                            Enumerable.Concat(new string[] { outputName }, _args)));
             }
             else
             {
-                command = Command.Create(outputName, _args);
+                command = Command.Create(outputName, Enumerable.Concat(hostArgs, _args));
             }
 
             result = command

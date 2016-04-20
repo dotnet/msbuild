@@ -3,13 +3,9 @@
     "emitEntryPoint": true
   },
   "frameworks": {
-    "netstandardapp1.5": {
-      "imports": [
-        "dnxcore50",
-        "portable-net45+win8"
-      ],
+    "netcoreapp1.0": {
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24008"
+        "Microsoft.NETCore.App": "1.0.0-rc2-*"
       }
     }
   },
@@ -21,7 +17,7 @@
     "ubuntu.14.04-x64": {},
     "centos.7-x64": {},
     "rhel.7.2-x64": {},
-    "debian.8.2-x64": {}
+    "debian.8-x64": {}
   },
   "runtimeOptions": {
     "somethingString": "anything",

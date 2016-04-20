@@ -12,7 +12,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
     public class GivenThatWeWantToParseArgumentsForDotnetTest
     {
         private const string ProjectJson = "project.json";
-        private const string Framework = "netstandardapp1.5";
+        private const string Framework = "netcoreapp1.0";
         private const string Output = "some output";
         private const string BuildBasePath = "some build base path";
         private const string Config = "some config";
@@ -108,7 +108,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_converts_the_framework_to_NugetFramework()
         {
-            _dotnetTestFullParams.Framework.DotNetFrameworkName.Should().Be(".NETStandardApp,Version=v1.5");
+            _dotnetTestFullParams.Framework.DotNetFrameworkName.Should().Be(".NETCoreApp,Version=v1.0");
         }
 
         [Fact]

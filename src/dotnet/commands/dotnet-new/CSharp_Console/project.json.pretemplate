@@ -10,6 +10,8 @@
     }
   },
   "frameworks": {
-    "netcoreapp1.0": {}
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
+    }
   }
 }

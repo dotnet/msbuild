@@ -18,7 +18,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     /// </summary>
     public abstract class TestBase : IDisposable
     {
-        protected const string DefaultFramework = "netstandardapp1.5";
+        protected const string DefaultFramework = "netcoreapp1.0";
+        protected const string DefaultLibraryFramework = "netstandard1.5";
         private TempRoot _temp;
         private static TestAssetsManager s_testsAssetsMgr;
         private static string s_repoRoot;
@@ -55,12 +56,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 if (s_testsAssetsMgr == null)
                 {
-                    string assetsRoot = Path.Combine(RepoRoot, "TestAssets", "TestProjects");
-                    s_testsAssetsMgr = new TestAssetsManager(assetsRoot);
+                    s_testsAssetsMgr = GetTestGroupTestAssetsManager("TestProjects");
                 }
 
                 return s_testsAssetsMgr;
             }
+        }
+        
+        protected static TestAssetsManager GetTestGroupTestAssetsManager(string testGroup)
+        {
+            string assetsRoot = Path.Combine(RepoRoot, "TestAssets", testGroup);
+            var testAssetsMgr = new TestAssetsManager(assetsRoot);
+            
+            return testAssetsMgr;
         }
 
         protected TestBase()

@@ -107,46 +107,26 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
 
                 arguments.Add("exec");
-
-                if (runtimeConfigPath != null)
-                {
-                    arguments.Add("--runtimeconfig");
-                    arguments.Add(runtimeConfigPath);
-                }
-
-                if (depsFilePath != null)
-                {
-                    arguments.Add("--depsfile");
-                    arguments.Add(depsFilePath);
-                }
-
-                arguments.Add("--additionalprobingpath");
-                arguments.Add(nugetPackagesRoot);
-
-                arguments.Add(commandPath);
             }
             else
             {
                 host = CoreHost.HostExePath;
-
-                arguments.Add(commandPath);
-
-                if (runtimeConfigPath != null)
-                {
-                    arguments.Add("--runtimeconfig");
-                    arguments.Add(runtimeConfigPath);
-                }
-
-                if (depsFilePath != null)
-                {
-                    arguments.Add("--depsfile");
-                    arguments.Add(depsFilePath);
-                }
-
-                arguments.Add("--additionalprobingpath");
-                arguments.Add(nugetPackagesRoot);
+            }
+            if (runtimeConfigPath != null)
+            {
+                arguments.Add("--runtimeconfig");
+                arguments.Add(runtimeConfigPath);
+            }
+            if (depsFilePath != null)
+            {
+                arguments.Add("--depsfile");
+                arguments.Add(depsFilePath);
             }
 
+            arguments.Add("--additionalprobingpath");
+            arguments.Add(nugetPackagesRoot);
+
+            arguments.Add(commandPath);
             arguments.AddRange(commandArguments);
 
             return CreateCommandSpec(host, arguments, commandResolutionStrategy);

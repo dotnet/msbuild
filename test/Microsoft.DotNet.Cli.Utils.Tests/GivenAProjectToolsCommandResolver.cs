@@ -18,12 +18,17 @@ using FluentAssertions;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using NuGet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Compilation;
+using NuGet.ProjectModel;
+
+using LockFile = Microsoft.DotNet.ProjectModel.Graph.LockFile;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
     public class GivenAProjectToolsCommandResolver
     {
-        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetStandardApp15;
+        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
         private static readonly string s_liveProjectDirectory = 
             Path.Combine(AppContext.BaseDirectory, "TestAssets/TestProjects/AppWithToolDependency");
@@ -182,6 +187,38 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .FirstOrDefault(p => Path.GetFileName(p).EndsWith(FileNameSuffixes.DepsJson));
 
             depsJsonFile.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Generate_deps_json_method_doesnt_overwrite_when_deps_file_already_exists()
+        {
+            var context = ProjectContext.Create(Path.Combine(s_liveProjectDirectory, "project.json"), s_toolPackageFramework);
+
+            var nugetPackagesRoot = context.PackagesDirectory;
+            var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
+
+            var lockFilePath = toolPathCalculator.GetLockFilePath(
+                "dotnet-portable", 
+                new NuGetVersion("1.0.0"), 
+                s_toolPackageFramework);
+
+            var lockFile = LockFileReader.Read(lockFilePath, designTime: false);
+
+            var depsJsonFile = Path.Combine(
+                Path.GetDirectoryName(lockFilePath),
+                "dotnet-portable.deps.json");
+
+            if (File.Exists(depsJsonFile))
+            {
+                File.Delete(depsJsonFile);
+            }
+            File.WriteAllText(depsJsonFile, "temp");
+
+            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
+            projectToolsCommandResolver.GenerateDepsJsonFile(lockFile, depsJsonFile);
+
+            File.ReadAllText(depsJsonFile).Should().Be("temp");
+            File.Delete(depsJsonFile);
         }
 
         private ProjectToolsCommandResolver SetupProjectToolsCommandResolver(

@@ -17,25 +17,26 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static readonly string[] TestProjects = new[]
         {
+            "ArgumentForwardingTests",
             "EndToEnd",
             "dotnet.Tests",
-            "dotnet-publish.Tests",
+            "dotnet-build.Tests",
             "dotnet-compile.Tests",
             "dotnet-compile.UnitTests",
             "dotnet-compile-fsc.Tests",
-            "dotnet-build.Tests",
+            "dotnet-new.Tests",
             "dotnet-pack.Tests",
             "dotnet-projectmodel-server.Tests",
+            "dotnet-publish.Tests",
             "dotnet-resgen.Tests",
             "dotnet-run.Tests",
+            "dotnet-test.Tests",
+            "dotnet-test.UnitTests",
+            "Kestrel.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
-            "Microsoft.Extensions.DependencyModel.Tests",
-            "ArgumentForwardingTests",
-            "dotnet-test.UnitTests",
-            "dotnet-test.Tests",
-            "Kestrel.Tests"
+            "Microsoft.Extensions.DependencyModel.Tests"
         };
 
         public static readonly dynamic[] ConditionalTestAssets = new[]
@@ -58,7 +59,10 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
         public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(RestoreTestAssetProjects), nameof(RestoreDesktopTestAssetProjects), nameof(BuildTestAssetProjects))]
+        [Target(nameof(RestoreTestAssetProjects), 
+            nameof(RestoreDesktopTestAssetProjects), 
+            nameof(BuildTestAssetProjects), 
+            nameof(BuildDesktopTestAssetProjects))]
         public static BuildTargetResult SetupTestProjects(BuildTargetContext c) => c.Success();
 
         [Target]
@@ -70,7 +74,10 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore("--verbosity", "verbose", "--infer-runtimes", "--fallbacksource", Dirs.Corehost)
+            dotnet.Restore("--verbosity", "verbose", 
+                "--infer-runtimes", 
+                "--fallbacksource", Dirs.Corehost,
+                "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"))
                 .Execute()
                 .EnsureSuccessful();
@@ -91,17 +98,9 @@ namespace Microsoft.DotNet.Cli.Build
                 "--verbosity", "verbose",
                 "--infer-runtimes",
                 "--fallbacksource", Dirs.TestPackages,
-                "--fallbacksource", Dirs.Corehost)
+                "--fallbacksource", Dirs.Corehost,
+                "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
-                .Execute()
-                .EnsureSuccessful();
-
-            // The 'ProjectWithTests' is a portable test app. Cannot call --infer-runtimes on it, since on win x64 machines,
-            // the x86 runtime is being inferred, and there are no x86 DotNetHost packages
-            dotnet.Restore(
-                "--verbosity", "verbose",
-                "--fallbacksource", Dirs.Corehost)
-                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectWithTests"))
                 .Execute()
                 .EnsureSuccessful();
 
@@ -109,7 +108,8 @@ namespace Microsoft.DotNet.Cli.Build
             dotnet.Restore(
                 "--verbosity", "verbose",
                 "--infer-runtimes",
-                "--fallbacksource", Dirs.Corehost)
+                "--fallbacksource", Dirs.Corehost,
+                "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthTestProjects"))
                 .Execute();
 
@@ -131,7 +131,8 @@ namespace Microsoft.DotNet.Cli.Build
             dotnet.Restore("--verbosity", "verbose",
                 "--infer-runtimes",
                 "--fallbacksource", Dirs.TestPackages,
-                "--fallbacksource", Dirs.Corehost)
+                "--fallbacksource", Dirs.Corehost,
+                "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
                 .Execute().EnsureSuccessful();
 
@@ -166,7 +167,7 @@ namespace Microsoft.DotNet.Cli.Build
                 {
                     "netstandard1.5",
                     "netstandard1.3",
-                    "netstandardapp1.5"
+                    "netcoreapp1.0"
                 };
 
                 if (CurrentPlatform.IsWindows)
@@ -187,7 +188,6 @@ namespace Microsoft.DotNet.Cli.Build
                     var packBuildResult = DotNetCli.Stage1.Build(buildArgs.ToArray())
                         .Execute();
                 }
-
 
                 var projectJson = Path.Combine(fullPath, "project.json");
                 var dotnetPackArgs = new List<string> {
@@ -233,40 +233,28 @@ namespace Microsoft.DotNet.Cli.Build
                     Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", packageProject.Name));
                 }
             }
-
             return c.Success();
         }
 
         [Target]
         public static BuildTargetResult BuildTestAssetProjects(BuildTargetContext c)
         {
-            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"));
-
+            var testAssetsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
             var dotnet = DotNetCli.Stage2;
-            var nobuildFileName = ".noautobuild";
-            string testProjectsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
-            var projects = Directory.GetFiles(testProjectsRoot, "project.json", SearchOption.AllDirectories)
-                                    .Where(p => !ConditionalTestAssets.Where(s => !s.Skip() && p.EndsWith(Path.Combine(s.Path, "project.json"))).Any())
-                                    .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), nobuildFileName)));
+            var framework = "netcoreapp1.0";
 
-            foreach (var project in projects)
-            {
-                c.Info($"Building: {project}");
-                dotnet.Build("--framework", "netstandardapp1.5")
-                    .WorkingDirectory(Path.GetDirectoryName(project))
-                    .Execute()
-                    .EnsureSuccessful();
-            }
+            return BuildTestAssets(c, testAssetsRoot, dotnet, framework);
+        }
 
-            // build ProjectWithTests, which is outside of TestProjects and targets netcoreapp
-            string projectWithTests = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectWithTests");
-            c.Info($"Building: {projectWithTests}");
-            dotnet.Build("--framework", "netcoreapp1.0")
-                .WorkingDirectory(projectWithTests)
-                .Execute()
-                .EnsureSuccessful();
+        [Target]
+        [BuildPlatforms(BuildPlatform.Windows)]
+        public static BuildTargetResult BuildDesktopTestAssetProjects(BuildTargetContext c)
+        {
+            var testAssetsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects");
+            var dotnet = DotNetCli.Stage2;
+            var framework = "net451";
 
-            return c.Success();
+            return BuildTestAssets(c, testAssetsRoot, dotnet, framework);
         }
 
         [Target]
@@ -278,7 +266,8 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
             DotNetCli.Stage2.Restore("--verbosity", "verbose",
                 "--fallbacksource", Dirs.TestPackages,
-                "--fallbacksource", Dirs.Corehost)
+                "--fallbacksource", Dirs.Corehost,
+                "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test"))
                 .Execute()
                 .EnsureSuccessful();
@@ -366,6 +355,28 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd(validator, Path.Combine(c.BuildContext.BuildDirectory, "src"))
                 .Execute();
+
+            return c.Success();
+        }
+
+        private static BuildTargetResult BuildTestAssets(BuildTargetContext c, string testAssetsRoot, DotNetCli dotnet, string framework)
+        {
+            CleanBinObj(c, testAssetsRoot);
+
+            var nobuildFileName = ".noautobuild";
+
+            var projects = Directory.GetFiles(testAssetsRoot, "project.json", SearchOption.AllDirectories)
+                                    .Where(p => !ConditionalTestAssets.Where(s => !s.Skip() && p.EndsWith(Path.Combine(s.Path, "project.json"))).Any())
+                                    .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), nobuildFileName)));
+
+            foreach (var project in projects)
+            {
+                c.Info($"Building: {project}");
+                dotnet.Build("--framework", framework)
+                    .WorkingDirectory(Path.GetDirectoryName(project))
+                    .Execute()
+                    .EnsureSuccessful();
+            }
 
             return c.Success();
         }

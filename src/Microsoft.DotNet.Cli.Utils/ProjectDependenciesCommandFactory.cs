@@ -27,13 +27,18 @@ namespace Microsoft.DotNet.Cli.Utils
             _outputPath = outputPath;
             _buildBasePath = buildBasePath;
             _projectDirectory = projectDirectory;
+
+            if (_configuration == null)
+            {
+                _configuration = Constants.DefaultConfiguration;
+            }
         }
 
         public ICommand Create(
             string commandName,
             IEnumerable<string> args,
             NuGetFramework framework = null,
-            string configuration = Constants.DefaultConfiguration)
+            string configuration = null)
         {
             if (string.IsNullOrEmpty(configuration))
             {

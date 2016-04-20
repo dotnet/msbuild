@@ -25,10 +25,10 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             TestProjectRoot = testInstance.TestRoot;
 
             var buildResult = BuildProject();
-            buildResult.Should().HaveCompiledProject(MainProject);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             buildResult = BuildProject();
-            buildResult.Should().HaveSkippedProjectCompilation(MainProject);
+            buildResult.Should().HaveSkippedProjectCompilation(MainProject, _appFrameworkFullName);
         }
     }
 }

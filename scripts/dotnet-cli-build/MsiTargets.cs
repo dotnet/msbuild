@@ -41,11 +41,11 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string MsiVersion { get; set; }
 
-        private static string CliVersion { get; set; }
+        private static string CliDisplayVersion { get; set; }
+
+        private static string CliNugetVersion { get; set; }
 
         private static string Arch { get; } = CurrentArchitecture.Current.ToString();
-
-        private static string Channel { get; set; }
 
         private static void AcquireWix(BuildTargetContext c)
         {
@@ -92,8 +92,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             MsiVersion = buildVersion.GenerateMsiVersion();
-            CliVersion = buildVersion.SimpleVersion;
-            Channel = c.BuildContext.Get<string>("Channel");
+            CliDisplayVersion = buildVersion.SimpleVersion;
+            CliNugetVersion = buildVersion.NuGetVersion;
 
             AcquireWix(c);
             return c.Success();
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatemsi.ps1"),
-                cliSdkRoot, SdkMsi, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch, Channel)
+                cliSdkRoot, SdkMsi, WixRoot, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "host", "generatemsi.ps1"),
-                inputDir, SharedHostMsi, WixRoot, MsiVersion, CliVersion, Arch, wixObjRoot)
+                inputDir, SharedHostMsi, WixRoot, MsiVersion, CliDisplayVersion, CliNugetVersion, Arch, wixObjRoot)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),
-                SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, MsiVersion, CliVersion, upgradeCode, Arch, Channel)
+                SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
                     .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
                     .Execute()
                     .EnsureSuccessful();
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatebundle.ps1"),
-                SharedFrameworkMsi, SharedHostMsi, SharedFrameworkBundle, WixRoot, MsiVersion, CliVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, Channel)
+                SharedFrameworkMsi, SharedHostMsi, SharedFrameworkBundle, WixRoot, MsiVersion, CliDisplayVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

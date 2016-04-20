@@ -4,7 +4,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160406-08",
+    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160410-01 ",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.Files": "1.0.0-*",
@@ -13,8 +13,7 @@
   "frameworks": {
     "netstandard1.5": {
       "imports": [
-        "portable-net45+wp80+win8+wpa81+dnxcore50",
-        "dnxcore50"
+        "portable-net45+wp80+win8+wpa81+dnxcore50"
       ]
     }
   },

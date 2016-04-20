@@ -6,10 +6,10 @@ param(
     [Parameter(Mandatory=$true)][string]$DotnetMSIOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
     [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
-    [Parameter(Mandatory=$true)][string]$DotnetCLIVersion,
+    [Parameter(Mandatory=$true)][string]$DotnetCLIDisplayVersion,
+    [Parameter(Mandatory=$true)][string]$DotnetCLINugetVersion,
     [Parameter(Mandatory=$true)][string]$UpgradeCode,
-    [Parameter(Mandatory=$true)][string]$Architecture,
-    [Parameter(Mandatory=$true)][string]$ReleaseSuffix
+    [Parameter(Mandatory=$true)][string]$Architecture
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -49,15 +49,14 @@ function RunCandle
         -dDotnetSrc="$inputDir" `
         -dMicrosoftEula="$RepoRoot\packaging\osx\clisdk\resources\en.lproj\eula.rtf" `
         -dBuildVersion="$DotnetMSIVersion" `
-        -dDisplayVersion="$DotnetCLIVersion" `
+        -dDisplayVersion="$DotnetCLIDisplayVersion" `
+        -dNugetVersion="$DotnetCLINugetVersion" `
         -dUpgradeCode="$UpgradeCode" `
-        -dReleaseSuffix="$ReleaseSuffix" `
         -arch "$Architecture" `
         -ext WixDependencyExtension.dll `
         "$AuthWsxRoot\dotnet.wxs" `
         "$AuthWsxRoot\provider.wxs" `
         "$AuthWsxRoot\registrykeys.wxs" `
-        "$AuthWsxRoot\checkbuildtype.wxs" `
         $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
@@ -84,7 +83,6 @@ function RunLight
         dotnet.wixobj `
         provider.wixobj `
         registrykeys.wixobj `
-        checkbuildtype.wixobj `
         $InstallFilesWixobj `
         -b "$inputDir" `
         -b "$AuthWsxRoot" `

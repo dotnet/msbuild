@@ -96,6 +96,18 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         }
 
         [Fact]
+        public void SetsServiceableToTrueForPackageDescriptions()
+        {
+            var context = Build(runtimeExports: new[]
+            {
+                Export(PackageDescription("Pack.Age", servicable: false))
+            });
+
+            var lib = context.RuntimeLibraries.Single();
+            lib.Serviceable.Should().BeTrue();
+        }
+
+        [Fact]
         public void TakesServicableFromPackageDescription()
         {
             var context = Build(runtimeExports: new[]
@@ -250,6 +262,24 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             asm.Hash.Should().BeEmpty();
             asm.Dependencies.Should().BeEmpty();
             asm.Assemblies.Should().OnlyContain(a => a == "System.Collections.dll");
+        }
+
+        [Fact]
+        public void FillsResources()
+        {
+            var context = Build(runtimeExports: new[]
+            {
+                Export(PackageDescription("Pack.Age", version: new NuGetVersion(1, 2, 3)),
+                    resourceAssemblies: new []
+                    {
+                        new LibraryResourceAssembly(new LibraryAsset("Dll", "resources/en-US/Pack.Age.dll", ""), "en-US")
+                    })
+            });
+
+            context.RuntimeLibraries.Should().HaveCount(1);
+
+            var lib = context.RuntimeLibraries.Should().Contain(l => l.Name == "Pack.Age").Subject;
+            lib.ResourceAssemblies.Should().OnlyContain(l => l.Locale == "en-US" && l.Path == "resources/en-US/Pack.Age.dll");
         }
 
         [Fact]

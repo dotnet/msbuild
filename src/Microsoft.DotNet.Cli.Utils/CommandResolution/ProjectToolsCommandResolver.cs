@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class ProjectToolsCommandResolver : ICommandResolver
     {
-        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetStandardApp15;
+        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
         
         private static readonly CommandResolutionStrategy s_commandResolutionStrategy = 
             CommandResolutionStrategy.ProjectToolsPackage;
@@ -190,38 +190,68 @@ namespace Microsoft.DotNet.Cli.Utils
                 depsPathRoot,
                 toolLibrary.Name + FileNameSuffixes.DepsJson);
 
-            EnsureToolJsonDepsFileExists(toolLibrary, toolLockFile, depsJsonPath);
+            EnsureToolJsonDepsFileExists(toolLockFile, depsJsonPath);
 
             return depsJsonPath;
         }
 
         private void EnsureToolJsonDepsFileExists(
-            LibraryRange toolLibrary, 
             LockFile toolLockFile, 
             string depsPath)
         {
             if (!File.Exists(depsPath))
             {
-                var projectContext = new ProjectContextBuilder()
-                    .WithLockFile(toolLockFile)
-                    .WithTargetFramework(s_toolPackageFramework.ToString())
-                    .Build();
+                GenerateDepsJsonFile(toolLockFile, depsPath);
+            }
+        }
 
-                var exporter = projectContext.CreateExporter(Constants.DefaultConfiguration);
+        // Need to unit test this, so public
+        public void GenerateDepsJsonFile(
+            LockFile toolLockFile, 
+            string depsPath)
+        {
+            Reporter.Verbose.WriteLine($"Generating deps.json at: {depsPath}");
 
-                var dependencyContext = new DependencyContextBuilder()
-                    .Build(null, 
-                        null, 
-                        exporter.GetAllExports(), 
-                        true, 
-                        s_toolPackageFramework, 
-                        string.Empty);
+            var projectContext = new ProjectContextBuilder()
+                .WithLockFile(toolLockFile)
+                .WithTargetFramework(s_toolPackageFramework.ToString())
+                .Build();
 
-                using (var fileStream = File.Create(depsPath))
+            var exporter = projectContext.CreateExporter(Constants.DefaultConfiguration);
+
+            var dependencyContext = new DependencyContextBuilder()
+                .Build(null, 
+                    null, 
+                    exporter.GetAllExports(),
+                    true, 
+                    s_toolPackageFramework, 
+                    string.Empty);
+
+            var tempDepsFile = Path.GetTempFileName();
+            using (var fileStream = File.Open(tempDepsFile, FileMode.Open, FileAccess.Write))
+            {
+                var dependencyContextWriter = new DependencyContextWriter();
+
+                dependencyContextWriter.Write(dependencyContext, fileStream);
+            }
+
+            try
+            {
+                File.Copy(tempDepsFile, depsPath);
+            }
+            catch (Exception e)
+            {
+                Reporter.Verbose.WriteLine($"unable to generate deps.json, it may have been already generated: {e.Message}");
+            }
+            finally
+            {
+                try
                 {
-                    var dependencyContextWriter = new DependencyContextWriter();
-
-                    dependencyContextWriter.Write(dependencyContext, fileStream);
+                    File.Delete(tempDepsFile);
+                }
+                catch (Exception e2)
+                { 
+                    Reporter.Verbose.WriteLine($"unable to delete temporary deps.json file: {e2.Message}");
                 }
             }
         }

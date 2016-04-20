@@ -18,7 +18,10 @@ arguments_t::arguments_t() :
 {
 }
 
-bool parse_arguments(const pal::string_t& deps_path, const std::vector<pal::string_t>& probe_paths, host_mode_t mode,
+bool parse_arguments(
+    const pal::string_t& deps_path,
+    const std::vector<pal::string_t>& probe_paths,
+    host_mode_t mode,
     const int argc, const pal::char_t* argv[], arguments_t* arg_out)
 {
     arguments_t& args = *arg_out;
@@ -67,30 +70,9 @@ bool parse_arguments(const pal::string_t& deps_path, const std::vector<pal::stri
         args.app_argc = argc - 1;
     }
 
-    std::unordered_map<pal::string_t, std::vector<pal::string_t>> opts;
-    std::vector<pal::string_t> known_opts = { _X("--depsfile"), _X("--additionalprobingpath") };
-    int num_args = 0;
-    if (!parse_known_args(args.app_argc, args.app_argv, known_opts, &opts, &num_args))
+    if (!deps_path.empty())
     {
-        return false;
-    }
-
-    args.app_argc -= num_args;
-    args.app_argv += num_args;
-    pal::string_t opts_deps_file = _X("--depsfile");
-    pal::string_t opts_probe_path = _X("--additionalprobingpath");
-    pal::string_t deps_file = get_last_known_arg(opts, opts_deps_file, deps_path);
-    if (opts.count(opts_probe_path))
-    {
-        for (const auto& str : opts[opts_probe_path])
-        {
-            args.probe_paths.push_back(str);
-        }
-    }
-
-    if (!deps_file.empty())
-    {
-        args.deps_path = deps_file;
+        args.deps_path = deps_path;
         args.app_dir = get_directory(args.deps_path);
     }
 

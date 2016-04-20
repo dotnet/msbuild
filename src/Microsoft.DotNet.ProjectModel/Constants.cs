@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.ProjectModel
         public static readonly string DefaultOutputDirectory = "bin";
         public static readonly string DefaultConfiguration = "Debug";
 
+        public static readonly string LocaleLockFilePropertyName = "locale";
+
         public static readonly Version Version50 = new Version(5, 0);
     }
 }

@@ -4,12 +4,10 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-24008"
+    "Microsoft.NETCore.App": "1.0.0-rc2-*"
   },
   "frameworks": {
-    "netstandardapp1.5": {
-      "imports": "dnxcore50"
-    }
+    "netcoreapp1.0": { }
   },
   "scripts": {
     "prepublish": [

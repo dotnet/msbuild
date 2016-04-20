@@ -4,18 +4,15 @@
   },
   "dependencies": {},
   "frameworks": {
-    "netstandard1.5": {
-      "imports": [
-        "dnxcore50",
-        "portable-net45+win8"
-      ],
+    "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
           "version": "1.0.0-rc2-*"
         },
         "System.Linq": "4.0.0"
-      }
+      }, 
+      "imports": "dnxcore50"
     }
   }
 }

@@ -9,7 +9,7 @@
   ],
   "dependencies": {
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-    "NETStandard.Library": "1.5.0-rc2-24008"
+    "Microsoft.NETCore.App": "1.0.0-rc2-*"
   },
   "tools": {
     "dotnet-compile-fsc": {
@@ -22,7 +22,7 @@
     }
   },
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "imports": "dnxcore50"
     }
   }

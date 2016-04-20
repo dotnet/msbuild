@@ -1,15 +1,32 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.Extensions.PlatformAbstractions;
 
+using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+
 namespace Microsoft.DotNet.Cli.Build
 {
-    internal static class Crossgen
+    public class Crossgen
     {
-        public static string GetCrossgenPathForVersion(string coreClrVersion)
+        private string _coreClrVersion;
+        private string _crossGenPath;
+
+        // This is not always correct. The version of crossgen we need to pick up is whatever one was restored as part
+        // of the Microsoft.NETCore.Runtime.CoreCLR package that is part of the shared library. For now, the version hardcoded
+        // in CompileTargets and the one in the shared library project.json match and are updated in lock step, but long term
+        // we need to be able to look at the project.lock.json file and figure out what version of Microsoft.NETCore.Runtime.CoreCLR
+        // was used, and then select that version.
+        public Crossgen(string coreClrVersion)
+        {
+            _coreClrVersion = coreClrVersion;
+            _crossGenPath = GetCrossgenPathForVersion();
+        }
+
+        private string GetCrossgenPathForVersion()
         {
             string arch = PlatformServices.Default.Runtime.RuntimeArchitecture;
             string packageId;
@@ -32,7 +49,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
             else if (CurrentPlatform.IsDebian)
             {
-                packageId = "runtime.debian.8.2-x64.Microsoft.NETCore.Runtime.CoreCLR";
+                packageId = "runtime.debian.8-x64.Microsoft.NETCore.Runtime.CoreCLR";
             }
             else
             {
@@ -42,9 +59,61 @@ namespace Microsoft.DotNet.Cli.Build
             return Path.Combine(
                 Dirs.NuGetPackages,
                 packageId,
-                coreClrVersion,
+                _coreClrVersion,
                 "tools",
                 $"crossgen{Constants.ExeSuffix}");
+        }
+
+        public void CrossgenDirectory(BuildTargetContext c, string pathToAssemblies)
+        {
+            // Check if we need to skip crossgen
+            if (string.Equals(Environment.GetEnvironmentVariable("DISABLE_CROSSGEN"), "1"))
+            {
+                c.Warn("Skipping crossgen for because DISABLE_CROSSGEN is set to 1");
+                return;
+            }
+
+            string sharedFxPath = c.BuildContext.Get<string>("SharedFrameworkPath");
+
+            // HACK
+            // The input directory can be a portable FAT app (example the CLI itself).
+            // In that case there can be RID specific managed dependencies which are not right next to the app binary (example System.Diagnostics.TraceSource).
+            // We need those dependencies during crossgen. For now we just pass all subdirectories of the input directory as input to crossgen.
+            // The right fix -
+            // If the assembly has deps.json then parse the json file to get all the dependencies, pass these dependencies as input to crossgen.
+            // else pass the current directory of assembly as input to crossgen.
+            var addtionalPaths = Directory.GetDirectories(pathToAssemblies, "*", SearchOption.AllDirectories).ToList();
+            var paths = new List<string>() { sharedFxPath, pathToAssemblies };
+            paths.AddRange(addtionalPaths);
+            var platformAssembliesPaths = string.Join(Path.PathSeparator.ToString(), paths.Distinct());
+
+            var env = new Dictionary<string, string>()
+            {
+                // disable partial ngen
+                { "COMPLUS_ZapDisable", "0" }
+            };
+
+            foreach (var file in Directory.GetFiles(pathToAssemblies))
+            {
+                string fileName = Path.GetFileName(file);
+
+                if (fileName == "mscorlib.dll" || fileName == "mscorlib.ni.dll" || !PEUtils.HasMetadata(file))
+                {
+                    continue;
+                }
+
+                string tempPathName = Path.ChangeExtension(file, "readytorun");
+
+                IList<string> crossgenArgs = new List<string> {
+                    "-readytorun", "-in", file, "-out", tempPathName,
+                    "-platform_assemblies_paths", platformAssembliesPaths
+                };
+
+                ExecSilent(_crossGenPath, crossgenArgs, env);
+
+                File.Delete(file);
+                File.Move(tempPathName, file);
+            }
         }
     }
 }

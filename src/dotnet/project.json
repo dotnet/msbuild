@@ -17,14 +17,15 @@
   ],
   "dependencies": {
     "NuGet.Commands": {
-      "version": "3.5.0-beta-1130",
+      "version": "3.5.0-beta-1178",
       "exclude": "compile"
     },
-    "NuGet.CommandLine.XPlat": "3.5.0-beta-1130",
+    "NuGet.CommandLine.XPlat": "3.5.0-beta-1178",
     "Newtonsoft.Json": "7.0.1",
-    "System.Text.Encoding.CodePages": "4.0.1-rc2-24008",
-    "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24008",
+    "System.Text.Encoding.CodePages": "4.0.1-rc2-24018",
+    "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24018",
     "System.CommandLine": "0.1.0-e160323-1",
+    "Microsoft.ApplicationInsights": "2.0.0",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
@@ -37,24 +38,24 @@
       "version": "1.0.0-rc2-20221"
     },
     "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
-    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24008",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-24008",
+    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24018",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-24018",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0-rc2-*"
     },
-    "System.Diagnostics.TraceSource": "4.0.0-rc2-24008",
-    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-24008",
-    "System.Resources.ReaderWriter": "4.0.0-rc2-24008",
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24008",
-    "System.Private.DataContractSerialization": "4.1.1-rc2-24008",
+    "System.Diagnostics.TraceSource": "4.0.0-rc2-24018",
+    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-24018",
+    "System.Resources.ReaderWriter": "4.0.0-rc2-24018",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24018",
+    "System.Private.DataContractSerialization": "4.1.1-rc2-24018",
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-24008",
+      "version": "4.0.0-rc2-24018",
       "exclude": "compile"
     }
   },
   "frameworks": {
-    "netstandard1.5": {
+    "netcoreapp1.0": {
       "imports": [
         "dnxcore50",
         "netstandardapp1.5",
