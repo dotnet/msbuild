@@ -3,6 +3,10 @@
   "compilationOptions": {
     "emitEntryPoint": true
   },
+  "compile": [
+    "**/*.cs",
+    "../../../src/dotnet/CommandLine/*.cs"
+  ],
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
@@ -10,12 +14,7 @@
     },
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "type": "build",
-      "version": "1.0.0-rc2-16453"
-    },
-    "System.CommandLine": "0.1.0-e160323-1"
+    "Microsoft.DotNet.Compiler.Common": "1.0.0-*"
   },
   "frameworks": {
     "netcoreapp1.0": {

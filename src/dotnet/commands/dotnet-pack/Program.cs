@@ -4,9 +4,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Pack;
 
 namespace Microsoft.DotNet.Tools.Compiler

@@ -1,9 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.Utils;
 using System;
-using System.CommandLine;
+using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Run
 {
@@ -13,56 +13,41 @@ namespace Microsoft.DotNet.Tools.Run
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var help = false;
-            string helpText = null;
-            var returnCode = 0;
+            CommandLineApplication app = new CommandLineApplication();
+            app.Name = "dotnet run";
+            app.FullName = ".NET Run Command";
+            app.Description = "Command used to run .NET apps";
+            app.HelpOption("-h|--help");
 
-            RunCommand runCmd = new RunCommand();
+            CommandOption framework = app.Option("-f|--framework", "Compile a specific framework", CommandOptionType.SingleValue);
+            CommandOption configuration = app.Option("-c|--configuration", "Configuration under which to build", CommandOptionType.SingleValue);
+            CommandOption project = app.Option("-p|--project", "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory", CommandOptionType.SingleValue);
 
-            try
+            // TODO: this is not supporting args which can be switches (i.e. --test)
+            // TODO: we need to make a change in CommandLine utils or parse args ourselves.
+            CommandArgument runArgs = app.Argument("args", "Arguments to pass to the executable or script", multipleValues: true);
+
+            app.OnExecute(() =>
             {
-                ArgumentSyntax.Parse(args, syntax =>
-                {
-                    syntax.HandleHelp = false;
-                    syntax.HandleErrors = false;
+                RunCommand runCmd = new RunCommand();
 
-                    syntax.DefineOption("f|framework", ref runCmd.Framework, "Compile a specific framework");
-                    syntax.DefineOption("c|configuration", ref runCmd.Configuration, "Configuration under which to build");
-                    syntax.DefineOption("p|project", ref runCmd.Project, "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory");
+                runCmd.Framework = framework.Value();
+                runCmd.Configuration = configuration.Value();
+                runCmd.Project = project.Value();
+                runCmd.Args = runArgs.Values;
 
-                    syntax.DefineOption("h|help", ref help, "Help for compile native.");
-
-                    // TODO: this is not supporting args which can be switches (i.e. --test)
-                    // TODO: we need to make a change in System.CommandLine or parse args ourselves.
-                    syntax.DefineParameterList("args", ref runCmd.Args, "Arguments to pass to the executable or script");
-
-                    helpText = syntax.GetHelpText();
-                });
-            }
-            catch (ArgumentSyntaxException exception)
-            {
-                Console.Error.WriteLine(exception.Message);
-                help = true;
-                returnCode = 1;
-            }
-
-            if (help)
-            {
-                Console.WriteLine(helpText);
-
-                return returnCode;
-            }
-
-            try
-            {
                 return runCmd.Start();
+            });
+            try
+            {
+                return app.Execute(args);
             }
             catch (Exception ex)
             {
 #if DEBUG
-                Console.Error.WriteLine(ex);
+                Reporter.Error.WriteLine(ex.ToString());
 #else
-                Console.Error.WriteLine(ex.Message);
+                Reporter.Error.WriteLine(ex.Message);
 #endif
                 return 1;
             }

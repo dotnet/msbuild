@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.CommandLine;
 using System.Linq;
+using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
@@ -9,146 +10,115 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
     {
         internal static ArgValues Parse(IEnumerable<string> args)
         {
-            string inputAssembly = null;
-            string outputDirectory = null;
-            string temporaryOutputDirectory = null;
-            string configuration = null;
-            BuildConfiguration? buildConfiguration = null;
-            string mode = null;
-            NativeIntermediateMode? nativeMode = null;
-            IReadOnlyList<string> ilcArgs = Array.Empty<string>();
-            IEnumerable<string> unquotIlcArgs = Array.Empty<string>();
-            string ilcPath = null;
-            string ilcSdkPath = null;
-            string appDepSdk = null;
-            string logPath = null;
-            var help = false;
-            string helpText = null;
-            var returnCode = 0;
-            string cppCompilerFlags = null;
+            CommandLineApplication app = new CommandLineApplication();
+            app.HelpOption("-h|--help");
 
-            IReadOnlyList<string> references = Array.Empty<string>();
-            IReadOnlyList<string> linklib = Array.Empty<string>();
+            CommandOption output = app.Option("--output <arg>", "Output Directory for native executable.", CommandOptionType.SingleValue);
+            CommandOption tempOutput = app.Option("--temp-output <arg>", "Directory for intermediate files.", CommandOptionType.SingleValue);
+
+            CommandOption configuration = app.Option("--configuration <arg>", "debug/release build configuration. Defaults to debug.", CommandOptionType.SingleValue);
+            CommandOption mode = app.Option("--mode <arg>", "Code Generation mode. Defaults to ryujit.", CommandOptionType.SingleValue);
+
+            CommandOption reference = app.Option("--reference <arg>...", "Use to specify Managed DLL references of the app.", CommandOptionType.MultipleValue);
+
+            // Custom Extensibility Points to support CoreRT workflow TODO better descriptions
+            CommandOption ilcarg = app.Option("--ilcarg <arg>...", "Use to specify custom arguments for the IL Compiler.", CommandOptionType.MultipleValue);
+            CommandOption ilcpath = app.Option("--ilcpath <arg>", "Use to specify a custom build of IL Compiler.", CommandOptionType.SingleValue);
+            CommandOption ilcsdkpath = app.Option("ilcsdkpath <arg>", "Use to specify a custom build of IL Compiler SDK", CommandOptionType.SingleValue);
+
+            CommandOption linklib = app.Option("--linklib <arg>...", "Use to link in additional static libs", CommandOptionType.MultipleValue);
+
+            // TEMPORARY Hack until CoreRT compatible Framework Libs are available 
+            CommandOption appdepsdk = app.Option("--appdepsdk <arg>", "Use to plug in custom appdepsdk path", CommandOptionType.SingleValue);
+
+            // Optional Log Path
+            CommandOption logpath = app.Option("--logpath <arg>", "Use to dump Native Compilation Logs to a file.", CommandOptionType.SingleValue);
+
+            // Optional flags to be passed to the native compiler
+            CommandOption cppcompilerflags = app.Option("--cppcompilerflags <arg>", "Additional flags to be passed to the native compiler.", CommandOptionType.SingleValue);
+
+            CommandArgument inputAssembly = app.Argument("INPUT_ASSEMBLY", "The managed input assembly to compile to native.");
+
+            ArgValues argValues = new ArgValues();
+            app.OnExecute(() =>
+            {
+                if (string.IsNullOrEmpty(inputAssembly.Value))
+                {
+                    Reporter.Error.WriteLine("Input Assembly is a required parameter.");
+                    return 1;
+                }
+
+                if (configuration.HasValue())
+                {
+                    try
+                    {
+                        argValues.BuildConfiguration = EnumExtensions.Parse<BuildConfiguration>(configuration.Value());
+                    }
+                    catch (ArgumentException)
+                    {
+                        Reporter.Error.WriteLine($"Invalid Configuration Option: {configuration}");
+                        return 1;
+                    }
+                }
+
+                if (mode.HasValue())
+                {
+                    try
+                    {
+                        argValues.NativeMode = EnumExtensions.Parse<NativeIntermediateMode>(mode.Value());
+                    }
+                    catch (ArgumentException)
+                    {
+                        Reporter.Error.WriteLine($"Invalid Mode Option: {mode}");
+                        return 1;
+                    }
+                }
+
+                argValues.InputManagedAssemblyPath = inputAssembly.Value;
+                argValues.OutputDirectory = output.Value();
+                argValues.IntermediateDirectory = tempOutput.Value();
+                argValues.Architecture = ArchitectureMode.x64;
+                argValues.ReferencePaths = reference.Values;
+                argValues.IlcArgs = ilcarg.Values.Select(s =>
+                {
+                    if (!s.StartsWith("\"") || !s.EndsWith("\""))
+                    {
+                        throw new ArgumentException("--ilcarg must be specified in double quotes", "ilcarg");
+                    }
+                    return s.Substring(1, s.Length - 2);
+                });
+                argValues.IlcPath = ilcpath.Value();
+                argValues.IlcSdkPath = ilcsdkpath.Value();
+                argValues.LinkLibPaths = linklib.Values;
+                argValues.AppDepSDKPath = appdepsdk.Value();
+                argValues.LogPath = logpath.Value();
+                argValues.CppCompilerFlags = cppcompilerflags.Value();
+
+                Reporter.Output.WriteLine($"Input Assembly: {inputAssembly}");
+
+                return 0;
+            });
 
             try
             {
-                ArgumentSyntax.Parse(args, syntax =>
-                {
-                    syntax.HandleHelp = false;
-                    syntax.HandleErrors = false;
-
-                    syntax.DefineOption("output", ref outputDirectory, "Output Directory for native executable.");
-                    syntax.DefineOption("temp-output", ref temporaryOutputDirectory, "Directory for intermediate files.");
-
-                    syntax.DefineOption("configuration", ref configuration,
-                        "debug/release build configuration. Defaults to debug.");
-                    syntax.DefineOption("mode", ref mode, "Code Generation mode. Defaults to ryujit.");
-
-                    syntax.DefineOptionList("reference", ref references,
-                        "Use to specify Managed DLL references of the app.");
-
-                    // Custom Extensibility Points to support CoreRT workflow TODO better descriptions
-                    syntax.DefineOptionList("ilcarg", ref ilcArgs, "Use to specify custom arguments for the IL Compiler.");
-                    syntax.DefineOption("ilcpath", ref ilcPath, "Use to specify a custom build of IL Compiler.");
-                    syntax.DefineOption("ilcsdkpath", ref ilcSdkPath, "Use to specify a custom build of IL Compiler SDK");
-
-                    syntax.DefineOptionList("linklib", ref linklib, "Use to link in additional static libs");
-
-                    // TEMPORARY Hack until CoreRT compatible Framework Libs are available 
-                    syntax.DefineOption("appdepsdk", ref appDepSdk, "Use to plug in custom appdepsdk path");
-
-                    // Optional Log Path
-                    syntax.DefineOption("logpath", ref logPath, "Use to dump Native Compilation Logs to a file.");
-
-                    // Optional flags to be passed to the native compiler
-                    syntax.DefineOption("cppcompilerflags", ref cppCompilerFlags, "Additional flags to be passed to the native compiler.");
-
-                    syntax.DefineOption("h|help", ref help, "Help for compile native.");
-
-                    syntax.DefineParameter("INPUT_ASSEMBLY", ref inputAssembly,
-                        "The managed input assembly to compile to native.");
-
-                    helpText = syntax.GetHelpText();
-
-                    if (string.IsNullOrWhiteSpace(inputAssembly))
-                    {
-                        syntax.ReportError("Input Assembly is a required parameter.");
-                        help = true;
-                    }
-
-                    if (!string.IsNullOrEmpty(configuration))
-                    {
-                        try
-                        {
-                            buildConfiguration = EnumExtensions.Parse<BuildConfiguration>(configuration);
-                        }
-                        catch (ArgumentException)
-                        {
-                            syntax.ReportError($"Invalid Configuration Option: {configuration}");
-                            help = true;
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(mode))
-                    {
-                        try
-                        {
-                            nativeMode = EnumExtensions.Parse<NativeIntermediateMode>(mode);
-                        }
-                        catch (ArgumentException)
-                        {
-                            syntax.ReportError($"Invalid Mode Option: {mode}");
-                            help = true;
-                        }
-                    }
-
-                    unquotIlcArgs = ilcArgs.Select(s =>
-                    {
-                        if (!s.StartsWith("\"") || !s.EndsWith("\""))
-                        {
-                            throw new ArgumentSyntaxException("--ilcarg must be specified in double quotes");
-                        }
-                        return s.Substring(1, s.Length - 2);
-                    });
-                });
+                argValues.ReturnCode = app.Execute(args.ToArray());
             }
-            catch (ArgumentSyntaxException exception)
+            catch (Exception ex)
             {
-                Console.Error.WriteLine(exception.Message);
-                help = true;
-                returnCode = 1;
+#if DEBUG
+                Console.Error.WriteLine(ex);
+#else
+                Console.Error.WriteLine(ex.Message);
+#endif
+                argValues.ReturnCode = 1;
             }
 
-            if (help)
+            if (argValues.ReturnCode != 0)
             {
-                Console.WriteLine(helpText);
-
-                return new ArgValues
-                {
-                    IsHelp = help,
-                    ReturnCode = returnCode
-                };
+                argValues.IsHelp = true;
             }
 
-            Console.WriteLine($"Input Assembly: {inputAssembly}");
-
-            return new ArgValues
-            {
-                InputManagedAssemblyPath = inputAssembly,
-                OutputDirectory = outputDirectory,
-                IntermediateDirectory = temporaryOutputDirectory,
-                Architecture = ArchitectureMode.x64,
-                BuildConfiguration = buildConfiguration,
-                NativeMode = nativeMode,
-                ReferencePaths = references,
-                IlcArgs = unquotIlcArgs,
-                IlcPath = ilcPath,
-                IlcSdkPath = ilcSdkPath,
-                LinkLibPaths = linklib,
-                AppDepSDKPath = appDepSdk,
-                LogPath = logPath,
-                CppCompilerFlags = cppCompilerFlags
-            };
+            return argValues;
         }
     }
 }

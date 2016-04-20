@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
@@ -23,103 +22,87 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommonCompilerOptions commonOptions = null;
-            AssemblyInfoOptions assemblyInfoOptions = null;
-            string tempOutDir = null;
-            IReadOnlyList<string> references = Array.Empty<string>();
-            IReadOnlyList<string> resources = Array.Empty<string>();
-            IReadOnlyList<string> sources = Array.Empty<string>();
-            IReadOnlyList<string> analyzers = Array.Empty<string>();
-            string outputName = null;
-            var help = false;
-            var returnCode = 0;
-            string helpText = null;
+            CommandLineApplication app = new CommandLineApplication();
+            app.Name = "dotnet compile-csc";
+            app.FullName = ".NET C# Compiler";
+            app.Description = "C# Compiler for the .NET Platform";
+            app.HelpOption("-h|--help");
+
+            CommonCompilerOptionsCommandLine commonCompilerCommandLine = CommonCompilerOptionsCommandLine.AddOptions(app);
+            AssemblyInfoOptionsCommandLine assemblyInfoCommandLine = AssemblyInfoOptionsCommandLine.AddOptions(app);
+
+            CommandOption tempOutput = app.Option("--temp-output <arg>", "Compilation temporary directory", CommandOptionType.SingleValue);
+            CommandOption outputName = app.Option("--out <arg>", "Name of the output assembly", CommandOptionType.SingleValue);
+            CommandOption references = app.Option("--reference <arg>...", "Path to a compiler metadata reference", CommandOptionType.MultipleValue);
+            CommandOption analyzers = app.Option("--analyzer <arg>...", "Path to an analyzer assembly", CommandOptionType.MultipleValue);
+            CommandOption resources = app.Option("--resource <arg>...", "Resources to embed", CommandOptionType.MultipleValue);
+            CommandArgument sources = app.Argument("<source-files>...", "Compilation sources", multipleValues: true);
+
+            app.OnExecute(() =>
+            {
+                if (!tempOutput.HasValue())
+                {
+                    Reporter.Error.WriteLine("Option '--temp-output' is required");
+                    return ExitFailed;
+                }
+
+                CommonCompilerOptions commonOptions = commonCompilerCommandLine.GetOptionValues();
+
+                AssemblyInfoOptions assemblyInfoOptions = assemblyInfoCommandLine.GetOptionValues();
+
+                var translated = TranslateCommonOptions(commonOptions, outputName.Value());
+
+                var allArgs = new List<string>(translated);
+                allArgs.AddRange(GetDefaultOptions());
+
+                // Generate assembly info
+                var assemblyInfo = Path.Combine(tempOutput.Value(), $"dotnet-compile.assemblyinfo.cs");
+
+                File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateCSharp(assemblyInfoOptions, sources.Values));
+
+                allArgs.Add($"\"{assemblyInfo}\"");
+
+                if (outputName.HasValue())
+                {
+                    allArgs.Add($"-out:\"{outputName.Value()}\"");
+                }
+
+                allArgs.AddRange(analyzers.Values.Select(a => $"-a:\"{a}\""));
+                allArgs.AddRange(references.Values.Select(r => $"-r:\"{r}\""));
+
+                // Resource has two parts separated by a comma
+                // Only the first should be quoted. This is handled
+                // in dotnet-compile where the information is present.
+                allArgs.AddRange(resources.Values.Select(resource => $"-resource:{resource}"));
+
+                allArgs.AddRange(sources.Values.Select(s => $"\"{s}\""));
+
+                var rsp = Path.Combine(tempOutput.Value(), "dotnet-compile-csc.rsp");
+
+                File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
+
+                // Execute CSC!
+                var result = RunCsc(new string[] { $"-noconfig", "@" + $"{rsp}" })
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .Execute();
+
+                return result.ExitCode;
+            });
 
             try
             {
-                ArgumentSyntax.Parse(args, syntax =>
-                {
-                    syntax.HandleHelp = false;
-                    syntax.HandleErrors = false;
-
-                    commonOptions = CommonCompilerOptionsExtensions.Parse(syntax);
-
-                    assemblyInfoOptions = AssemblyInfoOptions.Parse(syntax);
-
-                    syntax.DefineOption("temp-output", ref tempOutDir, "Compilation temporary directory");
-
-                    syntax.DefineOption("out", ref outputName, "Name of the output assembly");
-
-                    syntax.DefineOptionList("reference", ref references, "Path to a compiler metadata reference");
-
-                    syntax.DefineOptionList("analyzer", ref analyzers, "Path to an analyzer assembly");
-
-                    syntax.DefineOptionList("resource", ref resources, "Resources to embed");
-
-                    syntax.DefineOption("h|help", ref help, "Help for compile native.");
-
-                    syntax.DefineParameterList("source-files", ref sources, "Compilation sources");
-
-                    helpText = syntax.GetHelpText();
-
-                    if (tempOutDir == null)
-                    {
-                        syntax.ReportError("Option '--temp-output' is required");
-                    }
-                });
+                return app.Execute(args);
             }
-            catch (ArgumentSyntaxException exception)
+            catch (Exception ex)
             {
-                Console.Error.WriteLine(exception.Message);
-                help = true;
-                returnCode = ExitFailed;
+#if DEBUG
+                Reporter.Error.WriteLine(ex.ToString());
+#else
+                Reporter.Error.WriteLine(ex.Message);
+#endif
+                return ExitFailed;
             }
-
-            if (help)
-            {
-                Console.WriteLine(helpText);
-
-                return returnCode;
-            }
-
-            var translated = TranslateCommonOptions(commonOptions, outputName);
-
-            var allArgs = new List<string>(translated);
-            allArgs.AddRange(GetDefaultOptions());
-
-            // Generate assembly info
-            var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.cs");
-
-            File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateCSharp(assemblyInfoOptions, sources));
-
-            allArgs.Add($"\"{assemblyInfo}\"");
-
-            if (outputName != null)
-            {
-                allArgs.Add($"-out:\"{outputName}\"");
-            }
-
-            allArgs.AddRange(analyzers.Select(a => $"-a:\"{a}\""));
-            allArgs.AddRange(references.Select(r => $"-r:\"{r}\""));
-
-            // Resource has two parts separated by a comma
-            // Only the first should be quoted. This is handled
-            // in dotnet-compile where the information is present.
-            allArgs.AddRange(resources.Select(resource => $"-resource:{resource}"));
-
-            allArgs.AddRange(sources.Select(s => $"\"{s}\""));
-
-            var rsp = Path.Combine(tempOutDir, "dotnet-compile-csc.rsp");
-
-            File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
-
-            // Execute CSC!
-            var result = RunCsc(new string[] { $"-noconfig", "@" + $"{rsp}" })
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute();
-
-            return result.ExitCode;
         }
 
         // TODO: Review if this is the place for default options
