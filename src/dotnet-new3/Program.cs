@@ -17,7 +17,6 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
-            Console.ReadLine();
             Broker = new Broker();
 
             var app = new CommandLineApplication
