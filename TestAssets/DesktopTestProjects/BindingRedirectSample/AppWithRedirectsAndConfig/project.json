@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "compile": [
+    "../src/*.cs"
+  ],
+  "dependencies": {
+    "Newtonsoft.Json": "8.0.3",    
+    "Microsoft.AspNet.Mvc": "3.0.50813.1",
+    "Unity.Mvc": "3.0.1304",
+    "dotnet-desktop-binding-redirects": "1.0.0-*"
+  },
+  "frameworks": {
+    "net451": {}
+  }
+}

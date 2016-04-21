@@ -52,15 +52,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         internal static void GenerateBindingRedirects(string configFile, AssemblyRedirect[] bindingRedirects)
         {
-            XDocument configRoot = null;
-
-            if (File.Exists(configFile))
-            {
-                configRoot = XDocument.Load(configFile);
-            }
-
-            configRoot = configRoot ?? new XDocument();
-
+            XDocument configRoot = File.Exists(configFile) ? XDocument.Load(configFile) : new XDocument();
             var configuration = GetOrAddElement(configRoot, ConfigurationElementName);
             var runtime = GetOrAddElement(configuration, RuntimeElementName);
             var assemblyBindings = GetOrAddElement(runtime, AssemblyBindingElementName);
@@ -93,10 +85,15 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 assemblyBindings.Add(dependencyElement);
             }
 
-            dependencyElement.Add(new XElement(BindingRedirectElementName,
-                    new XAttribute(OldVersionAttributeName, redirect.From.Version),
-                    new XAttribute(NewVersionAttributeName, redirect.To.Version)
-                    ));
+            bool redirectExists = dependencyElement.Elements(BindingRedirectElementName).Any(element => IsSameRedirect(redirect, element));
+
+            if (!redirectExists)
+            {
+                dependencyElement.Add(new XElement(BindingRedirectElementName,
+                        new XAttribute(OldVersionAttributeName, redirect.From.Version),
+                        new XAttribute(NewVersionAttributeName, redirect.To.Version)
+                        ));
+            }
         }
 
         private static bool IsSameAssembly(AssemblyRedirect redirect, XElement dependentAssemblyElement)
@@ -109,6 +106,16 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return (string)identity.Attribute(NameAttributeName) == redirect.From.Name &&
                    (string)identity.Attribute(PublicKeyTokenAttributeName) == redirect.From.PublicKeyToken &&
                    (string)identity.Attribute(CultureAttributeName) == redirect.From.Culture;
+        }
+
+        private static bool IsSameRedirect(AssemblyRedirect redirect, XElement bindingRedirectElement)
+        {
+            if (bindingRedirectElement == null)
+            {
+                return false;
+            }
+            return (string)bindingRedirectElement.Attribute(OldVersionAttributeName) == redirect.From.Version.ToString() &&
+                   (string)bindingRedirectElement.Attribute(NewVersionAttributeName) == redirect.To.Version.ToString();
         }
 
         private static XElement GetOrAddElement(XContainer parent, XName elementName)

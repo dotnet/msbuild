@@ -254,7 +254,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         public void GenerateBindingRedirects(LibraryExporter exporter)
         {
             var outputName = _outputPaths.RuntimeFiles.Assembly;
-            var configFile = outputName + ".config";
+            var configFile = outputName + Constants.ConfigSuffix;
 
             var existingConfig = new DirectoryInfo(_context.ProjectDirectory)
                 .EnumerateFiles()
@@ -271,12 +271,12 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             foreach (var export in exporter.GetDependencies())
             {
                 var dependencyExecutables = export.RuntimeAssemblyGroups.GetDefaultAssets()
-                                                .Where(asset => asset.FileName.ToLower().EndsWith(".exe"))
+                                                .Where(asset => asset.FileName.ToLower().EndsWith(FileNameSuffixes.DotNet.Exe))
                                                 .Select(asset => Path.Combine(_runtimeOutputPath, asset.FileName));
 
                 foreach (var executable in dependencyExecutables)
                 {
-                    configFile = executable + ".config";
+                    configFile = executable + Constants.ConfigSuffix;
                     configFiles.Add(configFile);
                 }
             }

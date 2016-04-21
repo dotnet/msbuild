@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static readonly string ProjectFileName = "project.json";
         public static readonly string ExeSuffix = CurrentPlatform == Platform.Windows ? ".exe" : string.Empty;
+        public static readonly string ConfigSuffix = ".config";
 
         // Priority order of runnable suffixes to look for and run
         public static readonly string[] RunnableSuffixes = CurrentPlatform == Platform.Windows
