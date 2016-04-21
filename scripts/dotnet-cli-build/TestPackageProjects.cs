@@ -13,6 +13,17 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public static class TestPackageProjects
     {
+        public class TestPackageProject
+        {
+            public string Name { get; set; }
+            public bool IsTool { get; set; }
+            public string Path { get; set; }
+            public bool IsApplicable { get; set; }
+            public string VersionSuffix { get; set; }
+            public bool Clean { get; set; }
+            public string[] Frameworks { get; set; }
+        }
+
         private static string s_testPackageBuildVersionSuffix = "<buildversion>";
 
         public static string TestPackageBuildVersionSuffix
@@ -23,160 +34,177 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
-        public static readonly dynamic[] Projects = new[]
+        public static readonly TestPackageProject[] Projects = new[]
         {
-            new
+            new TestPackageProject()
             {
                 Name = "PackageWithFakeNativeDep",
                 IsTool = false,
                 Path = "TestAssets/TestPackages/PackageWithFakeNativeDep",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "net45" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "dotnet-dependency-context-test",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-dependency-context-test",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "netcoreapp1.0" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "dotnet-dependency-tool-invoker",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-dependency-tool-invoker",
-                IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows),
+                IsApplicable = CurrentPlatform.IsWindows,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "netcoreapp1.0" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "dotnet-desktop-and-portable",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-desktop-and-portable",
-                IsApplicable = new Func<bool>(() => CurrentPlatform.IsWindows),
+                IsApplicable = CurrentPlatform.IsWindows,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "net451", "netcoreapp1.0" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "dotnet-hello",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable =true,
                 VersionSuffix = string.Empty,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "netcoreapp1.0" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "dotnet-hello",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = string.Empty,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "netcoreapp1.0" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "dotnet-portable",
                 IsTool = true,
                 Path = "TestAssets/TestPackages/dotnet-portable",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = string.Empty,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "netcoreapp1.0" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.DotNet.Cli.Utils",
                 IsTool = true,
                 Path = "src/Microsoft.DotNet.Cli.Utils",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "net451", "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.DotNet.ProjectModel",
                 IsTool = true,
                 Path = "src/Microsoft.DotNet.ProjectModel",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "net451", "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.DotNet.ProjectModel.Loader",
                 IsTool = true,
                 Path = "src/Microsoft.DotNet.ProjectModel.Loader",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.DotNet.ProjectModel.Workspaces",
                 IsTool = true,
                 Path = "src/Microsoft.DotNet.ProjectModel.Workspaces",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable =true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.DotNet.InternalAbstractions",
                 IsTool = true,
                 Path = "src/Microsoft.DotNet.InternalAbstractions",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "net451", "netstandard1.3" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.Extensions.DependencyModel",
                 IsTool = true,
                 Path = "src/Microsoft.Extensions.DependencyModel",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "net451", "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.Extensions.Testing.Abstractions",
                 IsTool = true,
                 Path = "src/Microsoft.Extensions.Testing.Abstractions",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "net451", "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.DotNet.Compiler.Common",
                 IsTool = true,
                 Path = "src/Microsoft.DotNet.Compiler.Common",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "Microsoft.DotNet.Files",
                 IsTool = true,
                 Path = "src/Microsoft.DotNet.Files",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = false
+                Clean = false,
+                Frameworks = new [] { "netstandard1.5" }
             },
-            new
+            new TestPackageProject()
             {
                 Name = "dotnet-compile-fsc",
                 IsTool = true,
                 Path = "src/dotnet-compile-fsc",
-                IsApplicable = new Func<bool>(() => true),
+                IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
-                Clean = true
+                Clean = true,
+                Frameworks = new [] { "netcoreapp1.0" }
             }
         };
     }

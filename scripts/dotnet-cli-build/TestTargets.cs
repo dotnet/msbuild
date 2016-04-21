@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Cli.Build
             Rmdir(Dirs.TestPackages);
             Mkdirp(Dirs.TestPackages);
 
-            foreach (var testPackageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable()))
+            foreach (var testPackageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable))
             {
                 var relativePath = testPackageProject.Path;
 
@@ -162,17 +162,11 @@ namespace Microsoft.DotNet.Cli.Build
                 var fullPath = Path.Combine(c.BuildContext.BuildDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar));
                 c.Info($"Packing: {fullPath}");
 
-                // build and ignore failure, so net451 fail on non-windows doesn't crash the build
-                var packageBuildFrameworks = new List<string>()
-                {
-                    "netstandard1.5",
-                    "netstandard1.3",
-                    "netcoreapp1.0"
-                };
+                var packageBuildFrameworks = testPackageProject.Frameworks.ToList();
 
-                if (CurrentPlatform.IsWindows)
+                if (!CurrentPlatform.IsWindows)
                 {
-                    packageBuildFrameworks.Add("net451");
+                    packageBuildFrameworks.RemoveAll(f => f.StartsWith("net4"));
                 }
 
                 foreach (var packageBuildFramework in packageBuildFrameworks)
@@ -185,8 +179,9 @@ namespace Microsoft.DotNet.Cli.Build
                     buildArgs.Add(fullPath);
 
                     Mkdirp(Dirs.TestPackagesBuild);
-                    var packBuildResult = DotNetCli.Stage1.Build(buildArgs.ToArray())
-                        .Execute();
+                    dotnet.Build(buildArgs.ToArray())
+                        .Execute()
+                        .EnsureSuccessful();
                 }
 
                 var projectJson = Path.Combine(fullPath, "project.json");
@@ -225,7 +220,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
         {
-            foreach (var packageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable() && p.Clean))
+            foreach (var packageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable && p.Clean))
             {
                 Rmdir(Path.Combine(Dirs.NuGetPackages, packageProject.Name));
                 if(packageProject.IsTool)

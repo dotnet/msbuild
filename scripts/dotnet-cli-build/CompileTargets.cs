@@ -87,18 +87,21 @@ namespace Microsoft.DotNet.Cli.Build
         {
             string currentRid = GetRuntimeId();
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-
+            PrepareDummyRuntimeNuGetPackage(
+                            DotNetCli.Stage0,
+                            buildVersion.HostNuGetPackageVersion,
+                            Dirs.CorehostDummyPackages);
             foreach (var hostPackageId in HostPackages)
             {
                 foreach (var rid in HostPackageSupportedRids)
                 {
-                    if (! rid.Equals(currentRid))
+                    if (!rid.Equals(currentRid))
                     {
                         CreateDummyRuntimeNuGetPackage(
-                            DotNetCli.Stage0, 
+                            DotNetCli.Stage0,
                             hostPackageId,
-                            rid, 
-                            buildVersion.HostNuGetPackageVersion, 
+                            rid,
+                            buildVersion.HostNuGetPackageVersion,
                             Dirs.CorehostDummyPackages);
                     }
                 }
@@ -354,17 +357,14 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        private static void CreateDummyRuntimeNuGetPackage(DotNetCli dotnet, string basePackageId, string rid, string version, string outputDir)
-        {
-            var packageId = $"runtime.{rid}.{basePackageId}";
 
+        private static void PrepareDummyRuntimeNuGetPackage(DotNetCli dotnet, string version, string outputDir)
+        {
             var projectJson = new StringBuilder();
             projectJson.Append("{");
-            projectJson.Append($"  \"version\": \"{version}\",");
-            projectJson.Append($"  \"name\": \"{packageId}\",");
             projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24008\" },");
             projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { \"imports\": [\"netstandard1.5\", \"dnxcore50\"] } },");
-            projectJson.Append($"  \"runtimes\": {{ \"{rid}\": {{ }} }},");
+            projectJson.Append("  \"runtimes\": { \"win7-x64\": { } },");
             projectJson.Append("}");
 
             var programCs = "using System; namespace ConsoleApplication { public class Program { public static void Main(string[] args) { Console.WriteLine(\"Hello World!\"); } } }";
@@ -384,11 +384,28 @@ namespace Microsoft.DotNet.Cli.Build
                 .WorkingDirectory(tempPjDirectory)
                 .Execute()
                 .EnsureSuccessful();
-
-            dotnet.Build(tempPjFile, "--runtime", rid)
+            dotnet.Build(tempPjFile, "--runtime", "win7-x64")
                 .WorkingDirectory(tempPjDirectory)
                 .Execute()
                 .EnsureSuccessful();
+        }
+
+        private static void CreateDummyRuntimeNuGetPackage(DotNetCli dotnet, string basePackageId, string rid, string version, string outputDir)
+        {
+            var packageId = $"runtime.{rid}.{basePackageId}";
+
+            var projectJson = new StringBuilder();
+            projectJson.Append("{");
+            projectJson.Append($"  \"version\": \"{version}\",");
+            projectJson.Append($"  \"name\": \"{packageId}\",");
+            projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24008\" },");
+            projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { \"imports\": [\"netstandard1.5\", \"dnxcore50\"] } },");
+            projectJson.Append("}");
+
+            var tempPjDirectory = Path.Combine(Dirs.Intermediate, "dummyNuGetPackageIntermediate");
+            var tempPjFile = Path.Combine(tempPjDirectory, "project.json");
+
+            File.WriteAllText(tempPjFile, projectJson.ToString());
 
             dotnet.Pack(
                 tempPjFile, "--no-build",
