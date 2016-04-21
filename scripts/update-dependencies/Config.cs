@@ -27,37 +27,35 @@ namespace Microsoft.DotNet.Scripts
     /// </remarks>
     public class Config
     {
-        public static Config Instance { get; } = Read();
+        public static Config Instance { get; } = new Config();
 
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string CoreFxVersionUrl { get; set; }
-        public string GitHubOriginOwner { get; set; }
-        public string GitHubUpstreamOwner { get; set; }
-        public string GitHubProject { get; set; }
-        public string GitHubUpstreamBranch { get; set; }
-        public string[] GitHubPullRequestNotifications { get; set; }
+        private Lazy<string> _userName = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_USER"));
+        private Lazy<string> _email = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_EMAIL"));
+        private Lazy<string> _password = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PASSWORD"));
+        
+        private Lazy<string> _coreFxVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("COREFX_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/dotnet/corefx/release/1.0.0-rc2/LKG.txt"));
+        private Lazy<string> _gitHubOriginOwner;
+        private Lazy<string> _gitHubUpstreamOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"));
+        private Lazy<string> _gitHubProject = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PROJECT", "cli"));
+        private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", "rel/1.0.0"));
+        private Lazy<string[]> _gitHubPullRequestNotifications = new Lazy<string[]>(() => 
+                                                GetEnvironmentVariable("GITHUB_PULL_REQUEST_NOTIFICATIONS", "")
+                                                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
 
-        private static Config Read()
+        private Config()
         {
-            string userName = GetEnvironmentVariable("GITHUB_USER");
-
-            return new Config
-            {
-                UserName = userName,
-                Email = GetEnvironmentVariable("GITHUB_EMAIL"),
-                Password = GetEnvironmentVariable("GITHUB_PASSWORD"),
-
-                CoreFxVersionUrl = GetEnvironmentVariable("COREFX_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/dotnet/corefx/release/1.0.0-rc2/LKG.txt"),
-                GitHubOriginOwner = GetEnvironmentVariable("GITHUB_ORIGIN_OWNER", userName),
-                GitHubUpstreamOwner = GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"),
-                GitHubProject = GetEnvironmentVariable("GITHUB_PROJECT", "cli"),
-                GitHubUpstreamBranch = GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", "rel/1.0.0"),
-                GitHubPullRequestNotifications = GetEnvironmentVariable("GITHUB_PULL_REQUEST_NOTIFICATIONS", "")
-                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-            };
+            _gitHubOriginOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_ORIGIN_OWNER", UserName));
         }
+
+        public string UserName => _userName.Value;
+        public string Email => _email.Value; 
+        public string Password => _password.Value;
+        public string CoreFxVersionUrl => _coreFxVersionUrl.Value;
+        public string GitHubOriginOwner => _gitHubOriginOwner.Value;
+        public string GitHubUpstreamOwner => _gitHubUpstreamOwner.Value;
+        public string GitHubProject => _gitHubProject.Value;
+        public string GitHubUpstreamBranch => _gitHubUpstreamBranch.Value;
+        public string[] GitHubPullRequestNotifications => _gitHubPullRequestNotifications.Value;
 
         private static string GetEnvironmentVariable(string name, string defaultValue = null)
         {
