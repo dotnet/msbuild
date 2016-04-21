@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Loader;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
@@ -41,6 +42,10 @@ namespace Microsoft.DotNet.Cli
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
+
+            AssemblyLoadContext.Default.SetProfileOptimizationRoot(
+                new MulticoreJitProfilePathCalculator().MulticoreJitProfilePath);
+            AssemblyLoadContext.Default.StartProfileOptimization("dotnet");
 
             if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
             {
