@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.ProjectModel.Server

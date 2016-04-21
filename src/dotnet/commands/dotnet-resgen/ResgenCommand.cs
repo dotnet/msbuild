@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Tools.Resgen
         public string OutputFileName = null;
         public string AssemblyCulture = null;
         public string AssemblyVersion = null;
-        public IReadOnlyList<string> CompilationReferences = null;
-        public IReadOnlyList<string> Args = null;
+        public IEnumerable<string> CompilationReferences = null;
+        public IEnumerable<string> Args = null;
 
         public int Execute()
         {

@@ -24,18 +24,12 @@
     "Newtonsoft.Json": "7.0.1",
     "System.Text.Encoding.CodePages": "4.0.1-rc2-24018",
     "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24018",
-    "System.CommandLine": "0.1.0-e160323-1",
     "Microsoft.ApplicationInsights": "2.0.0",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.DotNet.ILCompiler.SDK": "1.0.6-prerelease-00003",
     "Microsoft.Extensions.Logging": "1.0.0-rc2-20581",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20581",
-    "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "type": "build",
-      "version": "1.0.0-rc2-20221"
-    },
     "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24018",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-24018",

@@ -3,30 +3,29 @@
 
 using Microsoft.DotNet.ProjectModel;
 using System.Collections.Generic;
-using System.CommandLine;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     public class AssemblyInfoOptions
     {
-        private const string TitleOptionName = "title";
+        public static readonly string TitleOptionName = "title";
 
-        private const string DescriptionOptionName = "description";
+        public static readonly string DescriptionOptionName = "description";
 
-        private const string CopyrightOptionName = "copyright";
+        public static readonly string CopyrightOptionName = "copyright";
 
-        private const string AssemblyFileVersionOptionName = "file-version";
+        public static readonly string AssemblyFileVersionOptionName = "file-version";
 
-        private const string AssemblyVersionOptionName = "version";
+        public static readonly string AssemblyVersionOptionName = "version";
 
-        private const string InformationalVersionOptionName = "informational-version";
+        public static readonly string InformationalVersionOptionName = "informational-version";
 
-        private const string CultureOptionName = "culture";
+        public static readonly string CultureOptionName = "culture";
 
-        private const string NeutralCultureOptionName = "neutral-language";
+        public static readonly string NeutralCultureOptionName = "neutral-language";
 
-        private const string TargetFrameworkOptionName = "target-framework";
+        public static readonly string TargetFrameworkOptionName = "target-framework";
 
         public string Title { get; set; }
 
@@ -70,49 +69,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 Title = project.Title,
                 NeutralLanguage = project.Language,
                 TargetFramework = targetFramework.DotNetFrameworkName
-            };
-        }
-
-        public static AssemblyInfoOptions Parse(ArgumentSyntax syntax)
-        {
-            string version = null;
-            string informationalVersion = null;
-            string fileVersion = null;
-            string title = null;
-            string description = null;
-            string copyright = null;
-            string culture = null;
-            string neutralCulture = null;
-            string targetFramework = null;
-
-            syntax.DefineOption(AssemblyVersionOptionName, ref version, UnescapeNewlines, "Assembly version");
-
-            syntax.DefineOption(TitleOptionName, ref title, UnescapeNewlines, "Assembly title");
-
-            syntax.DefineOption(DescriptionOptionName, ref description, UnescapeNewlines, "Assembly description");
-
-            syntax.DefineOption(CopyrightOptionName, ref copyright, UnescapeNewlines, "Assembly copyright");
-
-            syntax.DefineOption(NeutralCultureOptionName, ref neutralCulture, UnescapeNewlines, "Assembly neutral culture");
-
-            syntax.DefineOption(CultureOptionName, ref culture, UnescapeNewlines, "Assembly culture");
-
-            syntax.DefineOption(InformationalVersionOptionName, ref informationalVersion, UnescapeNewlines, "Assembly informational version");
-
-            syntax.DefineOption(AssemblyFileVersionOptionName, ref fileVersion, UnescapeNewlines, "Assembly title");
-
-            syntax.DefineOption(TargetFrameworkOptionName, ref targetFramework, UnescapeNewlines, "Assembly target framework");
-
-            return new AssemblyInfoOptions()
-            {
-                AssemblyFileVersion = fileVersion,
-                AssemblyVersion = version,
-                Copyright = copyright,
-                NeutralLanguage = neutralCulture,
-                Description = description,
-                InformationalVersion = informationalVersion,
-                Title = title,
-                TargetFramework = targetFramework
             };
         }
 
@@ -165,10 +121,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return $"--{optionName}:{EscapeNewlines(value)}";
         }
 
-        private static string UnescapeNewlines(string text)
-        {
-            return text.Replace("\\r", "\r").Replace("\\n", "\n");
-        }
         private static string EscapeNewlines(string text)
         {
             return text.Replace("\r", "\\r").Replace("\n", "\\n");

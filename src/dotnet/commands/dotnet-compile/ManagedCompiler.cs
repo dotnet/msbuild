@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success)
             {
-                success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, intermediateOutputPath, outputPath);
+                success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath);
             }
 
             return PrintSummary(diagnostics, sw, success);

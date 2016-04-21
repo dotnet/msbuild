@@ -1,4 +1,4 @@
-﻿using Microsoft.Dnx.Runtime.Common.CommandLine;
+﻿using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Collections.Generic;
