@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,13 +42,13 @@ namespace dotnet_new3
 
             if (!string.IsNullOrEmpty(searchString.Value))
             {
-                results.RemoveAll(x => x.Name.IndexOf(searchString.Value) < 0);
+                results.RemoveAll(x => x.Name.IndexOf(searchString.Value, StringComparison.OrdinalIgnoreCase) < 0);
             }
 
             return results;
         }
 
-        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption source, CommandOption parametersFiles, CommandOption help, CommandOption parameters)
+        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption parametersFiles, CommandOption help, CommandOption parameters)
         {
             if (string.IsNullOrEmpty(template.Value))
             {
@@ -94,7 +96,38 @@ namespace dotnet_new3
             if (generator == null || tmplt == null)
             {
                 Reporter.Error.WriteLine($"No template \"{template.Value}\" was found in any of the configured sources");
-                return -1;
+
+                List<ITemplate> results = List(template, source).ToList();
+
+                if (results.Count == 0)
+                {
+                    return -1;
+                }
+
+                Reporter.Output.WriteLine("Template Name - Source Name - Generator Name");
+                int index = 0;
+
+                foreach (ITemplate result in results)
+                {
+                    Reporter.Output.WriteLine($"[{index++}] {result.Name} - {result.Source.Alias} - {result.Generator.Name}");
+                }
+
+                Reporter.Output.WriteLine();
+                Reporter.Output.WriteLine($"Template # [0 - {results.Count - 1}] (q to cancel):");
+
+                string key = Console.ReadLine();
+                while (!int.TryParse(key, out index))
+                {
+                    if (string.Equals(key, "q", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return -1;
+                    }
+
+                    key = Console.ReadLine();
+                }
+
+                tmplt = results[index];
+                generator = results[index].Generator;
             }
 
             if (help.HasValue())
@@ -131,10 +164,10 @@ namespace dotnet_new3
                 return 0;
             }
 
-            string realName = name.Value() ?? new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+            string realName = name.Value() ?? tmplt.DefaultName ?? new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
             string currentDir = Directory.GetCurrentDirectory();
 
-            if (name.HasValue())
+            if (dir.HasValue())
             {
                 Directory.SetCurrentDirectory(Directory.CreateDirectory(name.Value()).FullName);
             }
