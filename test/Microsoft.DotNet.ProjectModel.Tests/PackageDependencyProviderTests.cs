@@ -65,5 +65,18 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             Assert.Equal(4, context.RootProject.Dependencies.Count());
         }
+        
+        [Fact]
+        public void NoDuplicateReferencesWhenFrameworkMissing()
+        {
+            var instance = TestAssetsManager.CreateTestInstance("TestMicrosoftCSharpReferenceMissingFramework")
+                                            .WithLockFiles();
+
+            var context = new ProjectContextBuilder().WithProjectDirectory(instance.TestRoot)
+                                                     .WithTargetFramework("net99")
+                                                     .Build();
+
+            context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name);
+        }
     }
 }

@@ -377,22 +377,28 @@ namespace Microsoft.DotNet.ProjectModel
                 // To make them work seamlessly on those platforms, we fill the gap with a reference
                 // assembly (if available)
                 var package = library as PackageDescription;
-                if (package != null && package.Resolved && !package.CompileTimeAssemblies.Any())
+                if (package != null && 
+                    package.Resolved && 
+                    package.HasCompileTimePlaceholder && 
+                    !TargetFramework.IsPackageBased)
                 {
-                    var replacement = referenceAssemblyDependencyResolver.GetDescription(new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly), TargetFramework);
-                    if (replacement?.Resolved == true)
+                    var newKey = new LibraryKey(library.Identity.Name, LibraryType.ReferenceAssembly);
+                    var dependency = new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly);
+
+                    // If the framework assembly can't be resolved then mark it as unresolved but still replace the package
+                    // dependency
+                    var replacement = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework) ??
+                                        UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
+
+                    requiresFrameworkAssemblies = true;
+
+                    // Remove the original package reference
+                    libraries.Remove(pair.Key);
+
+                    // Insert a reference assembly key if there isn't one
+                    if (!libraries.ContainsKey(newKey))
                     {
-                        requiresFrameworkAssemblies = true;
-
-                        // Remove the original package reference
-                        libraries.Remove(pair.Key);
-
-                        // Insert a reference assembly key if there isn't one
-                        var key = new LibraryKey(replacement.Identity.Name, LibraryType.ReferenceAssembly);
-                        if (!libraries.ContainsKey(key))
-                        {
-                            libraries[key] = replacement;
-                        }
+                        libraries[newKey] = replacement;
                     }
                 }
             }

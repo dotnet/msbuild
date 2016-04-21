@@ -36,6 +36,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public override IEnumerable<LockFileItem> CompileTimeAssemblies => FilterPlaceholders(base.CompileTimeAssemblies);
 
+        public bool HasCompileTimePlaceholder => base.CompileTimeAssemblies.Any(a => PackageDependencyProvider.IsPlaceholderFile(a));
+
         private static IEnumerable<LockFileItem> FilterPlaceholders(IEnumerable<LockFileItem> items)
         {
             return items.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a));
