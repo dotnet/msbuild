@@ -33,11 +33,24 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
+        public static string GetDataFromAppDomain(string propertyName)
+        {
+            var appDomainType = typeof(object).GetTypeInfo().Assembly?.GetType("System.AppDomain");
+            var currentDomain = appDomainType?.GetProperty("CurrentDomain")?.GetValue(null);
+            var deps = appDomainType?.GetMethod("GetData")?.Invoke(currentDomain, new[] { propertyName });
+
+            return deps as string;
+        }
+
         private bool TryResolveMuxerFromParentDirectories()
         {
-            var appBase = new FileInfo(typeof(object).GetTypeInfo().Assembly.Location);
-            var muxerDir = appBase.Directory?.Parent?.Parent?.Parent;
+            var fxDepsFile = GetDataFromAppDomain("FX_DEPS_FILE");
+            if (string.IsNullOrEmpty(fxDepsFile))
+            {
+                return false;
+            }
 
+            var muxerDir = new FileInfo(fxDepsFile).Directory?.Parent?.Parent?.Parent;
             if (muxerDir == null)
             {
                 return false;
