@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -100,15 +99,36 @@ namespace dotnet_new3
 
             if (help.HasValue())
             {
+                string val;
+                if (tmplt.TryGetProperty("Description", out val))
+                {
+                    Reporter.Output.WriteLine($"{val}");
+                }
+
+                if (tmplt.TryGetProperty("Author", out val))
+                {
+                    Reporter.Output.WriteLine($"Author: {val}");
+                }
+
+                if (tmplt.TryGetProperty("DiskPath", out val))
+                {
+                    Reporter.Output.WriteLine($"Disk Path: {val}");
+                }
+
+                Reporter.Output.WriteLine("Parameters:");
                 foreach (ITemplateParameter parameter in generator.GetParametersForTemplate(tmplt).Parameters.OrderBy(x => x.Priority).ThenBy(x => x.Name))
                 {
                     Reporter.Output.WriteLine(
-                        $@"{parameter.Name} ({parameter.Priority})
-    Type: {parameter.Type}
-    Documentation: {parameter.Documentation}");
+                        $@"    {parameter.Name} ({parameter.Priority})
+        Type: {parameter.Type}");
+
+                    if (!string.IsNullOrEmpty(parameter.Documentation))
+                    {
+                        Reporter.Output.WriteLine($"        Documentation: {parameter.Documentation}");
+                    }
                 }
 
-                return (generator == null || tmplt == null) ? -1 : 0;
+                return 0;
             }
 
             string realName = name.Value() ?? new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
@@ -121,7 +141,7 @@ namespace dotnet_new3
 
             IParameterSet templateParams = generator.GetParametersForTemplate(tmplt);
 
-            foreach(ITemplateParameter param in templateParams.Parameters)
+            foreach (ITemplateParameter param in templateParams.Parameters)
             {
                 if (param.IsName)
                 {

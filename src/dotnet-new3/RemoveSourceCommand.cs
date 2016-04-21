@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.CommandLineUtils;
+﻿using Microsoft.Extensions.CommandLineUtils;
 
 namespace dotnet_new3
 {

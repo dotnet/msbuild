@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.DotNet.Cli.Utils;
+﻿using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Mutant.Chicken.Abstractions;
 

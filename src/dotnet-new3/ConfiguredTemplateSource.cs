@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mutant.Chicken.Abstractions;
 
 namespace dotnet_new3
