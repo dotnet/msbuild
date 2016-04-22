@@ -234,10 +234,6 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     sw.WriteLine("#!/bin/bash");
-                    if (!string.IsNullOrWhiteSpace(_workingDirectory))
-                    {
-                        sw.WriteLine("cd " + _workingDirectory);
-                    }
                 }
 
                 if (isUnix && NativeMethodsShared.IsMono)
