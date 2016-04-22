@@ -1,14 +1,17 @@
 {
   "version": "1.0.0-*",
+
   "testRunner": "xunit",
+
   "dependencies": {
     "Newtonsoft.Json": "7.0.1"
   },
+  
   "frameworks": {
     "net451": {},
     "netstandard1.5": {
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24022"
+        "NETStandard.Library": "1.5.0-rc2-24018"
       },
       "imports": "portable-net45+win8"
     }
