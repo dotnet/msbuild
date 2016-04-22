@@ -24,21 +24,22 @@ namespace dotnet_new3
         public IEnumerable<ITemplateSourceEntry> EntriesIn(string location)
         {
             DirectoryInfo root = new DirectoryInfo(location);
-            return root.EnumerateFileSystemInfos().Select(EntryHelper.Create);
+            TemplateSourceFolder r = new Directory(null, root);
+            return root.EnumerateFileSystemInfos().Select(x => EntryHelper.Create(r, x));
         }
 
         private static class EntryHelper
         {
-            public static ITemplateSourceEntry Create(FileSystemInfo info)
+            public static ITemplateSourceEntry Create(ITemplateSourceFolder parent, FileSystemInfo info)
             {
                 DirectoryInfo dir = info as DirectoryInfo;
 
                 if(dir != null)
                 {
-                    return new Directory(dir);
+                    return new Directory(parent, dir);
                 }
 
-                return new File((FileInfo)info);
+                return new File(parent, (FileInfo)info);
             }
         }
 
@@ -46,12 +47,13 @@ namespace dotnet_new3
         {
             private readonly DirectoryInfo _dir;
 
-            public Directory(DirectoryInfo dir)
+            public Directory(ITemplateSourceFolder parent, DirectoryInfo dir)
+                : base(parent)
             {
                 _dir = dir;
             }
 
-            public override IEnumerable<ITemplateSourceEntry> Children => _dir.EnumerateFileSystemInfos().Select(EntryHelper.Create);
+            public override IEnumerable<ITemplateSourceEntry> Children => _dir.EnumerateFileSystemInfos().Select(x => EntryHelper.Create(this, x));
 
             public override string FullPath => _dir.FullName;
 
@@ -62,7 +64,8 @@ namespace dotnet_new3
         {
             private readonly FileInfo _file;
 
-            public File(FileInfo file)
+            public File(ITemplateSourceFolder parent, FileInfo file)
+                : base(parent)
             {
                 _file = file;
             }
