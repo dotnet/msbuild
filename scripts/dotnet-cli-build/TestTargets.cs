@@ -362,7 +362,7 @@ namespace Microsoft.DotNet.Cli.Build
         private static IEnumerable<string> GetTestProjects()
         {
             List<string> testProjects = new List<string>();
-            testProjects.AddRange(testProjects);
+            testProjects.AddRange(TestProjects);
 
             if (CurrentPlatform.IsWindows)
             {

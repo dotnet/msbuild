@@ -216,7 +216,7 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         public void Build_Generates_Redirects_For_App_Without_Config()
         {
             var redirects = GetRedirects(_appWithoutConfigBuildOutput);
@@ -227,7 +227,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         public void Publish_Generates_Redirects_For_App_Without_Config()
         {
             var redirects = GetRedirects(_appWithoutConfigPublishOutput);
@@ -238,7 +238,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         public void Build_Generates_Redirects_For_Executable_Dependency()
         {
             var redirects = GetRedirects(_executableDependencyBuildOutput);
@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        //[WindowsOnlyFact]
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/2632")]
         public void Publish_Generates_Redirects_For_Executable_Dependency()
         {
             var redirects = GetRedirects(_executableDependencyPublishOutput);
@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         public void Build_Generates_Redirects_For_App_With_Config()
         {
             var redirects = GetRedirects(_appWithConfigBuildOutput);
@@ -272,7 +272,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         public void Publish_Generates_Redirects_For_App_With_Config()
         {
             var redirects = GetRedirects(_appWithConfigPublishOutput);
