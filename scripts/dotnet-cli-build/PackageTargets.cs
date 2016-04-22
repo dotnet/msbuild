@@ -274,7 +274,6 @@ namespace Microsoft.DotNet.Cli.Build
                 { "Stage2Dir", Dirs.Stage2 },
                 { "STAGE2_DIR", Dirs.Stage2 },
                 { "Stage2CompilationDir", Dirs.Stage2Compilation },
-                { "HostDir", Dirs.Corehost },
                 { "PackageDir", Path.Combine(Dirs.Packages) }, // Legacy name
                 { "TestBinRoot", Dirs.TestOutput },
                 { "TestPackageDir", Dirs.TestPackages },

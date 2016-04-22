@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult PublishCoreHostPackages(BuildTargetContext c)
         {
-            foreach (var file in Directory.GetFiles(Dirs.Corehost, "*.nupkg"))
+            foreach (var file in Directory.GetFiles(Dirs.CorehostLocalPackages, "*.nupkg"))
             {
                 var hostBlob = $"{Channel}/Binaries/{CliNuGetVersion}/{Path.GetFileName(file)}";
                 AzurePublisherTool.PublishFile(hostBlob, file);

@@ -22,7 +22,9 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string Stage2 = Path.Combine(Output, "stage2");
         public static readonly string Stage2Compilation = Path.Combine(Output, "stage2compilation");
         public static readonly string Stage2Symbols = Path.Combine(Output, "stage2symbols");
-        public static readonly string Corehost = Path.Combine(Output, "corehost");
+        public static readonly string CorehostLatest = Path.Combine(Output, "corehost"); // Not using Path.Combine(Output, "corehost", "latest") to keep signing working.
+        public static readonly string CorehostLocked = Path.Combine(Output, "corehost", "locked");
+        public static readonly string CorehostLocalPackages = Path.Combine(Output, "corehost");
         public static readonly string CorehostDummyPackages = Path.Combine(Output, "corehostdummypackages");
         public static readonly string TestOutput = Path.Combine(Output, "tests");
         public static readonly string TestArtifacts = Path.Combine(TestOutput, "artifacts");
