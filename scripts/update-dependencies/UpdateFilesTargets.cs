@@ -74,6 +74,12 @@ namespace Microsoft.DotNet.Scripts
                     continue;
                 }
 
+                if (projectRoot == null)
+                {
+                    c.Warn($"A non valid JSON file was encountered '{projectJsonFile}'. Skipping file.");
+                    continue;
+                }
+
                 bool changedAnyPackage = FindAllDependencyProperties(projectRoot)
                     .Select(dependencyProperty => ReplaceDependencyVersion(dependencyProperty, dependencyInfos))
                     .ToArray()
