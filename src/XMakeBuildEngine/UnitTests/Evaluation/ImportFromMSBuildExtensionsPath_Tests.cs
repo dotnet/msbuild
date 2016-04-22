@@ -356,13 +356,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
                      <toolset toolsVersion=""14.1"">
                        <property name=""MSBuildToolsPath"" value="".""/>
                        <property name=""MSBuildBinPath"" value=""" + /*v4Folder*/"." + @"""/>
-                       <msbuildExtensionsPathSearchPaths>
+                       <projectImportSearchPaths>
                          <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
                            <property name=""MSBuildExtensionsPath"" value=""{0}"" />
                            <property name=""MSBuildExtensionsPath32"" value=""{1}"" />
                            <property name=""MSBuildExtensionsPath64"" value=""{2}"" />
                          </searchPaths>
-                       </msbuildExtensionsPathSearchPaths>
+                       </projectImportSearchPaths>
                       </toolset>
                    </msbuildToolsets>
                  </configuration>";
@@ -434,11 +434,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                      <toolset toolsVersion=""14.1"">
                        <property name=""MSBuildToolsPath"" value="".""/>
                        <property name=""MSBuildBinPath"" value="".""/>
-                       <msbuildExtensionsPathSearchPaths>
+                       <projectImportSearchPaths>
                          <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
                            <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1)"" />
                          </searchPaths>
-                       </msbuildExtensionsPathSearchPaths>
+                       </projectImportSearchPaths>
                       </toolset>
                    </msbuildToolsets>
                  </configuration>";
@@ -495,11 +495,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                      <toolset toolsVersion=""14.1"">
                        <property name=""MSBuildToolsPath"" value="".""/>
                        <property name=""MSBuildBinPath"" value="".""/>
-                       <msbuildExtensionsPathSearchPaths>
+                       <projectImportSearchPaths>
                          <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
                            <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1)"" />
                          </searchPaths>
-                       </msbuildExtensionsPathSearchPaths>
+                       </projectImportSearchPaths>
                       </toolset>
                    </msbuildToolsets>
                  </configuration>";
@@ -528,6 +528,75 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 // Expanded $(FallbackExpandDir) will appear in quotes in the log
                 logger.AssertLogContains("\"" + extnDir1 + "\"");
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(mainProjectPath);
+                FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
+            }
+        }
+
+        // Fall-back search path with custom variable
+        [Fact]
+        public void FallbackImportWithIndirectReference()
+        {
+            string mainTargetsFileContent = @"
+               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                   <PropertyGroup>
+                       <VSToolsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v99</VSToolsPath>
+                   </PropertyGroup>
+                   <Import Project='$(VSToolsPath)\DNX\Microsoft.DNX.Props' Condition=""Exists('$(VSToolsPath)\DNX\Microsoft.DNX.Props')"" />
+                   <Target Name='Main' DependsOnTargets='FromExtn' />
+               </Project>";
+
+            string extnTargetsFileContentTemplate = @"
+               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                   <Target Name='FromExtn'>
+                       <Message Text='Running FromExtn'/>
+                   </Target>
+               </Project>";
+
+            var configFileContents = @"
+                <configuration>
+                  <configSections>
+                    <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
+                  </configSections>
+                  <msbuildToolsets default=""14.1"">
+                    <toolset toolsVersion=""14.1"">
+                      <property name=""MSBuildToolsPath"" value="".""/>
+                      <property name=""MSBuildBinPath"" value="".""/>
+                      <projectImportSearchPaths>
+                        <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
+                          <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1)"" />
+                          <property name=""VSToolsPath"" value=""$(FallbackExpandDir1)\Microsoft\VisualStudio\v99"" />
+                        </searchPaths>
+                      </projectImportSearchPaths>
+                     </toolset>
+                  </msbuildToolsets>
+                </configuration>";
+
+            string extnDir1 = null;
+            string mainProjectPath = null;
+
+            try
+            {
+                extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("Microsoft", "VisualStudio", "v99", "DNX", "Microsoft.DNX.Props"),
+                    extnTargetsFileContentTemplate);
+
+                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
+
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
+                var reader = GetStandardConfigurationReader();
+
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+
+                projectCollection.ResetToolsetsForTests(reader);
+                var logger = new MockLogger();
+                projectCollection.RegisterLogger(logger);
+
+                var project = projectCollection.LoadProject(mainProjectPath);
+                Assert.True(project.Build("Main"));
+                logger.AssertLogContains("Running FromExtn");
             }
             finally
             {
@@ -597,7 +666,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             string combinedExtnDirs = extnDirs != null ? String.Join(";", extnDirs) : String.Empty;
 
-            var configFilePath = ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -606,11 +675,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                      <toolset toolsVersion=""14.1"">
                        <property name=""MSBuildToolsPath"" value=""."" />
                        <property name=""MSBuildBinPath"" value=""."" />
-                       <msbuildExtensionsPathSearchPaths>
+                       <projectImportSearchPaths>
                          <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
                            <property name=""" + extnPathPropertyName + @""" value=""" + combinedExtnDirs + @""" />
                          </searchPaths>
-                       </msbuildExtensionsPathSearchPaths>
+                       </projectImportSearchPaths>
                       </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -678,8 +747,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
-                ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
+            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
     }
 }

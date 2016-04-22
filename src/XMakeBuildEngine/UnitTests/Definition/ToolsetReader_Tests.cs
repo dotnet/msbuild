@@ -289,8 +289,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"");
 
-                ToolsetReader reader = new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
-                    ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
+                ToolsetReader reader = new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -2613,8 +2612,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
-                ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
+            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
     }
 
