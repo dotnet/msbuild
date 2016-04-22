@@ -10,12 +10,7 @@
     },
   },
   "frameworks": {
-    "netcoreapp1.0": {
-      "imports": [
-        "netstandardapp1.5",
-        "dnxcore50"
-      ]
-    }
+    "netcoreapp1.0": { }
   },
   "content": [
     "reflector_cmd.cmd"
