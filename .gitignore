@@ -3,6 +3,9 @@
 # Test results
 *-testResults.xml
 
+# Multicore JIT Optimization profiles
+**/optimizationdata/dotnet
+
 # NuGet keeps dropping
 Library/
 
