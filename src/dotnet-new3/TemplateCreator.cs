@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -95,35 +96,44 @@ namespace dotnet_new3
 
             if (generator == null || tmplt == null)
             {
-                Reporter.Error.WriteLine($"No template \"{template.Value}\" was found in any of the configured sources");
+                Reporter.Error.WriteLine($"No template with name \"{template.Value}\" was found in any of the configured sources, searching...");
 
                 List<ITemplate> results = List(template, source).ToList();
+                Reporter.Error.WriteLine($"{results.Count} matching template(s) found.");
 
                 if (results.Count == 0)
                 {
                     return -1;
                 }
 
-                Reporter.Output.WriteLine("Template Name - Source Name - Generator Name");
                 int index = 0;
 
-                foreach (ITemplate result in results)
+                if (results.Count != 1)
                 {
-                    Reporter.Output.WriteLine($"[{index++}] {result.Name} - {result.Source.Alias} - {result.Generator.Name}");
-                }
-
-                Reporter.Output.WriteLine();
-                Reporter.Output.WriteLine($"Template # [0 - {results.Count - 1}] (q to cancel):");
-
-                string key = Console.ReadLine();
-                while (!int.TryParse(key, out index))
-                {
-                    if (string.Equals(key, "q", StringComparison.OrdinalIgnoreCase))
+                    Reporter.Output.WriteLine("Template Name - Source Name - Generator Name");
+                    foreach (ITemplate result in results)
                     {
-                        return -1;
+                        Reporter.Output.WriteLine($"[{index++}] {result.Name} - {result.Source.Alias} - {result.Generator.Name}");
                     }
 
-                    key = Console.ReadLine();
+                    Reporter.Output.WriteLine();
+                    Reporter.Output.WriteLine($"Template # [0 - {results.Count - 1}] (q to cancel):");
+
+                    string key = Console.ReadLine();
+                    while (!int.TryParse(key, out index))
+                    {
+                        if (string.Equals(key, "q", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return -1;
+                        }
+
+                        key = Console.ReadLine();
+                    }
+                }
+                else
+                {
+                    Reporter.Output.WriteLine($"Using template: {results[0].Name} - {results[0].Source.Alias} - {results[0].Generator.Name}");
+                    index = 0;
                 }
 
                 tmplt = results[index];
@@ -159,6 +169,11 @@ namespace dotnet_new3
                     {
                         Reporter.Output.WriteLine($"        Documentation: {parameter.Documentation}");
                     }
+
+                    if (!string.IsNullOrEmpty(parameter.DefaultValue))
+                    {
+                        Reporter.Output.WriteLine($"        Default: {parameter.DefaultValue}");
+                    }
                 }
 
                 return 0;
@@ -169,7 +184,7 @@ namespace dotnet_new3
 
             if (dir.HasValue())
             {
-                Directory.SetCurrentDirectory(Directory.CreateDirectory(name.Value()).FullName);
+                Directory.SetCurrentDirectory(Directory.CreateDirectory(realName).FullName);
             }
 
             IParameterSet templateParams = generator.GetParametersForTemplate(tmplt);
@@ -179,7 +194,10 @@ namespace dotnet_new3
                 if (param.IsName)
                 {
                     templateParams.ParameterValues[param] = realName;
-                    break;
+                }
+                else
+                {
+                    templateParams.ParameterValues[param] = param.DefaultValue;
                 }
             }
 
@@ -194,7 +212,10 @@ namespace dotnet_new3
 
             try
             {
+                Stopwatch sw = Stopwatch.StartNew();
                 await generator.Create(tmplt, templateParams);
+                sw.Stop();
+                Reporter.Output.WriteLine($"Content generated in {sw.Elapsed.TotalMilliseconds} ms");
             }
             finally
             {
