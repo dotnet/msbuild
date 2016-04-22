@@ -244,7 +244,9 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
-                // automatically maps the network path to a drive letter, and then popd disconnects it
+                // automatically maps the network path to a drive letter, and then popd disconnects it.
+                // This is required because Cmd.exe does not support UNC names as the current directory:
+                // https://support.microsoft.com/en-us/kb/156276
                 if (workingDirectoryIsUNC)
                 {
                     sw.WriteLine("pushd " + _workingDirectory);
