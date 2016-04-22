@@ -8,6 +8,11 @@
         "Microsoft.NETCore.App": "1.0.0-rc2-*"
       }
     },
+    "netcore50": {
+      "dependencies": {
+        "System.Private.Uri": "4.0.1-rc2-24018"
+      }
+    },
     "net99": {
       "dependencies": {
         "Microsoft.CSharp": "4.0.1-rc2-24018"

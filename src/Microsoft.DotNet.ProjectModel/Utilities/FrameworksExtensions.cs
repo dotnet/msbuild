@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
+using System;
 using System.Runtime.Versioning;
 
 namespace NuGet.Frameworks
@@ -55,6 +55,13 @@ namespace NuGet.Frameworks
                 return name;
             }
             return name + "-" + frameworkName.Profile;
+        }
+        
+        public static bool IsPackageBased(this NuGetFramework self)
+        {
+            return self.IsPackageBased ||
+                    (self.Framework == FrameworkConstants.FrameworkIdentifiers.NetCore &&
+                     self.Version >= new Version(5, 0, 0, 0));
         }
     }
 }

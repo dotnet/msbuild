@@ -380,7 +380,7 @@ namespace Microsoft.DotNet.ProjectModel
                 if (package != null && 
                     package.Resolved && 
                     package.HasCompileTimePlaceholder && 
-                    !TargetFramework.IsPackageBased)
+                    !TargetFramework.IsPackageBased())
                 {
                     var newKey = new LibraryKey(library.Identity.Name, LibraryType.ReferenceAssembly);
                     var dependency = new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly);

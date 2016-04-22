@@ -76,7 +76,22 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                                                      .WithTargetFramework("net99")
                                                      .Build();
 
+            // Will fail with dupes if any
             context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name);
+        }
+        
+        [Fact]
+        public void NetCore50ShouldNotResolveFrameworkAssemblies()
+        {
+            var instance = TestAssetsManager.CreateTestInstance("TestMicrosoftCSharpReferenceMissingFramework")
+                                            .WithLockFiles();
+
+            var context = new ProjectContextBuilder().WithProjectDirectory(instance.TestRoot)
+                                                     .WithTargetFramework("netcore50")
+                                                     .Build();
+
+            var diagnostics = context.LibraryManager.GetAllDiagnostics();
+            Assert.False(diagnostics.Any(d => d.ErrorCode == ErrorCodes.DOTNET1011));
         }
     }
 }
