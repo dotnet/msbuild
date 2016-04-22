@@ -506,13 +506,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 var testProjectRoot = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "MSBuildReferencesProjects", "ValidCase01");
                 foreach (var classLibrary in classLibraries)
                 {
-                    dependencies.RetrieveDependency(classLibrary)
-                                .AssertProperty("Type", LibraryType.MSBuildProject.ToString())
-                                .AssertProperty("Path", NormalizePathString(Path.Combine(testProjectRoot, classLibrary, $"{classLibrary}.csproj")))
-                                .AssertProperty<bool>("Resolved", true)
-                                .AssertProperty("Name", classLibrary)
-                                .AssertProperty<JArray>("Errors", array => array.Count == 0)
-                                .AssertProperty<JArray>("Warnings", array => array.Count == 0);
+                    var dependency = dependencies.RetrieveDependency(classLibrary);
+                    dependency.AssertProperty("Type", LibraryType.MSBuildProject.ToString());
+                    dependency.AssertProperty("Path", NormalizePathString(Path.Combine(testProjectRoot, classLibrary, $"{classLibrary}.csproj")));
+                    dependency.AssertProperty<bool>("Resolved", true);
+                    dependency.AssertProperty("Name", classLibrary);
+                    dependency.AssertProperty<JArray>("Errors", array => array.Count == 0);
+                    dependency.AssertProperty<JArray>("Warnings", array => array.Count == 0);
                 }
 
                 var references = messages.RetrieveSingleMessage(MessageTypes.References)
@@ -632,12 +632,12 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 afterDependencies.RetrieveDependency("ClassLibrary3");
             }
         }
-        
+
         [Fact]
         public void TestMscorlibLibraryDuplication()
         {
             var projectPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "MscorlibLibraryDuplication");
-            
+
             using (var server = new DthTestServer(_loggerFactory))
             using (var client = new DthTestClient(server, _loggerFactory))
             {

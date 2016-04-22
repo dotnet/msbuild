@@ -56,7 +56,7 @@ namespace NuGet.Frameworks
             }
             return name + "-" + frameworkName.Profile;
         }
-        
+
         internal static bool IsPackageBased(this NuGetFramework self)
         {
             return self.IsPackageBased ||

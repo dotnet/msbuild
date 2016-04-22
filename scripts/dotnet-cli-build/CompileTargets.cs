@@ -280,7 +280,7 @@ namespace Microsoft.DotNet.Cli.Build
             return rid;
         }
 
-        [Target]
+        [Target(nameof(PrepareTargets.Init))]
         public static BuildTargetResult CompileStage1(BuildTargetContext c)
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
@@ -305,7 +305,7 @@ namespace Microsoft.DotNet.Cli.Build
             return result;
         }
 
-        [Target]
+        [Target(nameof(PrepareTargets.Init))]
         public static BuildTargetResult CompileStage2(BuildTargetContext c)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");

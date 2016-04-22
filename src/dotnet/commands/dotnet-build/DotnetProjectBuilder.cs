@@ -33,7 +33,8 @@ namespace Microsoft.DotNet.Tools.Build
                 args.ConfigValue,
                 args.OutputValue,
                 args.BuildBasePathValue,
-                args.GetRuntimes()
+                args.GetRuntimes(),
+                args.Workspace
                 );
             _scriptRunner = new ScriptRunner();
             _commandFactory = new DotNetCommandFactory();
@@ -120,7 +121,7 @@ namespace Microsoft.DotNet.Tools.Build
         private void MakeRunnable(ProjectGraphNode graphNode)
         {
             var runtimeContext = graphNode.ProjectContext.ProjectFile.HasRuntimeOutput(_args.ConfigValue) ?
-                graphNode.ProjectContext.CreateRuntimeContext(_args.GetRuntimes()) :
+                _args.Workspace.GetRuntimeContext(graphNode.ProjectContext, _args.GetRuntimes()) :
                 graphNode.ProjectContext;
 
             var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);

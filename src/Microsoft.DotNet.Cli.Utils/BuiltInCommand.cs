@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -51,17 +52,16 @@ namespace Microsoft.DotNet.Cli.Utils
                     // Reset the Reporters to the new Console Out and Error.
                     Reporter.Reset();
 
-                    Thread threadOut = _stdOut.BeginRead(new StreamReader(outStream));
-                    Thread threadErr = _stdErr.BeginRead(new StreamReader(errorStream));
+                    var taskOut = _stdOut.BeginRead(new StreamReader(outStream));
+                    var taskErr = _stdErr.BeginRead(new StreamReader(errorStream));
 
                     int exitCode = _builtInCommand(_commandArgs.ToArray());
 
                     outStream.DoneWriting();
                     errorStream.DoneWriting();
 
-                    threadOut.Join();
-                    threadErr.Join();
-             
+                    Task.WaitAll(taskOut, taskErr);
+
                     // fake out a ProcessStartInfo using the Muxer command name, since this is a built-in command
                     ProcessStartInfo startInfo = new ProcessStartInfo(new Muxer().MuxerPath, $"{CommandName} {CommandArgs}");
                     return new CommandResult(startInfo, exitCode, null, null);

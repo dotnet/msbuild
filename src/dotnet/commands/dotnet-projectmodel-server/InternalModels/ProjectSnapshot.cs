@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Server.Helpers;
 using Microsoft.DotNet.ProjectModel.Server.Models;
@@ -35,12 +36,12 @@ namespace Microsoft.DotNet.ProjectModel.Server
             snapshot.ProjectSearchPaths = currentSearchPaths.ToList();
             snapshot.GlobalJsonPath = globalSettings?.FilePath;
 
-            foreach (var projectContext in projectContextsCollection.ProjectContexts)
+            foreach (var projectContext in projectContextsCollection.FrameworkOnlyContexts)
             {
-                snapshot.ProjectContexts[projectContext.TargetFramework] = 
+                snapshot.ProjectContexts[projectContext.TargetFramework] =
                     ProjectContextSnapshot.Create(projectContext, configuration, currentSearchPaths);
             }
-            
+
             return snapshot;
         }
     }

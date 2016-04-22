@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (context.ProjectFile.HasRuntimeOutput(args.ConfigValue))
             {
-                var runtimeContext = context.CreateRuntimeContext(args.GetRuntimes());
+                var runtimeContext = args.Workspace.GetRuntimeContext(context, args.GetRuntimes());
                 var runtimeOutputPath = runtimeContext.GetOutputPaths(args.ConfigValue, args.BuildBasePathValue, args.OutputValue);
 
                 contextVariables.Add(

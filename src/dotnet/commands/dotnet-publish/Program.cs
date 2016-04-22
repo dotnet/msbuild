@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -43,6 +44,8 @@ namespace Microsoft.DotNet.Tools.Publish
                 publish.ProjectPath = projectPath.Value;
                 publish.VersionSuffix = versionSuffix.Value();
                 publish.ShouldBuild = !noBuild.HasValue();
+
+                publish.Workspace = WorkspaceContext.Create(versionSuffix.Value(), designTime: false);
 
                 if (string.IsNullOrEmpty(publish.ProjectPath))
                 {

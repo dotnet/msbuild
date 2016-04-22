@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
@@ -44,11 +45,16 @@ namespace Microsoft.DotNet.Tools.Compiler
         public bool ShouldNotUseIncrementality { get; set; }
         public bool ShouldSkipDependencies { get; set; }
 
+        public WorkspaceContext Workspace { get; private set; }
+
         // workaround: CommandLineApplication is internal therefore I cannot make _app protected so baseclasses can add their own params
         private readonly Dictionary<string, CommandOption> baseClassOptions;
 
-        public BuildCommandApp(string name, string fullName, string description)
+        public BuildCommandApp(string name, string fullName, string description) : this(name, fullName, description, workspace: null) { }
+
+        public BuildCommandApp(string name, string fullName, string description, WorkspaceContext workspace)
         {
+            Workspace = workspace;
             _app = new CommandLineApplication
             {
                 Name = name,
@@ -98,6 +104,18 @@ namespace Microsoft.DotNet.Tools.Compiler
                 ShouldPrintIncrementalPreconditions = _shouldPrintIncrementalPreconditionsArgument.HasValue();
                 ShouldNotUseIncrementality = _shouldNotUseIncrementalityArgument.HasValue();
                 ShouldSkipDependencies = _shouldSkipDependenciesArgument.HasValue();
+
+                // Set defaults based on the environment
+                if (Workspace == null)
+                {
+                    var settings = ProjectReaderSettings.ReadFromEnvironment();
+
+                    if (!string.IsNullOrEmpty(VersionSuffixValue))
+                    {
+                        settings.VersionSuffix = VersionSuffixValue;
+                    }
+                    Workspace = WorkspaceContext.Create(settings, designTime: false);
+                }
 
                 var files = new ProjectGlobbingResolver().Resolve(_projectArgument.Values);
                 IEnumerable<NuGetFramework> frameworks = null;

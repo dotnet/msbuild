@@ -109,12 +109,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private CommandResult RunProcess(string executable, string args, StreamForwarder stdOut, StreamForwarder stdErr)
         {
             CurrentProcess = StartProcess(executable, args);
-            var threadOut = stdOut.BeginRead(CurrentProcess.StandardOutput);
-            var threadErr = stdErr.BeginRead(CurrentProcess.StandardError);
+            var taskOut = stdOut.BeginRead(CurrentProcess.StandardOutput);
+            var taskErr = stdErr.BeginRead(CurrentProcess.StandardError);
 
             CurrentProcess.WaitForExit();
-            threadOut.Join();
-            threadErr.Join();
+            Task.WaitAll(taskOut, taskErr);
 
             var result = new CommandResult(
                 CurrentProcess.StartInfo,
@@ -128,14 +127,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private Task<CommandResult> RunProcessAsync(string executable, string args, StreamForwarder stdOut, StreamForwarder stdErr)
         {
             CurrentProcess = StartProcess(executable, args);
-            var threadOut = stdOut.BeginRead(CurrentProcess.StandardOutput);
-            var threadErr = stdErr.BeginRead(CurrentProcess.StandardError);
+            var taskOut = stdOut.BeginRead(CurrentProcess.StandardOutput);
+            var taskErr = stdErr.BeginRead(CurrentProcess.StandardError);
 
             var tcs = new TaskCompletionSource<CommandResult>();
             CurrentProcess.Exited += (sender, arg) =>
             {
-                threadOut.Join();
-                threadErr.Join();
+                Task.WaitAll(taskOut, taskErr);
                 var result = new CommandResult(
                                     CurrentProcess.StartInfo,
                                     CurrentProcess.ExitCode,

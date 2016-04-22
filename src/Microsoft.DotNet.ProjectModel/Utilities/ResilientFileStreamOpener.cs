@@ -13,18 +13,18 @@ namespace Microsoft.DotNet.ProjectModel.Utilities
         {
             return OpenFile(filepath, 0);
         }
-       
+
         public static FileStream OpenFile(string filepath, int retry)
         {
             if (retry < 0)
             {
                 throw new ArgumentException("Retry can't be fewer than 0", nameof(retry));
             }
-            
+
             var count = 0;
             while (true)
             {
-                try 
+                try
                 {
                     return new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 }

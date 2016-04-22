@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             _writer.Dispose();
             _networkStream.Dispose();
             _readCancellationToken.Cancel();
-            
+
             try
             {
                 _socket.Shutdown(SocketShutdown.Both);

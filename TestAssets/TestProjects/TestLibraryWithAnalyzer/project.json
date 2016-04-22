@@ -1,8 +1,5 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
   "dependencies": {
     "NETStandard.Library": "1.5.0-rc2-24022",
     "System.Runtime.Analyzers": {

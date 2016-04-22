@@ -18,16 +18,19 @@ namespace Microsoft.DotNet.Tools.Build
         private readonly string _outputPath;
         private readonly string _buildBasePath;
         private readonly IList<string> _runtimes;
+        private readonly WorkspaceContext _workspace;
 
         public CompilerIOManager(string configuration,
             string outputPath,
             string buildBasePath,
-            IEnumerable<string> runtimes)
+            IEnumerable<string> runtimes,
+            WorkspaceContext workspace)
         {
             _configuration = configuration;
             _outputPath = outputPath;
             _buildBasePath = buildBasePath;
             _runtimes = runtimes.ToList();
+            _workspace = workspace;
         }
 
         public bool AnyMissingIO(ProjectContext project, IEnumerable<string> items, string itemsType)
@@ -75,7 +78,7 @@ namespace Microsoft.DotNet.Tools.Build
             var allOutputPath = new HashSet<string>(calculator.CompilationFiles.All());
             if (isRootProject && project.ProjectFile.HasRuntimeOutput(_configuration))
             {
-                var runtimeContext = project.CreateRuntimeContext(_runtimes);
+                var runtimeContext = _workspace.GetRuntimeContext(project, _runtimes);
                 foreach (var path in runtimeContext.GetOutputPaths(_configuration, _buildBasePath, _outputPath).RuntimeFiles.All())
                 {
                     allOutputPath.Add(path);

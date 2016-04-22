@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
@@ -26,7 +27,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             _hostName = hostName;
             _loggerFactory = loggerFactory;
             _protocolManager = new ProtocolManager(maxVersion: 4, loggerFactory: _loggerFactory);
-            _workspaceContext = WorkspaceContext.Create();
+            _workspaceContext = WorkspaceContext.Create(designTime: true);
             _projects = new Dictionary<int, ProjectManager>();
         }
 
@@ -51,25 +52,33 @@ namespace Microsoft.DotNet.ProjectModel.Server
 
                 var logger = loggerFactory.CreateLogger<ProjectModelServerCommand>();
 
-                if (!MonitorHostProcess(hostpid, logger))
+                try
                 {
-                    return 1;
-                }
+                    if (!MonitorHostProcess(hostpid, logger))
+                    {
+                        return 1;
+                    }
 
-                var intPort = CheckPort(port, logger);
-                if (intPort == -1)
+                    var intPort = CheckPort(port, logger);
+                    if (intPort == -1)
+                    {
+                        return 1;
+                    }
+
+                    if (!hostname.HasValue())
+                    {
+                        logger.LogError($"Option \"{hostname.LongName}\" is missing.");
+                        return 1;
+                    }
+
+                    var program = new ProjectModelServerCommand(intPort, hostname.Value(), loggerFactory);
+                    program.OpenChannel();
+                }
+                catch (Exception ex)
                 {
-                    return 1;
+                    logger.LogCritical($"Unhandled exception in server main: {ex}");
+                    throw;
                 }
-
-                if (!hostname.HasValue())
-                {
-                    logger.LogError($"Option \"{hostname.LongName}\" is missing.");
-                    return 1;
-                }
-
-                var program = new ProjectModelServerCommand(intPort, hostname.Value(), loggerFactory);
-                program.OpenChannel();
 
                 return 0;
             });

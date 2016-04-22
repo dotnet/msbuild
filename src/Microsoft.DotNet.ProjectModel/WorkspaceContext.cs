@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -28,9 +29,16 @@ namespace Microsoft.DotNet.ProjectModel
         private readonly HashSet<string> _projects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private bool _needRefresh;
+        private readonly ProjectReaderSettings _settings;
+        private readonly bool _designTime;
+        private readonly LockFileReader _lockFileReader;
 
-        private WorkspaceContext(IEnumerable<string> projectPaths)
+        private WorkspaceContext(IEnumerable<string> projectPaths, ProjectReaderSettings settings, bool designTime)
         {
+            _settings = settings;
+            _designTime = designTime;
+            _lockFileReader = new LockFileReader();
+
             foreach (var path in projectPaths)
             {
                 AddProject(path);
@@ -41,31 +49,60 @@ namespace Microsoft.DotNet.ProjectModel
 
         /// <summary>
         /// Create a WorkspaceContext from a given path.
-        /// 
-        /// There must be either a global.json or project.json at under the given path. Otherwise
-        /// null is returned.
-        /// 
+        ///
         /// If the given path points to a global.json, all the projects found under the search paths
         /// are added to the WorkspaceContext.
-        /// 
+        ///
         /// If the given path points to a project.json, all the projects it referenced as well as itself
         /// are added to the WorkspaceContext.
+        ///
+        /// If no path is provided, the workspace context is created empty and projects must be manually added
+        /// to it using <see cref="AddProject(string)"/>.
         /// </summary>
-        public static WorkspaceContext CreateFrom(string projectPath)
+        public static WorkspaceContext CreateFrom(string projectPath, bool designTime)
         {
             var projectPaths = ResolveProjectPath(projectPath);
             if (projectPaths == null || !projectPaths.Any())
             {
-                return null;
+                return new WorkspaceContext(Enumerable.Empty<string>(), ProjectReaderSettings.ReadFromEnvironment(), designTime);
             }
 
-            var context = new WorkspaceContext(projectPaths);
+            var context = new WorkspaceContext(projectPaths, ProjectReaderSettings.ReadFromEnvironment(), designTime);
             return context;
         }
 
-        public static WorkspaceContext Create()
+        /// <summary>
+        /// Create an empty <see cref="WorkspaceContext" /> using the default <see cref="ProjectReaderSettings" />
+        /// </summary>
+        /// <param name="designTime">A boolean indicating if the workspace should be created in Design-Time mode</param>
+        /// <returns></returns>
+        public static WorkspaceContext Create(bool designTime) => Create(ProjectReaderSettings.ReadFromEnvironment(), designTime);
+
+        /// <summary>
+        /// Create an empty <see cref="WorkspaceContext" /> using the default <see cref="ProjectReaderSettings" />, with the specified Version Suffix
+        /// </summary>
+        /// <param name="versionSuffix">The suffix to use to replace any '-*' snapshot tokens in Project versions.</param>
+        /// <param name="designTime">A boolean indicating if the workspace should be created in Design-Time mode</param>
+        /// <returns></returns>
+        public static WorkspaceContext Create(string versionSuffix, bool designTime)
         {
-            return new WorkspaceContext(Enumerable.Empty<string>());
+            var settings = ProjectReaderSettings.ReadFromEnvironment();
+            if (!string.IsNullOrEmpty(versionSuffix))
+            {
+                settings.VersionSuffix = versionSuffix;
+            }
+            return Create(settings, designTime);
+        }
+
+        /// <summary>
+        /// Create an empty <see cref="WorkspaceContext" /> using the provided <see cref="ProjectReaderSettings" />.
+        /// </summary>
+        /// <param name="settings">The settings to use when reading projects</param>
+        /// <param name="designTime">A boolean indicating if the workspace should be created in Design-Time mode</param>
+        /// <returns></returns>
+        public static WorkspaceContext Create(ProjectReaderSettings settings, bool designTime)
+        {
+            return new WorkspaceContext(Enumerable.Empty<string>(), settings, designTime);
         }
 
         public void AddProject(string path)
@@ -104,7 +141,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             foreach (var projectDirectory in basePaths)
             {
-                var project = GetProject(projectDirectory).Model;
+                var project = GetProjectCore(projectDirectory).Model;
                 if (project == null)
                 {
                     continue;
@@ -116,7 +153,7 @@ namespace Microsoft.DotNet.ProjectModel
                 {
                     foreach (var reference in GetProjectReferences(projectContext))
                     {
-                        var referencedProject = GetProject(reference.Path).Model;
+                        var referencedProject = GetProjectCore(reference.Path).Model;
                         if (referencedProject != null)
                         {
                             _projects.Add(referencedProject.ProjectDirectory);
@@ -130,29 +167,100 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IReadOnlyList<ProjectContext> GetProjectContexts(string projectPath)
         {
-            return GetProjectContextCollection(projectPath).ProjectContexts;
+            return (IReadOnlyList<ProjectContext>)GetProjectContextCollection(projectPath)?.ProjectContexts.AsReadOnly() ??
+                EmptyArray<ProjectContext>.Value;
         }
+
+        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework) => GetProjectContext(projectPath, framework, EmptyArray<string>.Value);
+
+        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework, IEnumerable<string> runtimeIdentifier)
+        {
+            var contexts = GetProjectContextCollection(projectPath);
+            if (contexts == null)
+            {
+                return null;
+            }
+
+            return contexts
+                .ProjectContexts
+                .FirstOrDefault(c => Equals(c.TargetFramework, framework) && RidsMatch(c.RuntimeIdentifier, runtimeIdentifier));
+        }
+
+        public ProjectContext GetRuntimeContext(ProjectContext context, IEnumerable<string> runtimeIdentifiers)
+        {
+            var contexts = GetProjectContextCollection(context.ProjectDirectory);
+            if (contexts == null)
+            {
+                return null;
+            }
+
+            var runtimeContext = runtimeIdentifiers
+                .Select(r => contexts.GetTarget(context.TargetFramework, r))
+                .FirstOrDefault(c => c != null);
+
+            if (runtimeContext == null)
+            {
+                if (context.IsPortable)
+                {
+                    // We're specializing a portable target, so synthesize a runtime target manually
+                    // We don't cache this project context, but we'll still use the cached Project and LockFile
+                    return InitializeProjectContextBuilder(context.ProjectFile)
+                        .WithTargetFramework(context.TargetFramework)
+                        .WithRuntimeIdentifiers(runtimeIdentifiers)
+                        .Build();
+                }
+
+                // We are standalone, but don't support this runtime
+                var rids = string.Join(", ", runtimeIdentifiers);
+                throw new InvalidOperationException($"Can not find runtime target for framework '{context.TargetFramework}' compatible with one of the target runtimes: '{rids}'. " +
+                                                    "Possible causes:" + Environment.NewLine +
+                                                    "1. The project has not been restored or restore failed - run `dotnet restore`" + Environment.NewLine +
+                                                    $"2. The project does not list one of '{rids}' in the 'runtimes' section.");
+            }
+
+            return runtimeContext;
+        }
+
+        public Project GetProject(string projectDirectory) => GetProjectCore(projectDirectory)?.Model;
 
         public ProjectContextCollection GetProjectContextCollection(string projectPath)
         {
+            var normalizedPath = NormalizeProjectPath(projectPath);
+            if (normalizedPath == null)
+            {
+                return null;
+            }
+
             return _projectContextsCache.AddOrUpdate(
-                projectPath,
+                normalizedPath,
                 key => AddProjectContextEntry(key, null),
                 (key, oldEntry) => AddProjectContextEntry(key, oldEntry));
         }
 
-        private FileModelEntry<Project> GetProject(string projectDirectory)
+        private FileModelEntry<Project> GetProjectCore(string projectDirectory)
         {
+            var normalizedPath = NormalizeProjectPath(projectDirectory);
+            if (normalizedPath == null)
+            {
+                return null;
+            }
+
             return _projectsCache.AddOrUpdate(
-                projectDirectory,
+                normalizedPath,
                 key => AddProjectEntry(key, null),
                 (key, oldEntry) => AddProjectEntry(key, oldEntry));
         }
 
         private LockFile GetLockFile(string projectDirectory)
         {
+            var normalizedPath = NormalizeProjectPath(projectDirectory);
+            if (normalizedPath == null)
+            {
+                return null;
+            }
+
             return _lockFileCache.AddOrUpdate(
-                projectDirectory,
+                normalizedPath,
                 key => AddLockFileEntry(key, null),
                 (key, oldEntry) => AddLockFileEntry(key, oldEntry)).Model;
         }
@@ -173,7 +281,7 @@ namespace Microsoft.DotNet.ProjectModel
             if (currentEntry.IsInvalid)
             {
                 Project project;
-                if (!ProjectReader.TryGetProject(projectDirectory, out project, currentEntry.Diagnostics))
+                if (!ProjectReader.TryGetProject(projectDirectory, out project, currentEntry.Diagnostics, _settings))
                 {
                     currentEntry.Reset();
                 }
@@ -211,7 +319,7 @@ namespace Microsoft.DotNet.ProjectModel
                     {
                         try
                         {
-                            currentEntry.Model = LockFileReader.Read(currentEntry.FilePath, fs, designTime: true);
+                            currentEntry.Model = _lockFileReader.ReadLockFile(currentEntry.FilePath, fs, designTime: true);
                             currentEntry.UpdateLastWriteTimeUtc();
                         }
                         catch (FileFormatException ex)
@@ -238,8 +346,9 @@ namespace Microsoft.DotNet.ProjectModel
                 currentEntry = new ProjectContextCollection();
             }
 
-            var projectEntry = GetProject(projectDirectory);
-            if (projectEntry.Model == null)
+            var projectEntry = GetProjectCore(projectDirectory);
+
+            if (projectEntry?.Model == null)
             {
                 // project doesn't exist anymore
                 currentEntry.Reset();
@@ -251,17 +360,9 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 currentEntry.Reset();
 
-                foreach (var framework in project.GetTargetFrameworks())
-                {
-                    var builder = new ProjectContextBuilder()
-                        .WithProjectResolver(path => GetProject(path).Model)
-                        .WithLockFileResolver(path => GetLockFile(path))
-                        .WithProject(project)
-                        .WithTargetFramework(framework.FrameworkName)
-                        .AsDesignTime();
+                var builder = InitializeProjectContextBuilder(project);
 
-                    currentEntry.ProjectContexts.Add(builder.Build());
-                }
+                currentEntry.ProjectContexts.AddRange(builder.BuildAllTargets());
 
                 currentEntry.Project = project;
                 currentEntry.ProjectFilePath = project.ProjectFilePath;
@@ -278,6 +379,20 @@ namespace Microsoft.DotNet.ProjectModel
             }
 
             return currentEntry;
+        }
+
+        private ProjectContextBuilder InitializeProjectContextBuilder(Project project)
+        {
+            var builder = new ProjectContextBuilder()
+                .WithProjectResolver(path => GetProjectCore(path)?.Model)
+                .WithLockFileResolver(path => GetLockFile(path))
+                .WithProject(project);
+            if (_designTime)
+            {
+                builder.AsDesignTime();
+            }
+
+            return builder;
         }
 
         private class FileModelEntry<TModel> where TModel : class
@@ -399,6 +514,12 @@ namespace Microsoft.DotNet.ProjectModel
 
                 yield return description;
             }
+        }
+
+        private static bool RidsMatch(string rid, IEnumerable<string> compatibleRids)
+        {
+            return (string.IsNullOrEmpty(rid) && !compatibleRids.Any()) ||
+                (compatibleRids.Contains(rid));
         }
     }
 }

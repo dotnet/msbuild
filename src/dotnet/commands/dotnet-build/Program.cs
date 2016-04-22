@@ -15,13 +15,19 @@ namespace Microsoft.DotNet.Tools.Build
 {
     public class BuildCommand
     {
-        public static int Run(string[] args)
+        public static int Run(string[] args) => Run(args, null);
+
+        public static int Run(string[] args, WorkspaceContext workspace)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
             try
             {
-                var app = new BuildCommandApp("dotnet build", ".NET Builder", "Builder for the .NET Platform. It performs incremental compilation if it's safe to do so. Otherwise it delegates to dotnet-compile which performs non-incremental compilation");
+                var app = new BuildCommandApp(
+                    "dotnet build",
+                    ".NET Builder",
+                    "Builder for the .NET Platform. It performs incremental compilation if it's safe to do so. Otherwise it delegates to dotnet-compile which performs non-incremental compilation",
+                    workspace);
                 return app.Execute(OnExecute, args);
             }
             catch (Exception ex)
@@ -40,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Build
             var builderCommandApp = args;
             var graphCollector = new ProjectGraphCollector(
                 !builderCommandApp.ShouldSkipDependencies,
-                (project, target) => ProjectContext.Create(project, target));
+                (project, target) => args.Workspace.GetProjectContext(project, target));
 
             var contexts = ResolveRootContexts(files, frameworks, args);
             var graph = graphCollector.Collect(contexts).ToArray();
@@ -53,19 +59,11 @@ namespace Microsoft.DotNet.Tools.Build
             IEnumerable<NuGetFramework> frameworks,
             BuildCommandApp args)
         {
-
             List<Task<ProjectContext>> tasks = new List<Task<ProjectContext>>();
-            // Set defaults based on the environment
-            var settings = ProjectReaderSettings.ReadFromEnvironment();
-
-            if (!string.IsNullOrEmpty(args.VersionSuffixValue))
-            {
-                settings.VersionSuffix = args.VersionSuffixValue;
-            }
 
             foreach (var file in files)
             {
-                var project = ProjectReader.GetProject(file);
+                var project = args.Workspace.GetProject(file);
                 var projectFrameworks = project.GetTargetFrameworks().Select(f => f.FrameworkName);
                 if (!projectFrameworks.Any())
                 {
@@ -91,11 +89,7 @@ namespace Microsoft.DotNet.Tools.Build
 
                 foreach (var framework in selectedFrameworks)
                 {
-                    tasks.Add(Task.Run(() => new ProjectContextBuilder()
-                        .WithProjectDirectory(Path.GetDirectoryName(file))
-                        .WithTargetFramework(framework)
-                        .WithReaderSettings(settings)
-                        .Build()));
+                    tasks.Add(Task.Run(() => args.Workspace.GetProjectContext(file, framework)));
                 }
             }
             return Task.WhenAll(tasks).GetAwaiter().GetResult();

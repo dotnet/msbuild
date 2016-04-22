@@ -42,7 +42,10 @@ namespace Microsoft.DotNet.Tools.Test
                     RegisterForParentProcessExit(dotnetTestParams.ParentProcessId.Value);
                 }
 
-                var projectContexts = CreateProjectContexts(dotnetTestParams.ProjectPath, dotnetTestParams.Runtime);
+                // Create a workspace
+                var workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
+
+                var projectContexts = CreateProjectContexts(workspace, dotnetTestParams.ProjectPath, dotnetTestParams.Runtime);
 
                 var projectContext = projectContexts.First();
 
@@ -98,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
-        private static IEnumerable<ProjectContext> CreateProjectContexts(string projectPath, string runtime)
+        private static IEnumerable<ProjectContext> CreateProjectContexts(WorkspaceContext workspace, string projectPath, string runtime)
         {
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
 
@@ -116,7 +119,8 @@ namespace Microsoft.DotNet.Tools.Test
                 new[] { runtime } :
                 PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
 
-            return ProjectContext.CreateContextForEachFramework(projectPath).Select(context => context.CreateRuntimeContext(runtimeIdentifiers));
+            var contexts = workspace.GetProjectContextCollection(projectPath).FrameworkOnlyContexts;
+            return contexts.Select(c => workspace.GetRuntimeContext(c, runtimeIdentifiers));
         }
     }
 }

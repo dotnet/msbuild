@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         ProjectContext _context;
         List<string> _args;
+        private WorkspaceContext _workspace;
 
         public int Start()
         {
@@ -60,6 +61,8 @@ namespace Microsoft.DotNet.Tools.Run
                 Configuration = Constants.DefaultConfiguration;
             }
 
+            var frameworkContexts = _workspace.GetProjectContexts(Project).Where(c => string.IsNullOrEmpty(c.RuntimeIdentifier));
+
             var rids = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
 
             if (Framework == null)
@@ -70,16 +73,14 @@ namespace Microsoft.DotNet.Tools.Run
                     FrameworkConstants.FrameworkIdentifiers.NetStandardApp,
                 };
 
-                var contexts = ProjectContext.CreateContextForEachFramework(Project, null);
-
                 ProjectContext context;
-                if (contexts.Count() == 1)
+                if (frameworkContexts.Count() == 1)
                 {
-                    context = contexts.Single();
+                    context = frameworkContexts.Single();
                 }
                 else
                 {
-                    context = contexts.FirstOrDefault(c => defaultFrameworks.Contains(c.TargetFramework.Framework));
+                    context = frameworkContexts.FirstOrDefault(c => defaultFrameworks.Contains(c.TargetFramework.Framework));
                     if (context == null)
                     {
                         throw new InvalidOperationException($"Couldn't find target to run. Possible causes:" + Environment.NewLine +
@@ -88,11 +89,11 @@ namespace Microsoft.DotNet.Tools.Run
                     }
                 }
 
-                _context = context.CreateRuntimeContext(rids);
+                _context = _workspace.GetRuntimeContext(context, rids);
             }
             else
             {
-                _context = ProjectContext.Create(Project, NuGetFramework.Parse(Framework), rids);
+                _context = _workspace.GetProjectContext(Project, NuGetFramework.Parse(Framework), rids);
             }
 
             if (Args == null)
@@ -107,6 +108,9 @@ namespace Microsoft.DotNet.Tools.Run
 
         private int RunExecutable()
         {
+            // Set up the workspace
+            _workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
+
             CalculateDefaultsForNonAssigned();
 
             // Compile to that directory

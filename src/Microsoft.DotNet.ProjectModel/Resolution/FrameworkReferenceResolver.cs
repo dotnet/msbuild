@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.DependencyModel.Resolution;
@@ -23,7 +25,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
         private static FrameworkReferenceResolver _default;
 
-        private readonly IDictionary<NuGetFramework, FrameworkInformation> _cache = new Dictionary<NuGetFramework, FrameworkInformation>();
+        private readonly ConcurrentDictionary<NuGetFramework, FrameworkInformation> _cache = new ConcurrentDictionary<NuGetFramework, FrameworkInformation>();
 
         private static readonly IDictionary<NuGetFramework, NuGetFramework[]> _aliases = new Dictionary<NuGetFramework, NuGetFramework[]>
         {

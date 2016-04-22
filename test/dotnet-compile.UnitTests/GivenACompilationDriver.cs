@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         private Mock<ICompiler> _nativeCompilerMock;
         private List<ProjectContext> _contexts;
         private BuildCommandApp _args;
+        private readonly WorkspaceContext _workspace;
 
         public GivenACompilationDriverController()
         {
@@ -34,12 +35,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                 .Compile(It.IsAny<ProjectContext>(), It.IsAny<BuildCommandApp>()))
                 .Returns(true);
 
+            _workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
             _contexts = new List<ProjectContext>
             {
-                ProjectContext.Create(_projectJson, NuGetFramework.Parse("netcoreapp1.0"))
+                _workspace.GetProjectContext(_projectJson, NuGetFramework.Parse("netcoreapp1.0"))
             };
 
-            _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");
+            _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform", WorkspaceContext.Create(designTime: false));
         }
 
         [Fact]

@@ -154,39 +154,6 @@ namespace Microsoft.DotNet.ProjectModel
                         .BuildAllTargets();
         }
 
-
-        /// <summary>
-        /// Creates a project context based on existing context but using runtime target
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="runtimeIdentifiers"></param>
-        /// <returns></returns>
-
-        public ProjectContext CreateRuntimeContext(IEnumerable<string> runtimeIdentifiers)
-        {
-            // Temporary until we have removed RID inference from NuGet
-            if(TargetFramework.IsCompileOnly)
-            {
-                return this;
-            }
-
-            var context = CreateBuilder(ProjectFile.ProjectFilePath, TargetFramework)
-                .WithRuntimeIdentifiers(runtimeIdentifiers)
-                .WithLockFile(LockFile)
-                .Build();
-
-            if (!context.IsPortable && context.RuntimeIdentifier == null)
-            {
-                // We are standalone, but don't support this runtime
-                var rids = string.Join(", ", runtimeIdentifiers);
-                throw new InvalidOperationException($"Can not find runtime target for framework '{TargetFramework}' compatible with one of the target runtimes: '{rids}'. " +
-                                                    "Possible causes:" + Environment.NewLine +
-                                                    "1. The project has not been restored or restore failed - run `dotnet restore`" + Environment.NewLine +
-                                                    $"2. The project does not list one of '{rids}' in the 'runtimes' section.");
-            }
-            return context;
-        }
-
         public OutputPaths GetOutputPaths(string configuration, string buidBasePath = null, string outputPath = null)
         {
             return OutputPathsCalculator.GetOutputPaths(ProjectFile,

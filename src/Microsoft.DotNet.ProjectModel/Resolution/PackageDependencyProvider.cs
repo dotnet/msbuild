@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                     LibraryDependencyType.Default));
             }
 
-            if (!targetFramework.IsPackageBased)
+            if (!targetFramework.IsPackageBased())
             {
                 // Only add framework assemblies for non-package based frameworks.
                 foreach (var frameworkAssembly in targetLibrary.FrameworkAssemblies)

@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Publish
         public string Runtime { get; set; }
         public bool NativeSubdirectories { get; set; }
         public NuGetFramework NugetFramework { get; set; }
+        public WorkspaceContext Workspace { get; set; }
         public IList<ProjectContext> ProjectContexts { get; set; }
         public string VersionSuffix { get; set; }
         public int NumberOfProjects { get; private set; }
@@ -432,14 +433,17 @@ namespace Microsoft.DotNet.Tools.Publish
                 throw new InvalidProjectException($"'{projectPath}' does not contain a project.json file");
             }
 
-            var allContexts = framework == null ?
-                ProjectContext.CreateContextForEachFramework(projectPath) :
-                new[] { ProjectContext.Create(projectPath, framework) };
+            var contexts = Workspace.GetProjectContextCollection(projectPath).FrameworkOnlyContexts;
 
-            var runtimes = !string.IsNullOrEmpty(runtime) ?
-                new [] {runtime} :
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
-            return allContexts.Select(c => c.CreateRuntimeContext(runtimes));
+            contexts = framework == null ?
+                contexts :
+                contexts.Where(c => Equals(c.TargetFramework, framework));
+
+            var rids = string.IsNullOrEmpty(runtime) ?
+                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers() :
+                new[] { runtime };
+
+            return contexts.Select(c => Workspace.GetRuntimeContext(c, rids));
         }
 
         private static void CopyContents(ProjectContext context, string outputPath)

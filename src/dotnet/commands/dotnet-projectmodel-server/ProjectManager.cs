@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             catch (Exception ex)
             {
                 _log.LogError("A unexpected exception occurred: {0}", ex.ToString());
-                
+
                 var error = new ErrorMessage
                 {
                     Message = ex.Message

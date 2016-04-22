@@ -52,12 +52,17 @@ namespace Microsoft.DotNet.Tools.Compiler
                         yield return filePatternMatch.Path;
                     }
                 }
+                else if (value.Contains("*"))
+                {
+                    throw new InvalidOperationException($"Globbing pattern '{value}' did not match any files");
+                }
+                else if (value.EndsWith(Project.FileName))
+                {
+                    throw new InvalidOperationException($"Could not find project file '{value}'");
+                }
                 else
                 {
-                    throw new InvalidOperationException($"Could not resolve project path from '{value}':" +
-                                                        "1. It's not project file" +
-                                                        "2. It's not directory containing project.json file" +
-                                                        "3. Globbing returned no mathces");
+                    throw new InvalidOperationException($"Couldn't find '{Project.FileName}' in '{value}'");
                 }
             }
         }

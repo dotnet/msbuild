@@ -1,8 +1,11 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.IO;
-using System.Text;
-using System.Threading;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -17,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public string CapturedOutput
         {
-            get 
+            get
             {
                 return _capture?.GetStringBuilder()?.ToString();
             }
@@ -43,18 +46,16 @@ namespace Microsoft.DotNet.Cli.Utils
             return this;
         }
 
-        public Thread BeginRead(TextReader reader)
+        public Task BeginRead(TextReader reader)
         {
-            var thread = new Thread(() => Read(reader)) { IsBackground = true };
-            thread.Start();
-            return thread;
+            return Task.Run(() => Read(reader));
         }
 
         public void Read(TextReader reader)
         {
             var bufferSize = 1;
 
-            int readCharacterCount; 
+            int readCharacterCount;
             char currentCharacter;
 
             var buffer = new char[bufferSize];
@@ -93,7 +94,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private void WriteLine(string str)
-        { 
+        {
             if (_capture != null)
             {
                 _capture.WriteLine(str);

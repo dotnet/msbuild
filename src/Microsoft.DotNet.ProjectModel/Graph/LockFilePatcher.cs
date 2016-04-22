@@ -13,10 +13,12 @@ namespace Microsoft.DotNet.ProjectModel.Graph
     {
         private readonly LockFile _lockFile;
         private Dictionary<string, IList<LockFileTargetLibrary>> _msbuildTargetLibraries;
+        private readonly LockFileReader _reader;
 
-        public LockFilePatcher(LockFile lockFile)
+        public LockFilePatcher(LockFile lockFile, LockFileReader reader)
         {
             _lockFile = lockFile;
+            _reader = reader;
 
             var msbuildProjectLibraries = lockFile.ProjectLibraries.Where(MSBuildDependencyProvider.IsMSBuildProjectLibrary);
             _msbuildTargetLibraries = msbuildProjectLibraries.ToDictionary(GetProjectLibraryKey, l => GetTargetsForLibrary(_lockFile, l));
@@ -27,8 +29,8 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             var exportFilePath = GetExportFilePath(_lockFile.LockFilePath);
             if (File.Exists(exportFilePath) && _msbuildTargetLibraries.Any())
             {
-                var exportFile = LockFileReader.ReadExportFile(exportFilePath);
-                PatchLockWithExport(exportFile);   
+                var exportFile = _reader.ReadExportFile(exportFilePath);
+                PatchLockWithExport(exportFile);
             }
             else
             {

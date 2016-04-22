@@ -85,8 +85,16 @@ namespace Microsoft.DotNet.ProjectModel
             var project = new Project();
 
             var reader = new StreamReader(stream);
+            JObject rawProject;
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+                rawProject = JObject.Load(jsonReader);
 
-            var rawProject = JObject.Parse(reader.ReadToEnd());
+                // Try to read another token to ensure we're at the end of the document.
+                // This will no-op if we are, and throw a JsonReaderException if there is additional content (which is what we want)
+                jsonReader.Read();
+            }
+
             if (rawProject == null)
             {
                 throw FileFormatException.Create(

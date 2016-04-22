@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 success &= _managedCompiler.Compile(context, args);
                 if (args.IsNativeValue && success)
                 {
-                    var runtimeContext = context.CreateRuntimeContext(args.GetRuntimes());
+                    var runtimeContext = args.Workspace.GetRuntimeContext(context, args.GetRuntimes());
                     success &= _nativeCompiler.Compile(runtimeContext, args);
                 }
             }

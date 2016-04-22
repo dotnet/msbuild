@@ -43,14 +43,14 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Theory]
-        [InlineDataAttribute("TestMscorlibReference", true)]
-        [InlineDataAttribute("TestMscorlibReference", false)]
-        [InlineDataAttribute("TestMicrosoftCSharpReference", true)]
-        [InlineDataAttribute("TestMicrosoftCSharpReference", false)]
-        [InlineDataAttribute("TestSystemReference", true)]
-        [InlineDataAttribute("TestSystemReference", false)]
-        [InlineDataAttribute("TestSystemCoreReference", true)]
-        [InlineDataAttribute("TestSystemCoreReference", false)]
+        [InlineData("TestMscorlibReference", true)]
+        [InlineData("TestMscorlibReference", false)]
+        [InlineData("TestMicrosoftCSharpReference", true)]
+        [InlineData("TestMicrosoftCSharpReference", false)]
+        [InlineData("TestSystemReference", true)]
+        [InlineData("TestSystemReference", false)]
+        [InlineData("TestSystemCoreReference", true)]
+        [InlineData("TestSystemCoreReference", false)]
         public void TestDuplicateDefaultDesktopReferences(string sampleName, bool withLockFile)
         {
             var instance = TestAssetsManager.CreateTestInstance(sampleName);
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             Assert.Equal(4, context.RootProject.Dependencies.Count());
         }
-        
+
         [Fact]
         public void NoDuplicateReferencesWhenFrameworkMissing()
         {
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             // Will fail with dupes if any
             context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name);
         }
-        
+
         [Fact]
         public void NetCore50ShouldNotResolveFrameworkAssemblies()
         {

@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli
                 command = "help";
             }
 
-            int exitCode;            
+            int exitCode;
             Func<string[], int> builtIn;
             if (s_builtIns.TryGetValue(command, out builtIn))
             {
@@ -175,16 +175,16 @@ namespace Microsoft.DotNet.Cli
         {
             return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
         }
-        
+
         private static string GetCommitSha()
         {
             var versionFile = DotnetFiles.VersionFile;
-            
+
             if (File.Exists(versionFile))
             {
                 return File.ReadLines(versionFile).FirstOrDefault()?.Substring(0, 10);
             }
-            
+
             return null;
         }
     }
