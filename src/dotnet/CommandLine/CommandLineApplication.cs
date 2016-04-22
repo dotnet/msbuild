@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public Func<string> ShortVersionGetter { get; set; }
         public List<CommandLineApplication> Commands { get; private set; }
         public bool HandleResponseFiles { get; set; }
+        public bool AllowArgumentSeparator { get; set; }
 
         public CommandLineApplication Command(string name, Action<CommandLineApplication> configuration,
             bool throwOnUnexpectedArg = true)
@@ -129,10 +130,18 @@ namespace Microsoft.DotNet.Cli.CommandLine
                     if (longOption != null)
                     {
                         processed = true;
-                        option = command.Options.SingleOrDefault(opt => string.Equals(opt.LongName, longOption[0], StringComparison.Ordinal));
+                        string longOptionName = longOption[0];
+                        option = command.Options.SingleOrDefault(opt => string.Equals(opt.LongName, longOptionName, StringComparison.Ordinal));
 
                         if (option == null)
                         {
+                            if (string.IsNullOrEmpty(longOptionName) && !command._throwOnUnexpectedArg && AllowArgumentSeparator)
+                            {
+                                // a stand-alone "--" is the argument separator, so skip it and
+                                // handle the rest of the args as unexpected args
+                                index++;
+                            }
+
                             HandleUnexpectedArg(command, args, index, argTypeName: "option");
                             break;
                         }
@@ -403,6 +412,11 @@ namespace Microsoft.DotNet.Cli.CommandLine
                     commandsBuilder.AppendFormat("Use \"{0} [command] --help\" for more information about a command.", Name);
                     commandsBuilder.AppendLine();
                 }
+            }
+
+            if (target.AllowArgumentSeparator)
+            {
+                headerBuilder.Append(" [[--] <arg>...]]");
             }
 
             headerBuilder.AppendLine();
