@@ -1,8 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.Utils;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -20,22 +21,18 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string ConfigurationOption => string.IsNullOrEmpty(_configuration) ? "" : $"-c {_configuration}";
 
-        private string PreserveTemporaryOption => _preserveTemporary ? $"-t \"{_projectPath}\"" : "";
-
         private string AppArgsArgument => _appArgs;
 
         public RunCommand(
             string projectPath,
             string framework = "",
             string configuration = "",
-            bool preserveTemporary = false,
             string appArgs = "")
             : base("dotnet")
         {
             _projectPath = projectPath;
             _framework = framework;
             _configuration = configuration;
-            _preserveTemporary = preserveTemporary;
             _appArgs = appArgs;
         }
 
@@ -57,6 +54,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return base.ExecuteAsync(args);
         }
 
-        private string BuildArgs() => $"{ProjectPathOption} {FrameworkOption} {ConfigurationOption} {PreserveTemporaryOption} {AppArgsArgument}";
+        private string BuildArgs()
+        {
+            return string.Join(" ",
+                new[]
+                {
+                    ProjectPathOption,
+                    FrameworkOption,
+                    ConfigurationOption,
+                    AppArgsArgument,
+                }
+                .Where(s => !string.IsNullOrEmpty(s)));
+        }
     }
 }
