@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private readonly bool _noIncremental;
         private readonly bool _noDependencies;
         private readonly string _runtime;
+        private readonly bool _verbose;
 
         private string OutputOption
         {
@@ -199,6 +200,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
+        private string Verbose
+        {
+            get
+            {
+                return _verbose ?
+                    "--verbose" :
+                    "";
+            }
+        }
+
         public BuildCommand(
             string projectPath,
             string output="",
@@ -217,7 +228,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string cppCompilerFlags="",
             bool buildProfile=true,
             bool noIncremental=false,
-            bool noDependencies=false)
+            bool noDependencies=false,
+            bool verbose=true)
             : base("dotnet")
         {
             _projectPath = projectPath;
@@ -240,17 +252,18 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _buildProfile = buildProfile;
             _noIncremental = noIncremental;
             _noDependencies = noDependencies;
+            _verbose = verbose;
         }
 
         public override CommandResult Execute(string args = "")
         {
-            args = $"--verbose build {BuildArgs()} {args}";
+            args = $"{Verbose} build {BuildArgs()} {args}";
             return base.Execute(args);
         }
 
         public override CommandResult ExecuteWithCapturedOutput(string args = "")
         {
-            args = $"--verbose build {BuildArgs()} {args}";
+            args = $"{Verbose} build {BuildArgs()} {args}";
             return base.ExecuteWithCapturedOutput(args);
         }
 
