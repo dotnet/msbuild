@@ -16,7 +16,7 @@ namespace dotnet_new3
 
         public string Alias { get; }
 
-        public IEnumerable<ITemplateSourceEntry> Entries => Source.EntriesIn(_location);
+        public IDisposable<ITemplateSourceFolder> Root => Source.RootFor(_location);
 
         public string Location => _location;
 

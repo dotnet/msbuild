@@ -21,11 +21,10 @@ namespace dotnet_new3
             }
         }
 
-        public IEnumerable<ITemplateSourceEntry> EntriesIn(string location)
+        public IDisposable<ITemplateSourceFolder> RootFor(string location)
         {
             DirectoryInfo root = new DirectoryInfo(location);
-            TemplateSourceFolder r = new Directory(null, root);
-            return root.EnumerateFileSystemInfos().Select(x => EntryHelper.Create(r, x));
+            return new Directory(null, root).NoDispose<ITemplateSourceFolder>();
         }
 
         private static class EntryHelper
