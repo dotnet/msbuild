@@ -69,6 +69,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(
             nameof(PublishTargets.PublishCombinedHostFrameworkArchiveToAzure),
             nameof(PublishTargets.PublishCombinedHostFrameworkSdkArchiveToAzure),
+            nameof(PublishTargets.PublishCombinedFrameworkSDKArchiveToAzure),
             nameof(PublishTargets.PublishSDKSymbolsArchiveToAzure))]
         public static BuildTargetResult PublishArchivesToAzure(BuildTargetContext c) => c.Success();
 
@@ -108,11 +109,16 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, BuildPlatform.Windows)]
         public static BuildTargetResult PublishSharedHostInstallerFileToAzure(BuildTargetContext c)
         {
             var version = CliNuGetVersion;
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
+
+            if (CurrentPlatform.Current == BuildPlatform.Windows)
+            {
+                installerFile = Path.ChangeExtension(installerFile, "msi");
+            }
 
             AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
 
@@ -163,6 +169,17 @@ namespace Microsoft.DotNet.Cli.Build
             var installerFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
 
             AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
+
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult PublishCombinedFrameworkSDKArchiveToAzure(BuildTargetContext c)
+        {
+            var version = CliNuGetVersion;
+            var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKCompressedFile");
+
+            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
 
             return c.Success();
         }
