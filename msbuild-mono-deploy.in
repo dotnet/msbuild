@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /Users/ankit/dev/misc/bin/mono $MONO_OPTIONS /Users/ankit/dev/misc/lib/mono/msbuild/15.1/bin/MSBuild.exe /p:CscToolExe=mcs.exe /p:UseSharedCompilation=false /p:DebugFileExt=.mdb "$@"
+exec @bindir@/mono $MONO_OPTIONS @mono_instdir@/msbuild/15.0/bin/MSBuild.exe "$@"
