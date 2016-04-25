@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.TestFramework
             var testInstance = new TestInstance(testProjectDir, testDestination);
             return testInstance;
         }
-        
+
         public TestDirectory CreateTestDirectory([CallerMemberName] string callingMethod = "", string identifier = "")
         {
             string testDestination = Path.Combine(AppContext.BaseDirectory, callingMethod + identifier);

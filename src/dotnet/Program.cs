@@ -42,9 +42,9 @@ namespace Microsoft.DotNet.Cli
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
-            
+
             new MulticoreJitActivator().TryActivateMulticoreJit();
-            
+
             if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
             {
                 PerfTrace.Enabled = true;

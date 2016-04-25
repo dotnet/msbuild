@@ -22,9 +22,9 @@ namespace Microsoft.DotNet.TestFramework
             
             EnsureExistsAndEmpty(Path);
         }
-        
+
         public string Path { get; private set; }
-        
+
         private static void EnsureExistsAndEmpty(string path)
         {
             if (Directory.Exists(path))
