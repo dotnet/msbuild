@@ -14,50 +14,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private bool _preserveTemporary;
         private string _appArgs;
 
-        private string ProjectPathOption
-        {
-            get
-            {
-                return _projectPath == string.Empty ?
-                                       "" :
-                                       $"-p \"{_projectPath}\"";
-            }
-        }
+        private string ProjectPathOption => string.IsNullOrEmpty(_projectPath) ? "" : $"-p \"{_projectPath}\"";
 
-        private string FrameworkOption
-        {
-            get
-            {
-                return _framework == string.Empty ?
-                                       "" :
-                                       $"-f {_framework}";
-            }
-        }
+        private string FrameworkOption => string.IsNullOrEmpty(_framework) ? "" : $"-f {_framework}";
 
-        private string ConfigurationOption
-        {
-            get
-            {
-                return _configuration == string.Empty ?
-                                       "" :
-                                       $"-c {_configuration}";
-            }
-        }
+        private string ConfigurationOption => string.IsNullOrEmpty(_configuration) ? "" : $"-c {_configuration}";
 
-        private string PreserveTemporaryOption
-        {
-            get
-            {
-                return _preserveTemporary ?
-                                       $"-t \"{_projectPath}\"" :
-                                       "";
-            }
-        }
+        private string PreserveTemporaryOption => _preserveTemporary ? $"-t \"{_projectPath}\"" : "";
 
-        private string AppArgsArgument
-        {
-            get { return _appArgs; }
-        }
+        private string AppArgsArgument => _appArgs;
 
         public RunCommand(
             string projectPath,
@@ -92,9 +57,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return base.ExecuteAsync(args);
         }
 
-        private string BuildArgs()
-        {
-            return $"{ProjectPathOption} {FrameworkOption} {ConfigurationOption} {PreserveTemporaryOption} {AppArgsArgument}";
-        }
+        private string BuildArgs() => $"{ProjectPathOption} {FrameworkOption} {ConfigurationOption} {PreserveTemporaryOption} {AppArgsArgument}";
     }
 }

@@ -220,7 +220,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             }
 
             var workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
-            var context = workspace.GetProjectContext(projectJson, TestAssetFramework, rids);
+            var context = workspace.GetRuntimeContext(workspace.GetProjectContext(projectJson, TestAssetFramework), rids);
+            context = workspace.GetRuntimeContext(context, rids);
             managedCompiler.Compile(context, _args);
 
             RuntimeOutputDir = Path.Combine(OutputPath, rid);

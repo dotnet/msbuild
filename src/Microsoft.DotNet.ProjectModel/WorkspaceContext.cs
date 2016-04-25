@@ -171,9 +171,7 @@ namespace Microsoft.DotNet.ProjectModel
                 EmptyArray<ProjectContext>.Value;
         }
 
-        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework) => GetProjectContext(projectPath, framework, EmptyArray<string>.Value);
-
-        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework, IEnumerable<string> runtimeIdentifier)
+        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework)
         {
             var contexts = GetProjectContextCollection(projectPath);
             if (contexts == null)
@@ -183,11 +181,16 @@ namespace Microsoft.DotNet.ProjectModel
 
             return contexts
                 .ProjectContexts
-                .FirstOrDefault(c => Equals(c.TargetFramework, framework) && RidsMatch(c.RuntimeIdentifier, runtimeIdentifier));
+                .FirstOrDefault(c => Equals(c.TargetFramework, framework) && string.IsNullOrEmpty(c.RuntimeIdentifier));
         }
 
         public ProjectContext GetRuntimeContext(ProjectContext context, IEnumerable<string> runtimeIdentifiers)
         {
+            if(!runtimeIdentifiers.Any())
+            {
+                return context;
+            }
+
             var contexts = GetProjectContextCollection(context.ProjectDirectory);
             if (contexts == null)
             {
@@ -514,12 +517,6 @@ namespace Microsoft.DotNet.ProjectModel
 
                 yield return description;
             }
-        }
-
-        private static bool RidsMatch(string rid, IEnumerable<string> compatibleRids)
-        {
-            return (string.IsNullOrEmpty(rid) && !compatibleRids.Any()) ||
-                (compatibleRids.Contains(rid));
         }
     }
 }

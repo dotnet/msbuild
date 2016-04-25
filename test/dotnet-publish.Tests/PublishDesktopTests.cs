@@ -89,9 +89,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("KestrelDesktop", "http://localhost:20301")]
-        [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20302")]
-        public async Task DesktopApp_WithKestrel_WorksWhenRun(string project, string url)
+        [InlineData("KestrelDesktop", "http://localhost:20301", null)]
+        [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20302", null)]
+        [InlineData("KestrelDesktop", "http://localhost:20303", "net451")]
+        [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20304", "net451")]
+        public async Task DesktopApp_WithKestrel_WorksWhenRun(string project, string url, string framework)
         {
             // Disabled due to https://github.com/dotnet/cli/issues/2428
             if (RuntimeInformation.ProcessArchitecture == Architecture.X86)
@@ -104,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 .WithBuildArtifacts();
 
             Task exec = null;
-            var command = new RunCommand(Path.Combine(testInstance.TestRoot, project));
+            var command = new RunCommand(Path.Combine(testInstance.TestRoot, project), framework);
             try
             {
                 exec = command.ExecuteAsync(url);
