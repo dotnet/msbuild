@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
 
         private void CalculateProfileRootPath()
         {
-            var profileRoot = GetRuntimeDataRootPath();
+            var profileRoot = GetRuntimeDataRootPathString();
 
             var version = Product.Version;
 
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
             _multicoreJitProfilePath = Path.Combine(profileRoot, "sdk", version, rid, "optimizationdata");
         }
 
-        private string GetRuntimeDataRootPath()
+        private string GetRuntimeDataRootPathString()
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? GetWindowsRuntimeDataRoot()

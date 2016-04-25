@@ -11,23 +11,21 @@ namespace Microsoft.DotNet.TestFramework
 {
     public class TestDirectory
     {
-        private readonly string _path;
-
         internal TestDirectory(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException("path");
+                throw new ArgumentException(nameof(path));
             }
             
-            _path = path;
+            Path = path;
             
-            EnsureExistsAndEmpty(_path);
+            EnsureExistsAndEmpty(Path);
         }
         
-        public string Path { get { return _path; } }
+        public string Path { get; private set; }
         
-        private void EnsureExistsAndEmpty(string path)
+        private static void EnsureExistsAndEmpty(string path)
         {
             if (Directory.Exists(path))
             {
