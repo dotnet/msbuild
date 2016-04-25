@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace Microsoft.DotNet.Tools.Build
         private readonly string _buildBasePath;
         private readonly IList<string> _runtimes;
         private readonly WorkspaceContext _workspace;
+		private readonly ConcurrentDictionary<ProjectContextIdentity, CompilerIO> _cache;
 
         public CompilerIOManager(string configuration,
             string outputPath,
@@ -31,49 +33,36 @@ namespace Microsoft.DotNet.Tools.Build
             _buildBasePath = buildBasePath;
             _runtimes = runtimes.ToList();
             _workspace = workspace;
+            
+            _cache = new ConcurrentDictionary<ProjectContextIdentity, CompilerIO>();
         }
 
-        public bool AnyMissingIO(ProjectContext project, IEnumerable<string> items, string itemsType)
-        {
-            var missingItems = items.Where(i => !File.Exists(i)).ToList();
-
-            if (!missingItems.Any())
-            {
-                return false;
-            }
-
-            Reporter.Verbose.WriteLine($"Project {project.GetDisplayName()} will be compiled because expected {itemsType} are missing.");
-
-            foreach (var missing in missingItems)
-            {
-                Reporter.Verbose.WriteLine($" {missing}");
-            }
-
-            Reporter.Verbose.WriteLine(); ;
-
-            return true;
-        }
 
         // computes all the inputs and outputs that would be used in the compilation of a project
-        // ensures that all paths are files
-        // ensures no missing inputs
         public CompilerIO GetCompileIO(ProjectGraphNode graphNode)
         {
+            return _cache.GetOrAdd(graphNode.ProjectContext.Identity, i => ComputeIO(graphNode));
+        }
+
+        private CompilerIO ComputeIO(ProjectGraphNode graphNode)
+        {
+            var inputs = new List<string>();
+            var outputs = new List<string>();
+
             var isRootProject = graphNode.IsRoot;
             var project = graphNode.ProjectContext;
 
-            var compilerIO = new CompilerIO(new List<string>(), new List<string>());
             var calculator = project.GetOutputPaths(_configuration, _buildBasePath, _outputPath);
             var binariesOutputPath = calculator.CompilationOutputPath;
 
             // input: project.json
-            compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
+            inputs.Add(project.ProjectFile.ProjectFilePath);
 
             // input: lock file; find when dependencies change
-            AddLockFile(project, compilerIO);
+            AddLockFile(project, inputs);
 
             // input: source files
-            compilerIO.Inputs.AddRange(CompilerUtil.GetCompilationSources(project));
+            inputs.AddRange(CompilerUtil.GetCompilationSources(project));
 
             var allOutputPath = new HashSet<string>(calculator.CompilationFiles.All());
             if (isRootProject && project.ProjectFile.HasRuntimeOutput(_configuration))
@@ -88,23 +77,22 @@ namespace Microsoft.DotNet.Tools.Build
             // output: compiler outputs
             foreach (var path in allOutputPath)
             {
-                compilerIO.Outputs.Add(path);
+                outputs.Add(path);
             }
 
             // input compilation options files
-            AddCompilationOptions(project, _configuration, compilerIO);
+            AddCompilationOptions(project, _configuration, inputs);
 
             // input / output: resources with culture
-            AddNonCultureResources(project, calculator.IntermediateOutputDirectoryPath, compilerIO);
+            AddNonCultureResources(project, calculator.IntermediateOutputDirectoryPath, inputs, outputs);
 
             // input / output: resources without culture
-            AddCultureResources(project, binariesOutputPath, compilerIO);
+            AddCultureResources(project, binariesOutputPath, inputs, outputs);
 
-            return compilerIO;
+            return new CompilerIO(inputs, outputs);
         }
 
-
-        private static void AddLockFile(ProjectContext project, CompilerIO compilerIO)
+        private static void AddLockFile(ProjectContext project, List<string> inputs)
         {
             if (project.LockFile == null)
             {
@@ -113,48 +101,48 @@ namespace Microsoft.DotNet.Tools.Build
                 throw new InvalidOperationException(errorMessage);
             }
 
-            compilerIO.Inputs.Add(project.LockFile.LockFilePath);
+            inputs.Add(project.LockFile.LockFilePath);
 
             if (project.LockFile.ExportFile != null)
             {
-                compilerIO.Inputs.Add(project.LockFile.ExportFile.ExportFilePath);
+                inputs.Add(project.LockFile.ExportFile.ExportFilePath);
             }
         }
 
 
-        private static void AddCompilationOptions(ProjectContext project, string config, CompilerIO compilerIO)
+        private static void AddCompilationOptions(ProjectContext project, string config, List<string> inputs)
         {
             var compilerOptions = project.ResolveCompilationOptions(config);
 
             // input: key file
             if (compilerOptions.KeyFile != null)
             {
-                compilerIO.Inputs.Add(compilerOptions.KeyFile);
+                inputs.Add(compilerOptions.KeyFile);
             }
         }
 
-        private static void AddNonCultureResources(ProjectContext project, string intermediaryOutputPath, CompilerIO compilerIO)
+        private static void AddNonCultureResources(ProjectContext project, string intermediaryOutputPath, List<string> inputs, IList<string> outputs)
         {
             foreach (var resourceIO in CompilerUtil.GetNonCultureResources(project.ProjectFile, intermediaryOutputPath))
             {
-                compilerIO.Inputs.Add(resourceIO.InputFile);
+                inputs.Add(resourceIO.InputFile);
 
                 if (resourceIO.OutputFile != null)
                 {
-                    compilerIO.Outputs.Add(resourceIO.OutputFile);
+                    outputs.Add(resourceIO.OutputFile);
                 }
             }
         }
 
-        private static void AddCultureResources(ProjectContext project, string outputPath, CompilerIO compilerIO)
+        private static void AddCultureResources(ProjectContext project, string outputPath, List<string> inputs, List<string> outputs)
         {
             foreach (var cultureResourceIO in CompilerUtil.GetCultureResources(project.ProjectFile, outputPath))
             {
-                compilerIO.Inputs.AddRange(cultureResourceIO.InputFileToMetadata.Keys);
+                inputs.AddRange(cultureResourceIO.InputFileToMetadata.Keys);
 
                 if (cultureResourceIO.OutputFile != null)
                 {
-                    compilerIO.Outputs.Add(cultureResourceIO.OutputFile);
+                    outputs.Add(cultureResourceIO.OutputFile);
                 }
             }
         }

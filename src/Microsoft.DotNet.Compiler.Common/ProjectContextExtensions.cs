@@ -37,6 +37,12 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return Path.Combine(intermediatePath, ".SDKVersion");
         }
 
+        public static string IncrementalCacheFile(this ProjectContext context, string configuration, string buildBasePath, string outputPath)
+        {
+            var intermediatePath = context.GetOutputPaths(configuration, buildBasePath, outputPath).IntermediateOutputDirectoryPath;
+            return Path.Combine(intermediatePath, ".IncrementalCache");
+        }
+
         // used in incremental compilation for the key file
         public static CommonCompilerOptions ResolveCompilationOptions(this ProjectContext context, string configuration)
         {

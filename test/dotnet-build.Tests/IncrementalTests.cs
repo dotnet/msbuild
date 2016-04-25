@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
             buildResult = BuildProject(noIncremental: true);
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
             Assert.Contains("[Forced Unsafe]", buildResult.StdOut);
         }
 
@@ -85,12 +86,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             CreateTestInstance();
             BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
-            //change version file
+            // change version file
             var versionFile = Path.Combine(GetIntermediaryOutputPath(), ".SDKVersion");
             File.Exists(versionFile).Should().BeTrue();
             File.AppendAllText(versionFile, "text");
 
-            //assert rebuilt
+            // assert rebuilt
             BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
         }
 
@@ -100,17 +101,78 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             CreateTestInstance();
             BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
 
-            //delete version file
+            // delete version file
             var versionFile = Path.Combine(GetIntermediaryOutputPath(), ".SDKVersion");
             File.Exists(versionFile).Should().BeTrue();
             File.Delete(versionFile);
             File.Exists(versionFile).Should().BeFalse();
 
-            //assert build skipped due to no version file
+            // assert build skipped due to no version file
             BuildProject().Should().HaveSkippedProjectCompilation(MainProject, _appFrameworkFullName);
 
-            //the version file should have been regenerated during the build, even if compilation got skipped
+            // the version file should have been regenerated during the build, even if compilation got skipped
             File.Exists(versionFile).Should().BeTrue();
+        }
+
+        [Fact]
+        public void TestRebuildDeletedSource()
+        {
+            CreateTestInstance();
+            BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
+
+            var sourceFile = Path.Combine(GetProjectDirectory(MainProject), "Program2.cs");
+            File.Delete(sourceFile);
+            Assert.False(File.Exists(sourceFile));
+
+            // second build; should get rebuilt since we deleted a source file
+            BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
+
+            // third build; incremental cache should have been regenerated and project skipped
+            BuildProject().Should().HaveSkippedProjectCompilation(MainProject, _appFrameworkFullName);
+        }
+
+        [Fact]
+        public void TestRebuildRenamedSource()
+        {
+            CreateTestInstance();
+            var buildResult = BuildProject();
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
+
+            var sourceFile = Path.Combine(GetProjectDirectory(MainProject), "Program2.cs");
+            var destinationFile = Path.Combine(Path.GetDirectoryName(sourceFile), "ProgramNew.cs");
+            File.Move(sourceFile, destinationFile);
+            Assert.False(File.Exists(sourceFile));
+            Assert.True(File.Exists(destinationFile));
+
+            // second build; should get rebuilt since we renamed a source file
+            buildResult = BuildProject();
+            buildResult.Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
+
+            // third build; incremental cache should have been regenerated and project skipped
+            BuildProject().Should().HaveSkippedProjectCompilation(MainProject, _appFrameworkFullName);
+        }
+
+        [Fact]
+        public void TestRebuildDeletedSourceAfterCliChanged()
+        {
+            CreateTestInstance();
+            BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
+
+            // change version file
+            var versionFile = Path.Combine(GetIntermediaryOutputPath(), ".SDKVersion");
+            File.Exists(versionFile).Should().BeTrue();
+            File.AppendAllText(versionFile, "text");
+
+            // delete a source file
+            var sourceFile = Path.Combine(GetProjectDirectory(MainProject), "Program2.cs");
+            File.Delete(sourceFile);
+            Assert.False(File.Exists(sourceFile));
+
+            // should get rebuilt since we changed version file and deleted source file
+            BuildProject().Should().HaveCompiledProject(MainProject, _appFrameworkFullName);
+
+            // third build; incremental cache should have been regenerated and project skipped
+            BuildProject().Should().HaveSkippedProjectCompilation(MainProject, _appFrameworkFullName);
         }
 
         [Fact]
