@@ -12,7 +12,7 @@ namespace FakeTests
         {
             Assert.True(true);
         }
-        
+
         [Fact]
         public void It_also_succeeds()
         {
