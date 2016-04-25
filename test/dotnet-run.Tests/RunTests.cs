@@ -68,6 +68,19 @@ namespace Microsoft.DotNet.Tools.Run.Tests
             new RunCommand(instance.TestRoot).Execute().Should().Pass();
         }
 
+        [Fact]
+        public void ItRunsAppsThatOutputUnicodeCharacters()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithUnicodéPath")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hélló Wórld!");
+        }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {
