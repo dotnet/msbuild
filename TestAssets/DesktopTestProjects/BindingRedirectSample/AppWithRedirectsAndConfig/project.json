@@ -14,5 +14,14 @@
   },
   "frameworks": {
     "net451": {}
+  },
+  "tools": {
+    "dotnet-dependency-tool-invoker": {
+      "version": "1.0.0-*",
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
   }
 }

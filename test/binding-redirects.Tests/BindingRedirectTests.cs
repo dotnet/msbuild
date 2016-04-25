@@ -17,62 +17,13 @@ using FluentAssertions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class TestSetupFixture : TestBase
-    {
-        private const string Framework = "net451";
-        private const string Config = "Debug";
-        private const string AppWithConfig = "AppWithRedirectsAndConfig";
-        private const string AppWithoutConfig = "AppWithRedirectsNoConfig";
-
-        private string _Runtime = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
-        private string _desktopProjectsRoot = Path.Combine(RepoRoot, "TestAssets", "DesktopTestProjects");
-        private string _buildRelativePath;
-        private string _appWithConfigBuildDir;
-        private string _appWithConfigPublishDir;
-        private string _appWithoutConfigBuildDir;
-        private string _appWithoutConfigPublishDir;
-        private TestInstance _testInstance;
-
-
-        public string AppWithConfigBuildOutput { get; }
-        public string AppWithConfigPublishOutput { get; }
-        public string AppWithoutConfigBuildOutput { get; }
-        public string AppWithoutConfigPublishOutput { get; }
-
-        public TestSetupFixture()
-        {
-            _buildRelativePath = Path.Combine("bin", Config, Framework, _Runtime);
-            var testAssetsMgr = new TestAssetsManager(_desktopProjectsRoot);
-            _testInstance = testAssetsMgr.CreateTestInstance("BindingRedirectSample")
-                                         .WithLockFiles();
-
-            Setup(AppWithConfig, ref _appWithConfigBuildDir, ref _appWithConfigPublishDir);
-            Setup(AppWithoutConfig, ref _appWithoutConfigBuildDir, ref _appWithoutConfigPublishDir);
-
-            AppWithConfigBuildOutput = Path.Combine(_appWithConfigBuildDir, AppWithConfig + ".exe");
-            AppWithConfigPublishOutput = Path.Combine(_appWithConfigPublishDir, AppWithConfig + ".exe");
-            AppWithoutConfigBuildOutput = Path.Combine(_appWithoutConfigBuildDir, AppWithoutConfig + ".exe");
-            AppWithoutConfigPublishOutput = Path.Combine(_appWithoutConfigPublishDir, AppWithoutConfig + ".exe");
-        }
-
-        private void Setup(string project, ref string buildDir, ref string publishDir)
-        {
-            string projectRoot = Path.Combine(_testInstance.TestRoot, project);
-            buildDir = Path.Combine(projectRoot, _buildRelativePath);
-            publishDir = Path.Combine(projectRoot, "publish");
-
-            var buildCommand = new BuildCommand(projectRoot, framework: Framework, runtime: _Runtime);
-            buildCommand.Execute().Should().Pass();
-
-            var publishCommand = new PublishCommand(projectRoot, output: publishDir, framework: Framework, runtime: _Runtime);
-            publishCommand.Execute().Should().Pass();
-        }
-    }
-
     public class GivenAnAppWithRedirectsAndExecutableDependency : TestBase, IClassFixture<TestSetupFixture>
     {
         private const string ExecutableDependency = "dotnet-desktop-binding-redirects.exe";
+        private const string ExecutableDependencyCommand = "desktop-binding-redirects";
         private TestSetupFixture _testSetup;
+        public string _appWithConfigProjectRoot;
+        public string _appWithoutConfigProjectRoot;
         private string _appWithConfigBuildOutput;
         private string _appWithoutConfigBuildOutput;
         private string _appWithConfigPublishOutput;
@@ -83,8 +34,10 @@ namespace Microsoft.DotNet.Tests
         public GivenAnAppWithRedirectsAndExecutableDependency(TestSetupFixture testSetup)
         {
             _testSetup = testSetup;
+            _appWithConfigProjectRoot = _testSetup.AppWithConfigProjectRoot;
             _appWithConfigBuildOutput = _testSetup.AppWithConfigBuildOutput;
             _appWithConfigPublishOutput = _testSetup.AppWithConfigPublishOutput;
+            _appWithoutConfigProjectRoot = _testSetup.AppWithoutConfigProjectRoot;
             _appWithoutConfigBuildOutput = _testSetup.AppWithoutConfigBuildOutput;
             _appWithoutConfigPublishOutput = _testSetup.AppWithoutConfigPublishOutput;
             _executableDependencyBuildOutput = Path.Combine(Path.GetDirectoryName(_appWithConfigBuildOutput), ExecutableDependency);
@@ -281,6 +234,23 @@ namespace Microsoft.DotNet.Tests
 
             var commandResult = new TestCommand(_appWithConfigPublishOutput)
                                     .Execute();
+            commandResult.Should().Pass();
+        }
+
+        [Fact]
+        public void Tool_Command_Runs_Executable_Dependency_For_App_With_Config()
+        {
+            var commandResult = new DependencyToolInvokerCommand { WorkingDirectory = _appWithConfigProjectRoot }
+                                        .Execute("desktop-binding-redirects", "net451", "");
+            commandResult.Should().Pass();
+        }
+
+        [Fact]
+        public void Tool_Command_Runs_Executable_Dependency_For_App_Without_Config()
+        {
+            var appDirectory = Path.GetDirectoryName(_appWithoutConfigProjectRoot);
+            var commandResult = new DependencyToolInvokerCommand { WorkingDirectory = _appWithoutConfigProjectRoot }
+                                        .Execute("desktop-binding-redirects", "net451", "");
             commandResult.Should().Pass();
         }
     }
