@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using Microsoft.DotNet.Cli.Build.Framework;
@@ -24,6 +26,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkNugetVersion { get; set; }
 
+        private static List<string> _latestBlobs;
+
         [Target]
         public static BuildTargetResult InitPublish(BuildTargetContext c)
         {
@@ -41,19 +45,119 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init),
         nameof(PublishTargets.InitPublish),
         nameof(PublishTargets.PublishArtifacts),
-        nameof(PublishTargets.TriggerDockerHubBuilds))]
+        nameof(PublishTargets.TriggerDockerHubBuilds),
+        nameof(PublishTargets.FinalizeBuild))]
         [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
         public static BuildTargetResult Publish(BuildTargetContext c)
         {
             return c.Success();
         }
 
+        [Target]
+        public static BuildTargetResult FinalizeBuild(BuildTargetContext c)
+        {
+            if (CheckIfAllBuildsHavePublished())
+            {
+                string targetContainer = $"{Channel}/Binaries/Latest/";
+                string targetVersionFile = $"{targetContainer}{CliNuGetVersion}";
+                string leaseId = AzurePublisherTool.AcquireLeaseOnBlob(targetContainer);
+
+                // Prevent race conditions by dropping a version hint of what version this is. If we see this file
+                // and it is the same as our version then we know that a race happened where two+ builds finished 
+                // at the same time and someone already took care of publishing and we have no work to do.
+                if (AzurePublisherTool.IsLatestSpecifiedVersion(targetVersionFile))
+                {
+                    AzurePublisherTool.ReleaseLeaseOnBlob(targetContainer, leaseId);
+                    return c.Success();
+                }
+                else
+                {
+                    // This is an old drop of latest so remove all old files to ensure a clean state
+                    AzurePublisherTool.ListBlobs($"{targetContainer}").ToList().ForEach(f => AzurePublisherTool.DeleteBlob(f));
+
+                    // Drop the version file signaling such for any race-condition builds (see above comment).
+                    AzurePublisherTool.DropLatestSpecifiedVersion(targetVersionFile);
+                }
+
+                try
+                {
+                    // Iterate over every blob in the latest version folder and copy it to the 'latest' folder
+                    foreach (string blob in _latestBlobs)
+                    {
+                        string targetUrl = $"{targetContainer}{Path.GetFileName(blob)}"
+                                        .Replace(CliNuGetVersion, "latest")
+                                        .Replace(SharedFrameworkNugetVersion, "latest");
+                        AzurePublisherTool.CopyBlob(blob.Replace("/dotnet/", ""), targetUrl);
+                    }
+
+                    // Generate the CLI and SDK Version text files
+                    List<string> versionFiles = new List<string>() { "win.x86.version", "win.x64.version", "ubuntu.x64.version", "rhel.x64.version", "osx.x64.version", "debian.x64.version", "centos.x64.version" };
+                    string cliVersion = Utils.GetCliVersionFileContent(c);
+                    string sfxVersion = Utils.GetSharedFrameworkVersionFileContent(c);
+                    foreach (string version in versionFiles)
+                    {
+                        AzurePublisherTool.PublishStringToBlob($"{Channel}/dnvm/latest.{version}", cliVersion);
+                        AzurePublisherTool.PublishStringToBlob($"{Channel}/dnvm/latest.sharedfx.{version}", sfxVersion);
+                    }
+                }
+                finally
+                {
+                    AzurePublisherTool.ReleaseLeaseOnBlob(targetContainer, leaseId);
+                }
+            }
+
+            return c.Success();
+        }
+
+        private static bool CheckIfAllBuildsHavePublished()
+        {
+             Dictionary<string, bool> badges = new Dictionary<string, bool>()
+             {
+                 { "Windows_x86", false },
+                 { "Windows_x64", false },
+                 { "Ubuntu_x64", false },
+                 { "RHEL_x64", false },
+                 { "OSX_x64", false },
+                 { "Debian_x64", false },
+                 { "CentOS_x64", false }
+             };
+
+            _latestBlobs = new List<string>(AzurePublisherTool.ListBlobs($"{Channel}/Binaries/{CliNuGetVersion}/"));
+
+            var config = Environment.GetEnvironmentVariable("CONFIGURATION");
+            var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}";
+            if (badges.ContainsKey(versionBadgeName) == false)
+            {
+                throw new ArgumentException("A new OS build was added without adding the moniker to the {nameof(badges)} lookup");
+            }
+
+            foreach (string file in _latestBlobs)
+            {
+                string name = Path.GetFileName(file);
+                string key = string.Empty;
+
+                foreach (string img in badges.Keys)
+                {
+                    if ((name.StartsWith($"{img}")) && (name.EndsWith(".svg")))
+                    {
+                        key = img;
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(key) == false)
+                {
+                    badges[key] = true;
+                }
+            }
+
+            return badges.Keys.All(key => badges[key]);
+        }
+
         [Target(
             nameof(PublishTargets.PublishInstallerFilesToAzure),
             nameof(PublishTargets.PublishArchivesToAzure),
             nameof(PublishTargets.PublishDebFilesToDebianRepo),
-            nameof(PublishTargets.PublishLatestCliVersionTextFile),
-            nameof(PublishTargets.PublishLatestSharedFrameworkVersionTextFile),
             nameof(PublishTargets.PublishCoreHostPackages),
             nameof(PublishTargets.PublishCliVersionBadge))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c) => c.Success();
@@ -87,11 +191,8 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult PublishCliVersionBadge(BuildTargetContext c)
         {
             var versionBadge = c.BuildContext.Get<string>("VersionBadge");
-            var latestVersionBadgeBlob = $"{Channel}/Binaries/Latest/{Path.GetFileName(versionBadge)}";
             var versionBadgeBlob = $"{Channel}/Binaries/{CliNuGetVersion}/{Path.GetFileName(versionBadge)}";
-
             AzurePublisherTool.PublishFile(versionBadgeBlob, versionBadge);
-            AzurePublisherTool.PublishFile(latestVersionBadgeBlob, versionBadge);
             return c.Success();
         }
 
@@ -120,7 +221,7 @@ namespace Microsoft.DotNet.Cli.Build
                 installerFile = Path.ChangeExtension(installerFile, "msi");
             }
 
-            AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
+            AzurePublisherTool.PublishInstallerFile(installerFile, Channel, version);
 
             return c.Success();
         }
@@ -132,7 +233,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = SharedFrameworkNugetVersion;
             var installerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
 
-            AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
+            AzurePublisherTool.PublishInstallerFile(installerFile, Channel, version);
 
             return c.Success();
         }
@@ -144,7 +245,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = CliNuGetVersion;
             var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
 
-            AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
+            AzurePublisherTool.PublishInstallerFile(installerFile, Channel, version);
 
             return c.Success();
         }
@@ -156,7 +257,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = SharedFrameworkNugetVersion;
             var installerFile = c.BuildContext.Get<string>("CombinedFrameworkHostInstallerFile");
 
-            AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
+            AzurePublisherTool.PublishInstallerFile(installerFile, Channel, version);
 
             return c.Success();
         }
@@ -168,7 +269,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = CliNuGetVersion;
             var installerFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
 
-            AzurePublisherTool.PublishInstallerFileAndLatest(installerFile, Channel, version);
+            AzurePublisherTool.PublishInstallerFile(installerFile, Channel, version);
 
             return c.Success();
         }
@@ -179,7 +280,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = CliNuGetVersion;
             var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKCompressedFile");
 
-            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
+            AzurePublisherTool.PublishArchive(archiveFile, Channel, version);
 
             return c.Success();
         }
@@ -190,7 +291,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = CliNuGetVersion;
             var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile");
 
-            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
+            AzurePublisherTool.PublishArchive(archiveFile, Channel, version);
 
             return c.Success();
         }
@@ -201,7 +302,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = CliNuGetVersion;
             var archiveFile = c.BuildContext.Get<string>("SdkSymbolsCompressedFile");
 
-            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
+            AzurePublisherTool.PublishArchive(archiveFile, Channel, version);
 
             return c.Success();
         }
@@ -212,38 +313,7 @@ namespace Microsoft.DotNet.Cli.Build
             var version = SharedFrameworkNugetVersion;
             var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile");
 
-            AzurePublisherTool.PublishArchiveAndLatest(archiveFile, Channel, version);
-            return c.Success();
-        }
-
-        [Target]
-        public static BuildTargetResult PublishLatestCliVersionTextFile(BuildTargetContext c)
-        {
-            var version = CliNuGetVersion;
-
-            var osname = Monikers.GetOSShortName();
-            var latestCliVersionBlob = $"{Channel}/dnvm/latest.{osname}.{CurrentArchitecture.Current}.version";
-            var latestCliVersionFile = Path.Combine(Dirs.Stage2, "sdk", version, ".version");
-
-            AzurePublisherTool.PublishFile(latestCliVersionBlob, latestCliVersionFile);
-            return c.Success();
-        }
-
-        [Target]
-        public static BuildTargetResult PublishLatestSharedFrameworkVersionTextFile(BuildTargetContext c)
-        {
-            var version = SharedFrameworkNugetVersion;
-
-            var osname = Monikers.GetOSShortName();
-            var latestSharedFXVersionBlob = $"{Channel}/dnvm/latest.sharedfx.{osname}.{CurrentArchitecture.Current}.version";
-            var latestSharedFXVersionFile = Path.Combine(
-                Dirs.Stage2,
-                "shared",
-                CompileTargets.SharedFrameworkName,
-                version,
-                ".version");
-
-            AzurePublisherTool.PublishFile(latestSharedFXVersionBlob, latestSharedFXVersionFile);
+            AzurePublisherTool.PublishArchive(archiveFile, Channel, version);
             return c.Success();
         }
 

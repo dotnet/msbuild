@@ -3,6 +3,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
+using Microsoft.DotNet.Cli.Build.Framework;
+
 namespace Microsoft.DotNet.Cli.Build
 {
     public static class Utils
@@ -132,6 +134,19 @@ namespace Microsoft.DotNet.Cli.Build
                 Directory.CreateDirectory(Path.GetDirectoryName(destFile));
                 File.Copy(file, destFile, true);
             }
+        }
+
+        public static string GetSharedFrameworkVersionFileContent(BuildTargetContext c)
+        {
+            string SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+            return $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{SharedFrameworkNugetVersion}{Environment.NewLine}";
+        }
+
+        public static string GetCliVersionFileContent(BuildTargetContext c)
+        {
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            var version = buildVersion.NuGetVersion;
+            return $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
         }
     }
 }
