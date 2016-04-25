@@ -14,6 +14,7 @@ For more information on MSBuild, see the [MSDN documentation](https://msdn.micro
 * Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
 
 ### Building
+## Building MSBuild in VS 2015
 For the full supported experience, you will need to have Visual Studio 2015. You can open the solution in Visual Studio 2013, but you will encounter issues building with the provided scripts.
 
 To get started on **Visual Studio 2015**:
@@ -25,6 +26,9 @@ To get started on **Visual Studio 2015**:
 2. Clone the source code (see above).
 3. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
 4. Open src/MSBuild.sln solution in Visual Studio 2015.
+
+## Building MSBuild in Unix (Mac & Linux)
+MSBuild's xplat branch allows MSBuild to be run on Unix Systems. Set-up instructions can be viewed on the wiki:   [Building Testing and Debugging on .Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
 
 ## How to Engage, Contribute and Provide Feedback
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.
