@@ -9,6 +9,19 @@
     "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0-beta1-20160410-01 "
   },
   "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": {
+          "type": "build"
+        },
+        "System.Collections": {
+          "type": "build"
+        },
+        "System.IO": {
+          "type": "build"
+        }
+      }
+    },
     "netstandard1.5": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50",

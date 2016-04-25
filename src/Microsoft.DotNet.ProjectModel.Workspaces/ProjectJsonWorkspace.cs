@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,6 +13,7 @@ using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Workspaces
@@ -189,10 +189,10 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             bool optimize = compilerOptions.Optimize ?? false;
             bool warningsAsErrors = compilerOptions.WarningsAsErrors ?? false;
 
-            Platform platform;
+            Microsoft.CodeAnalysis.Platform platform;
             if (!Enum.TryParse(value: platformValue, ignoreCase: true, result: out platform))
             {
-                platform = Platform.AnyCpu;
+                platform = Microsoft.CodeAnalysis.Platform.AnyCpu;
             }
 
             options = options
@@ -213,7 +213,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             {
                 keyFile = Path.GetFullPath(Path.Combine(projectDirectory, compilerOptions.KeyFile));
 
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || useOssSigning)
+                if (PlatformServices.Default.Runtime.OperatingSystemPlatform != Extensions.PlatformAbstractions.Platform.Windows || useOssSigning)
                 {
                     return options.WithCryptoPublicKey(
                         SnkUtils.ExtractPublicKey(File.ReadAllBytes(keyFile)));
