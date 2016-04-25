@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.ProjectModel
                     .Cast<LibraryRange?>()
                     .FirstOrDefault();
             }
-            bool isPortable = platformDependency != null || TargetFramework.IsDesktop();
+            bool isPortable = platformDependency != null;
 
             LockFileTarget target = null;
             LibraryDescription platformLibrary = null;
@@ -262,9 +262,11 @@ namespace Microsoft.DotNet.ProjectModel
                 }
             }
 
-            string runtime;
-            if (TargetFramework.IsDesktop())
+            string runtime = target?.RuntimeIdentifier;
+            if (string.IsNullOrEmpty(runtime) && TargetFramework.IsDesktop())
             {
+                // we got a ridless target for desktop so turning portable mode on
+                isPortable = true;
                 var legacyRuntime = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
                 if (RuntimeIdentifiers.Contains(legacyRuntime))
                 {
@@ -274,10 +276,6 @@ namespace Microsoft.DotNet.ProjectModel
                 {
                     runtime = RuntimeIdentifiers.FirstOrDefault();
                 }
-            }
-            else
-            {
-                runtime = target?.RuntimeIdentifier;
             }
 
             var referenceAssemblyDependencyResolver = new ReferenceAssemblyDependencyResolver(frameworkReferenceResolver);

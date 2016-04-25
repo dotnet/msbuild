@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 compilerOptions: includeCompile ? _compilerOptions : null,
                 compilationExports: includeCompile ? exports : null,
                 runtimeExports: exports,
-                portable: string.IsNullOrEmpty(_context.RuntimeIdentifier),
+                portable: _context.IsPortable,
                 target: _context.TargetFramework,
                 runtime: _context.RuntimeIdentifier ?? string.Empty);
 
