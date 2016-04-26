@@ -84,7 +84,7 @@ Compiling to IL is done using:
 
 This will drop a binary in `./bin/[configuration]/[framework]/[rid]/[binary name]` that you can just run.
 
-For more details, please refer to the [documentation](https://github.com/dotnet/corert/tree/master/Documentation).
+For more details, please refer to the [documentation](Documentation).
 
 Building from source
 --------------------
