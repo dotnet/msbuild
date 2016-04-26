@@ -474,18 +474,16 @@ namespace Microsoft.Build.UnitTests
         [MemberData(nameof(ErrorTests))]
         public void EvaluateAVarietyOfErrorExpressions(string expression)
         {
-            Parser p = new Parser();
-            GenericExpressionNode tree;
-            // It seems that if an expression is invalid,
+            // If an expression is invalid,
             //      - Parse may throw, or
             //      - Evaluate may throw, or
             //      - Evaluate may return false causing its caller EvaluateCondition to throw
-            bool success = true;
             bool caughtException = false;
-            bool value;
             try
             {
-                tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+                Parser p = new Parser();
+                var tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+
                 ConditionEvaluator.IConditionEvaluationState state =
                     new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
                         (
@@ -497,15 +495,14 @@ namespace Microsoft.Build.UnitTests
                         ElementLocation.EmptyLocation
                         );
 
-                value = tree.Evaluate(state);
-                if (!success) output.WriteLine(expression + " caused Evaluate to return false");
+                var value = tree.Evaluate(state);
             }
             catch (InvalidProjectFileException ex)
             {
                 output.WriteLine(expression + " caused '" + ex.Message + "'");
                 caughtException = true;
             }
-            Assert.True((success == false || caughtException == true),
+            Assert.True(caughtException,
                 "expected '" + expression + "' to not parse or not be evaluated");
         }
     }
