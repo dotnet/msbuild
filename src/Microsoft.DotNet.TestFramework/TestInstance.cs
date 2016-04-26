@@ -58,7 +58,6 @@ namespace Microsoft.DotNet.TestFramework
             {
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
                 File.Copy(srcFile, destFile, true);
-                FixTimeStamp(srcFile, destFile);
             }
         }
 
@@ -68,7 +67,6 @@ namespace Microsoft.DotNet.TestFramework
             {
                 string destinationLockFile = lockFile.Replace(_testAssetRoot, Path);
                 File.Copy(lockFile, destinationLockFile, true);
-                FixTimeStamp(lockFile, destinationLockFile);
             }
 
             return this;
@@ -108,22 +106,11 @@ namespace Microsoft.DotNet.TestFramework
             {
                 string destFile = binFile.Replace(_testAssetRoot, Path);
                 File.Copy(binFile, destFile, true);
-                FixTimeStamp(binFile, destFile);
             }
 
             return this;
         }
 
         public string TestRoot => Path;
-
-        private static void FixTimeStamp(string originalFile, string newFile)
-        {
-            // workaround for https://github.com/dotnet/corefx/issues/6083
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var originalTime = File.GetLastWriteTime(originalFile);
-                File.SetLastWriteTime(newFile, originalTime);
-            }
-        }
     }
 }
