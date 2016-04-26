@@ -204,9 +204,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             get
             {
-                return _verbose ?
-                    "--verbose" :
-                    "";
+                return _verbose ? "--verbose" : "";
             }
         }
 
