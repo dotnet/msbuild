@@ -19,7 +19,7 @@ For debugging tests, use the `/d` switch for CoreRun.exe. This prompts the core 
 
 * MSBuild uses the .Net CLI to download Nuget packages during its build process, therefore you must have a dynamic OpenSSL library available. This can be downloaded using [brew](http://brew.sh/), `brew install openssl`, apt-get, `apt-get install openssl`, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac).
 
-* Libunwind is also a dependency of .Net CLI. Install [libunwind8](http://www.nongnu.org/libunwind/index.html)using ```sudo apt-get install libunwind8```
+* Libunwind is also a dependency of .Net CLI. Install [libunwind8](http://www.nongnu.org/libunwind/index.html) using ```sudo apt-get install libunwind8```
 
 ##Build process##
 Clone the xplat branch:
