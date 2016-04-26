@@ -406,12 +406,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A whole bunch of conditionals, that should be true, false, or error 
+        /// A whole bunch of conditionals that should be true
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
         [Fact]
-        public void EvaluateAVarietyOfExpressions()
+        public void EvaluateAVarietyOfTrueExpressions()
         {
             Parser p = new Parser();
             GenericExpressionNode tree;
@@ -432,6 +432,18 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.True(tree.Evaluate(state), "expected true from '" + TrueTests[i] + "'");
             }
+        }
+
+        /// <summary>
+        /// A whole bunch of conditionals that should be false
+        /// (many coincidentally like existing QA tests) to give breadth coverage.
+        /// Please add more cases as they arise.
+        /// </summary>
+        [Fact]
+        public void EvaluateAVarietyOfFalseExpressions()
+        {
+            Parser p = new Parser();
+            GenericExpressionNode tree;
 
             for (int i = 0; i < FalseTests.GetLength(0); i++)
             {
@@ -449,6 +461,18 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.False(tree.Evaluate(state), "expected false from '" + FalseTests[i] + "' and got true");
             }
+        }
+
+        /// <summary>
+        /// A whole bunch of conditionals that should produce errors
+        /// (many coincidentally like existing QA tests) to give breadth coverage.
+        /// Please add more cases as they arise.
+        /// </summary>
+        [Fact]
+        public void EvaluateAVarietyOfErrorExpressions()
+        {
+            Parser p = new Parser();
+            GenericExpressionNode tree;
 
             for (int i = 0; i < ErrorTests.GetLength(0); i++)
             {
