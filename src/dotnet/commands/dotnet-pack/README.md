@@ -63,21 +63,30 @@ Configuration to use when building the project. If not specified, will default t
 
 ## EXAMPLES
 
+### Pack the current project
 `dotnet-pack`
 
-    Pack the current project.
-
+### Pack the specific project
 `dotnet-pack ~/projects/app1/project.json`
-    
-    Pack the app1 project.
-	
-`dotnet-pack --output nupkgs`
-    
-    Pack the current application and place the resulting packages into the specified folder.
 
+### Pack the current application and place the resulting packages into the specified folder	
+`dotnet-pack --output nupkgs`
+
+### Pack the current project into the specified folder and skip the build step
 `dotnet-pack --no-build --output nupkgs`
 
-    Pack the current project into the specified folder and skip the build step.
-	
+### Add files to a project
+Add following section in the project.json
+```json
+{
+    "packInclude": {
+        "dir/in/the/package/": "path_relative_to_project.json",
+        "other/dir/in/the/package/": "absolute_path_to_a.file",
+        "another/dir/in/the/package/": ["file1.txt", "file2.txt", "file3.txt"],
+        "runtimes/ubuntu.14.04-x64/native/": "rid_specific_native_file.so"
+    }
+}
+```
+
 ## SEE ALSO
 
