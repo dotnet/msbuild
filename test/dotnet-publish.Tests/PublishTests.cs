@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.Execute().Should().Pass();
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/2536")]
+        [Fact]
         public void PublishedLibraryShouldOutputDependenciesAndNoHost()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary"))
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("System.Runtime.dll");
         }
 
-        [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/2536")]
+        [WindowsOnlyFact()]
         public void TestLibraryBindingRedirectGeneration()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestBindingRedirectGeneration")
