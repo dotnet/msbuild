@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -20,7 +21,8 @@ namespace Microsoft.Build.UnitTests
 
         private readonly Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
 
-        private static readonly string[] TrueTests = new string[] {
+        public static readonly IEnumerable<string[]> TrueTests = new []
+        {
             "true or (SHOULDNOTEVALTHIS)", // short circuit
             "(true and false) or true",
             "false or true or false",
@@ -153,9 +155,9 @@ namespace Microsoft.Build.UnitTests
             "'59264.59264' == '59264.59264'",
             "1" + new String('0', 500) + "==" + "1" + new String('0', 500), /* too big for double, eval as string */
             "'1" + new String('0', 500) + "'=='" + "1" + new String('0', 500) + "'" /* too big for double, eval as string */
-        };
+        }.Select(s => new[] {s});
 
-        private static readonly string[] FalseTests = new string[] {
+        public static readonly IEnumerable<string[]> FalseTests = new [] {
             "false and SHOULDNOTEVALTHIS", // short circuit
             "$(a)!=no",
             "$(b)==1.1",
@@ -205,9 +207,9 @@ namespace Microsoft.Build.UnitTests
             "1" + new String('0', 500) + "==2", /* too big for double, eval as string */
             "'1" + new String('0', 500) + "'=='2'", /* too big for double, eval as string */
             "'1" + new String('0', 500) + "'=='01" + new String('0', 500) + "'" /* too big for double, eval as string */
-        };
+        }.Select(s => new[] { s });
 
-        private static readonly string[] ErrorTests = new string[] {
+        public static readonly IEnumerable<object[]> ErrorTests = new [] {
             "$",
             "$(",
             "$()",
@@ -346,7 +348,7 @@ namespace Microsoft.Build.UnitTests
             "HasTrailingSlash(a,'b')",
             "HasTrailingSlash(,,)",
             "1.2.3==1,2,3"
-        };
+        }.Select(s => new[] { s });
 
         /// <summary>
         /// Set up expression tests by creating files for existence checks.
@@ -416,28 +418,25 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [Fact]
-        public void EvaluateAVarietyOfTrueExpressions()
+        [Theory]
+        [MemberData(nameof(TrueTests))]
+        public void EvaluateAVarietyOfTrueExpressions(string expression)
         {
             Parser p = new Parser();
             GenericExpressionNode tree;
+            tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            ConditionEvaluator.IConditionEvaluationState state =
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
+                    (
+                    expression,
+                    _expander,
+                    ExpanderOptions.ExpandAll,
+                    null,
+                    Directory.GetCurrentDirectory(),
+                    ElementLocation.EmptyLocation
+                    );
 
-            for (int i = 0; i < TrueTests.GetLength(0); i++)
-            {
-                tree = p.Parse(TrueTests[i], ParserOptions.AllowAll, ElementLocation.EmptyLocation);
-                ConditionEvaluator.IConditionEvaluationState state =
-                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                        (
-                        TrueTests[i],
-                        _expander,
-                        ExpanderOptions.ExpandAll,
-                        null,
-                        Directory.GetCurrentDirectory(),
-                        ElementLocation.EmptyLocation
-                        );
-
-                Assert.True(tree.Evaluate(state), "expected true from '" + TrueTests[i] + "'");
-            }
+            Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
         }
 
         /// <summary>
@@ -445,28 +444,25 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [Fact]
-        public void EvaluateAVarietyOfFalseExpressions()
+        [Theory]
+        [MemberData(nameof(FalseTests))]
+        public void EvaluateAVarietyOfFalseExpressions(string expression)
         {
             Parser p = new Parser();
             GenericExpressionNode tree;
+            tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            ConditionEvaluator.IConditionEvaluationState state =
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
+                    (
+                    expression,
+                    _expander,
+                    ExpanderOptions.ExpandAll,
+                    null,
+                    Directory.GetCurrentDirectory(),
+                    ElementLocation.EmptyLocation
+                    );
 
-            for (int i = 0; i < FalseTests.GetLength(0); i++)
-            {
-                tree = p.Parse(FalseTests[i], ParserOptions.AllowAll, ElementLocation.EmptyLocation);
-                ConditionEvaluator.IConditionEvaluationState state =
-                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                        (
-                        FalseTests[i],
-                        _expander,
-                        ExpanderOptions.ExpandAll,
-                        null,
-                        Directory.GetCurrentDirectory(),
-                        ElementLocation.EmptyLocation
-                        );
-
-                Assert.False(tree.Evaluate(state), "expected false from '" + FalseTests[i] + "' and got true");
-            }
+            Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
         }
 
         /// <summary>
@@ -474,45 +470,43 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [Fact]
-        public void EvaluateAVarietyOfErrorExpressions()
+        [Theory]
+        [MemberData(nameof(ErrorTests))]
+        public void EvaluateAVarietyOfErrorExpressions(string expression)
         {
             Parser p = new Parser();
             GenericExpressionNode tree;
-
-            for (int i = 0; i < ErrorTests.GetLength(0); i++)
+            // It seems that if an expression is invalid,
+            //      - Parse may throw, or
+            //      - Evaluate may throw, or
+            //      - Evaluate may return false causing its caller EvaluateCondition to throw
+            bool success = true;
+            bool caughtException = false;
+            bool value;
+            try
             {
-                // It seems that if an expression is invalid,
-                //      - Parse may throw, or
-                //      - Evaluate may throw, or
-                //      - Evaluate may return false causing its caller EvaluateCondition to throw
-                bool success = true;
-                bool caughtException = false;
-                bool value;
-                try
-                {
-                    tree = p.Parse(ErrorTests[i], ParserOptions.AllowAll, ElementLocation.EmptyLocation);
-                    ConditionEvaluator.IConditionEvaluationState state =
-                        new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                            (
-                            ErrorTests[i],
-                            _expander,
-                            ExpanderOptions.ExpandAll,
-                            null,
-                            Directory.GetCurrentDirectory(),
-                            ElementLocation.EmptyLocation
-                            );
+                tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+                ConditionEvaluator.IConditionEvaluationState state =
+                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
+                        (
+                        expression,
+                        _expander,
+                        ExpanderOptions.ExpandAll,
+                        null,
+                        Directory.GetCurrentDirectory(),
+                        ElementLocation.EmptyLocation
+                        );
 
-                    value = tree.Evaluate(state);
-                    if (!success) output.WriteLine(ErrorTests[i] + " caused Evaluate to return false");
-                }
-                catch (InvalidProjectFileException ex)
-                {
-                    output.WriteLine(ErrorTests[i] + " caused '" + ex.Message + "'");
-                    caughtException = true;
-                }
-                Assert.True((success == false || caughtException == true), "expected '" + ErrorTests[i] + "' to not parse or not be evaluated");
+                value = tree.Evaluate(state);
+                if (!success) output.WriteLine(expression + " caused Evaluate to return false");
             }
+            catch (InvalidProjectFileException ex)
+            {
+                output.WriteLine(expression + " caused '" + ex.Message + "'");
+                caughtException = true;
+            }
+            Assert.True((success == false || caughtException == true),
+                "expected '" + expression + "' to not parse or not be evaluated");
         }
     }
 }
