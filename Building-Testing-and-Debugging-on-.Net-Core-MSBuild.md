@@ -5,7 +5,7 @@ MSBuild can be successfully built on Windows, OS X, and Ubuntu.
 # Windows #
 ##Build process##
 
-`RebuildWithLocalMSBuild.cmd`. This script uses a .NET core hosted MSBuild to target .NET Core and run the tests.
+`RebuildWithLocalMSBuild.cmd`: This script uses a .NET core hosted MSBuild to target .NET Core and run the tests.
 
 ##Debugging##
 
@@ -15,13 +15,16 @@ For debugging tests, use the `/d` switch for CoreRun.exe. This prompts the core 
 
 **Required packages**
 
-_Mono_, when doing a Mono-hosted version of MSBuild
+*[Mono](http://www.mono-project.com/download/#download-lin), when doing a Mono-hosted version of MSBuild
+*MSBuild uses the .Net CLI to download Nuget packages during its build process, therefore you must have a dynamic OpenSSL library available. This can be downloaded using [brew](http://brew.sh/), `brew install openssl`, apt-get, `apt-get install openssl`, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac).
+*Libunwind is also a dependency of .Net CLI. Install [libunwind8](http://www.nongnu.org/libunwind/index.html)using ```sudo apt-get install libunwind8```
 
 ##Build process##
 Clone the xplat branch:
 ```
 git clone git@github.com:Microsoft/msbuild.git --branch xplat 
 ```
+
 Navigate to the clone's working directory and run your chosen build script:
 
 Targeting .Net Core: `./cibuild.sh --target CoreCLR`
@@ -35,14 +38,7 @@ Using a Mono MSBuild host: `./cibuild --host Mono`
 Default arguments lead to a Mono hosted MSBuild targeting CoreCLR: `./cibuild.sh`
 
 ##Debugging##
-On Mac: If you run into an error about "./Tools/corerun", clean your repo using the below command and run your script again.
-```
-git clean -xdf
-``` 
-On Ubuntu: If you run into an error about "libunwind.so.8," download the file using the command below and run your script again:
-```
-sudo apt-get install libunwind8 
-``` 
+TBD
 
 ##Tests##
 
