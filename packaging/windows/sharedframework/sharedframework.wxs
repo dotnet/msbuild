@@ -11,6 +11,27 @@
         <Feature Id="MainFeature" Title="Main Feature" Level="1">
             <ComponentGroupRef Id="InstallFiles" />
             <ComponentGroupRef Id="AuthoredRegistryKeys"/>
+            <Component Id="BreadcrumbStoreFolder" Directory="BreadcrumbStore" Guid="{DA957490-EA59-42B9-B9D6-3E80F6FB0ED0}">
+                <CreateFolder Directory="BreadcrumbStore">
+                    <Permission
+                        User="Everyone"
+                        CreateChild="no"
+                        CreateFile="yes"
+                        Delete="no"
+                        DeleteChild="no"
+                        Read="yes"
+                        ReadAttributes="yes"
+                        ReadExtendedAttributes="yes"
+                        ReadPermission="yes"
+                        Traverse="yes" />
+                    <Permission
+                        User="SYSTEM"
+                        GenericAll="yes" />
+                    <Permission
+                        User="Administrators"
+                        GenericAll="yes" />
+                </CreateFolder>
+            </Component>
         </Feature>
         <Feature Id="Provider" Absent="disallow" AllowAdvertise="no" Description="Used for Ref Counting" Display="hidden" Level="1" InstallDefault="local" Title="RefCounting" TypicalDefault="install">
             <ComponentRef Id="DotNet_CLI_SharedFramework_$(var.FrameworkName)_$(var.FrameworkComponentVersion)" />
@@ -29,6 +50,13 @@
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="$(var.Program_Files)">
                 <Directory Id="DOTNETHOME" Name="dotnet" />
+            </Directory>
+            <Directory Id="CommonAppDataFolder">
+              <Directory Id="MicrosoftCommonAppData" Name="Microsoft">
+                <Directory Id="NetFrameworkCommonAppData" Name="NetFramework">
+                  <Directory Id="BreadcrumbStore" Name="BreadcrumbStore" />
+                </Directory>
+              </Directory>
             </Directory>
         </Directory>
     </Fragment>
