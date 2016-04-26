@@ -174,6 +174,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
+        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult PublishCombinedFrameworkSDKArchiveToAzure(BuildTargetContext c)
         {
             var version = CliNuGetVersion;
