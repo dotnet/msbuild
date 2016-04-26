@@ -14,40 +14,13 @@ namespace Microsoft.Build.UnitTests
     {
         private static readonly string[] FilesWithExistenceChecks = { "a", "a;b", "a'b", ";", "'" };
 
+        private readonly Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
+
         /// <summary>
         /// Set up expression tests by creating files for existence checks.
         /// </summary>
         public ExpressionTest()
         {
-            foreach (string file in FilesWithExistenceChecks)
-            {
-                using (StreamWriter sw = File.CreateText(file)) {; }
-            }
-        }
-
-        /// <summary>
-        /// Clean up files created for these tests.
-        /// </summary>
-        public void Dispose()
-        {
-            foreach (string file in FilesWithExistenceChecks)
-            {
-                if (File.Exists(file)) File.Delete(file);
-            }
-
-        }
-
-        /// <summary>
-        /// A whole bunch of conditionals, that should be true, false, or error 
-        /// (many coincidentally like existing QA tests) to give breadth coverage.
-        /// Please add more cases as they arise.
-        /// </summary>
-        [Fact]
-        public void EvaluateAVarietyOfExpressions()
-        {
-            Parser p = new Parser();
-            GenericExpressionNode tree;
-
             ItemDictionary<ProjectItemInstance> itemBag = new ItemDictionary<ProjectItemInstance>();
 
             // Dummy project instance to own the items. 
@@ -84,8 +57,36 @@ namespace Microsoft.Build.UnitTests
             metadataDictionary["Culture"] = "french";
             StringMetadataTable itemMetadata = new StringMetadataTable(metadataDictionary);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander =
-                new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, itemMetadata);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, itemMetadata);
+
+            foreach (string file in FilesWithExistenceChecks)
+            {
+                using (StreamWriter sw = File.CreateText(file)) {; }
+            }
+        }
+
+        /// <summary>
+        /// Clean up files created for these tests.
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (string file in FilesWithExistenceChecks)
+            {
+                if (File.Exists(file)) File.Delete(file);
+            }
+
+        }
+
+        /// <summary>
+        /// A whole bunch of conditionals, that should be true, false, or error 
+        /// (many coincidentally like existing QA tests) to give breadth coverage.
+        /// Please add more cases as they arise.
+        /// </summary>
+        [Fact]
+        public void EvaluateAVarietyOfExpressions()
+        {
+            Parser p = new Parser();
+            GenericExpressionNode tree;
 
             string[] trueTests = {
                 "true or (SHOULDNOTEVALTHIS)", // short circuit
@@ -422,7 +423,7 @@ namespace Microsoft.Build.UnitTests
                     new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
                         (
                         trueTests[i],
-                        expander,
+                        _expander,
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
@@ -439,7 +440,7 @@ namespace Microsoft.Build.UnitTests
                     new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
                         (
                         falseTests[i],
-                        expander,
+                        _expander,
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
@@ -465,7 +466,7 @@ namespace Microsoft.Build.UnitTests
                         new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
                             (
                             errorTests[i],
-                            expander,
+                            _expander,
                             ExpanderOptions.ExpandAll,
                             null,
                             Directory.GetCurrentDirectory(),
