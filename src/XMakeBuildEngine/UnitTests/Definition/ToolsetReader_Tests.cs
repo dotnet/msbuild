@@ -1962,7 +1962,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Project project = projectCollection.LoadProject(projectPath);
 
-                string defaultExpected = "15.1";
+                string defaultExpected = "15.0";
                 if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
                 {
                     defaultExpected = ObjectModelHelpers.MSBuildDefaultToolsVersion;
