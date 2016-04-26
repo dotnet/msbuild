@@ -7,11 +7,15 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     public class ExpressionTest : IDisposable
     {
+        private readonly ITestOutputHelper output;
+
+
         private static readonly string[] FilesWithExistenceChecks = { "a", "a;b", "a'b", ";", "'" };
 
         private readonly Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
@@ -347,8 +351,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Set up expression tests by creating files for existence checks.
         /// </summary>
-        public ExpressionTest()
+        public ExpressionTest(ITestOutputHelper output)
         {
+            this.output = output;
+
             ItemDictionary<ProjectItemInstance> itemBag = new ItemDictionary<ProjectItemInstance>();
 
             // Dummy project instance to own the items. 
@@ -498,11 +504,11 @@ namespace Microsoft.Build.UnitTests
                             );
 
                     value = tree.Evaluate(state);
-                    if (!success) Console.WriteLine(ErrorTests[i] + " caused Evaluate to return false");
+                    if (!success) output.WriteLine(ErrorTests[i] + " caused Evaluate to return false");
                 }
                 catch (InvalidProjectFileException ex)
                 {
-                    Console.WriteLine(ErrorTests[i] + " caused '" + ex.Message + "'");
+                    output.WriteLine(ErrorTests[i] + " caused '" + ex.Message + "'");
                     caughtException = true;
                 }
                 Assert.True((success == false || caughtException == true), "expected '" + ErrorTests[i] + "' to not parse or not be evaluated");
