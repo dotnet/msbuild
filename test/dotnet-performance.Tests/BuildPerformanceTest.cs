@@ -1,182 +1,249 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Xunit;
+using Microsoft.Xunit.Performance;
+using Microsoft.DotNet.TestFramework;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class BuildPerformanceTest : PerformanceTestBase
     {
-        public static IEnumerable<object> SingleProjects
-        {
-            get
-            {
-                yield return new [] { "TwoTargetApp"};
-                yield return new [] { "SingleTargetApp" };
-            }
-        }
+        private static string SingleTargetApp = "SingleTargetApp";
+        private static string TwoTargetApp = "TwoTargetApp";
 
-        public static IEnumerable<object> GraphProjects
+        private static string[] SingleTargetGraph = new[]
         {
-            get
-            {
-                yield return new object[]
-                {
-                    "TwoTargetGraph",
-                    new[] { "TwoTargetGraph/TwoTargetP0", "TwoTargetGraph/TwoTargetP1", "TwoTargetGraph/TwoTargetP2" }
-                };
-                yield return new object[]
-                {
-                    "TwoTargetGraphLarge",
-                    new[]
-                    {
-                        "TwoTargetGraphLarge/TwoTargetLargeP0",
-                        "TwoTargetGraphLarge/TwoTargetLargeP1",
-                        "TwoTargetGraphLarge/TwoTargetLargeP2",
-                        "TwoTargetGraphLarge/TwoTargetLargeP3",
-                        "TwoTargetGraphLarge/TwoTargetLargeP4",
-                        "TwoTargetGraphLarge/TwoTargetLargeP5",
-                        "TwoTargetGraphLarge/TwoTargetLargeP6"
-                    }
-                };
-                yield return new object[]
-                {
-                    "SingleTargetGraph",
-                    new[] { "SingleTargetGraph/SingleTargetP0", "SingleTargetGraph/SingleTargetP1", "SingleTargetGraph/SingleTargetP2" }
-                };
-            }
-        }
+            "SingleTargetGraph/SingleTargetP0",
+            "SingleTargetGraph/SingleTargetP1",
+            "SingleTargetGraph/SingleTargetP2"
+        };
 
-        [Theory]
-        [MemberData(nameof(SingleProjects))]
-        public void BuildSingleProject(string project)
+        private static string[] TwoTargetGraph = new[]
         {
-            var instance = CreateTestInstance(project);
+            "TwoTargetGraph/TwoTargetP0",
+            "TwoTargetGraph/TwoTargetP1",
+            "TwoTargetGraph/TwoTargetP2"
+        };
 
-            Iterate(c =>
+        private static string[] TwoTargetGraphLarge = new[]
+        {
+            "TwoTargetGraphLarge/TwoTargetLargeP0",
+            "TwoTargetGraphLarge/TwoTargetLargeP1",
+            "TwoTargetGraphLarge/TwoTargetLargeP2",
+            "TwoTargetGraphLarge/TwoTargetLargeP3",
+            "TwoTargetGraphLarge/TwoTargetLargeP4",
+            "TwoTargetGraphLarge/TwoTargetLargeP5",
+            "TwoTargetGraphLarge/TwoTargetLargeP6"
+        };
+
+        [Benchmark]
+        public void BuildSingleProject_SingleTargetApp() => BuildSingleProject(CreateTestInstance(SingleTargetApp));
+        [Benchmark]
+        public void BuildSingleProject_TwoTargetApp() => BuildSingleProject(CreateTestInstance(TwoTargetApp));
+
+        public void BuildSingleProject(TestInstance instance)
+        {
+            foreach (var iteration in Benchmark.Iterations)
             {
-                c.Measure(() => Build(instance.TestRoot));
+                using (iteration.StartMeasurement())
+                {
+                    Build(instance.TestRoot);
+                }
                 RemoveBin(instance.TestRoot);
-            }, project);
+            }
         }
 
-        [Theory]
-        [MemberData(nameof(SingleProjects))]
-        public void IncrementalSkipSingleProject(string project)
+        [Benchmark]
+        public void IncrementalSkipSingleProject_SingleTargetApp() => IncrementalSkipSingleProject(CreateTestInstance(SingleTargetApp));
+        [Benchmark]
+        public void IncrementalSkipSingleProject_TwoTargetApp() => IncrementalSkipSingleProject(CreateTestInstance(TwoTargetApp));
+
+        public void IncrementalSkipSingleProject(TestInstance instance)
         {
-            var instance = CreateTestInstance(project);
             Build(instance.TestRoot);
 
-            Iterate(c =>
+            foreach (var iteration in Benchmark.Iterations)
             {
-                c.Measure(() => Build(instance.TestRoot));
-            }, project);
+                using (iteration.StartMeasurement())
+                {
+                    Build(instance.TestRoot);
+                }
+            }
         }
 
-        [Theory]
-        [MemberData(nameof(GraphProjects))]
-        public void BuildAllInGraph(string variation, string[] projects)
+        [Benchmark]
+        public void BuildAllInGraph_SingleTargetGraph() => BuildAllInGraph(CreateTestInstances(SingleTargetGraph));
+        [Benchmark]
+        public void BuildAllInGraph_TwoTargetGraph() => BuildAllInGraph(CreateTestInstances(TwoTargetGraph));
+        [Benchmark]
+        public void BuildAllInGraph_TwoTargetGraphLarge() => BuildAllInGraph(CreateTestInstances(TwoTargetGraphLarge));
+
+        public void BuildAllInGraph(TestInstance[] instances)
         {
-            var instances = projects.Select(p => CreateTestInstance(p, variation)).ToArray();
             var instance = instances[0];
 
-            Iterate(c =>
+            foreach (var iteration in Benchmark.Iterations)
             {
-                c.Measure(() => Build(instance.TestRoot));
+                using (iteration.StartMeasurement())
+                {
+                    Build(instance.TestRoot);
+                }
                 foreach (var i in instances)
                 {
                     RemoveBin(i.TestRoot);
                 }
-            }, variation);
+            }
         }
 
-        [Theory]
-        [MemberData(nameof(GraphProjects))]
-        public void IncrementalSkipAllInGraph(string variation, string[] projects)
+        [Benchmark]
+        public void IncrementalSkipAllInGraph_SingleTargetGraph() =>
+            IncrementalSkipAllInGraph(CreateTestInstances(SingleTargetGraph));
+
+        [Benchmark]
+        public void IncrementalSkipAllInGraph_TwoTargetGraph() =>
+            IncrementalSkipAllInGraph(CreateTestInstances(TwoTargetGraph));
+
+        [Benchmark]
+        public void IncrementalSkipAllInGraphh_TwoTargetGraphLarge() =>
+            IncrementalSkipAllInGraph(CreateTestInstances(TwoTargetGraphLarge));
+
+        public void IncrementalSkipAllInGraph(TestInstance[] instances)
         {
-            var instances = projects.Select(p => CreateTestInstance(p, variation)).ToArray();
             var instance = instances[0];
 
             Build(instance.TestRoot);
 
-            Iterate(c =>
+            foreach (var iteration in Benchmark.Iterations)
             {
-                c.Measure(() => Build(instance.TestRoot));
-            }, variation);
-        }
-
-        [Theory]
-        [MemberData(nameof(GraphProjects))]
-        public void IncrementalRebuildWithRootChangedInGraph(string variation, string[] projects)
-        {
-            var instances = projects.Select(p => CreateTestInstance(p, variation)).ToArray();
-            var instance = instances[0];
-
-            Build(instance.TestRoot);
-
-            Iterate(c =>
-            {
-                c.Measure(() => Build(instance.TestRoot));
-                RemoveBin(instance.TestRoot);
-            }, variation);
-        }
-
-        [Theory]
-        [MemberData(nameof(GraphProjects))]
-        public void IncrementalRebuildWithLastChangedInGraph(string variation, string[] projects)
-        {
-            var instances = projects.Select(p => CreateTestInstance(p, variation)).ToArray();
-            var instance = instances[0];
-
-            Build(instance.TestRoot);
-
-            Iterate(c =>
-            {
-                c.Measure(() => Build(instance.TestRoot));
-                RemoveBin(instances.Last().TestRoot);
-            }, variation);
-        }
-
-
-        [Theory]
-        [MemberData(nameof(GraphProjects))]
-        public void IncrementalSkipAllNoDependenciesInGraph(string variation, string[] projects)
-        {
-            var instances = projects.Select(p => CreateTestInstance(p, variation)).ToArray();
-            var instance = instances[0];
-
-            Build(instance.TestRoot);
-
-            Iterate(c =>
-            {
-                foreach (var i in instances)
+                using (iteration.StartMeasurement())
                 {
-                    c.Measure(() => Run(new BuildCommand(i.TestRoot, framework: DefaultFramework, noDependencies: true, buildProfile: false)));
+                    Build(instance.TestRoot);
                 }
-            }, variation);
+            }
         }
 
-        [Theory]
-        [MemberData(nameof(GraphProjects))]
-        public void BuildAllNoDependenciesInGraph(string variation, string[] projects)
-        {
-            var instances = projects.Select(p => CreateTestInstance(p, variation)).ToArray();
+        [Benchmark]
+        public void IncrementalRebuildWithRootChangedInGraph_SingleTargetGraph() =>
+            IncrementalRebuildWithRootChangedInGraph(CreateTestInstances(SingleTargetGraph));
 
-            Iterate(c =>
+        [Benchmark]
+        public void IncrementalRebuildWithRootChangedInGraph_TwoTargetGraph() =>
+            IncrementalRebuildWithRootChangedInGraph(CreateTestInstances(TwoTargetGraph));
+
+        [Benchmark]
+        public void IncrementalRebuildWithRootChangedInGraph_TwoTargetGraphLarge() =>
+            IncrementalRebuildWithRootChangedInGraph(CreateTestInstances(TwoTargetGraphLarge));
+
+        public void IncrementalRebuildWithRootChangedInGraph(TestInstance[] instances)
+        {
+            var instance = instances[0];
+
+            Build(instance.TestRoot);
+
+            foreach (var iteration in Benchmark.Iterations)
             {
-                foreach (var i in instances.Reverse())
+                using (iteration.StartMeasurement())
                 {
-                    c.Measure(() => Run(new BuildCommand(i.TestRoot, framework: DefaultFramework, noDependencies: true, buildProfile: false)));
+                    Build(instance.TestRoot);
+                }
+                RemoveBin(instance.TestRoot);
+            }
+        }
+
+        [Benchmark]
+        public void IncrementalRebuildWithLastChangedInGraph_SingleTargetGraph() =>
+            IncrementalRebuildWithLastChangedInGraph(CreateTestInstances(SingleTargetGraph));
+
+        [Benchmark]
+        public void IncrementalRebuildWithLastChangedInGraph_TwoTargetGraph() =>
+            IncrementalRebuildWithLastChangedInGraph(CreateTestInstances(TwoTargetGraph));
+
+        [Benchmark]
+        public void IncrementalRebuildWithLastChangedInGraph_TwoTargetGraphLarge() =>
+            IncrementalRebuildWithLastChangedInGraph(CreateTestInstances(TwoTargetGraphLarge));
+
+        public void IncrementalRebuildWithLastChangedInGraph(TestInstance[] instances)
+        {
+            var instance = instances[0];
+
+            Build(instance.TestRoot);
+
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    Build(instance.TestRoot);
+                }
+                RemoveBin(instances.Last().TestRoot);
+            }
+        }
+
+
+        [Benchmark]
+        public void IncrementalSkipAllNoDependenciesInGraph_SingleTargetGraph() =>
+           IncrementalSkipAllNoDependenciesInGraph(CreateTestInstances(SingleTargetGraph));
+
+        [Benchmark]
+        public void IncrementalSkipAllNoDependenciesInGraph_TwoTargetGraph() =>
+            IncrementalSkipAllNoDependenciesInGraph(CreateTestInstances(TwoTargetGraph));
+
+        [Benchmark]
+        public void IncrementalSkipAllNoDependenciesInGraph_TwoTargetGraphLarge() =>
+            IncrementalSkipAllNoDependenciesInGraph(CreateTestInstances(TwoTargetGraphLarge));
+
+        public void IncrementalSkipAllNoDependenciesInGraph(TestInstance[] instances)
+        {
+            var instance = instances[0];
+
+            Build(instance.TestRoot);
+
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    foreach (var i in instances)
+                    {
+                        Run(new BuildCommand(i.TestRoot,
+                            framework: DefaultFramework,
+                            noDependencies: true,
+                            buildProfile: false));
+                    }
+                }
+            }
+        }
+        [Benchmark]
+        public void BuildAllNoDependenciesInGraphh_SingleTargetGraph() =>
+          BuildAllNoDependenciesInGraph(CreateTestInstances(SingleTargetGraph));
+
+        [Benchmark]
+        public void BuildAllNoDependenciesInGraph_TwoTargetGraph() =>
+            BuildAllNoDependenciesInGraph(CreateTestInstances(TwoTargetGraph));
+
+        [Benchmark]
+        public void BuildAllNoDependenciesInGraph_TwoTargetGraphLarge() =>
+            BuildAllNoDependenciesInGraph(CreateTestInstances(TwoTargetGraphLarge));
+
+        public void BuildAllNoDependenciesInGraph(TestInstance[] instances)
+        {
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    foreach (var i in instances.Reverse())
+                    {
+                        Run(new BuildCommand(i.TestRoot,
+                            framework: DefaultFramework,
+                            noDependencies: true,
+                            buildProfile: false));
+                    }
                 }
                 foreach (var instance in instances)
                 {
                     RemoveBin(instance.TestRoot);
                 }
-
-            }, variation);
+            }
         }
     }
 }

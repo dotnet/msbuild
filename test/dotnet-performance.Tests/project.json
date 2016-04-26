@@ -11,7 +11,8 @@
     },
     "Newtonsoft.Json": "7.0.1",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-140469-38"
+    "dotnet-test-xunit": "1.0.0-dev-140469-38",
+    "Microsoft.DotNet.xunit.performance": "1.0.0-alpha-build0028"
   },
   "frameworks": {
     "netcoreapp1.0": {
