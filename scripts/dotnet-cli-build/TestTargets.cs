@@ -39,6 +39,11 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.Extensions.DependencyModel.Tests"
         };
 
+        public static readonly string[] WindowsTestProjects = new[]
+        {
+            "binding-redirects.Tests"
+        };
+
         public static readonly dynamic[] ConditionalTestAssets = new[]
         {
             new { Path = "AppWithDirectDependencyDesktopAndPortable", Skip = new Func<bool>(() => !CurrentPlatform.IsWindows) }
@@ -59,9 +64,9 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
         public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
 
-        [Target(nameof(RestoreTestAssetProjects), 
-            nameof(RestoreDesktopTestAssetProjects), 
-            nameof(BuildTestAssetProjects), 
+        [Target(nameof(RestoreTestAssetProjects),
+            nameof(RestoreDesktopTestAssetProjects),
+            nameof(BuildTestAssetProjects),
             nameof(BuildDesktopTestAssetProjects))]
         public static BuildTargetResult SetupTestProjects(BuildTargetContext c) => c.Success();
 
@@ -223,7 +228,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var packageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable && p.Clean))
             {
                 Rmdir(Path.Combine(Dirs.NuGetPackages, packageProject.Name));
-                if(packageProject.IsTool)
+                if (packageProject.IsTool)
                 {
                     Rmdir(Path.Combine(Dirs.NuGetPackages, ".tools", packageProject.Name));
                 }
@@ -276,7 +281,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var configuration = c.BuildContext.Get<string>("Configuration");
 
-            foreach (var testProject in TestProjects)
+            foreach (var testProject in GetTestProjects())
             {
                 c.Info($"Building tests: {testProject}");
                 dotnet.Build("--configuration", configuration)
@@ -307,7 +312,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Run the tests and set the VS vars in the environment when running them
             var failingTests = new List<string>();
-            foreach (var project in TestProjects)
+            foreach (var project in GetTestProjects())
             {
                 c.Info($"Running tests in: {project}");
                 var result = dotnet.Test("--configuration", configuration, "-xml", $"{project}-testResults.xml", "-notrait", "category=failing")
@@ -352,6 +357,19 @@ namespace Microsoft.DotNet.Cli.Build
                 .Execute();
 
             return c.Success();
+        }
+
+        private static IEnumerable<string> GetTestProjects()
+        {
+            List<string> testProjects = new List<string>();
+            testProjects.AddRange(TestProjects);
+
+            if (CurrentPlatform.IsWindows)
+            {
+                testProjects.AddRange(WindowsTestProjects);
+            }
+
+            return testProjects;
         }
 
         private static BuildTargetResult BuildTestAssets(BuildTargetContext c, string testAssetsRoot, DotNetCli dotnet, string framework)

@@ -242,25 +242,5 @@ namespace Microsoft.DotNet.Tests
                 return base.ExecuteWithCapturedOutput(args);
             }
         }
-
-        class DependencyToolInvokerCommand : TestCommand
-        {
-            public DependencyToolInvokerCommand()
-                : base("dotnet")
-            {
-            }
-
-            public CommandResult Execute(string commandName, string framework, string additionalArgs)
-            {
-                var args = $"dependency-tool-invoker {commandName} --framework {framework} {additionalArgs}";
-                return base.Execute(args);
-            }
-
-            public CommandResult ExecuteWithCapturedOutput(string commandName, string framework, string additionalArgs)
-            {
-                var args = $"dependency-tool-invoker {commandName} --framework {framework} {additionalArgs}";
-                return base.ExecuteWithCapturedOutput(args);
-            }
-        }
     }
 }

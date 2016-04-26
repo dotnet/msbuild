@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Newtonsoft.Json": "5.0.0",
+    "NuGet.Protocol.Core.v3": "3.3.0"
+  },
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Configuration": ""
+      }
+    }
+  }
+}
+

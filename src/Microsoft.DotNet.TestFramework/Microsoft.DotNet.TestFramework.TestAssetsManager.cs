@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.TestFramework
                                        .CaptureStdOut()
                                        .CaptureStdErr()
                                        .Execute();
-            
+
             int exitCode = commandResult.ExitCode;
 
             if (exitCode != 0)
@@ -93,7 +93,12 @@ namespace Microsoft.DotNet.TestFramework
                 throw new Exception($"Cannot find '{testProjectName}' at '{AssetsRoot}'");
             }
 
-            string testDestination = Path.Combine(AppContext.BaseDirectory, callingMethod + identifier, testProjectName);
+#if NET451
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+#else
+            string baseDirectory = AppContext.BaseDirectory;
+#endif
+            string testDestination = Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
             var testInstance = new TestInstance(testProjectDir, testDestination);
             return testInstance;
         }

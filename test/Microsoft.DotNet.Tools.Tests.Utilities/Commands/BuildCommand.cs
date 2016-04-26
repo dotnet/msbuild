@@ -266,7 +266,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public string GetExecutableExtension()
         {
+#if NET451
+            return ".exe";
+#else
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
+#endif
         }
 
         private string BuildArgs()

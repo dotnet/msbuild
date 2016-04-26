@@ -34,27 +34,38 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private static SHA1 Sha1 { get; } = SHA1.Create();
 
-        public static XDocument GenerateBindingRedirects(this IEnumerable<LibraryExport> dependencies, XDocument document)
+        public static void GenerateBindingRedirects(this IEnumerable<LibraryExport> dependencies, IEnumerable<string> configFiles)
         {
             var redirects = CollectRedirects(dependencies);
 
             if (!redirects.Any())
             {
                 // No redirects required
-                return document;
+                return;
             }
-            document = document ?? new XDocument();
 
-            var configuration = GetOrAddElement(document, ConfigurationElementName);
+            foreach (var configFile in configFiles)
+            {
+                GenerateBindingRedirects(configFile, redirects);
+            }
+        }
+
+        internal static void GenerateBindingRedirects(string configFile, AssemblyRedirect[] bindingRedirects)
+        {
+            XDocument configRoot = File.Exists(configFile) ? XDocument.Load(configFile) : new XDocument();
+            var configuration = GetOrAddElement(configRoot, ConfigurationElementName);
             var runtime = GetOrAddElement(configuration, RuntimeElementName);
             var assemblyBindings = GetOrAddElement(runtime, AssemblyBindingElementName);
 
-            foreach (var redirect in redirects)
+            foreach (var redirect in bindingRedirects)
             {
                 AddDependentAssembly(redirect, assemblyBindings);
             }
 
-            return document;
+            using (var fileStream = File.Open(configFile, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                configRoot.Save(fileStream);
+            }
         }
 
         private static void AddDependentAssembly(AssemblyRedirect redirect, XElement assemblyBindings)
@@ -74,10 +85,15 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 assemblyBindings.Add(dependencyElement);
             }
 
-            dependencyElement.Add(new XElement(BindingRedirectElementName,
-                    new XAttribute(OldVersionAttributeName, redirect.From.Version),
-                    new XAttribute(NewVersionAttributeName, redirect.To.Version)
-                    ));
+            bool redirectExists = dependencyElement.Elements(BindingRedirectElementName).Any(element => IsSameRedirect(redirect, element));
+
+            if (!redirectExists)
+            {
+                dependencyElement.Add(new XElement(BindingRedirectElementName,
+                        new XAttribute(OldVersionAttributeName, redirect.From.Version),
+                        new XAttribute(NewVersionAttributeName, redirect.To.Version)
+                        ));
+            }
         }
 
         private static bool IsSameAssembly(AssemblyRedirect redirect, XElement dependentAssemblyElement)
@@ -90,6 +106,16 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return (string)identity.Attribute(NameAttributeName) == redirect.From.Name &&
                    (string)identity.Attribute(PublicKeyTokenAttributeName) == redirect.From.PublicKeyToken &&
                    (string)identity.Attribute(CultureAttributeName) == redirect.From.Culture;
+        }
+
+        private static bool IsSameRedirect(AssemblyRedirect redirect, XElement bindingRedirectElement)
+        {
+            if (bindingRedirectElement == null)
+            {
+                return false;
+            }
+            return (string)bindingRedirectElement.Attribute(OldVersionAttributeName) == redirect.From.Version.ToString() &&
+                   (string)bindingRedirectElement.Attribute(NewVersionAttributeName) == redirect.To.Version.ToString();
         }
 
         private static XElement GetOrAddElement(XContainer parent, XName elementName)

@@ -5,13 +5,6 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.NETCore.App": {
-      "type": "platform",
-      "version": "1.0.0-rc2-*"
-    },
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24022",
-    "System.Collections.Immutable": "1.2.0-rc2-24022",
-    "System.Net.NetworkInformation": "4.1.0-rc2-24022",
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-162081-13",
@@ -27,8 +20,22 @@
     "netcoreapp1.0": {
       "imports": [
         "dotnet5.4",
-        "portable-net451+win8"
-      ]
+        "portable-net451+win8"      
+      ],
+      "Microsoft.NETCore.App": {
+        "type": "platform",
+        "version": "1.0.0-rc2-*"
+      },
+      "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24022",
+      "System.Collections.Immutable": "1.2.0-rc2-24022",
+      "System.Net.NetworkInformation": "4.1.0-rc2-24022"
+    },
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": {
+          "type": "build"
+        }
+      }
     }
   }
 }
