@@ -56,6 +56,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [Fact]
+        public void It_runs_tests_for_a_local_project_json()
+        {
+            string projectDirectory = Path.GetDirectoryName(_projectFilePath);
+
+            new DotnetTestCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("project.json")
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
         public void It_builds_the_project_using_the_output_passed()
         {
             var testCommand = new DotnetTestCommand();

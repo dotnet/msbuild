@@ -69,6 +69,21 @@ namespace Microsoft.DotNet.Tools.Run.Tests
         }
 
         [Fact]
+        public void ItRunsWithLocalProjectJsonArg()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppSimple")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand("project.json")
+                .WithWorkingDirectory(instance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
+        }
+
+        [Fact]
         public void ItRunsAppsThatOutputUnicodeCharacters()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithUnicodéPath")

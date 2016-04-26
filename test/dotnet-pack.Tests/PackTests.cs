@@ -136,6 +136,20 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             zip.Entries.Should().Contain(e => e.FullName == "lib/netstandard1.5/MyLibrary.pdb");
         }
 
+        [Fact]
+        public void PackWorksWithLocalProjectJson()
+        {
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestAppSimple")
+                .WithLockFiles();
+
+            new PackCommand(Project.FileName)
+                .WithWorkingDirectory(testInstance.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {
             // copy all the files to temp dir
