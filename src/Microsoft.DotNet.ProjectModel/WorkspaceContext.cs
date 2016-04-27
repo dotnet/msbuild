@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public void AddProject(string path)
         {
-            var projectPath = ProjectReader.NormalizeProjectDirectoryPath(path);
+            var projectPath = ProjectPath.NormalizeProjectDirectoryPath(path);
 
             if (projectPath != null)
             {
@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public ProjectContextCollection GetProjectContextCollection(string projectPath)
         {
-            var normalizedPath = ProjectReader.NormalizeProjectDirectoryPath(projectPath);
+            var normalizedPath = ProjectPath.NormalizeProjectDirectoryPath(projectPath);
             if (normalizedPath == null)
             {
                 return null;
@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private FileModelEntry<Project> GetProjectCore(string projectDirectory)
         {
-            var normalizedPath = ProjectReader.NormalizeProjectDirectoryPath(projectDirectory);
+            var normalizedPath = ProjectPath.NormalizeProjectDirectoryPath(projectDirectory);
             if (normalizedPath == null)
             {
                 return null;
@@ -256,7 +256,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private LockFile GetLockFile(string projectDirectory)
         {
-            var normalizedPath = ProjectReader.NormalizeProjectDirectoryPath(projectDirectory);
+            var normalizedPath = ProjectPath.NormalizeProjectDirectoryPath(projectDirectory);
             if (normalizedPath == null)
             {
                 return null;
