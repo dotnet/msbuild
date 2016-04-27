@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ProjectModel
         {
             foreach (var kvp in _compilerNameToLanguageId)
             {
-                if (kvp.Key == project.CompilerName)
+                if (kvp.Key == (project._defaultCompilerOptions.CompilerName))
                 {
                     return kvp.Value;
                 }

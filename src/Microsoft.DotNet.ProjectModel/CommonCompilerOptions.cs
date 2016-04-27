@@ -1,9 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.ProjectModel.Files;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -39,7 +39,15 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IEnumerable<string> AdditionalArguments { get; set; }
 
-        public string OutputName { get;set; }
+        public string OutputName { get; set; }
+
+        public string CompilerName { get; set; }
+
+        public IncludeContext CompileInclude { get; set; }
+
+        public IncludeContext EmbedInclude { get; set; }
+
+        public IncludeContext CopyToOutputInclude { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -60,7 +68,21 @@ namespace Microsoft.DotNet.ProjectModel
                    EnumerableEquals(Defines, other.Defines) &&
                    EnumerableEquals(SuppressWarnings, other.SuppressWarnings) &&
                    EnumerableEquals(AdditionalArguments, other.AdditionalArguments) &&
-                   OutputName == other.OutputName;
+                   OutputName == other.OutputName &&
+                   CompilerName == other.CompilerName &&
+                   IsEqual(CompileInclude, other.CompileInclude) &&
+                   IsEqual(EmbedInclude, other.EmbedInclude) &&
+                   IsEqual(CopyToOutputInclude, other.CopyToOutputInclude);
+        }
+
+        private static bool IsEqual(IncludeContext first, IncludeContext second)
+        {
+            if (first == null || second == null)
+            {
+                return first == second;
+            }
+
+            return first.Equals(second);
         }
 
         private static bool EnumerableEquals(IEnumerable<string> left, IEnumerable<string> right)
@@ -160,6 +182,27 @@ namespace Microsoft.DotNet.ProjectModel
                 if (option.OutputName != null)
                 {
                     result.OutputName = option.OutputName;
+                }
+
+                if (option.CompileInclude != null)
+                {
+                    result.CompileInclude = option.CompileInclude;
+                }
+
+                if (option.EmbedInclude != null)
+                {
+                    result.EmbedInclude = option.EmbedInclude;
+                }
+
+                if (option.CopyToOutputInclude != null)
+                {
+                    result.CopyToOutputInclude = option.CopyToOutputInclude;
+                }
+
+                // compilerName set in the root cannot be overriden.
+                if (result.CompilerName == null)
+                {
+                    result.CompilerName = option.CompilerName;
                 }
             }
 

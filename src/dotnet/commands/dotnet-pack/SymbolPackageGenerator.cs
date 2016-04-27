@@ -1,11 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.ProjectModel;
-using NuGet;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.Tools.Pack;
+using NuGet;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -34,16 +35,37 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         protected override bool GeneratePackage(string nupkg, List<DiagnosticMessage> packDiagnostics)
         {
-            foreach (var path in Project.Files.SourceFiles)
-            {
-                var srcFile = new PhysicalPackageFile
-                {
-                    SourcePath = path,
-                    TargetPath = Path.Combine("src", Common.PathUtility.GetRelativePath(Project.ProjectDirectory, path))
-                };
+            var compilerOptions = Project.GetCompilerOptions(
+                Project.GetTargetFramework(targetFramework: null).FrameworkName, Configuration);
 
-                PackageBuilder.Files.Add(srcFile);
+            if (compilerOptions.CompileInclude == null)
+            {
+                foreach (var path in Project.Files.SourceFiles)
+                {
+                    var srcFile = new PhysicalPackageFile
+                    {
+                        SourcePath = path,
+                        TargetPath = Path.Combine("src", Common.PathUtility.GetRelativePath(Project.ProjectDirectory, path))
+                    };
+
+                    PackageBuilder.Files.Add(srcFile);
+                }
             }
+            else
+            {
+                var includeFiles = IncludeFilesResolver.GetIncludeFiles(compilerOptions.CompileInclude, "/", diagnostics: null);
+                foreach (var entry in includeFiles)
+                {
+                    var srcFile = new PhysicalPackageFile
+                    {
+                        SourcePath = entry.SourcePath,
+                        TargetPath = Path.Combine("src", entry.TargetPath)
+                    };
+
+                    PackageBuilder.Files.Add(srcFile);
+                }
+            }
+
             return base.GeneratePackage(nupkg, packDiagnostics);
         }
     }

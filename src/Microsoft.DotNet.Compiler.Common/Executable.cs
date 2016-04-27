@@ -6,17 +6,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Files;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Reflection.PortableExecutable;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
@@ -88,7 +88,20 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         private void CopyContentFiles()
         {
             var contentFiles = new ContentFiles(_context);
-            contentFiles.StructuredCopyTo(_runtimeOutputPath);
+
+            if (_compilerOptions.CopyToOutputInclude != null)
+            {
+                var includeEntries = IncludeFilesResolver.GetIncludeFiles(
+                    _compilerOptions.CopyToOutputInclude,
+                    PathUtility.EnsureTrailingSlash(_runtimeOutputPath),
+                    diagnostics: null);
+
+                contentFiles.StructuredCopyTo(_runtimeOutputPath, includeEntries);
+            }
+            else
+            {
+                contentFiles.StructuredCopyTo(_runtimeOutputPath);
+            }
         }
 
         private void CopyAssemblies(IEnumerable<LibraryExport> libraryExports)

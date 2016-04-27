@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "embed": {
+      "include": "*.resx",
+      "mappings": {
+        "myresource.resx": "resource2.resx"
+      }
+    },
+    "copyToOutput": {
+      "include": "copy/*.txt",
+      "excludeFiles": "copy/fileex.txt"
+    }
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": "1.0.0-rc2-*"
+  },
+  "packOptions": {
+    "files": {
+      "includeFiles": "packfiles/pack1.txt",
+      "mappings": {
+        "newpath/": "packfiles/pack2.txt"
+      }
+    }
+  },
+  "publishOptions": "testpublishfile.txt",
+  "frameworks": {
+    "netcoreapp1.0": { }
+  }
+}

@@ -46,9 +46,21 @@ namespace Microsoft.DotNet.Tools.Compiler
             return success;
         }
 
-        protected static bool AddNonCultureResources(Project project, List<string> compilerArgs, string intermediateOutputPath)
+        protected static bool AddNonCultureResources(
+            Project project,
+            List<string> compilerArgs,
+            string intermediateOutputPath,
+            CommonCompilerOptions compilationOptions)
         {
-            var resgenFiles = CompilerUtil.GetNonCultureResources(project, intermediateOutputPath);
+            List<CompilerUtil.NonCultureResgenIO> resgenFiles = null;
+            if (compilationOptions.EmbedInclude == null)
+            {
+                resgenFiles = CompilerUtil.GetNonCultureResources(project, intermediateOutputPath);
+            }
+            else
+            {
+                resgenFiles = CompilerUtil.GetNonCultureResourcesFromIncludeEntries(project, intermediateOutputPath, compilationOptions);
+            }
 
             foreach (var resgenFile in resgenFiles)
             {
@@ -80,10 +92,20 @@ namespace Microsoft.DotNet.Tools.Compiler
         protected static bool GenerateCultureResourceAssemblies(
             Project project,
             List<LibraryExport> dependencies,
-            string outputPath)
+            string outputPath,
+            CommonCompilerOptions compilationOptions)
         {
             var referencePaths = CompilerUtil.GetReferencePathsForCultureResgen(dependencies);
-            var cultureResgenFiles = CompilerUtil.GetCultureResources(project, outputPath);
+
+            List<CompilerUtil.CultureResgenIO> cultureResgenFiles = null;
+            if (compilationOptions.EmbedInclude == null)
+            {
+                cultureResgenFiles = CompilerUtil.GetCultureResources(project, outputPath);
+            }
+            else
+            {
+                cultureResgenFiles = CompilerUtil.GetCultureResourcesFromIncludeEntries(project, outputPath, compilationOptions);
+            }
 
             foreach (var resgenFile in cultureResgenFiles)
             {

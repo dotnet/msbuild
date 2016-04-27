@@ -143,15 +143,15 @@ namespace Microsoft.DotNet.Tools.Compiler
                 compilerArgs.Add($"--resource:\"{depsJsonFile}\",{compilationOptions.OutputName}.deps.json");
             }
 
-            if (!AddNonCultureResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
+            if (!AddNonCultureResources(context.ProjectFile, compilerArgs, intermediateOutputPath, compilationOptions))
             {
                 return false;
             }
             // Add project source files
-            var sourceFiles = CompilerUtil.GetCompilationSources(context);
+            var sourceFiles = CompilerUtil.GetCompilationSources(context, compilationOptions);
             compilerArgs.AddRange(sourceFiles);
 
-            var compilerName = context.ProjectFile.CompilerName;
+            var compilerName = compilationOptions.CompilerName;
 
             // Write RSP file
             var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.rsp");
@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success)
             {
-                success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath);
+                success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath, compilationOptions);
             }
 
             return PrintSummary(diagnostics, sw, success);

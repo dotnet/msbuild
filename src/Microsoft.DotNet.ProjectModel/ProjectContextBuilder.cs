@@ -337,6 +337,11 @@ namespace Microsoft.DotNet.ProjectModel
                 }
             }
 
+            if (Project != null)
+            {
+                diagnostics.AddRange(Project.Diagnostics);
+            }
+
             // Create a library manager
             var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics, Project?.ProjectFilePath);
 
@@ -567,9 +572,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         private Project ResolveProject(string projectDirectory)
         {
-            // TODO: Handle diagnostics
             Project project;
-            if (ProjectReader.TryGetProject(projectDirectory, out project, diagnostics: null, settings: Settings))
+            if (ProjectReader.TryGetProject(projectDirectory, out project, settings: Settings))
             {
                 return project;
             }

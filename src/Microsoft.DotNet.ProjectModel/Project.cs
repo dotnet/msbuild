@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
@@ -47,15 +46,9 @@ namespace Microsoft.DotNet.ProjectModel
 
         public string Copyright { get; set; }
 
-        public string Summary { get; set; }
-
         public string Language { get; set; }
 
-        public string ReleaseNotes { get; set; }
-
         public string[] Authors { get; set; }
-
-        public string[] Owners { get; set; }
 
         public bool EmbedInteropTypes { get; set; }
 
@@ -69,27 +62,23 @@ namespace Microsoft.DotNet.ProjectModel
 
         public string EntryPoint { get; set; }
 
-        public string ProjectUrl { get; set; }
-
-        public string LicenseUrl { get; set; }
-
-        public string IconUrl { get; set; }
-
-        public bool RequireLicenseAcceptance { get; set; }
-
-        public string[] Tags { get; set; }
-
-        public string CompilerName { get; set; }
-
         public string TestRunner { get; set; }
 
         public ProjectFilesCollection Files { get; set; }
+
+        public PackOptions PackOptions { get; set; }
+
+        public RuntimeOptions RuntimeOptions { get; set; }
 
         public IDictionary<string, string> Commands { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public IDictionary<string, IEnumerable<string>> Scripts { get; } = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
 
         public string RawRuntimeOptions { get; set; }
+
+        public IncludeContext PublishOptions { get; set; }
+
+        public List<DiagnosticMessage> Diagnostics { get; } = new List<DiagnosticMessage>();
 
         public bool IsTestProject => !string.IsNullOrEmpty(TestRunner);
         
@@ -134,10 +123,10 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool HasRuntimeOutput(string configuration)
         {
-            var compilationOptions = GetCompilerOptions(targetFramework: null, configurationName: configuration);
+            var compilerOptions = GetCompilerOptions(targetFramework: null, configurationName: configuration);
 
             // TODO: Make this opt in via another mechanism
-            return compilationOptions.EmitEntryPoint.GetValueOrDefault() || IsTestProject;
+            return compilerOptions.EmitEntryPoint.GetValueOrDefault() || IsTestProject;
         }
 
         private CommonCompilerOptions GetCompilerOptions()

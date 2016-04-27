@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Files;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Common;
@@ -179,7 +180,20 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             var contentFiles = new ContentFiles(context);
-            contentFiles.StructuredCopyTo(outputPath);
+
+            if (context.ProjectFile.PublishOptions != null)
+            {
+                var includeEntries = IncludeFilesResolver.GetIncludeFiles(
+                    context.ProjectFile.PublishOptions,
+                    PathUtility.EnsureTrailingSlash(outputPath),
+                    diagnostics: null);
+
+                contentFiles.StructuredCopyTo(outputPath, includeEntries);
+            }
+            else
+            {
+                contentFiles.StructuredCopyTo(outputPath);
+            }
 
             // Publish a host if this is an application
             if (options.EmitEntryPoint.GetValueOrDefault() && !string.IsNullOrEmpty(context.RuntimeIdentifier))
@@ -444,51 +458,6 @@ namespace Microsoft.DotNet.Tools.Publish
                 new[] { runtime };
 
             return contexts.Select(c => Workspace.GetRuntimeContext(c, rids));
-        }
-
-        private static void CopyContents(ProjectContext context, string outputPath)
-        {
-            var contentFiles = context.ProjectFile.Files.GetContentFiles();
-            Copy(contentFiles, context.ProjectDirectory, outputPath);
-        }
-
-        private static void Copy(IEnumerable<string> contentFiles, string sourceDirectory, string targetDirectory)
-        {
-            if (contentFiles == null)
-            {
-                throw new ArgumentNullException(nameof(contentFiles));
-            }
-
-            sourceDirectory = PathUtility.EnsureTrailingSlash(sourceDirectory);
-            targetDirectory = PathUtility.EnsureTrailingSlash(targetDirectory);
-
-            foreach (var contentFilePath in contentFiles)
-            {
-                Reporter.Verbose.WriteLine($"Publishing {contentFilePath.Green().Bold()} ...");
-
-                var fileName = Path.GetFileName(contentFilePath);
-
-                var targetFilePath = contentFilePath.Replace(sourceDirectory, targetDirectory);
-                var targetFileParentFolder = Path.GetDirectoryName(targetFilePath);
-
-                // Create directory before copying a file
-                if (!Directory.Exists(targetFileParentFolder))
-                {
-                    Directory.CreateDirectory(targetFileParentFolder);
-                }
-
-                File.Copy(
-                    contentFilePath,
-                    targetFilePath,
-                    overwrite: true);
-
-                // clear read-only bit if set
-                var fileAttributes = File.GetAttributes(targetFilePath);
-                if ((fileAttributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-                {
-                    File.SetAttributes(targetFilePath, fileAttributes & ~FileAttributes.ReadOnly);
-                }
-            }
         }
 
         private static void RunScripts(ProjectContext context, string name, Dictionary<string, string> contextVariables)

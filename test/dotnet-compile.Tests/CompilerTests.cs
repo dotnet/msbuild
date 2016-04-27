@@ -148,6 +148,48 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         }
 
         [Fact]
+        public void EmbeddedResourcesAreCopied()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("EndToEndTestApp")
+                                                .WithLockFiles()
+                                                .WithBuildArtifacts();
+
+            var root = testInstance.TestRoot;
+
+            // run compile
+            var outputDir = Path.Combine(root, "bin");
+            var testProject = ProjectUtils.GetProjectJson(root, "EndToEndTestApp");
+            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var result = buildCommand.ExecuteWithCapturedOutput();
+            result.Should().Pass();
+
+            var objDirInfo = new DirectoryInfo(Path.Combine(root, "obj", "Debug", DefaultFramework));
+            objDirInfo.Should().HaveFile("EndToEndTestApp.resource1.resources");
+            objDirInfo.Should().HaveFile("myresource.resources");
+        }
+
+        [Fact]
+        public void CopyToOutputFilesAreCopied()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("EndToEndTestApp")
+                                                .WithLockFiles()
+                                                .WithBuildArtifacts();
+
+            var root = testInstance.TestRoot;
+
+            // run compile
+            var outputDir = Path.Combine(root, "bin");
+            var testProject = ProjectUtils.GetProjectJson(root, "EndToEndTestApp");
+            var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var result = buildCommand.ExecuteWithCapturedOutput();
+            result.Should().Pass();
+
+            var outputDirInfo = new DirectoryInfo(Path.Combine(outputDir, "copy"));
+            outputDirInfo.Should().HaveFile("file.txt");
+            outputDirInfo.Should().NotHaveFile("fileex.txt");
+        }
+
+        [Fact]
         public void CanSetOutputAssemblyNameForLibraries()
         {
             var testInstance =
