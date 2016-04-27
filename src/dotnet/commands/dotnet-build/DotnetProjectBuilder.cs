@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Build
         private readonly DotNetCommandFactory _commandFactory;
         private readonly IncrementalManager _incrementalManager;
 
-        public DotNetProjectBuilder(BuildCommandApp args)
+        public DotNetProjectBuilder(BuildCommandApp args): base(args.ShouldSkipDependencies)
         {
             _args = args;
 

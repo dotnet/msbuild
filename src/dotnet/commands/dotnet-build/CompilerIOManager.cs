@@ -74,6 +74,14 @@ namespace Microsoft.DotNet.Tools.Build
                     allOutputPath.Add(path);
                 }
             }
+            foreach (var dependency in graphNode.Dependencies)
+            {
+                var outputFiles = dependency.ProjectContext
+                    .GetOutputPaths(_configuration, _buildBasePath, _outputPath)
+                    .CompilationFiles;
+
+                inputs.Add(outputFiles.Assembly);
+            }
 
             // output: compiler outputs
             foreach (var path in allOutputPath)
