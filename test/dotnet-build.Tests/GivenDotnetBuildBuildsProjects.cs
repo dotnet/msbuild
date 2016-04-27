@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             var buildCommand = new BuildCommand("");
             buildCommand.WorkingDirectory = testProjectDirectory;
-            
+
             buildCommand.ExecuteWithCapturedOutput()
                 .Should()
                 .Pass();
@@ -44,17 +44,27 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Fact]
-        public void It_builds_projects_with_spaces_in_the_path()
+        public void It_builds_projects_with_xmlDoc_and_spaces_in_the_path()
         {
             var testInstance = TestAssetsManager
-                .CreateTestInstance("TestLibrary With Spaces")
+                .CreateTestInstance("TestLibraryWithXmlDoc", identifier: "With Space")
                 .WithLockFiles();
 
-            new BuildCommand("")
+            testInstance.TestRoot.Should().Contain(" ");
+
+            var output = new DirectoryInfo(Path.Combine(testInstance.TestRoot, "output"));
+
+            new BuildCommand("", output: output.FullName, framework: DefaultLibraryFramework)
                 .WithWorkingDirectory(testInstance.TestRoot)
                 .ExecuteWithCapturedOutput()
                 .Should()
                 .Pass();
+
+            output.Should().HaveFiles(new[]
+            {
+                "TestLibraryWithXmlDoc.dll",
+                "TestLibraryWithXmlDoc.xml"
+            });
         }
     }
 }
