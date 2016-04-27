@@ -42,5 +42,19 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void It_builds_projects_with_spaces_in_the_path()
+        {
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestLibrary With Spaces")
+                .WithLockFiles();
+
+            new BuildCommand("")
+                .WithWorkingDirectory(testInstance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass();
+        }
     }
 }
