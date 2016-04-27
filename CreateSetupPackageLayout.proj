@@ -4,8 +4,8 @@
   <Import Project="$(MicroBuildDir)MicroBuild.Core.props" />
 
   <PropertyGroup>
-      <SetupPackageLayoutDir>$(BinDir)Setup\</SetupPackageLayoutDir>
-      <SetupPackageOutputFile>$(SetupPackageLayoutDir)MSBuild-master-0001.fopx</SetupPackageOutputFile>
+      <SetupPackageLayoutDir>$(BinDir)Setup\layout\</SetupPackageLayoutDir>
+      <SetupPackageOutputFile>$(BinDir)Setup\MSBuild.fopx</SetupPackageOutputFile>
   </PropertyGroup>
 
   <ItemGroup>
