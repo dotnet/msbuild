@@ -8,6 +8,8 @@ namespace Microsoft.DotNet.Cli
 {
     public interface ITelemetry
     {
+        bool Enabled { get; }
+
         void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements);
     }
 }

@@ -22,36 +22,41 @@ namespace Microsoft.DotNet.Cli
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
 
+        public bool Enabled { get; }
+
         public Telemetry()
         {
-            bool optout = Env.GetEnvironmentVariableAsBool(TelemetryOptout);
+            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout);
 
-            if (optout)
+            if (!Enabled)
             {
                 return;
             }
 
             try
             {
-                _client = new TelemetryClient();
-                _client.InstrumentationKey = InstrumentationKey;
-                _client.Context.Session.Id = Guid.NewGuid().ToString();
+                using (PerfTrace.Current.CaptureTiming())
+                {
+                    _client = new TelemetryClient();
+                    _client.InstrumentationKey = InstrumentationKey;
+                    _client.Context.Session.Id = Guid.NewGuid().ToString();
 
-                var runtimeEnvironment = PlatformServices.Default.Runtime;
-                _client.Context.Device.OperatingSystem = runtimeEnvironment.OperatingSystem;
+                    var runtimeEnvironment = PlatformServices.Default.Runtime;
+                    _client.Context.Device.OperatingSystem = runtimeEnvironment.OperatingSystem;
 
-                _commonProperties = new Dictionary<string, string>();
-                _commonProperties.Add(OSVersion, runtimeEnvironment.OperatingSystemVersion);
-                _commonProperties.Add(OSPlatform, runtimeEnvironment.OperatingSystemPlatform.ToString());
-                _commonProperties.Add(RuntimeId, runtimeEnvironment.GetRuntimeIdentifier());
-                _commonProperties.Add(ProductVersion, Product.Version);
-                _commonMeasurements = new Dictionary<string, double>();
+                    _commonProperties = new Dictionary<string, string>();
+                    _commonProperties.Add(OSVersion, runtimeEnvironment.OperatingSystemVersion);
+                    _commonProperties.Add(OSPlatform, runtimeEnvironment.OperatingSystemPlatform.ToString());
+                    _commonProperties.Add(RuntimeId, runtimeEnvironment.GetRuntimeIdentifier());
+                    _commonProperties.Add(ProductVersion, Product.Version);
+                    _commonMeasurements = new Dictionary<string, double>();
+                }
 
                 _isInitialized = true;
             }
             catch (Exception)
             {
-                // we dont want to fail the tool if telemetry fais. We should be able to detect abnormalities from data 
+                // we dont want to fail the tool if telemetry fais. We should be able to detect abnormalities from data
                 // at the server end
                 Debug.Fail("Exception during telemetry initialization");
             }
@@ -64,17 +69,20 @@ namespace Microsoft.DotNet.Cli
                 return;
             }
 
-            Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
-            Dictionary<string, string> eventProperties = GetEventProperties(properties);
+            using (PerfTrace.Current.CaptureTiming())
+            {
+                Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
+                Dictionary<string, string> eventProperties = GetEventProperties(properties);
 
-            try
-            {
-                _client.TrackEvent(eventName, eventProperties, eventMeasurements);
-                _client.Flush();
-            }
-            catch (Exception) 
-            {
-                Debug.Fail("Exception during TrackEvent");
+                try
+                {
+                    _client.TrackEvent(eventName, eventProperties, eventMeasurements);
+                    _client.Flush();
+                }
+                catch (Exception)
+                {
+                    Debug.Fail("Exception during TrackEvent");
+                }
             }
         }
 

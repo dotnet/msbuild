@@ -92,16 +92,16 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return new Command(commandSpec);
         }
-        
+
         public static Command CreateForScript(
-            string commandName, 
-            IEnumerable<string> args, 
-            Project project, 
+            string commandName,
+            IEnumerable<string> args,
+            Project project,
             string[] inferredExtensionList)
         {
-            var commandSpec = CommandResolver.TryResolveScriptCommandSpec(commandName, 
-                args, 
-                project, 
+            var commandSpec = CommandResolver.TryResolveScriptCommandSpec(commandName,
+                args,
+                project,
                 inferredExtensionList);
 
             if (commandSpec == null)
@@ -128,15 +128,18 @@ namespace Microsoft.DotNet.Cli.Utils
             var sw = Stopwatch.StartNew();
             Reporter.Verbose.WriteLine($"> {FormatProcessInfo(_process.StartInfo)}".White());
 #endif
-            _process.Start();
+            using (PerfTrace.Current.CaptureTiming($"{Path.GetFileNameWithoutExtension(_process.StartInfo.FileName)} {_process.StartInfo.Arguments}"))
+            {
+                _process.Start();
 
-            Reporter.Verbose.WriteLine($"Process ID: {_process.Id}");
+                Reporter.Verbose.WriteLine($"Process ID: {_process.Id}");
 
-            var taskOut = _stdOut.BeginRead(_process.StandardOutput);
-            var taskErr = _stdErr.BeginRead(_process.StandardError);
-            _process.WaitForExit();
+                var taskOut = _stdOut.BeginRead(_process.StandardOutput);
+                var taskErr = _stdErr.BeginRead(_process.StandardError);
+                _process.WaitForExit();
 
-            Task.WaitAll(taskOut, taskErr);
+                Task.WaitAll(taskOut, taskErr);
+            }
 
             var exitCode = _process.ExitCode;
 

@@ -14,7 +14,10 @@ namespace Microsoft.DotNet.Tests
 {
     public class MockTelemetry : ITelemetry
     {
-        public string EventName{get;set;}
+        public bool Enabled { get; set; }
+
+        public string EventName { get; set; }
+
         public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             EventName = eventName;

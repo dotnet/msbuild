@@ -7,6 +7,8 @@ using System.Linq;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
 using NuGet.Frameworks;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -18,7 +20,10 @@ namespace Microsoft.DotNet.Tools.Build
         {
             foreach (var projectNode in roots)
             {
-                yield return Build(projectNode);
+                using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}"))
+                {
+                    yield return Build(projectNode);
+                }
             }
         }
 
@@ -68,18 +73,33 @@ namespace Microsoft.DotNet.Tools.Build
             }
 
             var context = projectNode.ProjectContext;
-            if (!HasSourceFiles(context))
+            using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}", nameof(HasSourceFiles)))
             {
-                return CompilationResult.IncrementalSkip;
+                if (!HasSourceFiles(context))
+                {
+                    return CompilationResult.IncrementalSkip;
+                }
             }
 
-            if (NeedsRebuilding(projectNode))
+            bool needsRebuilding;
+            using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}", nameof(NeedsRebuilding)))
             {
-                return RunCompile(projectNode);
+                needsRebuilding = NeedsRebuilding(projectNode);
+            }
+
+            if (needsRebuilding)
+            {
+                using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}",nameof(RunCompile)))
+                {
+                    return RunCompile(projectNode);
+                }
             }
             else
             {
-                ProjectSkiped(projectNode);
+                using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}", nameof(ProjectSkiped)))
+                {
+                    ProjectSkiped(projectNode);
+                }
                 return CompilationResult.IncrementalSkip;
             }
         }
