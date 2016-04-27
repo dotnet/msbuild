@@ -15,9 +15,9 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "System.Net.NameResolution": "4.0.0-rc2-24022",
-    "System.Net.Sockets": "4.1.0-rc2-24022",
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24022",
+    "System.Net.NameResolution": "4.0.0-rc2-24027",
+    "System.Net.Sockets": "4.1.0-rc2-24027",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24027",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-162081-13"
   },
