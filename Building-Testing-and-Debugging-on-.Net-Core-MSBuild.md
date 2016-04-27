@@ -13,12 +13,13 @@ For debugging tests, use the `/d` switch for CoreRun.exe. This prompts the core 
 
 # Unix #
 
-**Required packages**
+**Required packages for OSX & Ubuntu**
 
 * [Mono](http://www.mono-project.com/download/#download-lin), when doing a Mono-hosted version of MSBuild
 
 * MSBuild uses the .Net CLI to download Nuget packages during its build process, therefore you must have a dynamic OpenSSL library available. This can be downloaded using [brew](http://brew.sh/), `brew install openssl`, apt-get, `apt-get install openssl`, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac).
 
+**Required packages for Ubuntu**
 * Libunwind is also a dependency of .Net CLI. Install [libunwind8](http://www.nongnu.org/libunwind/index.html) using ```sudo apt-get install libunwind8```
 
 ##Build process##
