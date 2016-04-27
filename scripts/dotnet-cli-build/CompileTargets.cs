@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class CompileTargets
     {
-        public static readonly string CoreCLRVersion = "1.0.2-rc2-24022";
+        public static readonly string CoreCLRVersion = "1.0.2-rc2-24027";
         public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
         public static readonly string[] BinariesForCoreHost = new[]
