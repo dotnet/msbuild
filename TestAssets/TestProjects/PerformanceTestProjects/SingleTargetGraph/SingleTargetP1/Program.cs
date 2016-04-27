@@ -1,11 +1,12 @@
 ﻿using System;
 
-namespace ConsoleApplication
+namespace ConsoleLibrary.P1
 {
     public class Program
     {
         public static void Main()
         {
+            ConsoleLibrary.P2.Program.Main();
         }
     }
 }

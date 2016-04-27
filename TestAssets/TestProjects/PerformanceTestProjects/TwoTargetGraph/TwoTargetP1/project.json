@@ -1,8 +1,5 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
   "dependencies": {
     "TwoTargetP2" : {
       "target": "project"

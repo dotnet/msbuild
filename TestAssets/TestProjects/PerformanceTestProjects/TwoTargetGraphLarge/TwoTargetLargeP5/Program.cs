@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleApplication
+namespace ConsoleLibrary.P5
 {
     public class Program
     {
