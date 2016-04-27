@@ -6,6 +6,7 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedHostMSIFile,
     [Parameter(Mandatory=$true)][string]$DotnetBundleOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
+    [Parameter(Mandatory=$true)][string]$ProductMoniker,
     [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
     [Parameter(Mandatory=$true)][string]$DotnetCLIVersion,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetName,
@@ -27,6 +28,7 @@ function RunCandleForBundle
 
     .\candle.exe -nologo `
         -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
+        -dProductMoniker="$ProductMoniker" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
         -dSharedFXMsiSourcePath="$SharedFxMSIFile" `
