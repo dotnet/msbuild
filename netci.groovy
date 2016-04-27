@@ -43,8 +43,7 @@ def project = GithubProject
                     }
                 }
 
-                // Add xunit result archiving
-                Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml')
+                //no test archiving yet
 
                 break;
             case 'Ubuntu':
