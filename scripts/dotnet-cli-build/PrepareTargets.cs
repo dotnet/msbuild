@@ -229,7 +229,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var dotnet = DotNetCli.Stage0;
 
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--fallbacksource", Dirs.Corehost)
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--fallbacksource", Dirs.CorehostLocalPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "src"))
                 .Execute()
                 .EnsureSuccessful();

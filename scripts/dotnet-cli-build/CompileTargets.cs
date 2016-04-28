@@ -36,31 +36,30 @@ namespace Microsoft.DotNet.Cli.Build
             "vbc.exe"
         };
 
-        public static readonly string[] HostPackageSupportedRids = new[]
-        {
-            "win7-x64",
-            "win7-x86",
-            "osx.10.10-x64",
-            "osx.10.11-x64",
-            "ubuntu.14.04-x64",
-            "centos.7-x64",
-            "rhel.7-x64",
-            "rhel.7.2-x64",
-            "debian.8-x64"
-        };
+        public static string HostPackagePlatformRid => HostPackageSupportedRids[
+                             (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+                             ? $"win7-{PlatformServices.Default.Runtime.RuntimeArchitecture}"
+                             : PlatformServices.Default.Runtime.GetRuntimeIdentifier()];
 
-        public static readonly string[] HostPackages = new[]
+        public static readonly Dictionary<string, string> HostPackageSupportedRids = new Dictionary<string, string>()
         {
-            "Microsoft.NETCore.DotNetHost",
-            "Microsoft.NETCore.DotNetHostPolicy",
-            "Microsoft.NETCore.DotNetHostResolver"
+            // Key: Current platform RID. Value: The actual publishable (non-dummy) package name produced by the build system for this RID.
+            { "win7-x64", "win7-x64" },
+            { "win7-x86", "win7-x86" },
+            { "osx.10.10-x64", "osx.10.10-x64" },
+            { "osx.10.11-x64", "osx.10.10-x64" },
+            { "ubuntu.14.04-x64", "ubuntu.14.04-x64" },
+            { "centos.7-x64", "rhel.7-x64" },
+            { "rhel.7-x64", "rhel.7-x64" },
+            { "rhel.7.2-x64", "rhel.7-x64" },
+            { "debian.8-x64", "debian.8-x64" }
         };
 
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
 
         public static Crossgen CrossgenUtil = new Crossgen(CoreCLRVersion);
 
-        private static string CoreHostBaseName => $"corehost{Constants.ExeSuffix}";
+        private static string DotnetHostBaseName => $"dotnet{Constants.ExeSuffix}";
         private static string DotnetHostFxrBaseName => $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}";
         private static string HostPolicyBaseName => $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}";
 
@@ -73,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         // Moving PrepareTargets.RestorePackages after PackagePkgProjects because managed code depends on the
         // Microsoft.NETCore.App package that is created during PackagePkgProjects.
-        [Target(nameof(PrepareTargets.Init), nameof(CompileCoreHost), nameof(PackagePkgProjects), nameof(PrepareTargets.RestorePackages), nameof(CompileStage1), nameof(CompileStage2))]
+        [Target(nameof(PrepareTargets.Init), nameof(CompileCoreHost), nameof(PackagePkgProjects), nameof(RestoreLockedCoreHost), nameof(PrepareTargets.RestorePackages), nameof(CompileStage1), nameof(CompileStage2))]
         public static BuildTargetResult Compile(BuildTargetContext c)
         {
             return c.Success();
@@ -85,23 +84,20 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult GenerateStubHostPackages(BuildTargetContext c)
         {
-            string currentRid = GetRuntimeId();
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            PrepareDummyRuntimeNuGetPackage(
-                            DotNetCli.Stage0,
-                            buildVersion.HostNuGetPackageVersion,
-                            Dirs.CorehostDummyPackages);
-            foreach (var hostPackageId in HostPackages)
+            var currentRid = HostPackagePlatformRid;
+            PrepareDummyRuntimeNuGetPackage(DotNetCli.Stage0);
+            foreach (var hostPackage in buildVersion.LatestHostPackages)
             {
-                foreach (var rid in HostPackageSupportedRids)
+                foreach (var rid in HostPackageSupportedRids.Values.Distinct())
                 {
                     if (!rid.Equals(currentRid))
                     {
                         CreateDummyRuntimeNuGetPackage(
                             DotNetCli.Stage0,
-                            hostPackageId,
+                            hostPackage.Key,
                             rid,
-                            buildVersion.HostNuGetPackageVersion,
+                            hostPackage.Value,
                             Dirs.CorehostDummyPackages);
                     }
                 }
@@ -109,21 +105,57 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        private static string HostVer = "1.0.1";
-        private static string HostPolicyVer = "1.0.1";
-        private static string HostFxrVer = "1.0.1";
+        [Target(nameof(PrepareTargets.Init))]
+        public static BuildTargetResult RestoreLockedCoreHost(BuildTargetContext c)
+        {
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            var lockedHostFxrVersion = buildVersion.LockedHostFxrVersion;
+            var currentRid = HostPackagePlatformRid;
+            string projectJson = $@"{{
+  ""dependencies"": {{
+      ""Microsoft.NETCore.DotNetHostResolver"" : ""{lockedHostFxrVersion}""
+  }},
+  ""frameworks"": {{
+      ""netcoreapp1.0"": {{}}
+  }},
+  ""runtimes"": {{
+      ""{currentRid}"": {{}}
+  }}
+}}";
+            var tempPjDirectory = Path.Combine(Dirs.Intermediate, "lockedHostTemp");
+            FS.Rmdir(tempPjDirectory);
+            Directory.CreateDirectory(tempPjDirectory);
+            var tempPjFile = Path.Combine(tempPjDirectory, "project.json");
+            File.WriteAllText(tempPjFile, projectJson);
+
+            DotNetCli.Stage0.Restore("--verbosity", "verbose", "--infer-runtimes", 
+                    "--fallbacksource", Dirs.CorehostLocalPackages,
+                    "--fallbacksource", Dirs.CorehostDummyPackages)
+                .WorkingDirectory(tempPjDirectory)
+                .Execute()
+                .EnsureSuccessful();
+
+            // Clean out before publishing locked binaries
+            FS.Rmdir(Dirs.CorehostLocked);
+
+            // Use specific RIDS for non-backward compatible platforms.
+            (CurrentPlatform.IsWindows
+                ? DotNetCli.Stage0.Publish("--output", Dirs.CorehostLocked, "--no-build")
+                : DotNetCli.Stage0.Publish("--output", Dirs.CorehostLocked, "--no-build", "-r", currentRid))
+                .WorkingDirectory(tempPjDirectory)
+                .Execute()
+                .EnsureSuccessful();
+
+            return c.Success();
+        }
 
         [Target(nameof(PrepareTargets.Init))]
         public static BuildTargetResult CompileCoreHost(BuildTargetContext c)
         {
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            var versionTag = buildVersion.ReleaseSuffix;
-            var buildMajor = buildVersion.CommitCountString;
-
-            var hostPolicyFullVer = $"{HostPolicyVer}-{versionTag}-{buildMajor}";
 
             // Generate build files
-            var cmakeOut = Path.Combine(Dirs.Corehost, "cmake");
+            var cmakeOut = Path.Combine(Dirs.CorehostLatest, "cmake");
 
             Rmdir(cmakeOut);
             Mkdirp(cmakeOut);
@@ -133,6 +165,7 @@ namespace Microsoft.DotNet.Cli.Build
             // Run the build
             string rid = GetRuntimeId();
             string corehostSrcDir = Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost");
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
@@ -142,7 +175,7 @@ namespace Microsoft.DotNet.Cli.Build
                 var ridMacro = $"-DCLI_CMAKE_RUNTIME_ID:STRING={rid}";
                 var arch = IsWinx86 ? "x86" : "x64";
                 var baseSupportedRid = $"win7-{arch}";
-                var cmakeHostPolicyVer = $"-DCLI_CMAKE_HOST_POLICY_VER:STRING={hostPolicyFullVer}";
+                var cmakeHostPolicyVer = $"-DCLI_CMAKE_HOST_POLICY_VER:STRING={buildVersion.LatestHostPolicyVersion}";
                 var cmakeBaseRid = $"-DCLI_CMAKE_PKG_RID:STRING={baseSupportedRid}";
 
                 ExecIn(cmakeOut, "cmake",
@@ -169,14 +202,12 @@ namespace Microsoft.DotNet.Cli.Build
                     $"/p:Configuration={configuration}");
 
                 // Copy the output out
-                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.exe"), Path.Combine(Dirs.Corehost, "corehost.exe"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.pdb"), Path.Combine(Dirs.Corehost, "corehost.pdb"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.exe"), Path.Combine(Dirs.Corehost, "dotnet.exe"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.pdb"), Path.Combine(Dirs.Corehost, "dotnet.pdb"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.dll"), Path.Combine(Dirs.Corehost, "hostpolicy.dll"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.pdb"), Path.Combine(Dirs.Corehost, "hostpolicy.pdb"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", configuration, "hostfxr.dll"), Path.Combine(Dirs.Corehost, "hostfxr.dll"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", configuration, "hostfxr.pdb"), Path.Combine(Dirs.Corehost, "hostfxr.pdb"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.exe"), Path.Combine(Dirs.CorehostLatest, "dotnet.exe"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", configuration, "dotnet.pdb"), Path.Combine(Dirs.CorehostLatest, "dotnet.pdb"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.dll"), Path.Combine(Dirs.CorehostLatest, "hostpolicy.dll"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dll", configuration, "hostpolicy.pdb"), Path.Combine(Dirs.CorehostLatest, "hostpolicy.pdb"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", configuration, "hostfxr.dll"), Path.Combine(Dirs.CorehostLatest, "hostfxr.dll"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", configuration, "hostfxr.pdb"), Path.Combine(Dirs.CorehostLatest, "hostfxr.pdb"), overwrite: true);
             }
             else
             {
@@ -184,15 +215,14 @@ namespace Microsoft.DotNet.Cli.Build
                         "--arch",
                         "x64",
                         "--policyver",
-                        hostPolicyFullVer,
+                        buildVersion.LatestHostPolicyVersion,
                         "--rid",
                         rid);
 
                 // Copy the output out
-                File.Copy(Path.Combine(cmakeOut, "cli", "dotnet"), Path.Combine(Dirs.Corehost, "dotnet"), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", "dotnet"), Path.Combine(Dirs.Corehost, CoreHostBaseName), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", "dll", HostPolicyBaseName), Path.Combine(Dirs.Corehost, HostPolicyBaseName), overwrite: true);
-                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", DotnetHostFxrBaseName), Path.Combine(Dirs.Corehost, DotnetHostFxrBaseName), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dotnet"), Path.Combine(Dirs.CorehostLatest, "dotnet"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dll", HostPolicyBaseName), Path.Combine(Dirs.CorehostLatest, HostPolicyBaseName), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "fxr", DotnetHostFxrBaseName), Path.Combine(Dirs.CorehostLatest, DotnetHostFxrBaseName), overwrite: true);
             }
             return c.Success();
         }
@@ -200,11 +230,9 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(CompileTargets.GenerateStubHostPackages))]
         public static BuildTargetResult PackagePkgProjects(BuildTargetContext c)
         {
-            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            var versionTag = buildVersion.ReleaseSuffix;
-            var buildMajor = buildVersion.CommitCountString;
             var arch = IsWinx86 ? "x86" : "x64";
 
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             var version = buildVersion.NuGetVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             var pkgDir = Path.Combine(c.BuildContext.BuildDirectory, "pkg");
@@ -215,12 +243,12 @@ namespace Microsoft.DotNet.Cli.Build
                 Command.Create(Path.Combine(pkgDir, "pack.cmd"))
                     // Workaround to arg escaping adding backslashes for arguments to .cmd scripts.
                     .Environment("__WorkaroundCliCoreHostBuildArch", arch)
-                    .Environment("__WorkaroundCliCoreHostBinDir", Dirs.Corehost)
-                    .Environment("__WorkaroundCliCoreHostPolicyVer", HostPolicyVer)
-                    .Environment("__WorkaroundCliCoreHostFxrVer", HostFxrVer)
-                    .Environment("__WorkaroundCliCoreHostVer", HostVer)
-                    .Environment("__WorkaroundCliCoreHostBuildMajor", buildMajor)
-                    .Environment("__WorkaroundCliCoreHostVersionTag", versionTag)
+                    .Environment("__WorkaroundCliCoreHostBinDir", Dirs.CorehostLatest)
+                    .Environment("__WorkaroundCliCoreHostPolicyVer", buildVersion.LatestHostPolicyVersionNoSuffix)
+                    .Environment("__WorkaroundCliCoreHostFxrVer", buildVersion.LatestHostFxrVersionNoSuffix)
+                    .Environment("__WorkaroundCliCoreHostVer", buildVersion.LatestHostVersionNoSuffix)
+                    .Environment("__WorkaroundCliCoreHostBuildMajor", buildVersion.LatestHostBuildMajor)
+                    .Environment("__WorkaroundCliCoreHostVersionTag", buildVersion.LatestHostPrerelease)
                     .ForwardStdOut()
                     .ForwardStdErr()
                     .Execute()
@@ -232,30 +260,32 @@ namespace Microsoft.DotNet.Cli.Build
                     "--arch",
                     "x64",
                     "--hostbindir",
-                    Dirs.Corehost,
+                    Dirs.CorehostLatest,
                     "--policyver",
-                    HostPolicyVer,
+                    buildVersion.LatestHostPolicyVersionNoSuffix,
                     "--fxrver",
-                    HostFxrVer,
+                    buildVersion.LatestHostFxrVersionNoSuffix,
                     "--hostver",
-                    HostVer,
+                    buildVersion.LatestHostVersionNoSuffix,
                     "--build",
-                    buildMajor,
+                    buildVersion.LatestHostBuildMajor,
                     "--vertag",
-                    versionTag);
+                    buildVersion.LatestHostPrerelease);
             }
-            int runtimeCount = 0;
             foreach (var file in Directory.GetFiles(Path.Combine(pkgDir, "bin", "packages"), "*.nupkg"))
             {
                 var fileName = Path.GetFileName(file);
-                File.Copy(file, Path.Combine(Dirs.Corehost, fileName), true);
-                runtimeCount += (fileName.StartsWith("runtime.") ? 1 : 0);
+                File.Copy(file, Path.Combine(Dirs.CorehostLocalPackages, fileName), true);
 
-                Console.WriteLine($"Copying package {fileName} to artifacts directory {Dirs.Corehost}.");
+                Console.WriteLine($"Copying package {fileName} to artifacts directory {Dirs.CorehostLocalPackages}.");
             }
-            if (runtimeCount < 3)
+            foreach (var item in buildVersion.LatestHostPackages)
             {
-                throw new BuildFailureException("Not all corehost nupkgs were successfully created");
+                var fileFilter = $"runtime.{HostPackagePlatformRid}.{item.Key}.{item.Value}.nupkg";
+                if (Directory.GetFiles(Dirs.CorehostLocalPackages, fileFilter).Length == 0)
+                {
+                    throw new BuildFailureException($"Nupkg for {fileFilter} was not created.");
+                }
             }
             return c.Success();
         }
@@ -358,7 +388,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
 
-        private static void PrepareDummyRuntimeNuGetPackage(DotNetCli dotnet, string version, string outputDir)
+        private static void PrepareDummyRuntimeNuGetPackage(DotNetCli dotnet)
         {
             var projectJson = new StringBuilder();
             projectJson.Append("{");
@@ -430,12 +460,11 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static void CopySharedHost(string outputDir)
         {
-            // corehost will be renamed to dotnet at some point and then this can be removed.
             File.Copy(
-                Path.Combine(Dirs.Corehost, CoreHostBaseName),
-                Path.Combine(outputDir, $"dotnet{Constants.ExeSuffix}"), true);
+                Path.Combine(Dirs.CorehostLocked, DotnetHostBaseName),
+                Path.Combine(outputDir, DotnetHostBaseName), true);
             File.Copy(
-                Path.Combine(Dirs.Corehost, DotnetHostFxrBaseName),
+                Path.Combine(Dirs.CorehostLocked, DotnetHostFxrBaseName),
                 Path.Combine(outputDir, DotnetHostFxrBaseName), true);
         }
 
@@ -460,7 +489,7 @@ namespace Microsoft.DotNet.Cli.Build
                 "--verbosity", "verbose", 
                 "--disable-parallel", 
                 "--infer-runtimes", 
-                "--fallbacksource", Dirs.Corehost)
+                "--fallbacksource", Dirs.CorehostLocalPackages)
                 .WorkingDirectory(SharedFrameworkSourceRoot)
                 .Execute()
                 .EnsureSuccessful();
@@ -522,19 +551,21 @@ namespace Microsoft.DotNet.Cli.Build
                 c.Error($"Could not determine rid graph generation runtime for platform {PlatformServices.Default.Runtime.OperatingSystemPlatform}");
             }
 
-            // corehost will be renamed to dotnet at some point and then we will not need to rename it here.
             File.Copy(
-                Path.Combine(Dirs.Corehost, CoreHostBaseName),
-                Path.Combine(SharedFrameworkNameAndVersionRoot, $"dotnet{Constants.ExeSuffix}"), true);
+                Path.Combine(Dirs.CorehostLocked, DotnetHostBaseName),
+                Path.Combine(SharedFrameworkNameAndVersionRoot, DotnetHostBaseName), true);
+             File.Copy(
+                Path.Combine(Dirs.CorehostLocked, DotnetHostBaseName),
+                Path.Combine(SharedFrameworkNameAndVersionRoot, $"corehost{Constants.ExeSuffix}"), true);
             File.Copy(
-                Path.Combine(Dirs.Corehost, CoreHostBaseName),
-                Path.Combine(SharedFrameworkNameAndVersionRoot, CoreHostBaseName), true);
-            File.Copy(
-                Path.Combine(Dirs.Corehost, HostPolicyBaseName),
-                Path.Combine(SharedFrameworkNameAndVersionRoot, HostPolicyBaseName), true);
-            File.Copy(
-                Path.Combine(Dirs.Corehost, DotnetHostFxrBaseName),
+                Path.Combine(Dirs.CorehostLocked, DotnetHostFxrBaseName),
                 Path.Combine(SharedFrameworkNameAndVersionRoot, DotnetHostFxrBaseName), true);
+
+            // Hostpolicy should be the latest and not the locked version as it is supposed to evolve for
+            // the framework and has a tight coupling with coreclr's API in the framework.
+            File.Copy(
+                Path.Combine(Dirs.CorehostLatest, HostPolicyBaseName),
+                Path.Combine(SharedFrameworkNameAndVersionRoot, HostPolicyBaseName), true);
 
             if (File.Exists(Path.Combine(SharedFrameworkNameAndVersionRoot, "mscorlib.ni.dll")))
             {
@@ -614,10 +645,9 @@ namespace Microsoft.DotNet.Cli.Build
             var compilersDeps = Path.Combine(outputDir, "compilers.deps.json");
             var compilersRuntimeConfig = Path.Combine(outputDir, "compilers.runtimeconfig.json");
 
-            // Copy corehost
-            File.Copy(Path.Combine(Dirs.Corehost, $"corehost{Constants.ExeSuffix}"), Path.Combine(outputDir, $"corehost{Constants.ExeSuffix}"), overwrite: true);
-            File.Copy(Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(outputDir, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
-            File.Copy(Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), Path.Combine(outputDir, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), overwrite: true);
+            File.Copy(Path.Combine(Dirs.CorehostLocked, DotnetHostBaseName), Path.Combine(outputDir, $"corehost{Constants.ExeSuffix}"), overwrite: true);
+            File.Copy(Path.Combine(Dirs.CorehostLocked, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), Path.Combine(outputDir, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), overwrite: true);
+            File.Copy(Path.Combine(Dirs.CorehostLatest, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(outputDir, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
 
             var binaryToCorehostifyOutDir = Path.Combine(outputDir, "runtimes", "any", "native");
             // Corehostify binaries

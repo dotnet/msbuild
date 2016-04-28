@@ -1,4 +1,6 @@
-﻿namespace Microsoft.DotNet.Cli.Build
+﻿using System.Collections.Generic;
+
+namespace Microsoft.DotNet.Cli.Build
 {
     public class BuildVersion
     {
@@ -13,8 +15,45 @@
         public string VersionSuffix => $"{ReleaseSuffix}-{CommitCountString}";
         public string NuGetVersion => $"{Major}.{Minor}.{Patch}-{VersionSuffix}";
         public string NetCoreAppVersion => $"{Major}.{Minor}.{Patch}-rc2-3{CommitCountString}";
-        public string HostNuGetPackageVersion => $"{Major}.{Minor}.1-rc2-{CommitCountString}-00";
         public string ProductionVersion => $"{Major}.{Minor}.{Patch}";
+
+        // ------------------------------------------HOST-VERSIONING-------------------------------------------
+        //
+        // Host versions are independent of CLI versions. Moreover, these version numbers
+        // are baked into the binary and is used to look up a serviced binary replacement.
+        //
+
+        //
+        // Latest hosts for production of nupkgs.
+        //
+
+        // Version constants without suffix
+        public string LatestHostVersionNoSuffix => "1.0.1";
+        public string LatestHostFxrVersionNoSuffix => "1.0.1";
+        public string LatestHostPolicyVersionNoSuffix => "1.0.1";
+        public string LatestHostPrerelease => "rc2";
+        public string LatestHostBuildMajor => $"{CommitCountString}";
+        public string LatestHostSuffix => $"{LatestHostPrerelease}-{LatestHostBuildMajor}-00";
+
+        // Full versions and package information.
+        private string LatestHostVersion => $"{LatestHostVersionNoSuffix}-{LatestHostSuffix}";
+        private string LatestHostFxrVersion => $"{LatestHostFxrVersionNoSuffix}-{LatestHostSuffix}";
+        public  string LatestHostPolicyVersion => $"{LatestHostPolicyVersionNoSuffix}-{LatestHostSuffix}";
+        public Dictionary<string, string> LatestHostPackages => new Dictionary<string, string>()
+        {
+            { "Microsoft.NETCore.DotNetHost", LatestHostVersion },
+            { "Microsoft.NETCore.DotNetHostResolver", LatestHostFxrVersion },
+            { "Microsoft.NETCore.DotNetHostPolicy", LatestHostPolicyVersion }
+        };
+
+        //
+        // Locked muxer for consumption in CLI.
+        //
+        public bool IsLocked = false; // Set this variable to toggle muxer locking.
+        public string LockedHostFxrVersion => IsLocked ? "1.0.1-rc2-002468-00" : LatestHostFxrVersion;
+
+        //
+        // -----------------------------------------END-OF-HOST-VERSIONING-------------------------------------
 
         public string GenerateMsiVersion()
         {
@@ -29,7 +68,6 @@
             // CLI minor  -> 6 bits
             // CLI patch  -> 6 bits
             // CLI commitcount -> 14 bits
-
             var major = Major << 26;
             var minor = Minor << 20;
             var patch = Patch << 14;

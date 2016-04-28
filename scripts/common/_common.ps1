@@ -13,7 +13,6 @@ $Stage1Dir = $env:Stage1Dir
 $Stage1CompilationDir = $env:Stage1CompilationDir
 $Stage2Dir = $env:Stage2Dir
 $Stage2CompilationDir = $env:Stage2CompilationDir
-$HostDir = $env:HostDir
 $PackageDir = $env:PackageDir
 $TestBinRoot = $env:TestBinRoot
 $TestPackageDir = $env:TestPackageDir
