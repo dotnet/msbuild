@@ -69,7 +69,10 @@ namespace Microsoft.DotNet.Cli.Build
                 distTemplate.Replace("{SharedFxComponentId}", SharedFxComponentId)
                 .Replace("{SharedHostComponentId}", SharedHostComponentId)
                 .Replace("{CLISdkComponentId}", CLISdkComponentId)
-                .Replace("{CLISdkNugetVersion}", CLISdkNugetVersion);
+                .Replace("{CLISdkNugetVersion}", CLISdkNugetVersion)
+                .Replace("{CLISdkBrandName}", Monikers.CLISdkBrandName)
+                .Replace("{SharedFxBrandName}", Monikers.SharedFxBrandName)
+                .Replace("{SharedHostBrandName}", Monikers.SharedHostBrandName);
             File.WriteAllText(distributionPath, formattedDistContents);
 
             Cmd("productbuild",
@@ -125,7 +128,9 @@ namespace Microsoft.DotNet.Cli.Build
                 distTemplate.Replace("{SharedFxComponentId}", SharedFxComponentId)
                 .Replace("{SharedHostComponentId}", SharedHostComponentId)
                 .Replace("{SharedFrameworkNugetName}", Monikers.SharedFrameworkName)
-                .Replace("{SharedFrameworkNugetVersion}", SharedFrameworkNugetVersion);
+                .Replace("{SharedFrameworkNugetVersion}", SharedFrameworkNugetVersion)
+                .Replace("{SharedFxBrandName}", Monikers.SharedFxBrandName)
+                .Replace("{SharedHostBrandName}", Monikers.SharedHostBrandName);
             File.WriteAllText(distributionPath, formattedDistContents);
 
             Cmd("productbuild",

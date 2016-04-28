@@ -24,7 +24,7 @@
     <swid:Tag Regid="microsoft.com" InstallPath="[DOTNETHOME]" />
 
     <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles6432Folder]dotnet" bal:Overridable="yes" />
-    <Variable Name="BUNDLEMONIKER" Type="string" Value="$(var.ProductMoniker)" bal:Overridable="yes" />
+    <Variable Name="BUNDLEMONIKER" Type="string" Value="$(var.ProductMoniker)" bal:Overridable="no" />
 
     <util:RegistrySearch Id="PreviousInstallFolderSearch" Root="HKLM" Key="SOFTWARE\dotnet\sharedframework\$(var.FrameworkName) $(var.FrameworkDisplayVersion)\Setup" Value="InstallDir" Variable="PreviousInstallFolder" />
     <util:DirectorySearch Path="[PreviousInstallFolder]" Variable="DOTNETHOME" After="PreviousInstallFolderSearch" Condition="PreviousInstallFolder" />
