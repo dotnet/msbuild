@@ -3,11 +3,11 @@
 
 using System.IO;
 using System.Linq;
+using FluentAssertions;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
-using FluentAssertions;
 using Xunit;
 
 namespace Microsoft.Dotnet.Tools.Test.Tests
@@ -26,7 +26,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var contexts = ProjectContext.CreateContextForEachFramework(
                 _projectFilePath,
                 null,
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
 
             // Restore the project again in the destination to resolve projects
             // Since the lock file has project relative paths in it, those will be broken
@@ -39,9 +39,9 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             result.Should().Pass();
 
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
-                var rid = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers().First();
+                var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
                 _net451OutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "net451", rid);
                 result = buildCommand.Execute($"-f net451 -r {rid} -o {_net451OutputPath}");
                 result.Should().Pass();
@@ -71,7 +71,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             using (var adapter = new Adapter("TestDiscovery.Start"))
             {
                 adapter.Listen();
-                var rid = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers().First();
+                var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
 
                 var testCommand = new DotnetTestCommand();
                 var result = testCommand.Execute($"{_projectFilePath} -f net451 -r {rid} -o {_net451OutputPath} --port {adapter.Port} --no-build");
@@ -110,7 +110,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 adapter.Listen();
 
                 var testCommand = new DotnetTestCommand();
-                var rid = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers().First();
+                var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
                 var result = testCommand.Execute($"{_projectFilePath} -f net451 -r {rid} -o {_net451OutputPath} --port {adapter.Port} --no-build");
                 result.Should().Pass();
 

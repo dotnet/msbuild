@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-
-using static Microsoft.DotNet.Cli.Build.FS;
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
-using System.Text.RegularExpressions;
-using System.Reflection.PortableExecutable;
-using Newtonsoft.Json.Linq;
+using Microsoft.DotNet.InternalAbstractions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using static Microsoft.DotNet.Cli.Build.FS;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -37,9 +34,9 @@ namespace Microsoft.DotNet.Cli.Build
         };
 
         public static string HostPackagePlatformRid => HostPackageSupportedRids[
-                             (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
-                             ? $"win7-{PlatformServices.Default.Runtime.RuntimeArchitecture}"
-                             : PlatformServices.Default.Runtime.GetRuntimeIdentifier()];
+                             (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+                             ? $"win7-{RuntimeEnvironment.RuntimeArchitecture}"
+                             : RuntimeEnvironment.GetRuntimeIdentifier()];
 
         public static readonly Dictionary<string, string> HostPackageSupportedRids = new Dictionary<string, string>()
         {
@@ -479,13 +476,13 @@ namespace Microsoft.DotNet.Cli.Build
             string SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
 
             string sharedFrameworkRid;
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
-                sharedFrameworkRid = $"win7-{PlatformServices.Default.Runtime.RuntimeArchitecture}";
+                sharedFrameworkRid = $"win7-{RuntimeEnvironment.RuntimeArchitecture}";
             }
             else
             {
-                sharedFrameworkRid = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+                sharedFrameworkRid = RuntimeEnvironment.GetRuntimeIdentifier();
             }
 
             string SharedFrameworkSourceRoot = GenerateSharedFrameworkProject(c, SharedFrameworkTemplateSourceRoot, sharedFrameworkRid);
@@ -524,7 +521,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Generate RID fallback graph
             string runtimeGraphGeneratorRuntime = null;
-            switch (PlatformServices.Default.Runtime.OperatingSystemPlatform)
+            switch (RuntimeEnvironment.OperatingSystemPlatform)
             {
                 case Platform.Windows:
                     runtimeGraphGeneratorRuntime = "win";
@@ -553,7 +550,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
             else
             {
-                c.Error($"Could not determine rid graph generation runtime for platform {PlatformServices.Default.Runtime.OperatingSystemPlatform}");
+                c.Error($"Could not determine rid graph generation runtime for platform {RuntimeEnvironment.OperatingSystemPlatform}");
             }
 
             File.Copy(

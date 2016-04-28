@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.PlatformAbstractions;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string Output = Path.Combine(
             RepoRoot,
             "artifacts",
-            PlatformServices.Default.Runtime.GetRuntimeIdentifier());
+            RuntimeEnvironment.GetRuntimeIdentifier());
 
         public static readonly string Intermediate = Path.Combine(Output, "intermediate");
         public static readonly string PackagesIntermediate = Path.Combine(Output, "packages/intermediate");

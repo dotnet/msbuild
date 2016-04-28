@@ -2,26 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
-using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.Extensions.DependencyModel;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.DotNet.ProjectModel.Resolution;
-using NuGet.Frameworks;
-using NuGet.Packaging;
-using NuGet.ProjectModel;
-
-using LockFile = Microsoft.DotNet.ProjectModel.Graph.LockFile;
-using FileFormatException = Microsoft.DotNet.ProjectModel.FileFormatException;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public class DepsJsonCommandResolver : ICommandResolver
     {
-        private static readonly string[] s_extensionPreferenceOrder = new [] 
-        { 
+        private static readonly string[] s_extensionPreferenceOrder = new[]
+        {
             "",
             ".exe",
             ".dll"
@@ -30,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private string _nugetPackageRoot;
         private Muxer _muxer;
 
-        public DepsJsonCommandResolver(string nugetPackageRoot) 
+        public DepsJsonCommandResolver(string nugetPackageRoot)
             : this(new Muxer(), nugetPackageRoot) { }
 
         public DepsJsonCommandResolver(Muxer muxer, string nugetPackageRoot)
@@ -46,16 +35,16 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 return null;
             }
-            
+
             return ResolveFromDepsJsonFile(
-                commandResolverArguments.CommandName, 
+                commandResolverArguments.CommandName,
                 commandResolverArguments.CommandArguments.OrEmptyIfNull(),
                 commandResolverArguments.DepsJsonFile);
         }
 
         private CommandSpec ResolveFromDepsJsonFile(
-            string commandName, 
-            IEnumerable<string> commandArgs, 
+            string commandName,
+            IEnumerable<string> commandArgs,
             string depsJsonFile)
         {
             var dependencyContext = LoadDependencyContextFromFile(depsJsonFile);
@@ -67,8 +56,8 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             return CreateCommandSpecUsingMuxerIfPortable(
-                commandPath, 
-                commandArgs, 
+                commandPath,
+                commandArgs,
                 depsJsonFile,
                 CommandResolutionStrategy.DepsFile,
                 _nugetPackageRoot,
@@ -93,11 +82,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var commandCandidates = new List<CommandCandidate>();
 
             var assemblyCommandCandidates = GetCommandCandidates(
-                commandName, 
-                dependencyContext, 
+                commandName,
+                dependencyContext,
                 CommandCandidateType.RuntimeCommandCandidate);
             var nativeCommandCandidates = GetCommandCandidates(
-                commandName, 
+                commandName,
                 dependencyContext,
                 CommandCandidateType.NativeCommandCandidate);
 
@@ -110,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private IEnumerable<CommandCandidate> GetCommandCandidates(
-            string commandName, 
+            string commandName,
             DependencyContext dependencyContext,
             CommandCandidateType commandCandidateType)
         {
@@ -133,7 +122,7 @@ namespace Microsoft.DotNet.Cli.Utils
                                     commandName,
                                     runtimeAssetGroups,
                                     runtimeLibrary.Name,
-                                    runtimeLibrary.Version));            
+                                    runtimeLibrary.Version));
             }
 
             return commandCandidates;
@@ -141,14 +130,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private IEnumerable<CommandCandidate> GetCommandCandidatesFromRuntimeAssetGroups(
             string commandName,
-            IEnumerable<RuntimeAssetGroup> runtimeAssetGroups, 
+            IEnumerable<RuntimeAssetGroup> runtimeAssetGroups,
             string PackageName,
             string PackageVersion)
         {
             var candidateAssetGroups = runtimeAssetGroups
                 .Where(r => r.Runtime == string.Empty)
-                .Where(a => 
-                    a.AssetPaths.Any(p => 
+                .Where(a =>
+                    a.AssetPaths.Any(p =>
                         Path.GetFileNameWithoutExtension(p).Equals(commandName, StringComparison.OrdinalIgnoreCase)));
 
             var commandCandidates = new List<CommandCandidate>();
@@ -190,9 +179,9 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private CommandSpec CreateCommandSpecUsingMuxerIfPortable(
-            string commandPath, 
-            IEnumerable<string> commandArgs, 
-            string depsJsonFile, 
+            string commandPath,
+            IEnumerable<string> commandArgs,
+            string depsJsonFile,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
             bool isPortable)
@@ -248,9 +237,9 @@ namespace Microsoft.DotNet.Cli.Utils
             public string GetAbsoluteCommandPath(string nugetPackageRoot)
             {
                 return Path.Combine(
-                    nugetPackageRoot.Replace('/', Path.DirectorySeparatorChar), 
-                    PackageName.Replace('/', Path.DirectorySeparatorChar), 
-                    PackageVersion.Replace('/', Path.DirectorySeparatorChar), 
+                    nugetPackageRoot.Replace('/', Path.DirectorySeparatorChar),
+                    PackageName.Replace('/', Path.DirectorySeparatorChar),
+                    PackageVersion.Replace('/', Path.DirectorySeparatorChar),
                     RelativeCommandPath.Replace('/', Path.DirectorySeparatorChar));
             }
         }

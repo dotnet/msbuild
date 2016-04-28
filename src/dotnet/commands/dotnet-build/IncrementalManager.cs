@@ -7,12 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Compiler;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.DotNet.ProjectModel.Compilation;
-using NuGet.Protocol.Core.Types;
 
 namespace Microsoft.DotNet.Tools.Build
 {

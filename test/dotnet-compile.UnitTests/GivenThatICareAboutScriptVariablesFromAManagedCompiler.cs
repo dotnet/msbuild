@@ -4,14 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Moq;
 using NuGet.Frameworks;
 using Xunit;
-using Microsoft.DotNet.Cli.Utils;
-using FluentAssertions;
-using System.Linq;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Compiler.Tests
 {
@@ -70,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void It_passes_a_RuntimeOutputDir_variable_to_the_pre_compile_scripts_if_rid_is_set_in_the_ProjectContext()
         {
-            var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+            var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
             var fixture = ScriptVariablesFixture.GetFixtureWithRids(rid);
             fixture.PreCompileScriptVariables.Should().ContainKey("compile:RuntimeOutputDir");
             fixture.PreCompileScriptVariables["compile:RuntimeOutputDir"].Should().Be(fixture.RuntimeOutputDir);
@@ -129,7 +128,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void It_passes_a_RuntimeOutputDir_variable_to_the_post_compile_scripts_if_rid_is_set_in_the_ProjectContext()
         {
-            var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+            var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
             var fixture = ScriptVariablesFixture.GetFixtureWithRids(rid);
             fixture.PostCompileScriptVariables.Should().ContainKey("compile:RuntimeOutputDir");
             fixture.PostCompileScriptVariables["compile:RuntimeOutputDir"].Should().Be(fixture.RuntimeOutputDir);

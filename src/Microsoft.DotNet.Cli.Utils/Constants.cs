@@ -1,13 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public static class Constants
     {
-        private static Platform CurrentPlatform => PlatformServices.Default.Runtime.OperatingSystemPlatform;
+        private static Platform CurrentPlatform => RuntimeEnvironment.OperatingSystemPlatform;
         public const string DefaultConfiguration = "Debug";
 
         public static readonly string ProjectFileName = "project.json";

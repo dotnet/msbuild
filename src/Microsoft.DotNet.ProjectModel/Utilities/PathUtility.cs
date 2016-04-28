@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.ProjectModel.Utilities
 {
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.ProjectModel.Utilities
             }
 
             StringComparison compare;
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
                 compare = StringComparison.OrdinalIgnoreCase;
                 // check if paths are on the same volume

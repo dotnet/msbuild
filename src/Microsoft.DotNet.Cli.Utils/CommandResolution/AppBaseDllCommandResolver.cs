@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             if (commandResolverArguments.CommandName.EndsWith(FileNameSuffixes.DotNet.DynamicLib))
             {
-                var localPath = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath,
+                var localPath = Path.Combine(ApplicationEnvironment.ApplicationBasePath,
                     commandResolverArguments.CommandName);
                 if (File.Exists(localPath))
                 {

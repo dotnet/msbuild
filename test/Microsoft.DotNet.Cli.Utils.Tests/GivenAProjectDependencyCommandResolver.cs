@@ -2,27 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Linq;
-using Xunit;
-using Moq;
-using Microsoft.DotNet.Cli.Utils;
+using FluentAssertions;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.Threading;
-using FluentAssertions;
 using NuGet.Frameworks;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
     public class GivenAProjectDependenciesCommandResolver
     {
 
-        private static readonly string s_liveProjectDirectory = 
+        private static readonly string s_liveProjectDirectory =
             Path.Combine(AppContext.BaseDirectory, "TestAssets/TestProjects/AppWithDirectDependency");
 
         [Fact]
@@ -33,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = null,
-                CommandArguments = new string[] {""},
+                CommandArguments = new string[] { "" },
                 ProjectDirectory = "/some/directory",
                 Configuration = "Debug",
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
@@ -52,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "command",
-                CommandArguments = new string[] {""},
+                CommandArguments = new string[] { "" },
                 ProjectDirectory = null,
                 Configuration = "Debug",
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
@@ -71,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "command",
-                CommandArguments = new string[] {""},
+                CommandArguments = new string[] { "" },
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
                 Framework = null
@@ -90,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "command",
-                CommandArguments = new string[] {""},
+                CommandArguments = new string[] { "" },
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = null,
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
@@ -153,7 +146,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-hello",
-                CommandArguments = new [] { "arg with space"},
+                CommandArguments = new[] { "arg with space" },
                 ProjectDirectory = s_liveProjectDirectory,
                 Configuration = "Debug",
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
@@ -203,7 +196,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var projectContext = ProjectContext.Create(
                 s_liveProjectDirectory,
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
 
             var depsFilePath =
                 projectContext.GetOutputPaths("Debug", outputPath: AppContext.BaseDirectory).RuntimeFiles.DepsJson;
@@ -232,7 +225,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var projectContext = ProjectContext.Create(
                 s_liveProjectDirectory,
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
 
             var depsFilePath =
                 projectContext.GetOutputPaths("Debug", AppContext.BaseDirectory).RuntimeFiles.DepsJson;
@@ -260,7 +253,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
 
             result.Should().NotBeNull();
-            
+
             result.Args.Should().Contain("dotnet-hello");
         }
 

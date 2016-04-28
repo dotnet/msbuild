@@ -5,10 +5,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tests.EndToEnd
 {
@@ -152,7 +151,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .Should()
                 .Pass();
         }
-        
+
         [Fact]
         public void TestDotnetPack()
         {
@@ -169,7 +168,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             var publishCommand = new PublishCommand(TestProject, output: OutputDirectory);
             publishCommand.Execute().Should().Pass();
 
-            TestExecutable(OutputDirectory, publishCommand.GetPortableOutputName(), s_expectedOutput);    
+            TestExecutable(OutputDirectory, publishCommand.GetPortableOutputName(), s_expectedOutput);
         }
 
         [Fact]
@@ -196,7 +195,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             TestProject = Path.Combine(TestDirectory, "project.json");
             OutputDirectory = Path.Combine(TestDirectory, s_outputdirName);
 
-            Rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+            Rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
         }
 
         private static void SetupStaticTestProject()
@@ -208,7 +207,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             {
                 Directory.Delete(RestoredTestProjectDirectory, true);
             }
-            catch(Exception) {}
+            catch (Exception) { }
 
             Directory.CreateDirectory(RestoredTestProjectDirectory);
 
@@ -227,7 +226,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         private bool IsNativeCompilationSupported()
         {
             bool isSupported = true;
-            var platform = PlatformServices.Default.Runtime.OperatingSystem.ToLower();
+            var platform = RuntimeEnvironment.OperatingSystem.ToLower();
             switch (platform)
             {
                 case "centos":

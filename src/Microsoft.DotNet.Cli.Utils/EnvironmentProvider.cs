@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -19,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (_executableExtensions == null)
                 {
 
-                    _executableExtensions = PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows
+                    _executableExtensions = RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows
                         ? Environment.GetEnvironmentVariable("PATHEXT")
                             .Split(';')
                             .Select(e => e.ToLower().Trim('"'))
@@ -36,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (_searchPaths == null)
                 {
-                    var searchPaths = new List<string> { PlatformServices.Default.Application.ApplicationBasePath };
+                    var searchPaths = new List<string> { ApplicationEnvironment.ApplicationBasePath };
 
                     searchPaths.AddRange(Environment
                         .GetEnvironmentVariable("PATH")

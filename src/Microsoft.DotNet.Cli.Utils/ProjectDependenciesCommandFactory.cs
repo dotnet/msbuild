@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Cli.Utils
             if (framework.IsDesktop())
             {
                 IPlatformCommandSpecFactory platformCommandSpecFactory = null;
-                if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+                if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
                 {
                     platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();
                 }

@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             var content = File.ReadAllText(DotnetFiles.VersionFile);
             content += Environment.NewLine;
-            content += PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+            content += RuntimeEnvironment.GetRuntimeIdentifier();
             return content;
         }
     }

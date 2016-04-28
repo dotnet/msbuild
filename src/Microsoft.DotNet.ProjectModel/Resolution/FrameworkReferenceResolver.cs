@@ -7,11 +7,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.DependencyModel.Resolution;
-using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Resolution
@@ -63,7 +62,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 return referenceAssembliesPath;
             }
 
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform != Platform.Windows)
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
             {
                 // There is no reference assemblies path outside of windows
                 // The environment variable can be used to specify one
@@ -210,7 +209,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         private static FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework, string referenceAssembliesPath)
         {
             // Check for legacy frameworks
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows &&
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows &&
                 targetFramework.IsDesktop() &&
                 targetFramework.Version <= new Version(3, 5, 0, 0))
             {

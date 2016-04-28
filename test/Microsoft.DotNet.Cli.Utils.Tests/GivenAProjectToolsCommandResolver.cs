@@ -2,27 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Linq;
-using Xunit;
-using Moq;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.Threading;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
-using NuGet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
-using Microsoft.DotNet.ProjectModel.Compilation;
-using NuGet.ProjectModel;
-
-using LockFile = Microsoft.DotNet.ProjectModel.Graph.LockFile;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
@@ -30,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
     {
         private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
-        private static readonly string s_liveProjectDirectory = 
+        private static readonly string s_liveProjectDirectory =
             Path.Combine(AppContext.BaseDirectory, "TestAssets/TestProjects/AppWithToolDependency");
 
         [Fact]
@@ -41,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = null,
-                CommandArguments = new string[] {""},
+                CommandArguments = new string[] { "" },
                 ProjectDirectory = "/some/directory"
             };
 
@@ -58,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "command",
-                CommandArguments = new string[] {""},
+                CommandArguments = new string[] { "" },
                 ProjectDirectory = null
             };
 
@@ -115,7 +103,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
-                CommandArguments = new [] { "arg with space"},
+                CommandArguments = new[] { "arg with space" },
                 ProjectDirectory = s_liveProjectDirectory
             };
 
@@ -140,7 +128,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
 
             result.Should().NotBeNull();
-            
+
             var commandPath = result.Args.Trim('"');
             commandPath.Should().Contain("dotnet-portable.dll");
         }
@@ -163,8 +151,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
 
             var lockFilePath = toolPathCalculator.GetLockFilePath(
-                "dotnet-portable", 
-                new NuGetVersion("1.0.0"), 
+                "dotnet-portable",
+                new NuGetVersion("1.0.0"),
                 s_toolPackageFramework);
 
             var directory = Path.GetDirectoryName(lockFilePath);
@@ -181,7 +169,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
             result.Should().NotBeNull();
 
-            
+
             depsJsonFile = Directory
                 .EnumerateFiles(directory)
                 .FirstOrDefault(p => Path.GetFileName(p).EndsWith(FileNameSuffixes.DepsJson));
@@ -198,8 +186,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
 
             var lockFilePath = toolPathCalculator.GetLockFilePath(
-                "dotnet-portable", 
-                new NuGetVersion("1.0.0"), 
+                "dotnet-portable",
+                new NuGetVersion("1.0.0"),
                 s_toolPackageFramework);
 
             var lockFile = LockFileReader.Read(lockFilePath, designTime: false);

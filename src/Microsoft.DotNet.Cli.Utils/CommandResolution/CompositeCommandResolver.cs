@@ -1,13 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
-using Microsoft.Extensions.PlatformAbstractions;
-using NuGet.Frameworks;
-using NuGet.Packaging;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -15,9 +6,9 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         private IList<ICommandResolver> _orderedCommandResolvers;
 
-        public IEnumerable<ICommandResolver> OrderedCommandResolvers 
+        public IEnumerable<ICommandResolver> OrderedCommandResolvers
         {
-            get 
+            get
             {
                 return _orderedCommandResolvers;
             }
@@ -32,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             _orderedCommandResolvers.Add(commandResolver);
         }
-        
+
         public CommandSpec Resolve(CommandResolverArguments commandResolverArguments)
         {
             foreach (var commandResolver in _orderedCommandResolvers)
