@@ -66,12 +66,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return s_testsAssetsMgr;
             }
         }
-        
+
         protected static TestAssetsManager GetTestGroupTestAssetsManager(string testGroup)
         {
             string assetsRoot = Path.Combine(RepoRoot, "TestAssets", testGroup);
             var testAssetsMgr = new TestAssetsManager(assetsRoot);
-            
+
             return testAssetsMgr;
         }
 

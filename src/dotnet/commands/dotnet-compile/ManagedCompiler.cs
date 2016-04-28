@@ -63,11 +63,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                 diagnostics.Add(diag);
             }
 
-            if (missingFrameworkDiagnostics.Count > 0)
+            if(diagnostics.Any(d => d.Severity == DiagnosticMessageSeverity.Error))
             {
-                // The framework isn't installed so we should short circuit the rest of the compilation
-                // so we don't get flooded with errors
-                PrintSummary(missingFrameworkDiagnostics, sw);
+                // We got an unresolved dependency or missing framework. Don't continue the compilation.
+                PrintSummary(diagnostics, sw);
                 return false;
             }
 

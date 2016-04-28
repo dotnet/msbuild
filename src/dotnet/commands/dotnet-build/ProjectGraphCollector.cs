@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Build
                     LibraryDescription libraryDescription;
                     if (lookup.TryGetValue(dependency.Name, out libraryDescription))
                     {
-                        if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
+                        if (libraryDescription.Resolved && libraryDescription.Identity.Type.Equals(LibraryType.Project))
                         {
                             deps.Add(TraverseProject((ProjectDescription)libraryDescription, lookup));
                         }

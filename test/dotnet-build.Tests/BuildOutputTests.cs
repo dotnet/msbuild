@@ -215,6 +215,27 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Fact]
+        public void UnresolvedReferenceCausesBuildToFailAndNotProduceOutput()
+        {
+            var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
+            var testInstance = testAssetsManager.CreateTestInstance("TestProjectWithUnresolvedDependency")
+                                                .WithLockFiles();
+
+            var restoreResult = new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }.Execute();
+            restoreResult.Should().Fail();
+            new DirectoryInfo(testInstance.TestRoot).Should().HaveFile("project.lock.json");
+
+            var buildCmd = new BuildCommand(testInstance.TestRoot);
+            var buildResult = buildCmd.ExecuteWithCapturedOutput();
+            buildResult.Should().Fail();
+
+            buildResult.StdErr.Should().Contain("The dependency ThisIsNotARealDependencyAndIfSomeoneGoesAndAddsAProjectWithThisNameIWillFindThemAndPunishThem could not be resolved.");
+
+            var outputDir = new DirectoryInfo(Path.Combine(testInstance.TestRoot, "bin", "Debug", "netcoreapp1.0"));
+            outputDir.GetFiles().Length.Should().Be(0);
+        }
+
+        [Fact]
         public void PackageReferenceWithResourcesTest()
         {
             var testInstance = TestAssetsManager.CreateTestInstance("ResourcesTests")

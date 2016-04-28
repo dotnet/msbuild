@@ -138,7 +138,10 @@ namespace Microsoft.DotNet.Tools.Build
                 var success = managedCompiler.Compile(projectNode.ProjectContext, _args);
                 if (projectNode.IsRoot)
                 {
-                    MakeRunnable(projectNode);
+                    if (success)
+                    {
+                        MakeRunnable(projectNode);
+                    }
                     PrintSummary(projectNode, success);
                 }
 
