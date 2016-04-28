@@ -132,6 +132,8 @@ namespace Microsoft.DotNet.Cli
                 command = "help";
             }
 
+            telemetryClient.TrackEvent(command, null, null);
+
             int exitCode;
             Func<string[], int> builtIn;
             if (s_builtIns.TryGetValue(command, out builtIn))
@@ -147,13 +149,6 @@ namespace Microsoft.DotNet.Cli
                 exitCode = result.ExitCode;
             }
 
-            telemetryClient.TrackEvent(
-                command,
-                null,
-                new Dictionary<string, double>
-                {
-                    ["ExitCode"] = exitCode
-                });
 
             return exitCode;
 
