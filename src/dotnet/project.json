@@ -28,8 +28,6 @@
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-20581",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20581",
     "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24027",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-24027",

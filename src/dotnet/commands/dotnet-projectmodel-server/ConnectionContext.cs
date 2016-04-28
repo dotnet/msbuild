@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using Microsoft.DotNet.ProjectModel.Server.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.ProjectModel.Server
 {
@@ -18,13 +17,12 @@ namespace Microsoft.DotNet.ProjectModel.Server
             string hostName,
             ProtocolManager protocolManager,
             WorkspaceContext workspaceContext,
-            IDictionary<int, ProjectManager> projects,
-            ILoggerFactory loggerFactory)
+            IDictionary<int, ProjectManager> projects)
         {
             _hostName = hostName;
             _projects = projects;
 
-            _queue = new ProcessingQueue(new NetworkStream(acceptedSocket), loggerFactory);
+            _queue = new ProcessingQueue(new NetworkStream(acceptedSocket));
             _queue.OnReceive += message =>
             {
                 if (protocolManager.IsProtocolNegotiation(message))
@@ -39,7 +37,6 @@ namespace Microsoft.DotNet.ProjectModel.Server
                     if (!_projects.TryGetValue(message.ContextId, out projectManager))
                     {
                         projectManager = new ProjectManager(message.ContextId,
-                                                           loggerFactory,
                                                            workspaceContext,
                                                            protocolManager);
 

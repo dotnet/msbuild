@@ -12,15 +12,19 @@ namespace Microsoft.Extensions.Testing.Abstractions
     public class SourceInformationProvider : ISourceInformationProvider
     {
         private readonly string _pdbPath;
-        private readonly ILogger _logger;
         private readonly IPdbReader _pdbReader;
 
-        public SourceInformationProvider(string pdbPath, ILogger logger) :
-            this(pdbPath, logger, new PdbReaderFactory())
+        public SourceInformationProvider(string pdbPath) :
+            this(pdbPath, new PdbReaderFactory())
         {
         }
 
-        public SourceInformationProvider(string pdbPath, ILogger logger, IPdbReaderFactory pdbReaderFactory)
+        public SourceInformationProvider(string pdbPath, ILogger logger) :
+            this(pdbPath, new PdbReaderFactory())
+        {
+        }
+
+        public SourceInformationProvider(string pdbPath, IPdbReaderFactory pdbReaderFactory)
         {
             if (string.IsNullOrWhiteSpace(pdbPath) || !File.Exists(pdbPath))
             {
@@ -28,7 +32,6 @@ namespace Microsoft.Extensions.Testing.Abstractions
             }
 
             _pdbPath = pdbPath;
-            _logger = logger;
 
             _pdbReader = pdbReaderFactory.Create(pdbPath);
         }
@@ -57,7 +60,7 @@ namespace Microsoft.Extensions.Testing.Abstractions
             }
             catch (Exception ex)
             {
-                _logger?.LogWarning("Failed to access source information in symbol.", ex);
+                Console.WriteLine("Failed to access source information in symbol.", ex);
                 return null;
             }
         }
