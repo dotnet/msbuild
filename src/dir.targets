@@ -6,7 +6,7 @@
   <Import Project="$(ToolsDir)\sign.targets" Condition="Exists('$(ToolsDir)\sign.targets')" />
 
   <Import Project="$(MicroBuildDir)\MicroBuild.Core.targets" Condition="Exists('$(MicroBuildDir)\MicroBuild.Core.targets')" />
-
+  <Import Project="$(PackagesDir)Nerdbank.GitVersioning.1.4.19\build\dotnet\Nerdbank.GitVersioning.targets" />
   <!-- Restore packages -->
   <PropertyGroup>
     <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$(MSBuildProjectDirectory)\packages.config</PackagesConfig>

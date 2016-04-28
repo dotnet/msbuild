@@ -369,7 +369,7 @@ namespace Microsoft.Build.Evaluation
         /// Gets the file version of the file in which the Engine assembly lies.
         /// </summary>
         /// <remarks>
-        /// This is the Windows file version (specifically the value of the ProductVersion
+        /// This is the Windows file version (specifically the value of the FileVersion
         /// resource), not necessarily the assembly version.
         /// If you want the assembly version, use Constants.AssemblyVersion.
         /// This is not the <see cref="ToolsetsVersion">ToolsetCollectionVersion</see>.
@@ -384,7 +384,7 @@ namespace Microsoft.Build.Evaluation
                     // Use .CodeBase instead of .Location, because .Location doesn't
                     // work when Microsoft.Build.dll has been shadow-copied, for example
                     // in scenarios where NUnit is loading Microsoft.Build.
-                    s_engineVersion = new Version(FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath).ProductVersion);
+                    s_engineVersion = new Version(FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath).FileVersion);
                 }
 
                 return s_engineVersion;
