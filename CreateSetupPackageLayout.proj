@@ -4,8 +4,9 @@
   <Import Project="$(MicroBuildDir)MicroBuild.Core.props" />
 
   <PropertyGroup>
-      <SetupPackageLayoutDir>$(BinDir)Setup\layout\</SetupPackageLayoutDir>
-      <SetupPackageOutputFile>$(BinDir)Setup\MSBuild.fopx</SetupPackageOutputFile>
+      <SetupPackageRoot>$(BinDir)Setup\</SetupPackageRoot>
+      <SetupPackageLayoutDir>$(SetupPackageRoot)layout\</SetupPackageLayoutDir>
+      <SetupPackageOutputFile>$(SetupPackageRoot)MSBuild.fopx</SetupPackageOutputFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -88,16 +89,18 @@
     </FilesToSign>
   </ItemGroup>
   <PropertyGroup>
-    <OutDir>$(SetupPackageLayoutDir)</OutDir>
+    <OutDir>$(SetupPackageRoot)</OutDir>
   </PropertyGroup>
 
   <Target Name="Build">
     <Error Text="FopCreator.exe not found (MS internal only tool)."
            Condition="!Exists('$(PackagesDir)\VS.Tools.Setup.FopCreator.1.0.16022601\FopCreator.exe')" />
+    <Error Text="BinDir not set!"
+           Condition="'$(BinDir)'==''" />
     
     <!-- Delete the output if exists -->
-    <RemoveDir  Directories="$(SetupPackageLayoutDir)" />
-    
+    <RemoveDir  Directories="$(SetupPackageRoot)" />
+
     <!-- Copy our binaries -->
     <Copy SourceFiles="@(BinX86Output)"
           DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin" />
