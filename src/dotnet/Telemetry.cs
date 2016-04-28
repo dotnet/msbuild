@@ -58,6 +58,41 @@ namespace Microsoft.DotNet.Cli
                 return;
             }
 
+            _isCollectingTelemetry = true;
+            try
+            {
+                //initialize in task to offload to parallel thread
+                _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
+            }
+            catch(Exception)
+            {
+                Debug.Fail("Exception during telemetry task initialization");
+            }
+        }
+        
+        public void TrackEvent(string eventName, IList<string> properties, IDictionary<string, double> measurements)
+        {
+            if (!_isCollectingTelemetry)
+            {
+                return;
+            }
+            
+            try
+            {
+                _trackEventTask = _trackEventTask.ContinueWith(
+                    () => TrackEventTask(eventName, 
+                        properties, 
+                        measurements)
+                );
+            }
+            catch(Exception)
+            {
+                Debug.Fail("Exception during telemetry task continuation");
+            }
+        }
+        
+        private void InitializeTelemetry()
+        {
             try
             {
                 using (PerfTrace.Current.CaptureTiming())
