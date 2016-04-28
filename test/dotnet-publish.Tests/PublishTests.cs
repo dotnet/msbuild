@@ -360,5 +360,18 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 command.Execute($"publish {temp}").Should().Fail();
             }
         }
+
+        [Fact]
+        public void PublishWorksWithLocalProjectJson()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppSimple")
+                .WithLockFiles();
+
+            new PublishCommand("project.json")
+                .WithWorkingDirectory(instance.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }

@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public void AddProject(string path)
         {
-            var projectPath = NormalizeProjectPath(path);
+            var projectPath = ProjectPathHelper.NormalizeProjectDirectoryPath(path);
 
             if (projectPath != null)
             {
@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public ProjectContextCollection GetProjectContextCollection(string projectPath)
         {
-            var normalizedPath = NormalizeProjectPath(projectPath);
+            var normalizedPath = ProjectPathHelper.NormalizeProjectDirectoryPath(projectPath);
             if (normalizedPath == null)
             {
                 return null;
@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private FileModelEntry<Project> GetProjectCore(string projectDirectory)
         {
-            var normalizedPath = NormalizeProjectPath(projectDirectory);
+            var normalizedPath = ProjectPathHelper.NormalizeProjectDirectoryPath(projectDirectory);
             if (normalizedPath == null)
             {
                 return null;
@@ -256,7 +256,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private LockFile GetLockFile(string projectDirectory)
         {
-            var normalizedPath = NormalizeProjectPath(projectDirectory);
+            var normalizedPath = ProjectPathHelper.NormalizeProjectDirectoryPath(projectDirectory);
             if (normalizedPath == null)
             {
                 return null;
@@ -439,22 +439,6 @@ namespace Microsoft.DotNet.ProjectModel
                 Diagnostics.Clear();
                 _lastWriteTimeUtc = DateTime.MinValue;
             }
-        }
-
-        private static string NormalizeProjectPath(string path)
-        {
-            if (File.Exists(path) &&
-                string.Equals(Path.GetFileName(path), Project.FileName, StringComparison.OrdinalIgnoreCase))
-            {
-                return Path.GetFullPath(Path.GetDirectoryName(path));
-            }
-            else if (Directory.Exists(path) &&
-                     File.Exists(Path.Combine(path, Project.FileName)))
-            {
-                return Path.GetFullPath(path);
-            }
-
-            return null;
         }
 
         private static List<string> ResolveProjectPath(string projectPath)

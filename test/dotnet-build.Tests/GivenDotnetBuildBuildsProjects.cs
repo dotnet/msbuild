@@ -44,6 +44,20 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Fact]
+        public void It_builds_projects_with_a_local_project_json_path()
+        {
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestAppSimple")
+                .WithLockFiles();
+
+            new BuildCommand("project.json")
+                .WithWorkingDirectory(testInstance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
         public void It_builds_projects_with_xmlDoc_and_spaces_in_the_path()
         {
             var testInstance = TestAssetsManager

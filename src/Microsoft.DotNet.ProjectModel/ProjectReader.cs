@@ -64,10 +64,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public static Project GetProject(string projectPath, ProjectReaderSettings settings = null)
         {
-            if (!projectPath.EndsWith(Project.FileName))
-            {
-                projectPath = Path.Combine(projectPath, Project.FileName);
-            }
+            projectPath = ProjectPathHelper.NormalizeProjectFilePath(projectPath);
 
             var name = Path.GetFileName(Path.GetDirectoryName(projectPath));
 
