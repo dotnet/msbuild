@@ -12,6 +12,13 @@ namespace Microsoft.DotNet.Tools.Build
 {
     internal abstract class ProjectBuilder
     {
+        private readonly bool _skipDependencies;
+
+        public ProjectBuilder(bool skipDependencies)
+        {
+            _skipDependencies = skipDependencies;
+        }
+
         private Dictionary<ProjectContextIdentity, CompilationResult> _compilationResults = new Dictionary<ProjectContextIdentity, CompilationResult>();
 
         public IEnumerable<CompilationResult> Build(IEnumerable<ProjectGraphNode> roots)
@@ -40,6 +47,7 @@ namespace Microsoft.DotNet.Tools.Build
         protected virtual void ProjectSkiped(ProjectGraphNode projectNode)
         {
         }
+
         protected abstract CompilationResult RunCompile(ProjectGraphNode projectNode);
 
         private CompilationResult Build(ProjectGraphNode projectNode)
@@ -58,12 +66,15 @@ namespace Microsoft.DotNet.Tools.Build
 
         private CompilationResult CompileWithDependencies(ProjectGraphNode projectNode)
         {
-            foreach (var dependency in projectNode.Dependencies)
+            if (!_skipDependencies)
             {
-                var result = Build(dependency);
-                if (result == CompilationResult.Failure)
+                foreach (var dependency in projectNode.Dependencies)
                 {
-                    return CompilationResult.Failure;
+                    var result = Build(dependency);
+                    if (result == CompilationResult.Failure)
+                    {
+                        return CompilationResult.Failure;
+                    }
                 }
             }
 
