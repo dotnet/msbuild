@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.ProjectModel
 {
-    internal static class ProjectPath
+    internal static class ProjectPathHelper
     {
         public static string NormalizeProjectDirectoryPath(string path)
         {

@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public static Project GetProject(string projectPath, ProjectReaderSettings settings = null)
         {
-            projectPath = ProjectPath.NormalizeProjectFilePath(projectPath);
+            projectPath = ProjectPathHelper.NormalizeProjectFilePath(projectPath);
 
             var name = Path.GetFileName(Path.GetDirectoryName(projectPath));
 
