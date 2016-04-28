@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     public class TestCommand
     {
         protected string _command;
-        
+
         private string _baseDirectory;
 
         public string WorkingDirectory { get; set; }
@@ -31,6 +31,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 #else
             _baseDirectory = AppContext.BaseDirectory;
 #endif 
+        }
+
+        public TestCommand WithWorkingDirectory(string workingDirectory)
+        {
+            WorkingDirectory = workingDirectory;
+            return this;
         }
 
         public virtual CommandResult Execute(string args = "")

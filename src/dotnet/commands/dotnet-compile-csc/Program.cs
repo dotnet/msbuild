@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             if (options.GenerateXmlDocumentation == true)
             {
-                commonArgs.Add($"-doc:{Path.ChangeExtension(outputName, "xml")}");
+                commonArgs.Add($"-doc:\"{Path.ChangeExtension(outputName, "xml")}\"");
             }
 
             if (options.EmitEntryPoint != true)
