@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli
             try
             {
                 _trackEventTask = _trackEventTask.ContinueWith(
-                    () => TrackEventTask(eventName, 
+                    x => TrackEventTask(eventName, 
                         properties, 
                         measurements)
                 );
