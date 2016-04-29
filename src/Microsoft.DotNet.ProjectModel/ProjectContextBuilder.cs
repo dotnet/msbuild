@@ -355,11 +355,6 @@ namespace Microsoft.DotNet.ProjectModel
                 }
             }
 
-            if (Project != null)
-            {
-                diagnostics.AddRange(Project.Diagnostics);
-            }
-
             // Create a library manager
             var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics, Project?.ProjectFilePath);
 
@@ -372,7 +367,8 @@ namespace Microsoft.DotNet.ProjectModel
                 runtime,
                 PackagesDirectory,
                 libraryManager,
-                LockFile);
+                LockFile,
+                diagnostics);
         }
 
         private void ReadLockFile(ICollection<DiagnosticMessage> diagnostics)

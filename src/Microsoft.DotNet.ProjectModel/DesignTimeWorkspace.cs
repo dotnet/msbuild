@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public void AddProject(string path)
         {
-            var projectPath = NormalizeProjectPath(path);
+            var projectPath = ProjectPathHelper.NormalizeProjectDirectoryPath(path);
 
             if (projectPath != null)
             {

@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli
             }
             catch (GracefulException e)
             {
-                Console.WriteLine(CommandContext.IsVerbose() ? e.ToString().Red().Bold() : e.Message.Red().Bold());
+                Reporter.Error.WriteLine(CommandContext.IsVerbose() ? e.ToString().Red().Bold() : e.Message.Red().Bold());
 
                 return 1;
             }

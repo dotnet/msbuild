@@ -44,7 +44,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var testCommand = new DotnetTestCommand();
             var result = testCommand
-                .ExecuteWithCapturedOutput($"test {_projectFilePath}");
+                .ExecuteWithCapturedOutput($"{_projectFilePath}");
             result.Should().Pass();
             result.StdOut.Should().Contain("Skipped for NET451");
             result.StdOut.Should().Contain("Skipped for NETCOREAPP1.0");
@@ -55,7 +55,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var testCommand = new DotnetTestCommand();
             var result = testCommand
-                .ExecuteWithCapturedOutput($"test {_projectFilePath} -f net451");
+                .ExecuteWithCapturedOutput($"{_projectFilePath} -f net451");
             result.Should().Pass();
             result.StdOut.Should().Contain($"Skipped for NET451");
             result.StdOut.Should().NotContain($"Skipped for NETCOREAPP1.0");
@@ -66,7 +66,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var testCommand = new DotnetTestCommand();
             var result = testCommand
-                .ExecuteWithCapturedOutput($"test {_projectFilePath} -f netcoreapp1.0");
+                .ExecuteWithCapturedOutput($"{_projectFilePath} -f netcoreapp1.0");
             result.Should().Pass();
             result.StdOut.Should().Contain($"Skipped for NETCOREAPP1.0");
             result.StdOut.Should().NotContain($"Skipped for NET451");
@@ -121,7 +121,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var nonExistentFramework = "doesnotexisttfm99.99";
             var testCommand = new DotnetTestCommand();
             var result = testCommand
-                .ExecuteWithCapturedOutput($"test {_projectFilePath} -f {nonExistentFramework}");
+                .ExecuteWithCapturedOutput($"{_projectFilePath} -f {nonExistentFramework}");
 
             result.Should().Fail();
             result.StdErr.Should().Contain($"does not support framework");
@@ -139,7 +139,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             };
 
             var result = testCommand
-                .ExecuteWithCapturedOutput($"test {_projectFilePath}");
+                .ExecuteWithCapturedOutput($"{_projectFilePath}");
 
             result.Should().Fail();
             result.StdOut.Should().Contain("Failing in NET451");
