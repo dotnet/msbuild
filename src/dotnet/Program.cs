@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
@@ -41,14 +42,32 @@ namespace Microsoft.DotNet.Cli
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
+            if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
+            {
+                PerfTrace.Enabled = true;
+            }
+
+            InitializeProcess();
+
             try
             {
-                return Program.ProcessArgs(args, new Telemetry());
+                using (PerfTrace.Current.CaptureTiming())
+                {
+                    return ProcessArgs(args, new Telemetry());
+                }
             }
             catch (GracefulException e)
             {
                 Console.WriteLine(e.Message.Red().Bold());
                 return 1;
+            }
+            finally
+            {
+                if (PerfTrace.Enabled)
+                {
+                    Reporter.Output.WriteLine("Performance Summary:");
+                    PerfTraceOutput.Print(Reporter.Output, PerfTrace.GetEvents());
+                }
             }
         }
 
@@ -104,6 +123,7 @@ namespace Microsoft.DotNet.Cli
             if (verbose.HasValue)
             {
                 Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
+                Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
             if (string.IsNullOrEmpty(command))
@@ -136,6 +156,14 @@ namespace Microsoft.DotNet.Cli
 
             return exitCode;
 
+        }
+
+
+        private static void InitializeProcess()
+        {
+            // by default, .NET Core doesn't have all code pages needed for Console apps.
+            // see the .NET Core Notes in https://msdn.microsoft.com/en-us/library/system.diagnostics.process(v=vs.110).aspx
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
         internal static bool TryGetBuiltInCommand(string commandName, out Func<string[], int> builtInCommand)

@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public void AddProject(string path)
         {
-            var projectPath = NormalizeProjectPath(path);
+            var projectPath = ProjectPathHelper.NormalizeProjectDirectoryPath(path);
 
             if (projectPath != null)
             {
@@ -171,9 +171,7 @@ namespace Microsoft.DotNet.ProjectModel
                 EmptyArray<ProjectContext>.Value;
         }
 
-        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework) => GetProjectContext(projectPath, framework, EmptyArray<string>.Value);
-
-        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework, IEnumerable<string> runtimeIdentifier)
+        public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework)
         {
             var contexts = GetProjectContextCollection(projectPath);
             if (contexts == null)
@@ -183,11 +181,16 @@ namespace Microsoft.DotNet.ProjectModel
 
             return contexts
                 .ProjectContexts
-                .FirstOrDefault(c => Equals(c.TargetFramework, framework) && RidsMatch(c.RuntimeIdentifier, runtimeIdentifier));
+                .FirstOrDefault(c => Equals(c.TargetFramework, framework) && string.IsNullOrEmpty(c.RuntimeIdentifier));
         }
 
         public ProjectContext GetRuntimeContext(ProjectContext context, IEnumerable<string> runtimeIdentifiers)
         {
+            if(!runtimeIdentifiers.Any())
+            {
+                return context;
+            }
+
             var contexts = GetProjectContextCollection(context.ProjectDirectory);
             if (contexts == null)
             {
@@ -225,7 +228,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public ProjectContextCollection GetProjectContextCollection(string projectPath)
         {
-            var normalizedPath = NormalizeProjectPath(projectPath);
+            var normalizedPath = ProjectPathHelper.NormalizeProjectDirectoryPath(projectPath);
             if (normalizedPath == null)
             {
                 return null;
@@ -239,7 +242,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private FileModelEntry<Project> GetProjectCore(string projectDirectory)
         {
-            var normalizedPath = NormalizeProjectPath(projectDirectory);
+            var normalizedPath = ProjectPathHelper.NormalizeProjectDirectoryPath(projectDirectory);
             if (normalizedPath == null)
             {
                 return null;
@@ -253,7 +256,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private LockFile GetLockFile(string projectDirectory)
         {
-            var normalizedPath = NormalizeProjectPath(projectDirectory);
+            var normalizedPath = ProjectPathHelper.NormalizeProjectDirectoryPath(projectDirectory);
             if (normalizedPath == null)
             {
                 return null;
@@ -281,13 +284,14 @@ namespace Microsoft.DotNet.ProjectModel
             if (currentEntry.IsInvalid)
             {
                 Project project;
-                if (!ProjectReader.TryGetProject(projectDirectory, out project, currentEntry.Diagnostics, _settings))
+                if (!ProjectReader.TryGetProject(projectDirectory, out project, _settings))
                 {
                     currentEntry.Reset();
                 }
                 else
                 {
                     currentEntry.Model = project;
+                    currentEntry.Diagnostics.AddRange(project.Diagnostics);
                     currentEntry.FilePath = project.ProjectFilePath;
                     currentEntry.UpdateLastWriteTimeUtc();
                 }
@@ -437,22 +441,6 @@ namespace Microsoft.DotNet.ProjectModel
             }
         }
 
-        private static string NormalizeProjectPath(string path)
-        {
-            if (File.Exists(path) &&
-                string.Equals(Path.GetFileName(path), Project.FileName, StringComparison.OrdinalIgnoreCase))
-            {
-                return Path.GetFullPath(Path.GetDirectoryName(path));
-            }
-            else if (Directory.Exists(path) &&
-                     File.Exists(Path.Combine(path, Project.FileName)))
-            {
-                return Path.GetFullPath(path);
-            }
-
-            return null;
-        }
-
         private static List<string> ResolveProjectPath(string projectPath)
         {
             if (File.Exists(projectPath))
@@ -514,12 +502,6 @@ namespace Microsoft.DotNet.ProjectModel
 
                 yield return description;
             }
-        }
-
-        private static bool RidsMatch(string rid, IEnumerable<string> compatibleRids)
-        {
-            return (string.IsNullOrEmpty(rid) && !compatibleRids.Any()) ||
-                (compatibleRids.Contains(rid));
         }
     }
 }

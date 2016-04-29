@@ -6,17 +6,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Files;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Reflection.PortableExecutable;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
@@ -88,7 +88,20 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         private void CopyContentFiles()
         {
             var contentFiles = new ContentFiles(_context);
-            contentFiles.StructuredCopyTo(_runtimeOutputPath);
+
+            if (_compilerOptions.CopyToOutputInclude != null)
+            {
+                var includeEntries = IncludeFilesResolver.GetIncludeFiles(
+                    _compilerOptions.CopyToOutputInclude,
+                    PathUtility.EnsureTrailingSlash(_runtimeOutputPath),
+                    diagnostics: null);
+
+                contentFiles.StructuredCopyTo(_runtimeOutputPath, includeEntries);
+            }
+            else
+            {
+                contentFiles.StructuredCopyTo(_runtimeOutputPath);
+            }
         }
 
         private void CopyAssemblies(IEnumerable<LibraryExport> libraryExports)
@@ -98,10 +111,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 libraryExport.RuntimeAssemblyGroups.GetDefaultAssets().CopyTo(_runtimeOutputPath);
                 libraryExport.NativeLibraryGroups.GetDefaultAssets().CopyTo(_runtimeOutputPath);
 
-                foreach(var group in libraryExport.ResourceAssemblies.GroupBy(r => r.Locale))
+                foreach (var group in libraryExport.ResourceAssemblies.GroupBy(r => r.Locale))
                 {
                     var localeSpecificDir = Path.Combine(_runtimeOutputPath, group.Key);
-                    if(!Directory.Exists(localeSpecificDir))
+                    if (!Directory.Exists(localeSpecificDir))
                     {
                         Directory.CreateDirectory(localeSpecificDir);
                     }
@@ -239,7 +252,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 compilerOptions: includeCompile ? _compilerOptions : null,
                 compilationExports: includeCompile ? exports : null,
                 runtimeExports: exports,
-                portable: string.IsNullOrEmpty(_context.RuntimeIdentifier),
+                portable: _context.IsPortable,
                 target: _context.TargetFramework,
                 runtime: _context.RuntimeIdentifier ?? string.Empty);
 
@@ -254,30 +267,34 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         public void GenerateBindingRedirects(LibraryExporter exporter)
         {
             var outputName = _outputPaths.RuntimeFiles.Assembly;
+            var configFile = outputName + Constants.ConfigSuffix;
 
             var existingConfig = new DirectoryInfo(_context.ProjectDirectory)
                 .EnumerateFiles()
                 .FirstOrDefault(f => f.Name.Equals("app.config", StringComparison.OrdinalIgnoreCase));
 
-            XDocument baseAppConfig = null;
-
             if (existingConfig != null)
             {
-                using (var fileStream = File.OpenRead(existingConfig.FullName))
+                File.Copy(existingConfig.FullName, configFile, true);
+            }
+
+            List<string> configFiles = new List<string>();
+            configFiles.Add(configFile);
+
+            foreach (var export in exporter.GetDependencies())
+            {
+                var dependencyExecutables = export.RuntimeAssemblyGroups.GetDefaultAssets()
+                                                .Where(asset => asset.FileName.ToLower().EndsWith(FileNameSuffixes.DotNet.Exe))
+                                                .Select(asset => Path.Combine(_runtimeOutputPath, asset.FileName));
+
+                foreach (var executable in dependencyExecutables)
                 {
-                    baseAppConfig = XDocument.Load(fileStream);
+                    configFile = executable + Constants.ConfigSuffix;
+                    configFiles.Add(configFile);
                 }
             }
 
-            var appConfig = exporter.GetAllExports().GenerateBindingRedirects(baseAppConfig);
-
-            if (appConfig == null) { return; }
-
-            var path = outputName + ".config";
-            using (var stream = File.Create(path))
-            {
-                appConfig.Save(stream);
-            }
+            exporter.GetAllExports().GenerateBindingRedirects(configFiles);
         }
     }
 }

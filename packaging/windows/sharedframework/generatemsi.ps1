@@ -5,6 +5,7 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedFrameworkPublishRoot,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkMSIOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
+    [Parameter(Mandatory=$true)][string]$ProductMoniker,
     [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetName,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetVersion,
@@ -60,6 +61,7 @@ function RunCandle
         -out "$WixObjRoot\" `
         -dSharedFrameworkSource="$SharedFrameworkPublishRoot" `
         -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
+        -dProductMoniker="$ProductMoniker" `
         -dFrameworkName="$SharedFrameworkNugetName" `
         -dFrameworkDisplayVersion="$SharedFrameworkNugetVersion" `
         -dFrameworkComponentVersion="$SharedFrameworkComponentVersion" `

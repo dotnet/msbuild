@@ -15,6 +15,13 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
 {
     public class PublishDesktopTests : TestBase
     {
+        private TestAssetsManager _testAssetsManager;
+
+        public PublishDesktopTests()
+        {
+            _testAssetsManager = GetTestGroupTestAssetsManager("DesktopTestProjects");
+        }
+
         [WindowsOnlyTheory]
         [InlineData(null, null)]
         [InlineData("win7-x64", "the-win-x64-version.txt")]
@@ -26,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 expectedOutputName = $"the-win-{RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant()}-version.txt";
             }
 
-            var testInstance = TestAssetsManager.CreateTestInstance(Path.Combine("..", "DesktopTestProjects", "DesktopAppWithNativeDep"))
+            var testInstance = _testAssetsManager.CreateTestInstance("DesktopAppWithNativeDep")
                 .WithLockFiles();
 
             var publishCommand = new PublishCommand(testInstance.TestRoot, runtime: runtime);
@@ -55,7 +62,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var testInstance = GetTestInstance()
                 .WithLockFiles();
 
-            var publishCommand = new PublishCommand(Path.Combine(testInstance.TestRoot, project), runtime: runtime);
+            // Prevent path too long failure on CI machines
+            var projectPath = Path.Combine(testInstance.TestRoot, project);
+            var publishCommand = new PublishCommand(projectPath, runtime: runtime, output: Path.Combine(projectPath, "out"));
             var result = await publishCommand.ExecuteAsync();
 
             result.Should().Pass();
@@ -89,9 +98,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("KestrelDesktop", "http://localhost:20301")]
-        [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20302")]
-        public async Task DesktopApp_WithKestrel_WorksWhenRun(string project, string url)
+        [InlineData("KestrelDesktop", "http://localhost:20301", null)]
+        [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20302", null)]
+        [InlineData("KestrelDesktop", "http://localhost:20303", "net451")]
+        [InlineData("KestrelDesktopWithRuntimes", "http://localhost:20304", "net451")]
+        public async Task DesktopApp_WithKestrel_WorksWhenRun(string project, string url, string framework)
         {
             // Disabled due to https://github.com/dotnet/cli/issues/2428
             if (RuntimeInformation.ProcessArchitecture == Architecture.X86)
@@ -104,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 .WithBuildArtifacts();
 
             Task exec = null;
-            var command = new RunCommand(Path.Combine(testInstance.TestRoot, project));
+            var command = new RunCommand(Path.Combine(testInstance.TestRoot, project), framework);
             try
             {
                 exec = command.ExecuteAsync(url);
@@ -121,9 +132,28 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             }
         }
 
-        private static TestInstance GetTestInstance([CallerMemberName] string callingMethod = "")
+
+        [WindowsOnlyFact]
+        public async Task DesktopApp_WithRuntimes_PublishedSplitPackageAssets()
         {
-            return TestAssetsManager.CreateTestInstance(Path.Combine("..", "DesktopTestProjects", "DesktopKestrelSample"), callingMethod);
+            var testInstance = _testAssetsManager.CreateTestInstance("DesktopAppWithRuntimes")
+                .WithLockFiles();
+
+            var publishCommand = new PublishCommand(testInstance.TestRoot, runtime: "win7-x64");
+            var result = await publishCommand.ExecuteAsync();
+
+            result.Should().Pass();
+
+            // Test the output
+            var outputDir = publishCommand.GetOutputDirectory(portable: false);
+            System.Console.WriteLine(outputDir);
+            outputDir.Should().HaveFile("api-ms-win-core-file-l1-1-0.dll");
+            outputDir.Should().HaveFile(publishCommand.GetOutputExecutable());
+        }
+
+        private TestInstance GetTestInstance([CallerMemberName] string callingMethod = "")
+        {
+            return _testAssetsManager.CreateTestInstance("DesktopKestrelSample", callingMethod);
         }
     }
 }

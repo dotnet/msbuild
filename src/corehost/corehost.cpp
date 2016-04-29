@@ -63,7 +63,7 @@ int run(const int argc, const pal::char_t* argv[])
     pal::string_t own_path;
     if (!pal::get_own_executable_path(&own_path) || !pal::realpath(&own_path))
     {
-        trace::error(_X("Failed to locate current executable"));
+        trace::error(_X("Failed to resolve full path of the current executable [%s]"), own_path.c_str());
         return StatusCode::CoreHostCurExeFindFailure;
     }
 
@@ -96,7 +96,7 @@ int main(const int argc, const pal::char_t* argv[])
 
     if (trace::is_enabled())
     {
-        trace::info(_X("--- Invoked host main = {"));
+        trace::info(_X("--- Invoked dotnet [commit hash: %s] main = {"), _STRINGIFY(REPO_COMMIT_HASH));
         for (int i = 0; i < argc; ++i)
         {
             trace::info(_X("%s"), argv[i]);

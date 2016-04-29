@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel.Server.Models;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectModel.Server
 {
@@ -15,12 +14,9 @@ namespace Microsoft.DotNet.ProjectModel.Server
         /// </summary>
         public const string EnvDthProtocol = "DTH_PROTOCOL";
 
-        private readonly ILogger _log;
-
-        public ProtocolManager(int maxVersion, ILoggerFactory loggerFactory)
+        public ProtocolManager(int maxVersion)
         {
             MaxVersion = maxVersion;
-            _log = loggerFactory.CreateLogger<ProtocolManager>();
 
             // initialized to the highest supported version or environment overridden value
             int? protocol = GetProtocolVersionFromEnvironment();
@@ -54,18 +50,18 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 return;
             }
 
-            _log.LogInformation("Initializing the protocol negotiation.");
+            Reporter.Output.WriteLine("Initializing the protocol negotiation.");
 
             if (EnvironmentOverridden)
             {
-                _log.LogInformation($"DTH protocol negotiation is override by environment variable {EnvDthProtocol} and set to {CurrentVersion}.");
+                Reporter.Output.WriteLine($"DTH protocol negotiation is override by environment variable {EnvDthProtocol} and set to {CurrentVersion}.");
                 return;
             }
 
             var tokenValue = message.Payload?["Version"];
             if (tokenValue == null)
             {
-                _log.LogInformation("Protocol negotiation failed. Version property is missing in payload.");
+                Reporter.Output.WriteLine("Protocol negotiation failed. Version property is missing in payload.");
                 return;
             }
 
@@ -73,16 +69,16 @@ namespace Microsoft.DotNet.ProjectModel.Server
             if (preferredVersion == 0)
             {
                 // the preferred version can't be zero. either property is missing or the the payload is corrupted.
-                _log.LogInformation("Protocol negotiation failed. Protocol version 0 is invalid.");
+                Reporter.Output.WriteLine("Protocol negotiation failed. Protocol version 0 is invalid.");
                 return;
             }
 
             CurrentVersion = Math.Min(preferredVersion, MaxVersion);
-            _log.LogInformation($"Protocol negotiation successed. Use protocol {CurrentVersion}");
+            Reporter.Output.WriteLine($"Protocol negotiation successed. Use protocol {CurrentVersion}");
 
             if (message.Sender != null)
             {
-                _log.LogInformation("Respond to protocol negotiation.");
+                Reporter.Output.WriteLine("Respond to protocol negotiation.");
                 message.Sender.Transmit(Message.FromPayload(
                     MessageTypes.ProtocolVersion,
                     0,
@@ -90,7 +86,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             }
             else
             {
-                _log.LogInformation($"{nameof(Message.Sender)} is null.");
+                Reporter.Output.WriteLine($"{nameof(Message.Sender)} is null.");
             }
         }
 

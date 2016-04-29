@@ -4,6 +4,9 @@
   "tags": [
     ""
   ],
+  "compilationOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
   "projectUrl": "",
   "licenseUrl": "",
   "dependencies": {
@@ -14,6 +17,7 @@
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ]
-    }
+    },
+    "net451": { }
   }
 }

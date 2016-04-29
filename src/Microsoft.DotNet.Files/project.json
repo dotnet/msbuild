@@ -7,9 +7,22 @@
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "System.Linq.Expressions": "4.0.11-rc2-24022"
+    "System.Linq.Expressions": "4.0.11-rc2-24027"
   },
   "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": {
+          "type": "build"
+        },
+        "System.Collections": {
+          "type": "build"
+        },
+        "System.IO": {
+          "type": "build"
+        }
+      }
+    },
     "netstandard1.5": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50"

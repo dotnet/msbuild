@@ -279,6 +279,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         private LibraryExport ExportProject(ProjectDescription project)
         {
             var builder = LibraryExportBuilder.Create(project);
+            var compilerOptions = project.Project.GetCompilerOptions(project.TargetFrameworkInfo.FrameworkName, _configuration);
 
             if (!string.IsNullOrEmpty(project.TargetFrameworkInfo?.AssemblyPath))
             {
@@ -298,7 +299,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                     builder.AddRuntimeAsset(new LibraryAsset(Path.GetFileName(pdbPath), Path.GetFileName(pdbPath), pdbPath));
                 }
             }
-            else if (project.Project.Files.SourceFiles.Any())
+            else if (HasSourceFiles(project))
             {
                 var outputPaths = project.GetOutputPaths(_buildBasePath, _solutionRootPath, _configuration, _runtime);
 
@@ -334,6 +335,20 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             ));
 
             return builder.Build();
+        }
+
+        private bool HasSourceFiles(ProjectDescription project)
+        {
+            var compilerOptions = project.TargetFrameworkInfo.CompilerOptions;
+
+            if (compilerOptions.CompileInclude == null)
+            {
+                return project.Project.Files.SourceFiles.Any();
+            }
+
+            var includeFiles = IncludeFilesResolver.GetIncludeFiles(compilerOptions.CompileInclude, "/", diagnostics: null);
+
+            return includeFiles.Any();
         }
 
         private IEnumerable<LibraryAsset> CollectAssets(CompilationOutputFiles files)

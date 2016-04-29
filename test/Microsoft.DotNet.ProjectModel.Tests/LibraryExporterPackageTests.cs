@@ -336,7 +336,10 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var rootProject = new Project()
             {
                 Name = "RootProject",
-                CompilerName = "csc"
+                _defaultCompilerOptions = new CommonCompilerOptions
+                {
+                    CompilerName = "csc"
+                }
             };
 
             var rootProjectDescription = new ProjectDescription(

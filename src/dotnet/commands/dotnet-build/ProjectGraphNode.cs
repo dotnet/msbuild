@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,16 @@ namespace Microsoft.DotNet.Tools.Build
             IsRoot = isRoot;
         }
 
-        public ProjectContext ProjectContext { get { return _projectContextCreator.GetAwaiter().GetResult(); } }
+        public ProjectContext ProjectContext
+        {
+            get
+            {
+                using (_projectContextCreator.IsCompleted ? null : PerfTrace.Current.CaptureTiming("", "Blocking ProjectContext wait"))
+                {
+                    return _projectContextCreator.GetAwaiter().GetResult();
+                }
+            }
+        }
 
         public IReadOnlyList<ProjectGraphNode> Dependencies { get; }
 

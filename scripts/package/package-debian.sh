@@ -28,9 +28,10 @@ help(){
     echo "  --manpages <man pages directory>   Directory containing man pages for the package (Optional)."
     echo "  --output <output debfile>          The full path to which the package will be written."
     echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-nightly', 'dotnet'"
+    echo "  --brand-name <brand name>          Brand name of the package, used for 'short_description' of the deb file. Example - '.NET CLI SDK'"
     echo "  --framework-nuget-name <name>      The name of the nuget package that produced this shared framework."
     echo "  --framework-nuget-version <ver>    The versionf of the nuget package that produced this shared framework."
-    echo "  --previous-version-url <url>           Url to the previous version of the debian packge against which to run the upgrade tests."
+    echo "  --previous-version-url <url>       Url to the previous version of the debian packge against which to run the upgrade tests."
     echo "  --obj-root <object root>           Root folder for intermediate objects."
     exit 1
 }
@@ -54,6 +55,10 @@ parseargs(){
             ;;
         -p|--package-name)
             DOTNET_DEB_PACKAGE_NAME=$2
+            shift
+            ;;
+        -b|--brand-name)
+            DOTNET_CLI_BRAND_NAME=$2
             shift
             ;;
         -v|--version)
@@ -196,6 +201,7 @@ update_debian_json()
     sed -i "s/%SHARED_FRAMEWORK_NUGET_NAME%/$SHARED_FRAMEWORK_NUGET_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
     sed -i "s/%SHARED_FRAMEWORK_NUGET_VERSION%/$SHARED_FRAMEWORK_NUGET_VERSION/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
     sed -i "s/%SDK_NUGET_VERSION%/$DOTNET_CLI_VERSION/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
+    sed -i "s/%CLI_SDK_BRAND_NAME%/$DOTNET_CLI_BRAND_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
 }
 
 test_debian_package(){

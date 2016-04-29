@@ -10,7 +10,7 @@
     },
     "net451": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.1-rc2-24022"
+        "Microsoft.CSharp": "4.0.1-rc2-24027"
       }
     }
   }

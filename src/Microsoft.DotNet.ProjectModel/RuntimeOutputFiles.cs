@@ -38,9 +38,9 @@ namespace Microsoft.DotNet.ProjectModel
                     extension = FileNameSuffixes.DotNet.DynamicLib;
                 }
 
-                var compilationOptions = Project.GetCompilerOptions(Framework, Configuration);
+                var compilerOptions = Project.GetCompilerOptions(Framework, Configuration);
 
-                return Path.Combine(BasePath, compilationOptions.OutputName + extension);
+                return Path.Combine(BasePath, compilerOptions.OutputName + extension);
             }
         }
 

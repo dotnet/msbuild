@@ -117,6 +117,21 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
+        public void ProjectWithPublishOptionsTest()
+        {
+            var instance = TestAssetsManager.CreateTestInstance("EndToEndTestApp")
+                                            .WithLockFiles()
+                                            .WithBuildArtifacts();
+
+            var testProject = _getProjectJson(instance.TestRoot, "EndToEndTestApp");
+
+            var publishCommand = new PublishCommand(testProject);
+
+            publishCommand.Execute().Should().Pass();
+            publishCommand.GetOutputDirectory().Should().HaveFile("testpublishfile.txt");
+        }
+
+        [Fact]
         public void FailWhenNoRestoreTest()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary");
@@ -178,7 +193,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.Execute().Should().Pass();
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/2536")]
+        [Fact]
         public void PublishedLibraryShouldOutputDependenciesAndNoHost()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary"))
@@ -195,7 +210,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("System.Runtime.dll");
         }
 
-        [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/2536")]
+        [WindowsOnlyFact()]
         public void TestLibraryBindingRedirectGeneration()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestBindingRedirectGeneration")
@@ -344,6 +359,19 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 string temp = Path.Combine(dir.Path, "project.json");
                 command.Execute($"publish {temp}").Should().Fail();
             }
+        }
+
+        [Fact]
+        public void PublishWorksWithLocalProjectJson()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppSimple")
+                .WithLockFiles();
+
+            new PublishCommand("project.json")
+                .WithWorkingDirectory(instance.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

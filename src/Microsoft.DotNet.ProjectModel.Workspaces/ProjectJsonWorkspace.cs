@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,6 +13,8 @@ using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Workspaces
@@ -69,15 +70,26 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             // TODO: ctor argument?
             var configuration = "Debug";
 
-            var compilationOptions = project.GetLanguageSpecificCompilerOptions(project.TargetFramework, configuration);
+            var compilerOptions = project.GetLanguageSpecificCompilerOptions(project.TargetFramework, configuration);
 
-            var compilationSettings = ToCompilationSettings(compilationOptions, project.TargetFramework, project.ProjectFile.ProjectDirectory);
+            var compilationSettings = ToCompilationSettings(compilerOptions, project.TargetFramework, project.ProjectFile.ProjectDirectory);
 
             OnParseOptionsChanged(projectInfo.Id, new CSharpParseOptions(compilationSettings.LanguageVersion, preprocessorSymbols: compilationSettings.Defines));
 
             OnCompilationOptionsChanged(projectInfo.Id, compilationSettings.CompilationOptions);
 
-            foreach (var file in project.ProjectFile.Files.SourceFiles)
+            IEnumerable<string> sourceFiles = null;
+            if (compilerOptions.CompileInclude == null)
+            {
+                sourceFiles = project.ProjectFile.Files.SourceFiles;
+            }
+            else
+            {
+                var includeFiles = IncludeFilesResolver.GetIncludeFiles(compilerOptions.CompileInclude, "/", diagnostics: null);
+                sourceFiles = includeFiles.Select(f => f.SourcePath);
+            }
+
+            foreach (var file in sourceFiles)
             {
                 using (var stream = File.OpenRead(file))
                 {
@@ -189,10 +201,10 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             bool optimize = compilerOptions.Optimize ?? false;
             bool warningsAsErrors = compilerOptions.WarningsAsErrors ?? false;
 
-            Platform platform;
+            Microsoft.CodeAnalysis.Platform platform;
             if (!Enum.TryParse(value: platformValue, ignoreCase: true, result: out platform))
             {
-                platform = Platform.AnyCpu;
+                platform = Microsoft.CodeAnalysis.Platform.AnyCpu;
             }
 
             options = options
@@ -213,7 +225,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             {
                 keyFile = Path.GetFullPath(Path.Combine(projectDirectory, compilerOptions.KeyFile));
 
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || useOssSigning)
+                if (PlatformServices.Default.Runtime.OperatingSystemPlatform != Extensions.PlatformAbstractions.Platform.Windows || useOssSigning)
                 {
                     return options.WithCryptoPublicKey(
                         SnkUtils.ExtractPublicKey(File.ReadAllBytes(keyFile)));

@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var baseOption = context.ProjectFile.GetCompilerOptions(framework, configurationName);
 
             IReadOnlyList<string> defaultSuppresses;
-            var compilerName = context.ProjectFile.CompilerName ?? "csc";
+            var compilerName = baseOption.CompilerName ?? "csc";
             if (DefaultCompilerWarningSuppresses.Suppresses.TryGetValue(compilerName, out defaultSuppresses))
             {
                 baseOption.SuppressWarnings = (baseOption.SuppressWarnings ?? Enumerable.Empty<string>()).Concat(defaultSuppresses).Distinct();
@@ -37,25 +37,31 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return Path.Combine(intermediatePath, ".SDKVersion");
         }
 
+        public static string IncrementalCacheFile(this ProjectContext context, string configuration, string buildBasePath, string outputPath)
+        {
+            var intermediatePath = context.GetOutputPaths(configuration, buildBasePath, outputPath).IntermediateOutputDirectoryPath;
+            return Path.Combine(intermediatePath, ".IncrementalCache");
+        }
+
         // used in incremental compilation for the key file
         public static CommonCompilerOptions ResolveCompilationOptions(this ProjectContext context, string configuration)
         {
-            var compilationOptions = context.GetLanguageSpecificCompilerOptions(context.TargetFramework, configuration);
+            var compilerOptions = context.GetLanguageSpecificCompilerOptions(context.TargetFramework, configuration);
 
             // Path to strong naming key in environment variable overrides path in project.json
             var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);
 
             if (!string.IsNullOrWhiteSpace(environmentKeyFile))
             {
-                compilationOptions.KeyFile = environmentKeyFile;
+                compilerOptions.KeyFile = environmentKeyFile;
             }
-            else if (!string.IsNullOrWhiteSpace(compilationOptions.KeyFile))
+            else if (!string.IsNullOrWhiteSpace(compilerOptions.KeyFile))
             {
                 // Resolve full path to key file
-                compilationOptions.KeyFile =
-                    Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
+                compilerOptions.KeyFile =
+                    Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilerOptions.KeyFile));
             }
-            return compilationOptions;
+            return compilerOptions;
         }
     }
 }

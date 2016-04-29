@@ -10,8 +10,6 @@
 #include <codecvt>
 #include <ShlObj.h>
 
-static thread_local std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> t_converter;
-
 pal::string_t pal::to_lower(const pal::string_t& in)
 {
     pal::string_t ret = in;
@@ -135,7 +133,7 @@ bool pal::load_library(const char_t* path, dll_t* dll)
     *dll = ::LoadLibraryExW(path, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     if (*dll == nullptr)
     {
-        trace::error(_X("Failed to load the dll from %s, HRESULT: 0x%X"), path, HRESULT_FROM_WIN32(GetLastError()));
+        trace::error(_X("Failed to load the dll from [%s], HRESULT: 0x%X"), path, HRESULT_FROM_WIN32(GetLastError()));
         return false;
     }
 
@@ -143,7 +141,7 @@ bool pal::load_library(const char_t* path, dll_t* dll)
     HMODULE dummy_module;
     if (!::GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_PIN, path, &dummy_module))
     {
-        trace::error(_X("Failed to pin library: %s"));
+        trace::error(_X("Failed to pin library [%s] in [%s]"), path, _STRINGIFY(__FUNCTION__));
         return false;
     }
 
@@ -220,14 +218,14 @@ bool pal::getenv(const char_t* name, string_t* recv)
         auto err = GetLastError();
         if (err != ERROR_ENVVAR_NOT_FOUND)
         {
-            trace::error(_X("Failed to read environment variable '%s', HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
+            trace::error(_X("Failed to read environment variable [%s], HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
         }
         return false;
     }
     auto buf = new char_t[length];
     if (::GetEnvironmentVariableW(name, buf, length) == 0)
     {
-        trace::error(_X("Failed to read environment variable '%s', HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
+        trace::error(_X("Failed to read environment variable [%s], HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
         return false;
     }
 
@@ -253,24 +251,42 @@ bool pal::get_own_executable_path(string_t* recv)
     return true;
 }
 
-std::string pal::to_stdstring(const string_t& str)
+static bool wchar_convert_helper(DWORD code_page, const char* cstr, int len, pal::string_t* out)
 {
-    return t_converter.to_bytes(str);
+    out->clear();
+
+    // No need of explicit null termination, so pass in the actual length.
+    size_t size = ::MultiByteToWideChar(code_page, 0, cstr, len, nullptr, 0);
+    if (size == 0)
+    {
+        return false;
+    }
+    out->resize(size, '\0');
+    return ::MultiByteToWideChar(code_page, 0, cstr, len, &(*out)[0], out->size()) != 0;
 }
 
-pal::string_t pal::to_palstring(const std::string& str)
+bool pal::utf8_palstring(const std::string& str, pal::string_t* out)
 {
-    return t_converter.from_bytes(str);
+    return wchar_convert_helper(CP_UTF8, &str[0], str.size(), out);
 }
 
-void pal::to_palstring(const char* str, pal::string_t* out)
+bool pal::pal_clrstring(const pal::string_t& str, std::vector<char>* out)
 {
-    out->assign(t_converter.from_bytes(str));
+    out->clear();
+
+    // Pass -1 as we want explicit null termination in the char buffer.
+    size_t size = ::WideCharToMultiByte(CP_ACP, 0, str.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (size == 0)
+    {
+        return false;
+    }
+    out->resize(size, '\0');
+    return ::WideCharToMultiByte(CP_ACP, 0, str.c_str(), -1, out->data(), out->size(), nullptr, nullptr) != 0;
 }
 
-void pal::to_stdstring(const pal::char_t* str, std::string* out)
+bool pal::clr_palstring(const char* cstr, pal::string_t* out)
 {
-    out->assign(t_converter.to_bytes(str));
+    return wchar_convert_helper(CP_ACP, cstr, ::strlen(cstr), out);
 }
 
 bool pal::realpath(string_t* path)
@@ -279,7 +295,7 @@ bool pal::realpath(string_t* path)
     auto res = ::GetFullPathNameW(path->c_str(), MAX_PATH, buf, nullptr);
     if (res == 0 || res > MAX_PATH)
     {
-        trace::error(_X("Error resolving path: %s"), path->c_str());
+        trace::error(_X("Error resolving full path [%s]"), path->c_str());
         return false;
     }
     path->assign(buf);

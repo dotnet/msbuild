@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "SingleTargetP2" : {
+      "target": "project"
+    },
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
+  },
+  "frameworks": {
+    "netcoreapp1.0": { }
+  }
+}

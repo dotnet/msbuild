@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         private const string ProjectName = "some project name";
         private const string SomeLanguageVersion = "some language version";
         private const string SomeOutputName = "some output name";
+        private const string SomeCompilerName = "some compiler name";
         private const string SomePlatform = "some platform";
         private const string SomeKeyFile = "some key file";
         private const string SomeDebugType = "some debug type";
@@ -49,6 +50,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             _jsonCompilationOptions.Add("additionalArguments", new JArray(_someAdditionalArguments));
             _jsonCompilationOptions.Add("languageVersion", SomeLanguageVersion);
             _jsonCompilationOptions.Add("outputName", SomeOutputName);
+            _jsonCompilationOptions.Add("compilerName", SomeCompilerName);
             _jsonCompilationOptions.Add("platform", SomePlatform);
             _jsonCompilationOptions.Add("keyFile", SomeKeyFile);
             _jsonCompilationOptions.Add("debugType", SomeDebugType);
@@ -68,6 +70,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 AdditionalArguments = _someAdditionalArguments,
                 LanguageVersion = SomeLanguageVersion,
                 OutputName = SomeOutputName,
+                CompilerName = SomeCompilerName,
                 Platform = SomePlatform,
                 KeyFile = SomeKeyFile,
                 DebugType = SomeDebugType,
@@ -168,18 +171,18 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         public void It_leaves_marketing_information_empty_when_it_is_not_set_in_the_ProjectJson()
         {
             _emptyProject.Description.Should().BeNull();
-            _emptyProject.Summary.Should().BeNull();
+            _emptyProject.PackOptions.Summary.Should().BeNull();
             _emptyProject.Copyright.Should().BeNull();
             _emptyProject.Title.Should().BeNull();
             _emptyProject.EntryPoint.Should().BeNull();
-            _emptyProject.ProjectUrl.Should().BeNull();
-            _emptyProject.LicenseUrl.Should().BeNull();
-            _emptyProject.IconUrl.Should().BeNull();
+            _emptyProject.PackOptions.ProjectUrl.Should().BeNull();
+            _emptyProject.PackOptions.LicenseUrl.Should().BeNull();
+            _emptyProject.PackOptions.IconUrl.Should().BeNull();
             _emptyProject.Authors.Should().BeEmpty();
-            _emptyProject.Owners.Should().BeEmpty();
-            _emptyProject.Tags.Should().BeEmpty();
+            _emptyProject.PackOptions.Owners.Should().BeEmpty();
+            _emptyProject.PackOptions.Tags.Should().BeEmpty();
             _emptyProject.Language.Should().BeNull();
-            _emptyProject.ReleaseNotes.Should().BeNull();
+            _emptyProject.PackOptions.ReleaseNotes.Should().BeNull();
         }
 
         [Fact]
@@ -216,24 +219,105 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var project = GetProject(json);
 
             project.Description.Should().Be(someDescription);
-            project.Summary.Should().Be(someSummary);
+            project.PackOptions.Summary.Should().Be(someSummary);
             project.Copyright.Should().Be(someCopyright);
             project.Title.Should().Be(someTitle);
             project.EntryPoint.Should().Be(someEntryPoint);
-            project.ProjectUrl.Should().Be(someProjectUrl);
-            project.LicenseUrl.Should().Be(someLicenseUrl);
-            project.IconUrl.Should().Be(someIconUrl);
+            project.PackOptions.ProjectUrl.Should().Be(someProjectUrl);
+            project.PackOptions.LicenseUrl.Should().Be(someLicenseUrl);
+            project.PackOptions.IconUrl.Should().Be(someIconUrl);
             project.Authors.Should().Contain(authors);
-            project.Owners.Should().Contain(owners);
-            project.Tags.Should().Contain(tags);
+            project.PackOptions.Owners.Should().Contain(owners);
+            project.PackOptions.Tags.Should().Contain(tags);
             project.Language.Should().Be(someLanguage);
-            project.ReleaseNotes.Should().Be(someReleaseNotes);
+            project.PackOptions.ReleaseNotes.Should().Be(someReleaseNotes);
+        }
+
+        [Fact]
+        public void It_sets_the_marketing_information_when_it_is_set_in_the_ProjectJson_PackOptions()
+        {
+            const string someDescription = "some description";
+            const string someSummary = "some summary";
+            const string someCopyright = "some copyright";
+            const string someTitle = "some title";
+            const string someEntryPoint = "some entry point";
+            const string someProjectUrl = "some project url";
+            const string someLicenseUrl = "some license url";
+            const string someIconUrl = "some icon url";
+            const string someLanguage = "some language";
+            const string someReleaseNotes = "someReleaseNotes";
+            var authors = new[] { "some author", "and another author" };
+            var owners = new[] { "some owner", "a second owner" };
+            var tags = new[] { "tag1", "tag2" };
+
+            var json = new JObject();
+            var packOptions = new JObject();
+
+            json.Add("description", someDescription);
+            json.Add("copyright", someCopyright);
+            json.Add("title", someTitle);
+            json.Add("entryPoint", someEntryPoint);
+            json.Add("authors", new JArray(authors));
+            json.Add("language", someLanguage);
+            packOptions.Add("summary", someSummary);
+            packOptions.Add("projectUrl", someProjectUrl);
+            packOptions.Add("licenseUrl", someLicenseUrl);
+            packOptions.Add("iconUrl", someIconUrl);
+            packOptions.Add("owners", new JArray(owners));
+            packOptions.Add("tags", new JArray(tags));
+            packOptions.Add("releaseNotes", someReleaseNotes);
+            json.Add("packOptions", packOptions);
+
+            var project = GetProject(json);
+
+            project.Description.Should().Be(someDescription);
+            project.PackOptions.Summary.Should().Be(someSummary);
+            project.Copyright.Should().Be(someCopyright);
+            project.Title.Should().Be(someTitle);
+            project.EntryPoint.Should().Be(someEntryPoint);
+            project.PackOptions.ProjectUrl.Should().Be(someProjectUrl);
+            project.PackOptions.LicenseUrl.Should().Be(someLicenseUrl);
+            project.PackOptions.IconUrl.Should().Be(someIconUrl);
+            project.Authors.Should().Contain(authors);
+            project.PackOptions.Owners.Should().Contain(owners);
+            project.PackOptions.Tags.Should().Contain(tags);
+            project.Language.Should().Be(someLanguage);
+            project.PackOptions.ReleaseNotes.Should().Be(someReleaseNotes);
+        }
+
+        [Fact]
+        public void It_warns_when_deprecated_schema_is_used()
+        {
+            var json = new JObject();
+
+            json.Add("compilerName", "some compiler");
+            json.Add("compilationOptions", new JObject());
+            json.Add("projectUrl", "some project url");
+
+            var project = GetProject(json);
+
+            project.Diagnostics.Should().HaveCount(3);
+
+            project.Diagnostics.Should().Contain(m =>
+                m.ErrorCode == ErrorCodes.DOTNET1015 &&
+                m.Severity == DiagnosticMessageSeverity.Warning &&
+                m.Message == "The 'compilationOptions' option is deprecated. Use 'buildOptions' instead.");
+
+            project.Diagnostics.Should().Contain(m =>
+                m.ErrorCode == ErrorCodes.DOTNET1016 &&
+                m.Severity == DiagnosticMessageSeverity.Warning &&
+                m.Message == "The 'projectUrl' option in the root is deprecated. Use it in 'packOptions' instead.");
+
+            project.Diagnostics.Should().Contain(m =>
+                m.ErrorCode == ErrorCodes.DOTNET1016 &&
+                m.Severity == DiagnosticMessageSeverity.Warning &&
+                m.Message == "The 'compilerName' option in the root is deprecated. Use it in 'buildOptions' instead.");
         }
 
         [Fact]
         public void It_sets_the_compilerName_to_csc_when_one_is_not_set_in_the_ProjectJson()
         {
-            _emptyProject.CompilerName.Should().Be("csc");
+            _emptyProject.GetCompilerOptions(targetFramework: null, configurationName: null).CompilerName.Should().Be("csc");
         }
 
         [Fact]
@@ -244,7 +328,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             json.Add("compilerName", compilerName);
             var project = GetProject(json);
 
-            project.CompilerName.Should().Be(compilerName);
+            project.GetCompilerOptions(targetFramework: null, configurationName: null).CompilerName.Should().Be(compilerName);
         }
 
         [Fact]
@@ -267,7 +351,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void It_sets_requireLicenseAcceptance_to_false_when_one_is_not_set_in_the_ProjectJson()
         {
-            _emptyProject.RequireLicenseAcceptance.Should().BeFalse();
+            _emptyProject.PackOptions.RequireLicenseAcceptance.Should().BeFalse();
         }
 
         [Fact]
@@ -277,7 +361,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             json.Add("requireLicenseAcceptance", true);
             var project = GetProject(json);
 
-            project.RequireLicenseAcceptance.Should().BeTrue();
+            project.PackOptions.RequireLicenseAcceptance.Should().BeTrue();
         }
 
         [Fact]
@@ -287,7 +371,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             json.Add("requireLicenseAcceptance", false);
             var project = GetProject(json);
 
-            project.RequireLicenseAcceptance.Should().BeFalse();
+            project.PackOptions.RequireLicenseAcceptance.Should().BeFalse();
         }
 
         [Fact]
@@ -405,7 +489,8 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         {
             _emptyProject.GetCompilerOptions(null, null).Should().Be(new CommonCompilerOptions
             {
-                OutputName = ProjectName
+                OutputName = ProjectName,
+                CompilerName = "csc"
             });
         }
 
@@ -465,6 +550,17 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         {
             var json = new JObject();
             json.Add("compilationOptions", _jsonCompilationOptions);
+
+            var project = GetProject(json);
+
+            project.GetCompilerOptions(null, null).Should().Be(_commonCompilerOptions);
+        }
+
+        [Fact]
+        public void It_sets_buildOptions_when_it_is_set_in_the_compilationOptions_in_the_ProjectJson()
+        {
+            var json = new JObject();
+            json.Add("buildOptions", _jsonCompilationOptions);
 
             var project = GetProject(json);
 
@@ -874,7 +970,6 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                         stream,
                         ProjectName,
                         ProjectFilePath,
-                        new List<DiagnosticMessage>(),
                         settings);
                 }
             }

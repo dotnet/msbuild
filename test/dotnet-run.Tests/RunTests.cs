@@ -68,19 +68,96 @@ namespace Microsoft.DotNet.Tools.Run.Tests
             new RunCommand(instance.TestRoot).Execute().Should().Pass();
         }
 
-
-        private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
+        [Fact]
+        public void ItRunsWithLocalProjectJsonArg()
         {
-            // copy all the files to temp dir
-            foreach (var file in Directory.EnumerateFiles(projectDir))
-            {
-                tempDir.CopyFile(file);
-            }
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppSimple")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand("project.json")
+                .WithWorkingDirectory(instance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
         }
 
-        private string GetProjectPath(TempDirectory projectDir)
+        [Fact]
+        public void ItRunsAppsThatOutputUnicodeCharacters()
         {
-            return Path.Combine(projectDir.Path, "project.json");
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithUnicodéPath")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hélló Wórld!");
+        }
+
+        [Fact]
+        public void ItPassesArgumentsToTheApp()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithArgs")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot)
+                .ExecuteWithCapturedOutput("one --two -three")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(
+                    JoinWithNewlines(
+                        "Hello World!",
+                        "I was passed 3 args:",
+                        "arg: [one]",
+                        "arg: [--two]",
+                        "arg: [-three]"));
+        }
+
+        [Fact]
+        public void ItPassesAllArgsAfterUnexpectedArg()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithArgs")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot)
+                .ExecuteWithCapturedOutput("Hello -f")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(
+                    JoinWithNewlines(
+                        "Hello World!",
+                        "I was passed 2 args:",
+                        "arg: [Hello]",
+                        "arg: [-f]"));
+        }
+
+        [Fact]
+        public void ItHandlesArgSeparatorCorrectly()
+        {
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithArgs")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
+            new RunCommand(instance.TestRoot)
+                .ExecuteWithCapturedOutput("-- one two")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(
+                    JoinWithNewlines(
+                        "Hello World!",
+                        "I was passed 2 args:",
+                        "arg: [one]",
+                        "arg: [two]"));
+        }
+
+        private static string JoinWithNewlines(params string[] values)
+        {
+            return string.Join(Environment.NewLine, values);
         }
     }
 }

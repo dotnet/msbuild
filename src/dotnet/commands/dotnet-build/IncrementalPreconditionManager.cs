@@ -68,7 +68,8 @@ namespace Microsoft.DotNet.Tools.Build
         {
             if (project.ProjectFile != null)
             {
-                var projectCompiler = project.ProjectFile.CompilerName;
+                var compilerOptions = project.ProjectFile.GetCompilerOptions(project.TargetFramework, null);
+                var projectCompiler = compilerOptions.CompilerName;
 
                 if (!KnownCompilers.Any(knownCompiler => knownCompiler.Equals(projectCompiler, StringComparison.Ordinal)))
                 {

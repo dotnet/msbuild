@@ -5,23 +5,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Files;
 using NuGet.Frameworks;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Build
 {
     internal abstract class ProjectBuilder
     {
+        private readonly bool _skipDependencies;
+
+        public ProjectBuilder(bool skipDependencies)
+        {
+            _skipDependencies = skipDependencies;
+        }
+
         private Dictionary<ProjectContextIdentity, CompilationResult> _compilationResults = new Dictionary<ProjectContextIdentity, CompilationResult>();
 
         public IEnumerable<CompilationResult> Build(IEnumerable<ProjectGraphNode> roots)
         {
             foreach (var projectNode in roots)
             {
-                yield return Build(projectNode);
+                using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}"))
+                {
+                    yield return Build(projectNode);
+                }
             }
         }
 
-        protected CompilationResult? GetCompilationResult(ProjectGraphNode projectNode)
+        public CompilationResult? GetCompilationResult(ProjectGraphNode projectNode)
         {
             CompilationResult result;
             if (_compilationResults.TryGetValue(projectNode.ProjectContext.Identity, out result))
@@ -39,6 +52,7 @@ namespace Microsoft.DotNet.Tools.Build
         protected virtual void ProjectSkiped(ProjectGraphNode projectNode)
         {
         }
+
         protected abstract CompilationResult RunCompile(ProjectGraphNode projectNode);
 
         private CompilationResult Build(ProjectGraphNode projectNode)
@@ -57,30 +71,62 @@ namespace Microsoft.DotNet.Tools.Build
 
         private CompilationResult CompileWithDependencies(ProjectGraphNode projectNode)
         {
-            foreach (var dependency in projectNode.Dependencies)
+            if (!_skipDependencies)
             {
-                var result = Build(dependency);
-                if (result == CompilationResult.Failure)
+                foreach (var dependency in projectNode.Dependencies)
                 {
-                    return CompilationResult.Failure;
+                    var result = Build(dependency);
+                    if (result == CompilationResult.Failure)
+                    {
+                        return CompilationResult.Failure;
+                    }
                 }
             }
 
             var context = projectNode.ProjectContext;
-            if (!context.ProjectFile.Files.SourceFiles.Any())
+            using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}", nameof(HasSourceFiles)))
             {
-                return CompilationResult.IncrementalSkip;
+                if (!HasSourceFiles(context))
+                {
+                    return CompilationResult.IncrementalSkip;
+                }
             }
 
-            if (NeedsRebuilding(projectNode))
+            bool needsRebuilding;
+            using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}", nameof(NeedsRebuilding)))
             {
-                return RunCompile(projectNode);
+                needsRebuilding = NeedsRebuilding(projectNode);
+            }
+
+            if (needsRebuilding)
+            {
+                using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}",nameof(RunCompile)))
+                {
+                    return RunCompile(projectNode);
+                }
             }
             else
             {
-                ProjectSkiped(projectNode);
+                using (PerfTrace.Current.CaptureTiming($"{projectNode.ProjectContext.ProjectName()}", nameof(ProjectSkiped)))
+                {
+                    ProjectSkiped(projectNode);
+                }
                 return CompilationResult.IncrementalSkip;
             }
+        }
+
+        private static bool HasSourceFiles(ProjectContext context)
+        {
+            var compilerOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, null);
+
+            if (compilerOptions.CompileInclude == null)
+            {
+                return context.ProjectFile.Files.SourceFiles.Any();
+            }
+
+            var includeFiles = IncludeFilesResolver.GetIncludeFiles(compilerOptions.CompileInclude, "/", diagnostics: null);
+
+            return includeFiles.Any();
         }
     }
 }

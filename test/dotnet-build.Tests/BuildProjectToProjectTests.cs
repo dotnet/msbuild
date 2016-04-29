@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                                                 .WithBuildArtifacts();
 
             TestProjectRoot = testInstance.TestRoot;
-            
+
             var dependencies = new[] { "L11", "L12", "L21", "L22" };
 
             // modify the source code of a leaf dependency
@@ -84,6 +84,27 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var result3 = BuildProject(noDependencies: true);
             result3.Should().HaveSkippedProjectCompilation("L0", _appFrameworkFullName);
             AssertResultDoesNotContainStrings(result3, dependencies);
+        }
+
+        [Fact]
+        public void TestNoDependenciesDependencyRebuild()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestProjectToProjectDependencies")
+                                                .WithLockFiles()
+                                                .WithBuildArtifacts();
+
+            TestProjectRoot = testInstance.TestRoot;
+
+            // modify the source code of a leaf dependency
+            TouchSourcesOfProject("L11");
+
+            // second build with no dependencies, rebuilding leaf
+            var result2 = new BuildCommand(GetProjectDirectory("L11"), noDependencies: true, framework: DefaultLibraryFramework).ExecuteWithCapturedOutput();
+            result2.Should().HaveStdOutMatching("Compiling.*L11.*");
+
+            // third build with no dependencies but incremental; root project should rebuild
+            var result3 = BuildProject(noDependencies: true);
+            result3.Should().HaveCompiledProject("L0", _appFrameworkFullName);
         }
 
         private static void AssertResultDoesNotContainStrings(CommandResult commandResult, string[] strings)

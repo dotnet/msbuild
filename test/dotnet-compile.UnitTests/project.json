@@ -18,14 +18,14 @@
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc2-24022",
+      "version": "4.0.0-rc2-24027",
       "exclude": "Compile"
     },
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-140469-38",
+    "dotnet-test-xunit": "1.0.0-rc2-162081-13",
     "moq.netcore": "4.4.0-beta8",
     "FluentAssertions": "4.2.2"
   },

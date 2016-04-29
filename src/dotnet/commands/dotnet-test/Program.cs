@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -42,18 +41,52 @@ namespace Microsoft.DotNet.Tools.Test
                     RegisterForParentProcessExit(dotnetTestParams.ParentProcessId.Value);
                 }
 
+                var projectPath = GetProjectPath(dotnetTestParams.ProjectPath);
+                var runtimeIdentifiers = !string.IsNullOrEmpty(dotnetTestParams.Runtime) ?
+                    new[] { dotnetTestParams.Runtime } :
+                    PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
+                var exitCode = 0;
+
                 // Create a workspace
                 var workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
 
-                var projectContexts = CreateProjectContexts(workspace, dotnetTestParams.ProjectPath, dotnetTestParams.Runtime);
+                if (dotnetTestParams.Framework != null)
+                {
+                    var projectContext = ProjectContext.Create(projectPath, dotnetTestParams.Framework, runtimeIdentifiers);
+                    exitCode = RunTest(projectContext, dotnetTestParams);
+                }
+                else
+                {
+                    var summary = new Summary();
+                    var projectContexts = workspace
+                        .GetProjectContextCollection(projectPath).FrameworkOnlyContexts
+                        .Select(c => workspace.GetRuntimeContext(c, runtimeIdentifiers))
+                        .ToList();
 
-                var projectContext = projectContexts.First();
+                    // Execute for all TFMs the project targets.
+                    foreach (var projectContext in projectContexts)
+                    {
+                        var result = RunTest(projectContext, dotnetTestParams);
+                        if (result == 0)
+                        {
+                            summary.Passed++;
+                        }
+                        else
+                        {
+                            summary.Failed++;
+                            if (exitCode == 0)
+                            {
+                                // If tests fail in more than one TFM, we'll have it use the result of the first one
+                                // as the exit code.
+                                exitCode = result;
+                            }
+                        }
+                    }
 
-                var testRunner = projectContext.ProjectFile.TestRunner;
+                    summary.Print();
+                }
 
-                IDotnetTestRunner dotnetTestRunner = _dotnetTestRunnerFactory.Create(dotnetTestParams.Port);
-
-                return dotnetTestRunner.RunTests(projectContext, dotnetTestParams);
+                return exitCode;
             }
             catch (InvalidOperationException ex)
             {
@@ -101,7 +134,14 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
-        private static IEnumerable<ProjectContext> CreateProjectContexts(WorkspaceContext workspace, string projectPath, string runtime)
+        private int RunTest(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        {
+            var testRunner = projectContext.ProjectFile.TestRunner;
+            var dotnetTestRunner = _dotnetTestRunnerFactory.Create(dotnetTestParams.Port);
+            return dotnetTestRunner.RunTests(projectContext, dotnetTestParams);
+        }
+
+        private static string GetProjectPath(string projectPath)
         {
             projectPath = projectPath ?? Directory.GetCurrentDirectory();
 
@@ -115,12 +155,29 @@ namespace Microsoft.DotNet.Tools.Test
                 throw new InvalidOperationException($"{projectPath} does not exist.");
             }
 
-            var runtimeIdentifiers = !string.IsNullOrEmpty(runtime) ?
-                new[] { runtime } :
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
+            return projectPath;
+        }
 
-            var contexts = workspace.GetProjectContextCollection(projectPath).FrameworkOnlyContexts;
-            return contexts.Select(c => workspace.GetRuntimeContext(c, runtimeIdentifiers));
+        private class Summary
+        {
+            public int Passed { get; set; }
+
+            public int Failed { get; set; }
+
+            public int Total => Passed + Failed;
+
+            public void Print()
+            {
+                var summaryMessage = $"SUMMARY: Total: {Total} targets, Passed: {Passed}, Failed: {Failed}.";
+                if (Failed > 0)
+                {
+                    Reporter.Error.WriteLine(summaryMessage.Red());
+                }
+                else
+                {
+                    Reporter.Output.WriteLine(summaryMessage);
+                }
+            }
         }
     }
 }

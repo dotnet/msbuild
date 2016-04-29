@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "SingleTargetP1" : {
+      "target": "project"
+    },
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
+  },
+  "frameworks": {
+    "netcoreapp1.0": { }
+  }
+}

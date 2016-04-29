@@ -10,6 +10,22 @@
     "Microsoft.DotNet.Files": "1.0.0-*"
   },
   "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": {
+          "type": "build"
+        },
+        "System.Collections": {
+          "type": "build"
+        },
+        "System.IO": {
+            "type": "build"
+        },
+        "System.Threading.Tasks": {
+            "type": "build"
+        }
+      }
+    },
     "netstandard1.5": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50"

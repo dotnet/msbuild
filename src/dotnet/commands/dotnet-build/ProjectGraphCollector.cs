@@ -36,15 +36,16 @@ namespace Microsoft.DotNet.Tools.Build
 
         private ProjectGraphNode TraverseProject(ProjectDescription project, IDictionary<string, LibraryDescription> lookup, ProjectContext context = null)
         {
+            var isRoot = context != null;
             var deps = new List<ProjectGraphNode>();
-            if (_collectDependencies)
+            if (isRoot || _collectDependencies)
             {
                 foreach (var dependency in project.Dependencies)
                 {
                     LibraryDescription libraryDescription;
                     if (lookup.TryGetValue(dependency.Name, out libraryDescription))
                     {
-                        if (libraryDescription.Identity.Type.Equals(LibraryType.Project))
+                        if (libraryDescription.Resolved && libraryDescription.Identity.Type.Equals(LibraryType.Project))
                         {
                             deps.Add(TraverseProject((ProjectDescription)libraryDescription, lookup));
                         }
@@ -55,8 +56,9 @@ namespace Microsoft.DotNet.Tools.Build
                     }
                 }
             }
+
             var task = context != null ? Task.FromResult(context) : Task.Run(() => _projectContextFactory(project.Path, project.Framework));
-            return new ProjectGraphNode(task, deps, context != null);
+            return new ProjectGraphNode(task, deps, isRoot);
         }
 
         private IEnumerable<ProjectGraphNode> TraverseNonProject(LibraryDescription root, IDictionary<string, LibraryDescription> lookup)

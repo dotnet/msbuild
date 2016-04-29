@@ -26,6 +26,7 @@ help(){
     echo "  --input <input directory>          Package the entire contents of the directory tree."
     echo "  --output <output debfile>          The full path to which the package will be written."
     echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-sharedframework'"
+    echo "  --brand-name <brand name>          Brand name of the package, used for 'short_description' of the deb file. Example - '.NET Core'"
     echo "  --framework-nuget-name <name>      The name of the nuget package that produced this shared framework."
     echo "  --framework-nuget-version <ver>    The versionf of the nuget package that produced this shared framework."
     echo "  --obj-root <object root>           Root folder for intermediate objects."
@@ -46,6 +47,10 @@ while [[ $# > 0 ]]; do
             ;;
         -p|--package-name)
             SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME=$2
+            shift
+            ;;
+        -b|--brand-name)
+            SHARED_FRAMEWORK_BRAND_NAME=$2
             shift
             ;;
         --framework-nuget-name)
@@ -124,6 +129,7 @@ update_debian_json()
     sed -i "s/%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%/$SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
     sed -i "s/%SHARED_FRAMEWORK_NUGET_NAME%/$SHARED_FRAMEWORK_NUGET_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
     sed -i "s/%SHARED_FRAMEWORK_NUGET_VERSION%/$SHARED_FRAMEWORK_NUGET_VERSION/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
+    sed -i "s/%SHARED_FRAMEWORK_BRAND_NAME%/$SHARED_FRAMEWORK_BRAND_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
 }
 
 test_debian_package(){

@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
                 return new string[] { json.Value<string>() };
             }
 
-            if(json.Type == JTokenType.Array)
+            if (json.Type == JTokenType.Array)
             {
                 return json.Select(v => v.ToString()).ToArray();
             }

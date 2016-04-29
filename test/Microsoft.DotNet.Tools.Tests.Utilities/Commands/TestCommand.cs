@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         protected string _command;
 
+        private string _baseDirectory;
+
         public string WorkingDirectory { get; set; }
 
         public Process CurrentProcess { get; set; }
@@ -24,6 +26,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public TestCommand(string command)
         {
             _command = command;
+#if NET451            
+            _baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+#else
+            _baseDirectory = AppContext.BaseDirectory;
+#endif 
+        }
+
+        public TestCommand WithWorkingDirectory(string workingDirectory)
+        {
+            WorkingDirectory = workingDirectory;
+            return this;
         }
 
         public virtual CommandResult Execute(string args = "")
@@ -63,7 +76,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var command = _command;
             ResolveCommand(ref command, ref args);
             var commandPath = Env.GetCommandPath(command, ".exe", ".cmd", "") ??
-                Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, command, ".exe", ".cmd", "");
+                Env.GetCommandPathFromRootPath(_baseDirectory, command, ".exe", ".cmd", "");
 
             Console.WriteLine($"Executing (Captured Output) - {commandPath} {args}");
 
@@ -102,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             if (!Path.IsPathRooted(executable))
             {
                 executable = Env.GetCommandPath(executable) ??
-                           Env.GetCommandPathFromRootPath(AppContext.BaseDirectory, executable);
+                           Env.GetCommandPathFromRootPath(_baseDirectory, executable);
             }
         }
 
@@ -153,12 +166,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 Arguments = args,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
-                RedirectStandardInput = true
+                RedirectStandardInput = true,
+                UseShellExecute = false
             };
 
             foreach (var item in Environment)
             {
+#if NET451
+                psi.EnvironmentVariables[item.Key] = item.Value;
+#else
                 psi.Environment[item.Key] = item.Value;
+#endif
             }
 
             if (!string.IsNullOrWhiteSpace(WorkingDirectory))

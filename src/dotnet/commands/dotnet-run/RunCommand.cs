@@ -20,6 +20,13 @@ namespace Microsoft.DotNet.Tools.Run
         public string Project = null;
         public IReadOnlyList<string> Args = null;
 
+        public static readonly string[] DefaultFrameworks = new[]
+        {
+            FrameworkConstants.FrameworkIdentifiers.NetCoreApp,
+            FrameworkConstants.FrameworkIdentifiers.NetStandardApp,
+        };
+
+
         ProjectContext _context;
         List<string> _args;
         private WorkspaceContext _workspace;
@@ -61,40 +68,37 @@ namespace Microsoft.DotNet.Tools.Run
                 Configuration = Constants.DefaultConfiguration;
             }
 
-            var frameworkContexts = _workspace.GetProjectContexts(Project).Where(c => string.IsNullOrEmpty(c.RuntimeIdentifier));
+            var frameworkContexts = _workspace.GetProjectContextCollection(Project).FrameworkOnlyContexts;
 
             var rids = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
 
+            ProjectContext frameworkContext;
             if (Framework == null)
             {
-                var defaultFrameworks = new[]
-                {
-                    FrameworkConstants.FrameworkIdentifiers.NetCoreApp,
-                    FrameworkConstants.FrameworkIdentifiers.NetStandardApp,
-                };
-
-                ProjectContext context;
                 if (frameworkContexts.Count() == 1)
                 {
-                    context = frameworkContexts.Single();
+                    frameworkContext = frameworkContexts.Single();
                 }
                 else
                 {
-                    context = frameworkContexts.FirstOrDefault(c => defaultFrameworks.Contains(c.TargetFramework.Framework));
-                    if (context == null)
-                    {
-                        throw new InvalidOperationException($"Couldn't find target to run. Possible causes:" + Environment.NewLine +
-                            "1. No project.lock.json file or restore failed - run `dotnet restore`" + Environment.NewLine +
-                            $"2. project.lock.json has multiple targets none of which is in default list ({string.Join(", ", defaultFrameworks)})");
-                    }
+                    frameworkContext = frameworkContexts.FirstOrDefault(c => DefaultFrameworks.Contains(c.TargetFramework.Framework));
                 }
-
-                _context = _workspace.GetRuntimeContext(context, rids);
             }
             else
             {
-                _context = _workspace.GetProjectContext(Project, NuGetFramework.Parse(Framework), rids);
+                frameworkContext = frameworkContexts.FirstOrDefault(c => Equals(c.TargetFramework, NuGetFramework.Parse(Framework)));
             }
+
+            if (frameworkContext == null)
+            {
+                throw new InvalidOperationException($"Couldn't find target to run. Possible causes:" + Environment.NewLine +
+                    "1. No project.lock.json file or restore failed - run `dotnet restore`" + Environment.NewLine +
+                    Framework == null ?
+                        $"2. project.lock.json has multiple targets none of which is in default list ({string.Join(", ", DefaultFrameworks)})" :
+                        $"2. The project does not support the desired framework: {Framework}");
+            }
+
+            _context = _workspace.GetRuntimeContext(frameworkContext, rids);
 
             if (Args == null)
             {

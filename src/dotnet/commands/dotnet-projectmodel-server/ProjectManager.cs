@@ -6,18 +6,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel.Server.Helpers;
 using Microsoft.DotNet.ProjectModel.Server.Messengers;
 using Microsoft.DotNet.ProjectModel.Server.Models;
-using Microsoft.Extensions.Logging;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Server
 {
     internal class ProjectManager
     {
-        private readonly ILogger _log;
-
         private readonly object _processingLock = new object();
         private readonly Queue<Message> _inbox = new Queue<Message>();
         private readonly ProtocolManager _protocolManager;
@@ -42,13 +40,12 @@ namespace Microsoft.DotNet.ProjectModel.Server
         private GlobalErrorMessenger _globalErrorMessenger;
         private ProjectInformationMessenger _projectInforamtionMessenger;
 
-        public ProjectManager(int contextId,
-                                     ILoggerFactory loggerFactory,
-                                     WorkspaceContext workspaceContext,
-                                     ProtocolManager protocolManager)
+        public ProjectManager(
+            int contextId,
+            WorkspaceContext workspaceContext,
+            ProtocolManager protocolManager)
         {
             Id = contextId;
-            _log = loggerFactory.CreateLogger<ProjectManager>();
             _workspaceContext = workspaceContext;
             _protocolManager = protocolManager;
 
@@ -122,7 +119,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             }
             catch (Exception ex)
             {
-                _log.LogError("A unexpected exception occurred: {0}", ex.ToString());
+                Reporter.Error.WriteLine($"A unexpected exception occurred: {ex}");
 
                 var error = new ErrorMessage
                 {
@@ -169,11 +166,11 @@ namespace Microsoft.DotNet.ProjectModel.Server
 
         private void DrainInbox()
         {
-            _log.LogInformation("Begin draining inbox.");
+            Reporter.Output.WriteLine("Begin draining inbox.");
 
             while (ProcessMessage()) { }
 
-            _log.LogInformation("Finish draining inbox.");
+            Reporter.Output.WriteLine("Finish draining inbox.");
         }
 
         private bool ProcessMessage()
@@ -191,7 +188,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 Debug.Assert(message != null);
             }
 
-            _log.LogInformation($"Received {message.MessageType}");
+            Reporter.Output.WriteLine($"Received {message.MessageType}");
 
             switch (message.MessageType)
             {
@@ -218,7 +215,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
         {
             if (_initializedContext != null)
             {
-                _log.LogWarning($"Received {message.MessageType} message more than once for {_appPath.Value}");
+                Reporter.Output.WriteLine($"Received {message.MessageType} message more than once for {_appPath.Value}");
                 return;
             }
 
@@ -230,7 +227,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             if (version != 0 && !_protocolManager.EnvironmentOverridden)
             {
                 _contextProtocolVersion = Math.Min(version, _protocolManager.MaxVersion);
-                _log.LogInformation($"Set context protocol version to {_contextProtocolVersion.Value}");
+                Reporter.Output.WriteLine($"Set context protocol version to {_contextProtocolVersion.Value}");
             }
         }
 

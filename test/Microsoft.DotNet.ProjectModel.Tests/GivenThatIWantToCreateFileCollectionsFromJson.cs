@@ -83,7 +83,6 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                         stream,
                         ProjectName,
                         ProjectFilePath,
-                        new List<DiagnosticMessage>(),
                         settings);
                 }
             }

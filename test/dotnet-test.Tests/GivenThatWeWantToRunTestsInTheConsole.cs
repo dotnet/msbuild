@@ -20,7 +20,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         public GivenThatWeWantToRunTestsInTheConsole()
         {
             var testInstance =
-                TestAssetsManager.CreateTestInstance("ProjectWithTests", identifier: "ConsoleTests");
+                TestAssetsManager.CreateTestInstance(Path.Combine("ProjectsWithTests", "NetCoreAppOnlyProject"), identifier: "ConsoleTests");
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(
@@ -53,6 +53,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var testCommand = new DotnetTestCommand();
             var result = testCommand.Execute($"{_projectFilePath}");
             result.Should().Pass();
+        }
+
+        [Fact]
+        public void It_runs_tests_for_a_local_project_json()
+        {
+            string projectDirectory = Path.GetDirectoryName(_projectFilePath);
+
+            new DotnetTestCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("project.json")
+                .Should()
+                .Pass();
         }
 
         [Fact]

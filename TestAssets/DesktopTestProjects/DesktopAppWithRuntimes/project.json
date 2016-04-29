@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.NETCore.Windows.ApiSets": "1.0.1-rc2-*"
+  },
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "frameworks": {
+    "net451": {}
+  },
+  "runtimes":
+  {
+    "win7-x64": {}
+  }
+}
