@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using System.Threading;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel.Server.Models;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.ProjectModel.Server
@@ -14,20 +14,18 @@ namespace Microsoft.DotNet.ProjectModel.Server
     {
         private readonly BinaryReader _reader;
         private readonly BinaryWriter _writer;
-        private readonly ILogger _log;
 
-        public ProcessingQueue(Stream stream, ILoggerFactory loggerFactory)
+        public ProcessingQueue(Stream stream)
         {
             _reader = new BinaryReader(stream);
             _writer = new BinaryWriter(stream);
-            _log = loggerFactory.CreateLogger<ProcessingQueue>();
         }
 
         public event Action<Message> OnReceive;
 
         public void Start()
         {
-            _log.LogInformation("Start");
+            Reporter.Output.WriteLine("Start");
             new Thread(ReceiveMessages).Start();
         }
 
@@ -43,11 +41,11 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 catch (IOException ex)
                 {
                     // swallow
-                    _log.LogInformation($"Ignore {nameof(IOException)} during sending message: \"{ex.Message}\".");
+                    Reporter.Output.WriteLine($"Ignore {nameof(IOException)} during sending message: \"{ex.Message}\".");
                 }
                 catch (Exception ex)
                 {
-                    _log.LogWarning($"Unexpected exception {ex.GetType().Name} during sending message: \"{ex.Message}\".");
+                    Reporter.Output.WriteLine($"Unexpected exception {ex.GetType().Name} during sending message: \"{ex.Message}\".");
                     throw;
                 }
             }
@@ -59,7 +57,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
         {
             return Send(_writer =>
             {
-                _log.LogInformation("OnSend ({0})", message);
+                Reporter.Output.WriteLine($"OnSend ({message})");
                 _writer.Write(JsonConvert.SerializeObject(message));
             });
         }
@@ -73,17 +71,17 @@ namespace Microsoft.DotNet.ProjectModel.Server
                     var content = _reader.ReadString();
                     var message = JsonConvert.DeserializeObject<Message>(content);
 
-                    _log.LogInformation("OnReceive ({0})", message);
+                    Reporter.Output.WriteLine($"OnReceive ({message})");
                     OnReceive(message);
                 }
             }
             catch (IOException ex)
             {
-                _log.LogInformation($"Ignore {nameof(IOException)} during receiving messages: \"{ex}\".");
+                Reporter.Output.WriteLine($"Ignore {nameof(IOException)} during receiving messages: \"{ex}\".");
             }
             catch (Exception ex)
             {
-                _log.LogError($"Unexpected exception {ex.GetType().Name} during receiving messages: \"{ex}\".");
+                Reporter.Error.WriteLine($"Unexpected exception {ex.GetType().Name} during receiving messages: \"{ex}\".");
             }
         }
     }

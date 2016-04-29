@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -11,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -22,30 +20,9 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
     public class DthTests : TestBase
     {
         private readonly TestAssetsManager _testAssetsManager;
-        private readonly ILoggerFactory _loggerFactory;
 
         public DthTests()
         {
-            _loggerFactory = new LoggerFactory();
-
-            var testVerbose = Environment.GetEnvironmentVariable("DOTNET_TEST_VERBOSE");
-            if (testVerbose == "2")
-            {
-                _loggerFactory.AddConsole(LogLevel.Trace);
-            }
-            else if (testVerbose == "1")
-            {
-                _loggerFactory.AddConsole(LogLevel.Information);
-            }
-            else if (testVerbose == "0")
-            {
-                _loggerFactory.AddConsole(LogLevel.Warning);
-            }
-            else
-            {
-                _loggerFactory.AddConsole(LogLevel.Error);
-            }
-
             _testAssetsManager = new TestAssetsManager(
                 Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "DthTestProjects", "src"));
         }
@@ -56,8 +33,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var projectPath = Path.Combine(_testAssetsManager.AssetsRoot, "EmptyConsoleApp");
             Assert.NotNull(projectPath);
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
 
@@ -86,8 +63,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var projectPath = Path.Combine(_testAssetsManager.AssetsRoot, "EmptyConsoleApp");
             Assert.NotNull(projectPath);
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
                 var messages = client.DrainAllMessages()
@@ -123,8 +100,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         [InlineData(3, 3)]
         public void DthStartup_ProtocolNegotiation(int requestVersion, int expectVersion)
         {
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.SetProtocolVersion(requestVersion);
 
@@ -138,8 +115,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         [Fact]
         public void DthStartup_ProtocolNegotiation_ZeroIsNoAllowed()
         {
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.SetProtocolVersion(0);
 
@@ -168,8 +145,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var projectPath = Path.Combine(_testAssetsManager.AssetsRoot, testProjectName);
             Assert.NotNull(projectPath);
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
 
@@ -221,8 +198,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         [Fact]
         public void DthNegative_BrokenProjectPathInLockFile()
         {
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 // After restore the project is copied to another place so that
                 // the relative path in project lock file is invalid.
@@ -255,8 +232,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var projectPath = assets.CreateTestInstance("DthUpdateSearchPathSample").WithLockFiles().TestRoot;
             Assert.True(Directory.Exists(projectPath));
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 var testProject = Path.Combine(projectPath, "home", "src", "MainProject");
 
@@ -312,8 +289,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         {
             var projectPath = _testAssetsManager.CreateTestInstance("EmptyConsoleApp").TestRoot;
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
                 var messages = client.DrainAllMessages();
@@ -338,8 +315,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var assetsManager = new TestAssetsManager(testAssetsPath);
             var testSource = assetsManager.CreateTestInstance("IncorrectProjectJson").TestRoot;
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(Path.Combine(_testAssetsManager.AssetsRoot, "EmptyLibrary"));
                 client.Initialize(testSource);
@@ -371,8 +348,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var assetsManager = new TestAssetsManager(testAssetsPath);
             var testSource = assetsManager.CreateTestInstance("IncorrectGlobalJson");
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(Path.Combine(testSource.TestRoot, "src", "Project1"));
 
@@ -390,8 +367,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                 .WithLockFiles()
                                                 .TestRoot;
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 var projectFile = Path.Combine(testProject, Project.FileName);
                 var content = File.ReadAllText(projectFile);
@@ -417,8 +394,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                 .WithLockFiles()
                                                 .TestRoot;
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 var lockFilePath = Path.Combine(testProject, LockFile.FileName);
                 var lockFileContent = File.ReadAllText(lockFilePath);
@@ -469,8 +446,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
 
             File.WriteAllText(projectFilePath, JsonConvert.SerializeObject(projectJson));
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
                 var messages = client.DrainAllMessages();
@@ -495,8 +472,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                      "src",
                                                      "MainApp");
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(testProject);
                 var messages = client.DrainAllMessages();
@@ -550,8 +527,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                 .WithLockFiles()
                                                 .TestRoot;
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
 
@@ -596,8 +573,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var projectPath = tam.CreateTestInstance("ValidCase01").WithLockFiles().TestRoot;
             projectPath = Path.Combine(projectPath, "src", "MainApp");
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
 
@@ -638,8 +615,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         {
             var projectPath = Path.Combine(RepoRoot, "TestAssets", "ProjectModelServer", "MscorlibLibraryDuplication");
 
-            using (var server = new DthTestServer(_loggerFactory))
-            using (var client = new DthTestClient(server, _loggerFactory))
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
             {
                 client.Initialize(projectPath);
 

@@ -5,8 +5,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Microsoft.DotNet.ProjectModel.Server;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Tests
 {
@@ -15,14 +13,12 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         private readonly ProjectModelServerCommand _program;
         private readonly Thread _thread;
 
-        public DthTestServer(ILoggerFactory loggerFactory)
+        public DthTestServer()
         {
-            LoggerFactory = loggerFactory;
-
             Port = FindFreePort();
             HostId = Guid.NewGuid().ToString();
 
-            _program = new ProjectModelServerCommand(Port, HostId, LoggerFactory);
+            _program = new ProjectModelServerCommand(Port, HostId);
 
             _thread = new Thread(() => { _program.OpenChannel(); }) { IsBackground = true };
             _thread.Start();
@@ -31,8 +27,6 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         public string HostId { get; }
 
         public int Port { get; }
-
-        public ILoggerFactory LoggerFactory { get; }
 
         public void Dispose()
         {
