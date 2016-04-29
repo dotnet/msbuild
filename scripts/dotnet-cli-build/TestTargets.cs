@@ -36,8 +36,7 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
-            "Microsoft.Extensions.DependencyModel.Tests",
-            "Performance"
+            "Microsoft.Extensions.DependencyModel.Tests"
         };
 
         public static readonly string[] WindowsTestProjects = new[]
