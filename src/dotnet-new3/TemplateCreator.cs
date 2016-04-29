@@ -96,10 +96,10 @@ namespace dotnet_new3
 
             if (generator == null || tmplt == null)
             {
-                Reporter.Output.WriteLine($"No template with name \"{template.Value}\" was found in any of the configured sources, searching...".Yellow());
+                Reporter.Output.WriteLine($"No template with name \"{template.Value}\" was found in any of the configured sources, searching...".Bold().Yellow());
 
                 List<ITemplate> results = List(template, source).ToList();
-                Reporter.Output.WriteLine($"{results.Count} matching template(s) found.".Yellow());
+                Reporter.Output.WriteLine($"{results.Count} matching template(s) found.".Bold().Yellow());
 
                 if (results.Count == 0)
                 {
@@ -140,7 +140,48 @@ namespace dotnet_new3
                 generator = results[index].Generator;
             }
 
-            if (help.HasValue())
+            string realName = name.Value() ?? tmplt.DefaultName ?? new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+            string currentDir = Directory.GetCurrentDirectory();
+            bool missingProps = false;
+
+            if (dir.HasValue())
+            {
+                Directory.SetCurrentDirectory(Directory.CreateDirectory(realName).FullName);
+            }
+
+            IParameterSet templateParams = generator.GetParametersForTemplate(tmplt);
+
+            foreach (ITemplateParameter param in templateParams.Parameters)
+            {
+                if (param.IsName)
+                {
+                    templateParams.ParameterValues[param] = realName;
+                }
+                else if (param.Priority != TemplateParameterPriority.Required && param.DefaultValue != null)
+                {
+                    templateParams.ParameterValues[param] = param.DefaultValue;
+                }
+            }
+
+            foreach (KeyValuePair<string, string> pair in parameters)
+            {
+                ITemplateParameter param;
+                if (templateParams.TryGetParameter(pair.Key, out param))
+                {
+                    templateParams.ParameterValues[param] = pair.Value;
+                }
+            }
+
+            foreach (ITemplateParameter parameter in templateParams.Parameters)
+            {
+                if (parameter.Priority == TemplateParameterPriority.Required && !templateParams.ParameterValues.ContainsKey(parameter))
+                {
+                    Reporter.Error.WriteLine($"Missing required parameter {parameter.Name}".Bold().Red());
+                    missingProps = true;
+                }
+            }
+
+            if (help.HasValue() || missingProps)
             {
                 string val;
                 if (tmplt.TryGetProperty("Description", out val))
@@ -176,46 +217,7 @@ namespace dotnet_new3
                     }
                 }
 
-                return 0;
-            }
-
-            string realName = name.Value() ?? tmplt.DefaultName ?? new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
-            string currentDir = Directory.GetCurrentDirectory();
-
-            if (dir.HasValue())
-            {
-                Directory.SetCurrentDirectory(Directory.CreateDirectory(realName).FullName);
-            }
-
-            IParameterSet templateParams = generator.GetParametersForTemplate(tmplt);
-
-            foreach (ITemplateParameter param in templateParams.Parameters)
-            {
-                if (param.IsName)
-                {
-                    templateParams.ParameterValues[param] = realName;
-                }
-                else if(param.Priority != TemplateParameterPriority.Required)
-                {
-                    templateParams.ParameterValues[param] = param.DefaultValue;
-                }
-            }
-
-            foreach(KeyValuePair<string, string> pair in parameters)
-            {
-                ITemplateParameter param;
-                if (templateParams.TryGetParameter(pair.Key, out param))
-                {
-                    templateParams.ParameterValues[param] = pair.Value;
-                }
-            }
-
-            foreach (ITemplateParameter parameter in templateParams.Parameters)
-            {
-                if (parameter.Priority == TemplateParameterPriority.Required && !templateParams.ParameterValues.ContainsKey(parameter))
-                {
-                    throw new Exception($"Missing required parameter {parameter.Name}");
-                }
+                return missingProps ? -1 : 0;
             }
 
             try
