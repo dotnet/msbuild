@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-*"
+    },
+  },
+  "frameworks": {
+    "netcoreapp1.0": { },
+    "netstandard1.5": { }
+  }
+}
