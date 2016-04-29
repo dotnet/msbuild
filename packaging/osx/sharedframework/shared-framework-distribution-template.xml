@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <installer-gui-script minSpecVersion="1">
-    <title>.NET Core Shared Framework ({SharedFrameworkNugetName} {SharedFrameworkNugetVersion})</title>
+    <title>{SharedFxBrandName} ({SharedFrameworkNugetName} {SharedFrameworkNugetVersion})</title>
     <license file="eula.rtf" mime-type="application/rtf" />
     <background file="dotnetbackground.png" mime-type="image/png"/>
     <options customize="never" require-scripts="false" />
@@ -13,10 +13,10 @@
         <line choice="{SharedFxComponentId}.pkg" />
         <line choice="{SharedHostComponentId}.pkg" />
     </choices-outline>
-    <choice id="{SharedFxComponentId}.pkg" visible="true" title=".NET Core Shared Framework (x64)" description="The .NET Core Shared Framework">
+    <choice id="{SharedFxComponentId}.pkg" visible="true" title="{SharedFxBrandName} (x64)" description="The .NET Core Shared Framework">
         <pkg-ref id="{SharedFxComponentId}.pkg" />
     </choice>
-    <choice id="{SharedHostComponentId}.pkg" visible="true" title=".NET Core Shared Host (x64)" description="The .NET Core Shared Host." >
+    <choice id="{SharedHostComponentId}.pkg" visible="true" title="{SharedHostBrandName} (x64)" description="The .NET Core Shared Host." >
         <pkg-ref id="{SharedHostComponentId}.pkg" />
     </choice>
     <pkg-ref id="{SharedFxComponentId}.pkg">{SharedFxComponentId}.pkg</pkg-ref>

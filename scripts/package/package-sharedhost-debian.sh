@@ -26,6 +26,7 @@ help(){
     echo "  --input <input directory>          Package the entire contents of the directory tree."
     echo "  --output <output debfile>          The full path to which the package will be written."
     echo "  --package-name <package name>      Package to identify during installation. Example - 'dotnet-sharedhost'"
+    echo "  --brand-name <brand name>          Brand name of the package, used for 'short_description' of the deb file. Example - '.NET Core Host'"
     echo "  --obj-root <object root>           Root folder for intermediate objects."
     echo "  --version <version>                Version for the debain package."
     exit 1
@@ -44,6 +45,10 @@ while [[ $# > 0 ]]; do
             ;;
         -p|--package-name)
             SHARED_HOST_DEBIAN_PACKAGE_NAME=$2
+            shift
+            ;;
+        -b|--brand-name)
+            SHARED_HOST_BRAND_NAME=$2
             shift
             ;;
         --obj-root)
@@ -78,6 +83,7 @@ TEST_STAGE_DIR="$OBJECT_DIR/debian_tests"
 execute_build(){
     create_empty_debian_layout
     copy_files_to_debian_layout
+    update_debian_json
     create_debian_package
 }
 
@@ -112,6 +118,12 @@ create_debian_package(){
     mkdir -p "$PACKAGE_OUTPUT_DIR"
 
     "$PACKAGING_TOOL_DIR/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -n "$SHARED_HOST_DEBIAN_PACKAGE_NAME" -v "$SHARED_HOST_DEBIAN_VERSION"
+}
+
+update_debian_json()
+{
+    header "Updating debian.json file"
+    sed -i "s/%SHARED_HOST_BRAND_NAME%/$SHARED_HOST_BRAND_NAME/g" "$PACKAGE_LAYOUT_DIR"/debian_config.json
 }
 
 test_debian_package(){
