@@ -165,6 +165,7 @@ namespace Microsoft.DotNet.Cli.Build
             // Run the build
             string rid = GetRuntimeId();
             string corehostSrcDir = Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost");
+            string commitHash = c.BuildContext.Get<string>("CommitHash");
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -177,6 +178,7 @@ namespace Microsoft.DotNet.Cli.Build
                 var baseSupportedRid = $"win7-{arch}";
                 var cmakeHostPolicyVer = $"-DCLI_CMAKE_HOST_POLICY_VER:STRING={buildVersion.LatestHostPolicyVersion}";
                 var cmakeBaseRid = $"-DCLI_CMAKE_PKG_RID:STRING={baseSupportedRid}";
+                var cmakeCommitHash = $"-DCLI_CMAKE_COMMIT_HASH:STRING={commitHash}";
 
                 ExecIn(cmakeOut, "cmake",
                     corehostSrcDir,
@@ -184,6 +186,7 @@ namespace Microsoft.DotNet.Cli.Build
                     ridMacro,
                     cmakeHostPolicyVer,
                     cmakeBaseRid,
+                    cmakeCommitHash,
                     "-G",
                     visualStudio);
 
@@ -217,7 +220,9 @@ namespace Microsoft.DotNet.Cli.Build
                         "--policyver",
                         buildVersion.LatestHostPolicyVersion,
                         "--rid",
-                        rid);
+                        rid,
+                        "--commithash",
+                        commitHash);
 
                 // Copy the output out
                 File.Copy(Path.Combine(cmakeOut, "cli", "dotnet"), Path.Combine(Dirs.CorehostLatest, "dotnet"), overwrite: true);
