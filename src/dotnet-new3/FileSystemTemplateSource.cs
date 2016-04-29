@@ -24,7 +24,7 @@ namespace dotnet_new3
         public IDisposable<ITemplateSourceFolder> RootFor(string location)
         {
             DirectoryInfo root = new DirectoryInfo(location);
-            return new Directory(null, root).NoDispose<ITemplateSourceFolder>();
+            return new Directory(null, root).NoDispose();
         }
 
         private static class EntryHelper

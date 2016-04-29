@@ -49,7 +49,7 @@ namespace dotnet_new3
             return results;
         }
 
-        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption parametersFiles, CommandOption help, CommandOption parameters)
+        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption parametersFiles, CommandOption help, IReadOnlyDictionary<string, string> parameters)
         {
             if (string.IsNullOrEmpty(template.Value))
             {
@@ -96,10 +96,10 @@ namespace dotnet_new3
 
             if (generator == null || tmplt == null)
             {
-                Reporter.Error.WriteLine($"No template with name \"{template.Value}\" was found in any of the configured sources, searching...");
+                Reporter.Output.WriteLine($"No template with name \"{template.Value}\" was found in any of the configured sources, searching...".Yellow());
 
                 List<ITemplate> results = List(template, source).ToList();
-                Reporter.Error.WriteLine($"{results.Count} matching template(s) found.");
+                Reporter.Output.WriteLine($"{results.Count} matching template(s) found.".Yellow());
 
                 if (results.Count == 0)
                 {
@@ -195,18 +195,26 @@ namespace dotnet_new3
                 {
                     templateParams.ParameterValues[param] = realName;
                 }
-                else
+                else if(param.Priority != TemplateParameterPriority.Required)
                 {
                     templateParams.ParameterValues[param] = param.DefaultValue;
                 }
             }
 
-            for (int i = 0; i < parameters.Values.Count - 1; i += 2)
+            foreach(KeyValuePair<string, string> pair in parameters)
             {
                 ITemplateParameter param;
-                if (templateParams.TryGetParameter(parameters.Values[i], out param))
+                if (templateParams.TryGetParameter(pair.Key, out param))
                 {
-                    templateParams.ParameterValues[param] = parameters.Values[i + 1];
+                    templateParams.ParameterValues[param] = pair.Value;
+                }
+            }
+
+            foreach (ITemplateParameter parameter in templateParams.Parameters)
+            {
+                if (parameter.Priority == TemplateParameterPriority.Required && !templateParams.ParameterValues.ContainsKey(parameter))
+                {
+                    throw new Exception($"Missing required parameter {parameter.Name}");
                 }
             }
 

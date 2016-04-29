@@ -34,7 +34,7 @@ namespace dotnet_new3
 
         public IDisposable<ITemplateSourceFolder> RootFor(string location)
         {
-            return new Directory(null, "", "", () => ZipFile.OpenRead(location)).NoDispose<ITemplateSourceFolder>();
+            return new Directory(null, "", "", () => ZipFile.OpenRead(location)).NoDispose();
         }
 
         private class Directory : TemplateSourceFolder
@@ -49,7 +49,7 @@ namespace dotnet_new3
                 FullPath = fullPath;
                 Name = name;
                 _opener = opener;
-                _lastSlashIndex = fullPath.Length - 1;
+                _lastSlashIndex = string.IsNullOrEmpty(fullPath) ? 0 : (fullPath.Length - 1);
             }
 
             public override IEnumerable<ITemplateSourceEntry> Children
@@ -69,19 +69,24 @@ namespace dotnet_new3
                         {
                             //If there's only one part beyond the last slash, it's a file since ZIPs don't support dirs
                             //  as independent constructs
-                            if (entry.FullName.LastIndexOf('\\') == _lastSlashIndex)
+                            if (!string.IsNullOrWhiteSpace(entry.Name) && entry.FullName.LastIndexOfAny(new []{ '\\', '/' }) == _lastSlashIndex)
                             {
                                 yield return new File(this, entry.FullName, entry.Name, _opener);
                             }
                             else
                             {
-                                int nextSlash = entry.FullName.IndexOf('\\', _lastSlashIndex + 1);
-                                string name = entry.FullName.Substring(_lastSlashIndex, nextSlash - _lastSlashIndex);
+                                int startAt = string.IsNullOrEmpty(FullPath) ? -1 : _lastSlashIndex;
 
-                                if (seenDirNames.Add(name))
+                                if (startAt < entry.FullName.Length - 1)
                                 {
-                                    string fullPath = FullPath + name + "\\";
-                                    yield return new Directory(this, fullPath, name, _opener);
+                                    int nextSlash = entry.FullName.IndexOfAny(new[] { '\\', '/' }, startAt + 1);
+                                    string name = entry.FullName.Substring(startAt + 1, nextSlash - startAt - 1);
+
+                                    if (seenDirNames.Add(name))
+                                    {
+                                        string fullPath = FullPath + name + "/";
+                                        yield return new Directory(this, fullPath, name, _opener);
+                                    }
                                 }
                             }
                         }

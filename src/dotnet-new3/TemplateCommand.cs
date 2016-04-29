@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.CommandLineUtils;
+﻿using System.Collections.Generic;
+using Microsoft.Extensions.CommandLineUtils;
 
 namespace dotnet_new3
 {
@@ -14,8 +15,8 @@ namespace dotnet_new3
             CommandOption dir = app.Option("-d|--dir", "Indicates whether to display create a directory for the generated content.", CommandOptionType.NoValue);
             CommandOption parametersFiles = app.Option("-a|--args", "Adds a parameters file.", CommandOptionType.MultipleValue);
             CommandOption source = app.Option("-s|--source", "The specific template source to get the template from.", CommandOptionType.SingleValue);
-            CommandOption parameters = app.Option("-p|--parameter", "The parameter name/value alternations to supply to the template.", CommandOptionType.MultipleValue);
 
+            IReadOnlyDictionary<string, string> parameters = app.ParseExtraArgs();
             app.OnExecute(() => TemplateCreator.Instantiate(app, template, name, dir, source, parametersFiles, help, parameters));
         }
     }

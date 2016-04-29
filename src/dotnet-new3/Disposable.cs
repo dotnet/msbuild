@@ -14,6 +14,12 @@ namespace dotnet_new3
         {
             return new Disposable<T>(result, (t, v) => { });
         }
+
+        public static IDisposable<T> BuiltInDispose<T>(this T result)
+            where T : IDisposable
+        {
+            return new Disposable<T>(result, (t, v) => t.Dispose());
+        }
     }
 
     internal class Disposable<T> : IDisposable<T>

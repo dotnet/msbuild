@@ -13,9 +13,10 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
+            Console.ReadLine();
             Broker = new Broker();
 
-            CommandLineApplication app = new CommandLineApplication
+            CommandLineApplication app = new CommandLineApplication(false)
             {
                 Name = "dotnet new3",
                 FullName = "Mutant Chicken Template Instantiation Commands for .NET Core CLI."
@@ -33,7 +34,6 @@ namespace dotnet_new3
             CommandOption dir = app.Option("-d|--dir", "Indicates whether to display create a directory for the generated content.", CommandOptionType.NoValue);
             CommandOption parametersFiles = app.Option("-a|--args", "Adds a parameters file.", CommandOptionType.MultipleValue);
             CommandOption source = app.Option("-s|--source", "The specific template source to get the template from.", CommandOptionType.SingleValue);
-            CommandOption parameters = app.Option("-p|--parameter", "The parameter name/value alternations to supply to the template.", CommandOptionType.MultipleValue);
 
             app.OnExecute(() =>
             {
@@ -49,6 +49,7 @@ namespace dotnet_new3
                     return Task.FromResult(0);
                 }
 
+                IReadOnlyDictionary<string, string> parameters = app.ParseExtraArgs();
                 return TemplateCreator.Instantiate(app, template, name, dir, source, parametersFiles, help, parameters);
             });
 
@@ -68,11 +69,59 @@ namespace dotnet_new3
                 }
 
                 Reporter.Error.WriteLine(ex.Message.Bold().Red());
+
+                while(ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    ax = ex as AggregateException;
+
+                    while (ax != null && ax.InnerExceptions.Count == 1)
+                    {
+                        ex = ax.InnerException;
+                        ax = ex as AggregateException;
+                    }
+                }
+
                 Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
                 result = 1;
             }
 
             return result;
+        }
+    }
+
+    internal static class AppExtensions
+    {
+        public static IReadOnlyDictionary<string, string> ParseExtraArgs(this CommandLineApplication app)
+        {
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            for (int i = 0; i < app.RemainingArguments.Count; ++i)
+            {
+                string key = app.RemainingArguments[i];
+
+                if (!key.StartsWith("--", StringComparison.Ordinal))
+                {
+                    throw new Exception("Parameter names must start with --");
+                }
+
+                string value = null;
+                if (app.RemainingArguments.Count > i + 1)
+                {
+                    value = app.RemainingArguments[i + 1];
+                    if (value.StartsWith("--", StringComparison.Ordinal))
+                    {
+                        value = null;
+                    }
+                    else
+                    {
+                        ++i;
+                    }
+                }
+
+                parameters[key.Substring(2)] = value;
+            }
+
+            return parameters;
         }
     }
 }
