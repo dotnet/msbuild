@@ -9,7 +9,6 @@ using System.Text;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
-using Microsoft.Extensions.Internal;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel

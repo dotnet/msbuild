@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
+using Microsoft.DotNet.ProjectModel.FileSystemGlobbing.Abstractions;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {

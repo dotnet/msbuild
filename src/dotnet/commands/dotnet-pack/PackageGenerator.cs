@@ -8,12 +8,12 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
+using Microsoft.DotNet.ProjectModel.FileSystemGlobbing.Abstractions;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resources;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Pack;
-using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using NuGet;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
@@ -167,7 +167,11 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        internal static IEnumerable<PhysicalPackageFile> CollectAdditionalFiles(DirectoryInfoBase rootDirectory, IEnumerable<PackIncludeEntry> projectFileGlobs, string projectFilePath, IList<DiagnosticMessage> diagnostics)
+        internal static IEnumerable<PhysicalPackageFile> CollectAdditionalFiles(
+            DirectoryInfoBase rootDirectory,
+            IEnumerable<PackIncludeEntry> projectFileGlobs,
+            string projectFilePath,
+            IList<DiagnosticMessage> diagnostics)
         {
             foreach (var entry in projectFileGlobs)
             {
