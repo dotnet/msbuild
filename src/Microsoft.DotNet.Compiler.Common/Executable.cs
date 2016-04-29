@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
             var emitEntryPoint = _compilerOptions.EmitEntryPoint ?? false;
-            if (emitEntryPoint && !string.IsNullOrEmpty(_context.RuntimeIdentifier))
+            if (emitEntryPoint && !_context.IsPortable)
             {
                 // TODO: Pick a host based on the RID
                 CoreHost.CopyTo(_runtimeOutputPath, _compilerOptions.OutputName + Constants.ExeSuffix);
