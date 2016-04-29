@@ -116,17 +116,24 @@ namespace Microsoft.DotNet.Tools.Build
 
         private void MakeRunnable(ProjectGraphNode graphNode)
         {
-            var runtimeContext = graphNode.ProjectContext.ProjectFile.HasRuntimeOutput(_args.ConfigValue) ?
-                _args.Workspace.GetRuntimeContext(graphNode.ProjectContext, _args.GetRuntimes()) :
-                graphNode.ProjectContext;
+            try
+            {
+                var runtimeContext = graphNode.ProjectContext.ProjectFile.HasRuntimeOutput(_args.ConfigValue) ?
+                    _args.Workspace.GetRuntimeContext(graphNode.ProjectContext, _args.GetRuntimes()) :
+                    graphNode.ProjectContext;
 
-            var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
-            var libraryExporter = runtimeContext.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
+                var outputPaths = runtimeContext.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
+                var libraryExporter = runtimeContext.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
 
-            CopyCompilationOutput(outputPaths);
+                CopyCompilationOutput(outputPaths);
 
-            var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);
-            executable.MakeCompilationOutputRunnable();
+                var executable = new Executable(runtimeContext, outputPaths, libraryExporter, _args.ConfigValue);
+                executable.MakeCompilationOutputRunnable();
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to make the following project runnable: {graphNode.ProjectContext.GetDisplayName()}", e);
+            }
         }
 
         protected override CompilationResult RunCompile(ProjectGraphNode projectNode)
