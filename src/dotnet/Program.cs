@@ -42,16 +42,32 @@ namespace Microsoft.DotNet.Cli
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
+            if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
+            {
+                PerfTrace.Enabled = true;
+            }
+
             InitializeProcess();
 
             try
             {
-                return Program.ProcessArgs(args, new Telemetry());
+                using (PerfTrace.Current.CaptureTiming())
+                {
+                    return ProcessArgs(args, new Telemetry());
+                }
             }
             catch (GracefulException e)
             {
                 Console.WriteLine(e.Message.Red().Bold());
                 return 1;
+            }
+            finally
+            {
+                if (PerfTrace.Enabled)
+                {
+                    Reporter.Output.WriteLine("Performance Summary:");
+                    PerfTraceOutput.Print(Reporter.Output, PerfTrace.GetEvents());
+                }
             }
         }
 
@@ -107,6 +123,7 @@ namespace Microsoft.DotNet.Cli
             if (verbose.HasValue)
             {
                 Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
+                Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
             if (string.IsNullOrEmpty(command))
@@ -140,6 +157,7 @@ namespace Microsoft.DotNet.Cli
             return exitCode;
 
         }
+
 
         private static void InitializeProcess()
         {
