@@ -145,31 +145,31 @@ namespace Microsoft.Build.Utilities
                         }
                     }
 
+                    DependentPlatforms = new List<DependentPlatform>();
+                    ApiContracts = new List<ApiContract>();
+
                     if (rootElement != null)
                     {
                         Name = rootElement.GetAttribute(Attributes.Name);
                         FriendlyName = rootElement.GetAttribute(Attributes.FriendlyName);
                         PlatformVersion = rootElement.GetAttribute(Attributes.Version);
-                    }
 
-                    DependentPlatforms = new List<DependentPlatform>();
-                    ApiContracts = new List<ApiContract>();
+                        foreach (XmlNode childNode in rootElement.ChildNodes)
+                        {
+                            XmlElement childElement = childNode as XmlElement;
+                            if (childElement == null)
+                            {
+                                continue;
+                            }
 
-                    foreach (XmlNode childNode in rootElement.ChildNodes)
-                    {
-                        XmlElement childElement = childNode as XmlElement;
-                        if (childElement == null)
-                        {
-                            continue;
-                        }
-
-                        if (ApiContract.IsContainedApiContractsElement(childElement.Name))
-                        {
-                            ApiContract.ReadContractsElement(childElement, ApiContracts);
-                        }
-                        else if (String.Equals(childElement.Name, Elements.DependentPlatform, StringComparison.Ordinal))
-                        {
-                            DependentPlatforms.Add(new DependentPlatform(childElement.GetAttribute(Attributes.Name), childElement.GetAttribute(Attributes.Version)));
+                            if (ApiContract.IsContainedApiContractsElement(childElement.Name))
+                            {
+                                ApiContract.ReadContractsElement(childElement, ApiContracts);
+                            }
+                            else if (String.Equals(childElement.Name, Elements.DependentPlatform, StringComparison.Ordinal))
+                            {
+                                DependentPlatforms.Add(new DependentPlatform(childElement.GetAttribute(Attributes.Name), childElement.GetAttribute(Attributes.Version)));
+                            }
                         }
                     }
                 }
