@@ -3,7 +3,9 @@
     "emitEntryPoint": true,
     "preserveCompilationContext": true
   },
-  "dependencies": {},
+  "dependencies": {
+    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160425-01"
+  },
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {

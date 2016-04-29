@@ -1,8 +1,9 @@
-﻿using Microsoft.DotNet.TestFramework;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.Tools.Test.Utilities;
+using FluentAssertions;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Publish.Tests
@@ -93,7 +94,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory(true).Should().HaveFile("PortableAppCompilationContext.dll");
 
             var refsDirectory = new DirectoryInfo(Path.Combine(publishCommand.GetOutputDirectory(true).FullName, "refs"));
-            // Should have compilation time assemblies
+            // Microsoft.CodeAnalysis.CSharp is IL only
+            refsDirectory.Should().NotHaveFile("Microsoft.CodeAnalysis.CSharp.dll");
+            // System.IO has facede
             refsDirectory.Should().HaveFile("System.IO.dll");
             // Libraries in which lib==ref should be deduped
             refsDirectory.Should().NotHaveFile("PortableAppCompilationContext.dll");
