@@ -43,5 +43,12 @@ namespace Microsoft.DotNet.Cli.Utils
             (CurrentPlatform == Platform.Windows ? "hostfxr" : "libhostfxr") + DynamicLibSuffix
         };
 
+        public static readonly string[] LibCoreClrBinaryNames = new string[] 
+        {
+            "coreclr.dll",
+            "libcoreclr.so",
+            "libcoreclr.dylib"
+        };
+
     }
 }
