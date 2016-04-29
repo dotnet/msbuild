@@ -47,7 +47,7 @@
 
       <Text X="11" Y="80" Width="-11" Height="30" FontId="2" DisablePrefix="yes">#(loc.FilesInUseHeader)</Text>
       <Text X="11" Y="121" Width="-11" Height="34" FontId="3" DisablePrefix="yes">#(loc.FilesInUseLabel)</Text>
-      <Text Name="FilesInUseText" X="11" Y="150" Width="-11" Height="-86" FontId="3" DisablePrefix="yes" HexStyle="0x0000000C">A</Text>
+      <Text Name="FilesInUseText" X="11" Y="150" Width="-11" Height="-86" FontId="3" DisablePrefix="yes" HexStyle="0x0000000C"></Text>
 
       <Button Name="FilesInUseCloseRadioButton" X="300" Y="-65" Width="-11" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes" HexStyle="0x000009">#(loc.FilesInUseCloseRadioButton)</Button>
       <Button Name="FilesInUseDontCloseRadioButton" X="300" Y="-45" Width="-11" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes" HexStyle="0x000009">#(loc.FilesInUseDontCloseRadioButton)</Button>
