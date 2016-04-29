@@ -34,7 +34,7 @@
             </Component>
         </Feature>
         <Feature Id="Provider" Absent="disallow" AllowAdvertise="no" Description="Used for Ref Counting" Display="hidden" Level="1" InstallDefault="local" Title="RefCounting" TypicalDefault="install">
-            <ComponentRef Id="DotNet_CLI_SharedFramework_$(var.FrameworkName)_$(var.FrameworkComponentVersion)" />
+            <ComponentRef Id="$(var.DependencyKeyId)" />
         </Feature>
 
         <Property Id="MSIFASTINSTALL" Value="7" />

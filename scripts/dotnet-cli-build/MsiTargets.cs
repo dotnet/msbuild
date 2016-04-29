@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "host", "generatemsi.ps1"),
-                inputDir, SharedHostMsi, WixRoot, sharedHostBrandName, MsiVersion, CliDisplayVersion, CliNugetVersion, Arch, wixObjRoot)
+                inputDir, SharedHostMsi, WixRoot, sharedHostBrandName, MsiVersion, CliNugetVersion, Arch, wixObjRoot)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

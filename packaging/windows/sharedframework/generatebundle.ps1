@@ -25,6 +25,7 @@ function RunCandleForBundle
 
     Write-Host Running candle for bundle..
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\sharedframework"
+    $SharedFrameworkComponentVersion = $SharedFrameworkNugetVersion.Replace('-', '_');
 
     .\candle.exe -nologo `
         -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
@@ -35,6 +36,7 @@ function RunCandleForBundle
         -dSharedHostMsiSourcePath="$SharedHostMSIFile" `
         -dFrameworkName="$SharedFrameworkNugetName" `
         -dFrameworkDisplayVersion="$SharedFrameworkNugetVersion" `
+        -dFrameworkComponentVersion="$SharedFrameworkComponentVersion" `
         -dFrameworkUpgradeCode="$SharedFrameworkUpgradeCode" `
         -arch "$Architecture" `
         -ext WixBalExtension.dll `

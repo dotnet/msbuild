@@ -2,8 +2,8 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:dep="http://schemas.microsoft.com/wix/DependencyExtension">
   <?include "Variables.wxi" ?>
   <Fragment>
-    <Component Id="Dotnet_CLI_SharedHost_$(var.Dotnet_DisplayVersion)" Directory="TARGETDIR" Win64="no" Guid="82516259-FF21-446E-A432-1FFCA5A02296">
-      <dep:Provides Key="Dotnet_CLI_SharedHost_$(var.Dotnet_DisplayVersion)" />
+    <Component Id="$(var.DependencyKeyId)" Directory="TARGETDIR" Win64="no" Guid="82516259-FF21-446E-A432-1FFCA5A02296">
+      <dep:Provides Key="$(var.DependencyKey)" />
     </Component>
   </Fragment>
 </Wix>
