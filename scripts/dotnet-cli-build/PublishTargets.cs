@@ -60,7 +60,9 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 string targetContainer = $"{Channel}/Binaries/Latest/";
                 string targetVersionFile = $"{targetContainer}{CliNuGetVersion}";
-                string leaseId = AzurePublisherTool.AcquireLeaseOnBlob(targetContainer);
+                string semaphoreBlob = $"{Channel}/Binaries/publishSemaphore";
+                AzurePublisherTool.CreateBlobIfNotExists(semaphoreBlob);
+                string leaseId = AzurePublisherTool.AcquireLeaseOnBlob(semaphoreBlob);
 
                 // Prevent race conditions by dropping a version hint of what version this is. If we see this file
                 // and it is the same as our version then we know that a race happened where two+ builds finished 

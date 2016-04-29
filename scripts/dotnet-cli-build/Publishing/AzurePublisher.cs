@@ -125,6 +125,20 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
+        public void CreateBlobIfNotExists(string path)
+        {
+            System.Threading.Tasks.Task<bool> task = _blobContainer.GetBlockBlobReference(path).ExistsAsync();
+            task.Wait();
+            if (!task.Result)
+            {
+                CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(path);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    blob.UploadFromStreamAsync(ms).Wait();
+                }
+            }
+        }
+
         public void DeleteBlob(string path)
         {
             _blobContainer.GetBlockBlobReference(path).DeleteAsync().Wait();
