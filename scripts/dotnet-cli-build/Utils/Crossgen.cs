@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-
+using Microsoft.DotNet.InternalAbstractions;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
 namespace Microsoft.DotNet.Cli.Build
@@ -28,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private string GetCrossgenPathForVersion()
         {
-            string arch = PlatformServices.Default.Runtime.RuntimeArchitecture;
+            string arch = RuntimeEnvironment.RuntimeArchitecture;
             string packageId;
             if (CurrentPlatform.IsWindows)
             {

@@ -4,8 +4,8 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 // This class is responsible with defining the arguments for the Compile verb.
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 IEnumerable<NuGetFramework> frameworks = null;
                 if (_frameworkOption.HasValue())
                 {
-                    frameworks = new [] { NuGetFramework.Parse(_frameworkOption.Value()) };
+                    frameworks = new[] { NuGetFramework.Parse(_frameworkOption.Value()) };
                 }
                 var success = execute(files, frameworks, this);
 
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var rids = new List<string>();
             if (string.IsNullOrEmpty(RuntimeValue))
             {
-                return PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
+                return RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();
             }
             else
             {

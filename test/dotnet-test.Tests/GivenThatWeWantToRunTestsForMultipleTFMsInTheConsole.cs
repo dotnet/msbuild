@@ -5,10 +5,10 @@ using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
 
 namespace Microsoft.Dotnet.Tools.Test.Tests
@@ -28,7 +28,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var contexts = ProjectContext.CreateContextForEachFramework(
                 _projectFilePath,
                 null,
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
 
             // Restore the project again in the destination to resolve projects
             // Since the lock file has project relative paths in it, those will be broken
@@ -36,7 +36,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }.Execute().Should().Pass();
 
             _defaultNetCoreAppOutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "netcoreapp1.0");
-            _defaultNet451OutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "net451", PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers().First());
+            _defaultNet451OutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "net451", RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First());
         }
 
         [WindowsOnlyFact]
@@ -105,7 +105,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [WindowsOnlyFact]
         public void It_skips_build_when_the_no_build_flag_is_passed_for_net451()
         {
-            var rid = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers().First();
+            var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
             var buildCommand = new BuildCommand(_projectFilePath);
             var result = buildCommand.Execute($"-f net451 -r {rid} -o {_defaultNet451OutputPath}");
             result.Should().Pass();

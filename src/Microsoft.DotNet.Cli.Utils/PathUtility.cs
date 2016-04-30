@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Tools.Common
 {
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Tools.Common
             }
 
             StringComparison compare;
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
                 compare = StringComparison.OrdinalIgnoreCase;
                 // check if paths are on the same volume
@@ -216,7 +216,7 @@ namespace Microsoft.DotNet.Tools.Common
         {
             var comparison = StringComparison.Ordinal;
 
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
                 comparison = StringComparison.OrdinalIgnoreCase;
             }

@@ -7,8 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-using Newtonsoft.Json;
+using Microsoft.DotNet.InternalAbstractions;
 using Newtonsoft.Json.Linq;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 using static Microsoft.DotNet.Cli.Build.FS;
@@ -37,8 +36,6 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(GenerateVersions), nameof(UpdateTemplateVersions), nameof(CheckPrereqs), nameof(LocateStage0), nameof(ExpectedBuildArtifacts))]
         public static BuildTargetResult Init(BuildTargetContext c)
         {
-            var runtimeInfo = PlatformServices.Default.Runtime;
-
             var configEnv = Environment.GetEnvironmentVariable("CONFIGURATION");
 
             if (string.IsNullOrEmpty(configEnv))
@@ -51,8 +48,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             c.Info($"Building {c.BuildContext["Configuration"]} to: {Dirs.Output}");
             c.Info("Build Environment:");
-            c.Info($" Operating System: {runtimeInfo.OperatingSystem} {runtimeInfo.OperatingSystemVersion}");
-            c.Info($" Platform: {runtimeInfo.OperatingSystemPlatform}");
+            c.Info($" Operating System: {RuntimeEnvironment.OperatingSystem} {RuntimeEnvironment.OperatingSystemVersion}");
+            c.Info($" Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
 
             return c.Success();
         }

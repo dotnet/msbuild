@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build.Framework
 {
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                var osname = RuntimeEnvironment.OperatingSystem;
                 return string.Equals(osname, "ubuntu", StringComparison.OrdinalIgnoreCase);
             }
         }
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                var osname = RuntimeEnvironment.OperatingSystem;
                 return string.Equals(osname, "centos", StringComparison.OrdinalIgnoreCase);
             }
         }
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                var osname = RuntimeEnvironment.OperatingSystem;
                 return string.Equals(osname, "rhel", StringComparison.OrdinalIgnoreCase);
             }
         }
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                var osname = RuntimeEnvironment.OperatingSystem;
                 return string.Equals(osname, "debian", StringComparison.OrdinalIgnoreCase);
             }
         }

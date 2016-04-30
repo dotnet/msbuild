@@ -1,8 +1,8 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -43,12 +43,12 @@ namespace Microsoft.DotNet.Cli.Build
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0",
-                    PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString(),
-                    PlatformServices.Default.Runtime.RuntimeArchitecture);
+                    RuntimeEnvironment.OperatingSystemPlatform.ToString(),
+                    RuntimeEnvironment.RuntimeArchitecture);
             }
             else
             {
-                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", PlatformServices.Default.Runtime.OperatingSystemPlatform.ToString());
+                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", RuntimeEnvironment.OperatingSystemPlatform.ToString());
             }
 
         }

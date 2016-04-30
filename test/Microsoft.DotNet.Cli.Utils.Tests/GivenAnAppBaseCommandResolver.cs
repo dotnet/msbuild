@@ -2,20 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Linq;
-using Xunit;
-using Moq;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.Threading;
 using FluentAssertions;
-using NuGet.Frameworks;
+using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.Tools.Test.Utilities;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
@@ -107,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "appbasetestcommand1",
-                CommandArguments = new [] { "arg with space"}
+                CommandArguments = new[] { "arg with space" }
             };
 
             var result = appBaseCommandResolver.Resolve(commandResolverArguments);
@@ -163,12 +154,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
         public void It_wraps_command_with_CMD_EXE_when_command_has_CMD_Extension_and_using_WindowsExePreferredCommandSpecFactory()
         {
-            var environment = new EnvironmentProvider(new [] {".cmd"});
+            var environment = new EnvironmentProvider(new[] { ".cmd" });
             var platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();
 
             var pathCommandResolver = new PathCommandResolver(environment, platformCommandSpecFactory);
 
-            var testCommandPath = 
+            var testCommandPath =
                 CommandResolverTestUtils.CreateNonRunnableTestCommand(AppContext.BaseDirectory, "cmdWrapCommand", ".cmd");
 
             var commandResolverArguments = new CommandResolverArguments()
@@ -193,9 +184,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             environment = environment ?? new EnvironmentProvider();
 
-            IPlatformCommandSpecFactory platformCommandSpecFactory  = new GenericPlatformCommandSpecFactory();
+            IPlatformCommandSpecFactory platformCommandSpecFactory = new GenericPlatformCommandSpecFactory();
 
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows
                 && !forceGeneric)
             {
                 platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils.CommandParsing;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -48,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static string[] DetermineInferredScriptExtensions()
         {
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
                 return new string[] { "", ".cmd" };
             }

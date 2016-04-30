@@ -11,7 +11,6 @@ using Xunit;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
 using System.Diagnostics;
 using FluentAssertions;
 

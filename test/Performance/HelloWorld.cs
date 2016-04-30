@@ -3,13 +3,8 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Xunit.Performance;
-using Xunit;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tests.Performance
 {

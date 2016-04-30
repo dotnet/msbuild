@@ -1,5 +1,5 @@
 using System;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build.Framework
 {
@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                var archName = PlatformServices.Default.Runtime.RuntimeArchitecture;
+                var archName = RuntimeEnvironment.RuntimeArchitecture;
                 return string.Equals(archName, "x86", StringComparison.OrdinalIgnoreCase);
             }
         }
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                var archName = PlatformServices.Default.Runtime.RuntimeArchitecture;
+                var archName = RuntimeEnvironment.RuntimeArchitecture;
                 return string.Equals(archName, "x64", StringComparison.OrdinalIgnoreCase);
             }
         }

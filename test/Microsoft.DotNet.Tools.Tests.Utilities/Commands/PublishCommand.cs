@@ -1,13 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -69,10 +69,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string config = string.IsNullOrEmpty(_config) ? "Debug" : _config;
             string framework = string.IsNullOrEmpty(_framework) ?
                 _project.GetTargetFrameworks().First().FrameworkName.GetShortFolderName() : _framework;
-            
+
             if (!portable)
             {
-                var runtime = string.IsNullOrEmpty(_runtime) ? PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier() : _runtime;
+                var runtime = string.IsNullOrEmpty(_runtime) ? RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier() : _runtime;
                 return Path.Combine(config, framework, runtime, PublishSubfolderName);
             }
             else
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string RuntimeOption => string.IsNullOrEmpty(_runtime) ? "" : $"-r {_runtime}";
         private string OutputOption => string.IsNullOrEmpty(_output) ? "" : $"-o \"{_output}\"";
         private string ConfigOption => string.IsNullOrEmpty(_config) ? "" : $"-c {_output}";
-        private string NoBuildFlag => _noBuild ? "--no-build" :"";
+        private string NoBuildFlag => _noBuild ? "--no-build" : "";
         private string BuildBasePathOption => string.IsNullOrEmpty(_buidBasePathDirectory) ? "" : $"-b {_buidBasePathDirectory}";
     }
 }

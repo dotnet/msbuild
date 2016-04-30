@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.ApplicationInsights;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.Diagnostics;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -41,13 +41,13 @@ namespace Microsoft.DotNet.Cli
                     _client.InstrumentationKey = InstrumentationKey;
                     _client.Context.Session.Id = Guid.NewGuid().ToString();
 
-                    var runtimeEnvironment = PlatformServices.Default.Runtime;
-                    _client.Context.Device.OperatingSystem = runtimeEnvironment.OperatingSystem;
+
+                _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
 
                     _commonProperties = new Dictionary<string, string>();
-                    _commonProperties.Add(OSVersion, runtimeEnvironment.OperatingSystemVersion);
-                    _commonProperties.Add(OSPlatform, runtimeEnvironment.OperatingSystemPlatform.ToString());
-                    _commonProperties.Add(RuntimeId, runtimeEnvironment.GetRuntimeIdentifier());
+                _commonProperties.Add(OSVersion, RuntimeEnvironment.OperatingSystemVersion);
+                _commonProperties.Add(OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString());
+                _commonProperties.Add(RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier());
                     _commonProperties.Add(ProductVersion, Product.Version);
                     _commonMeasurements = new Dictionary<string, double>();
                 }

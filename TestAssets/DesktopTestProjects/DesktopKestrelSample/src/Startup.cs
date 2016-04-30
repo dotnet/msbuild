@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel;
 using Microsoft.AspNetCore.Server.Kestrel.Filter;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace SampleApp
 {
@@ -21,7 +20,7 @@ namespace SampleApp
         private static string Args { get; set; }
         private static CancellationTokenSource ServerCancellationTokenSource { get; set; }
 
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IApplicationEnvironment env)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
             var ksi = app.ServerFeatures.Get<IKestrelServerInformation>();
             ksi.NoDelay = true;

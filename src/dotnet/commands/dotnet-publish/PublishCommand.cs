@@ -8,13 +8,13 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Files;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Common;
-using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Publish
@@ -150,10 +150,10 @@ namespace Microsoft.DotNet.Tools.Publish
                 var runtimeAssetsToCopy = export.RuntimeAssets.Where(a => ShouldCopyExportRuntimeAsset(context, buildOutputPaths, export, a));
                 runtimeAssetsToCopy.StructuredCopyTo(outputPath, outputPaths.IntermediateOutputDirectoryPath);
 
-                foreach(var resourceAsset in export.ResourceAssemblies)
+                foreach (var resourceAsset in export.ResourceAssemblies)
                 {
                     var dir = Path.Combine(outputPath, resourceAsset.Locale);
-                    if(!Directory.Exists(dir))
+                    if (!Directory.Exists(dir))
                     {
                         Directory.CreateDirectory(dir);
                     }
@@ -291,7 +291,7 @@ namespace Microsoft.DotNet.Tools.Publish
             foreach (var dependency in dependencies)
             {
                 var export = exports[dependency.Name];
-                if(export.Library.Identity.Version.Equals(dependency.VersionRange.MinVersion))
+                if (export.Library.Identity.Version.Equals(dependency.VersionRange.MinVersion))
                 {
                     exclusionList.Add(export.Library.Identity.Name);
                     CollectDependencies(exports, export.Library.Dependencies, exclusionList);
@@ -454,7 +454,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 contexts.Where(c => Equals(c.TargetFramework, framework));
 
             var rids = string.IsNullOrEmpty(runtime) ?
-                PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers() :
+                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers() :
                 new[] { runtime };
 
             return contexts.Select(c => Workspace.GetRuntimeContext(c, rids));

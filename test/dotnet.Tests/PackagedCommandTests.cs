@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.Runtime.InteropServices;
+using Microsoft.DotNet.InternalAbstractions;
 using Xunit;
-using FluentAssertions;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -76,9 +76,9 @@ namespace Microsoft.DotNet.Tests
             CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
                     .ExecuteWithCapturedOutput("tool-with-output-name", framework, string.Empty);
 
-                result.Should().HaveStdOutContaining("Tool with output name!");
-                result.Should().NotHaveStdErr();
-                result.Should().Pass();
+            result.Should().HaveStdOutContaining("Tool with output name!");
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
         }
 
         // need conditional theories so we can skip on non-Windows
@@ -101,11 +101,11 @@ namespace Microsoft.DotNet.Tests
             CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
                     .ExecuteWithCapturedOutput("desktop-and-portable", framework, args);
 
-                result.Should().HaveStdOutContaining(framework);
-                result.Should().HaveStdOutContaining(args);
-                result.Should().HaveStdOutContaining(expectedDependencyToolPath);
-                result.Should().NotHaveStdErr();
-                result.Should().Pass();
+            result.Should().HaveStdOutContaining(framework);
+            result.Should().HaveStdOutContaining(args);
+            result.Should().HaveStdOutContaining(expectedDependencyToolPath);
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
         }
 
         [Fact]
@@ -123,8 +123,8 @@ namespace Microsoft.DotNet.Tests
         {
             get
             {
-                var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
-                var projectOutputPath  = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
+                var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+                var projectOutputPath = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
                     new object[] { ".NETCoreApp,Version=v1.0", "CoreFX", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll" },

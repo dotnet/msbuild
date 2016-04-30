@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Compiler;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -23,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Build
         private readonly DotNetCommandFactory _commandFactory;
         private readonly IncrementalManager _incrementalManager;
 
-        public DotNetProjectBuilder(BuildCommandApp args): base(args.ShouldSkipDependencies)
+        public DotNetProjectBuilder(BuildCommandApp args) : base(args.ShouldSkipDependencies)
         {
             _args = args;
 

@@ -1,16 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.TestFramework;
-using Microsoft.Extensions.PlatformAbstractions;
-using Xunit;
+using Microsoft.DotNet.Tools.Test.Utilities;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -21,7 +15,7 @@ namespace Microsoft.DotNet.Tests
         private const string AppWithConfig = "AppWithRedirectsAndConfig";
         private const string AppWithoutConfig = "AppWithRedirectsNoConfig";
 
-        private string _Runtime = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+        private string _Runtime = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
         private string _desktopProjectsRoot = Path.Combine(RepoRoot, "TestAssets", "DesktopTestProjects");
         private string _buildRelativePath;
         private string _appWithConfigProjectRoot;

@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace Microsoft.DotNet.Cli.Utils

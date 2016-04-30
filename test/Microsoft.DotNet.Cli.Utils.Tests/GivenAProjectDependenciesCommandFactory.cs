@@ -1,22 +1,13 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Linq;
-using Xunit;
-using Moq;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.DotNet.TestFramework;
-using System.Threading;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {

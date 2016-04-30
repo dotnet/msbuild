@@ -6,14 +6,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Xml.Linq;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.DotNet.TestFramework;
-using Microsoft.Extensions.PlatformAbstractions;
-using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.Tools.Test.Utilities;
+using Xunit;
 
 namespace Microsoft.DotNet.Tests
 {
