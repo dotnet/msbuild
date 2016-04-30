@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Graph;
-using Microsoft.Extensions.Internal;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel

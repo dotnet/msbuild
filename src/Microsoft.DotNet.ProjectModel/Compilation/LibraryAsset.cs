@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Utilities;
-using Microsoft.Extensions.Internal;
 
 namespace Microsoft.DotNet.ProjectModel.Compilation
 {

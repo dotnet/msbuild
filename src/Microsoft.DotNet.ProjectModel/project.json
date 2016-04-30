@@ -6,11 +6,6 @@
   "description": "Types to model a .NET Project",
   "dependencies": {
     "Microsoft.Extensions.DependencyModel": "1.0.0-*",
-    "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-20581",
-    "Microsoft.Extensions.HashCodeCombiner.Sources": {
-      "type": "build",
-      "version": "1.0.0-rc2-20459"
-    },
     "Newtonsoft.Json": "7.0.1",
     "NuGet.Packaging": "3.5.0-beta-1233",
     "NuGet.RuntimeModel": "3.5.0-beta-1233",

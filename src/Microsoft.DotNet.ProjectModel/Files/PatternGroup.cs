@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.FileSystemGlobbing;
+using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectModel.Files
