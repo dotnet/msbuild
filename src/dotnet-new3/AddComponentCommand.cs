@@ -11,9 +11,16 @@ namespace dotnet_new3
         internal static void Configure(CommandLineApplication app)
         {
             CommandArgument assemblyName = app.Argument("assembly", "The assembly containing components to add.");
+            CommandOption help = app.Help();
 
             app.OnExecute(() =>
             {
+                if (help.HasValue())
+                {
+                    app.ShowHelp();
+                    return 0;
+                }
+
                 Assembly asm = null;
                 try
                 {

@@ -4,15 +4,16 @@ namespace dotnet_new3
 {
     internal class SourceCommand
     {
-        internal static void Configure(CommandLineApplication obj)
+        internal static void Configure(CommandLineApplication app)
         {
-            obj.Command("add", AddSourceCommand.Configure);
-            obj.Command("list", ListSourceCommand.Configure);
-            obj.Command("remove", RemoveSourceCommand.Configure);
+            app.Command("add", AddSourceCommand.Configure);
+            app.Command("list", ListSourceCommand.Configure);
+            app.Command("remove", RemoveSourceCommand.Configure);
+            app.Help();
 
-            obj.OnExecute(() =>
+            app.OnExecute(() =>
             {
-                obj.ShowHelp();
+                app.ShowHelp();
                 return 0;
             });
         }

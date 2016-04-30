@@ -9,6 +9,7 @@ namespace dotnet_new3
             app.Command("add", AddComponentCommand.Configure);
             app.Command("list", ListComponentCommand.Configure);
             app.Command("remove", RemoveComponentCommand.Configure);
+            app.Help();
 
             app.OnExecute(() =>
             {

@@ -5,14 +5,21 @@ namespace dotnet_new3
 {
     internal class AddSourceCommand
     {
-        internal static void Configure(CommandLineApplication obj)
+        internal static void Configure(CommandLineApplication app)
         {
-            CommandArgument alias = obj.Argument("alias", "The alias template source.");
-            CommandArgument location = obj.Argument("location", "The location of the template source.");
-            CommandOption sourceName = obj.Option("-n|--name", "The name of the template source reader.", CommandOptionType.SingleValue);
+            CommandArgument alias = app.Argument("alias", "The alias template source.");
+            CommandArgument location = app.Argument("location", "The location of the template source.");
+            CommandOption sourceName = app.Option("-n|--name", "The name of the template source reader.", CommandOptionType.SingleValue);
+            CommandOption help = app.Help();
 
-            obj.OnExecute(() =>
+            app.OnExecute(() =>
             {
+                if (help.HasValue())
+                {
+                    app.ShowHelp();
+                    return 0;
+                }
+
                 if (sourceName.HasValue())
                 {
                     Program.Broker.AddConfiguredSource(alias.Value, sourceName.Value(), location.Value);

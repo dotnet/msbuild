@@ -22,10 +22,10 @@ namespace dotnet_new3
                 FullName = "Mutant Chicken Template Instantiation Commands for .NET Core CLI."
             };
 
-            app.Command("source", SourceCommand.Configure);
-            app.Command("template", TemplateCommand.Configure);
-            app.Command("component", ComponentCommand.Configure);
-            app.Command("reset", ResetCommand.Configure);
+            app.Command("source", SourceCommand.Configure, false);
+            app.Command("template", TemplateCommand.Configure, false);
+            app.Command("component", ComponentCommand.Configure, false);
+            app.Command("reset", ResetCommand.Configure, false);
 
             CommandArgument template = app.Argument("template", "The template to instantiate.");
             CommandOption name = app.Option("-n|--name", "The name for the output. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
@@ -87,41 +87,6 @@ namespace dotnet_new3
             }
 
             return result;
-        }
-    }
-
-    internal static class AppExtensions
-    {
-        public static IReadOnlyDictionary<string, string> ParseExtraArgs(this CommandLineApplication app)
-        {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            for (int i = 0; i < app.RemainingArguments.Count; ++i)
-            {
-                string key = app.RemainingArguments[i];
-
-                if (!key.StartsWith("--", StringComparison.Ordinal))
-                {
-                    throw new Exception("Parameter names must start with --");
-                }
-
-                string value = null;
-                if (app.RemainingArguments.Count > i + 1)
-                {
-                    value = app.RemainingArguments[i + 1];
-                    if (value.StartsWith("--", StringComparison.Ordinal))
-                    {
-                        value = null;
-                    }
-                    else
-                    {
-                        ++i;
-                    }
-                }
-
-                parameters[key.Substring(2)] = value;
-            }
-
-            return parameters;
         }
     }
 }

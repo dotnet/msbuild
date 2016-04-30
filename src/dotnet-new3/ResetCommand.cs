@@ -9,8 +9,16 @@ namespace dotnet_new3
     {
         internal static void Configure(CommandLineApplication app)
         {
+            CommandOption help = app.Help();
+
             app.OnExecute(() =>
             {
+                if (help.HasValue())
+                {
+                    app.ShowHelp();
+                    return 0;
+                }
+
                 Assembly asm = Assembly.GetEntryAssembly();
                 Uri codebase = new Uri(asm.CodeBase, UriKind.Absolute);
                 string localPath = codebase.LocalPath;

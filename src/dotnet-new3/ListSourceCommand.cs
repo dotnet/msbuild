@@ -6,10 +6,18 @@ namespace dotnet_new3
 {
     internal class ListSourceCommand
     {
-        internal static void Configure(CommandLineApplication obj)
+        internal static void Configure(CommandLineApplication app)
         {
-            obj.OnExecute(() =>
+            CommandOption help = app.Help();
+
+            app.OnExecute(() =>
             {
+                if (help.HasValue())
+                {
+                    app.ShowHelp();
+                    return 0;
+                }
+
                 Reporter.Output.WriteLine("Alias - Provider - Location");
 
                 foreach(IConfiguredTemplateSource source in Program.Broker.GetConfiguredSources())

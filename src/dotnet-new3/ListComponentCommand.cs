@@ -8,8 +8,16 @@ namespace dotnet_new3
     {
         internal static void Configure(CommandLineApplication app)
         {
+            CommandOption help = app.Help();
+
             app.OnExecute(() =>
             {
+                if (help.HasValue())
+                {
+                    app.ShowHelp();
+                    return 0;
+                }
+
                 bool anyWritten = false;
                 foreach (IComponent component in Program.Broker.ComponentRegistry.OfType<ITemplateSource>())
                 {

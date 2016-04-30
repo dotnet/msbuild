@@ -9,11 +9,18 @@ namespace dotnet_new3
     {
         public static void Configure(CommandLineApplication app)
         {
-            var searchString = app.Argument("search", "The template name to search for.");
-            var source = app.Option("-s|--source", "The specific template source to get the template from.", CommandOptionType.SingleValue);
+            CommandArgument searchString = app.Argument("search", "The template name to search for.");
+            CommandOption source = app.Option("-s|--source", "The specific template source to get the template from.", CommandOptionType.SingleValue);
+            CommandOption help = app.Help();
 
             app.OnExecute(() =>
             {
+                if (help.HasValue())
+                {
+                    app.ShowHelp();
+                    return 0;
+                }
+
                 IEnumerable<ITemplate> results = TemplateCreator.List(searchString, source);
                 Reporter.Output.WriteLine("Template Name - Source Name - Generator Name");
 
