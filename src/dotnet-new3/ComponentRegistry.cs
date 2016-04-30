@@ -107,7 +107,7 @@ namespace dotnet_new3
             List<Action> removes = new List<Action>();
             foreach (ITemplateSource source in OfType<ITemplateSource>())
             {
-                if (source.GetType().GetTypeInfo().Assembly.GetName().Equals(asm.GetName()))
+                if (asm.GetName().ToString().Equals(source.GetType().GetTypeInfo().Assembly.GetName().ToString(), StringComparison.OrdinalIgnoreCase))
                 {
                     removes.Add(() => ObjectCache<ITemplateSource>.Items.Remove(source.Name));
                 }
@@ -115,7 +115,7 @@ namespace dotnet_new3
 
             foreach (IGenerator source in OfType<IGenerator>())
             {
-                if (source.GetType().GetTypeInfo().Assembly.GetName().Equals(asm.GetName()))
+                if (asm.GetName().ToString().Equals(source.GetType().GetTypeInfo().Assembly.GetName().ToString(), StringComparison.OrdinalIgnoreCase))
                 {
                     removes.Add(() => ObjectCache<IGenerator>.Items.Remove(source.Name));
                 }

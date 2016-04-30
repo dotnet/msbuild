@@ -80,13 +80,13 @@ namespace dotnet_new3
             return _configuredSources.Values.Select(x => new ConfiguredTemplateSource(x.Source, x.Alias, x.Location));
         }
 
-        public void AddConfiguredSource(string alias, string sourceName, string location)
+        public bool AddConfiguredSource(string alias, string sourceName, string location)
         {
             Load();
             ITemplateSource component;
             if (!ComponentRegistry.TryGetNamedComponent(sourceName, out component))
             {
-                return;
+                return false;
             }
 
             _configuredSources[alias] = new TemplateSource
@@ -107,16 +107,17 @@ namespace dotnet_new3
             }
 
             File.WriteAllText(_path, result.ToString());
+            return true;
         }
 
-        public void RemoveConfiguredSource(string alias)
+        public bool RemoveConfiguredSource(string alias)
         {
             Load();
 
             if(alias == "*")
             {
                 File.WriteAllText(_path, "{}");
-                return;
+                return true;
             }
 
             if (_configuredSources.Remove(alias))
@@ -132,7 +133,10 @@ namespace dotnet_new3
                 }
 
                 File.WriteAllText(_path, result.ToString());
+                return true;
             }
+
+            return false;
         }
     }
 }
