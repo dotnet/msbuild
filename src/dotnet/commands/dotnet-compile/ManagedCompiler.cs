@@ -189,6 +189,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             Reporter outputReporter = Reporter.Output;
 
             CommandResult result = _commandFactory.Create($"compile-{compilerName}", new[] { $"@{rsp}" })
+                .WorkingDirectory(context.ProjectDirectory)
                 .OnErrorLine(line => HandleCompilerOutputLine(line, context, diagnostics, errorReporter))
                 .OnOutputLine(line => HandleCompilerOutputLine(line, context, diagnostics, outputReporter))
                 .Execute();

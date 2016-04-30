@@ -84,6 +84,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
                 // Execute CSC!
                 var result = RunCsc(new string[] { $"-noconfig", "@" + $"{rsp}" })
+                    .WorkingDirectory(Directory.GetCurrentDirectory())
                     .ForwardStdErr()
                     .ForwardStdOut()
                     .Execute();
