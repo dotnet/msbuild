@@ -25,8 +25,6 @@ namespace dotnet_new3
                 FullName = "Mutant Chicken Template Instantiation Commands for .NET Core CLI."
             };
 
-            app.Command("reset", ResetCommand.Configure, false);
-
             CommandArgument template = app.Argument("template", "The template to instantiate.");
             CommandOption name = app.Option("-n|--name", "The name for the output. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
             CommandOption listOnly = app.Option("-l|--list", "Lists templates with containing the specified name.", CommandOptionType.NoValue);
@@ -63,6 +61,28 @@ namespace dotnet_new3
                 {
                     foreach (string value in uninstall.Values)
                     {
+                        if (value == "*")
+                        {
+                            Assembly asm = Assembly.GetEntryAssembly();
+                            Uri codebase = new Uri(asm.CodeBase, UriKind.Absolute);
+                            string localPath = codebase.LocalPath;
+                            string targetDir = Path.GetDirectoryName(localPath);
+                            string manifest = Path.Combine(targetDir, "component_registry.json");
+                            string sources = Path.Combine(targetDir, "template_sources.json");
+
+                            if (File.Exists(manifest))
+                            {
+                                File.Delete(manifest);
+                            }
+
+                            if (File.Exists(sources))
+                            {
+                                File.Delete(sources);
+                            }
+
+                            return Task.FromResult(0);
+                        }
+
                         if (!TryRemoveComponent(value) && !TryRemoveSource(value))
                         {
                             Reporter.Error.WriteLine($"Couldn't remove {value} as either a template source or an assembly.".Red().Bold());
