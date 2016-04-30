@@ -179,33 +179,40 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private static AssemblyReferenceInfo GetAssemblyInfo(LibraryAsset arg)
         {
-            using (var peReader = new PEReader(File.OpenRead(arg.ResolvedPath)))
+            try
             {
-                var metadataReader = peReader.GetMetadataReader();
-
-                var definition = metadataReader.GetAssemblyDefinition();
-
-                var identity = new AssemblyIdentity(
-                    metadataReader.GetString(definition.Name),
-                    definition.Version,
-                    metadataReader.GetString(definition.Culture),
-                    GetPublicKeyToken(metadataReader.GetBlobBytes(definition.PublicKey))
-                );
-
-                var references = new List<AssemblyIdentity>(metadataReader.AssemblyReferences.Count);
-
-                foreach (var assemblyReferenceHandle in metadataReader.AssemblyReferences)
+                using (var peReader = new PEReader(File.OpenRead(arg.ResolvedPath)))
                 {
-                    var assemblyReference = metadataReader.GetAssemblyReference(assemblyReferenceHandle);
-                    references.Add(new AssemblyIdentity(
-                        metadataReader.GetString(assemblyReference.Name),
-                        assemblyReference.Version,
-                        metadataReader.GetString(assemblyReference.Culture),
-                        GetPublicKeyToken(metadataReader.GetBlobBytes(assemblyReference.PublicKeyOrToken))
-                    ));
-                }
+                    var metadataReader = peReader.GetMetadataReader();
 
-                return new AssemblyReferenceInfo(identity, references.ToArray());
+                    var definition = metadataReader.GetAssemblyDefinition();
+
+                    var identity = new AssemblyIdentity(
+                        metadataReader.GetString(definition.Name),
+                        definition.Version,
+                        metadataReader.GetString(definition.Culture),
+                        GetPublicKeyToken(metadataReader.GetBlobBytes(definition.PublicKey))
+                        );
+
+                    var references = new List<AssemblyIdentity>(metadataReader.AssemblyReferences.Count);
+
+                    foreach (var assemblyReferenceHandle in metadataReader.AssemblyReferences)
+                    {
+                        var assemblyReference = metadataReader.GetAssemblyReference(assemblyReferenceHandle);
+                        references.Add(new AssemblyIdentity(
+                            metadataReader.GetString(assemblyReference.Name),
+                            assemblyReference.Version,
+                            metadataReader.GetString(assemblyReference.Culture),
+                            GetPublicKeyToken(metadataReader.GetBlobBytes(assemblyReference.PublicKeyOrToken))
+                            ));
+                    }
+
+                    return new AssemblyReferenceInfo(identity, references.ToArray());
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InvalidDataException($"Could not read assembly info for {arg.ResolvedPath}", e);
             }
         }
 
