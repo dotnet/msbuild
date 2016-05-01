@@ -157,6 +157,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             // Project files
             project.Files = new ProjectFilesCollection(rawProject, project.ProjectDirectory, project.ProjectFilePath);
+            AddProjectFilesCollectionDiagnostics(rawProject, project);
 
             var commands = rawProject.Value<JToken>("commands") as JObject;
             if (commands != null)
@@ -410,7 +411,7 @@ namespace Microsoft.DotNet.ProjectModel
                         if (!success)
                         {
                             var lineInfo = (IJsonLineInfo)framework.Value;
-                            project.Diagnostics?.Add(
+                            project.Diagnostics.Add(
                                 new DiagnosticMessage(
                                     ErrorCodes.NU1008,
                                     $"\"{framework.Key}\" is an unsupported framework.",
@@ -509,7 +510,7 @@ namespace Microsoft.DotNet.ProjectModel
             if (compilerName != null)
             {
                 var lineInfo = rawObject.Value<IJsonLineInfo>("compilerName");
-                project.Diagnostics?.Add(
+                project.Diagnostics.Add(
                     new DiagnosticMessage(
                         ErrorCodes.DOTNET1016,
                         $"The 'compilerName' option in the root is deprecated. Use it in 'buildOptions' instead.",
@@ -533,7 +534,7 @@ namespace Microsoft.DotNet.ProjectModel
 
                 var lineInfo = (IJsonLineInfo)rawOptions;
 
-                project.Diagnostics?.Add(
+                project.Diagnostics.Add(
                     new DiagnosticMessage(
                         ErrorCodes.DOTNET1015,
                         $"The 'compilationOptions' option is deprecated. Use 'buildOptions' instead.",
@@ -678,7 +679,7 @@ namespace Microsoft.DotNet.ProjectModel
             if (rawProject.GetValue(option) != null)
             {
                 var lineInfo = rawProject.Value<IJsonLineInfo>(option);
-                project.Diagnostics?.Add(
+                project.Diagnostics.Add(
                     new DiagnosticMessage(
                         ErrorCodes.DOTNET1016,
                         $"The '{option}' option in the root is deprecated. Use it in 'packOptions' instead.",
@@ -765,6 +766,54 @@ namespace Microsoft.DotNet.ProjectModel
             string projectPath = Path.Combine(path, Project.FileName);
 
             return File.Exists(projectPath);
+        }
+
+        private static void AddProjectFilesCollectionDiagnostics(JObject rawProject, Project project)
+        {
+            var compileWarning = "'compile' in 'buildOptions'";
+            AddDiagnosticMesage(rawProject, project, "compile", compileWarning);
+            AddDiagnosticMesage(rawProject, project, "compileExclude", compileWarning);
+            AddDiagnosticMesage(rawProject, project, "compileFiles", compileWarning);
+            AddDiagnosticMesage(rawProject, project, "compileBuiltIn", compileWarning);
+
+            var resourceWarning = "'embed' in 'buildOptions'";
+            AddDiagnosticMesage(rawProject, project, "resource", resourceWarning);
+            AddDiagnosticMesage(rawProject, project, "resourceExclude", resourceWarning);
+            AddDiagnosticMesage(rawProject, project, "resourceFiles", resourceWarning);
+            AddDiagnosticMesage(rawProject, project, "resourceBuiltIn", resourceWarning);
+            AddDiagnosticMesage(rawProject, project, "namedResource", resourceWarning);
+
+            var contentWarning = "'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output";
+            AddDiagnosticMesage(rawProject, project, "content", contentWarning);
+            AddDiagnosticMesage(rawProject, project, "contentExclude", contentWarning);
+            AddDiagnosticMesage(rawProject, project, "contentFiles", contentWarning);
+            AddDiagnosticMesage(rawProject, project, "contentBuiltIn", contentWarning);
+
+            AddDiagnosticMesage(rawProject, project, "packInclude", "'files' in 'packOptions'");
+            AddDiagnosticMesage(rawProject, project, "publishExclude", "'publishOptions'");
+            AddDiagnosticMesage(rawProject, project, "exclude", "'exclude' within 'compile' or 'embed'");
+        }
+
+        private static void AddDiagnosticMesage(
+            JObject rawProject,
+            Project project,
+            string option,
+            string message)
+        {
+            var lineInfo = rawProject.Value<IJsonLineInfo>(option);
+            if (lineInfo == null)
+            {
+                return;
+            }
+
+            project.Diagnostics.Add(
+                new DiagnosticMessage(
+                    ErrorCodes.DOTNET1015,
+                    $"The '{option}' option is deprecated. Use {message} instead.",
+                    project.ProjectFilePath,
+                    DiagnosticMessageSeverity.Warning,
+                    lineInfo.LineNumber,
+                    lineInfo.LinePosition));
         }
     }
 }
