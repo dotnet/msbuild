@@ -7,7 +7,7 @@
   "dependencies": {
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-rc2-162081-13",
+    "dotnet-test-xunit": "1.0.0-rc2-173361-36",
     "Microsoft.DotNet.TestFramework": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
