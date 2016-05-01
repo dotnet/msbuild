@@ -42,15 +42,17 @@ namespace dotnet_new3
                 }
             }
 
+            IReadOnlyList<ITemplate> aliasResults = AliasRegistry.GetTemplatesForAlias(searchString.Value, results);
+
             if (!string.IsNullOrEmpty(searchString.Value))
             {
                 results.RemoveAll(x => x.Name.IndexOf(searchString.Value, StringComparison.OrdinalIgnoreCase) < 0);
             }
 
-            return results;
+            return results.Union(aliasResults);
         }
 
-        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption parametersFiles, CommandOption help, IReadOnlyDictionary<string, string> parameters)
+        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption parametersFiles, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters)
         {
             if (string.IsNullOrEmpty(template.Value))
             {
@@ -79,12 +81,19 @@ namespace dotnet_new3
 
             IGenerator generator = null;
             ITemplate tmplt = null;
+            string aliasTemplateName = AliasRegistry.GetTemplateNameForAlias(template.Value);
 
             foreach (IGenerator gen in Program.Broker.ComponentRegistry.OfType<IGenerator>())
             {
                 foreach (IConfiguredTemplateSource target in searchSources)
                 {
                     if (gen.TryGetTemplateFromSource(target, template.Value, out tmplt))
+                    {
+                        generator = gen;
+                        break;
+                    }
+                    
+                    if(aliasTemplateName != null && gen.TryGetTemplateFromSource(target, aliasTemplateName, out tmplt))
                     {
                         generator = gen;
                         break;
@@ -140,7 +149,7 @@ namespace dotnet_new3
                 }
                 else
                 {
-                    Reporter.Output.WriteLine($"Using template: {results[0].Name} - {results[0].Source.Alias} - {results[0].Generator.Name}");
+                    Reporter.Output.WriteLine($"Using template: {results[0].Name} [{results[0].ShortName}] {AliasRegistry.GetAliasForTemplate(results[0])}");
                     index = 0;
                 }
 
@@ -169,6 +178,14 @@ namespace dotnet_new3
                 {
                     templateParams.ParameterValues[param] = param.DefaultValue;
                 }
+            }
+
+            if (alias.HasValue())
+            {
+                //TODO: Add parameters to aliases (from _parameters_ collection)
+                AliasRegistry.SetTemplateAlias(alias.Value(), tmplt);
+                Reporter.Output.WriteLine("Alias created.");
+                return 0;
             }
 
             foreach (KeyValuePair<string, string> pair in parameters)

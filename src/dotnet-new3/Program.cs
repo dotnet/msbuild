@@ -30,11 +30,12 @@ namespace dotnet_new3
             CommandOption listOnly = app.Option("-l|--list", "Lists templates with containing the specified name.", CommandOptionType.NoValue);
             CommandOption help = app.Option("-h|--help", "Indicates whether to display the help for the template's parameters instead of creating it.", CommandOptionType.NoValue);
             CommandOption dir = app.Option("-d|--dir", "Indicates whether to display create a directory for the generated content.", CommandOptionType.NoValue);
-            CommandOption parametersFiles = app.Option("-a|--args", "Adds a parameters file.", CommandOptionType.MultipleValue);
+            CommandOption parametersFiles = app.Option("-x|--extra-args", "Adds a parameters file.", CommandOptionType.MultipleValue);
             CommandOption source = app.Option("-s|--source", "The specific template source to get the template from.", CommandOptionType.SingleValue);
             CommandOption install = app.Option("-i|--install", "Installs a component or a source", CommandOptionType.MultipleValue);
             CommandOption uninstall = app.Option("-u|--uninstall", "Uninstalls a component or a source", CommandOptionType.MultipleValue);
             CommandOption currentConfig = app.Option("-c|--current-config", "Lists the currently installed components and sources.", CommandOptionType.NoValue);
+            CommandOption alias = app.Option("-a|--alias", "Creates an alias for the specified template", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -97,14 +98,16 @@ namespace dotnet_new3
                     IEnumerable<ITemplate> results = TemplateCreator.List(template, source);
                     TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
                     {
-                        {"Name", x => x.Name}
+                        {"Templates", x => x.Name},
+                        {"Short Names", x => $"[{x.ShortName}]" },
+                        {"Alias", x => AliasRegistry.GetAliasForTemplate(x) ?? "" }
                     });
 
                     return Task.FromResult(0);
                 }
 
                 IReadOnlyDictionary<string, string> parameters = app.ParseExtraArgs();
-                return TemplateCreator.Instantiate(app, template, name, dir, source, parametersFiles, help, parameters);
+                return TemplateCreator.Instantiate(app, template, name, dir, source, parametersFiles, help, alias, parameters);
             });
 
             int result;
@@ -135,6 +138,8 @@ namespace dotnet_new3
                         ex = ax.InnerException;
                         ax = ex as AggregateException;
                     }
+
+                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
                 }
 
                 Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
