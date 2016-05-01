@@ -117,7 +117,6 @@ namespace dotnet_new3
             }
             catch (Exception ex)
             {
-                Reporter.Error.WriteLine($"Exception type: {ex.GetType().FullName}");
                 AggregateException ax = ex as AggregateException;
 
                 while (ax != null && ax.InnerExceptions.Count == 1)
