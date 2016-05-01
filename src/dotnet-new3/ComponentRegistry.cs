@@ -13,6 +13,8 @@ namespace dotnet_new3
         private JObject _truth;
         private string _path;
 
+        public bool IsUninitialized { get; private set; }
+
         private static class ObjectCache<T>
         {
             public static readonly Dictionary<string, T> Items = new Dictionary<string, T>();
@@ -78,6 +80,22 @@ namespace dotnet_new3
             }
 
             _truth = obj;
+
+            Assembly asm = typeof(Broker).GetTypeInfo().Assembly;
+
+            foreach (Type type in asm.ExportedTypes)
+            {
+                if (typeof(ITemplateSource).IsAssignableFrom(type))
+                {
+                    Register<ITemplateSource>(type);
+                }
+
+                if (typeof(IGenerator).IsAssignableFrom(type))
+                {
+                    Register<IGenerator>(type);
+                }
+            }
+
             return;
         }
 
@@ -98,7 +116,20 @@ namespace dotnet_new3
                 _truth[typeof(T).FullName] = items = new JArray();
             }
 
+            HashSet<string> installed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             items.Add(type.AssemblyQualifiedName);
+            JArray realItems = new JArray();
+            _truth[typeof(T).FullName] = realItems;
+
+            foreach(JToken entry in items)
+            {
+                string value = entry.ToString();
+                if (installed.Add(value))
+                {
+                    realItems.Add(value);
+                }
+            }
+
             File.WriteAllText(_path, _truth.ToString());
         }
 
