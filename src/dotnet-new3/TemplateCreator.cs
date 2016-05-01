@@ -16,11 +16,11 @@ namespace dotnet_new3
         public static IEnumerable<ITemplate> List(CommandArgument searchString, CommandOption source)
         {
             List<ITemplate> results = new List<ITemplate>();
-            IEnumerable<IConfiguredTemplateSource> searchSources;
+            IReadOnlyList<IConfiguredTemplateSource> searchSources;
 
             if (!source.HasValue())
             {
-                searchSources = Program.Broker.GetConfiguredSources();
+                searchSources = Program.Broker.GetConfiguredSources().ToList();
             }
             else
             {
@@ -32,6 +32,8 @@ namespace dotnet_new3
 
                 searchSources = new List<IConfiguredTemplateSource> { realSource };
             }
+
+            //searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
 
             foreach (IGenerator gen in Program.Broker.ComponentRegistry.OfType<IGenerator>())
             {

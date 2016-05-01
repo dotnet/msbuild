@@ -9,6 +9,9 @@ namespace dotnet_new3
 {
     public class ZipArchiveTemplateSource : ITemplateSource
     {
+        public bool IsEmbeddable => true;
+
+
         public string Name => "ZipArchive";
 
         public bool CanHandle(string location)
@@ -32,9 +35,43 @@ namespace dotnet_new3
             }
         }
 
+        public bool CanHandle(IConfiguredTemplateSource source, string location)
+        {
+
+            try
+            {
+                string extension = Path.GetExtension(location).ToUpperInvariant();
+                switch (extension)
+                {
+                    case ".ZIP":
+                    case ".VSIX":
+                    case ".NUPKG":
+                        break;
+                    default:
+                        return false;
+                }
+
+                using (Stream fileData = source.OpenFile(location))
+                using (ZipArchive archive = new ZipArchive(fileData, ZipArchiveMode.Read, true))
+                {
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public IDisposable<ITemplateSourceFolder> RootFor(string location)
         {
             return new Directory(null, "", "", () => ZipFile.OpenRead(location)).NoDispose();
+        }
+
+        public IDisposable<ITemplateSourceFolder> RootFor(IConfiguredTemplateSource source, string location)
+        {
+            return new Directory(null, "", "", () => new ZipArchive(source.OpenFile(location), ZipArchiveMode.Read, false)).NoDispose();
         }
 
         private class Directory : TemplateSourceFolder
@@ -67,9 +104,15 @@ namespace dotnet_new3
                         //The new entry and this directory must have the same root for it to be a child
                         if (entry.FullName.IndexOf(FullPath, StringComparison.OrdinalIgnoreCase) == 0)
                         {
+                            if (string.IsNullOrWhiteSpace(entry.Name))
+                            {
+                                continue;
+                            }
+
                             //If there's only one part beyond the last slash, it's a file since ZIPs don't support dirs
                             //  as independent constructs
-                            if (!string.IsNullOrWhiteSpace(entry.Name) && entry.FullName.LastIndexOfAny(new []{ '\\', '/' }) == _lastSlashIndex)
+                            int lastIndex = entry.FullName.LastIndexOfAny(new[] { '\\', '/' });
+                            if (lastIndex == _lastSlashIndex || (_lastSlashIndex == 0 && lastIndex < 0))
                             {
                                 yield return new File(this, entry.FullName, entry.Name, _opener);
                             }
@@ -120,52 +163,6 @@ namespace dotnet_new3
                     ZipArchiveEntry file = archive.GetEntry(FullPath);
                     Stream result = file.Open();
                     return new CoDisposableStream(result, archive);
-                }
-
-                private class CoDisposableStream :Stream
-                {
-                    private readonly IDisposable[] _alsoDispose;
-                    private readonly Stream _source;
-
-                    public CoDisposableStream(Stream source, params IDisposable[] alsoDispose)
-                    {
-                        _source = source;
-                        _alsoDispose = alsoDispose;
-                    }
-
-                    public override bool CanRead => _source.CanRead;
-
-                    public override bool CanSeek => _source.CanSeek;
-
-                    public override bool CanWrite => _source.CanWrite;
-
-                    public override long Length => _source.Length;
-
-                    public override long Position
-                    {
-                        get { return _source.Position; }
-                        set { _source.Position = value; }
-                    }
-
-                    public override void Flush() => _source.Flush();
-
-                    public override int Read(byte[] buffer, int offset, int count) => _source.Read(buffer, offset, count);
-
-                    public override long Seek(long offset, SeekOrigin origin) => _source.Seek(offset, origin);
-
-                    public override void SetLength(long value) => _source.SetLength(value);
-
-                    public override void Write(byte[] buffer, int offset, int count) => _source.Write(buffer, offset, count);
-
-                    protected override void Dispose(bool disposing)
-                    {
-                        foreach(IDisposable disposable in _alsoDispose)
-                        {
-                            disposable.Dispose();
-                        }
-
-                        _source.Dispose();
-                    }
                 }
             }
         }

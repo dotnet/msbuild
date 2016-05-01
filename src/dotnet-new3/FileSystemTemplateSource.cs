@@ -7,6 +7,8 @@ namespace dotnet_new3
 {
     public class FileSystemTemplateSource : ITemplateSource
     {
+        public bool IsEmbeddable => false;
+
         public string Name => "FileSystem";
 
         public bool CanHandle(string location)
@@ -21,40 +23,59 @@ namespace dotnet_new3
             }
         }
 
+        public bool CanHandle(IConfiguredTemplateSource source, string location)
+        {
+            return false;
+        }
+
         public IDisposable<ITemplateSourceFolder> RootFor(string location)
         {
             DirectoryInfo root = new DirectoryInfo(location);
-            return new Directory(null, root).NoDispose();
+            int len = root.FullName.Length;
+
+            if (root.FullName.LastIndexOfAny(new[] { '\\', '/' }) != root.FullName.Length - 1)
+            {
+                ++len;
+            }
+
+            return new Directory(len, null, root).NoDispose();
+        }
+
+        public IDisposable<ITemplateSourceFolder> RootFor(IConfiguredTemplateSource source, string location)
+        {
+            return null;
         }
 
         private static class EntryHelper
         {
-            public static ITemplateSourceEntry Create(ITemplateSourceFolder parent, FileSystemInfo info)
+            public static ITemplateSourceEntry Create(int rootLength, ITemplateSourceFolder parent, FileSystemInfo info)
             {
                 DirectoryInfo dir = info as DirectoryInfo;
 
                 if(dir != null)
                 {
-                    return new Directory(parent, dir);
+                    return new Directory(rootLength, parent, dir);
                 }
 
-                return new File(parent, (FileInfo)info);
+                return new File(rootLength, parent, (FileInfo)info);
             }
         }
 
         private class Directory : TemplateSourceFolder
         {
             private readonly DirectoryInfo _dir;
+            private readonly int _rootLength;
 
-            public Directory(ITemplateSourceFolder parent, DirectoryInfo dir)
+            public Directory(int rootLength, ITemplateSourceFolder parent, DirectoryInfo dir)
                 : base(parent)
             {
+                _rootLength = rootLength;
                 _dir = dir;
             }
 
-            public override IEnumerable<ITemplateSourceEntry> Children => _dir.EnumerateFileSystemInfos().Select(x => EntryHelper.Create(this, x));
+            public override IEnumerable<ITemplateSourceEntry> Children => _dir.EnumerateFileSystemInfos().Select(x => EntryHelper.Create(_rootLength, this, x));
 
-            public override string FullPath => _dir.FullName;
+            public override string FullPath => _dir.FullName.Substring(_rootLength);
 
             public override string Name => _dir.Name;
         }
@@ -62,14 +83,16 @@ namespace dotnet_new3
         private class File : TemplateSourceFile
         {
             private readonly FileInfo _file;
+            private int _rootLength;
 
-            public File(ITemplateSourceFolder parent, FileInfo file)
+            public File(int rootLength, ITemplateSourceFolder parent, FileInfo file)
                 : base(parent)
             {
+                _rootLength = rootLength;
                 _file = file;
             }
 
-            public override string FullPath => _file.FullName;
+            public override string FullPath => _file.FullName.Substring(_rootLength);
 
             public override string Name => _file.Name;
 
