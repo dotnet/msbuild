@@ -11,7 +11,7 @@ namespace dotnet_new3
     internal class Broker : IBroker
     {
         private IComponentRegistry _registry;
-        private readonly Dictionary<string, TemplateSource> _configuredSources = new Dictionary<string, TemplateSource>();
+        private readonly Dictionary<string, TemplateSource> _configuredSources = new Dictionary<string, TemplateSource>(StringComparer.OrdinalIgnoreCase);
         private string _path;
 
         private class TemplateSource
