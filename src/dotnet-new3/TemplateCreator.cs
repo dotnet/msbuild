@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -76,6 +75,8 @@ namespace dotnet_new3
                 searchSources = new List<IConfiguredTemplateSource> { realSource };
             }
 
+            //searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
+
             IGenerator generator = null;
             ITemplate tmplt = null;
 
@@ -98,13 +99,11 @@ namespace dotnet_new3
 
             if (generator == null || tmplt == null)
             {
-                Reporter.Output.WriteLine($"No template with name \"{template.Value}\" was found in any of the configured sources, searching...".Bold().Yellow());
-
                 List<ITemplate> results = List(template, source).ToList();
-                Reporter.Output.WriteLine($"{results.Count} matching template(s) found.".Bold().Yellow());
 
                 if (results.Count == 0)
                 {
+                    Reporter.Output.WriteLine($"No template containing \"{template.Value}\" was found in any of the configured sources.".Bold().Red());
                     return -1;
                 }
 
@@ -112,16 +111,23 @@ namespace dotnet_new3
 
                 if (results.Count != 1)
                 {
-                    Reporter.Output.WriteLine("Template Name - Source Name - Generator Name");
-                    foreach (ITemplate result in results)
+                    int counter = 0;
+                    TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
                     {
-                        Reporter.Output.WriteLine($"[{index++}] {result.Name} - {result.Source.Alias} - {result.Generator.Name}");
-                    }
+                        {"#", x => $"{++counter}." },
+                        {"Templates", x => x.Name}
+                    });
 
                     Reporter.Output.WriteLine();
-                    Reporter.Output.WriteLine($"Template # [0 - {results.Count - 1}] (q to cancel):");
+                    Reporter.Output.WriteLine($"Select a template [1]:");
 
                     string key = Console.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(key))
+                    {
+                        key = "1";
+                    }
+
                     while (!int.TryParse(key, out index))
                     {
                         if (string.Equals(key, "q", StringComparison.OrdinalIgnoreCase))
