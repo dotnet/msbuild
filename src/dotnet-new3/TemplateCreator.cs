@@ -46,7 +46,7 @@ namespace dotnet_new3
 
             if (!string.IsNullOrEmpty(searchString.Value))
             {
-                results.RemoveAll(x => x.Name.IndexOf(searchString.Value, StringComparison.OrdinalIgnoreCase) < 0);
+                results.RemoveAll(x => x.Name.IndexOf(searchString.Value, StringComparison.OrdinalIgnoreCase) < 0 && (x.ShortName?.IndexOf(searchString.Value, StringComparison.OrdinalIgnoreCase) ?? -1) < 0);
             }
 
             return results.Union(aliasResults);
