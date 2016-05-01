@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.Testing.Abstractions
 {
@@ -15,11 +14,6 @@ namespace Microsoft.Extensions.Testing.Abstractions
         private readonly IPdbReader _pdbReader;
 
         public SourceInformationProvider(string pdbPath) :
-            this(pdbPath, new PdbReaderFactory())
-        {
-        }
-
-        public SourceInformationProvider(string pdbPath, ILogger logger) :
             this(pdbPath, new PdbReaderFactory())
         {
         }
