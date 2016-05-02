@@ -139,6 +139,22 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
+        public bool TryDeleteBlob(string path)
+        {
+            try
+            {
+                DeleteBlob(path);
+                
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Deleting blob {path} failed with \r\n{e.Message}");
+                
+                return false;
+            }
+        }
+
         public void DeleteBlob(string path)
         {
             _blobContainer.GetBlockBlobReference(path).DeleteAsync().Wait();
