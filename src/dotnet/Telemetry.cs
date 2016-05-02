@@ -86,6 +86,7 @@ namespace Microsoft.DotNet.Cli
             {
                 using (PerfTrace.Current.CaptureTiming())
                 {
+                    //continue task in existing parallel thread
                     _trackEventTask = _trackEventTask.ContinueWith(
                         x => TrackEventTask(eventName, properties, measurements)
                     );
@@ -105,7 +106,6 @@ namespace Microsoft.DotNet.Cli
                 _client.InstrumentationKey = InstrumentationKey;
                 _client.Context.Session.Id = Guid.NewGuid().ToString();
 
-                var runtimeEnvironment = PlatformServices.Default.Runtime;
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
 
                 _commonProperties = new Dictionary<string, string>();
@@ -123,7 +123,6 @@ namespace Microsoft.DotNet.Cli
                 _isInitialized = false;
                 // we dont want to fail the tool if telemetry fails.
                 Debug.Fail("Exception during telemetry initialization");
-                return;
             }
         }
 
@@ -136,15 +135,15 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                var eventMeasurements = GetEventMeasures(measurements);
                 var eventProperties = GetEventProperties(properties);
+                var eventMeasurements = GetEventMeasures(measurements);
 
                 _client.TrackEvent(eventName, eventProperties, eventMeasurements);
                 _client.Flush();
             }
             catch (Exception)
             {
-                Debug.Fail("Exception during TrackEvent");
+                Debug.Fail("Exception during TrackEventTask");
             }
         }
 
