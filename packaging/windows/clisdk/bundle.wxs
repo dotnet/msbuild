@@ -23,11 +23,8 @@
 
     <swid:Tag Regid="microsoft.com" InstallPath="[DOTNETHOME]" />
 
-    <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles6432Folder]dotnet" bal:Overridable="yes" />
+    <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles6432Folder]dotnet" bal:Overridable="no" />
     <Variable Name="BUNDLEMONIKER" Type="string" Value="$(var.ProductMoniker)" bal:Overridable="no" />
-
-    <util:RegistrySearch Id="PreviousInstallFolderSearch" Root="HKLM" Key="SOFTWARE\dotnet\Setup" Value="InstallDir" Variable="PreviousInstallFolder" />
-    <util:DirectorySearch Path="[PreviousInstallFolder]" Variable="DOTNETHOME" After="PreviousInstallFolderSearch" Condition="PreviousInstallFolder" />
 
     <Chain DisableSystemRestore="yes" ParallelCache="yes">
       <ExePackage Name="VC_redist.$(var.Platform).exe"
