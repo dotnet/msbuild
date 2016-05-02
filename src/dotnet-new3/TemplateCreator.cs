@@ -150,7 +150,7 @@ namespace dotnet_new3
                 else
                 {
                     Reporter.Output.WriteLine($"Using template: {results[0].Name} [{results[0].ShortName}] {AliasRegistry.GetAliasForTemplate(results[0])}");
-                    index = 0;
+                    index = 1;
                 }
 
                 tmplt = results[index - 1];
