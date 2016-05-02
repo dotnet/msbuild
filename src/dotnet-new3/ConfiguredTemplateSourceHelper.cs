@@ -24,7 +24,10 @@ namespace dotnet_new3
 
             foreach (IConfiguredTemplateSource configuredSource in configuredSources)
             {
-                Scan(configuredSource, fileEmbeddableSources, result);
+                if (configuredSource.Source.CanHostEmbeddedSources)
+                {
+                    Scan(configuredSource, fileEmbeddableSources, result);
+                }
             }
 
             return result.Values.ToList();
@@ -44,7 +47,11 @@ namespace dotnet_new3
                             {
                                 IConfiguredTemplateSource embedded = new EmbeddedTemplateSource(configuredSource, entry, source);
                                 configuredSources[embedded.Location] = embedded;
-                                Scan(embedded, fileEmbeddableSources, configuredSources);
+
+                                if (embedded.Source.CanHostEmbeddedSources)
+                                {
+                                    Scan(embedded, fileEmbeddableSources, configuredSources);
+                                }
                             }
                         }
                     }

@@ -11,6 +11,7 @@ namespace dotnet_new3
     {
         public bool IsEmbeddable => true;
 
+        public bool CanHostEmbeddedSources => false;
 
         public string Name => "ZipArchive";
 

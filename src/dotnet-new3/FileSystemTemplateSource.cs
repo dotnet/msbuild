@@ -9,6 +9,8 @@ namespace dotnet_new3
     {
         public bool IsEmbeddable => false;
 
+        public bool CanHostEmbeddedSources => true;
+
         public string Name => "FileSystem";
 
         public bool CanHandle(string location)

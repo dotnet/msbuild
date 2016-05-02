@@ -32,7 +32,7 @@ namespace dotnet_new3
                 searchSources = new List<IConfiguredTemplateSource> { realSource };
             }
 
-            //searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
+            searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
 
             foreach (IGenerator gen in Program.Broker.ComponentRegistry.OfType<IGenerator>())
             {
@@ -60,11 +60,11 @@ namespace dotnet_new3
                 return help.HasValue() ? 0 : -1;
             }
 
-            IEnumerable<IConfiguredTemplateSource> searchSources;
+            IReadOnlyList<IConfiguredTemplateSource> searchSources;
 
             if (!source.HasValue())
             {
-                searchSources = Program.Broker.GetConfiguredSources();
+                searchSources = Program.Broker.GetConfiguredSources().ToList();
             }
             else
             {
@@ -77,7 +77,7 @@ namespace dotnet_new3
                 searchSources = new List<IConfiguredTemplateSource> { realSource };
             }
 
-            //searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
+            searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
 
             IGenerator generator = null;
             ITemplate tmplt = null;
@@ -153,8 +153,8 @@ namespace dotnet_new3
                     index = 0;
                 }
 
-                tmplt = results[index];
-                generator = results[index].Generator;
+                tmplt = results[index - 1];
+                generator = results[index - 1].Generator;
             }
 
             string realName = name.Value() ?? tmplt.DefaultName ?? new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
