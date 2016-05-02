@@ -3,26 +3,11 @@
   <?include "Variables.wxi" ?>
   <Fragment>
     <ComponentGroup Id="AuthoredRegistryKeys">
-      <?if $(var.Platform) = x64?>
-      <Component Id="SetupRegistry_x64" Directory="TARGETDIR" Win64="yes">
-        <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\sharedframework\$(var.FrameworkName) $(var.FrameworkDisplayVersion)\Setup">
-          <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
-          <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[SHAREDFRAMEWORKHOME]" />
-          <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.FrameworkDisplayVersion)" />
-        </RegistryKey>
-      </Component>
-      <?endif?>
-
-      <?if $(var.Platform) = x86?>
       <Component Id="SetupRegistry_x86" Directory="TARGETDIR" Win64="no">
-        <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\sharedframework\$(var.FrameworkName) $(var.FrameworkDisplayVersion)\Setup">
-          <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
-          <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[SHAREDFRAMEWORKHOME]" />
-          <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.FrameworkDisplayVersion)" />
+        <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\Setup\InstalledVersions\$(var.Platform)\sharedfx\$(var.FrameworkName)">
+          <RegistryValue Action="write" Name="$(var.FrameworkDisplayVersion)" Type="integer" Value="1" KeyPath="yes"/>
         </RegistryKey>
       </Component>
-      <?endif?>
-
     </ComponentGroup>
   </Fragment>
 </Wix>
