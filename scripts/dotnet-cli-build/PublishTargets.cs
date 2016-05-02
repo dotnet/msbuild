@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Build
                 else
                 {
                     // This is an old drop of latest so remove all old files to ensure a clean state
-                    AzurePublisherTool.ListBlobs($"{targetContainer}").ToList().ForEach(f => AzurePublisherTool.DeleteBlob(f));
+                    AzurePublisherTool.ListBlobs($"{targetContainer}").ToList().ForEach(f => AzurePublisherTool.TryDeleteBlob(f));
 
                     // Drop the version file signaling such for any race-condition builds (see above comment).
                     AzurePublisherTool.DropLatestSpecifiedVersion(targetVersionFile);
