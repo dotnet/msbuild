@@ -141,7 +141,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_BuildBasePath_when_one_is_passed_in()
         {
-            _dotnetTestFullParams.BuildBasePath.Should().Be(BuildBasePath);
+            _dotnetTestFullParams.BuildBasePath.Should().Be(Path.GetFullPath(BuildBasePath));
         }
 
         [Fact]

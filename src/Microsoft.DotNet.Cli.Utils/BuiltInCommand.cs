@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly Func<string[], int> _builtInCommand;
         private readonly StreamForwarder _stdOut;
         private readonly StreamForwarder _stdErr;
+        private string _workingDirectory;
 
         public string CommandName { get; }
         public string CommandArgs => string.Join(" ", _commandArgs);
@@ -38,6 +39,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             TextWriter originalConsoleOut = Console.Out;
             TextWriter originalConsoleError = Console.Error;
+            string originalWorkingDirectory = Directory.GetCurrentDirectory();
 
             try
             {
@@ -51,6 +53,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
                     // Reset the Reporters to the new Console Out and Error.
                     Reporter.Reset();
+
+                    if (!string.IsNullOrEmpty(_workingDirectory))
+                    {
+                        Directory.SetCurrentDirectory(_workingDirectory);
+                    }
 
                     var taskOut = _stdOut.BeginRead(new StreamReader(outStream));
                     var taskErr = _stdErr.BeginRead(new StreamReader(errorStream));
@@ -71,6 +78,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 Console.SetOut(originalConsoleOut);
                 Console.SetError(originalConsoleError);
+                Directory.SetCurrentDirectory(originalWorkingDirectory);
 
                 Reporter.Reset();
             }
@@ -96,6 +104,13 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             _stdErr.ForwardTo(writeLine: handler);
+
+            return this;
+        }
+
+        public ICommand WorkingDirectory(string workingDirectory)
+        {
+            _workingDirectory = workingDirectory;
 
             return this;
         }
@@ -129,11 +144,6 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         public ICommand ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false, bool ansiPassThrough = true)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ICommand WorkingDirectory(string projectDirectory)
         {
             throw new NotImplementedException();
         }

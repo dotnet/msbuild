@@ -176,6 +176,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var projectJson = Path.Combine(TestAssetPath, "project.json");
             var command = new Mock<ICommand>();
             command.Setup(c => c.Execute()).Returns(new CommandResult());
+            command.Setup(c => c.WorkingDirectory(It.IsAny<string>())).Returns(() => command.Object);
             command.Setup(c => c.OnErrorLine(It.IsAny<Action<string>>())).Returns(() => command.Object);
             command.Setup(c => c.OnOutputLine(It.IsAny<Action<string>>())).Returns(() => command.Object);
             var commandFactory = new Mock<ICommandFactory>();

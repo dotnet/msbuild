@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using static System.Int32;
 
@@ -106,7 +107,7 @@ namespace Microsoft.DotNet.Tools.Test
                 }
 
                 Output = _outputOption.Value();
-                BuildBasePath = _buildBasePath.Value();
+                BuildBasePath = PathUtility.GetFullPath(_buildBasePath.Value());
                 Config = _configurationOption.Value() ?? Constants.DefaultConfiguration;
                 Runtime = _runtimeOption.Value();
                 NoBuild = _noBuildOption.HasValue();
