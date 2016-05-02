@@ -293,10 +293,15 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             json.Add("compilerName", "some compiler");
             json.Add("compilationOptions", new JObject());
             json.Add("projectUrl", "some project url");
+            json.Add("compile", "something");
+            json.Add("resource", "something");
+            json.Add("content", "something");
+            json.Add("packInclude", "something");
+            json.Add("publishExclude", "something");
 
             var project = GetProject(json);
 
-            project.Diagnostics.Should().HaveCount(3);
+            project.Diagnostics.Should().HaveCount(8);
 
             project.Diagnostics.Should().Contain(m =>
                 m.ErrorCode == ErrorCodes.DOTNET1015 &&
@@ -312,6 +317,31 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 m.ErrorCode == ErrorCodes.DOTNET1016 &&
                 m.Severity == DiagnosticMessageSeverity.Warning &&
                 m.Message == "The 'compilerName' option in the root is deprecated. Use it in 'buildOptions' instead.");
+
+            project.Diagnostics.Should().Contain(m =>
+               m.ErrorCode == ErrorCodes.DOTNET1015 &&
+               m.Severity == DiagnosticMessageSeverity.Warning &&
+               m.Message == "The 'compile' option is deprecated. Use 'compile' in 'buildOptions' instead.");
+
+            project.Diagnostics.Should().Contain(m =>
+               m.ErrorCode == ErrorCodes.DOTNET1015 &&
+               m.Severity == DiagnosticMessageSeverity.Warning &&
+               m.Message == "The 'resource' option is deprecated. Use 'embed' in 'buildOptions' instead.");
+
+            project.Diagnostics.Should().Contain(m =>
+               m.ErrorCode == ErrorCodes.DOTNET1015 &&
+               m.Severity == DiagnosticMessageSeverity.Warning &&
+               m.Message == "The 'content' option is deprecated. Use 'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output instead.");
+
+            project.Diagnostics.Should().Contain(m =>
+               m.ErrorCode == ErrorCodes.DOTNET1015 &&
+               m.Severity == DiagnosticMessageSeverity.Warning &&
+               m.Message == "The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead.");
+
+            project.Diagnostics.Should().Contain(m =>
+               m.ErrorCode == ErrorCodes.DOTNET1015 &&
+               m.Severity == DiagnosticMessageSeverity.Warning &&
+               m.Message == "The 'publishExclude' option is deprecated. Use 'publishOptions' instead.");
         }
 
         [Fact]
