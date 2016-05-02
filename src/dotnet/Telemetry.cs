@@ -58,41 +58,6 @@ namespace Microsoft.DotNet.Cli
                 return;
             }
 
-            _isCollectingTelemetry = true;
-            try
-            {
-                //initialize in task to offload to parallel thread
-                _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
-            }
-            catch(Exception)
-            {
-                Debug.Fail("Exception during telemetry task initialization");
-            }
-        }
-
-        public void TrackEvent(string eventName, IList<string> properties, IDictionary<string, double> measurements)
-        {
-            if (!_isCollectingTelemetry)
-            {
-                return;
-            }
-
-            try
-            {
-                _trackEventTask = _trackEventTask.ContinueWith(
-                    x => TrackEventTask(eventName,
-                        properties,
-                        measurements)
-                );
-            }
-            catch(Exception)
-            {
-                Debug.Fail("Exception during telemetry task continuation");
-            }
-        }
-
-        private void InitializeTelemetry()
-        {
             try
             {
                 using (PerfTrace.Current.CaptureTiming())
@@ -101,11 +66,9 @@ namespace Microsoft.DotNet.Cli
                     _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
                 }
             }
-            catch (Exception)
+            catch(Exception)
             {
-                // we dont want to fail the tool if telemetry fais. We should be able to detect abnormalities from data
-                // at the server end
-                Debug.Fail("Exception during telemetry initialization");
+                Debug.Fail("Exception during telemetry task initialization");
             }
         }
 
