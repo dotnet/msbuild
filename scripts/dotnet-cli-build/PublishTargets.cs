@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Build
                 // at the same time and someone already took care of publishing and we have no work to do.
                 if (AzurePublisherTool.IsLatestSpecifiedVersion(targetVersionFile))
                 {
-                    AzurePublisherTool.ReleaseLeaseOnBlob(targetContainer, leaseId);
+                    AzurePublisherTool.ReleaseLeaseOnBlob(semaphoreBlob, leaseId);
                     return c.Success();
                 }
                 else
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Cli.Build
                 }
                 finally
                 {
-                    AzurePublisherTool.ReleaseLeaseOnBlob(targetContainer, leaseId);
+                    AzurePublisherTool.ReleaseLeaseOnBlob(semaphoreBlob, leaseId);
                 }
             }
 
