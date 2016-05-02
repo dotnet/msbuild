@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 
 // This class is responsible with defining the arguments for the Compile verb.
@@ -97,7 +98,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 }
 
                 OutputValue = _outputOption.Value();
-                BuildBasePathValue = _buildBasePath.Value();
+                BuildBasePathValue = PathUtility.GetFullPath(_buildBasePath.Value());
                 ConfigValue = _configurationOption.Value() ?? Constants.DefaultConfiguration;
                 RuntimeValue = _runtimeOption.Value();
                 VersionSuffixValue = _versionSuffixOption.Value();

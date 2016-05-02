@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Pack;
 
 namespace Microsoft.DotNet.Tools.Compiler
@@ -61,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
                 var outputValue = output.Value();
-                var buildBasePathValue = buildBasePath.Value();
+                var buildBasePathValue = PathUtility.GetFullPath(buildBasePath.Value());
 
                 var contexts = ProjectContext.CreateContextForEachFramework(pathValue, settings);
                 var project = contexts.First().ProjectFile;

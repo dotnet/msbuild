@@ -223,5 +223,19 @@ namespace Microsoft.DotNet.Tools.Common
 
             return Path.GetExtension(filePath).Equals(extension, comparison);
         }
+
+        /// <summary>
+        /// Gets the fully-qualified path without failing if the
+        /// path is empty.
+        /// </summary>
+        public static string GetFullPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return path;
+            }
+
+            return Path.GetFullPath(path);
+        }
     }
 }

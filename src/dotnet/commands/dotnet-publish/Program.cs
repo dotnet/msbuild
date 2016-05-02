@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -37,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 publish.Framework = framework.Value();
                 publish.Runtime = runtime.Value();
-                publish.BuildBasePath = buildBasePath.Value();
+                publish.BuildBasePath = PathUtility.GetFullPath(buildBasePath.Value());
                 publish.OutputPath = output.Value();
                 publish.Configuration = configuration.Value() ?? Constants.DefaultConfiguration;
                 publish.NativeSubdirectories = nativeSubdirectories.HasValue();
