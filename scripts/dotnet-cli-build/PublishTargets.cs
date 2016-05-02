@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Build
                 }
                 finally
                 {
-                    AzurePublisherTool.ReleaseLeaseOnBlob(targetContainer, leaseId);
+                    AzurePublisherTool.ReleaseLeaseOnBlob(semaphoreBlob, leaseId);
                 }
             }
 
