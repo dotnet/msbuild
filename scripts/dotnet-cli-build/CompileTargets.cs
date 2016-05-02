@@ -694,30 +694,40 @@ namespace Microsoft.DotNet.Cli.Build
                 deps = JObject.ReadFrom(reader);
             }
 
-            var target = deps["targets"][deps["runtimeTarget"]["name"].Value<string>()];
-            var library = target.Children<JProperty>().First();
-            var version = library.Name.Substring(library.Name.IndexOf('/') + 1);
-            if (newName == null)
+            string version = null;
+            foreach (JProperty target in deps["targets"])
             {
-                library.Remove();
+                var targetLibrary = target.Value.Children<JProperty>().FirstOrDefault();
+                if (targetLibrary == null)
+                {
+                    continue;
+                }
+                version = targetLibrary.Name.Substring(targetLibrary.Name.IndexOf('/') + 1);
+                if (newName == null)
+                {
+                    targetLibrary.Remove();
+                }
+                else
+                {
+                    targetLibrary.Replace(new JProperty(newName + '/' + version, targetLibrary.Value));
+                }
             }
-            else
+            if (version != null)
             {
-                library.Replace(new JProperty(newName + '/' + version, library.Value));
-            }
-            library = deps["libraries"].Children<JProperty>().First();
-            if (newName == null)
-            {
-                library.Remove();
-            }
-            else
-            {
-                library.Replace(new JProperty(newName + '/' + version, library.Value));
-            }
-            using (var file = File.CreateText(depsFile))
-            using (var writer = new JsonTextWriter(file) { Formatting = Formatting.Indented })
-            {
-                deps.WriteTo(writer);
+                var library = deps["libraries"].Children<JProperty>().First();
+                if (newName == null)
+                {
+                    library.Remove();
+                }
+                else
+                {
+                    library.Replace(new JProperty(newName + '/' + version, library.Value));
+                }
+                using (var file = File.CreateText(depsFile))
+                using (var writer = new JsonTextWriter(file) { Formatting = Formatting.Indented })
+                {
+                    deps.WriteTo(writer);
+                }
             }
         }
 

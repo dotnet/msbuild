@@ -129,18 +129,12 @@ namespace Microsoft.DotNet.Tools.Publish
             // Use a library exporter to collect publish assets
             var exporter = context.CreateExporter(configuration, buildBasePath);
 
-            // Collect all exports and organize them
-            var packageExports = exporter.GetAllExports()
-                .Where(e => e.Library.Identity.Type.Equals(LibraryType.Package))
-                .ToDictionary(e => e.Library.Identity.Name);
-            var collectExclusionList = context.IsPortable ? GetExclusionList(context, packageExports) : new HashSet<string>();
-
             // Get the output paths used by the call to `dotnet build` above (since we didn't pass `--output`, they will be different from
             // our current output paths)
             var buildOutputPaths = context.GetOutputPaths(configuration, buildBasePath);
 
             var exports = exporter.GetAllExports();
-            foreach (var export in exports.Where(e => !collectExclusionList.Contains(e.Library.Identity.Name)))
+            foreach (var export in context.ExcludePlatformExports(exports))
             {
                 Reporter.Verbose.WriteLine($"publish: Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
@@ -160,6 +154,13 @@ namespace Microsoft.DotNet.Tools.Publish
                     File.Copy(resourceAsset.Asset.ResolvedPath, Path.Combine(dir, resourceAsset.Asset.FileName), overwrite: true);
                 }
             }
+            foreach (var export in exports)
+            {
+                if (options.PreserveCompilationContext.GetValueOrDefault())
+                {
+                    PublishRefs(export, outputPath);
+                }
+            }
 
             if (context.ProjectFile.HasRuntimeOutput(configuration) && !context.TargetFramework.IsDesktop())
             {
@@ -169,14 +170,6 @@ namespace Microsoft.DotNet.Tools.Publish
                         buildOutputPaths.RuntimeFiles.RuntimeConfigJson
                     },
                     outputPath);
-            }
-
-            if (options.PreserveCompilationContext.GetValueOrDefault())
-            {
-                foreach (var export in exports)
-                {
-                    PublishRefs(export, outputPath, !collectExclusionList.Contains(export.Library.Identity.Name));
-                }
             }
 
             var contentFiles = new ContentFiles(context);
@@ -265,41 +258,7 @@ namespace Microsoft.DotNet.Tools.Publish
             return result == 0;
         }
 
-        private HashSet<string> GetExclusionList(ProjectContext context, Dictionary<string, LibraryExport> exports)
-        {
-            var exclusionList = new HashSet<string>();
-            var redistPackages = context.RootProject.Dependencies
-                .Where(r => r.Type.Equals(LibraryDependencyType.Platform))
-                .ToList();
-            if (redistPackages.Count == 0)
-            {
-                return exclusionList;
-            }
-            else if (redistPackages.Count > 1)
-            {
-                throw new InvalidOperationException("Multiple packages with type: \"platform\" were specified!");
-            }
-            var redistExport = exports[redistPackages[0].Name];
-
-            exclusionList.Add(redistExport.Library.Identity.Name);
-            CollectDependencies(exports, redistExport.Library.Dependencies, exclusionList);
-            return exclusionList;
-        }
-
-        private void CollectDependencies(Dictionary<string, LibraryExport> exports, IEnumerable<LibraryRange> dependencies, HashSet<string> exclusionList)
-        {
-            foreach (var dependency in dependencies)
-            {
-                var export = exports[dependency.Name];
-                if (export.Library.Identity.Version.Equals(dependency.VersionRange.MinVersion))
-                {
-                    exclusionList.Add(export.Library.Identity.Name);
-                    CollectDependencies(exports, export.Library.Dependencies, exclusionList);
-                }
-            }
-        }
-
-        private static void PublishRefs(LibraryExport export, string outputPath, bool deduplicate)
+        private static void PublishRefs(LibraryExport export, string outputPath)
         {
             var refsPath = Path.Combine(outputPath, "refs");
             if (!Directory.Exists(refsPath))
@@ -311,11 +270,12 @@ namespace Microsoft.DotNet.Tools.Publish
             var runtimeAssemblies = new HashSet<LibraryAsset>(export.RuntimeAssemblyGroups.GetDefaultAssets());
             foreach (var compilationAssembly in export.CompilationAssemblies)
             {
-                if (!deduplicate || !runtimeAssemblies.Contains(compilationAssembly))
+                if (runtimeAssemblies.Contains(compilationAssembly))
                 {
-                    var destFileName = Path.Combine(refsPath, Path.GetFileName(compilationAssembly.ResolvedPath));
-                    File.Copy(compilationAssembly.ResolvedPath, destFileName, overwrite: true);
+                    continue;
                 }
+                var destFileName = Path.Combine(refsPath, Path.GetFileName(compilationAssembly.ResolvedPath));
+                File.Copy(compilationAssembly.ResolvedPath, destFileName, overwrite: true);
             }
         }
 
