@@ -187,7 +187,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                     It.IsAny<string>()))
                 .Returns(command.Object);
 
-            var _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform", WorkspaceContext.Create(designTime: false));
+            var _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform", new BuildWorkspace(new ProjectReaderSettings()));
             _args.ConfigValue = ConfigValue;
 
             PreCompileScriptVariables = new Dictionary<string, string>();
@@ -218,7 +218,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                 rids.Add(rid);
             }
 
-            var workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
+            var workspace = new BuildWorkspace(new ProjectReaderSettings());
             var context = workspace.GetRuntimeContext(workspace.GetProjectContext(projectJson, TestAssetFramework), rids);
             context = workspace.GetRuntimeContext(context, rids);
             managedCompiler.Compile(context, _args);

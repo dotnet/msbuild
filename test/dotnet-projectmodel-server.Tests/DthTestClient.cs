@@ -53,12 +53,12 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             Task.Run(() => ReadMessage(_readCancellationToken.Token), _readCancellationToken.Token);
         }
 
-        public void SendPayLoad(Project project, string messageType)
+        public void SendPayload(Project project, string messageType)
         {
-            SendPayLoad(project.ProjectDirectory, messageType);
+            SendPayload(project.ProjectDirectory, messageType);
         }
 
-        public void SendPayLoad(string projectPath, string messageType)
+        public void SendPayload(string projectPath, string messageType)
         {
             int contextId;
             if (!_projectContexts.TryGetValue(projectPath, out contextId))
@@ -66,15 +66,15 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                 Assert.True(false, $"Unable to resolve context for {projectPath}");
             }
 
-            SendPayLoad(contextId, messageType);
+            SendPayload(contextId, messageType);
         }
 
-        public void SendPayLoad(int contextId, string messageType)
+        public void SendPayload(int contextId, string messageType)
         {
-            SendPayLoad(contextId, messageType, new { });
+            SendPayload(contextId, messageType, new { });
         }
 
-        public void SendPayLoad(int contextId, string messageType, object payload)
+        public void SendPayload(int contextId, string messageType, object payload)
         {
             lock (_writer)
             {
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var contextId = _nextContextId++;
 
             _projectContexts[projectPath] = contextId;
-            SendPayLoad(contextId, MessageTypes.Initialize, new { ProjectFolder = projectPath });
+            SendPayload(contextId, MessageTypes.Initialize, new { ProjectFolder = projectPath });
 
             return contextId;
         }
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var contextId = _nextContextId++;
 
             _projectContexts[projectPath] = contextId;
-            SendPayLoad(contextId, MessageTypes.Initialize, new { ProjectFolder = projectPath, Version = protocolVersion });
+            SendPayload(contextId, MessageTypes.Initialize, new { ProjectFolder = projectPath, Version = protocolVersion });
 
             return contextId;
         }
@@ -114,14 +114,14 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var contextId = _nextContextId++;
 
             _projectContexts[projectPath] = contextId;
-            SendPayLoad(contextId, MessageTypes.Initialize, new { ProjectFolder = projectPath, Version = protocolVersion, Configuration = configuration });
+            SendPayload(contextId, MessageTypes.Initialize, new { ProjectFolder = projectPath, Version = protocolVersion, Configuration = configuration });
 
             return contextId;
         }
 
         public void SetProtocolVersion(int version)
         {
-            SendPayLoad(0, MessageTypes.ProtocolVersion, new { Version = version });
+            SendPayload(0, MessageTypes.ProtocolVersion, new { Version = version });
         }
 
         public List<DthMessage> DrainMessage(int count)

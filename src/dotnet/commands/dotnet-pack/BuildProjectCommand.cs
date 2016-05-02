@@ -15,18 +15,18 @@ namespace Microsoft.DotNet.Tools.Pack
         private readonly string _buildBasePath;
         private readonly string _configuration;
 
-        private readonly string _versionSuffix;
+        private readonly BuildWorkspace _workspace;
 
         public BuildProjectCommand(
             Project project,
             string buildBasePath,
             string configuration,
-            string versionSuffix)
+            BuildWorkspace workspace)
         {
             _project = project;
             _buildBasePath = buildBasePath;
             _configuration = configuration;
-            _versionSuffix = versionSuffix;
+            _workspace = workspace;
         }
 
         public int Execute()
@@ -37,11 +37,8 @@ namespace Microsoft.DotNet.Tools.Pack
                 argsBuilder.Add("--configuration");
                 argsBuilder.Add($"{_configuration}");
 
-                if (!string.IsNullOrEmpty(_versionSuffix))
-                {
-                    argsBuilder.Add("--version-suffix");
-                    argsBuilder.Add(_versionSuffix);
-                }
+                // Passing the Workspace along will flow the version suffix,
+                // so we don't need to pass it as an argument.
 
                 if (!string.IsNullOrEmpty(_buildBasePath))
                 {
@@ -51,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
                 argsBuilder.Add($"{_project.ProjectFilePath}");
 
-                var result = Build.BuildCommand.Run(argsBuilder.ToArray());
+                var result = Build.BuildCommand.Run(argsBuilder.ToArray(), _workspace);
 
                 return result;
             }

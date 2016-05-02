@@ -29,7 +29,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             _dotnetTestRunnerMock = new Mock<IDotnetTestRunner>();
             _dotnetTestRunnerMock
-                .Setup(d => d.RunTests(It.IsAny<ProjectContext>(), It.IsAny<DotnetTestParams>()))
+                .Setup(d => d.RunTests(It.IsAny<ProjectContext>(), It.IsAny<DotnetTestParams>(), It.IsAny<BuildWorkspace>()))
                 .Returns(0);
 
             _dotnetTestRunnerFactoryMock = new Mock<IDotnetTestRunnerFactory>();
@@ -62,7 +62,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var result = _testCommand.DoRun(new[] { ProjectJsonPath, "-f", "netcoreapp1.0" });
 
             _dotnetTestRunnerMock.Verify(
-                d => d.RunTests(It.IsAny<ProjectContext>(), It.IsAny<DotnetTestParams>()),
+                d => d.RunTests(It.IsAny<ProjectContext>(), It.IsAny<DotnetTestParams>(), It.IsAny<BuildWorkspace>()),
                 Times.Once);
         }
     }

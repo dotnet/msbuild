@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Publish
         public string Runtime { get; set; }
         public bool NativeSubdirectories { get; set; }
         public NuGetFramework NugetFramework { get; set; }
-        public WorkspaceContext Workspace { get; set; }
+        public BuildWorkspace Workspace { get; set; }
         public IList<ProjectContext> ProjectContexts { get; set; }
         public string VersionSuffix { get; set; }
         public int NumberOfProjects { get; private set; }
@@ -253,7 +253,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 args.Add(buildBasePath);
             }
 
-            var result = Build.BuildCommand.Run(args.ToArray());
+            var result = Build.BuildCommand.Run(args.ToArray(), Workspace);
 
             return result == 0;
         }

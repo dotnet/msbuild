@@ -17,9 +17,11 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Files;
 using NuGet.Frameworks;
 
+using RoslynWorkspace = Microsoft.CodeAnalysis.Workspace;
+
 namespace Microsoft.DotNet.ProjectModel.Workspaces
 {
-    public class ProjectJsonWorkspace : Workspace
+    public class ProjectJsonWorkspace : RoslynWorkspace
     {
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
 

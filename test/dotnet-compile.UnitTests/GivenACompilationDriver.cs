@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Tools.Compiler;
 using Moq;
 using NuGet.Frameworks;
 using Xunit;
@@ -20,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         private Mock<ICompiler> _nativeCompilerMock;
         private List<ProjectContext> _contexts;
         private BuildCommandApp _args;
-        private readonly WorkspaceContext _workspace;
+        private readonly BuildWorkspace _workspace;
 
         public GivenACompilationDriverController()
         {
@@ -35,13 +34,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
                 .Compile(It.IsAny<ProjectContext>(), It.IsAny<BuildCommandApp>()))
                 .Returns(true);
 
-            _workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
+            _workspace = new BuildWorkspace(ProjectReaderSettings.ReadFromEnvironment());
             _contexts = new List<ProjectContext>
             {
                 _workspace.GetProjectContext(_projectJson, NuGetFramework.Parse("netcoreapp1.0"))
             };
 
-            _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform", WorkspaceContext.Create(designTime: false));
+            _args = new BuildCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform", _workspace);
         }
 
         [Fact]

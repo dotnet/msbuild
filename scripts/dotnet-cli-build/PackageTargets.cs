@@ -230,11 +230,11 @@ namespace Microsoft.DotNet.Cli.Build
                 var projectFile = Path.Combine(Dirs.RepoRoot, "src", projectName, "project.json");
 
                 dotnet.Pack(
-                    projectFile, 
-                    "--no-build", 
-                    "--build-base-path", packagingBuildBasePath, 
-                    "--output", Dirs.PackagesIntermediate, 
-                    "--configuration", configuration, 
+                    projectFile,
+                    "--no-build",
+                    "--build-base-path", packagingBuildBasePath,
+                    "--output", Dirs.PackagesIntermediate,
+                    "--configuration", configuration,
                     "--version-suffix", versionSuffix)
                     .Execute()
                     .EnsureSuccessful();

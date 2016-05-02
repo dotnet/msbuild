@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Server.Helpers;
 using Microsoft.DotNet.ProjectModel.Server.Models;
@@ -20,7 +19,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
         public ErrorMessage GlobalErrorMessage { get; set; }
         public Dictionary<NuGetFramework, ProjectContextSnapshot> ProjectContexts { get; } = new Dictionary<NuGetFramework, ProjectContextSnapshot>();
 
-        public static ProjectSnapshot Create(string projectDirectory, string configuration, WorkspaceContext workspaceContext, IReadOnlyList<string> projectSearchPaths)
+        public static ProjectSnapshot Create(string projectDirectory, string configuration, DesignTimeWorkspace workspaceContext, IReadOnlyList<string> projectSearchPaths)
         {
             var projectContextsCollection = workspaceContext.GetProjectContextCollection(projectDirectory);
             if (!projectContextsCollection.ProjectContexts.Any())

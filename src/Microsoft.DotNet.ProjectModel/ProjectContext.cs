@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.ProjectModel
                 yield return new ProjectContextBuilder()
                                 .WithProject(project)
                                 .WithTargetFramework(framework.FrameworkName)
-                                .WithReaderSettings(settings)
+                                .WithProjectReaderSettings(settings)
                                 .WithRuntimeIdentifiers(runtimeIdentifiers ?? Enumerable.Empty<string>())
                                 .Build();
             }
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.ProjectModel
             var project = ProjectReader.GetProject(projectPath);
 
             return new ProjectContextBuilder()
-                        .WithReaderSettings(settings)
+                        .WithProjectReaderSettings(settings)
                         .WithProject(project)
                         .BuildAllTargets();
         }

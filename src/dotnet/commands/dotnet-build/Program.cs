@@ -4,11 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Compiler;
-using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Build
@@ -17,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Build
     {
         public static int Run(string[] args) => Run(args, null);
 
-        public static int Run(string[] args, WorkspaceContext workspace)
+        public static int Run(string[] args, BuildWorkspace workspace)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 

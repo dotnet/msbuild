@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using Microsoft.DotNet.TestFramework;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
 {

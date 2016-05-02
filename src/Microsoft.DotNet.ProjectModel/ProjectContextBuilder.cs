@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Graph;
@@ -15,11 +17,12 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectContextBuilder
     {
+        // Note: When adding a property, make sure to add it to Clone below. You'll also need to update the CloneTest in
+        // Microsoft.DotNet.ProjectModel.Tests.ProjectContextBuilderTests
+
         private Project Project { get; set; }
 
         private LockFile LockFile { get; set; }
-
-        private GlobalSettings GlobalSettings { get; set; }
 
         private NuGetFramework TargetFramework { get; set; }
 
@@ -39,12 +42,34 @@ namespace Microsoft.DotNet.ProjectModel
 
         private Func<string, LockFile> LockFileResolver { get; set; }
 
-        private ProjectReaderSettings Settings { get; set; } = ProjectReaderSettings.ReadFromEnvironment();
+        private ProjectReaderSettings ProjectReaderSettings { get; set; } = ProjectReaderSettings.ReadFromEnvironment();
 
         public ProjectContextBuilder()
         {
             ProjectResolver = ResolveProject;
             LockFileResolver = ResolveLockFile;
+        }
+
+        public ProjectContextBuilder Clone()
+        {
+            var builder = new ProjectContextBuilder()
+                .WithLockFile(LockFile)
+                .WithProject(Project)
+                .WithProjectDirectory(ProjectDirectory)
+                .WithTargetFramework(TargetFramework)
+                .WithRuntimeIdentifiers(RuntimeIdentifiers)
+                .WithReferenceAssembliesPath(ReferenceAssembliesPath)
+                .WithPackagesDirectory(PackagesDirectory)
+                .WithRootDirectory(RootDirectory)
+                .WithProjectResolver(ProjectResolver)
+                .WithLockFileResolver(LockFileResolver)
+                .WithProjectReaderSettings(ProjectReaderSettings);
+            if(IsDesignTime)
+            {
+                builder.AsDesignTime();
+            }
+
+            return builder;
         }
 
         public ProjectContextBuilder WithLockFile(LockFile lockFile)
@@ -113,9 +138,9 @@ namespace Microsoft.DotNet.ProjectModel
             return this;
         }
 
-        public ProjectContextBuilder WithReaderSettings(ProjectReaderSettings settings)
+        public ProjectContextBuilder WithProjectReaderSettings(ProjectReaderSettings projectReaderSettings)
         {
-            Settings = settings;
+            ProjectReaderSettings = projectReaderSettings;
             return this;
         }
 
@@ -125,13 +150,20 @@ namespace Microsoft.DotNet.ProjectModel
             return this;
         }
 
+        /// <summary>
+        /// Produce all targets found in the lock file associated with this builder.
+        /// Returns an empty enumerable if there is no lock file
+        /// (making this unsuitable for scenarios where the lock file may not be present,
+        /// such as at design-time)
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<ProjectContext> BuildAllTargets()
         {
             ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
             EnsureProjectLoaded();
             LockFile = LockFile ?? LockFileResolver(ProjectDirectory);
 
-            if (LockFile != null && LockFile.Targets.Any())
+            if (LockFile != null)
             {
                 var deduper = new HashSet<string>();
                 foreach (var target in LockFile.Targets)
@@ -139,15 +171,9 @@ namespace Microsoft.DotNet.ProjectModel
                     var id = $"{target.TargetFramework}/{target.RuntimeIdentifier}";
                     if (deduper.Add(id))
                     {
-                        var builder = new ProjectContextBuilder()
-                            .WithProject(Project)
-                            .WithLockFile(LockFile)
+                        var builder = Clone()
                             .WithTargetFramework(target.TargetFramework)
                             .WithRuntimeIdentifiers(new[] { target.RuntimeIdentifier });
-                        if (IsDesignTime)
-                        {
-                            builder.AsDesignTime();
-                        }
 
                         yield return builder.Build();
                     }
@@ -155,8 +181,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
             else
             {
-                // Build a context for each framework. It won't be fully valid, since it won't have resolved data or runtime data, but the diagnostics will show that
-                // (Project Model Server needs this)
+                // Build a context for each framework. It won't be fully valid, since it won't have resolved data or runtime data, but the diagnostics will show that.
                 foreach (var framework in Project.GetTargetFrameworks())
                 {
                     var builder = new ProjectContextBuilder()
@@ -177,19 +202,15 @@ namespace Microsoft.DotNet.ProjectModel
 
             ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
 
-            if (GlobalSettings == null && ProjectDirectory != null)
+            GlobalSettings globalSettings = null;
+            if (ProjectDirectory != null)
             {
                 RootDirectory = ProjectRootResolver.ResolveRootDirectory(ProjectDirectory);
-
-                GlobalSettings globalSettings;
-                if (GlobalSettings.TryGetGlobalSettings(RootDirectory, out globalSettings))
-                {
-                    GlobalSettings = globalSettings;
-                }
+                GlobalSettings.TryGetGlobalSettings(RootDirectory, out globalSettings);
             }
 
-            RootDirectory = GlobalSettings?.DirectoryPath ?? RootDirectory;
-            PackagesDirectory = PackagesDirectory ?? PackageDependencyProvider.ResolvePackagesPath(RootDirectory, GlobalSettings);
+            RootDirectory = globalSettings?.DirectoryPath ?? RootDirectory;
+            PackagesDirectory = PackagesDirectory ?? PackageDependencyProvider.ResolvePackagesPath(RootDirectory, globalSettings);
 
             FrameworkReferenceResolver frameworkReferenceResolver;
             if (string.IsNullOrEmpty(ReferenceAssembliesPath))
@@ -343,7 +364,7 @@ namespace Microsoft.DotNet.ProjectModel
             var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics, Project?.ProjectFilePath);
 
             return new ProjectContext(
-                GlobalSettings,
+                globalSettings,
                 mainProject,
                 platformLibrary,
                 TargetFramework,
@@ -570,7 +591,7 @@ namespace Microsoft.DotNet.ProjectModel
         private Project ResolveProject(string projectDirectory)
         {
             Project project;
-            if (ProjectReader.TryGetProject(projectDirectory, out project, settings: Settings))
+            if (ProjectReader.TryGetProject(projectDirectory, out project, settings: ProjectReaderSettings))
             {
                 return project;
             }

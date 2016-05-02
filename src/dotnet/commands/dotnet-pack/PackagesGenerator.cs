@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Pack
             var packDiagnostics = new List<DiagnosticMessage>();
 
             var mainPackageGenerator = new PackageGenerator(project, _configuration, _artifactPathsCalculator);
-            var symbolsPackageGenerator = 
+            var symbolsPackageGenerator =
                 new SymbolPackageGenerator(project, _configuration, _artifactPathsCalculator);
 
             return mainPackageGenerator.BuildPackage(_contexts, packDiagnostics) &&

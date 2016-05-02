@@ -45,14 +45,14 @@ namespace Microsoft.DotNet.Tools.Compiler
         public bool ShouldNotUseIncrementality { get; set; }
         public bool ShouldSkipDependencies { get; set; }
 
-        public WorkspaceContext Workspace { get; private set; }
+        public BuildWorkspace Workspace { get; private set; }
 
         // workaround: CommandLineApplication is internal therefore I cannot make _app protected so baseclasses can add their own params
         private readonly Dictionary<string, CommandOption> baseClassOptions;
 
         public BuildCommandApp(string name, string fullName, string description) : this(name, fullName, description, workspace: null) { }
 
-        public BuildCommandApp(string name, string fullName, string description, WorkspaceContext workspace)
+        public BuildCommandApp(string name, string fullName, string description, BuildWorkspace workspace)
         {
             Workspace = workspace;
             _app = new CommandLineApplication
@@ -108,13 +108,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 // Set defaults based on the environment
                 if (Workspace == null)
                 {
-                    var settings = ProjectReaderSettings.ReadFromEnvironment();
-
-                    if (!string.IsNullOrEmpty(VersionSuffixValue))
-                    {
-                        settings.VersionSuffix = VersionSuffixValue;
-                    }
-                    Workspace = WorkspaceContext.Create(settings, designTime: false);
+                    Workspace = BuildWorkspace.Create(VersionSuffixValue);
                 }
 
                 var files = new ProjectGlobbingResolver().Resolve(_projectArgument.Values);

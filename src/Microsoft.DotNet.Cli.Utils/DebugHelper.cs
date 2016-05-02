@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
-        private static void WaitForDebugger()
+        public static void WaitForDebugger()
         {
             Console.WriteLine("Waiting for debugger to attach. Press ENTER to continue");
             Console.WriteLine($"Process ID: {Process.GetCurrentProcess().Id}");

@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         ProjectContext _context;
         List<string> _args;
-        private WorkspaceContext _workspace;
+        private BuildWorkspace _workspace;
 
         public int Start()
         {
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Tools.Run
         private int RunExecutable()
         {
             // Set up the workspace
-            _workspace = WorkspaceContext.Create(ProjectReaderSettings.ReadFromEnvironment(), designTime: false);
+            _workspace = new BuildWorkspace(ProjectReaderSettings.ReadFromEnvironment());
 
             CalculateDefaultsForNonAssigned();
 
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Tools.Run
                 $"--configuration",
                 Configuration,
                 $"{_context.ProjectFile.ProjectDirectory}"
-            });
+            }, _workspace);
 
             if (result != 0)
             {

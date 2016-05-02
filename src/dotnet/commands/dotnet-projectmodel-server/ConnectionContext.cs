@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
         public ConnectionContext(Socket acceptedSocket,
             string hostName,
             ProtocolManager protocolManager,
-            WorkspaceContext workspaceContext,
+            DesignTimeWorkspace workspaceContext,
             IDictionary<int, ProjectManager> projects)
         {
             _hostName = hostName;

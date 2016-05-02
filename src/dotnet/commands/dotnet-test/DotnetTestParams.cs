@@ -41,6 +41,8 @@ namespace Microsoft.DotNet.Tools.Test
 
         public NuGetFramework Framework { get; set; }
 
+        public string UnparsedFramework { get; set; }
+
         public List<string> RemainingArguments { get; set; }
 
         public bool NoBuild { get; set; }
@@ -97,6 +99,7 @@ namespace Microsoft.DotNet.Tools.Test
                     Port = port;
                 }
 
+                UnparsedFramework = _frameworkOption.Value();
                 if (_frameworkOption.HasValue())
                 {
                     Framework = NuGetFramework.Parse(_frameworkOption.Value());

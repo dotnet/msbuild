@@ -8,26 +8,26 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public abstract class BaseDotnetTestRunner : IDotnetTestRunner
     {
-        public int RunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        public int RunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams, BuildWorkspace workspace)
         {
-            var result = BuildTestProject(projectContext, dotnetTestParams);
+            var result = BuildTestProject(projectContext, dotnetTestParams, workspace);
 
             return result == 0 ? DoRunTests(projectContext, dotnetTestParams) : result;
         }
 
         internal abstract int DoRunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams);
 
-        private int BuildTestProject(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        private int BuildTestProject(ProjectContext projectContext, DotnetTestParams dotnetTestParams, BuildWorkspace workspace)
         {
             if (dotnetTestParams.NoBuild)
             {
                 return 0;
             }
 
-            return DoBuildTestProject(projectContext, dotnetTestParams);
+            return DoBuildTestProject(projectContext, dotnetTestParams, workspace);
         }
 
-        private int DoBuildTestProject(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        private int DoBuildTestProject(ProjectContext projectContext, DotnetTestParams dotnetTestParams, BuildWorkspace workspace)
         {
             var strings = new List<string>
             {
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Test
                 strings.Add(projectContext.RuntimeIdentifier);
             }
 
-            var result = Build.BuildCommand.Run(strings.ToArray());
+            var result = Build.BuildCommand.Run(strings.ToArray(), workspace);
 
             return result;
         }

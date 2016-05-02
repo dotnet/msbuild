@@ -13,8 +13,14 @@ namespace Microsoft.DotNet.ProjectModel
     {
         public Project Project { get; set; }
 
+        /// <summary>
+        /// Gets all the ProjectContexts in this collection
+        /// </summary>
         public List<ProjectContext> ProjectContexts { get; } = new List<ProjectContext>();
 
+        /// <summary>
+        /// Gets the ProjectContexts in this collection which are not runtime-specific (i.e. the ones used for compilation)
+        /// </summary>
         public IEnumerable<ProjectContext> FrameworkOnlyContexts => ProjectContexts.Where(c => string.IsNullOrEmpty(c.RuntimeIdentifier));
 
         public List<DiagnosticMessage> ProjectDiagnostics { get; } = new List<DiagnosticMessage>();

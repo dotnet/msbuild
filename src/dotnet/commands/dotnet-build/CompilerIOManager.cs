@@ -4,12 +4,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Tools.Compiler;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Compiler.Common;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Compiler;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -19,21 +18,21 @@ namespace Microsoft.DotNet.Tools.Build
         private readonly string _outputPath;
         private readonly string _buildBasePath;
         private readonly IList<string> _runtimes;
-        private readonly WorkspaceContext _workspace;
+        private readonly BuildWorkspace _workspace;
 		private readonly ConcurrentDictionary<ProjectContextIdentity, CompilerIO> _cache;
 
         public CompilerIOManager(string configuration,
             string outputPath,
             string buildBasePath,
             IEnumerable<string> runtimes,
-            WorkspaceContext workspace)
+            BuildWorkspace workspace)
         {
             _configuration = configuration;
             _outputPath = outputPath;
             _buildBasePath = buildBasePath;
             _runtimes = runtimes.ToList();
             _workspace = workspace;
-            
+
             _cache = new ConcurrentDictionary<ProjectContextIdentity, CompilerIO>();
         }
 

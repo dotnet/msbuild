@@ -8,6 +8,6 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public interface IDotnetTestRunner
     {
-        int RunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams);
+        int RunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams, BuildWorkspace workspace);
     }
 }

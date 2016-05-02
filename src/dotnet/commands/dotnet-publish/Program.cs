@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 publish.VersionSuffix = versionSuffix.Value();
                 publish.ShouldBuild = !noBuild.HasValue();
 
-                publish.Workspace = WorkspaceContext.Create(versionSuffix.Value(), designTime: false);
+                publish.Workspace = BuildWorkspace.Create(versionSuffix.Value());
 
                 if (string.IsNullOrEmpty(publish.ProjectPath))
                 {
