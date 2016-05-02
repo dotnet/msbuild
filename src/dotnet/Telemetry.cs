@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                 _sampleRate = ReciprocalSampleRateValueForTest;
             }
 
-            _isCollectingTelemetry = (Environment.TickCount % _sampleRate == 0);    
+            _isCollectingTelemetry = (Environment.TickCount % _sampleRate == 0);
             if(!_isCollectingTelemetry)
             {
                 return;
@@ -69,19 +69,19 @@ namespace Microsoft.DotNet.Cli
                 Debug.Fail("Exception during telemetry task initialization");
             }
         }
-        
+
         public void TrackEvent(string eventName, IList<string> properties, IDictionary<string, double> measurements)
         {
             if (!_isCollectingTelemetry)
             {
                 return;
             }
-            
+
             try
             {
                 _trackEventTask = _trackEventTask.ContinueWith(
-                    x => TrackEventTask(eventName, 
-                        properties, 
+                    x => TrackEventTask(eventName,
+                        properties,
                         measurements)
                 );
             }
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli
                 Debug.Fail("Exception during telemetry task continuation");
             }
         }
-        
+
         private void InitializeTelemetry()
         {
             try
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Cli
                 Debug.Fail("Exception during telemetry initialization");
             }
         }
-        
+
         public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             if (!Enabled)
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Cli
             if (!_isCollectingTelemetry)
             {
                 return;
-            }                
+            }
             try
             {
                 using (PerfTrace.Current.CaptureTiming())
@@ -223,9 +223,9 @@ namespace Microsoft.DotNet.Cli
                 }
                 return eventProperties;
             }
-            else 
+            else
             {
-                return _commonProperties;    
+                return _commonProperties;
             }
         }
     }
