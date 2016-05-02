@@ -245,7 +245,7 @@ is_dotnet_package_installed() {
     
     local install_root=$1
     local relative_path_to_package=$2
-    local specific_version=$3
+    local specific_version=${3//[$'\t\r\n']}
     
     local dotnet_package_path=$(combine_paths $(combine_paths $install_root $relative_path_to_package) $specific_version)
     say_verbose "is_dotnet_package_installed: dotnet_package_path=$dotnet_package_path"
@@ -343,7 +343,7 @@ construct_download_link() {
     local azure_feed=$1
     local azure_channel=$2
     local normalized_architecture=$3
-    local specific_version=$4
+    local specific_version=${4//[$'\t\r\n']}
     
     local osname=$(get_current_os_name)
     
