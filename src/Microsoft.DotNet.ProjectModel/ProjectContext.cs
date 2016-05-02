@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public string RootDirectory => GlobalSettings?.DirectoryPath;
 
-        public string ProjectDirectory => ProjectFile.ProjectDirectory;
+        public string ProjectDirectory => ProjectFile?.ProjectDirectory;
 
         public string PackagesDirectory { get; }
 
