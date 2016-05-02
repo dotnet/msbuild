@@ -26,8 +26,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkNugetVersion { get; set; }
 
-        private static List<string> _latestBlobs;
-
         [Target]
         public static BuildTargetResult InitPublish(BuildTargetContext c)
         {
@@ -86,14 +84,17 @@ namespace Microsoft.DotNet.Cli.Build
 
                 try
                 {
-                    // Iterate over every blob in the latest version folder and copy it to the 'latest' folder
-                    foreach (string blob in _latestBlobs)
-                    {
-                        string targetUrl = $"{targetContainer}{Path.GetFileName(blob)}"
-                                        .Replace(CliNuGetVersion, "latest")
-                                        .Replace(SharedFrameworkNugetVersion, "latest");
-                        AzurePublisherTool.CopyBlob(blob.Replace("/dotnet/", ""), targetUrl);
-                    }
+                    // Copy the latest CLI bits
+                    CopyBlobs($"{Channel}/Binaries/{CliNuGetVersion}/", targetContainer);
+                    
+                    // Copy the latest installer files
+                    CopyBlobs($"{Channel}/Installers/{CliNuGetVersion}/", $"{Channel}/Installers/Latest/");
+
+                    // Copy the shared framework installers
+                    CopyBlobs($"{Channel}/Installers/{SharedFrameworkNugetVersion}/", $"{Channel}/Installers/Latest/");
+
+                    // Copy the shared framework
+                    CopyBlobs($"{Channel}/Binaries/{SharedFrameworkNugetVersion}/", targetContainer);
 
                     // Generate the CLI and SDK Version text files
                     List<string> versionFiles = new List<string>() { "win.x86.version", "win.x64.version", "ubuntu.x64.version", "rhel.x64.version", "osx.x64.version", "debian.x64.version", "centos.x64.version" };
@@ -114,6 +115,19 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        private static void CopyBlobs(string sourceFolder, string destinationFolder)
+        {
+            foreach (string blob in AzurePublisherTool.ListBlobs(sourceFolder))
+            {
+                string source = blob.Replace("/dotnet/", "");
+                string targetName = Path.GetFileName(blob)
+                                        .Replace(CliNuGetVersion, "latest")
+                                        .Replace(SharedFrameworkNugetVersion, "latest");
+                string target = $"{destinationFolder}{targetName}";
+                AzurePublisherTool.CopyBlob(source, target);
+            }
+        }
+
         private static bool CheckIfAllBuildsHavePublished()
         {
              Dictionary<string, bool> badges = new Dictionary<string, bool>()
@@ -127,7 +141,7 @@ namespace Microsoft.DotNet.Cli.Build
                  { "CentOS_x64", false }
              };
 
-            _latestBlobs = new List<string>(AzurePublisherTool.ListBlobs($"{Channel}/Binaries/{CliNuGetVersion}/"));
+            List<string> blobs = new List<string>(AzurePublisherTool.ListBlobs($"{Channel}/Binaries/{CliNuGetVersion}/"));
 
             var config = Environment.GetEnvironmentVariable("CONFIGURATION");
             var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}";
@@ -136,7 +150,7 @@ namespace Microsoft.DotNet.Cli.Build
                 throw new ArgumentException("A new OS build was added without adding the moniker to the {nameof(badges)} lookup");
             }
 
-            foreach (string file in _latestBlobs)
+            foreach (string file in blobs)
             {
                 string name = Path.GetFileName(file);
                 string key = string.Empty;
