@@ -199,7 +199,7 @@ namespace dotnet_new3
 
             foreach (ITemplateParameter parameter in templateParams.Parameters)
             {
-                if (parameter.Priority == TemplateParameterPriority.Required && !templateParams.ParameterValues.ContainsKey(parameter))
+                if (!help.HasValue() && parameter.Priority == TemplateParameterPriority.Required && !templateParams.ParameterValues.ContainsKey(parameter))
                 {
                     Reporter.Error.WriteLine($"Missing required parameter {parameter.Name}".Bold().Red());
                     missingProps = true;
