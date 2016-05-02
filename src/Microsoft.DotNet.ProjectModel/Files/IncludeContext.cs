@@ -62,18 +62,8 @@ namespace Microsoft.DotNet.ProjectModel.Files
                     BuiltInsInclude = CreateCollection(
                         sourceBasePath, "include", ExtractValues(builtIns.Value<JToken>("include")), literalPath: false);
 
-                    if (defaultBuiltInInclude != null && !BuiltInsInclude.Any())
-                    {
-                        BuiltInsInclude = defaultBuiltInInclude.ToList();
-                    }
-
                     BuiltInsExclude = CreateCollection(
                         sourceBasePath, "exclude", ExtractValues(builtIns.Value<JToken>("exclude")), literalPath: false);
-
-                    if (defaultBuiltInExclude != null && !BuiltInsExclude.Any())
-                    {
-                        BuiltInsExclude = defaultBuiltInExclude.ToList();
-                    }
                 }
 
                 var mappings = token.Value<JToken>("mappings") as JObject;
@@ -93,6 +83,18 @@ namespace Microsoft.DotNet.ProjectModel.Files
                                 defaultBuiltInExclude: null));
                     }
                 }
+            }
+
+            if (defaultBuiltInInclude != null &&
+                (BuiltInsInclude == null || !BuiltInsInclude.Any()))
+            {
+                BuiltInsInclude = defaultBuiltInInclude.ToList();
+            }
+
+            if (defaultBuiltInExclude != null &&
+                (BuiltInsExclude == null || !BuiltInsExclude.Any()))
+            {
+                BuiltInsExclude = defaultBuiltInExclude.ToList();
             }
         }
 

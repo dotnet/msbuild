@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 'buildOptions': {
   'compile': {
     'includeFiles': [ 'files/file1.cs', 'files/file2.cs' ],
-    'exclude': 'files/*ex.cs'
+    'exclude': '**/*.cs'
   }
 }}");
 
