@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Fact]
-        private void StandaloneApp_WithoutCoreclrDll_Fails()
+        private void StandaloneApp_WithoutCoreClrDll_Fails()
         {
             // Convert a Portable App to Standalone to simulate the customer scenario
             var testInstance = TestAssetsManager.CreateTestInstance("DependencyChangeTest")
@@ -328,7 +328,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             buildResult.Should().Fail();
 
-            buildResult.StdErr.Should().Contain("Expected coreclr library not found in package graph. Please try running restore again.");
+            buildResult.StdErr.Should().Contain("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
