@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         private readonly IEnumerable<string> _commandArgs;
         private readonly Func<string[], int> _builtInCommand;
+        private readonly IBuiltInCommandEnvironment _environment;
         private readonly StreamForwarder _stdOut;
         private readonly StreamForwarder _stdErr;
         private string _workingDirectory;
@@ -26,10 +27,16 @@ namespace Microsoft.DotNet.Cli.Utils
         public string CommandArgs => string.Join(" ", _commandArgs);
 
         public BuiltInCommand(string commandName, IEnumerable<string> commandArgs, Func<string[], int> builtInCommand)
+            : this(commandName, commandArgs, builtInCommand, new BuiltInCommandEnvironment())
+        {
+        }
+
+        internal BuiltInCommand(string commandName, IEnumerable<string> commandArgs, Func<string[], int> builtInCommand, IBuiltInCommandEnvironment environment)
         {
             CommandName = commandName;
             _commandArgs = commandArgs;
             _builtInCommand = builtInCommand;
+            _environment = environment;
 
             _stdOut = new StreamForwarder();
             _stdErr = new StreamForwarder();
@@ -37,9 +44,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandResult Execute()
         {
-            TextWriter originalConsoleOut = Console.Out;
-            TextWriter originalConsoleError = Console.Error;
-            string originalWorkingDirectory = Directory.GetCurrentDirectory();
+            TextWriter originalConsoleOut = _environment.GetConsoleOut();
+            TextWriter originalConsoleError = _environment.GetConsoleError();
+            string originalWorkingDirectory = _environment.GetWorkingDirectory();
 
             try
             {
@@ -48,15 +55,15 @@ namespace Microsoft.DotNet.Cli.Utils
                 using (BlockingMemoryStream outStream = new BlockingMemoryStream())
                 using (BlockingMemoryStream errorStream = new BlockingMemoryStream())
                 {
-                    Console.SetOut(new StreamWriter(outStream) { AutoFlush = true });
-                    Console.SetError(new StreamWriter(errorStream) { AutoFlush = true });
+                    _environment.SetConsoleOut(new StreamWriter(outStream) { AutoFlush = true });
+                    _environment.SetConsoleError(new StreamWriter(errorStream) { AutoFlush = true });
 
                     // Reset the Reporters to the new Console Out and Error.
                     Reporter.Reset();
 
                     if (!string.IsNullOrEmpty(_workingDirectory))
                     {
-                        Directory.SetCurrentDirectory(_workingDirectory);
+                        _environment.SetWorkingDirectory(_workingDirectory);
                     }
 
                     var taskOut = _stdOut.BeginRead(new StreamReader(outStream));
@@ -76,9 +83,9 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             finally
             {
-                Console.SetOut(originalConsoleOut);
-                Console.SetError(originalConsoleError);
-                Directory.SetCurrentDirectory(originalWorkingDirectory);
+                _environment.SetConsoleOut(originalConsoleOut);
+                _environment.SetConsoleError(originalConsoleError);
+                _environment.SetWorkingDirectory(originalWorkingDirectory);
 
                 Reporter.Reset();
             }
@@ -113,6 +120,39 @@ namespace Microsoft.DotNet.Cli.Utils
             _workingDirectory = workingDirectory;
 
             return this;
+        }
+
+        private class BuiltInCommandEnvironment : IBuiltInCommandEnvironment
+        {
+            public TextWriter GetConsoleOut()
+            {
+                return Console.Out;
+            }
+
+            public void SetConsoleOut(TextWriter newOut)
+            {
+                Console.SetOut(newOut);
+            }
+
+            public TextWriter GetConsoleError()
+            {
+                return Console.Error;
+            }
+
+            public void SetConsoleError(TextWriter newError)
+            {
+                Console.SetError(newError);
+            }
+
+            public string GetWorkingDirectory()
+            {
+                return Directory.GetCurrentDirectory();
+            }
+
+            public void SetWorkingDirectory(string path)
+            {
+                Directory.SetCurrentDirectory(path);
+            }
         }
 
         public CommandResolutionStrategy ResolutionStrategy
