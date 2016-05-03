@@ -45,12 +45,10 @@ Overall, there are two significant installable components:
 2. Shared runtime redistributable 
 
 The .NET Core SDK contains the following items:
-1. A given version of the CLI toolset
-2. A given version of the shared runtime that the CLI toolset uses; this is a full shared redist, so other apps can also use target this one
 
-The shared runtime redistributable ("the redist") contains only the packages and the shared host tied to the version of those packages.  
-
-The third component is the "multiplexer" ("muxer"), that is the shared component that is in charge of running the applications and the CLI commands. In general, although there will be an installer for this component, it should be treated as an implementation detail. We will see what that means in the next section. 
+1. A given version of the CLI toolset - "SDK"
+2. A given version of the shared runtime - "redist" - this will be consumed by both end-customers and CLI toolset
+3. A given version of the shared host - "muxer" - shared component that is in charge of running the applications and the CLI commands - it should be treated as an implementation detail
 
 ## Installation process
 Each of the components listed in the previous section will have an installer/package. The dependencies of the installers between themseslves are given in the table below.
@@ -58,7 +56,7 @@ Each of the components listed in the previous section will have an installer/pac
 | Installer 	| Depends on 	|
 |-----------	|------------	|
 | SDK       	| redist     	|
-| Redist    	| muxer      	|
+| redist    	| muxer      	|
 | muxer     	| -          	|
 
 The installation process will depend on the platform and the way of the install. For those installers that don't have automatic dependency resolution (Windows installer, OS X PKG) the installers will chain the installers of the components they depend on. DEB, RPM and similar will declare proper dependencies and the package manager will do the Right Thing(tm) by default. 
@@ -75,45 +73,40 @@ Removing the bits from the machine **must** follow the order outlined above in i
 ## Upgrading the CLI 
 The semantics of installing the CLI will be side-by-side by default. This means that each new version will get installed besides any existing versions on disk. The [layout section](#layout-on-disk) covers how that will look like on disk.
 
-Since this is the case, there is no special "upgrade". When the user needs a new  version, the user just installs the new version using any of the installers specified in this document. The installer will just drop a new version at the predefined location. 
+Since this is the case, there is no special "upgrade". When the user needs a new version, the user just installs the new version using any of the installers specified in this document. The installer will just drop a new version at the predefined location. 
 
-This, however, does have one specific constraint: **newever versions must be installed in the same location the previous version was in**. This constraint is due to the fact that the "muxer" uses convention to figure out how to find the actual driver that the user reuqested. 
+This, however, does have one specific constraint: **newer versions must be installed in the same location the previous version was in**. This constraint is due to the fact that the "muxer" uses convention to figure out how to find the actual driver that the user reuqested. 
 
 ## Layout on disk
 ```
-~/dotnet
-	-dotnet (%PATH%)
-	-SDK
-       - 1.0.0
-           - 
-       - 2.0.0
-	-Shared
-		-[redist framework]
-			-1.0.0
-				-coreclr.dll
-				-mscorlib.ni.dll <Regular NI image>
-				-system.*.dll  <R2R NI image>
-				-dotnet-hostimpl.dll
-				-dotnet
-				-netcoreapp.deps.json 
-			-1.5.0
-				-coreclr.dll
-				-mscorlib.ni.dll <Regular NI image>-
-				-system.*.dll  <R2R NI image>
-				-dotnet-hostimpl.dll
-				-dotnet
-				-netcoreapp.deps.json 
+<INSTALL_DIR>/ (%PATH%)
+	dotnet ("muxer", has platform dependant file extension)
+    hostfxr (implementation detail for "muxer", platform dependant file extension)
+	sdk/
+        <sdk-version-0>/ (i.e. "1.0.0-rc2-002543")
+            ... (binaries like: dotnet.dll, csc.dll)
+        <sdk-version-1>/
+            ... (binaries)
+        ...
+	shared/ ("redist" or "shared framework")
+        <target-framework-name>/ (currently only "Microsoft.NETCore.App")
+			<redist-version-0>/ (i.e. "1.0.0-rc2-3002543")
+                ... (binaries like: coreclr.dll, mscorlib.ni.dll, System.*.dll, dotnet-hostimpl.dll, dotnet, netcoreapp.deps.json)
+			<redist-version-1>/
+				... (binaries)
 ```	
 
 ## Native dependencies
 .NET Core CLI is built on top of CoreFX and CoreCLR and as such its' dependencies set is defined by the platform that those two combine. Whether or not those dependencies will be installed depends on the installer being used. The table below lists out the installers and whether or not they bring in dependencies. 
 
-| Installer  	| Dependencies Y/N   	|
-|------------	|--------------------	|
-| EXE        	| Y (chains them in) 	|
-| PKG        	| N                  	|
-| apt-get    	| Y                  	|
-| rpm        	| Y                  	| 
+| Installer  	| Dependencies Y/N                   |
+|------------	|----------------------------------- |
+| EXE        	| Y (chains them in) 	             |
+| PKG        	| N (need to be manually installed*) |
+| apt-get    	| Y                                  |
+| rpm        	| Y                                  |
+
+`*` PKG cannot specify and automatically install native dependencies
 
 A list of dependencies can be found on [dependency list](TBD). 
 
@@ -154,12 +147,12 @@ The Getting Started page should only point users to curated install experiences 
 
 The below table shows other pertinent information for installs on the "Getting started" page. 
  
-| Property              	| Description                                                  	|
-|-----------------------	|--------------------------------------------------------------	|
-| Debian feed           	| Development                                                  	|
-| Brew repo/tap           	| Brew binary repo (https://github.com/Homebrew/homebrew-binary)|
-| CentOS feed               | TBD
-| Local install scripts 	| Latest from rel/1.0.0                                        	|
+| Property              	| Description                                                  	 |
+|-----------------------	|--------------------------------------------------------------- |
+| Debian feed           	| Development                                                  	 |
+| Brew repo/tap           	| Brew binary repo (https://github.com/Homebrew/homebrew-binary) |
+| CentOS feed               | TBD                                                            |
+| Local install scripts 	| Latest from rel/1.0.0                                        	 |
 
 
 ### Repo landing page
@@ -178,7 +171,7 @@ There are multiple acquisition modes that the CLI will have:
 Let's dig into some details. 
 
 ### Native installers
-These installation experiences are the primary way new users are getting the bits.The primary way to get information about this mode of installation is the [Getting Started page](#getting-started-page). The native installers are considered to be stable by default; this does not imply lack of bugs, but it does imply predictable behavior. They are generated from the stable branches and are never used to get the Future bits.
+These installation experiences are the primary way new users are getting the bits. The primary way to get information about this mode of installation is the [Getting Started page](#getting-started-page). The native installers are considered to be stable by default; this does not imply lack of bugs, but it does imply predictable behavior. They are generated from the stable branches and are never used to get the Future bits.
 
 There are three main components that will be installed  
 
@@ -214,14 +207,17 @@ The features the script needs to support/have are:
 #### Installation script features
 The following arguments are needed for the installation script:
 
-| dotnet-install.sh param (Linux, OSX) 	| dotnet-install.ps1 param (Windows) 	| Defaults              	| Description                                                                                                                                                                                                                                   	|
+| dotnet-install.sh arg (Linux, OSX) 	| dotnet-install.ps1 arg (Windows) 	| Defaults              	| Description                                                                                                                                                                                                                                   	|
 |--------------------------------------	|------------------------------------	|-----------------------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | --channel                            	| -Channel                           	| "Production"          	| Which channel (i.e. "Future", "preview", "production") to install from.                                                                                                                                                                       	|
 | --version                            	| -Version                           	| global.json or Latest 	| Which version of CLI to install; you need to specify the version as 3-part version (i.e. 1.0.0-13232). If omitted, it will default to the first global.json that contains the sdkVersion property; if that is not present it will use Latest. 	|
-| --install-dir                             	| -InstallDir                        	| .dotnet               	| Path to where to install the CLI bundle. The directory is created if it doesn't exist. On Linux/OSX this directory is created in the user home directory (`$HOME`). On Windows, this directory is created in `%LocalAppData%`.                	|
+| --install-dir                         | -InstallDir                        	| .dotnet               	| Path to where to install the CLI bundle. The directory is created if it doesn't exist. On Linux/OSX this directory is created in the user home directory (`$HOME`). On Windows, this directory is created in `%LocalAppData%`.                	|
 | --debug                              	| -Debug                             	| false                 	| Whether to use the "fat" packages that contain debugging symbols or not.                                                                                                                                                                      	|
 | --no-path                            	| -NoPath                            	| false                 	| Export the prefix/installdir to the path for the current session. This makes CLI tools available immidiately after install.                                                                                                                   	|
 | --shared-runtime                     	| -SharedRuntime                     	| false                 	| Install just the shared runtime bits, not the entire SDK.                                                                                                                                                                                     	|
+
+Note: Powershell arg naming convention is supported on Windows and non-Windows platforms. Non-Windows platforms do additionally support convention specific to their platform.
+
 ##### Install the latest Future CLI
 
 Windows:
@@ -241,7 +237,7 @@ Windows:
 ```
 OSX/Linux:
 ```
-./dotnet-install.sh --channel preview --prefix ~/cli
+./dotnet-install.sh --channel preview --install-dir ~/cli
 ```
 
 #### Windows obtain one-liner example 
@@ -250,10 +246,10 @@ OSX/Linux:
 @powershell -NoProfile -ExecutionPolicy unrestricted -Command "&{iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1'))}"
 ```
 
-#### OSX/Linux obtain one-liner example
+#### OSX/Linux obtain one-liner
 
 ```
-curl -sSL https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.sh | bash /dev/stdin [args] 
+curl -sSL https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.sh | bash /dev/stdin <additional args> 
 ```
 
 ### Docker 
@@ -276,6 +272,195 @@ If there exist any mechanism that notifies users of updates of the CLI, it shoul
 Cross-platform IDEs/editors will work in similar way as above. The notification should also point people to the Getting Started page. The reason is simple: it is the one page where users can pick and choose their installation experience. 
 
 ### Visual Studio 
-Visual Studio will not be shipping CLI in-box. However, it will use CLI when installed. The install will be tied into other installs like WET and similar.  The URL that is baked in VS should be an aka.ms URL because it needs to be stable on that end. The other, pointing end, should also be a stable URL/location. 
+Visual Studio will not be shipping CLI in-box. However, it will use CLI when installed. The install will be tied into other installs like WET and similar. The URL that is baked in VS should be an aka.ms URL or other stable URL/location.
 
+# Detecting dotnet/cli installation
 
+## Windows
+
+### Requirements for CLI SDK and shared framework installer
+- Support side by side installation and can be compatible with older versions of themselves
+- Supports removing of any side by side version
+- Prerelease versions are compatible only with the same prerelease versions
+
+#### Scenarios
+- Installing the product produces registry value informing about full version of the product which is being installed
+- Installing the product produces registry values informing about compatible versions of the products
+- Removing the product removes the registry keys if none of the versions of the product is supporting the given version. Specifically at least one registry key with full version should be removed.
+- Installing older version of the product is possible
+
+#### Registry keys and values
+- Full version refers to NuGet semantic version which contains the build number
+- Version refers to NuGet semantic version which does *not* contain build number
+
+Registry key should be created under following path:
+```
+HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\<platform>\<installer-name>\[REG_DWORD]<nuget-version>=1
+```
+
+`<platform>=(x86|x64)`
+`<installer-name>=(sdk|sharedfx)`
+
+Example output (installing CLI SDK x86 with version 1.0.3-123456):
+
+```
+HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0=1
+HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1=1
+HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2=1
+HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3=1
+HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-123456=1
+```
+
+Note: 1.0.3 has two entries
+
+Explanation:
+CLI SDK version 1.0.3-123456 is compatible with any build of 1.0.3, 1.0.2, 1.0.1 and 1.0.0. If another installer is trying to find if there exists CLI SDK which supports specific version of installer they can check for presence of the value 1 under the registry path.
+
+### Requirements for shared host installer
+- Supports only in-place updated and is assumed to be always compatible with older versions of itself
+
+#### Scenarios
+- Installing the product produces one registry value containing the latest version
+- Installing older version on top of the other is not possible
+- Removing removes the product completely with its registry keys, regardless of any previous installations
+
+Registry key should be created under following path:
+```
+HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\<platform>\[REG_SZ]sharedhost=<nuget-semversion>
+```
+
+##### Example
+```
+HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\dotnet\Setup\x64\[REG_SZ]sharedhost=1.0.0-rc2-123456
+```
+
+### Other Examples
+
+Operations:
+`NOP` - key already existed, do nothing with it
+`ADD` - add
+`DEL` - delete
+`RF+` - not adding because key already exist (installer will increse ref count on GUID related to this value)
+`RF-` - not deleting because something else is compatible with this (decrease ref count)
+
+#### Scenario 1
+
+Installing 1.0.3-123456 (RTM) to a clean machine
+
+Note: Installer is compatible with all previous versions and all their RCs.
+
+```
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-123456=1
+```
+
+Installing 1.0.4-234567 (RTM) on top of that
+
+```
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc1=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc2=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2-rc1=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2-rc2=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc1=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc2=1
+RF+ HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-123456=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-234567=1
+```
+
+Removing 1.0.3-123456
+
+```
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc1=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc2=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2-rc1=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2-rc2=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.2=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc1=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc2=1
+RF- HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3=1
+DEL HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-123456=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-rc1=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-rc2=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-234567=1
+```
+
+#### Scenario 2
+
+Installing 1.0.0-123456 (RTM) to a clean machine
+
+```
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-123456=1
+```
+
+Installing 1.1.0-567890 (RTM) which is incompatible since 1.0.2
+
+Note: User is unable to run apps targetting 1.0.1 or 1.0.2 until compatible version is installed.
+
+```
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-123456=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc1=1 (first back-incompatible version)
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.3=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.4=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.1.0-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.1.0-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.1.0=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.1.0-567890=1
+```
+
+#### Scenario 3
+
+Installing 1.0.0-rc2-123456 to a clean machine
+
+Note: User is unable to run apps targetting 1.0.0 until RTM is installed.
+
+```
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2-123456=1
+```
+
+Installing 1.0.1-rc1-234567
+
+Note: User is still unable to run apps targetting 1.0.0 until any 1.0.0+ RTM is installed.
+
+```
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2=1
+NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc2-123456=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc1=1
+ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.1-rc1-123456=1
+```
