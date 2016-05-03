@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
@@ -14,13 +15,13 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 {
     public class GivenThatWeWantToUseDotnetTestE2EInDesignTimeForMultipleTFms : TestBase
     {
-        private readonly string _projectFilePath;
-        private readonly string _netCoreAppOutputPath;
-        private readonly string _net451OutputPath;
+        private string _projectFilePath;
+        private string _netCoreAppOutputPath;
+        private string _net451OutputPath;
 
-        public GivenThatWeWantToUseDotnetTestE2EInDesignTimeForMultipleTFms()
+        private void Setup([CallerMemberName] string callingMethod = "")
         {
-            var testInstance = TestAssetsManager.CreateTestInstance(Path.Combine("ProjectsWithTests", "MultipleFrameworkProject"));
+            var testInstance = TestAssetsManager.CreateTestInstance(Path.Combine("ProjectsWithTests", "MultipleFrameworkProject"), callingMethod);
 
             _projectFilePath = Path.Combine(testInstance.TestRoot, "project.json");
             var contexts = ProjectContext.CreateContextForEachFramework(
@@ -51,6 +52,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [WindowsOnlyFact]
         public void It_discovers_tests_for_the_ProjectWithTestsWithNetCoreApp()
         {
+            Setup();
+
             using (var adapter = new Adapter("TestDiscovery.Start"))
             {
                 adapter.Listen();
@@ -68,6 +71,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [WindowsOnlyFact]
         public void It_discovers_tests_for_the_ProjectWithTestsWithNet451()
         {
+            Setup();
+
             using (var adapter = new Adapter("TestDiscovery.Start"))
             {
                 adapter.Listen();
@@ -86,6 +91,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_runs_tests_for_netcoreapp10()
         {
+            Setup();
+
             using (var adapter = new Adapter("TestExecution.GetTestRunnerProcessStartInfo"))
             {
                 adapter.Listen();
@@ -105,6 +112,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [WindowsOnlyFact]
         public void It_runs_tests_for_net451()
         {
+            Setup();
+
             using (var adapter = new Adapter("TestExecution.GetTestRunnerProcessStartInfo"))
             {
                 adapter.Listen();
