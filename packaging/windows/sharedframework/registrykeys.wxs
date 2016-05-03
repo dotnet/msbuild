@@ -8,6 +8,11 @@
           <RegistryValue Action="write" Name="$(var.FrameworkDisplayVersion)" Type="integer" Value="1" KeyPath="yes"/>
         </RegistryKey>
       </Component>
+      <Component Id="SetupRegistry_x86_RC2_Compat_Key" Directory="TARGETDIR" Win64="no">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\Setup\InstalledVersions\$(var.Platform)\sharedfx\$(var.FrameworkName)">
+          <RegistryValue Action="write" Name="1.0.0-rc2" Type="integer" Value="1" KeyPath="yes"/>
+        </RegistryKey>
+      </Component>
     </ComponentGroup>
   </Fragment>
 </Wix>
