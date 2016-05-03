@@ -6,6 +6,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
+using System.IO;
 
 namespace Microsoft.DotNet.ProjectModel.Tests
 {
@@ -139,6 +140,19 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             var diagnostics = context.LibraryManager.GetAllDiagnostics();
             Assert.False(diagnostics.Any(d => d.ErrorCode == ErrorCodes.DOTNET1011));
+        }
+
+        [Fact]
+        public void NoDuplicatesWithProjectAndReferenceAssemblyWithSameName()
+        {
+            var instance = TestAssetsManager.CreateTestInstance("DuplicatedReferenceAssembly")
+                                            .WithLockFiles();
+            var context = new ProjectContextBuilder().WithProjectDirectory(Path.Combine(instance.TestRoot, "TestApp"))
+                                                     .WithTargetFramework("net461")
+                                                     .Build();
+
+            // Will fail with dupes if any
+            context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name);
         }
     }
 }
