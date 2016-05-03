@@ -42,6 +42,53 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             Assert.Empty(p2.RuntimeAssemblies);
         }
 
+        [Fact]
+        public void HasCompileTimePlaceholderChecksAllCompileTimeAssets()
+        {
+            var provider = new PackageDependencyProvider("/foo/packages", new FrameworkReferenceResolver("/foo/references"));
+            var package = new LockFilePackageLibrary();
+            package.Name = "Something";
+            package.Version = NuGetVersion.Parse("1.0.0");
+            package.Files.Add("lib/net46/_._");
+            package.Files.Add("lib/net46/Something.dll");
+
+            var target = new LockFileTargetLibrary();
+            target.Name = "Something";
+            target.Version = package.Version;
+
+            target.RuntimeAssemblies.Add("lib/net46/_._");
+            target.RuntimeAssemblies.Add("lib/net46/Something.dll");
+            target.CompileTimeAssemblies.Add("lib/net46/_._");
+            target.CompileTimeAssemblies.Add("lib/net46/Something.dll");
+
+            var p1 = provider.GetDescription(NuGetFramework.Parse("net46"), package, target);
+            
+            Assert.False(p1.HasCompileTimePlaceholder);
+            Assert.Equal(1, p1.CompileTimeAssemblies.Count());
+            Assert.Equal(1, p1.RuntimeAssemblies.Count());
+            Assert.Equal("lib/net46/Something.dll", p1.CompileTimeAssemblies.First().Path);
+            Assert.Equal("lib/net46/Something.dll", p1.RuntimeAssemblies.First().Path);
+        }
+        
+        [Fact]
+        public void HasCompileTimePlaceholderReturnsFalseIfEmpty()
+        {
+            var provider = new PackageDependencyProvider("/foo/packages", new FrameworkReferenceResolver("/foo/references"));
+            var package = new LockFilePackageLibrary();
+            package.Name = "Something";
+            package.Version = NuGetVersion.Parse("1.0.0");
+
+            var target = new LockFileTargetLibrary();
+            target.Name = "Something";
+            target.Version = package.Version;
+
+            var p1 = provider.GetDescription(NuGetFramework.Parse("net46"), package, target);
+            
+            Assert.False(p1.HasCompileTimePlaceholder);
+            Assert.Equal(0, p1.CompileTimeAssemblies.Count());
+            Assert.Equal(0, p1.RuntimeAssemblies.Count());
+        }
+
         [Theory]
         [InlineData("TestMscorlibReference", true)]
         [InlineData("TestMscorlibReference", false)]
