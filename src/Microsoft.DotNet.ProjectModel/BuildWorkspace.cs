@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class BuildWorkspace : Workspace
     {
-        public BuildWorkspace(ProjectReaderSettings settings) : base(settings) { }
+        public BuildWorkspace(ProjectReaderSettings settings) : base(settings, false) { }
 
         /// <summary>
         /// Create an empty <see cref="WorkspaceContext" /> using the default <see cref="ProjectReaderSettings" />
@@ -58,7 +58,6 @@ namespace Microsoft.DotNet.ProjectModel
                     return CreateBaseProjectBuilder(context.ProjectFile)
                         .WithTargetFramework(context.TargetFramework)
                         .WithRuntimeIdentifiers(runtimeIdentifiers)
-                        .AsDesignTime()
                         .Build();
                 }
 
