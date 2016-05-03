@@ -497,6 +497,22 @@ namespace Microsoft.DotNet.ProjectModel
                     dependencyDescription.Parents.Add(library);
                 }
             }
+
+            // Deduplicate libraries with the same name
+            // Priority list is backwards so not found -1 would be last when sorting by descending
+            var priorities = new[] { LibraryType.Package, LibraryType.Project, LibraryType.ReferenceAssembly };
+            var nameGroups = libraries.Keys.ToLookup(libraryKey => libraryKey.Name);
+            foreach (var nameGroup in nameGroups)
+            {
+                var librariesToRemove = nameGroup
+                    .OrderByDescending(libraryKey => Array.IndexOf(priorities, libraryKey.LibraryType))
+                    .Skip(1);
+
+                foreach (var library in librariesToRemove)
+                {
+                    libraries.Remove(library);
+                }
+            }
         }
 
         private void ScanLibraries(LockFileTarget target,
