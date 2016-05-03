@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 
@@ -9,13 +7,7 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public static class ProjectModelPlatformExtensions
     {
-        public static IEnumerable<LibraryExport> ExcludePlatformExports(this ProjectContext context, IEnumerable<LibraryExport> allExports)
-        {
-            var exclusionList = context.GetPlatformExclusionList(allExports);
-            return allExports.Where(e => !exclusionList.Contains(e.Library.Identity.Name));
-        }
-
-        public static HashSet<string> GetPlatformExclusionList(this ProjectContext context, IEnumerable<LibraryExport> allExports)
+        public static HashSet<string> GetPlatformExclusionList(this ProjectContext context, IDictionary<string, LibraryExport> exports)
         {
             var exclusionList = new HashSet<string>();
             var redistPackage = context.PlatformLibrary;
@@ -23,9 +15,6 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 return exclusionList;
             }
-            var exports = allExports
-                .Where(e => e.Library.Identity.Type.Equals(LibraryType.Package))
-                .ToDictionary(e => e.Library.Identity.Name);
 
             var redistExport = exports[redistPackage.Identity.Name];
 
@@ -34,7 +23,7 @@ namespace Microsoft.DotNet.ProjectModel
             return exclusionList;
         }
 
-        private static void CollectDependencies(Dictionary<string, LibraryExport> exports, IEnumerable<LibraryRange> dependencies, HashSet<string> exclusionList)
+        private static void CollectDependencies(IDictionary<string, LibraryExport> exports, IEnumerable<LibraryRange> dependencies, HashSet<string> exclusionList)
         {
             foreach (var dependency in dependencies)
             {
@@ -43,6 +32,35 @@ namespace Microsoft.DotNet.ProjectModel
                 {
                     exclusionList.Add(export.Library.Identity.Name);
                     CollectDependencies(exports, export.Library.Dependencies, exclusionList);
+                }
+            }
+        }
+
+        public static HashSet<string> GetTypeBuildExclusionList(this ProjectContext context, IDictionary<string, LibraryExport> exports)
+        {
+            var acceptedExports = new HashSet<string>();
+
+            // Accept the root project, obviously :)
+            acceptedExports.Add(context.RootProject.Identity.Name);
+
+            // Walk all dependencies, tagging exports. But don't walk through Build dependencies.
+            CollectNonBuildDependencies(exports, context.RootProject.Dependencies, acceptedExports);
+
+            // Whatever is left in exports was brought in ONLY by a build dependency
+            var exclusionList = new HashSet<string>(exports.Keys);
+            exclusionList.ExceptWith(acceptedExports);
+            return exclusionList;
+        }
+
+        private static void CollectNonBuildDependencies(IDictionary<string, LibraryExport> exports, IEnumerable<LibraryRange> dependencies, HashSet<string> acceptedExports)
+        {
+            foreach (var dependency in dependencies)
+            {
+                var export = exports[dependency.Name];
+                if (!dependency.Type.Equals(LibraryDependencyType.Build))
+                {
+                    acceptedExports.Add(export.Library.Identity.Name);
+                    CollectNonBuildDependencies(exports, export.Library.Dependencies, acceptedExports);
                 }
             }
         }

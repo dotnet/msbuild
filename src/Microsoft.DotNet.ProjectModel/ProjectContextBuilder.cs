@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ProjectModel
                 .WithProjectResolver(ProjectResolver)
                 .WithLockFileResolver(LockFileResolver)
                 .WithProjectReaderSettings(ProjectReaderSettings);
-            if(IsDesignTime)
+            if (IsDesignTime)
             {
                 builder.AsDesignTime();
             }
@@ -168,14 +168,14 @@ namespace Microsoft.DotNet.ProjectModel
                 var deduper = new HashSet<string>();
                 foreach (var target in LockFile.Targets)
                 {
-                    var id = $"{target.TargetFramework}/{target.RuntimeIdentifier}";
+                    var context = Clone()
+                        .WithTargetFramework(target.TargetFramework)
+                        .WithRuntimeIdentifiers(new[] { target.RuntimeIdentifier }).Build();
+
+                    var id = $"{context.TargetFramework}/{context.RuntimeIdentifier}";
                     if (deduper.Add(id))
                     {
-                        var builder = Clone()
-                            .WithTargetFramework(target.TargetFramework)
-                            .WithRuntimeIdentifiers(new[] { target.RuntimeIdentifier });
-
-                        yield return builder.Build();
+                        yield return context;
                     }
                 }
             }

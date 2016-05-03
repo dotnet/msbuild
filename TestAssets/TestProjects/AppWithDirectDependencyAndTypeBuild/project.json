@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+        "version": "1.0.0-rc2-*",
+        "type": "platform"
+    },
+    "xunit.core": "2.1.0",
+    "xunit": {
+        "version": "2.1.0",
+        "type": "build"
+    }
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+        "imports": [ "portable-net451+win8" ]
+    }
+  }
+}

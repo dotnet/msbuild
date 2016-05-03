@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using Xunit;
 
 namespace Microsoft.DotNet.ProjectModel.Tests
 {
-    public class ProjectContextBuilderTests
+    public class ProjectContextBuilderTests : TestBase
     {
         private static readonly HashSet<string> KnownProperties = new HashSet<string>(StringComparer.Ordinal) {
             "Project",
@@ -48,7 +51,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var clonedBuilder = initialBuilder.Clone();
 
             // Compare all the properties. This is a shallow clone, so they should all be exactly ReferenceEqual
-            foreach(var prop in typeof(ProjectContextBuilder).GetTypeInfo().DeclaredProperties)
+            foreach (var prop in typeof(ProjectContextBuilder).GetTypeInfo().DeclaredProperties)
             {
                 KnownProperties.Remove(prop.Name).Should().BeTrue(because: $"{prop.Name} should be listed in the known properties to ensure it is properly tested.");
 
@@ -64,6 +67,19 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             }
 
             KnownProperties.Should().BeEmpty(because: "all properties should have been checked by the CloneTest");
+        }
+
+        [Fact]
+        public void BuildAllTargetsProperlyDeduplicatesTargets()
+        {
+            // Load all project contexts for the test project
+            var contexts = new ProjectContextBuilder()
+                .WithProjectDirectory(Path.Combine(TestAssetsManager.AssetsRoot, "TestProjectContextBuildAllDedupe"))
+                .BuildAllTargets()
+                .ToList();
+
+            // This is a portable app, so even though RIDs are specified, BuildAllTargets should only produce one output.
+            Assert.Equal(1, contexts.Count);
         }
     }
 }

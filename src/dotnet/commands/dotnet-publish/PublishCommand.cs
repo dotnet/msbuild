@@ -134,7 +134,14 @@ namespace Microsoft.DotNet.Tools.Publish
             var buildOutputPaths = context.GetOutputPaths(configuration, buildBasePath);
 
             var exports = exporter.GetAllExports();
-            foreach (var export in context.ExcludePlatformExports(exports))
+
+            var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name);
+            var platformExclusionList = context.GetPlatformExclusionList(exportsLookup);
+            var buildExclusionList = context.GetTypeBuildExclusionList(exportsLookup);
+            var allExclusionList = new HashSet<string>(platformExclusionList);
+            allExclusionList.UnionWith(buildExclusionList);
+
+            foreach (var export in FilterExports(exports, allExclusionList))
             {
                 Reporter.Verbose.WriteLine($"publish: Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
@@ -164,12 +171,9 @@ namespace Microsoft.DotNet.Tools.Publish
 
             if (context.ProjectFile.HasRuntimeOutput(configuration) && !context.TargetFramework.IsDesktop())
             {
-                PublishFiles(
-                    new[] {
-                        buildOutputPaths.RuntimeFiles.DepsJson,
-                        buildOutputPaths.RuntimeFiles.RuntimeConfigJson
-                    },
-                    outputPath);
+                // Make executable in the new location
+                var executable = new Executable(context, buildOutputPaths, outputPath, buildOutputPaths.IntermediateOutputDirectoryPath, exporter, configuration);
+                executable.WriteConfigurationFiles(exports, FilterExports(exports, buildExclusionList), includeDevConfig: false);
             }
 
             var contentFiles = new ContentFiles(context);
@@ -200,6 +204,11 @@ namespace Microsoft.DotNet.Tools.Publish
             Reporter.Output.WriteLine($"publish: Published to {outputPath}".Green().Bold());
 
             return true;
+        }
+
+        private static IEnumerable<LibraryExport> FilterExports(IEnumerable<LibraryExport> exports, HashSet<string> exclusionList)
+        {
+            return exports.Where(e => !exclusionList.Contains(e.Library.Identity.Name));
         }
 
         /// <summary>

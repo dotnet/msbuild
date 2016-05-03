@@ -109,8 +109,8 @@ namespace Microsoft.DotNet.Cli.Build
 
                 ExecSilent(_crossGenPath, crossgenArgs, env);
 
-                File.Delete(file);
-                File.Move(tempPathName, file);
+                File.Copy(tempPathName, file, overwrite: true);
+                File.Delete(tempPathName);
             }
         }
     }

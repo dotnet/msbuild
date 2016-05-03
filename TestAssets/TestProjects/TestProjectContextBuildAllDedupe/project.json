@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+        "version": "1.0.0-rc2-*",
+        "type": "platform"
+    },
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+        "imports": [ "portable-net451+win8" ]
+    }
+  },
+  "runtimes": {
+      "win7-x64": {},
+      "win7-x86": {}
+  }
+}

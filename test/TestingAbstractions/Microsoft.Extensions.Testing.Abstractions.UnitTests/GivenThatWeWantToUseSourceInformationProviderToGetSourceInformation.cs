@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.Testing.Abstractions.UnitTests
         public void It_creates_a_pdb_reader_right_away()
         {
             var pdbReaderFactoryMock = new Mock<IPdbReaderFactory>();
-            var sourceInformationProvider = new SourceInformationProvider(_pdbPath, null, pdbReaderFactoryMock.Object);
+            var sourceInformationProvider = new SourceInformationProvider(_pdbPath, pdbReaderFactoryMock.Object);
 
             pdbReaderFactoryMock.Verify(p => p.Create(_pdbPath), Times.Once);
         }
@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.Testing.Abstractions.UnitTests
             var pdbReaderFactoryMock = new Mock<IPdbReaderFactory>();
             pdbReaderFactoryMock.Setup(p => p.Create(_pdbPath)).Returns(pdbReaderMock.Object);
 
-            var sourceInformationProvider = new SourceInformationProvider(_pdbPath, null, pdbReaderFactoryMock.Object);
+            var sourceInformationProvider = new SourceInformationProvider(_pdbPath, pdbReaderFactoryMock.Object);
 
             var actualSourceInformation = sourceInformationProvider.GetSourceInformation(methodInfo);
 
@@ -53,7 +53,7 @@ namespace Microsoft.Extensions.Testing.Abstractions.UnitTests
             pdbReaderFactoryMock.Setup(p => p.Create(_pdbPath)).Returns(pdbReaderMock.Object);
 
             using (var sourceInformationProvider =
-                new SourceInformationProvider(_pdbPath, null, pdbReaderFactoryMock.Object))
+                new SourceInformationProvider(_pdbPath, pdbReaderFactoryMock.Object))
             {
             }
 
