@@ -25,4 +25,7 @@
   <?else?>
   <?error Invalid Platform ($(var.Platform))?>
   <?endif?>
+
+  <?define DependencyKey   = "Dotnet_CLI_$(var.Dotnet_DisplayVersion)_$(var.Platform)"?>
+  <?define DependencyKeyId = "$(var.DependencyKey)" ?>
 </Include>

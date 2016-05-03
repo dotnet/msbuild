@@ -28,4 +28,7 @@
   <?else?>
   <?error Invalid Platform ($(var.Platform))?>
   <?endif?>
+
+  <?define DependencyKey  = "DotNet.CLI.SharedFramework.$(var.FrameworkName)_$(var.FrameworkComponentVersion)_$(var.Platform)"?>
+  <?define DependencyKeyId = "$(var.DependencyKey)" ?>
 </Include>

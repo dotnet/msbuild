@@ -13,7 +13,7 @@
             <ComponentGroupRef Id="AuthoredRegistryKeys"/>
         </Feature>
         <Feature Id="Provider" Absent="disallow" AllowAdvertise="no" Description="Used for Ref Counting" Display="hidden" Level="1" InstallDefault="local" Title="RefCounting" TypicalDefault="install">
-            <ComponentRef Id="Dotnet_CLI_SharedHost_$(var.Dotnet_DisplayVersion)" />
+            <ComponentRef Id="$(var.DependencyKeyId)" />
         </Feature>
         <Property Id="ProductCPU" Value="$(var.Platform)" />
         <Property Id="RTM_ProductVersion" Value="$(var.Dotnet_ProductVersion)" />
