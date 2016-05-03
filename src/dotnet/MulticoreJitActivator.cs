@@ -36,11 +36,28 @@ namespace Microsoft.DotNet.Cli
         {
             var profileOptimizationRootPath = new MulticoreJitProfilePathCalculator().MulticoreJitProfilePath;
 
-            PathUtility.EnsureDirectory(profileOptimizationRootPath);
+            if (!TryEnsureDirectory(profileOptimizationRootPath))
+            {
+                return;
+            }
             
             AssemblyLoadContext.Default.SetProfileOptimizationRoot(profileOptimizationRootPath);
             
             AssemblyLoadContext.Default.StartProfileOptimization("dotnet");
+        }
+
+        private bool TryEnsureDirectory(string directoryPath)
+        {
+            try
+            {
+                PathUtility.EnsureDirectory(directoryPath);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }
