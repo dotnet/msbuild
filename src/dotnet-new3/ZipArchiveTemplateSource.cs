@@ -52,7 +52,7 @@ namespace dotnet_new3
                         return false;
                 }
 
-                using (Stream fileData = source.OpenFile(location))
+                using (Stream fileData = source.Root.Value.OpenFile(location))
                 using (ZipArchive archive = new ZipArchive(fileData, ZipArchiveMode.Read, true))
                 {
                 }
@@ -72,7 +72,7 @@ namespace dotnet_new3
 
         public IDisposable<ITemplateSourceFolder> RootFor(IConfiguredTemplateSource source, string location)
         {
-            return new Directory(null, "", "", () => new ZipArchive(source.OpenFile(location), ZipArchiveMode.Read, false)).NoDispose();
+            return new Directory(null, "", "", () => new ZipArchive(source.Root.Value.OpenFile(location), ZipArchiveMode.Read, false)).NoDispose();
         }
 
         private class Directory : TemplateSourceFolder
