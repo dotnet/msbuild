@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli
         
         private bool IsMulticoreJitDisabled()
         {
-            return Environment.GetEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT") == "1";
+            return Env.GetEnvironmentVariableAsBool("DOTNET_DISABLE_MULTICOREJIT");
         }
         
         private void StartCliProfileOptimization()

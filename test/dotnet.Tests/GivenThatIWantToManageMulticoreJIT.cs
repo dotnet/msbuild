@@ -33,7 +33,6 @@ namespace Microsoft.DotNet.Tests
             new TestCommand("dotnet")
                 .WithUserProfileRoot(testDirectory.Path)
                 .ExecuteWithCapturedOutput("--help");
-            
 
             var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
 
@@ -54,7 +53,6 @@ namespace Microsoft.DotNet.Tests
                 .WithUserProfileRoot(testDirectory.Path)
                 .WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "1")
                 .ExecuteWithCapturedOutput("--help");
-            
 
             var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
 
