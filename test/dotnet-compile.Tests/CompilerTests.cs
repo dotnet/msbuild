@@ -166,6 +166,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var objDirInfo = new DirectoryInfo(Path.Combine(root, "obj", "Debug", DefaultFramework));
             objDirInfo.Should().HaveFile("EndToEndTestApp.resource1.resources");
             objDirInfo.Should().HaveFile("myresource.resources");
+            objDirInfo.Should().HaveFile("EndToEndTestApp.defaultresource.resources");
         }
 
         [Fact]
