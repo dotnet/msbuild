@@ -59,9 +59,15 @@ namespace Microsoft.DotNet.Tools.Common
         public static void EnsureParentDirectory(string filePath)
         {
             string directory = Path.GetDirectoryName(filePath);
-            if (!Directory.Exists(directory))
+
+            EnsureDirectory(directory);
+        }
+        
+        public static void EnsureDirectory(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(directory);
+                Directory.CreateDirectory(directoryPath);
             }
         }
 

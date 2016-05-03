@@ -96,6 +96,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             Test(new string[] { }, new[] { "L21" }, workingDirectory: Path.Combine("src", "L21"));
         }
+
         [Fact]
         public void TestFailsIfNoProjectJsonInCurrentDirectoryWithNoArguments()
         {

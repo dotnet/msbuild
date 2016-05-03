@@ -93,14 +93,26 @@ namespace Microsoft.DotNet.TestFramework
                 throw new Exception($"Cannot find '{testProjectName}' at '{AssetsRoot}'");
             }
 
+            var testDestination = GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
+            var testInstance = new TestInstance(testProjectDir, testDestination);
+            return testInstance;
+        }
+
+        public TestDirectory CreateTestDirectory([CallerMemberName] string callingMethod = "", string identifier = "")
+        {
+            var testDestination = GetTestDestinationDirectoryPath(string.Empty, callingMethod, identifier);
+
+            return new TestDirectory(testDestination);
+        }
+
+        private string GetTestDestinationDirectoryPath(string testProjectName, string callingMethod, string identifier)
+        {
 #if NET451
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 #else
             string baseDirectory = AppContext.BaseDirectory;
 #endif
-            string testDestination = Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
-            var testInstance = new TestInstance(testProjectDir, testDestination);
-            return testInstance;
+            return Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
         }
     }
 }

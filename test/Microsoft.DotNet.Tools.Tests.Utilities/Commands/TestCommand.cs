@@ -193,5 +193,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             process.Start();
             return process;
         }
+        
+        public TestCommand WithEnvironmentVariable(string name, string value)
+        {
+            Environment.Add(name, value);
+            
+            return this;
+        }
     }
 }

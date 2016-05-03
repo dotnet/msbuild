@@ -16,6 +16,7 @@
       "target": "project",
       "type": "build"
     },
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-20581",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-173361-36"
   },
