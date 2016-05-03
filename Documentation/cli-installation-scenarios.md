@@ -106,7 +106,7 @@ This, however, does have one specific constraint: **newer versions must be insta
 | apt-get    	| Y                                  |
 | rpm        	| Y                                  |
 
-`*` PKG has no way of installing native dependencies
+`*` PKG cannot specify and automatically install native dependencies
 
 A list of dependencies can be found on [dependency list](TBD). 
 
