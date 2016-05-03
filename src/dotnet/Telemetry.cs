@@ -14,27 +14,22 @@ namespace Microsoft.DotNet.Cli
     public class Telemetry : ITelemetry
     {
         private bool _isInitialized = false;
-        private bool _isCollectingTelemetry = false;
         private TelemetryClient _client = null;
 
         private Dictionary<string, string> _commonProperties = null;
         private Dictionary<string, double> _commonMeasurements = null;
         private Task _trackEventTask = null;
 
-        private int _sampleRate = 1;
-        private bool _isTestMachine = false;
+        private string _telemetryProfile;
 
-        private const int ReciprocalSampleRateValue = 1;
-        private const int ReciprocalSampleRateValueForTest = 1;
         private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
-        private const string TestMachineFlag = "TEST_MACHINE";
-        private const string TestMachine = "Test Machine";
+        private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
         private const string OSVersion = "OS Version";
         private const string OSPlatform = "OS Platform";
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
-        private const string ReciprocalSampleRate = "Reciprocal SampleRate";
+        private const string TelemetryProfile = "Telemetry Profile";
 
         public bool Enabled { get; }
 
@@ -47,32 +42,10 @@ namespace Microsoft.DotNet.Cli
                 return;
             }
 
-            _sampleRate = ReciprocalSampleRateValue;
-            _isTestMachine = Env.GetEnvironmentVariableAsBool(TestMachineFlag);
+            _telemetryProfile = Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable);
 
-            if(_isTestMachine)
-            {
-                _sampleRate = ReciprocalSampleRateValueForTest;
-            }
-
-            _isCollectingTelemetry = (Environment.TickCount % _sampleRate == 0);
-            if(!_isCollectingTelemetry)
-            {
-                return;
-            }
-
-            try
-            {
-                using (PerfTrace.Current.CaptureTiming())
-                {
-                    //initialize in task to offload to parallel thread
-                    _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
-                }
-            }
-            catch(Exception)
-            {
-                Debug.Fail("Exception during telemetry task initialization");
-            }
+            //initialize in task to offload to parallel thread
+            _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
         }
 
         public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
@@ -81,24 +54,11 @@ namespace Microsoft.DotNet.Cli
             {
                 return;
             }
-            if (!_isCollectingTelemetry)
-            {
-                return;
-            }
-            try
-            {
-                using (PerfTrace.Current.CaptureTiming())
-                {
-                    //continue task in existing parallel thread
-                    _trackEventTask = _trackEventTask.ContinueWith(
-                        x => TrackEventTask(eventName, properties, measurements)
-                    );
-                }
-            }
-            catch(Exception)
-            {
-                Debug.Fail("Exception during telemetry task continuation");
-            }
+
+            //continue task in existing parallel thread
+            _trackEventTask = _trackEventTask.ContinueWith(
+                x => TrackEventTask(eventName, properties, measurements)
+            );
         }
 
         private void InitializeTelemetry()
@@ -116,12 +76,11 @@ namespace Microsoft.DotNet.Cli
                 _commonProperties.Add(OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString());
                 _commonProperties.Add(RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier());
                 _commonProperties.Add(ProductVersion, Product.Version);
-                _commonProperties.Add(TestMachine, _isTestMachine.ToString());
-                _commonProperties.Add(ReciprocalSampleRate, _sampleRate.ToString());
+                _commonProperties.Add(TelemetryProfile, _telemetryProfile);
                 _commonMeasurements = new Dictionary<string, double>();
                 _isInitialized = true;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 _isInitialized = false;
                 // we dont want to fail the tool if telemetry fails.
@@ -131,7 +90,7 @@ namespace Microsoft.DotNet.Cli
 
         private void TrackEventTask(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
-            if(!_isInitialized)
+            if (!_isInitialized)
             {
                 return;
             }
