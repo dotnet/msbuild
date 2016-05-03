@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string[] TestProjects = new[]
         {
             "ArgumentForwardingTests",
+            "crossgen.Tests",
             "EndToEnd",
             "dotnet.Tests",
             "dotnet-build.Tests",
