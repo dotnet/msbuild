@@ -31,6 +31,7 @@ namespace Microsoft.Build.Tasks
         private static string s_version40Path;
         private static string s_version45Path;
         private static string s_version451Path;
+        private static string s_version452Path;
         private static string s_version46Path;
         private static string s_version461Path;
 
@@ -173,6 +174,23 @@ namespace Microsoft.Build.Tasks
                 }
 
                 return s_version451Path;
+            }
+        }
+
+        /// <summary>
+        /// Path to the v4.5.2 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion452Path
+        {
+            get
+            {
+                if (s_version452Path == null)
+                {
+                    s_version452Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version452);
+                }
+
+                return s_version452Path;
             }
         }
 
