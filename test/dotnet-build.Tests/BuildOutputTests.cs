@@ -307,6 +307,30 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             }
 
         }
+
+        [Fact]
+        private void StandaloneApp_WithoutCoreClrDll_Fails()
+        {
+            // Convert a Portable App to Standalone to simulate the customer scenario
+            var testInstance = TestAssetsManager.CreateTestInstance("DependencyChangeTest")
+                                .WithLockFiles();
+
+            // Convert the portable test project to standalone by removing "type": "platform" and adding rids
+            var originalTestProject = Path.Combine(testInstance.TestRoot, "PortableApp_Standalone", "project.json");
+            var modifiedTestProject = Path.Combine(testInstance.TestRoot, "PortableApp_Standalone", "project.json.modified");
+
+            // Simulate a user editting the project.json
+            File.Delete(originalTestProject);
+            File.Copy(modifiedTestProject, originalTestProject);
+
+            var buildResult = new BuildCommand(originalTestProject, framework: DefaultFramework)
+                .ExecuteWithCapturedOutput();
+
+            buildResult.Should().Fail();
+
+            buildResult.StdErr.Should().Contain("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
+        }
+
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {
             // copy all the files to temp dir

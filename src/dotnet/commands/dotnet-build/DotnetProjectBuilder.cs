@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Tools.Build
             }
             catch (Exception e)
             {
-                throw new Exception($"Failed to make the following project runnable: {graphNode.ProjectContext.GetDisplayName()}", e);
+                throw new Exception($"Failed to make the following project runnable: {graphNode.ProjectContext.GetDisplayName()} reason: {e.Message}", e);
             }
         }
 

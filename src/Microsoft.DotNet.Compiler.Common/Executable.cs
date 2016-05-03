@@ -56,6 +56,23 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             ExportRuntimeAssets();
         }
 
+        private void VerifyCoreClrPresenceInPackageGraph()
+        {
+            var isCoreClrPresent = _exporter
+                .GetAllExports()
+                .SelectMany(e => e.NativeLibraryGroups)
+                .SelectMany(g => g.Assets)
+                .Select(a => a.FileName)
+                .Where(f => Constants.LibCoreClrBinaryNames.Contains(f))
+                .Any();
+
+            // coreclr should be present for standalone apps
+            if (! isCoreClrPresent)
+            {
+                throw new InvalidOperationException("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
+            }
+        }
+
         private void ExportRuntimeAssets()
         {
             if (_context.TargetFramework.IsDesktop())
@@ -77,13 +94,15 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         }
 
         private void MakeCompilationOutputRunnableForCoreCLR()
-        {
+        {   
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
             var emitEntryPoint = _compilerOptions.EmitEntryPoint ?? false;
-            if (emitEntryPoint && !string.IsNullOrEmpty(_context.RuntimeIdentifier))
+
+            if (emitEntryPoint && !_context.IsPortable)
             {
                 // TODO: Pick a host based on the RID
+                VerifyCoreClrPresenceInPackageGraph();
                 CoreHost.CopyTo(_runtimeOutputPath, _compilerOptions.OutputName + Constants.ExeSuffix);
             }
         }
