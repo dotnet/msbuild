@@ -173,6 +173,96 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                     entry.SourcePath.Contains(PathUtility.GetPathWithDirectorySeparator("files/pfile2ex.txt")));
         }
 
+        [Fact]
+        public void It_maintains_folder_structure()
+        {
+            var json = JObject.Parse(@"{
+'packOptions': {
+  'files': {
+    'include': 'packfiles/**/*.txt',
+    'excludeFiles': 'packfiles/morefiles/file2.txt',
+    'mappings': {
+      'somepath/': 'mappackfiles/**/*.txt'
+    }
+  }
+}}");
+
+            CreateFile("packfiles/morefiles/file1.txt");
+            CreateFile("packfiles/morefiles/file2.txt");
+            CreateFile("packfiles/file3.txt");
+            CreateFile("mappackfiles/morefiles/file4.txt");
+            CreateFile("mappackfiles/morefiles/file5.txt");
+            CreateFile("mappackfiles/file6.txt");
+
+            var project = GetProject(json);
+            var sourceBasePath = project.PackOptions.PackInclude.SourceBasePath;
+            var targetBasePath = PathUtility.GetPathWithDirectorySeparator("basepath/");
+
+            var packIncludeEntries = GetIncludeFiles(project.PackOptions.PackInclude, targetBasePath);
+
+            packIncludeEntries.Should().HaveCount(5);
+
+            packIncludeEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("packfiles/morefiles/file1.txt")) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("packfiles/morefiles/file1.txt")));
+            packIncludeEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("packfiles/file3.txt")) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("packfiles/file3.txt")));
+            packIncludeEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("mappackfiles/morefiles/file4.txt")) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("somepath/morefiles/file4.txt")));
+            packIncludeEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("mappackfiles/morefiles/file5.txt")) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("somepath/morefiles/file5.txt")));
+            packIncludeEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("mappackfiles/file6.txt")) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("somepath/file6.txt")));
+        }
+
+        [Fact]
+        public void It_handles_paths_with_directory_traversals_properly()
+        {
+            var json = JObject.Parse(@"{
+'publishOptions': {
+  'include': '../pubfiles/**/*.txt',
+  'excludeFiles': '../pubfiles/morefiles/file2.txt',
+  'mappings': {
+    'somepath/': '../mappubfiles/**/*.txt'
+  }
+}}");
+
+            CreateFile("../pubfiles/morefiles/file1.txt");
+            CreateFile("../pubfiles/morefiles/file2.txt");
+            CreateFile("../pubfiles/file3.txt");
+            CreateFile("../mappubfiles/morefiles/file4.txt");
+            CreateFile("../mappubfiles/morefiles/file5.txt");
+            CreateFile("../mappubfiles/file6.txt");
+
+            var project = GetProject(json);
+            var sourceBasePath = project.PublishOptions.SourceBasePath;
+            var targetBasePath = PathUtility.GetPathWithDirectorySeparator("basepath/");
+
+            var publishEntries = GetIncludeFiles(project.PublishOptions, targetBasePath);
+
+            publishEntries.Should().HaveCount(5);
+
+            publishEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.GetFullPath(Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("../pubfiles/morefiles/file1.txt"))) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("pubfiles/morefiles/file1.txt")));
+            publishEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.GetFullPath(Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("../pubfiles/file3.txt"))) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("pubfiles/file3.txt")));
+            publishEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.GetFullPath(Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("../mappubfiles/morefiles/file4.txt"))) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("somepath/morefiles/file4.txt")));
+            publishEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.GetFullPath(Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("../mappubfiles/morefiles/file5.txt"))) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("somepath/morefiles/file5.txt")));
+            publishEntries.Should().Contain(entry =>
+                entry.SourcePath == Path.GetFullPath(Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator("../mappubfiles/file6.txt"))) &&
+                entry.TargetPath == Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator("somepath/file6.txt")));
+        }
+
         private Project GetProject(JObject json, ProjectReaderSettings settings = null)
         {
             using (var stream = new MemoryStream())

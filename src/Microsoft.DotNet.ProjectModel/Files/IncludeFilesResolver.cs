@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
+using Microsoft.DotNet.ProjectModel.FileSystemGlobbing.Abstractions;
 
 namespace Microsoft.DotNet.ProjectModel.Files
 {
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
                     sourceBasePath,
                     DiagnosticMessageSeverity.Error));
             }
-            else if (targetBasePath.Split('/').Any(s => s.Equals(".") || s.Equals("..")))
+            else if (targetBasePath.Split(Path.DirectorySeparatorChar).Any(s => s.Equals(".") || s.Equals("..")))
             {
                 diagnostics?.Add(new DiagnosticMessage(
                     ErrorCodes.NU1004,
@@ -56,12 +57,11 @@ namespace Microsoft.DotNet.ProjectModel.Files
                     context.IncludePatterns,
                     context.ExcludePatterns,
                     context.IncludeFiles,
-                    context.ExcludeFiles,
                     context.BuiltInsInclude,
-                    context.BuiltInsExclude);
+                    context.BuiltInsExclude).ToList();
 
                 var isFile = targetBasePath[targetBasePath.Length - 1] != Path.DirectorySeparatorChar;
-                if (isFile && files.Count() > 1)
+                if (isFile && files.Count > 1)
                 {
                     // It's a file. But the glob matched multiple things
                     diagnostics?.Add(new DiagnosticMessage(
@@ -72,29 +72,69 @@ namespace Microsoft.DotNet.ProjectModel.Files
                         sourceBasePath,
                         DiagnosticMessageSeverity.Error));
                 }
-                else if (isFile && files.Any())
+                else if (isFile && files.Count > 0)
                 {
-                    includeEntries.Add(new IncludeEntry(targetBasePath, files.First()));
+                    var filePath = Path.GetFullPath(
+                        Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator(files[0].Path)));
+
+                    includeEntries.Add(new IncludeEntry(targetBasePath, filePath));
                 }
-                else
+                else if (!isFile)
                 {
                     targetBasePath = targetBasePath.Substring(0, targetBasePath.Length - 1);
 
                     foreach (var file in files)
                     {
-                        string targetPath = null;
+                        var fullPath = Path.GetFullPath(
+                            Path.Combine(sourceBasePath, PathUtility.GetPathWithDirectorySeparator(file.Path)));
+                        string targetPath;
 
                         if (flatten)
                         {
-                            targetPath = Path.Combine(targetBasePath, Path.GetFileName(file));
+                            targetPath = Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator(file.Stem));
                         }
                         else
                         {
-                            targetPath = Path.Combine(targetBasePath, PathUtility.GetRelativePath(sourceBasePath, file));
+                            targetPath = Path.Combine(
+                                targetBasePath,
+                                PathUtility.GetRelativePathIgnoringDirectoryTraversals(sourceBasePath, fullPath));
                         }
 
-                        includeEntries.Add(new IncludeEntry(targetPath, file));
+                        includeEntries.Add(new IncludeEntry(targetPath, fullPath));
                     }
+                }
+
+                if (context.IncludeFiles != null)
+                {
+                    foreach (var literalRelativePath in context.IncludeFiles)
+                    {
+                        var fullPath = Path.GetFullPath(Path.Combine(sourceBasePath, literalRelativePath));
+                        string targetPath;
+
+                        if (isFile)
+                        {
+                            targetPath = targetBasePath;
+                        }
+                        else if (flatten)
+                        {
+                            targetPath =  Path.Combine(targetBasePath, Path.GetFileName(fullPath));
+                        }
+                        else
+                        {
+                            targetPath = Path.Combine(targetBasePath, PathUtility.GetRelativePath(sourceBasePath, fullPath));
+                        }
+
+                        includeEntries.Add(new IncludeEntry(targetPath, fullPath));
+                    }
+                }
+
+                if (context.ExcludeFiles != null)
+                {
+                    var literalExcludedFiles = new HashSet<string>(
+                        context.ExcludeFiles.Select(file => Path.GetFullPath(Path.Combine(sourceBasePath, file))),
+                        StringComparer.Ordinal);
+
+                    includeEntries.RemoveWhere(entry => literalExcludedFiles.Contains(entry.SourcePath));
                 }
             }
             
@@ -105,7 +145,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
                 {
                     var targetPath = Path.Combine(targetBasePath, PathUtility.GetPathWithDirectorySeparator(map.Key));
 
-                    foreach (var file in GetIncludeFiles(map.Value, targetPath, diagnostics, flatten))
+                    foreach (var file in GetIncludeFiles(map.Value, targetPath, diagnostics, flatten: true))
                     {
                         file.IsCustomTarget = true;
 
@@ -119,12 +159,11 @@ namespace Microsoft.DotNet.ProjectModel.Files
             return includeEntries;
         }
 
-        private static IEnumerable<string> GetIncludeFilesCore(
+        private static IEnumerable<FilePatternMatch> GetIncludeFilesCore(
             string sourceBasePath,
             List<string> includePatterns,
             List<string> excludePatterns,
             List<string> includeFiles,
-            List<string> excludeFiles,
             List<string> builtInsInclude,
             List<string> builtInsExclude)
         {
@@ -167,16 +206,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
                 matcher.AddExcludePatterns(excludePatterns);
             }
 
-            var files = matcher.GetResultsInFullPath(sourceBasePath);
-            files = files.Concat(literalIncludedFiles).Distinct();
-
-            if (files.Any() && excludeFiles != null)
-            {
-                var literalExcludedFiles = excludeFiles.Select(file => Path.GetFullPath(Path.Combine(sourceBasePath, file)));
-                files = files.Except(literalExcludedFiles);
-            }
-
-            return files;
+            return matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(sourceBasePath))).Files;
         }
     }
 }
