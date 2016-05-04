@@ -182,8 +182,8 @@ namespace Microsoft.DotNet.Cli
             var commitSha = GetCommitSha() ?? "N/A";
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Product Information:");
-            Reporter.Output.WriteLine($" Version:     {Product.Version}");
-            Reporter.Output.WriteLine($" Commit Sha:  {commitSha}");
+            Reporter.Output.WriteLine($" Version:            {Product.Version}");
+            Reporter.Output.WriteLine($" Commit SHA-1 hash:  {commitSha}");
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Runtime Environment:");
             Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
