@@ -9,9 +9,9 @@ namespace Microsoft.DotNet.Cli.Build
     public class Monikers
     {
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
-        public const string CLISdkBrandName = "Microsoft .NET Core SDK";
-        public const string SharedFxBrandName = "Microsoft .NET Core";
-        public const string SharedHostBrandName = "Microsoft .NET Core Host";
+        public const string CLISdkBrandName = "Microsoft .NET Core 1.0 RC2 - SDK Preview 1";
+        public const string SharedFxBrandName = "Microsoft .NET Core 1.0 RC2 - Runtime";
+        public const string SharedHostBrandName = "Microsoft .NET Core 1.0 RC2 - Host";
 
         public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix, string version)
         {
@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Cli.Build
                 case "beta":
                 case "rc1":
                 case "rc2":
+                case "rc2-preview1":
                 case "rtm":
                     packageName = "dotnet";
                     break;
