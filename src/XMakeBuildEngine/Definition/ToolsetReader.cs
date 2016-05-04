@@ -8,6 +8,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -109,7 +110,6 @@ namespace Microsoft.Build.Evaluation
             string overrideTasksPathFromConfiguration = null;
             string defaultOverrideToolsVersionFromConfiguration = null;
 
-            ToolsetConfigurationReader configurationReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
                 if (configurationReader == null && ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
@@ -122,11 +122,10 @@ namespace Microsoft.Build.Evaluation
 
                 if (configurationReader != null)
                 {
-                    configurationReaderToUse = configurationReader == null ? new ToolsetConfigurationReader(environmentProperties, globalProperties) : configurationReader;
-
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
-                    defaultToolsVersionFromConfiguration =
-                    configurationReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration, out defaultOverrideToolsVersionFromConfiguration);
+                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
+                        initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
+                        out defaultOverrideToolsVersionFromConfiguration);
                 }
             }
 
@@ -134,16 +133,17 @@ namespace Microsoft.Build.Evaluation
             string overrideTasksPathFromRegistry = null;
             string defaultOverrideToolsVersionFromRegistry = null;
 
-            ToolsetRegistryReader registryReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
-                registryReaderToUse = registryReader == null ? new ToolsetRegistryReader(environmentProperties, globalProperties) : registryReader;
+                // If we haven't been provided a registry reader (i.e. unit tests), create one
+                registryReader = registryReader ?? new ToolsetRegistryReader(environmentProperties, globalProperties);
 
                 // We do not accumulate properties when reading them from the registry, because the order
                 // in which values are returned to us is essentially random: so we disallow one property
                 // in the registry to refer to another also in the registry
-                defaultToolsVersionFromRegistry =
-                    registryReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, false /* do not accumulate properties */, out overrideTasksPathFromRegistry, out defaultOverrideToolsVersionFromRegistry);
+                defaultToolsVersionFromRegistry = registryReader.ReadToolsets(toolsets, globalProperties,
+                    initialProperties, false /* do not accumulate properties */, out overrideTasksPathFromRegistry,
+                    out defaultOverrideToolsVersionFromRegistry);
             }
 
             // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry. 
