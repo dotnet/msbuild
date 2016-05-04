@@ -31,11 +31,13 @@ namespace Microsoft.DotNet.ProjectModel
 
         private readonly ProjectReaderSettings _settings;
         private readonly LockFileReader _lockFileReader;
+        private readonly bool _designTime;
 
-        protected Workspace(ProjectReaderSettings settings)
+        protected Workspace(ProjectReaderSettings settings, bool designTime)
         {
             _settings = settings;
             _lockFileReader = new LockFileReader();
+            _designTime = designTime;
         }
 
         public ProjectContext GetProjectContext(string projectPath, NuGetFramework framework)
@@ -168,7 +170,7 @@ namespace Microsoft.DotNet.ProjectModel
                     {
                         try
                         {
-                            currentEntry.Model = _lockFileReader.ReadLockFile(currentEntry.FilePath, fs, designTime: true);
+                            currentEntry.Model = _lockFileReader.ReadLockFile(currentEntry.FilePath, fs, designTime: _designTime);
                             currentEntry.UpdateLastWriteTimeUtc();
                         }
                         catch (FileFormatException ex)
