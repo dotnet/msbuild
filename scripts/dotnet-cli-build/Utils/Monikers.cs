@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Build
                 case "beta":
                 case "rc1":
                 case "rc2":
-                case "rc2-preview1":
+                case "preview1":
                 case "rtm":
                     packageName = "dotnet";
                     break;

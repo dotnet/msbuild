@@ -1,11 +1,11 @@
 {
-  "version": "1.0.0-rc2-preview1-*",
+  "version": "1.0.0-preview1-*",
   "compilationOptions": {
     "keyFile": "../../tools/Key.snk"
   },
   "description": "Abstraction to interact with the file system and file paths.",
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-rc2-preview1-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
     "System.Linq.Expressions": "4.0.11-rc2-24027"
   },

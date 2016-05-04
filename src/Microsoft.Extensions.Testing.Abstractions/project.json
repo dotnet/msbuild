@@ -1,6 +1,6 @@
 {
   "description": "Abstractions for test runners to communicate to a tool, such as Visual Studio.",
-  "version": "1.0.0-rc2-preview1-*",
+  "version": "1.0.0-preview1-*",
   "repository": {
     "type": "git",
     "url": "git://github.com/dotnet/cli"
