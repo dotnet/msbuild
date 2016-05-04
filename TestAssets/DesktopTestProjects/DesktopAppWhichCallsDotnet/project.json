@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-rc2-*"
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-*"
   },
   "compilationOptions": {
     "emitEntryPoint": true

@@ -57,6 +57,7 @@ namespace Microsoft.DotNet.Cli.Build
                 case "beta":
                 case "rc1":
                 case "rc2":
+                case "preview1":
                 case "rtm":
                     packagePrefix = "dotnet";
                     break;
