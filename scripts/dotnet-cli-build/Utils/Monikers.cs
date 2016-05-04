@@ -76,8 +76,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static string GetDebianSharedHostPackageName(BuildTargetContext c)
         {
-            var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-
             return $"dotnet-host".ToLower();
         }
 

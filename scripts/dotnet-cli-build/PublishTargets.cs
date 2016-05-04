@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkNugetVersion { get; set; }
 
+        private static string SharedHostNugetVersion { get; set; }
+
         [Target]
         public static BuildTargetResult InitPublish(BuildTargetContext c)
         {
@@ -35,6 +37,7 @@ namespace Microsoft.DotNet.Cli.Build
             CliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             CliNuGetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+            SharedHostNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
             Channel = c.BuildContext.Get<string>("Channel");
 
             return c.Success();
@@ -86,15 +89,18 @@ namespace Microsoft.DotNet.Cli.Build
                 {
                     // Copy the latest CLI bits
                     CopyBlobs($"{Channel}/Binaries/{CliNuGetVersion}/", targetContainer);
-                    
+
+                    // Copy the shared framework
+                    CopyBlobs($"{Channel}/Binaries/{SharedFrameworkNugetVersion}/", targetContainer);
+
                     // Copy the latest installer files
                     CopyBlobs($"{Channel}/Installers/{CliNuGetVersion}/", $"{Channel}/Installers/Latest/");
 
                     // Copy the shared framework installers
                     CopyBlobs($"{Channel}/Installers/{SharedFrameworkNugetVersion}/", $"{Channel}/Installers/Latest/");
 
-                    // Copy the shared framework
-                    CopyBlobs($"{Channel}/Binaries/{SharedFrameworkNugetVersion}/", targetContainer);
+                    // Copy the shared host installers
+                    CopyBlobs($"{Channel}/Installers/{SharedHostNugetVersion}/", $"{Channel}/Installers/Latest/");
 
                     // Generate the CLI and SDK Version text files
                     List<string> versionFiles = new List<string>() { "win.x86.version", "win.x64.version", "ubuntu.x64.version", "rhel.x64.version", "osx.x64.version", "debian.x64.version", "centos.x64.version" };
@@ -122,7 +128,8 @@ namespace Microsoft.DotNet.Cli.Build
                 string source = blob.Replace("/dotnet/", "");
                 string targetName = Path.GetFileName(blob)
                                         .Replace(CliNuGetVersion, "latest")
-                                        .Replace(SharedFrameworkNugetVersion, "latest");
+                                        .Replace(SharedFrameworkNugetVersion, "latest")
+                                        .Replace(SharedHostNugetVersion, "latest");
                 string target = $"{destinationFolder}{targetName}";
                 AzurePublisherTool.CopyBlob(source, target);
             }
@@ -130,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static bool CheckIfAllBuildsHavePublished()
         {
-             Dictionary<string, bool> badges = new Dictionary<string, bool>()
+            Dictionary<string, bool> badges = new Dictionary<string, bool>()
              {
                  { "Windows_x86", false },
                  { "Windows_x64", false },
@@ -232,7 +239,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Ubuntu, BuildPlatform.Windows)]
         public static BuildTargetResult PublishSharedHostInstallerFileToAzure(BuildTargetContext c)
         {
-            var version = CliNuGetVersion;
+            var version = SharedHostNugetVersion;
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
 
             if (CurrentPlatform.Current == BuildPlatform.Windows)
@@ -377,7 +384,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSharedHostDebToDebianRepo(BuildTargetContext c)
         {
-            var version = CliNuGetVersion;
+            var version = SharedHostNugetVersion;
 
             var packageName = Monikers.GetDebianSharedHostPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
