@@ -35,6 +35,24 @@ namespace Microsoft.DotNet.Tests
                 .Should().Pass();
         }
         
+        [Fact]
+        public void When_dotnet_build_is_invoked_Then_project_builds_without_warnings()
+        {
+            var rootPath = Temp.CreateDirectory().Path;
+
+            new TestCommand("dotnet") { WorkingDirectory = rootPath }
+                .Execute("new");
+
+            new TestCommand("dotnet") { WorkingDirectory = rootPath }
+                .Execute("restore");
+
+            var buildResult = new TestCommand("dotnet") { WorkingDirectory = rootPath }
+                .ExecuteWithCapturedOutput("build");
+            
+            buildResult.Should().Pass();
+            buildResult.Should().NotHaveStdErr();
+        }
+        
         private static void AddProjectJsonDependency(string projectJsonPath, string dependencyId, string dependencyVersion)
         {
             var projectJsonRoot = ReadProject(projectJsonPath);

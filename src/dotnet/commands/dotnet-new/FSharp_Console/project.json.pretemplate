@@ -1,12 +1,14 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "Program.fs"
+      ]
+    }
   },
-  "compilerName": "fsc",
-  "compileFiles": [
-    "Program.fs"
-  ],
   "dependencies": {
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160316",
     "Microsoft.NETCore.App": {
