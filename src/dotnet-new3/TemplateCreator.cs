@@ -124,7 +124,8 @@ namespace dotnet_new3
                     TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
                     {
                         {"#", x => $"{++counter}." },
-                        {"Templates", x => x.Name}
+                        {"Templates", x => x.Name},
+                        {"Short Names", x => $"[{x.ShortName}]"}
                     });
 
                     Reporter.Output.WriteLine();
