@@ -28,8 +28,7 @@ namespace Microsoft.DotNet.Cli.Build
             PkgsIntermediateDir = Path.Combine(Dirs.Packages, "intermediate");
             Directory.CreateDirectory(PkgsIntermediateDir);
 
-            var hostVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").ProductionVersion;
-            SharedHostComponentId = $"com.microsoft.dotnet.sharedhost.{hostVersion}.component.osx.x64";
+            SharedHostComponentId = $"com.microsoft.dotnet.sharedhost.component.osx.x64";
 
             string sharedFrameworkNugetName = Monikers.SharedFrameworkName;
             SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
@@ -171,7 +170,7 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.OSX)]
         public static BuildTargetResult GenerateSharedHostPkg(BuildTargetContext c)
         {
-            string version = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
+            string version = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
             string outFilePath = Path.Combine(PkgsIntermediateDir, SharedHostComponentId + ".pkg");
             string installLocation = "/usr/local/share/dotnet";
             string scriptsLocation = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "sharedhost", "scripts");

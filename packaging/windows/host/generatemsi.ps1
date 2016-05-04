@@ -6,8 +6,8 @@ param(
     [Parameter(Mandatory=$true)][string]$DotnetHostMSIOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
     [Parameter(Mandatory=$true)][string]$ProductMoniker,
-    [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
-    [Parameter(Mandatory=$true)][string]$DotnetCLINugetVersion,
+    [Parameter(Mandatory=$true)][string]$SharedHostMSIVersion,
+    [Parameter(Mandatory=$true)][string]$SharedHostNugetVersion,
     [Parameter(Mandatory=$true)][string]$Architecture,
     [Parameter(Mandatory=$true)][string]$WixObjRoot
 )
@@ -29,8 +29,8 @@ function RunCandle
         -dHostSrc="$SharedHostPublishRoot" `
         -dMicrosoftEula="$RepoRoot\packaging\osx\clisdk\resources\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
-        -dBuildVersion="$DotnetMSIVersion" `
-        -dNugetVersion="$DotnetCLINugetVersion" `
+        -dBuildVersion="$SharedHostMSIVersion" `
+        -dNugetVersion="$SharedHostNugetVersion" `
         -arch $Architecture `
         "$AuthWsxRoot\host.wxs" `
         "$AuthWsxRoot\provider.wxs" `
