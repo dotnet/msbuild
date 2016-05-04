@@ -29,7 +29,7 @@ Language of project. Defaults to `C##`. Also `csharp` ( `fsharp` ) or `cs` ( `fs
 
 `-t`, `--type`
 
-Type of the project. Valid values are "console" (default), "lib" and "xunittest"
+Type of the project. Valid value is "console".
 
 ## EXAMPLES
 
