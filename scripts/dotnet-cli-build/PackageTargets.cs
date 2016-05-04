@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult GenerateNugetPackages(BuildTargetContext c)
         {
-            var versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").VersionSuffix;
+            var versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").CommitCountString;
             var configuration = c.BuildContext.Get<string>("Configuration");
 
             var env = GetCommonEnvVars(c);
