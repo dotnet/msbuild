@@ -29,12 +29,21 @@ namespace Microsoft.Build.Shared
     {
         // A list of possible test runners. If the program running has one of these substrings in the name, we assume
         // this is a test harness.
-        private static readonly string[] s_testRunners = { "XUNIT",
-                                                  "NUNIT", "DEVENV", "MSTEST", "VSTEST", "TASKRUNNER", "VSTESTHOST",
-                                                  "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
-                                              };
+        private static readonly string[] s_testRunners =
+        {
+            "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER",
+            "VSTESTHOST", "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
+        };
 
+        /// <summary>
+        /// Name of the Visual Studio process(es)
+        /// </summary>
         private static readonly string[] s_visualStudioProcess = {"DEVENV"};
+
+        /// <summary>
+        /// Name of the MSBuild process(es)
+        /// </summary>
+        private static readonly string[] s_msBuildProcess = {"MSBUILD"};
 
 
         // This flag, when set, indicates that we are running tests. Initially assume it's true. It also implies that
@@ -78,8 +87,11 @@ namespace Microsoft.Build.Shared
             s_runningInVisualStudio = IsProcessInList(processNameCommandLine, s_visualStudioProcess) ||
                                       IsProcessInList(processNameCurrentProcess, s_visualStudioProcess);
 
-            // Definitely not a test, leave
-            if (!s_runningTests)
+            bool runningInMsBuildExe = IsProcessInList(processNameCommandLine, s_msBuildProcess) ||
+                                       IsProcessInList(processNameCurrentProcess, s_msBuildProcess);
+
+            // No need to customize execution info if we're running in msbuild.exe
+            if (runningInMsBuildExe)
             {
                 s_currentExecutableOverride = null;
                 return;
