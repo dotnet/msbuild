@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0",
   "compilationOptions": {
     "emitEntryPoint": true
   },
@@ -8,7 +8,7 @@
       "type": "platform",
       "version": "1.0.0-rc2-*"
     },
-    "Microsoft.Extensions.DependencyModel": "1.0.0-*"
+    "Microsoft.Extensions.DependencyModel": "1.0.0-rc2-*"
   },
   "frameworks": {
     "netcoreapp1.0": {

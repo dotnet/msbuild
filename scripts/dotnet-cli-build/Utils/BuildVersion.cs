@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
         public string ReleaseSuffix { get; set; }
 
         public string SimpleVersion => $"{Major}.{Minor}.{Patch}.{CommitCountString}";
-        public string VersionSuffix => $"{ReleaseSuffix}-{CommitCountString}";
+        public string VersionSuffix => $"{CommitCountString}";
         public string NuGetVersion => $"{Major}.{Minor}.{Patch}-{VersionSuffix}";
         public string NetCoreAppVersion => $"{Major}.{Minor}.{Patch}-rc2-3{CommitCountString}";
         public string ProductionVersion => $"{Major}.{Minor}.{Patch}";

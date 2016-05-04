@@ -1,10 +1,10 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc2-preview1-*",
   "compilationOptions": {
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
     "System.Runtime.Loader": "4.0.0-rc2-24027"
   },
   "frameworks": {

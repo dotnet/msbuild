@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc2-preview1-*",
   "compilationOptions": {
     "emitEntryPoint": true
   },
@@ -25,10 +25,10 @@
     "System.Text.Encoding.CodePages": "4.0.1-rc2-24027",
     "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24027",
     "Microsoft.ApplicationInsights": "2.0.0",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
+    "Microsoft.DotNet.Compiler.Common": "1.0.0-rc2-preview1-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-rc2-preview1-*",
+    "Microsoft.Extensions.Testing.Abstractions": "1.0.0-rc2-preview1-*",
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24027",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-24027",
     "Microsoft.NETCore.App": {

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0",
   "compilationOptions": {
     "emitEntryPoint": true
   },
@@ -12,9 +12,9 @@
       "type": "platform",
       "version": "1.0.0-rc2-*"
     },
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-*"
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-rc2-preview1-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
+    "Microsoft.DotNet.Compiler.Common": "1.0.0-rc2-preview1-*"
   },
   "frameworks": {
     "netcoreapp1.0": {

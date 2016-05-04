@@ -13,16 +13,16 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static readonly string[] ProjectsToPack  = new string[]
         {
+            "dotnet-compile-fsc",
             "Microsoft.DotNet.Cli.Utils",
+            "Microsoft.DotNet.Compiler.Common",
+            "Microsoft.DotNet.Files",
+            "Microsoft.DotNet.InternalAbstractions",
             "Microsoft.DotNet.ProjectModel",
             "Microsoft.DotNet.ProjectModel.Loader",
             "Microsoft.DotNet.ProjectModel.Workspaces",
-            "Microsoft.DotNet.InternalAbstractions",
             "Microsoft.Extensions.DependencyModel",
-            "Microsoft.Extensions.Testing.Abstractions",
-            "Microsoft.DotNet.Compiler.Common",
-            "Microsoft.DotNet.Files",
-            "dotnet-compile-fsc"
+            "Microsoft.Extensions.Testing.Abstractions"
         };
 
         [Target(nameof(PackageTargets.CopyCLISDKLayout),

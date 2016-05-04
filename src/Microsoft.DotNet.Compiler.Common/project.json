@@ -1,13 +1,13 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc2-preview1-*",
   "compilationOptions": {
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
     "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160429-01",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.DotNet.Files": "1.0.0-*"
+    "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-rc2-preview1-*",
+    "Microsoft.DotNet.Files": "1.0.0-rc2-preview1-*"
   },
   "frameworks": {
     "net451": {

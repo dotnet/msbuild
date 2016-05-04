@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0",
   "compilationOptions": {
     "emitEntryPoint": true
   },
@@ -10,7 +10,7 @@
           "type": "platform",
           "version": "1.0.0-rc2-*"
         }
-      },
+      }
     },
     "net451": {}
   }
