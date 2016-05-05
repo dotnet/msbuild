@@ -619,8 +619,6 @@ namespace Microsoft.DotNet.Cli.Build
 
             foreach (var project in ProjectsToPublish)
             {
-                // TODO: Use the flag once we get a full build round tripped
-                // --version-suffix buildVesion.VersionSuffix
                 dotnet.Publish(
                     "--native-subdirectory",
                     "--output",
