@@ -625,9 +625,7 @@ namespace Microsoft.DotNet.Cli.Build
                     outputDir,
                     "--configuration",
                     configuration,
-                    Path.Combine(c.BuildContext.BuildDirectory, "src", project),
-                    "--version-suffix",
-                    buildVersion.VersionSuffix)
+                    Path.Combine(c.BuildContext.BuildDirectory, "src", project))
                     .Environment("DOTNET_BUILD_VERSION", buildVersion.VersionSuffix)
                     .Execute()
                     .EnsureSuccessful();
