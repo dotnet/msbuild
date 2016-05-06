@@ -52,7 +52,7 @@ namespace dotnet_new3
             return results.Union(aliasResults);
         }
 
-        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption parametersFiles, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters)
+        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters)
         {
             if (string.IsNullOrEmpty(template.Value))
             {

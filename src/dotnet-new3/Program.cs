@@ -106,8 +106,8 @@ namespace dotnet_new3
                     return Task.FromResult(0);
                 }
 
-                IReadOnlyDictionary<string, string> parameters = app.ParseExtraArgs();
-                return TemplateCreator.Instantiate(app, template, name, dir, source, parametersFiles, help, alias, parameters);
+                IReadOnlyDictionary<string, string> parameters = app.ParseExtraArgs(parametersFiles);
+                return TemplateCreator.Instantiate(app, template, name, dir, source, help, alias, parameters);
             });
 
             int result;

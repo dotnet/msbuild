@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Microsoft.Extensions.CommandLineUtils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace dotnet_new3
 {
@@ -11,9 +15,31 @@ namespace dotnet_new3
             return app.Option("-h|--help", "Displays help for this command.", CommandOptionType.NoValue);
         }
 
-        public static IReadOnlyDictionary<string, string> ParseExtraArgs(this CommandLineApplication app)
+        public static IReadOnlyDictionary<string, string> ParseExtraArgs(this CommandLineApplication app, CommandOption extraArgs)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+            if (extraArgs.HasValue())
+            {
+                foreach (string argFile in extraArgs.Values)
+                {
+                    using (Stream s = File.OpenRead(argFile))
+                    using (TextReader r = new StreamReader(s, Encoding.UTF8, true, 4096, true))
+                    using (JsonTextReader reader = new JsonTextReader(r))
+                    {
+                        JObject obj = JObject.Load(reader);
+
+                        foreach (JProperty property in obj.Properties())
+                        {
+                            if(property.Value.Type == JTokenType.String)
+                            {
+                                parameters[property.Name] = property.Value.ToString();
+                            }
+                        }
+                    }
+                }
+            }
+
             for (int i = 0; i < app.RemainingArguments.Count; ++i)
             {
                 string key = app.RemainingArguments[i];
