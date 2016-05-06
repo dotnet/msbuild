@@ -2,8 +2,7 @@
   "version": "1.0.0-*",
   "dependencies": {
     "Microsoft.Extensions.DependencyModel": {
-      "target": "project",
-      "version": "1.0.0-*"
+      "target": "project"
     }
   },
   "frameworks": {

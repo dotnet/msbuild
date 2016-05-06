@@ -78,7 +78,14 @@ namespace Microsoft.DotNet.Cli.Build
                 ReleaseSuffix = branchInfo["RELEASE_SUFFIX"],
                 CommitCount = commitCount
             };
+
+            var hostVersion = new HostVersion()
+            {
+                CommitCount = commitCount
+            };
+
             c.BuildContext["BuildVersion"] = buildVersion;
+            c.BuildContext["HostVersion"] = hostVersion;
             c.BuildContext["CommitHash"] = commitHash;
             c.BuildContext["SharedFrameworkNugetVersion"] = buildVersion.NetCoreAppVersion;
 
@@ -143,9 +150,10 @@ namespace Microsoft.DotNet.Cli.Build
 
             var cliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             var sharedFrameworkVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+            var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
 
             AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk", cliVersion);
-            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", cliVersion);
+            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
             AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
             AddInstallerArtifactToContext(c, "dotnet-dev", "CombinedFrameworkSDKHost", cliVersion);
             AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);

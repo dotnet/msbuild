@@ -162,7 +162,7 @@ namespace Microsoft.DotNet.Cli.Build
                 var versionSuffix = testPackageProject.VersionSuffix;
                 if (versionSuffix.Equals(s_testPackageBuildVersionSuffix))
                 {
-                    versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").VersionSuffix;
+                    versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").CommitCountString;
                 }
 
                 var fullPath = Path.Combine(c.BuildContext.BuildDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar));

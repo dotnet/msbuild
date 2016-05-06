@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <installer-gui-script minSpecVersion="1">
-    <title>{SharedFxBrandName} ({SharedFrameworkNugetName} {SharedFrameworkNugetVersion})</title>
+    <title>{SharedFxBrandName} (x64)</title>
     <license file="eula.rtf" mime-type="application/rtf" />
     <background file="dotnetbackground.png" mime-type="image/png"/>
     <options customize="never" require-scripts="false" />

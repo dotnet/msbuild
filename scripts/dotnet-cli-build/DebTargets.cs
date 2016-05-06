@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateSharedHostDeb(BuildTargetContext c)
         {
             var packageName = Monikers.GetDebianSharedHostPackageName(c);
-            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
+            var version = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
             var inputRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
             var debFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
             var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedhost");
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Cli.Build
             Directory.CreateDirectory(objRoot);
 
             Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedhost-debian.sh"),
-                    "--input", inputRoot, "--output", debFile, "-b", Monikers.SharedFxBrandName,
+                    "--input", inputRoot, "--output", debFile, "-b", Monikers.SharedHostBrandName,
                     "--obj-root", objRoot, "--version", version, "-m", manPagesDir)
                     .Execute()
                     .EnsureSuccessful();
