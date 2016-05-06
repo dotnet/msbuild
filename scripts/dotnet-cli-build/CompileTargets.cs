@@ -612,8 +612,10 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var configuration = c.BuildContext.Get<string>("Configuration");
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            var srcDir = Path.Combine(c.BuildContext.BuildDirectory, "src");
             outputDir = Path.Combine(outputDir, "sdk", buildVersion.NuGetVersion);
 
+            FS.CleanBinObj(c, srcDir);
             Rmdir(outputDir);
             Mkdirp(outputDir);
 
@@ -621,12 +623,10 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 dotnet.Publish(
                     "--native-subdirectory",
-                    "--output",
-                    outputDir,
-                    "--configuration",
-                    configuration,
-                    Path.Combine(c.BuildContext.BuildDirectory, "src", project))
-                    .Environment("DOTNET_BUILD_VERSION", buildVersion.VersionSuffix)
+                    "--output", outputDir,
+                    "--configuration", configuration,
+                    "--version-suffix", buildVersion.CommitCountString,
+                    Path.Combine(srcDir, project))
                     .Execute()
                     .EnsureSuccessful();
             }
