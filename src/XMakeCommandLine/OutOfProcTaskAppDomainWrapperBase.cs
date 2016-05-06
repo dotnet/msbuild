@@ -127,7 +127,7 @@ namespace Microsoft.Build.CommandLine
             LoadedType taskType = null;
             try
             {
-                TypeLoader typeLoader = new TypeLoader(new TypeFilter(TaskLoader.IsTaskClass));
+                TypeLoader typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
                 taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation));
             }
             catch (Exception e)

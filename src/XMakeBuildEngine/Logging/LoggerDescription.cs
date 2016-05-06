@@ -237,17 +237,17 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Used for finding loggers when reflecting through assemblies.
         /// </summary>
-        private static readonly TypeFilter s_forwardingLoggerClassFilter = new TypeFilter(IsForwardingLoggerClass);
+        private static readonly Func<Type, object, bool> s_forwardingLoggerClassFilter = IsForwardingLoggerClass;
 
         /// <summary>
         /// Used for finding loggers when reflecting through assemblies.
         /// </summary>
-        private static readonly TypeFilter s_loggerClassFilter = new TypeFilter(IsLoggerClass);
+        private static readonly Func<Type, object, bool> s_loggerClassFilter = IsLoggerClass;
 
         /// <summary>
         /// Checks if the given type is a logger class.
         /// </summary>
-        /// <remarks>This method is used as a TypeFilter delegate.</remarks>
+        /// <remarks>This method is used as a Type Filter delegate.</remarks>
         /// <returns>true, if specified type is a logger</returns>
         private static bool IsForwardingLoggerClass(Type type, object unused)
         {
