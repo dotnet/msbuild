@@ -6,7 +6,12 @@ This repo contains the source code for cross-platform [.NET Core](http://github.
 
 New to .NET CLI?
 ------------
-Check out our http://dotnet.github.io/getting-started/ page. 
+Check out our [Getting started page](https://aka.ms/dotnetcoregs).
+
+Release schedule
+----------------
+
+There have been some changes in the schedule for .NET Core and .NET Core CLI tools. You can read more about them in the [.NET Core RC2 – Improvements, Schedule, and Roadmap](https://blogs.msdn.microsoft.com/dotnet/2016/05/06/net-core-rc2-improvements-schedule-and-roadmap/) blog post. 
 
 Found an issue?
 ---------------
