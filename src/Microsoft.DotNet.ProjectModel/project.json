@@ -5,7 +5,7 @@
   },
   "description": "Types to model a .NET Project",
   "dependencies": {
-    "Microsoft.Extensions.DependencyModel": "1.0.0-rc2-*",
+    "Microsoft.Extensions.DependencyModel": { "target": "project" },
     "Newtonsoft.Json": "7.0.1",
     "NuGet.Packaging": "3.5.0-beta",
     "NuGet.RuntimeModel": "3.5.0-beta",

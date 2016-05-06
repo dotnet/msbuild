@@ -10,7 +10,7 @@
   "projectUrl": "",
   "licenseUrl": "",
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-*"
+    "Microsoft.DotNet.Cli.Utils": { "target": "project" }
   },
   "frameworks": {
     "netstandard1.5": {

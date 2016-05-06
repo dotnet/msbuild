@@ -5,9 +5,9 @@
   },
   "dependencies": {
     "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160429-01",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-*",
-    "Microsoft.DotNet.Files": "1.0.0-preview1-*"
+    "Microsoft.DotNet.ProjectModel": { "target": "project" },
+    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
+    "Microsoft.DotNet.Files": { "target": "project" }
   },
   "frameworks": {
     "net451": {

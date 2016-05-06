@@ -5,7 +5,7 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
+    "Microsoft.DotNet.ProjectModel": { "target": "project" },
     "NuGet.Versioning": "3.5.0-beta",
     "NuGet.Packaging": "3.5.0-beta",
     "NuGet.Frameworks": "3.5.0-beta",

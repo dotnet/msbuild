@@ -11,9 +11,9 @@
   ],
   "dependencies": {
     "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-160318",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-*",
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-preview1-*",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-*",
+    "Microsoft.DotNet.ProjectModel": { "target": "project" },
+    "Microsoft.DotNet.Compiler.Common": { "target": "project" },
+    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0-rc2-*"
