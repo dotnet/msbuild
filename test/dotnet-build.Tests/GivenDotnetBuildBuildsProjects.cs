@@ -100,5 +100,20 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 "TestLibraryWithXmlDoc.xml"
             });
         }
+
+        [WindowsOnlyFact]
+        public void It_builds_projects_targeting_net46_and_Roslyn()
+        {
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("AppWithNet46AndRoslyn")
+                .WithLockFiles();
+
+            var testProject = Path.Combine(testInstance.TestRoot, "project.json");
+
+            new BuildCommand(testProject)
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }

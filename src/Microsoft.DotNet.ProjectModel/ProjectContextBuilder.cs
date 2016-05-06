@@ -440,15 +440,21 @@ namespace Microsoft.DotNet.ProjectModel
                     package.HasCompileTimePlaceholder &&
                     !TargetFramework.IsPackageBased)
                 {
+                    // requiresFrameworkAssemblies is true whenever we find a CompileTimePlaceholder in a non-package based framework, even if
+                    // the reference is unresolved. This ensures the best error experience when someone is building on a machine without
+                    // the target framework installed.
+                    requiresFrameworkAssemblies = true;
+
                     var newKey = new LibraryKey(library.Identity.Name, LibraryType.ReferenceAssembly);
                     var dependency = new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly);
 
-                    // If the framework assembly can't be resolved then mark it as unresolved but still replace the package
-                    // dependency
-                    var replacement = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework) ??
-                                        UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
-
-                    requiresFrameworkAssemblies = true;
+                    var replacement = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework);
+                    
+                    // If the reference is unresolved, just skip it.  Don't replace the package dependency
+                    if (replacement == null)
+                    {
+                        continue;
+                    }
 
                     // Remove the original package reference
                     libraries.Remove(pair.Key);
