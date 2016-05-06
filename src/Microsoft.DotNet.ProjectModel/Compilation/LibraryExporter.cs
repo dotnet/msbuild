@@ -299,7 +299,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                     builder.AddRuntimeAsset(new LibraryAsset(Path.GetFileName(pdbPath), Path.GetFileName(pdbPath), pdbPath));
                 }
             }
-            else if (HasSourceFiles(project))
+            else if (HasSourceFiles(project, compilerOptions))
             {
                 var outputPaths = project.GetOutputPaths(_buildBasePath, _solutionRootPath, _configuration, _runtime);
 
@@ -337,10 +337,8 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             return builder.Build();
         }
 
-        private bool HasSourceFiles(ProjectDescription project)
+        private bool HasSourceFiles(ProjectDescription project, CommonCompilerOptions compilerOptions)
         {
-            var compilerOptions = project.TargetFrameworkInfo.CompilerOptions;
-
             if (compilerOptions.CompileInclude == null)
             {
                 return project.Project.Files.SourceFiles.Any();
