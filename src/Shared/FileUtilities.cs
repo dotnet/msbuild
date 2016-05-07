@@ -54,13 +54,17 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void GetTestExecutionInfo()
         {
-            // Get the executable we are running
-            var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
+            string program;
+
+#if FEATURE_GET_COMMANDLINE
+            //We may get better precision for the executable from the command line args, if the API is available
+            program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
 
             // Check if it matches the pattern
             s_runningTests = program != null
                            && s_testRunners.Any(
                                s => program.IndexOf(s, StringComparison.OrdinalIgnoreCase) == -1);
+#endif
 
             // Does not look like it's a test, but check the process name
             if (!s_runningTests)
