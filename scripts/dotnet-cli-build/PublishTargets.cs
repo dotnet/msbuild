@@ -346,7 +346,10 @@ namespace Microsoft.DotNet.Cli.Build
 
             List<string> buildVersions = new List<string>();
 
-            Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+-[^-]+-\d{6})/$");
+            // The corehost packages are published to the CLI version, which is "preview1-xxxxxx" right now.
+            // But there are -rc2-xxxxxx blobs on Azure, which breaks the sort descending.  So only look for
+            // -p(.*)-xxxxxx for now to ignore those rc2 packages.
+            Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+-p[^-]+-\d{6})/$");
 
             foreach (string file in AzurePublisherTool.ListBlobs(hostBlob))
             {
