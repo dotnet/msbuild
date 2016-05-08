@@ -78,8 +78,20 @@ namespace Microsoft.DotNet.Cli.Utils
             var depsFilePath =
                 projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.DepsJson;
 
+            if (! File.Exists(depsFilePath))
+            {
+                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: {depsFilePath} does not exist");
+                return null;
+            }
+
             var runtimeConfigPath =
                 projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.RuntimeConfigJson;
+
+            if (! File.Exists(runtimeConfigPath))
+            {
+                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: {runtimeConfigPath} does not exist");
+                return null;
+            }
 
             var toolLibrary = GetToolLibraryForContext(projectContext, commandName);
 

@@ -53,6 +53,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var buildOutputPath = projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.BasePath;
 
+            if (! Directory.Exists(buildOutputPath))
+            {
+                Reporter.Verbose.WriteLine($"outputpathresolver: {buildOutputPath} does not exist");
+                return null;
+            }
+
             return _environment.GetCommandPathFromRootPath(buildOutputPath, commandName);
         }
 

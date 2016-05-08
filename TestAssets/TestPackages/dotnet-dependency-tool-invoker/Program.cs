@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
             {
                 Console.WriteLine("A command name must be provided");
                 
-                return;
+                return 1;
             }
             
             var projectContexts = 
@@ -59,8 +59,10 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
                 catch (CommandUnknownException)
                 {
                     Console.WriteLine($"Command not found");
+                    return 1;
                 }
             }
+            return 0;
         }
 
         private static IEnumerable<ProjectContext> CreateProjectContexts(string projectPath = null)

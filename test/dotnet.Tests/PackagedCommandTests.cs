@@ -18,6 +18,34 @@ namespace Microsoft.DotNet.Tests
         private readonly string _testProjectsRoot;
         private readonly string _desktopTestProjectsRoot;
 
+        public static IEnumerable<object[]> DependencyToolArguments
+        {
+            get
+            {
+                var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+                var projectOutputPath = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
+                return new[]
+                {
+                    new object[] { ".NETCoreApp,Version=v1.0", "CoreFX", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll", true },
+                    new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath, true }
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> LibraryDependencyToolArguments
+        {
+            get
+            {
+                var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+                var projectOutputPath = $"LibraryWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\dotnet-desktop-and-portable.exe";
+                return new[]
+                {
+                    new object[] { ".NETStandard,Version=v1.5", "CoreFX", "lib\\netstandard1.5\\dotnet-desktop-and-portable.dll", true },
+                    new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath, true }
+                };
+            }
+        }
+
         public PackagedCommandTests()
         {
             _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
@@ -39,7 +67,7 @@ namespace Microsoft.DotNet.Tests
             CommandResult result = new PortableCommand { WorkingDirectory = appDirectory }
                 .ExecuteWithCapturedOutput();
 
-            result.Should().HaveStdOut("Hello Portable World!" + Environment.NewLine);
+            result.Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine);
             result.Should().NotHaveStdErr();
             result.Should().Pass();
         }
@@ -84,9 +112,9 @@ namespace Microsoft.DotNet.Tests
         // need conditional theories so we can skip on non-Windows
         [Theory]
         [MemberData("DependencyToolArguments")]
-        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args, string expectedDependencyToolPath)
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args, string expectedDependencyToolPath, bool windowsOnly)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && windowsOnly)
             {
                 return;
             }
@@ -108,6 +136,29 @@ namespace Microsoft.DotNet.Tests
             result.Should().Pass();
         }
 
+        [Theory]
+        [MemberData("LibraryDependencyToolArguments")]
+        public void TestFrameworkSpecificLibraryDependencyToolsCannotBeInvoked(string framework, string args, string expectedDependencyToolPath, bool windowsOnly)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && windowsOnly)
+            {
+                return;
+            }
+
+            var appDirectory = Path.Combine(_desktopTestProjectsRoot, "LibraryWithDirectDependencyDesktopAndPortable");
+
+            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
+                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, args);
+
+            result.Should().HaveStdOutContaining("Command not found");
+            result.Should().Fail();
+        }
+
         [Fact]
         public void ToolsCanAccessDependencyContextProperly()
         {
@@ -117,20 +168,6 @@ namespace Microsoft.DotNet.Tests
                 .Execute(Path.Combine(appDirectory, "project.json"));
 
             result.Should().Pass();
-        }
-
-        public static IEnumerable<object[]> DependencyToolArguments
-        {
-            get
-            {
-                var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
-                var projectOutputPath = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
-                return new[]
-                {
-                    new object[] { ".NETCoreApp,Version=v1.0", "CoreFX", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll" },
-                    new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath }
-                };
-            }
         }
 
         [Fact]
