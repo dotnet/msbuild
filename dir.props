@@ -108,6 +108,7 @@
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+    <FullFrameworkBuild>true</FullFrameworkBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -121,6 +122,7 @@
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
+    <FullFrameworkBuild>true</FullFrameworkBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -162,7 +164,7 @@
   <PropertyGroup>
     <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
     <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
-    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">DNXCore,Version=v5.0</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">.NETStandard,Version=v1.3</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true'">.NETFramework,Version=v4.6</NuGetTargetMoniker>
   </PropertyGroup>
 

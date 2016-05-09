@@ -13,7 +13,7 @@
     />
 
     <MSBuild Projects="$(RepoRoot)\targets\BootStrapFullFrameworkMSBuild.proj"
-             Condition="'$(NetCoreBuild)' == '' And '$(MonoBuild)' == ''"
+             Condition="'$(FullFrameworkBuild)' == 'true'"
     />
   </Target>
 </Project>

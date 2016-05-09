@@ -1,9 +1,9 @@
 ﻿{
   "runtimes": {
-    "win7-x86": { },
-    "win7-x64": { },
-    "osx.10.10-x64": { },
-    "ubuntu.14.04-x64": { }
+    "win7-x86": {},
+    "win7-x64": {},
+    "osx.10.10-x64": {},
+    "ubuntu.14.04-x64": {}
   },
   "dependencies": {
     "xunit": "2.1.0",
@@ -12,11 +12,12 @@
   "frameworks": {
     "net46": {
       "dependencies": {
-         "xunit.runner.visualstudio": "2.1.0",
-         "System.Threading.Tasks.Dataflow": "4.5.26-rc3-24109-00"
+        "xunit.runner.visualstudio": "2.1.0",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc3-24109-00",
+        "System.Threading.Tasks.Dataflow": "4.5.26-rc3-24109-00"
       }
     },
-    "dnxcore50": {
+    "netcoreapp1.0": {
       "dependencies": {
         "System.Security.Cryptography.X509Certificates": "4.1.0-rc3-24109-00",
         "System.Net.NetworkInformation": "4.1.0-rc3-24109-00",
@@ -51,11 +52,15 @@
         "Microsoft.Net.Compilers.NetCore": "1.2.0-beta1-20160122-02",
         "Microsoft.Net.Compilers.Targets.NetCore": "0.1.4-dev",
         "Microsoft.Portable.Targets": "0.1.1-dev",
-        "Microsoft.Win32.Primitives":  "4.0.1-rc3-24109-00",
+        "Microsoft.Win32.Primitives": "4.0.1-rc3-24109-00",
         "Newtonsoft.Json": "8.0.3",
         "xunit.console.netcore": "1.0.2-prerelease-00410-02"
       },
-      "imports": [ "portable-net451+win81", "netstandard1.3" ]
+      "imports": [
+        "portable-net451+win81",
+        "dnxcore50",
+        "netstandard1.6"
+      ]
     }
   }
 }
