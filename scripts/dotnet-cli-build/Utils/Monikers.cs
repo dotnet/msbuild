@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Cli.Build
                 case "rc1":
                 case "rc2":
                 case "preview1":
+                case "preview2":
                 case "rtm":
                     packageName = "dotnet";
                     break;
@@ -58,6 +59,7 @@ namespace Microsoft.DotNet.Cli.Build
                 case "rc1":
                 case "rc2":
                 case "preview1":
+                case "preview2":
                 case "rtm":
                     packagePrefix = "dotnet";
                     break;
