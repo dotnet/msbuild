@@ -1,6 +1,6 @@
 **These instructions refer to working with the [`xplat`](https://github.com/Microsoft/msbuild/tree/xplat) branch.**
 
-MSBuild can be successfully built on Windows, OS X, and Ubuntu.
+MSBuild can be successfully built on Windows, OS X 10.11, and Ubuntu 14.04. Newer versions of Ubuntu may work, but .NET Core development is currently aimed at 14.04.
 
 # Windows #
 ##Build process##
