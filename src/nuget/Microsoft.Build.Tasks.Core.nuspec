@@ -37,6 +37,7 @@
         <dependency id="System.ObjectModel" version="4.0.12-rc3-23908" />
         <dependency id="System.Reflection" version="4.1.0-rc3-23908" />
         <dependency id="System.Reflection.Metadata" version="1.1.0" />
+        <dependency id="System.Reflection.TypeExtensions" version="4.1.0-rc3-23908" />
         <dependency id="System.Resources.ReaderWriter" version="4.0.0-rc3-23908" />
         <dependency id="System.Resources.ResourceManager" version="4.0.1-rc3-23908" />
         <dependency id="System.Runtime" version="4.1.0-rc3-23908" />

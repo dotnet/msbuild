@@ -1109,7 +1109,7 @@ namespace Microsoft.Build.BackEnd
                 string fieldName = null;
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
-                    assemblyLoadInfo = AssemblyLoadInfo.Create(null, Field.DeclaringType.GetTypeInfo().Assembly.Location);
+                    assemblyLoadInfo = AssemblyLoadInfo.Create(null, AssemblyUtilities.GetAssemblyLocation(Field.DeclaringType.GetTypeInfo().Assembly));
                     declaringTypeFullName = Field.DeclaringType.FullName;
                     fieldName = Field.Name;
                 }
@@ -1265,7 +1265,7 @@ namespace Microsoft.Build.BackEnd
                 var ret = new SerializedBuildEventArgs();
                 Type eventArgsType = e.GetType();
 
-                ret.EventArgsAssembly = AssemblyLoadInfo.Create(null, eventArgsType.GetTypeInfo().Assembly.Location);
+                ret.EventArgsAssembly = AssemblyLoadInfo.Create(null, AssemblyUtilities.GetAssemblyLocation(eventArgsType.GetTypeInfo().Assembly));
                 ret.EventArgsTypeFullName = eventArgsType.FullName;
 
                 //  Force LazyFormattedBuildEventArgs message to be materialized so we don't have to serialize the parameter object array
@@ -1380,7 +1380,7 @@ namespace Microsoft.Build.BackEnd
             {
                 var ret = new SerializedException();
                 Type exceptionType = ex.GetType();
-                ret.ExceptionAssembly = AssemblyLoadInfo.Create(null, exceptionType.GetTypeInfo().Assembly.Location);
+                ret.ExceptionAssembly = AssemblyLoadInfo.Create(null, AssemblyUtilities.GetAssemblyLocation(exceptionType.GetTypeInfo().Assembly));
                 ret.TypeFullName = exceptionType.FullName;
                 ret.Message = ex.Message;
                 ret.StackTrace = ex.StackTrace;
@@ -1472,5 +1472,5 @@ namespace Microsoft.Build.BackEnd
             }
         }
 #endif
-    }
+                }
 }

@@ -551,23 +551,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get the currently executing assembly path
         /// </summary>
-        internal static string ExecutingAssemblyPath
-        {
-            get
-            {
-                try
-                {
-                    return Path.GetFullPath(typeof(FileUtilities).GetTypeInfo().Assembly.Location);
-                }
-                catch (InvalidOperationException e)
-                {
-                    // Workaround for issue where people are getting relative uri crash here.
-                    // Last resort. We may have a problem when the assembly is shadow-copied.
-                    ExceptionHandling.DumpExceptionToFile(e);
-                    return typeof(FileUtilities).GetTypeInfo().Assembly.Location;
-                }
-            }
-        }
+        internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
+
 
         /// <summary>
         /// Name of the current .exe without extension, such as "MSBuild" "Devenv" or "Blend".

@@ -882,19 +882,18 @@ namespace Microsoft.Build.UnitTests
         [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
         public void AbsolutePathLooksLikeUnixPathOnUnix()
         {
-            var absolutePathToThisAssembly = Path.GetFullPath(typeof (FileUtilities_Tests).GetTypeInfo().Assembly.Location);
-
-            Assert.True(FileUtilities.LooksLikeUnixFilePath(absolutePathToThisAssembly));
+            Assert.True(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
         }
 
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void PathDoesNotLookLikeUnixPathOnWindows()
         {
-            var absolutePathToThisAssembly = Path.GetFullPath(typeof(FileUtilities_Tests).GetTypeInfo().Assembly.Location);
-
-            Assert.False(FileUtilities.LooksLikeUnixFilePath(absolutePathToThisAssembly));
+            Assert.False(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
             Assert.False(FileUtilities.LooksLikeUnixFilePath("/path/that/looks/unixy"));
         }
+
+        private static string SystemSpecificAbsolutePath => FileUtilities.ExecutingAssemblyPath;
+
     }
 }

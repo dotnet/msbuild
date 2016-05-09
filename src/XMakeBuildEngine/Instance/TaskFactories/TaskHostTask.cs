@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
-                        _taskType.Type.GetTypeInfo().Assembly.Location,
+                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
                         _setParameters
                     );
 
@@ -486,8 +486,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     exceptionMessage = "TaskInstantiationFailureError";
                     exceptionMessageArgs = new string[] { _taskType.Type.Name,
-                        _taskType.Type.GetTypeInfo().Assembly.Location,
-                        String.Empty };
+                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        string.Empty };
                 }
 
                 _taskLoggingContext.LogFatalError(new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskException, taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);
@@ -496,7 +496,7 @@ namespace Microsoft.Build.BackEnd
             // Set the output parameters for later
             foreach (KeyValuePair<string, TaskParameter> outputParam in taskHostTaskComplete.TaskOutputParameters)
             {
-                _setParameters[outputParam.Key] = (outputParam.Value == null) ? null : outputParam.Value.WrappedParameter;
+                _setParameters[outputParam.Key] = outputParam.Value?.WrappedParameter;
             }
         }
 
