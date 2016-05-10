@@ -183,7 +183,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(
             nameof(PublishTargets.PublishInstallerFilesToAzure),
             nameof(PublishTargets.PublishArchivesToAzure),
-            nameof(PublishTargets.PublishDebFilesToDebianRepo),
+            /*nameof(PublishTargets.PublishDebFilesToDebianRepo),*/ //https://github.com/dotnet/cli/issues/2973
             nameof(PublishTargets.PublishCoreHostPackages),
             nameof(PublishTargets.PublishCliVersionBadge))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c) => c.Success();

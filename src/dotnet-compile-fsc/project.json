@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-preview1-*",
+  "version": "1.0.0-preview2-*",
   "compilationOptions": {
     "emitEntryPoint": true
   },
@@ -16,7 +16,7 @@
     "Microsoft.DotNet.Cli.Utils": { "target": "project" },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-*"
+      "version": "1.0.0-rc3-*"
     }
   },
   "frameworks": {

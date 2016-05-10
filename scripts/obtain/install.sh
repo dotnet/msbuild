@@ -47,7 +47,7 @@ say_err() {
 say() {
     # using stream 3 (defined in the beginning) to not interfere with stdout of functions
     # which may be used as return value
-    printf "%b\n" "${cyan:-}dotnet_install:${normal:-} $1" >&3
+    printf "%b\n" "${cyan:-}dotnet-install:${normal:-} $1" >&3
 }
 
 say_verbose() {
@@ -245,7 +245,7 @@ is_dotnet_package_installed() {
     
     local install_root=$1
     local relative_path_to_package=$2
-    local specific_version=$3
+    local specific_version=${3//[$'\t\r\n']}
     
     local dotnet_package_path=$(combine_paths $(combine_paths $install_root $relative_path_to_package) $specific_version)
     say_verbose "is_dotnet_package_installed: dotnet_package_path=$dotnet_package_path"
@@ -288,8 +288,12 @@ get_azure_channel_from_channel() {
             echo "dev"
             return 0
             ;;
-        preview|beta)
+        beta)
             echo "beta"
+            return 0
+            ;;
+        preview)
+            echo "preview"
             return 0
             ;;
         production)
@@ -343,7 +347,7 @@ construct_download_link() {
     local azure_feed=$1
     local azure_channel=$2
     local normalized_architecture=$3
-    local specific_version=$4
+    local specific_version=${4//[$'\t\r\n']}
     
     local osname=$(get_current_os_name)
     
@@ -528,7 +532,7 @@ local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
 temporary_file_template="${TMPDIR:-/tmp}/dotnet.XXXXXXXXX"
 
-channel="preview"
+channel="beta"
 version="Latest"
 install_dir="<auto>"
 architecture="<auto>"

@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Build
         public override int Major => 1;
         public override int Minor => 0;
         public override int Patch => 1;
-        public override string ReleaseSuffix => "rc2";
+        public override string ReleaseSuffix => "rc3";
         public string LatestHostVersionNoSuffix => $"{Major}.{Minor}.{Patch}";
         public string LatestHostFxrVersionNoSuffix => $"{Major}.{Minor}.{Patch}";
         public string LatestHostPolicyVersionNoSuffix => $"{Major}.{Minor}.{Patch}";

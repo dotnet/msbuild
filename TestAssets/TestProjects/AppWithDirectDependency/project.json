@@ -5,7 +5,7 @@
   },
 
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc2-*",
+    "Microsoft.NETCore.App": "1.0.0-rc3-*",
     "dotnet-hello": {
       "version": "1.0.0",
       "target": "package"
