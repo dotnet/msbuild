@@ -3,7 +3,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-3002498"
+      "version": "1.0.0-rc3-*"
     },
     "Microsoft.Net.Compilers": {
       "type": "build",
