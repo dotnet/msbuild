@@ -47,7 +47,7 @@
 #>
 [cmdletbinding()]
 param(
-   [string]$Channel="preview",
+   [string]$Channel="beta",
    [string]$Version="Latest",
    [string]$InstallDir="<auto>",
    [string]$Architecture="<auto>",
@@ -130,7 +130,8 @@ function Get-Azure-Channel-From-Channel([string]$Channel) {
     # For compatibility with build scripts accept also directly Azure channels names
     switch ($Channel.ToLower()) {
         { ($_ -eq "future") -or ($_ -eq "dev") } { return "dev" }
-        { ($_ -eq "preview") -or ($_ -eq "beta") } { return "beta" }
+        { ($_ -eq "beta") } { return "beta" }
+        { ($_ -eq "preview") } { return "preview" }
         { $_ -eq "production" } { throw "Production channel does not exist yet" }
         default { throw "``$Channel`` is an invalid channel name. Use one of the following: ``future``, ``preview``, ``production``" }
     }

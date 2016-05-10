@@ -47,7 +47,7 @@
 #>
 [cmdletbinding()]
 param(
-   [string]$Channel="preview",
+   [string]$Channel="beta",
    [string]$Version="Latest",
    [string]$InstallDir="<auto>",
    [string]$Architecture="<auto>",
@@ -68,11 +68,11 @@ $VersionRegEx="/\d+\.\d+[^/]+/"
 $OverrideNonVersionedFiles=$true
 
 function Say($str) {
-    Write-Host "dotnet_install: $str"
+    Write-Host "dotnet-install: $str"
 }
 
 function Say-Verbose($str) {
-    Write-Verbose "dotnet_install: $str"
+    Write-Verbose "dotnet-install: $str"
 }
 
 function Say-Invocation($Invocation) {
@@ -130,7 +130,8 @@ function Get-Azure-Channel-From-Channel([string]$Channel) {
     # For compatibility with build scripts accept also directly Azure channels names
     switch ($Channel.ToLower()) {
         { ($_ -eq "future") -or ($_ -eq "dev") } { return "dev" }
-        { ($_ -eq "preview") -or ($_ -eq "beta") } { return "beta" }
+        { ($_ -eq "beta") } { return "beta" }
+        { ($_ -eq "preview") } { return "preview" }
         { $_ -eq "production" } { throw "Production channel does not exist yet" }
         default { throw "``$Channel`` is an invalid channel name. Use one of the following: ``future``, ``preview``, ``production``" }
     }

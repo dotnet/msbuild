@@ -288,8 +288,12 @@ get_azure_channel_from_channel() {
             echo "dev"
             return 0
             ;;
-        preview|beta)
+        beta)
             echo "beta"
+            return 0
+            ;;
+        preview)
+            echo "preview"
             return 0
             ;;
         production)
@@ -528,7 +532,7 @@ local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
 temporary_file_template="${TMPDIR:-/tmp}/dotnet.XXXXXXXXX"
 
-channel="preview"
+channel="beta"
 version="Latest"
 install_dir="<auto>"
 architecture="<auto>"
