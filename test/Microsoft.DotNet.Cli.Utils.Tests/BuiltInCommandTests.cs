@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Utils
             Func<string[], int> testCommand = args => args.Length;
             string[] testCommandArgs = new[] { "1", "2" };
 
-            var builtInCommand = new BuiltInCommand("fakeCommand", testCommandArgs, testCommand);
+            var builtInCommand = new BuiltInCommand("fakeCommand", testCommandArgs, testCommand, new TestBuiltInCommandEnvironment());
             CommandResult result = builtInCommand.Execute();
 
             Assert.Equal(testCommandArgs.Length, result.ExitCode);
