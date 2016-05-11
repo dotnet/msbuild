@@ -561,7 +561,7 @@ namespace Microsoft.DotNet.ProjectModel
                                     analyzerOption.Value.ToString(),
                                     project.ProjectFilePath);
                             }
-                            analyzerOptions.LanguageId = analyzerOption.Value.ToString();
+                            analyzerOptions = new AnalyzerOptions(analyzerOption.Value.ToString());
                             break;
 
                         default:
