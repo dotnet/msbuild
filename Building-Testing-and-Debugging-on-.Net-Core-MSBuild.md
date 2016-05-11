@@ -41,7 +41,9 @@ Using a Mono MSBuild host: `./cibuild --host Mono`
 Default arguments lead to a Mono hosted MSBuild targeting CoreCLR: `./cibuild.sh`
 
 ##Debugging##
-TBD
+To get a clearer idea of what's going on in your build, check out [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog). MSBuildStructuredLog is a logger for MSBuild that records and visualizes a structured representation of executed targets, tasks, properties, and item values.
+
+![](https://github.com/KirillOsenkov/MSBuildStructuredLog/blob/master/docs/Screenshot1.png) 
 
 ##Tests##
 
