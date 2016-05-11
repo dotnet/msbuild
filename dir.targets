@@ -18,7 +18,13 @@
     <!-- No parallel execution because most of our tests do bad things
          with state.  They were passing because MSTest was serial. -->
     <Message Importance="High" Text="xunit -> %(MainAssembly.Filename)..." />
-    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt" />
+    <!-- Exec 32-bit console runner -->
+    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt"
+          Condition="'$(PlatformTarget)'!='x64'" />
+
+    <!-- Building 64-bit only, use x64 console runner -->
+    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt"
+          Condition="'$(PlatformTarget)'=='x64'" />
   </Target>
 
   <!-- See https://github.com/Microsoft/msbuild/issues/224 -->
