@@ -155,6 +155,35 @@ namespace Microsoft.DotNet.Tools.Run.Tests
                         "arg: [two]"));
         }
 
+        [Fact]
+        public void ItHandlesUnrestoredProjectFileCorrectly()
+        {
+            // NOTE: we don't say "WithLockFiles", so the project is "unrestored"
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppSimple");
+
+            new RunCommand(instance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("NU1009")
+                .And
+                .HaveStdErrContaining("dotnet restore");
+        }
+
+        [Fact]
+        public void ItHandlesUnknownProjectFileCorrectly()
+        {
+            new RunCommand("bad path")
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("DOTNET1017")
+                .And
+                .HaveStdErrContaining("bad path");
+        }
+
         private static string JoinWithNewlines(params string[] values)
         {
             return string.Join(Environment.NewLine, values);

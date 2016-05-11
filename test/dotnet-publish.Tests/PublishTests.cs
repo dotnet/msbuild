@@ -372,5 +372,21 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void PublishFailsCorrectlyWithUnrestoredProject()
+        {
+            // NOTE: we don't say "WithLockFiles", so the project is "unrestored"
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppSimple");
+
+            new PublishCommand(instance.TestRoot)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("NU1009")
+                .And
+                .HaveStdErrContaining("dotnet restore");
+        }
     }
 }

@@ -68,7 +68,9 @@ namespace Microsoft.DotNet.Tools.Run
                 Configuration = Constants.DefaultConfiguration;
             }
 
-            var frameworkContexts = _workspace.GetProjectContextCollection(Project).FrameworkOnlyContexts;
+            var frameworkContexts = _workspace.GetProjectContextCollection(Project)
+                .EnsureValid(Project)
+                .FrameworkOnlyContexts;
 
             var rids = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();
 

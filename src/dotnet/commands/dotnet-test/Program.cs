@@ -65,8 +65,9 @@ namespace Microsoft.DotNet.Tools.Test
                 else
                 {
                     var summary = new Summary();
-                    var projectContexts = workspace
-                        .GetProjectContextCollection(projectPath).FrameworkOnlyContexts
+                    var projectContexts = workspace.GetProjectContextCollection(projectPath)
+                        .EnsureValid(projectPath)
+                        .FrameworkOnlyContexts
                         .Select(c => workspace.GetRuntimeContext(c, runtimeIdentifiers))
                         .ToList();
 
@@ -100,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Test
                 TestHostTracing.Source.TraceEvent(TraceEventType.Error, 0, ex.ToString());
                 return -1;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!(ex is GracefulException))
             {
                 TestHostTracing.Source.TraceEvent(TraceEventType.Error, 0, ex.ToString());
                 return -2;

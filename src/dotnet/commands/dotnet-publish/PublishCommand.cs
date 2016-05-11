@@ -416,7 +416,9 @@ namespace Microsoft.DotNet.Tools.Publish
                 throw new InvalidProjectException($"'{projectPath}' does not contain a project.json file");
             }
 
-            var contexts = Workspace.GetProjectContextCollection(projectPath).FrameworkOnlyContexts;
+            var contexts = Workspace.GetProjectContextCollection(projectPath)
+                .EnsureValid(projectPath)
+                .FrameworkOnlyContexts;
 
             contexts = framework == null ?
                 contexts :

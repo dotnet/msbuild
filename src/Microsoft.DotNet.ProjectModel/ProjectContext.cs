@@ -42,6 +42,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public LibraryManager LibraryManager { get; }
 
+        public List<DiagnosticMessage> Diagnostics { get; }
+
         internal ProjectContext(
             GlobalSettings globalSettings,
             ProjectDescription rootProject,
@@ -51,7 +53,8 @@ namespace Microsoft.DotNet.ProjectModel
             string runtimeIdentifier,
             string packagesDirectory,
             LibraryManager libraryManager,
-            LockFile lockfile)
+            LockFile lockfile,
+            List<DiagnosticMessage> diagnostics)
         {
             Identity = new ProjectContextIdentity(rootProject?.Path, targetFramework);
             GlobalSettings = globalSettings;
@@ -63,6 +66,7 @@ namespace Microsoft.DotNet.ProjectModel
             LibraryManager = libraryManager;
             LockFile = lockfile;
             IsPortable = isPortable;
+            Diagnostics = diagnostics;
         }
 
         public LibraryExporter CreateExporter(string configuration, string buildBasePath = null)

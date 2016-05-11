@@ -22,5 +22,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         // The '{0}' option in the root is deprecated. Use it in '{1}' instead.
         public static readonly string DOTNET1016 = nameof(DOTNET1016);
+
+        // Project file does not exist '{0}'.
+        public static readonly string DOTNET1017 = nameof(DOTNET1017);
     }
 }
