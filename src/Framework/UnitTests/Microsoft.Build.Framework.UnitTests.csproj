@@ -12,10 +12,12 @@
     <CopyNuGetImplementations>true</CopyNuGetImplementations>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
     <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
