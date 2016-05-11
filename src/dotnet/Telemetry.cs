@@ -13,14 +13,11 @@ namespace Microsoft.DotNet.Cli
 {
     public class Telemetry : ITelemetry
     {
-        private bool _isInitialized = false;
         private TelemetryClient _client = null;
 
         private Dictionary<string, string> _commonProperties = null;
         private Dictionary<string, double> _commonMeasurements = null;
         private Task _trackEventTask = null;
-
-        private string _telemetryProfile;
 
         private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
@@ -41,8 +38,6 @@ namespace Microsoft.DotNet.Cli
             {
                 return;
             }
-
-            _telemetryProfile = Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable);
 
             //initialize in task to offload to parallel thread
             _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
@@ -76,13 +71,12 @@ namespace Microsoft.DotNet.Cli
                 _commonProperties.Add(OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString());
                 _commonProperties.Add(RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier());
                 _commonProperties.Add(ProductVersion, Product.Version);
-                _commonProperties.Add(TelemetryProfile, _telemetryProfile);
+                _commonProperties.Add(TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable));
                 _commonMeasurements = new Dictionary<string, double>();
-                _isInitialized = true;
             }
             catch (Exception)
             {
-                _isInitialized = false;
+                _client = null;
                 // we dont want to fail the tool if telemetry fails.
                 Debug.Fail("Exception during telemetry initialization");
             }
@@ -90,7 +84,7 @@ namespace Microsoft.DotNet.Cli
 
         private void TrackEventTask(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
-            if (!_isInitialized)
+            if (_client == null)
             {
                 return;
             }
