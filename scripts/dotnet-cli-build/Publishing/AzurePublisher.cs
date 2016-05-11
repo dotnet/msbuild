@@ -58,6 +58,9 @@ namespace Microsoft.DotNet.Cli.Build
         {
             CloudBlockBlob blockBlob = _blobContainer.GetBlockBlobReference(blob);
             blockBlob.UploadTextAsync(content).Wait();
+            
+            blockBlob.Properties.ContentType = "text/plain";
+            blockBlob.SetPropertiesAsync().Wait();
         }
 
         public void CopyBlob(string sourceBlob, string targetBlob)
@@ -81,6 +84,11 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 blockBlob.Properties.ContentType = "image/svg+xml";
                 blockBlob.Properties.CacheControl = "no-cache";
+                blockBlob.SetPropertiesAsync().Wait();
+            }
+            else if (Path.GetExtension(blockBlob.Uri.AbsolutePath.ToLower()) == ".version")
+            {
+                blockBlob.Properties.ContentType = "text/plain";
                 blockBlob.SetPropertiesAsync().Wait();
             }
         }
