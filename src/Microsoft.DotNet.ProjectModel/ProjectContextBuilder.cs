@@ -277,7 +277,7 @@ namespace Microsoft.DotNet.ProjectModel
 
                     if (platformDependency != null)
                     {
-                        platformLibrary = libraries[new LibraryKey(platformDependency.Value.Name)];
+                        libraries.TryGetValue(new LibraryKey(platformDependency.Value.Name), out platformLibrary);
                     }
                 }
             }
