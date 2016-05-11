@@ -31,7 +31,7 @@ In order to build .NET Command Line Interface, you need the following installed 
 ## Building/Running
 
 1. Run `build.cmd` or `build.sh` from the root depending on your OS.
-2. Use `artifacts/{os}-{arch}/stage2/bin/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2/bin` to the PATH if you want to run `dotnet` from anywhere.
+2. Use `artifacts/{os}-{arch}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to run `dotnet` from anywhere.
 
 ## A simple test
 
@@ -48,11 +48,11 @@ All the CLI tests are located under `test`. In order to run them, after doing a 
 
 For unit test projects (they have UnitTests at the name), that's all that you need to do, as they take a dependency on the product code directly, which gets rebuilt by dotnet when you run the tests.
 
-For E2E and functional tests, they all depend on the binaries located under `artifacts\rid\stage2\bin`. So, after changing the code, you will need to re-build the product code and copy the new bits to the folder above. For instance, imagine you changed something in dotnet itself, you would have to do the following:
+For E2E and functional tests, they all depend on the binaries located under `artifacts\rid\stage2`. So, after changing the code, you will need to re-build the product code and copy the new bits to the folder above. For instance, imagine you changed something in dotnet itself, you would have to do the following:
 
 1. `cd src\dotnet\`
 2. `dotnet build`
-3. `cp bin\debug\netstandardapp1.5\dotnet.dll artifacts\rid\stage2\bin`
+3. `cp bin\debug\netstandardapp1.5\dotnet.dll artifacts\rid\stage2`
 4. `cd ..\..\test\dotnet-build.Tests`
 5. `dotnet test`
 
