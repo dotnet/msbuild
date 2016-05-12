@@ -116,7 +116,13 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [str
 
     $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.win.$CLIArchitecture.version"
     $Response = Invoke-WebRequest -UseBasicParsing $VersionFileUrl
-    $VersionText = [Text.Encoding]::UTF8.GetString($Response.Content)
+
+    switch ($Response.Headers.'Content-Type'){
+        { ($_ -eq "application/octet-stream") } { $VersionText = [Text.Encoding]::UTF8.GetString($Response.Content) }
+        { ($_ -eq "text/plain") } { $VersionText = $Response.Content }
+        default { throw "``$Response.Headers.'Content-Type'`` is an unknown .version file content type." }
+    }
+    
 
     $VersionInfo = Get-Version-Info-From-Version-Text $VersionText
 
