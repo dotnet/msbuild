@@ -32,7 +32,6 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <SourceDir>$(RepoRoot)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
     <SamplesDir>$(RepoRoot)Samples$([System.IO.Path]::DirectorySeparatorChar)</SamplesDir>
-    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
     <ToolsDir Condition="'$(MSBuildRuntimeType)'!='Core'">$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <!-- When running in .NET Core, use the MSBuild bin path as the ToolsDir.  This supports the bootstrap scenario -->
     <ToolsDir Condition="'$(MSBuildRuntimeType)'=='Core'">$(MSBuildBinPath)$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
@@ -329,5 +328,7 @@
 
     <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
     <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
+
+    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
   </PropertyGroup>
 </Project>
