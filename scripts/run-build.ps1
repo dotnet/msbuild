@@ -61,7 +61,7 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
 }
 
 # Install a stage 0
-Write-Host "Installing .NET Core CLI Stage 0 from beta channel"
+Write-Host "Installing .NET Core CLI ($Architecture) Stage 0 from '$env:CHANNEL' channel"
 & "$PSScriptRoot\obtain\dotnet-install.ps1" -Channel $env:CHANNEL -Architecture $Architecture -Verbose
 
 # Put the stage0 on the path
