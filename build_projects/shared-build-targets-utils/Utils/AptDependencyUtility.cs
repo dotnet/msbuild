@@ -1,16 +1,18 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Build.Framework;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class YumDependencyUtility
+    public class AptDependencyUtility
     {
-        internal static bool PackageIsInstalled(string packageName)
+        public static bool PackageIsInstalled(string packageName)
         {
-            var result = Command.Create("yum", "list", "installed", packageName)
+            var result = Command.Create("dpkg", "-s", packageName)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .QuietBuildReporter()

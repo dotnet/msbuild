@@ -15,7 +15,8 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 OLDPATH="$PATH"
 
-source "$DIR/common/_prettyprint.sh"
+REPOROOT="$DIR/../.."
+source "$REPOROOT/scripts/common/_prettyprint.sh"
 
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
@@ -78,13 +79,13 @@ while read line; do
         IFS='=' read -ra splat <<< "$line"
         export ${splat[0]}="${splat[1]}"
     fi
-done < "$DIR/../branchinfo.txt"
+done < "$REPOROOT/branchinfo.txt"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
-[ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$DIR/../.dotnet_stage0/$(uname)
-[ -d $DOTNET_INSTALL_DIR ] || mkdir -p $DOTNET_INSTALL_DIR
+[ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$(uname)
+[ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
-$DIR/obtain/dotnet-install.sh --channel $CHANNEL --verbose
+$REPOROOT/scripts/obtain/dotnet-install.sh --channel $CHANNEL --verbose
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
@@ -100,24 +101,18 @@ fi
 # Restore the build scripts
 echo "Restoring Build Script projects..."
 (
-    cd $DIR
+    cd "$DIR/.."
     dotnet restore --infer-runtimes
 )
 
 # Build the builder
 echo "Compiling Build Scripts..."
-dotnet publish "$DIR/dotnet-cli-build" -o "$DIR/dotnet-cli-build/bin" --framework netstandardapp1.5
+dotnet publish "$DIR" -o "$DIR/bin" --framework netcoreapp1.0
 
 export PATH="$OLDPATH"
 # Run the builder
 echo "Invoking Build Scripts..."
 echo "Configuration: $CONFIGURATION"
 
-if [ -f "$DIR/dotnet-cli-build/bin/dotnet-cli-build" ]; then
-    $DIR/dotnet-cli-build/bin/dotnet-cli-build ${targets[@]}
-    exit $?
-else
-    # We're on an older CLI. This is temporary while Ubuntu and CentOS VSO builds are stalled.
-    $DIR/dotnet-cli-build/bin/Debug/dnxcore50/dotnet-cli-build "${targets[@]}"
-    exit $?
-fi
+$DIR/bin/dotnet-cli-build ${targets[@]}
+exit $?
