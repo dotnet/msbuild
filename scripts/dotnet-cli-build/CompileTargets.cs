@@ -174,6 +174,7 @@ namespace Microsoft.DotNet.Cli.Build
                 var arch = IsWinx86 ? "x86" : "x64";
                 var baseSupportedRid = $"win7-{arch}";
                 var cmakeHostPolicyVer = $"-DCLI_CMAKE_HOST_POLICY_VER:STRING={hostVersion.LatestHostPolicyVersion}";
+                var cmakeHostFxrVer = $"-DCLI_CMAKE_HOST_FXR_VER:STRING={hostVersion.LatestHostFxrVersion}";
                 var cmakeBaseRid = $"-DCLI_CMAKE_PKG_RID:STRING={baseSupportedRid}";
                 var cmakeCommitHash = $"-DCLI_CMAKE_COMMIT_HASH:STRING={commitHash}";
 
@@ -181,6 +182,7 @@ namespace Microsoft.DotNet.Cli.Build
                     corehostSrcDir,
                     archMacro,
                     ridMacro,
+                    cmakeHostFxrVer,
                     cmakeHostPolicyVer,
                     cmakeBaseRid,
                     cmakeCommitHash,
@@ -214,6 +216,8 @@ namespace Microsoft.DotNet.Cli.Build
                 ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"),
                         "--arch",
                         "x64",
+                        "--fxrver",
+                        hostVersion.LatestHostFxrVersion,
                         "--policyver",
                         hostVersion.LatestHostPolicyVersion,
                         "--rid",
