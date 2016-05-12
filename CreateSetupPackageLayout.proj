@@ -4,74 +4,43 @@
   <Import Project="$(MicroBuildDir)MicroBuild.Core.props" />
 
   <PropertyGroup>
+      <X86OutputPath>$(BaseOutputPath)X86\$(OS)\$(Configuration)\</X86OutputPath>
+      <X64OutputPath>$(BaseOutputPath)X64\$(OS)\$(Configuration)\</X64OutputPath>
       <SetupPackageRoot>$(BinDir)Setup\</SetupPackageRoot>
       <SetupPackageLayoutDir>$(SetupPackageRoot)layout\</SetupPackageLayoutDir>
       <SetupPackageOutputFile>$(SetupPackageRoot)MSBuild.fopx</SetupPackageOutputFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Commenting out files that aren't produced by the open source build
-    (When comparing against VS2015 installed to Program Files\MSBuild\14.0\Bin) -->
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.dll" />
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.Framework.dll" />
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.Tasks.Core.dll" />
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.Utilities.Core.dll" />
+    <BinX86Output Include="$(X86OutputPath)MSBuild.exe" />
+    <BinX86Output Include="$(X86OutputPath)MSBuild.exe.config" />
+    <BinX86Output Include="$(X86OutputPath)System.Threading.Tasks.Dataflow.dll" />
     
-    <!-- <BinX86Output Include="$(OutputPath)Workflow.VisualBasic.targets" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)csc.exe" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)csc.exe.config" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)csc.rsp" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)csi.exe" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)csi.rsp" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)FileTracker.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.Build.Conversion.Core.dll" /> -->
-    <BinX86Output Include="$(OutputPath)Microsoft.Build.dll" />
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.Build.Engine.dll" /> -->
-    <BinX86Output Include="$(OutputPath)Microsoft.Build.Framework.dll" />
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.Build.Tasks.CodeAnalysis.dll" /> -->
-    <BinX86Output Include="$(OutputPath)Microsoft.Build.Tasks.Core.dll" />
-    <BinX86Output Include="$(OutputPath)Microsoft.Build.Utilities.Core.dll" />
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.CodeAnalysis.CSharp.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.CodeAnalysis.CSharp.Scripting.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.CodeAnalysis.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.CodeAnalysis.Scripting.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.CodeAnalysis.VisualBasic.dll" /> -->
-    <BinX86Output Include="$(OutputPath)Microsoft.Common.CurrentVersion.targets" />
-    <BinX86Output Include="$(OutputPath)Microsoft.Common.overridetasks" />
-    <BinX86Output Include="$(OutputPath)Microsoft.Common.targets" />
-    <BinX86Output Include="$(OutputPath)Microsoft.Common.tasks" />
-    <BinX86Output Include="$(OutputPath)Microsoft.CSharp.Core.targets" />
-    <BinX86Output Include="$(OutputPath)Microsoft.CSharp.CurrentVersion.targets" />
-    <BinX86Output Include="$(OutputPath)Microsoft.CSharp.targets" />
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.Data.Entity.targets" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.DiaSymReader.Native.amd64.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.DiaSymReader.Native.x86.dll" /> -->
-    <BinX86Output Include="$(OutputPath)Microsoft.NetFramework.CurrentVersion.props" />
-    <BinX86Output Include="$(OutputPath)Microsoft.NetFramework.CurrentVersion.targets" />
-    <BinX86Output Include="$(OutputPath)Microsoft.NetFramework.props" />
-    <BinX86Output Include="$(OutputPath)Microsoft.NetFramework.targets" />
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.ServiceModel.targets" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.VisualBasic.Core.targets" /> -->
-    <BinX86Output Include="$(OutputPath)Microsoft.VisualBasic.CurrentVersion.targets" />
-    <BinX86Output Include="$(OutputPath)Microsoft.VisualBasic.targets" />
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.WinFx.targets" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.WorkflowBuildExtensions.targets" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Microsoft.Xaml.targets" /> -->
-    <BinX86Output Include="$(OutputPath)MSBuild.exe" />
-    <BinX86Output Include="$(OutputPath)MSBuild.exe.config" />
-    <!-- <BinX86Output Include="$(OutputPath)MSBuild.rsp" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)MSBuildTaskHost.exe" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)MSBuildTaskHost.exe.config" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)System.AppContext.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)System.Collections.Immutable.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)System.Diagnostics.StackTrace.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)System.IO.FileSystem.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)System.IO.FileSystem.Primitives.dll" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)System.Reflection.Metadata.dll" /> -->
-    <BinX86Output Include="$(OutputPath)System.Threading.Tasks.Dataflow.dll" />
-    <!-- <BinX86Output Include="$(OutputPath)Tracker.exe" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)vbc.exe" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)vbc.exe.config" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)vbc.rsp" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)VBCSCompiler.exe" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)VBCSCompiler.exe.config" /> -->
-    <!-- <BinX86Output Include="$(OutputPath)Workflow.targets" /> -->
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.dll" />
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Framework.dll" />
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Tasks.Core.dll" />
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Utilities.Core.dll" />
+    <BinX64Output Include="$(X64OutputPath)MSBuild.exe" />
+    <BinX64Output Include="$(X64OutputPath)MSBuild.exe.config" />
+    <BinX64Output Include="$(X64OutputPath)System.Threading.Tasks.Dataflow.dll" />
+    
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.overridetasks" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.tasks" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.CSharp.Core.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.CSharp.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.CSharp.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.CurrentVersion.props" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.props" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.VisualBasic.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.VisualBasic.targets" />
   </ItemGroup>
 
   <ItemGroup>
@@ -95,15 +64,24 @@
   <Target Name="Build">
     <Error Text="FopCreator.exe not found (MS internal only tool)."
            Condition="!Exists('$(PackagesDir)\VS.Tools.Setup.FopCreator.1.0.16022601\FopCreator.exe')" />
-    <Error Text="BinDir not set!"
-           Condition="'$(BinDir)'==''" />
+    <Error Text="X86 output folder not found."
+           Condition="!Exists('$(X86OutputPath)')" />
+    <Error Text="X64 output folder not found."
+           Condition="!Exists('$(X64OutputPath)')" />
     
     <!-- Delete the output if exists -->
     <RemoveDir  Directories="$(SetupPackageRoot)" />
 
-    <!-- Copy our binaries -->
+    <!-- Copy our binaries to Bin and Bin\amd64 -->
     <Copy SourceFiles="@(BinX86Output)"
           DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin" />
+    <Copy SourceFiles="@(CommonOutput)"
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin" />
+
+    <Copy SourceFiles="@(BinX64Output)"
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin\amd64" />
+    <Copy SourceFiles="@(CommonOutput)"
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin\amd64" />
 
     <Copy SourceFiles="@(PkgDef)"
           DestinationFolder="$(SetupPackageLayoutDir)Common7\IDE\CommonExtensions\MSBuild" />
