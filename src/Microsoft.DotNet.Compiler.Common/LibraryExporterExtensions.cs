@@ -1,16 +1,23 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.IO;
-using System;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
-using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     public static class LibraryExporterExtensions
     {
+        public static IEnumerable<LibraryExport> GetAllProjectTypeDependencies(this LibraryExporter exporter)
+        {
+            return
+                exporter.GetDependencies(LibraryType.Project)
+                    .Concat(exporter.GetDependencies(LibraryType.MSBuildProject));
+        }
+
         public static void CopyTo(this IEnumerable<LibraryAsset> assets, string destinationPath)
         {
             if (!Directory.Exists(destinationPath))

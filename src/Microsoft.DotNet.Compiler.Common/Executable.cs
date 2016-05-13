@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var exports = exporter.GetAllExports().ToList();
             WriteConfigurationFiles(exports, exports, includeDevConfig: true);
 
-            var projectExports = exporter.GetDependencies(LibraryType.Project);
+            var projectExports = exporter.GetAllProjectTypeDependencies();
             CopyAssemblies(projectExports);
             CopyAssets(projectExports);
 
