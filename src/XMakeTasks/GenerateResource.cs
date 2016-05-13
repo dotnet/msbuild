@@ -1425,16 +1425,11 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-
-                // Now that we've logged an error, we know we're not going to do anything more, so 
-                // don't bother to correctly populate the inputs / outputs. 
                 Log.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile", StronglyTypedFileName, e.Message);
+                // Now that we've logged an error, we know we're not going to do anything more, so 
+                // don't bother to correctly populate the inputs / outputs.
                 _unsuccessfullyCreatedOutFiles.Add(OutputResources[0].ItemSpec);
                 _stronglyTypedResourceSuccessfullyCreated = false;
                 return;
@@ -2369,49 +2364,49 @@ namespace Microsoft.Build.Tasks
             {
                 if (ae.InnerException is XmlException)
                 {
-                    XmlException xe = (XmlException)ae.InnerException;
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber, xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
+                    XmlException xe = (XmlException) ae.InnerException;
+                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
+                        xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }
                 else
                 {
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0, "General.InvalidResxFile", ae.Message);
+                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                        "General.InvalidResxFile", ae.Message);
                 }
                 return false;
             }
             catch (TextFileException tfe)
             {
                 // Used to pass back error context from ReadTextResources to here.
-                _logger.LogErrorWithCodeFromResources(null, tfe.FileName, tfe.LineNumber, tfe.LinePosition, 1, 1, "GenerateResource.MessageTunnel", tfe.Message);
+                _logger.LogErrorWithCodeFromResources(null, tfe.FileName, tfe.LineNumber, tfe.LinePosition, 1, 1,
+                    "GenerateResource.MessageTunnel", tfe.Message);
                 return false;
             }
             catch (XmlException xe)
             {
-                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber, xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
+                    xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 return false;
             }
-            catch (Exception e)
+            catch (Exception e) when (e is SerializationException || e is TargetInvocationException)
             {
                 // DDB #9819
                 // SerializationException and TargetInvocationException can occur when trying to deserialize a type from a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
-                if (e is SerializationException ||
-                    e is TargetInvocationException)
-                {
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0, "General.InvalidResxFile", e.Message);
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                    "General.InvalidResxFile", e.Message);
 
-                    // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
-                    _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true, FileUtilities.GetFullPathNoThrow(inFile));
-                    return false;
-                }
-
-                if (!ExceptionHandling.NotExpectedException(e))
-                {
-                    // Regular IO error
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0, "General.InvalidResxFile", e.Message);
-                    return false;
-                }
-
-                throw;
+                // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
+                _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true,
+                    FileUtilities.GetFullPathNoThrow(inFile));
+                return false;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Regular IO error
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                    "General.InvalidResxFile", e.Message);
+                return false;
             }
 
             string currentOutputFile = null;
@@ -2433,9 +2428,9 @@ namespace Microsoft.Build.Tasks
                         currentOutputFile = null;
                         currentOutputDirectoryAlreadyExisted = true;
                         string priDirectory = Path.Combine(outFileOrDir ?? String.Empty,
-                                                           reader.assemblySimpleName);
+                            reader.assemblySimpleName);
                         currentOutputDirectory = Path.Combine(priDirectory,
-                                                              reader.cultureName ?? String.Empty);
+                            reader.cultureName ?? String.Empty);
 
                         if (!Directory.Exists(currentOutputDirectory))
                         {
@@ -2448,7 +2443,8 @@ namespace Microsoft.Build.Tasks
                         // If so, assume that the name is so long it will already uniquely distinguish itself.
                         // However for shorter names we'd still prefer to use the assembly simple name
                         // in the path to avoid conflicts.
-                        currentOutputFile = EnsurePathIsShortEnough(currentOutputFile, currentOutputFileNoPath, outFileOrDir, reader.cultureName);
+                        currentOutputFile = EnsurePathIsShortEnough(currentOutputFile, currentOutputFileNoPath,
+                            outFileOrDir, reader.cultureName);
 
                         if (currentOutputFile == null)
                         {
@@ -2479,7 +2475,9 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     currentOutputFile = outFileOrDir;
-                    ErrorUtilities.VerifyThrow(_readers.Count == 1, "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}", _readers.Count);
+                    ErrorUtilities.VerifyThrow(_readers.Count == 1,
+                        "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
+                        _readers.Count);
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2487,22 +2485,22 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        ErrorUtilities.VerifyThrow(_readers.Count == 1, "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}", _readers.Count);
+                        ErrorUtilities.VerifyThrow(_readers.Count == 1,
+                            "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
+                            _readers.Count);
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                        {
-                            throw;
-                        }
-
                         // IO Error
-                        _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile", _stronglyTypedFilename, e.Message);
+                        _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile",
+                            _stronglyTypedFilename, e.Message);
 
                         if (File.Exists(outFileOrDir)
-                            && GetFormat(inFile) != Format.Assembly // outFileOrDir is a directory when the input file is an assembly
-                            && GetFormat(outFileOrDir) != Format.Assembly) // Never delete an assembly since we don't ever actually write to assemblies.
+                            && GetFormat(inFile) != Format.Assembly
+                            // outFileOrDir is a directory when the input file is an assembly
+                            && GetFormat(outFileOrDir) != Format.Assembly)
+                            // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(outFileOrDir);
                         }
@@ -2518,10 +2516,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (currentOutputFile != null)
                 {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput", FileUtilities.GetFullPathNoThrow(currentOutputFile), io.Message);
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
+                        FileUtilities.GetFullPathNoThrow(currentOutputFile), io.Message);
                     if (File.Exists(currentOutputFile))
                     {
-                        if (GetFormat(currentOutputFile) != Format.Assembly) // Never delete an assembly since we don't ever actually write to assemblies.
+                        if (GetFormat(currentOutputFile) != Format.Assembly)
+                            // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(currentOutputFile);
                         }
@@ -2530,13 +2530,15 @@ namespace Microsoft.Build.Tasks
 
                 if (currentOutputDirectory != null &&
                     currentOutputDirectoryAlreadyExisted == false)
-                { // Do not annoy the user by removing an empty directory we did not create.
+                {
+                    // Do not annoy the user by removing an empty directory we did not create.
                     try
                     {
                         Directory.Delete(currentOutputDirectory); // Remove output directory if empty
                     }
                     catch (Exception e)
-                    { // Fail silently (we are not even checking if the call to File.Delete succeeded)
+                    {
+                        // Fail silently (we are not even checking if the call to File.Delete succeeded)
                         if (ExceptionHandling.IsCriticalException(e))
                         {
                             throw;
@@ -2545,29 +2547,25 @@ namespace Microsoft.Build.Tasks
                 }
                 return false;
             }
-            catch (Exception e)
+            catch (Exception e) when (e is SerializationException || e is TargetInvocationException)
             {
                 // DDB #9819
                 // SerializationException and TargetInvocationException can occur when trying to serialize a type into a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
-                if (e is SerializationException ||
-                    e is TargetInvocationException)
-                {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput", FileUtilities.GetFullPathNoThrow(inFile), e.Message); // Input file is more useful to log
+                _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
+                    FileUtilities.GetFullPathNoThrow(inFile), e.Message); // Input file is more useful to log
 
-                    // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
-                    _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true, FileUtilities.GetFullPathNoThrow(inFile));
-                    return false;
-                }
-
-                if (!ExceptionHandling.NotExpectedException(e))
-                {
-                    // Regular IO error
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput", FileUtilities.GetFullPathNoThrow(currentOutputFile), e.Message);
-                    return false;
-                }
-
-                throw;
+                // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
+                _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true,
+                    FileUtilities.GetFullPathNoThrow(inFile));
+                return false;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Regular IO error
+                _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
+                    FileUtilities.GetFullPathNoThrow(currentOutputFile), e.Message);
+                return false;
             }
 
             return true;
