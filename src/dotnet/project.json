@@ -17,10 +17,10 @@
   ],
   "dependencies": {
     "NuGet.Commands": {
-      "version": "3.5.0-beta",
+      "version": "3.5.0-rc-1285",
       "exclude": "compile"
     },
-    "NuGet.CommandLine.XPlat": "3.5.0-beta",
+    "NuGet.CommandLine.XPlat": "3.5.0-rc-1285",
     "Newtonsoft.Json": "7.0.1",
     "System.Text.Encoding.CodePages": "4.0.1-rc2-24027",
     "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24027",

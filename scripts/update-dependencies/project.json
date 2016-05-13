@@ -9,7 +9,7 @@
     "Microsoft.CSharp": "4.0.1-rc2-24027",
     "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24027",
     "Microsoft.DotNet.Cli.Build.Framework": "1.0.0-*",
-    "NuGet.Versioning": "3.5.0-beta",
+    "NuGet.Versioning": "3.5.0-rc-1285",
     "Newtonsoft.Json": "7.0.1",
     "Octokit": "0.18.0",
     "Microsoft.Net.Http": "2.2.29"
