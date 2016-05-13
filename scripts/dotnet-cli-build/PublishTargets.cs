@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             foreach (var file in Directory.GetFiles(Dirs.CorehostLocalPackages, "*.nupkg"))
             {
-                var hostBlob = $"{Channel}/Binaries/{CliNuGetVersion}/{Path.GetFileName(file)}";
+                var hostBlob = $"{Channel}/Binaries/{SharedFrameworkNugetVersion}/{Path.GetFileName(file)}";
                 AzurePublisherTool.PublishFile(hostBlob, file);
                 Console.WriteLine($"Publishing package {hostBlob} to Azure.");
             }
@@ -458,10 +458,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             List<string> buildVersions = new List<string>();
 
-            // The corehost packages are published to the CLI version, which is "preview1-xxxxxx" right now.
-            // But there are -rc2-xxxxxx blobs on Azure, which breaks the sort descending.  So only look for
-            // -p(.*)-xxxxxx for now to ignore those rc2 packages.
-            Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+-p[^-]+-\d{6})/$");
+            Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+-[^-]+-\d{6})/$");
 
             foreach (string file in AzurePublisherTool.ListBlobs(hostBlob))
             {

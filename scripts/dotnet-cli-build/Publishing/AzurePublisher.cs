@@ -205,15 +205,5 @@ namespace Microsoft.DotNet.Cli.Build
                 }
             }
         }
-
-        public IEnumerable<string> ListBlobs(string blobVirtualDirectory)
-        {
-            CloudBlobDirectory blobDir = _blobContainer.GetDirectoryReference(blobVirtualDirectory);
-            BlobContinuationToken continuationToken = new BlobContinuationToken();
-
-            var blobFiles = blobDir.ListBlobsSegmentedAsync(continuationToken).Result;
-
-            return blobFiles.Results.Select(bf => bf.Uri.AbsoluteUri);
-        }
     }
 }
