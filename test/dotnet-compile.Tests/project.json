@@ -23,13 +23,27 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/DependencyContextValidator/**/*",
-    "../../TestAssets/TestProjects/TestLibraryWithAnalyzer/*",
-    "../../TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/*",
-    "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/*",
-    "../../TestAssets/TestProjects/TestAppCompilationContext/**/*",
-    "../../TestAssets/TestProjects/global.json"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/DependencyContextValidator/**/*",
+      "../../TestAssets/TestProjects/TestLibraryWithAnalyzer/*",
+      "../../TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/*",
+      "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/*",
+      "../../TestAssets/TestProjects/TestAppCompilationContext/**/*",
+      "../../TestAssets/TestProjects/global.json"
+    ]
+  },
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/DependencyContextValidator/**/*",
+        "../../TestAssets/TestProjects/TestLibraryWithAnalyzer/*",
+        "../../TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/*",
+        "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/*",
+        "../../TestAssets/TestProjects/TestAppCompilationContext/**/*",
+        "../../TestAssets/TestProjects/global.json"
+      ]
+    }
+  }
 }

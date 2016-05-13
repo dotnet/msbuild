@@ -29,9 +29,19 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/ProjectsWithTests/**/*",
-    "../../TestAssets/TestProjects/global.json"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/ProjectsWithTests/**/*",
+      "../../TestAssets/TestProjects/global.json"
+    ]
+  },
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/ProjectsWithTests/**/*",
+        "../../TestAssets/TestProjects/global.json"
+      ]
+    }
+  }
 }

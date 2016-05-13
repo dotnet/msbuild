@@ -1,20 +1,24 @@
 {
   "version": "1.0.0-preview2-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "embed": {
+      "include": [
+        "commands/dotnet-new/CSharp_Console/NuGet.Config",
+        "commands/dotnet-new/CSharp_Console/Program.cs",
+        "commands/dotnet-new/CSharp_Console/project.json.template",
+        "commands/dotnet-new/FSharp_Console/NuGet.config",
+        "commands/dotnet-new/FSharp_Console/Program.fs",
+        "commands/dotnet-new/FSharp_Console/project.json.template"
+      ]
+    },
+    "compile": {
+      "exclude": [
+        "commands/dotnet-new/CSharp_Console/**",
+        "commands/dotnet-new/FSharp_Console/**"
+      ]
+    }
   },
-  "compileExclude": [
-    "commands/dotnet-new/CSharp_Console/**",
-    "commands/dotnet-new/FSharp_Console/**"
-  ],
-  "resource": [
-    "commands/dotnet-new/CSharp_Console/NuGet.Config",
-    "commands/dotnet-new/CSharp_Console/Program.cs",
-    "commands/dotnet-new/CSharp_Console/project.json.template",
-    "commands/dotnet-new/FSharp_Console/NuGet.config",
-    "commands/dotnet-new/FSharp_Console/Program.fs",
-    "commands/dotnet-new/FSharp_Console/project.json.template"
-  ],
   "dependencies": {
     "NuGet.Commands": {
       "version": "3.5.0-rc-1285",
@@ -25,10 +29,18 @@
     "System.Text.Encoding.CodePages": "4.0.1-rc2-24027",
     "System.Diagnostics.FileVersionInfo": "4.0.0-rc2-24027",
     "Microsoft.ApplicationInsights": "2.0.0",
-    "Microsoft.DotNet.ProjectModel": { "target": "project" },
-    "Microsoft.DotNet.Compiler.Common": { "target": "project" },
-    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
-    "Microsoft.Extensions.Testing.Abstractions": { "target": "project" },
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Compiler.Common": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+    "Microsoft.Extensions.Testing.Abstractions": {
+      "target": "project"
+    },
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-24027",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-24027",
     "Microsoft.NETCore.App": {

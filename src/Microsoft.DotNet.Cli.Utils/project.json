@@ -1,11 +1,13 @@
 {
   "version": "1.0.0-preview2-*",
-  "compilationOptions": {
+  "buildOptions": {
     "keyFile": "../../tools/Key.snk",
     "warningsAsErrors": true
   },
   "dependencies": {
-    "Microsoft.DotNet.ProjectModel": { "target": "project" },
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
+    },
     "NuGet.Versioning": "3.5.0-rc-1285",
     "NuGet.Packaging": "3.5.0-rc-1285",
     "NuGet.Frameworks": "3.5.0-rc-1285",

@@ -1,8 +1,17 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true,
-    "keyFile": "../../tools/Key.snk"
+    "keyFile": "../../tools/Key.snk",
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",
+        "../../TestAssets/TestProjects/TestAppWithArgs/*",
+        "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
+        "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
+        "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
+      ]
+    }
   },
   "dependencies": {
     "Microsoft.NETCore.App": {
@@ -37,12 +46,14 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",
-    "../../TestAssets/TestProjects/TestAppWithArgs/*",
-    "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
-    "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
-    "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",
+      "../../TestAssets/TestProjects/TestAppWithArgs/*",
+      "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
+      "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
+      "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
+    ]
+  }
 }

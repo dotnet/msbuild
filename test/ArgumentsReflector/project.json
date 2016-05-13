@@ -1,18 +1,25 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "copyToOutput": {
+      "include": [
+        "reflector_cmd.cmd"
+      ]
+    }
   },
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0-rc3-*"
-    },
+    }
   },
   "frameworks": {
-    "netcoreapp1.0": { }
+    "netcoreapp1.0": {}
   },
-  "content": [
-    "reflector_cmd.cmd"
-  ]
+  "publishOptions": {
+    "include": [
+      "reflector_cmd.cmd"
+    ]
+  }
 }

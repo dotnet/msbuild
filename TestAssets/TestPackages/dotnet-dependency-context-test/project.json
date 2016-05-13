@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-rc-*",
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true
   },
   "dependencies": {
@@ -8,7 +8,9 @@
       "type": "platform",
       "version": "1.0.0-rc3-*"
     },
-    "Microsoft.Extensions.DependencyModel": { "target": "project" }
+    "Microsoft.Extensions.DependencyModel": {
+      "target": "project"
+    }
   },
   "frameworks": {
     "netcoreapp1.0": {

@@ -27,8 +27,17 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/ProjectsWithTests/NetCoreAppOnlyProject/project.json"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/ProjectsWithTests/NetCoreAppOnlyProject/project.json"
+    ]
+  },
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/ProjectsWithTests/NetCoreAppOnlyProject/project.json"
+      ]
+    }
+  }
 }

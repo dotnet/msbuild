@@ -24,8 +24,17 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/TestLibraryWithConfiguration/*"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/TestLibraryWithConfiguration/*"
+    ]
+  },
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/TestLibraryWithConfiguration/*"
+      ]
+    }
+  }
 }

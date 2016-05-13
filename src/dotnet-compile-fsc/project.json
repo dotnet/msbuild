@@ -1,19 +1,27 @@
 {
   "version": "1.0.0-preview2-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "compile": {
+      "include": [
+        "**/*.cs",
+        "../dotnet/CommandLine/*.cs",
+        "../dotnet/commands/dotnet-compile-csc/AssemblyInfoOptionsCommandLine.cs",
+        "../dotnet/commands/dotnet-compile-csc/CommonCompilerOptionsCommandLine.cs"
+      ]
+    }
   },
-  "compile": [
-    "**/*.cs",
-    "../dotnet/CommandLine/*.cs",
-    "../dotnet/commands/dotnet-compile-csc/AssemblyInfoOptionsCommandLine.cs",
-    "../dotnet/commands/dotnet-compile-csc/CommonCompilerOptionsCommandLine.cs"
-  ],
   "dependencies": {
     "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-160318",
-    "Microsoft.DotNet.ProjectModel": { "target": "project" },
-    "Microsoft.DotNet.Compiler.Common": { "target": "project" },
-    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Compiler.Common": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0-rc3-*"

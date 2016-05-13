@@ -24,8 +24,17 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/TestProjectWithResource/**/*"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/TestProjectWithResource/**/*"
+    ]
+  },
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/TestProjectWithResource/**/*"
+      ]
+    }
+  }
 }
