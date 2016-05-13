@@ -40,7 +40,7 @@ namespace Microsoft.Build.Evaluation
     /// <remarks>
     /// UNDONE: Review immutability. If this is not immutable, add a mechanism to notify the project collection/s owning it to increment their toolsetVersion.
     /// </remarks>
-    [DebuggerDisplay("ToolsVersion={ToolsVersion} ToolsPath={ToolsPath} #Properties={properties.Count}")]
+    [DebuggerDisplay("ToolsVersion={ToolsVersion} ToolsPath={ToolsPath} #Properties={_properties.Count}")]
     public class Toolset : INodePacketTranslatable
     {
         /// <summary>

@@ -71,7 +71,7 @@ namespace Microsoft.Build.Evaluation
     /// <remarks>
     /// UNDONE: (Multiple configurations.) Protect against problems when attempting to edit, after edits were made to the same ProjectRootElement either directly or through other projects evaluated from that ProjectRootElement.
     /// </remarks>
-    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={data.globalProperties.Count} #Properties={data.Properties.Count} #ItemTypes={data.ItemTypes.Count} #ItemDefinitions={data.ItemDefinitions.Count} #Items={data.Items.Count} #Targets={data.Targets.Count}")]
+    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={_data._globalProperties.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
     public class Project
     {
         /// <summary>
