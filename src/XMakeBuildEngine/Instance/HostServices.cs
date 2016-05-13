@@ -42,7 +42,7 @@ namespace Microsoft.Build.Execution
     /// Implementation of HostServices that
     /// mediates access from the build to the host.
     /// </summary>
-    [DebuggerDisplay("#Entries={hostObjectMap.Count}")]
+    [DebuggerDisplay("#Entries={_hostObjectMap.Count}")]
     public class HostServices
     {
         /// <summary>
@@ -232,7 +232,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Bag holding host object information for a single project file.
         /// </summary>
-        [DebuggerDisplay("#HostObjects={hostObjects.Count}")]
+        [DebuggerDisplay("#HostObjects={_hostObjects.Count}")]
         private class HostObjects
         {
             /// <summary>

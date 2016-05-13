@@ -73,7 +73,7 @@ namespace Microsoft.Build.BackEnd
     /// This class represents a single target in the TargetBuilder.  It maintains the state machine for a particular target as well as
     /// relevant information on outputs generated while a target is running.
     /// </summary>
-    [DebuggerDisplay("Name={targetSpecification.TargetName} State={state} Result={targetResult.ResultCode}")]
+    [DebuggerDisplay("Name={_targetSpecification.TargetName} State={_state} Result={_targetResult.ResultCode}")]
     internal class TargetEntry : IEquatable<TargetEntry>
     {
         /// <summary>
