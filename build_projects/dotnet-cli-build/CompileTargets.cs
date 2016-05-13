@@ -396,7 +396,8 @@ namespace Microsoft.DotNet.Cli.Build
             File.Copy(Path.Combine(Dirs.CorehostLocked, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), Path.Combine(outputDir, $"{Constants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}"), overwrite: true);
             File.Copy(Path.Combine(Dirs.CorehostLatest, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(outputDir, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
 
-            var binaryToCorehostifyOutDir = Path.Combine(outputDir, "runtimes", "any", "native");
+            var binaryToCorehostifyRelDir = Path.Combine("runtimes", "any", "native");
+            var binaryToCorehostifyOutDir = Path.Combine(outputDir, binaryToCorehostifyRelDir);
             // Corehostify binaries
             foreach (var binaryToCorehostify in BinariesForCoreHost)
             {
@@ -407,7 +408,13 @@ namespace Microsoft.DotNet.Cli.Build
                     File.Delete(Path.Combine(binaryToCorehostifyOutDir, $"{binaryToCorehostify}.exe"));
                     File.Copy(compilersDeps, Path.Combine(outputDir, binaryToCorehostify + ".deps.json"));
                     File.Copy(compilersRuntimeConfig, Path.Combine(outputDir, binaryToCorehostify + ".runtimeconfig.json"));
-                    ChangeEntryPointLibraryName(Path.Combine(outputDir, binaryToCorehostify + ".deps.json"), binaryToCorehostify);
+                    var binaryToCoreHostifyDeps = Path.Combine(outputDir, binaryToCorehostify + ".deps.json");
+                    ChangeEntryPointLibraryName(binaryToCoreHostifyDeps, binaryToCorehostify);
+                    foreach (var binaryToRemove in new string[] { "csc", "vbc" })
+                    {
+                        var assetPath = Path.Combine(binaryToCorehostifyRelDir, $"{binaryToRemove}.exe").Replace(Path.DirectorySeparatorChar, '/');
+                        RemoveAssetFromDepsPackages(binaryToCoreHostifyDeps, "runtimeTargets", assetPath);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -428,6 +435,40 @@ namespace Microsoft.DotNet.Cli.Build
             File.WriteAllText(Path.Combine(outputDir, ".version"), content);
 
             return c.Success();
+        }
+
+        private static void RemoveAssetFromDepsPackages(string depsFile, string sectionName, string assetPath)
+        {
+            JToken deps;
+            using (var file = File.OpenText(depsFile))
+            using (JsonTextReader reader = new JsonTextReader(file))
+            {
+                deps = JObject.ReadFrom(reader);
+            }
+
+            foreach (JProperty target in deps["targets"])
+            {
+                foreach (JProperty pv in target.Value.Children<JProperty>())
+                {
+                    var section = pv.Value[sectionName];
+                    if (section != null)
+                    {
+                        foreach (JProperty relPath in section)
+                        {
+                            if (assetPath.Equals(relPath.Name))
+                            {
+                                relPath.Remove();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            using (var file = File.CreateText(depsFile))
+            using (var writer = new JsonTextWriter(file) { Formatting = Formatting.Indented })
+            {
+                deps.WriteTo(writer);
+            }
         }
 
         private static void ChangeEntryPointLibraryName(string depsFile, string newName)
