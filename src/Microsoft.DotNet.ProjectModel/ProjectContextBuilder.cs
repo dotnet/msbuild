@@ -355,8 +355,14 @@ namespace Microsoft.DotNet.ProjectModel
                 }
             }
 
+            List<DiagnosticMessage> allDiagnostics = new List<DiagnosticMessage>(diagnostics);
+            if (Project != null)
+            {
+                allDiagnostics.AddRange(Project.Diagnostics);
+            }
+
             // Create a library manager
-            var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics, Project?.ProjectFilePath);
+            var libraryManager = new LibraryManager(libraries.Values.ToList(), allDiagnostics, Project?.ProjectFilePath);
 
             return new ProjectContext(
                 globalSettings,
@@ -445,7 +451,7 @@ namespace Microsoft.DotNet.ProjectModel
                     var dependency = new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly);
 
                     var replacement = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework);
-                    
+
                     // If the reference is unresolved, just skip it.  Don't replace the package dependency
                     if (replacement == null)
                     {
