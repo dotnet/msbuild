@@ -78,6 +78,7 @@
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' ==''">Debug</Configuration>
     <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
+    <PlatformTarget Condition="'$(PlatformTarget)'==''">$(Platform)</PlatformTarget>
   </PropertyGroup>
 
   <!-- Setup Default symbol and optimization for Configuration -->
