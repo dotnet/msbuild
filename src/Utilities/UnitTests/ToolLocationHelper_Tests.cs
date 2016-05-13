@@ -943,8 +943,7 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
