@@ -307,7 +307,7 @@ if ($DryRun) {
         Say "- $DownloadLink"
     }
     Say "Repeatable invocation: .\$($MyInvocation.MyCommand) -Version $SpecificVersion -Channel $Channel -Architecture $CLIArchitecture -InstallDir $InstallDir"
-    return
+    exit 0
 }
 
 $InstallRoot = Resolve-Installation-Path $InstallDir
@@ -317,7 +317,7 @@ $IsSdkInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -Relativ
 Say-Verbose ".NET SDK installed? $IsSdkInstalled"
 if ($IsSdkInstalled) {
     Say ".NET SDK version $SpecificVersion is already installed."
-    return
+    exit 0
 }
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
@@ -343,3 +343,4 @@ else {
 }
 
 Say "Installation finished"
+exit 0
