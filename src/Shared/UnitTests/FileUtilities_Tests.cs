@@ -375,6 +375,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
@@ -391,6 +392,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+#endif
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -489,6 +491,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(@"c:\abc\def", FileUtilities.NormalizePath(@"c:\abc\" + longPart + @"\..\def"));
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         [Fact]
         public void NormalizePathBadGlobalroot()
         {
@@ -512,6 +515,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+#endif
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]

@@ -856,18 +856,39 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("Item CleanFiles=foo.obj;bar.obj");
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         /// <summary>
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "mono-osx-failing")]
-        public void InvalidPathAndMetadataItemFunction()
+        [PlatformSpecific(PlatformID.Windows)]
+        public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'/>
+                    </ItemGroup>
+                    <Target Name='Build'>
+                        <Message Text=""@(x->Metadata('FullPath'))"" />
+                    </Target>
+                </Project>", false);
+
+            logger.AssertLogContains("MSB4023");
+        }
+#endif
+
+        /// <summary>
+        /// Bad path with illegal windows chars when getting metadata through ->Metadata function
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
+                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <ItemGroup>
+                        <x Include='" + ":|?*" + @"'/>
                     </ItemGroup>
                     <Target Name='Build'>
                         <Message Text=""@(x->Metadata('FullPath'))"" />
@@ -896,18 +917,39 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         /// <summary>
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "mono-osx-failing")]
-        public void InvalidPathAndMetadataItemFunction2()
+        [PlatformSpecific(PlatformID.Windows)]
+        public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'/>
+                    </ItemGroup>
+                    <Target Name='Build'>
+                        <Message Text=""@(x->WithMetadataValue('FullPath', 'x'))"" />
+                    </Target>
+                </Project>", false);
+
+            logger.AssertLogContains("MSB4023");
+        }
+#endif
+
+        /// <summary>
+        /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars2()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
+                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <ItemGroup>
+                        <x Include='" + ":|?*" + @"'/>
                     </ItemGroup>
                     <Target Name='Build'>
                         <Message Text=""@(x->WithMetadataValue('FullPath', 'x'))"" />
@@ -936,18 +978,39 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         /// <summary>
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "mono-osx-failing")]
-        public void InvalidPathAndMetadataItemFunction3()
+        [PlatformSpecific(PlatformID.Windows)]
+        public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'/>
+                    </ItemGroup>
+                    <Target Name='Build'>
+                        <Message Text=""@(x->AnyHaveMetadataValue('FullPath', 'x'))"" />
+                    </Target>
+                </Project>", false);
+
+            logger.AssertLogContains("MSB4023");
+        }
+#endif
+
+        /// <summary>
+        /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void InvalidPathAndMetadataItemInvalidWindowsPathChars3()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
+                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <ItemGroup>
+                        <x Include='" + ":|?*" + @"'/>
                     </ItemGroup>
                     <Target Name='Build'>
                         <Message Text=""@(x->AnyHaveMetadataValue('FullPath', 'x'))"" />

@@ -234,6 +234,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_HANDLEREF</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HTTP_LISTENER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETFULLPATH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPES_FULL_DUPLEX</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
