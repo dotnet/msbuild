@@ -458,7 +458,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             List<string> buildVersions = new List<string>();
 
-            Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+-[^-]+-\d{6})/$");
+            Regex buildVersionRegex = new Regex(@"Binaries/(?<version>\d+\.\d+\.\d+(?<prerelease>-[^-]+-\d{6})?)/$");
 
             foreach (string file in AzurePublisherTool.ListBlobs(hostBlob))
             {
@@ -535,7 +535,9 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             if (missingRuntime)
+            {
                 Console.WriteLine($"Build version {buildVersion} is missing some runtime packages so not pushing this drop.");
+            }
 
             return !missingRuntime;
         }
