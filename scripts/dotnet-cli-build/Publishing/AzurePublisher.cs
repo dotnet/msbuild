@@ -187,5 +187,23 @@ namespace Microsoft.DotNet.Cli.Build
         {
             return $"{channel}/Binaries/{version}/{Path.GetFileName(archiveFile)}";
         }
+
+        public void DownloadFiles(string blobVirtualDirectory, string fileExtension, string downloadPath)
+        {
+            CloudBlobDirectory blobDir = _blobContainer.GetDirectoryReference(blobVirtualDirectory);
+            BlobContinuationToken continuationToken = new BlobContinuationToken();
+
+            var blobFiles = blobDir.ListBlobsSegmentedAsync(continuationToken).Result;
+
+            foreach (var blobFile in blobFiles.Results.OfType<CloudBlockBlob>())
+            {
+                if (Path.GetExtension(blobFile.Uri.AbsoluteUri) == fileExtension)
+                {
+                    string localBlobFile = Path.Combine(downloadPath, Path.GetFileName(blobFile.Uri.AbsoluteUri));
+                    Console.WriteLine($"Downloading {blobFile.Uri.AbsoluteUri} to {localBlobFile}...");
+                    blobFile.DownloadToFileAsync(localBlobFile, FileMode.Create).Wait();
+                }
+            }
+        }
     }
 }
