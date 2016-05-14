@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 
@@ -2182,7 +2183,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
            );
         }
         /// <summary>
-        /// Expand property function calls a static method with quoted arguments
+        /// Expand property function that calls a static method with quoted arguments
         /// </summary>
         [Fact]
         public void PropertyFunctionInvalid8()
@@ -2229,7 +2230,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function that calls a static method 
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -2247,7 +2248,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function that calls a static method 
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethod1()
@@ -2362,7 +2363,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function that calls a static method 
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -2379,7 +2380,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function that calls a static method 
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted1Spaces()
@@ -2397,7 +2398,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function that calls a static method 
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted1Spaces2()
@@ -2415,7 +2416,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function that calls a static method 
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted1Spaces3()
@@ -2432,7 +2433,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method with quoted arguments
+        /// Expand property function that calls a static method with quoted arguments
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted2()
@@ -2448,7 +2449,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method with quoted arguments
+        /// Expand property function that calls a static method with quoted arguments
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted3()
@@ -2463,7 +2464,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method with quoted arguments
+        /// Expand property function that calls a static method with quoted arguments
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted4()
@@ -2478,7 +2479,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function that calls a static method 
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodNested()
@@ -2496,7 +2497,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method regex
+        /// Expand property function that calls a static method regex
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodRegex1()
@@ -2522,7 +2523,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static method  with an instance method chained
+        /// Expand property function that calls a static method  with an instance method chained
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodChained()
@@ -2536,12 +2537,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(DateTime.Parse(_dateToParse).ToString("yyyy/MM/dd HH:mm:ss"), result);
         }
 
+#if FEATURE_SPECIAL_FOLDERS
         /// <summary>
-        /// Expand property function calls a static method an enum argument
+        /// Expand property function that calls a static method available only on net46 (Environment.GetFolderPath)
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        public void PropertyFunctionStaticMethodEnumArgument()
+        public void PropertyFunctionGetFolderPath()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
@@ -2549,11 +2550,60 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Environment]::GetFolderPath(SpecialFolder.System))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-#if FEATURE_SPECIAL_FOLDERS
             Assert.Equal(System.Environment.GetFolderPath(Environment.SpecialFolder.System), result);
-#else
-            Assert.Equal(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), result);
+        }
 #endif
+
+#if FEATURE_RUNTIMEINFORMATION
+        /// <summary>
+        /// Expand property function that uses types available only on .netstandard1.3 and above (RuntimeInformation)
+        /// The test exercises: static method invocation, static property invocation, method invocation expression as argument, call chain expression as argument,
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionRuntimeInformation()
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            var currentPlatformString = "";
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                currentPlatformString = "Windows";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                currentPlatformString = "Linux";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                currentPlatformString = "OSX";
+            }
+
+            var propertyFunction = "$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(" +
+                                        "$([System.Runtime.InteropServices.OSPlatform]::Create(" +
+                                            $"$([System.Runtime.InteropServices.OSPlatform]::{currentPlatformString}.ToString()" +
+                                   ")))))";
+
+            var result = expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal("True", result);
+        }
+#endif
+
+        /// <summary>
+        /// Expand property function that calls a method with an enum parameter
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionStaticMethodEnumArgument()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+            
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.String]::Equals(`a`, `A`, StringComparison.OrdinalIgnoreCase))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal(true.ToString(), result);
         }
 
         /// <summary>
@@ -2590,7 +2640,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls GetCultureInfo
+        /// Expand property function that calls GetCultureInfo
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodGetCultureInfo()
@@ -2609,7 +2659,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static arithmetic method
+        /// Expand property function that calls a static arithmetic method
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodArithmeticAddInt32()
@@ -2624,7 +2674,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function calls a static arithmetic method
+        /// Expand property function that calls a static arithmetic method
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodArithmeticAddDouble()
@@ -2789,7 +2839,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #endif
 
         /// <summary>
-        /// Expand property function calls a static bitwise method to retrieve file attribute
+        /// Expand property function that calls a static bitwise method to retrieve file attribute
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]

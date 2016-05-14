@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-
+using System.Runtime.InteropServices;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
@@ -270,33 +270,58 @@ namespace Microsoft.Build.Internal
                     s_availableStaticMethods = new ConcurrentDictionary<string, Tuple<string, Type>>(StringComparer.OrdinalIgnoreCase);
 
                     // Pre declare our common type Tuples
-                    Tuple<string, Type> environmentType = new Tuple<string, Type>(null, typeof(System.Environment));
-                    Tuple<string, Type> directoryType = new Tuple<string, Type>(null, typeof(System.IO.Directory));
-                    Tuple<string, Type> fileType = new Tuple<string, Type>(null, typeof(System.IO.File));
+                    var environmentType = new Tuple<string, Type>(null, typeof(System.Environment));
+                    var directoryType = new Tuple<string, Type>(null, typeof(System.IO.Directory));
+                    var fileType = new Tuple<string, Type>(null, typeof(System.IO.File));
+#if FEATURE_RUNTIMEINFORMATION
+                    var runtimeInformationType = new Tuple<string, Type>(null, typeof(System.Runtime.InteropServices.RuntimeInformation));
+                    var osPlatformType = new Tuple<string, Type>(null, typeof(System.Runtime.InteropServices.OSPlatform));
+#endif
 
                     // Make specific static methods available (Assembly qualified type names are *NOT* supported, only null which means mscorlib):
                     s_availableStaticMethods.TryAdd("System.Environment::ExpandEnvironmentVariables", environmentType);
                     s_availableStaticMethods.TryAdd("System.Environment::GetEnvironmentVariable", environmentType);
                     s_availableStaticMethods.TryAdd("System.Environment::GetEnvironmentVariables", environmentType);
+#if FEATURE_SPECIAL_FOLDERS
                     s_availableStaticMethods.TryAdd("System.Environment::GetFolderPath", environmentType);
                     s_availableStaticMethods.TryAdd("System.Environment::GetLogicalDrives", environmentType);
+#endif
 
-                    // All the following properties only have getters
+// All the following properties only have getters
+#if FEATURE_GET_COMMANDLINE
                     s_availableStaticMethods.TryAdd("System.Environment::CommandLine", environmentType);
+#endif
+#if FEATURE_64BIT_ENVIRONMENT_QUERY
                     s_availableStaticMethods.TryAdd("System.Environment::Is64BitOperatingSystem", environmentType);
                     s_availableStaticMethods.TryAdd("System.Environment::Is64BitProcess", environmentType);
+#endif
+
                     s_availableStaticMethods.TryAdd("System.Environment::MachineName", environmentType);
+#if FEATURE_OSVERSION
                     s_availableStaticMethods.TryAdd("System.Environment::OSVersion", environmentType);
+#endif
                     s_availableStaticMethods.TryAdd("System.Environment::ProcessorCount", environmentType);
                     s_availableStaticMethods.TryAdd("System.Environment::StackTrace", environmentType);
+#if FEATURE_SPECIAL_FOLDERS
                     s_availableStaticMethods.TryAdd("System.Environment::SystemDirectory", environmentType);
+#endif
+#if FEATURE_SYSTEMPAGESIZE
                     s_availableStaticMethods.TryAdd("System.Environment::SystemPageSize", environmentType);
+#endif
                     s_availableStaticMethods.TryAdd("System.Environment::TickCount", environmentType);
+#if FEATURE_USERDOMAINNAME
                     s_availableStaticMethods.TryAdd("System.Environment::UserDomainName", environmentType);
+#endif
+#if FEATURE_USERINTERACTIVE
                     s_availableStaticMethods.TryAdd("System.Environment::UserInteractive", environmentType);
+#endif
                     s_availableStaticMethods.TryAdd("System.Environment::UserName", environmentType);
+#if FEATURE_DOTNETVERSION
                     s_availableStaticMethods.TryAdd("System.Environment::Version", environmentType);
+#endif
+#if FEATURE_WORKINGSET
                     s_availableStaticMethods.TryAdd("System.Environment::WorkingSet", environmentType);
+#endif
 
                     s_availableStaticMethods.TryAdd("System.IO.Directory::GetDirectories", directoryType);
                     s_availableStaticMethods.TryAdd("System.IO.Directory::GetFiles", directoryType);
@@ -310,7 +335,9 @@ namespace Microsoft.Build.Internal
                     s_availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTime", fileType);
                     s_availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
 
+#if FEATURE_CULTUREINFO_GETCULTUREINFO
                     s_availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(System.Globalization.CultureInfo))); // user request
+#endif
                     s_availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(System.Globalization.CultureInfo))); // user request
                     s_availableStaticMethods.TryAdd("System.Globalization.CultureInfo::CurrentUICulture", new Tuple<string, Type>(null, typeof(System.Globalization.CultureInfo))); // user request
 
@@ -341,6 +368,10 @@ namespace Microsoft.Build.Internal
                     s_availableStaticMethods.TryAdd("System.UriBuilder", new Tuple<string, Type>(null, typeof(System.UriBuilder)));
                     s_availableStaticMethods.TryAdd("System.Version", new Tuple<string, Type>(null, typeof(System.Version)));
                     s_availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
+#if FEATURE_RUNTIMEINFORMATION
+                    s_availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
+                    s_availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
+#endif
                 }
             }
         }
