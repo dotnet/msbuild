@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-publish.Tests",
             "dotnet-resgen.Tests",
             "dotnet-run.Tests",
+            "dotnet-run.UnitTests",
             "dotnet-test.Tests",
             "dotnet-test.UnitTests",
             "Kestrel.Tests",
