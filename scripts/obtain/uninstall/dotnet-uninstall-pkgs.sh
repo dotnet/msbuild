@@ -31,7 +31,7 @@ remove_dotnet_pkgs
 [ "$?" -ne 0 ] && echo "Failed to remove dotnet packages." && exit 1
 
 echo "Deleting install root - $dotnet_install_root"
-rm -rf $dotnet_install_location
+rm -rf $dotnet_install_root
 rm -f $dotnet_path_file
 
 echo "dotnet packages removal succeeded."
