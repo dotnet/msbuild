@@ -17,6 +17,9 @@ dotnet_pkg_name_suffix="com.microsoft.dotnet"
 dotnet_install_root="/usr/local/share/dotnet"
 dotnet_path_file="/etc/paths.d/dotnet"
 
+# nuget paths
+nuget_root=~/.nuget
+
 remove_dotnet_pkgs(){
     installed_pkgs=($(pkgutil --pkgs | grep $dotnet_pkg_name_suffix))
     
@@ -33,6 +36,9 @@ remove_dotnet_pkgs
 echo "Deleting install root - $dotnet_install_root"
 rm -rf $dotnet_install_root
 rm -f $dotnet_path_file
+
+echo "Deleting NuGet package location"
+rm -rf $nuget_root
 
 echo "dotnet packages removal succeeded."
 exit 0
