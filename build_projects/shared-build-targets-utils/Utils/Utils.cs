@@ -136,6 +136,11 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
+        public static string GetVersionFileContent(string commitHash, string version)
+        {
+            return $@"{commitHash}{Environment.NewLine}{version}{Environment.NewLine}";
+        }
+
         public static string GetSharedFrameworkVersionFileContent(BuildTargetContext c)
         {
             string SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");

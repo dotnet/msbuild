@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Build.Framework;
@@ -37,6 +38,19 @@ namespace Microsoft.DotNet.Cli.Build
         public Command Pack(params string[] args) => Exec("pack", args);
         public Command Test(params string[] args) => Exec("test", args);
         public Command Publish(params string[] args) => Exec("publish", args);
+
+        public string GetRuntimeId()
+        {
+            string info = Exec("", "--info").CaptureStdOut().Execute().StdOut;
+            string rid = Array.Find<string>(info.Split(Environment.NewLine.ToCharArray()), (e) => e.Contains("RID:"))?.Replace("RID:", "").Trim();
+
+            if (string.IsNullOrEmpty(rid))
+            {
+                throw new BuildFailureException("Could not find the Runtime ID from Stage0 --info or --version");
+            }
+
+            return rid;
+        }
 
         private static string GetStage0Path()
         {

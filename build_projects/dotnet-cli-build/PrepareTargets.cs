@@ -33,7 +33,13 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c) => c.Success();
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
-        [Target(nameof(GenerateVersions), nameof(UpdateTemplateVersions), nameof(CheckPrereqs), nameof(LocateStage0), nameof(ExpectedBuildArtifacts))]
+        [Target(
+            nameof(GenerateVersions), 
+            nameof(UpdateTemplateVersions), 
+            nameof(CheckPrereqs), 
+            nameof(LocateStage0), 
+            nameof(ExpectedBuildArtifacts),
+            nameof(RestorePackages))]
         public static BuildTargetResult Init(BuildTargetContext c)
         {
             var configEnv = Environment.GetEnvironmentVariable("CONFIGURATION");
