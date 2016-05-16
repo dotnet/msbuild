@@ -25,7 +25,7 @@
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00199</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
-    <XunitVersion>2.1.0-rc1-build3168</XunitVersion>
+    <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
 
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
