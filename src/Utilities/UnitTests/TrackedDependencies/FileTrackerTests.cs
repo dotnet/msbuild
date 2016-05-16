@@ -1860,65 +1860,82 @@ class X
         public void LaunchMultipleOfSameTool_SameCommand()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_SameCommand");
-            Directory.CreateDirectory(testDir);
+            FileUtilities.DeleteDirectoryNoThrow(testDir, true);
 
-            string originalFindstrPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "findstr.exe");
-            string destinationFindstrPath = Path.Combine(testDir, "abc.exe");
-            File.Copy(originalFindstrPath, destinationFindstrPath);
+            try
+            {
+                Directory.CreateDirectory(testDir);
 
-            string tempFilePath = Path.Combine(testDir, "bar.txt");
-            File.WriteAllText(tempFilePath, "foo baz");
+                string originalFindstrPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "findstr.exe");
+                string destinationFindstrPath = Path.Combine(testDir, "abc.exe");
+                File.Copy(originalFindstrPath, destinationFindstrPath);
 
-            // Item1: appname
-            // Item2: command line
-            // Item3: number of times to launch
-            IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-            toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
+                string tempFilePath = Path.Combine(testDir, "bar.txt");
+                File.WriteAllText(tempFilePath, "foo baz");
 
-            // Item1: FileTracker context name
-            // Item2: Tuple <string, string, int> as described above
-            IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-            contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                // Item1: appname
+                // Item2: command line
+                // Item3: number of times to launch
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
+                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
 
-            // Item1: tlog pattern
-            // Item2: # times it's expected to appear
-            IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-            tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3));
+                // Item1: FileTracker context name
+                // Item2: Tuple <string, string, int> as described above
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
+                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
 
-            LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
+                // Item1: tlog pattern
+                // Item2: # times it's expected to appear
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
+                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3));
+
+                LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(testDir, true);
+            }
         }
 
         [Fact]
         public void LaunchMultipleOfSameTool_DifferentCommands1()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands1");
-            Directory.CreateDirectory(testDir);
+            FileUtilities.DeleteDirectoryNoThrow(testDir, true);
 
-            string originalFindstrPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "findstr.exe");
-            string destinationFindstrPath = Path.Combine(testDir, "abc.exe");
-            File.Copy(originalFindstrPath, destinationFindstrPath);
+            try
+            {
+                Directory.CreateDirectory(testDir);
+                string originalFindstrPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "findstr.exe");
+                string destinationFindstrPath = Path.Combine(testDir, "abc.exe");
+                File.Copy(originalFindstrPath, destinationFindstrPath);
 
-            string tempFilePath = Path.Combine(testDir, "bar.txt");
-            File.WriteAllText(tempFilePath, "foo baz");
+                string tempFilePath = Path.Combine(testDir, "bar.txt");
+                File.WriteAllText(tempFilePath, "foo baz");
 
-            // Item1: appname
-            // Item2: command line
-            // Item3: number of times to launch
-            IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-            toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i foo " + tempFilePath, 3));
-            toolsToLaunch.Add(new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i baz " + tempFilePath, 3));
+                // Item1: appname
+                // Item2: command line
+                // Item3: number of times to launch
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
+                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i foo " + tempFilePath, 3));
+                toolsToLaunch.Add(new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i baz " + tempFilePath, 3));
 
-            // Item1: FileTracker context name
-            // Item2: Tuple <string, string, int> as described above
-            IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-            contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                // Item1: FileTracker context name
+                // Item2: Tuple <string, string, int> as described above
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
+                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
 
-            // Item1: tlog pattern
-            // Item2: # times it's expected to appear
-            IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-            tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 6));
+                // Item1: tlog pattern
+                // Item2: # times it's expected to appear
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
+                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 6));
 
-            LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
+                LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(testDir, true);
+            }
         }
 
         [Fact]
@@ -2133,34 +2150,44 @@ class X
         public void LaunchMultipleOfSameTool_DifferentContexts()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentContexts");
-            Directory.CreateDirectory(testDir);
+            FileUtilities.DeleteDirectoryNoThrow(testDir, true);
+            try
+            {
+                Directory.CreateDirectory(testDir);
 
-            string originalFindstrPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "findstr.exe");
-            string destinationFindstrPath = Path.Combine(testDir, "abc.exe");
-            File.Copy(originalFindstrPath, destinationFindstrPath);
+                string originalFindstrPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "findstr.exe");
+                string destinationFindstrPath = Path.Combine(testDir, "abc.exe");
+                File.Copy(originalFindstrPath, destinationFindstrPath);
 
-            string tempFilePath = Path.Combine(testDir, "bar.txt");
-            File.WriteAllText(tempFilePath, "foo baz");
+                string tempFilePath = Path.Combine(testDir, "bar.txt");
+                File.WriteAllText(tempFilePath, "foo baz");
 
-            // Item1: appname
-            // Item2: command line
-            // Item3: number of times to launch
-            IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-            toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
+                // Item1: appname
+                // Item2: command line
+                // Item3: number of times to launch
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
+                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
 
-            // Item1: FileTracker context name
-            // Item2: Tuple <string, string, int> as described above
-            IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-            contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
-            contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest2", toolsToLaunch));
+                // Item1: FileTracker context name
+                // Item2: Tuple <string, string, int> as described above
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications =
+                    new List<Tuple<string, IList<Tuple<string, string, int>>>>();
+                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest2", toolsToLaunch));
 
-            // Item1: tlog pattern
-            // Item2: # times it's expected to appear
-            IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-            tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3));
-            tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest2-abc*tlog", 3));
+                // Item1: tlog pattern
+                // Item2: # times it's expected to appear
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
+                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3));
+                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest2-abc*tlog", 3));
 
-            LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
+                LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, false);
+            }
+            catch (Exception)
+            {
+                FileUtilities.DeleteDirectoryNoThrow(testDir, true);
+            }
+
         }
 
         [Fact(Skip = "Ignored in MSTest")]

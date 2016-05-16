@@ -103,11 +103,16 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version140,
 
+        /// <summary>
+        /// Visual Studio Dev15
+        /// </summary>
+        Version150,
+
         // keep this up-to-date; always point to the last entry.
         /// <summary>
         /// The latest version available at the time of release
         /// </summary>
-        VersionLatest = Version140
+        VersionLatest = Version150
     }
 
     /// <summary>
@@ -856,30 +861,33 @@ namespace Microsoft.Build.Utilities
                 string registryRoot
             )
         {
-            if (s_cachedTargetPlatformReferences == null)
+            lock (s_locker)
             {
-                s_cachedTargetPlatformReferences = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
-            }
+                if (s_cachedTargetPlatformReferences == null)
+                {
+                    s_cachedTargetPlatformReferences = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+                }
 
-            string cacheKey = String.Join("|", sdkIdentifier, sdkVersion, targetPlatformIdentifier, targetPlatformMinVersion, targetPlatformVersion, diskRoots, registryRoot);
+                string cacheKey = String.Join("|", sdkIdentifier, sdkVersion, targetPlatformIdentifier, targetPlatformMinVersion, targetPlatformVersion, diskRoots, registryRoot);
 
-            string[] targetPlatformReferences = null;
-            if (s_cachedTargetPlatformReferences.TryGetValue(cacheKey, out targetPlatformReferences))
-            {
+                string[] targetPlatformReferences = null;
+                if (s_cachedTargetPlatformReferences.TryGetValue(cacheKey, out targetPlatformReferences))
+                {
+                    return targetPlatformReferences;
+                }
+
+                if (String.IsNullOrEmpty(sdkIdentifier) && String.IsNullOrEmpty(sdkVersion))
+                {
+                    targetPlatformReferences = GetLegacyTargetPlatformReferences(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
+                }
+                else
+                {
+                    targetPlatformReferences = GetTargetPlatformReferencesFromManifest(sdkIdentifier, sdkVersion, targetPlatformIdentifier, targetPlatformMinVersion, targetPlatformVersion, diskRoots, registryRoot);
+                }
+
+                s_cachedTargetPlatformReferences.Add(cacheKey, targetPlatformReferences);
                 return targetPlatformReferences;
             }
-
-            if (String.IsNullOrEmpty(sdkIdentifier) && String.IsNullOrEmpty(sdkVersion))
-            {
-                targetPlatformReferences = GetLegacyTargetPlatformReferences(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
-            }
-            else
-            {
-                targetPlatformReferences = GetTargetPlatformReferencesFromManifest(sdkIdentifier, sdkVersion, targetPlatformIdentifier, targetPlatformMinVersion, targetPlatformVersion, diskRoots, registryRoot);
-            }
-
-            s_cachedTargetPlatformReferences.Add(cacheKey, targetPlatformReferences);
-            return targetPlatformReferences;
         }
 
         /// <summary>
@@ -901,53 +909,57 @@ namespace Microsoft.Build.Utilities
                 string registryRoot
             )
         {
-            if (s_cachedExtensionSdkReferences == null)
+
+            lock (s_locker)
             {
-                s_cachedExtensionSdkReferences = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
-            }
-
-            string cacheKey = String.Join("|", extensionSdkMoniker, targetSdkIdentifier, targetSdkVersion);
-
-            string[] extensionSdkReferences = null;
-            if (s_cachedExtensionSdkReferences.TryGetValue(cacheKey, out extensionSdkReferences))
-            {
-                return extensionSdkReferences;
-            }
-
-            TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetSdkIdentifier, targetSdkVersion, diskRoots, extensionDiskRoots, registryRoot);
-
-            if (matchingSdk == null)
-            {
-                ErrorUtilities.DebugTraceMessage("GetExtensionSdkReferences", "Could not find root SDK for SDKI = '{0}', SDKV = '{1}'", targetSdkIdentifier, targetSdkVersion);
-            }
-            else
-            {
-                string targetSdkPath = matchingSdk.Path;
-                string extensionSdkPath = null;
-
-                if (matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath)
-                    ||
-                    (
-                        // It is possible the SDK may be of the newer style (targets multiple). We need to hit the untargeted SDK cache to look for a hit.
-                        s_cachedExtensionSdks.TryGetValue(extensionDiskRoots, out matchingSdk)
-                        && matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath)
-                    ))
+                if (s_cachedExtensionSdkReferences == null)
                 {
-                    ExtensionSDK extensionSdk = new ExtensionSDK(extensionSdkMoniker, extensionSdkPath);
-                    if (extensionSdk.SDKType == SDKType.Framework || extensionSdk.SDKType == SDKType.Platform)
-                    {
-                        // We don't want to attempt to gather ApiContract references if the framework isn't explicitly marked as Framework/Platform
-                        extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, targetSdkPath);
-                    }
+                    s_cachedExtensionSdkReferences = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                string cacheKey = String.Join("|", extensionSdkMoniker, targetSdkIdentifier, targetSdkVersion);
+
+                string[] extensionSdkReferences = null;
+                if (s_cachedExtensionSdkReferences.TryGetValue(cacheKey, out extensionSdkReferences))
+                {
+                    return extensionSdkReferences;
+                }
+
+                TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetSdkIdentifier, targetSdkVersion, diskRoots, extensionDiskRoots, registryRoot);
+
+                if (matchingSdk == null)
+                {
+                    ErrorUtilities.DebugTraceMessage("GetExtensionSdkReferences", "Could not find root SDK for SDKI = '{0}', SDKV = '{1}'", targetSdkIdentifier, targetSdkVersion);
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetExtensionSdkReferences", "Could not find matching extension SDK = '{0}'", extensionSdkMoniker);
-                }
-            }
+                    string targetSdkPath = matchingSdk.Path;
+                    string extensionSdkPath = null;
 
-            s_cachedExtensionSdkReferences.Add(cacheKey, extensionSdkReferences);
-            return extensionSdkReferences;
+                    if (matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath)
+                        ||
+                        (
+                            // It is possible the SDK may be of the newer style (targets multiple). We need to hit the untargeted SDK cache to look for a hit.
+                            s_cachedExtensionSdks.TryGetValue(extensionDiskRoots, out matchingSdk)
+                            && matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath)
+                        ))
+                    {
+                        ExtensionSDK extensionSdk = new ExtensionSDK(extensionSdkMoniker, extensionSdkPath);
+                        if (extensionSdk.SDKType == SDKType.Framework || extensionSdk.SDKType == SDKType.Platform)
+                        {
+                            // We don't want to attempt to gather ApiContract references if the framework isn't explicitly marked as Framework/Platform
+                            extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, targetSdkPath);
+                        }
+                    }
+                    else
+                    {
+                        ErrorUtilities.DebugTraceMessage("GetExtensionSdkReferences", "Could not find matching extension SDK = '{0}'", extensionSdkMoniker);
+                    }
+                }
+
+                s_cachedExtensionSdkReferences.Add(cacheKey, extensionSdkReferences);
+                return extensionSdkReferences;
+            }
         }
 
         /// <summary>
@@ -1796,6 +1808,9 @@ namespace Microsoft.Build.Utilities
 
                 case VisualStudioVersion.Version140:
                     return FrameworkLocationHelper.visualStudioVersion140;
+
+                case VisualStudioVersion.Version150:
+                    return FrameworkLocationHelper.visualStudioVersion150;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedVisualStudioVersion", version);

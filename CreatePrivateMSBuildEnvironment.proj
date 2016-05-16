@@ -32,7 +32,7 @@
   <Target Name="Build">
     <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
     <Copy SourceFiles="@(InstalledVersionedExtensions)"
-          DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)14.1\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
           DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
 
@@ -41,15 +41,15 @@
 
     <!-- Delete shim projects, because they point where we can't follow. -->
     <!-- It would be better to just not copy these. -->
-    <Delete Files="@(ShimTargets->'$(BootstrapDestination)14.1\Bin\%(FileName)%(Extension)')" />
+    <Delete Files="@(ShimTargets->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(FileName)%(Extension)')" />
 
     <!-- Copy our binaries -->
     <Copy SourceFiles="@(FreshlyBuiltBinaries)"
-          DestinationFolder="$(BootstrapDestination)14.1\Bin" />
+          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin" />
 
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
-          DestinationFolder="$(BootstrapDestination)14.1\Bin" />
+          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin" />
   </Target>
 
   <Target Name="CheckForBootstrap">

@@ -10,9 +10,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
          copying its dependencies (which are in the GAC). -->
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
+    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -94,6 +96,7 @@
   <!-- Set default Configuration and Platform -->
   <PropertyGroup>
     <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
+    <PlatformTarget Condition="'$(PlatformTarget)'==''">$(Platform)</PlatformTarget>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
   </PropertyGroup>
 

@@ -640,10 +640,10 @@ EndGlobal
 
         /// <summary>
         /// Generated project metaproj should declare its outputs for relay.
-        /// Here B depends on C
+        /// Here B depends on C (via solution dep only) and D (via ProjectReference only)
         /// </summary>
         /// <seealso href="https://github.com/Microsoft/msbuild/issues/69">
-        /// MSBuild should generate metaprojects that merge the outputs of the individual MSBuild invocations
+        /// MSBuild should generate metaprojects that relay the outputs of the individual MSBuild invocations
         /// </seealso>
         [Fact]
         public void SolutionConfigurationWithDependenciesRelaysItsOutputs()
@@ -660,20 +660,19 @@ Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `B.csproj`, `{881C1674-
 EndProject
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `C`, `C.csproj`, `{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}`
 EndProject
+Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `D`, `D.csproj`, `{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}`
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = preSolution
 		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.Build.0 = Release|Any CPU
 		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -688,6 +687,12 @@ EndGlobal
                                     <ComputedQuestion Include='What do you get if you multiply six by nine' />
                                 </ItemGroup>
                             </Target>
+                            <ItemGroup>
+                                <ProjectReference Include='D.csproj'>
+                                    <Project>{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}</Project>
+                                    <Name>D</Name>
+                                </ProjectReference>
+                            </ItemGroup>
                         </Project>
                     ";
             const string projectCharlieFileContents =
@@ -700,44 +705,85 @@ EndGlobal
                             </Target>
                         </Project>
                     ";
+            const string projectDeltaFileContents =
+                    @"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                            <PropertyGroup>
+                                <ProjectGuid>{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}</ProjectGuid>
+                            </PropertyGroup>
+                            <Target Name='Build' Outputs='@(ComputedPunctuation)'>
+                                <ItemGroup>
+                                    <ComputedPunctuation Include='!!!' />
+                                </ItemGroup>
+                            </Target>
+                        </Project>
+                    ";
             const string automaticProjectFileContents = @"
 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='compile' xmlns='msbuildnamespace'>
-	<Target Name='compile'>
-		<MSBuild Projects='B.csproj' Targets='Build'>
-			<Output
-				TaskParameter='TargetOutputs'
-				ItemName='BravoProjectOutputs' />
-		</MSBuild>
-		<Message Importance='high' Text='BravoProjectOutputs: @(BravoProjectOutputs)' />
-		<MSBuild Projects='C.csproj' Targets='Build'>
-			<Output
-				TaskParameter='TargetOutputs'
-				ItemName='CharlieProjectOutputs' />
-		</MSBuild>
-		<Message Importance='high' Text='CharlieProjectOutputs: @(CharlieProjectOutputs)' />
-		<MSBuild Projects='B.csproj.metaproj' Targets='Build'>
-			<Output
-				TaskParameter='TargetOutputs'
-				ItemName='BravoMetaProjectOutputs' />
-		</MSBuild>
-		<Message Importance='high' Text='BravoMetaProjectOutputs: @(BravoMetaProjectOutputs)' />
-		<Error Condition=` '@(CharlieProjectOutputs);@(BravoProjectOutputs)' != '@(BravoMetaProjectOutputs)' ` Text='Metaproj must relay outputs' />
-	</Target>
+    <Target Name='compile'>
+        <!-- Build projects to get a baseline for their output -->
+        <MSBuild Projects='B.csproj' Targets='Build'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='BravoProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='BravoProjectOutputs: @(BravoProjectOutputs)' />
+
+        <MSBuild Projects='C.csproj' Targets='Build'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='CharlieProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='CharlieProjectOutputs: @(CharlieProjectOutputs)' />
+
+        <MSBuild Projects='D.csproj' Targets='Build'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='DeltaProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='DeltaProjectOutputs: @(DeltaProjectOutputs)' />
+
+        <PropertyGroup>
+            <StringifiedBravoProjectOutputs>@(BravoProjectOutputs)</StringifiedBravoProjectOutputs>
+            <StringifiedCharlieProjectOutputs>@(CharlieProjectOutputs)</StringifiedCharlieProjectOutputs>
+            <StringifiedDeltaProjectOutputs>@(DeltaProjectOutputs)</StringifiedDeltaProjectOutputs>
+        </PropertyGroup>
+
+        <!-- Explicitly build the metaproject generated for B -->
+        <MSBuild Projects='B.csproj.metaproj' Targets='Build'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='BravoMetaProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='BravoMetaProjectOutputs: @(BravoMetaProjectOutputs)' />
+        <Error Condition=` '@(BravoProjectOutputs)' != '@(BravoMetaProjectOutputs)' ` Text='Metaproj outputs must match outputs of normal project build.' />
+
+        <!-- Build the solution as a whole (which will build the metaproj and return overall outputs) -->
+        <MSBuild Projects='MSBuildIssue.sln'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='SolutionProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='SolutionProjectOutputs: @(SolutionProjectOutputs)' />
+        <Error Condition=` '@(SolutionProjectOutputs->Count())' != '3' ` Text='Overall sln outputs must include outputs of each referenced project (there should be 3).' />
+        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedBravoProjectOutputs)'))' != 'true'` Text='Overall sln outputs must include outputs of normal project build of project B.' />
+        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedCharlieProjectOutputs)'))' != 'true' ` Text='Overall sln outputs must include outputs of normal project build of project C.' />
+        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedDeltaProjectOutputs)'))' != 'true' ` Text='Overall sln outputs must include outputs of normal project build of project D.' />
+    </Target>
 </Project>";
             #endregion
-            // arrange
+
             var logger = new MockLogger();
             var loggers = new List<ILogger>(1) { logger };
             var solutionFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("MSBuildIssue.sln", solutionFileContents);
             ObjectModelHelpers.CreateFileInTempProjectDirectory("B.csproj", projectBravoFileContents);
             ObjectModelHelpers.CreateFileInTempProjectDirectory("C.csproj", projectCharlieFileContents);
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("D.csproj", projectDeltaFileContents);
             var solution = new SolutionFile { FullPath = solutionFile };
             solution.ParseSolutionFile();
 
-            // act
             var instances = SolutionProjectGenerator.Generate(solution, null, null, new BuildEventContext(0, 0, 0, 0), null);
 
-            // assert
             var projectBravoMetaProject = instances[1];
             Assert.False(projectBravoMetaProject.Targets.Any(kvp => kvp.Value.Outputs.Equals("@()"))); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
             // saves the in-memory metaproj to disk
@@ -745,6 +791,8 @@ EndGlobal
             var automaticProjectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("automatic.msbuild", automaticProjectFileContents);
             var automaticProject = new Project(automaticProjectFile);
             var buildResult = automaticProject.Build(loggers);
+
+            // NOTE: most of the actual assertions for this test are embedded in automaticProjectFileContents as <Error>s
             Assert.True(buildResult, String.Join(Environment.NewLine, logger.Errors.Select(beea => beea.Message)));
         }
 

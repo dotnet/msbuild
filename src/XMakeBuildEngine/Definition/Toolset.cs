@@ -41,7 +41,7 @@ namespace Microsoft.Build.Evaluation
     /// <remarks>
     /// UNDONE: Review immutability. If this is not immutable, add a mechanism to notify the project collection/s owning it to increment their toolsetVersion.
     /// </remarks>
-    [DebuggerDisplay("ToolsVersion={ToolsVersion} ToolsPath={ToolsPath} #Properties={properties.Count}")]
+    [DebuggerDisplay("ToolsVersion={ToolsVersion} ToolsPath={ToolsPath} #Properties={_properties.Count}")]
     public class Toolset : INodePacketTranslatable
     {
         /// <summary>
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Evaluation
         private DirectoryGetFiles _getFiles;
 
         /// <summary>
-        /// Delegate to check to see if a direcotry exists
+        /// Delegate to check to see if a directory exists
         /// </summary>
         private DirectoryExists _directoryExists = null;
 
@@ -204,6 +204,11 @@ namespace Microsoft.Build.Evaluation
         /// sub-toolset, just use the base toolset. 
         /// </summary>
         private string _defaultSubToolsetVersion;
+
+        /// <summary>
+        /// Map of project import properties to their list of fall-back search paths
+        /// </summary>
+        private Dictionary<string, List<string>> _propertySearchPathsTable;
 
         /// <summary>
         /// Constructor taking only tools version and a matching tools path
@@ -274,6 +279,7 @@ namespace Microsoft.Build.Evaluation
             _environmentProperties = environmentProperties;
             _overrideTasksPath = msbuildOverrideTasksPath;
             _defaultOverrideToolsVersion = defaultOverrideToolsVersion;
+            
         }
 
         /// <summary>
@@ -285,33 +291,25 @@ namespace Microsoft.Build.Evaluation
         /// Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.
         /// </param>
-        internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion)
+        internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, List<string>> importSearchPathsTable = null)
             : this(toolsVersion, toolsPath, environmentProperties, globalProperties, msbuildOverrideTasksPath, defaultOverrideToolsVersion)
         {
             if (_properties == null)
             {
-                if (null != buildProperties)
-                {
-                    _properties = new PropertyDictionary<ProjectPropertyInstance>(buildProperties);
-                }
-                else
-                {
-                    _properties = new PropertyDictionary<ProjectPropertyInstance>();
-                }
+                _properties = buildProperties != null
+                    ? new PropertyDictionary<ProjectPropertyInstance>(buildProperties)
+                    : new PropertyDictionary<ProjectPropertyInstance>();
             }
 
             if (subToolsets != null)
             {
                 Dictionary<string, SubToolset> subToolsetsAsDictionary = subToolsets as Dictionary<string, SubToolset>;
+                _subToolsets = subToolsetsAsDictionary ?? new Dictionary<string, SubToolset>(subToolsets);
+            }
 
-                if (subToolsetsAsDictionary != null)
-                {
-                    _subToolsets = subToolsetsAsDictionary;
-                }
-                else
-                {
-                    _subToolsets = new Dictionary<string, SubToolset>(subToolsets);
-                }
+            if (importSearchPathsTable != null)
+            {
+                _propertySearchPathsTable = importSearchPathsTable;
             }
         }
 
@@ -350,29 +348,36 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns a copy of the list of search paths for a MSBuildExtensionsPath* property kind.
+        /// Returns a ProjectImportPathMatch struct for the first property found in the expression for which
+        /// project import search paths is enabled.
+        /// <param name="expression">Expression to search for properties in (first level only, not recursive)</param>
+        /// <returns>List of search paths or ProjectImportPathMatch.None if empty</returns>
         /// </summary>
-        internal IList<string> GetMSBuildExtensionsPathSearchPathsFor(MSBuildExtensionsPathReferenceKind refKind)
+        internal ProjectImportPathMatch GetProjectImportSearchPaths(string expression)
         {
-            IList<string> paths;
-            if (MSBuildExtensionsPathSearchPathsTable != null && MSBuildExtensionsPathSearchPathsTable.TryGetValue(refKind, out paths))
+            if (string.IsNullOrEmpty(expression) || ImportPropertySearchPathsTable == null)
             {
-                return new List<string>(paths);
+                return ProjectImportPathMatch.None;
             }
 
-            return new List<string>();
+            foreach (var searchPath in _propertySearchPathsTable)
+            {
+                if (expression.IndexOf($"$({searchPath.Key})", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return new ProjectImportPathMatch(searchPath.Key, searchPath.Value);
+                }
+            }
+
+            return ProjectImportPathMatch.None;
         }
 
         /// <summary>
         /// Name of this toolset
         /// </summary>
-        public string ToolsVersion
-        {
-            get { return _toolsVersion; }
-        }
+        public string ToolsVersion => _toolsVersion;
 
         /// <summary>
-        /// Path to this toolset's tasks and targets. Corresponds to $(MSBuildToolsPath) in a project or targets file. 
+        /// Path to this toolset's tasks and targets. Corresponds to $(MSBuildToolsPath) in a project or targets file.
         /// </summary>
         public string ToolsPath
         {
@@ -567,18 +572,17 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Path to look for msbuild override task files.
         /// </summary>
-        internal string OverrideTasksPath
-        {
-            get { return _overrideTasksPath; }
-        }
+        internal string OverrideTasksPath => _overrideTasksPath;
 
         /// <summary>
         /// ToolsVersion to use as the default ToolsVersion for this version of MSBuild
         /// </summary>
-        internal string DefaultOverrideToolsVersion
-        {
-            get { return _defaultOverrideToolsVersion; }
-        }
+        internal string DefaultOverrideToolsVersion => _defaultOverrideToolsVersion;
+
+        /// <summary>
+        /// Map of properties to their list of fall-back search paths
+        /// </summary>
+        internal Dictionary<string, List<string>> ImportPropertySearchPathsTable => _propertySearchPathsTable;
 
         /// <summary>
         /// Map of MSBuildExtensionsPath properties to their list of fallback search paths
@@ -601,6 +605,7 @@ namespace Microsoft.Build.Evaluation
             translator.TranslateDictionary(ref _subToolsets, StringComparer.OrdinalIgnoreCase, SubToolset.FactoryForDeserialization);
             translator.Translate(ref _overrideTasksPath);
             translator.Translate(ref _defaultOverrideToolsVersion);
+            translator.TranslateDictionaryList(ref _propertySearchPathsTable, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -654,18 +659,13 @@ namespace Microsoft.Build.Evaluation
                 property = subToolset.Properties[propertyName];
             }
 
-            if (property == null)
-            {
-                property = Properties[propertyName];
-            }
-
-            return property;
+            return property ?? (Properties[propertyName]);
         }
 
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        static internal Toolset FactoryForDeserialization(INodePacketTranslator translator)
+        internal static Toolset FactoryForDeserialization(INodePacketTranslator translator)
         {
             Toolset toolset = new Toolset(translator);
             return toolset;
@@ -812,12 +812,7 @@ namespace Microsoft.Build.Evaluation
 
             // Solution version also didn't work out, so fall back to default. 
             // If subToolsetVersion is null, there simply wasn't a matching solution version. 
-            if (subToolsetVersion == null)
-            {
-                subToolsetVersion = DefaultSubToolsetVersion;
-            }
-
-            return subToolsetVersion;
+            return subToolsetVersion ?? (DefaultSubToolsetVersion);
         }
 
         /// <summary>

@@ -1,7 +1,13 @@
 @echo off
 setlocal
 
-set MSBUILD_ARGS="%~dp0build.proj" /m /verbosity:minimal /fileloggerparameters:Verbosity=diag;LogFile="%~dp0msbuild.log" %*
+if not defined MSBUILDLOGPATH (
+    set MSBUILDLOGPATH=%~dp0msbuild.log
+)
+
+
+
+set MSBUILD_ARGS="%~dp0build.proj" /m /verbosity:minimal /fileloggerparameters:Verbosity=diag;LogFile="%MSBUILDLOGPATH%" %*
 
 :: Check for a custom MSBuild path. If not defined, default to the one in your path.
 if not defined MSBUILD_CUSTOM_PATH (
@@ -24,6 +30,7 @@ if not defined RUNTIME_HOST (
 
 echo ** MSBuild Path: %MSBUILD_CUSTOM_PATH%
 echo ** Runtime Host Path: %RUNTIME_HOST%
+echo ** MSBuild Path: %MSBUILDCUSTOMPATH%
 echo ** Building all sources
 
 :: Restore build tools
@@ -36,7 +43,7 @@ set BUILDERRORLEVEL=%ERRORLEVEL%
 echo.
 
 :: Pull the build summary from the log file
-findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%~dp0msbuild.log"
-echo ** Build completed. Exit code: %BUILDERRORLEVEL%
+findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%MSBUILDLOGPATH%"
+echo ** Build completed. Log: %MSBUILDLOGPATH% Exit code: %BUILDERRORLEVEL%
 
 exit /b %BUILDERRORLEVEL%

@@ -96,11 +96,8 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                result =
-                    (
-                    File.Exists(FileUtilities.CurrentExecutableConfigurationFilePath) &&
-                    File.ReadAllText(FileUtilities.CurrentExecutableConfigurationFilePath).Contains("toolsVersion")
-                    );
+                var configFile = FileUtilities.CurrentExecutableConfigurationFilePath;
+                result = File.Exists(configFile) && File.ReadAllText(configFile).Contains("toolsVersion");
             }
             catch (Exception e)
             {
@@ -157,14 +154,14 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Collection of all the search paths for MSBuildExtensionsPath*, per OS
+        /// Collection of all the search paths for project imports, per OS
         /// </summary>
-        [ConfigurationProperty("msbuildExtensionsPathSearchPaths")]
-        public ExtensionsPathsElementCollection AllMSBuildExtensionPathsSearchPaths
+        [ConfigurationProperty("projectImportSearchPaths")]
+        public ExtensionsPathsElementCollection AllProjectImportSearchPaths
         {
             get
             {
-                return (ExtensionsPathsElementCollection)base["msbuildExtensionsPathSearchPaths"];
+                return (ExtensionsPathsElementCollection)base["projectImportSearchPaths"];
             }
         }
 

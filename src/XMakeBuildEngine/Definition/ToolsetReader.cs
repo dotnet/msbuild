@@ -6,16 +6,15 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
-
 using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
@@ -130,8 +129,7 @@ namespace Microsoft.Build.Evaluation
             string defaultOverrideToolsVersionFromConfiguration = null;
 
 #if FEATURE_SYSTEM_CONFIGURATION
-            if ((locations & ToolsetDefinitionLocations.ConfigurationFile)
-                == ToolsetDefinitionLocations.ConfigurationFile)
+            if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
                 if (configurationReader == null && ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
                 {
@@ -144,12 +142,8 @@ namespace Microsoft.Build.Evaluation
                 if (configurationReader != null)
                 {
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
-                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(
-                        toolsets,
-                        globalProperties,
-                        initialProperties,
-                        true /* accumulate properties */,
-                        out overrideTasksPathFromConfiguration,
+                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
+                        initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
                         out defaultOverrideToolsVersionFromConfiguration);
                 }
             }
@@ -163,21 +157,16 @@ namespace Microsoft.Build.Evaluation
             {
 #if FEATURE_WIN32_REGISTRY
                 if (NativeMethodsShared.IsWindows || registryReader != null)
-                {
-                    var registryReaderToUse = registryReader
-                                              ?? new ToolsetRegistryReader(environmentProperties, globalProperties);
+                // If we haven't been provided a registry reader (i.e. unit tests), create one
+                registryReader = registryReader ?? new ToolsetRegistryReader(environmentProperties, globalProperties);
 
-                    // We do not accumulate properties when reading them from the registry, because the order
-                    // in which values are returned to us is essentially random: so we disallow one property
-                    // in the registry to refer to another also in the registry
-                    defaultToolsVersionFromRegistry = registryReaderToUse.ReadToolsets(
-                        toolsets,
-                        globalProperties,
-                        initialProperties,
-                        false /* do not accumulate properties */,
-                        out overrideTasksPathFromRegistry,
-                        out defaultOverrideToolsVersionFromRegistry);
-                }
+                // We do not accumulate properties when reading them from the registry, because the order
+                // in which values are returned to us is essentially random: so we disallow one property
+                // in the registry to refer to another also in the registry
+                defaultToolsVersionFromRegistry = registryReader.ReadToolsets(toolsets, globalProperties,
+                    initialProperties, false /* do not accumulate properties */, out overrideTasksPathFromRegistry,
+                    out defaultOverrideToolsVersionFromRegistry);
+            }
                 else
 #endif
                 {
@@ -411,7 +400,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
         /// </summary>
-        protected abstract Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os);
+        protected abstract Dictionary<string, List<string>> GetProjectImportSearchPathsTable(string toolsVersion, string os);
 
         /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
@@ -515,8 +504,8 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion);
-                toolset.MSBuildExtensionsPathSearchPathsTable = GetMSBuildExtensionPathsSearchPathsTable(toolsVersion.Name, NativeMethodsShared.GetOSNameForExtensionsPath());
+                var importSearchPathsTable = GetProjectImportSearchPathsTable(toolsVersion.Name, NativeMethodsShared.GetOSNameForExtensionsPath());
+                toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion, importSearchPathsTable);
             }
             catch (ArgumentException e)
             {
@@ -540,7 +529,6 @@ namespace Microsoft.Build.Evaluation
             {
                 return null;
             }
-
             PropertyDictionary<ProjectPropertyInstance> buildProperties =
                 new PropertyDictionary<ProjectPropertyInstance>();
             AppendStandardProperties(buildProperties, globalProperties, version, root, toolsPath);

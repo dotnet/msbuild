@@ -26,7 +26,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// This class will cache string values for loaded Xml files.
     /// </summary>
-    [DebuggerDisplay("#Strings={Count} #Documents={documents.Count}")]
+    [DebuggerDisplay("#Strings={Count} #Documents={_documents.Count}")]
     internal class ProjectStringCache
     {
         /// <summary>
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Construction
         /// Represents an entry in the ProjectStringCache.
         /// Can't be a struct because the copy-by-value and the ref counting don't go well together.
         /// </summary>
-        [DebuggerDisplay("Count={refCount} String={cachedString}")]
+        [DebuggerDisplay("Count={_refCount} String={_cachedString}")]
         private class StringCacheEntry : IKeyed
         {
             /// <summary>

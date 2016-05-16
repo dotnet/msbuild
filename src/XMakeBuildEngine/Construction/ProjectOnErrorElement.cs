@@ -20,7 +20,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// ProjectUsingTaskElement represents the Import element in the MSBuild project.
     /// </summary>
-    [DebuggerDisplay("ExecuteTargets={ExecuteTargets}")]
+    [DebuggerDisplay("ExecuteTargetsAttribute={ExecuteTargetsAttribute}")]
     public class ProjectOnErrorElement : ProjectElement
     {
         /// <summary>

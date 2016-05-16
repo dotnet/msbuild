@@ -33,16 +33,20 @@ namespace Microsoft.Build.Tasks
             // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
             // here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
             // doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
-            // Note: 8/12/15 - Changed encoding to use UTF8 when OS version is greater than or equal to 6.1 (Windows 7)
-            _standardOutputEncoding = GetEncodingWithOsFallback();
-            _standardErrorEncoding = GetEncodingWithOsFallback();
+            // If the cmd file contains non-ANSI characters encoding may change.
+            _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
         }
 
         #endregion
 
         #region Fields
 
-        // Are the ecodings for StdErr and StdOut streams valid
+        private const string UseUtf8Always = "ALWAYS";
+        private const string UseUtf8Never = "NEVER";
+        private const string UseUtf8Detect = "DETECT";
+
+        // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
         private string _workingDirectory;
         private ITaskItem[] _outputs;
@@ -70,7 +74,7 @@ namespace Microsoft.Build.Tasks
         /// Enable the pipe of the standard out to an item (StandardOutput).
         /// </summary>
         /// <Remarks>
-        /// Even thought this is called a pipe, it is infact a Tee.  Use StandardOutputImportance to adjust the visibility of the stdout.
+        /// Even thought this is called a pipe, it is in fact a Tee.  Use StandardOutputImportance to adjust the visibility of the stdout.
         /// </Remarks>
         public bool ConsoleToMSBuild { get; set; }
 
@@ -122,6 +126,14 @@ namespace Microsoft.Build.Tasks
         {
             get { return _standardErrorEncoding; }
         }
+
+        /// <summary>
+        /// Whether or not to use UTF8 encoding for the cmd file and console window.
+        /// Values: Always, Never, Detect
+        /// If set to Detect, the current code page will be used unless it cannot represent 
+        /// the Command string. In that case, UTF-8 is used.
+        /// </summary>
+        public string UseUtf8Encoding { get; set; }
 
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
@@ -191,6 +203,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
+            var encoding = BatchFileEncoding();
+
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
             bool isUnix = Path.DirectorySeparatorChar == '/';
@@ -201,7 +215,8 @@ namespace Microsoft.Build.Tasks
             // just the OEM version.
             // See http://www.microsoft.com/globaldev/getWR/steps/wrg_codepage.mspx for a discussion of ANSI vs OEM
             // Note: 8/12/15 - Switched to use UTF8 on OS newer than 6.1 (Windows 7)
-            using (StreamWriter sw = FileUtilities.OpenWrite(_batchFile, false, GetEncodingWithOsFallback()))
+            // Note: 1/12/16 - Only use UTF8 when we detect we need to or the user specifies 'Always'
+            using (StreamWriter sw = FileUtilities.OpenWrite(_batchFile, false, encoding))
             {
                 if (!isUnix)
                 {
@@ -220,12 +235,21 @@ namespace Microsoft.Build.Tasks
                     sw.WriteLine("set errorlevel=dummy");
                     sw.WriteLine("set errorlevel=");
 
-                    // set the console to use the stream writer's encoding
+                // We may need to change the code page and console encoding.
+                if (encoding.CodePage != EncodingUtilities.CurrentSystemOemEncoding.CodePage)
+                {
                     // Output to nul so we don't change output and logs.
-                    sw.WriteLine(string.Format(@"%SystemRoot%\System32\chcp.com {0}>nul", sw.Encoding.CodePage));
+                    sw.WriteLine(string.Format(@"%SystemRoot%\System32\chcp.com {0}>nul", encoding.CodePage));
+
+                    // Ensure that the console encoding is correct.
+                    _standardOutputEncoding = encoding;
+                    _standardErrorEncoding = encoding;
+                }
 
                     // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
-                    // automatically maps the network path to a drive letter, and then popd disconnects it
+                    // automatically maps the network path to a drive letter, and then popd disconnects it.
+                    // This is required because Cmd.exe does not support UNC names as the current directory:
+                    // https://support.microsoft.com/en-us/kb/156276
                     if (workingDirectoryIsUNC)
                     {
                         sw.WriteLine("pushd " + _workingDirectory);
@@ -618,29 +642,81 @@ namespace Microsoft.Build.Tasks
         private static readonly Encoding s_utf8WithoutBom = new UTF8Encoding(false);
 
         /// <summary>
-        /// Get encoding based on OS. This will fall back to previous behavior on Windows before Windows 7.
-        /// If the OS is greater than or equal to Windows 7, UTF8 encoding will be used for the cmd file.
-        /// On unices, use ASCII.
+        /// Find the encoding for the batch file.
         /// </summary>
-        /// <remarks>UTF8 w/o BOM is used because cmd.exe does not like a BOM in a .cmd file.</remarks>
-        /// <returns>Encoding to use</returns>
-        private Encoding GetEncodingWithOsFallback()
+        /// <remarks>
+        /// The "best" encoding is the current OEM encoding, unless it's not capable of representing
+        /// the characters we plan to put in the file. If it isn't, we can fall back to UTF-8.
+        ///
+        /// Why not always UTF-8? Because tools don't always handle it well. See
+        /// https://github.com/Microsoft/msbuild/issues/397
+        /// </remarks>
+        private Encoding BatchFileEncoding()
         {
 #if FEATURE_OSVERSION
             if (!NativeMethodsShared.IsWindows)
             {
                 return s_utf8WithoutBom;
             }
+            
+            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            string useUtf8 = string.IsNullOrEmpty(UseUtf8Encoding) ? UseUtf8Detect : UseUtf8Encoding;
 
-            // Windows 7 (6.1) or greater
+            // UTF8 is only supposed in Windows 7 (6.1) or greater.
             var windows7 = new Version(6, 1);
 
-            return Environment.OSVersion.Version >= windows7
-                ? s_utf8WithoutBom
-                : EncodingUtilities.CurrentSystemOemEncoding;
+            if (Environment.OSVersion.Version < windows7)
+            {
+                useUtf8 = UseUtf8Never;
+            }
+
+            switch (useUtf8.ToUpperInvariant())
+            {
+                case UseUtf8Always:
+                    return s_utf8WithoutBom;
+                case UseUtf8Never:
+                    return EncodingUtilities.CurrentSystemOemEncoding;
+                default:
+                    return CanEncodeString(defaultEncoding.CodePage, Command + WorkingDirectory)
+                        ? defaultEncoding
+                        : s_utf8WithoutBom;
+            }
 #else
             return s_utf8WithoutBom;
 #endif
+        }
+
+            /// <summary>
+            /// Checks to see if a string can be encoded in a specified code page.
+            /// </summary>
+            /// <remarks>Internal for testing purposes.</remarks>
+            /// <param name="codePage">Code page for encoding.</param>
+            /// <param name="stringToEncode">String to encode.</param>
+            /// <returns>True if the string can be encoded in the specified code page.</returns>
+        internal static bool CanEncodeString(int codePage, string stringToEncode)
+        {
+            // We have a System.String that contains some characters. Get a lossless representation
+            // in byte-array form.
+            var unicodeEncoding = new UnicodeEncoding();
+            var unicodeBytes = unicodeEncoding.GetBytes(stringToEncode);
+
+            // Create an Encoding using the desired code page, but throws if there's a
+            // character that can't be represented.
+            var systemEncoding = Encoding.GetEncoding(codePage, EncoderFallback.ExceptionFallback,
+                DecoderFallback.ExceptionFallback);
+
+            try
+            {
+                var oemBytes = Encoding.Convert(unicodeEncoding, systemEncoding, unicodeBytes);
+
+                // If Convert didn't throw, we can represent everything in the desired encoding.
+                return true;
+            }
+            catch (EncoderFallbackException)
+            {
+                // If a fallback encoding was attempted, we need to go to Unicode.
+                return false;
+            }
         }
     }
 }

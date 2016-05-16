@@ -48,7 +48,9 @@ namespace Microsoft.Build.CommandLine
             OldOM,
 #endif
             DistributedFileLogger,
+#if FEATURE_MSBUILD_DEBUGGER
             Debugger,
+#endif
             DetailedSummary,
 #if DEBUG
             WaitForDebugger,
@@ -225,8 +227,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null, null    ),
 #endif
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null, null    ),
-
+#if FEATURE_MSBUILD_DEBUGGER
             new ParameterlessSwitchInfo(  new string[] { "debug", "d" },         ParameterlessSwitch.Debugger,                         null, "DebuggerEnabled"),
+#endif
             new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null   ),
 #if DEBUG
             new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null , null   ),
@@ -461,10 +464,19 @@ namespace Microsoft.Build.CommandLine
             {
                 // initialize its parameter storage
                 _parameterizedSwitches[(int)parameterizedSwitch].parameters = new ArrayList();
-            }
 
-            // save the switch text
-            _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg = commandLineArg;
+                // save the switch text
+                _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg = commandLineArg;
+            }
+            else
+            {
+                // append the switch text
+                _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg = string.Concat(
+                        _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg,
+                        " ",
+                        commandLineArg
+                    );
+            }
 
             // check if the switch has multiple parameters
             if (multipleParametersAllowed)
@@ -861,7 +873,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        #region Flag Lightup Support
+#region Flag Lightup Support
         /// <summary>
         /// Read a lightup key from either HKLM or HKCU depending on what is passed in root.
         /// The key may either be a string, in which case it needs to be like "true" or "false"
@@ -945,6 +957,6 @@ namespace Microsoft.Build.CommandLine
             parameterlessSwitch.lightUpKeyResult = ReadLightupBool(parameterlessSwitch.lightUpKey);
             return parameterlessSwitch.lightUpKeyResult;
         }
-        #endregion
+#endregion
     }
 }
