@@ -1,6 +1,26 @@
 Known issues & workarounds
 ==========================
 
+## OpenSSL dependency on OS X
+OS X "El Capitan" (10.11) comes with 0.9.8 version of OpenSSL. .NET Core depends on versions >= 1.0.1 of OpenSSL. You can update the version by using [Homebrew](https://brew.sh), [MacPorts](https://www.macports.org/) or manually. The important bit is that you need to have the required OpenSSL version on the path when you work with .NET Core. 
+
+With Homebrew, you can run the following commands to get this done: 
+
+```console
+brew update
+brew install openssl
+brew link --force openssl
+```
+
+MacPorts doesn't have the concept of linking, so it is reccomended that you uninstall 0.9.8 version of OpenSSL using the following command:
+
+```console
+sudo port upgrade openssl
+sudo port -f uninstall openssl @0.9.8
+```
+
+You can verify whether you have the right version using the  `openssl version` command from the Terminal. 
+
 ## `dotnet restore` times out on Win7 x64
 If you have Virtual Box and you try to use the CLI on a Win7 x64 machine, `dotnet restore` will be really slow and will eventually time out without doing much restoring. 
 
