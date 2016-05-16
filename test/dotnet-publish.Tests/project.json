@@ -5,15 +5,17 @@
       "type": "platform",
       "version": "1.0.0-rc3-*"
     },
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24027",
-    "Microsoft.DotNet.TestFramework": { "target": "project" },
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc3-24113-00",
+    "Microsoft.DotNet.TestFramework": {
+      "target": "project"
+    },
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-00206",
     "dotnet-test-xunit": "1.0.0-rc2-192208-24",
-    "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc2-24027"
+    "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc3-24113-00"
   },
   "frameworks": {
     "netcoreapp1.0": {

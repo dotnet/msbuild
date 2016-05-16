@@ -199,7 +199,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         //        [InlineData("net20", false, true)]
         //        [InlineData("net40", true, true)]
         //        [InlineData("net461", true, true)]
-        [InlineData("netstandard1.5", true, false)]
+        [InlineData("netstandard1.6", true, false)]
         public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute, bool windowsOnly)
         {
             var framework = NuGetFramework.Parse(frameworkName);

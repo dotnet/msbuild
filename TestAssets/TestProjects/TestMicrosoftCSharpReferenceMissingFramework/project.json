@@ -10,12 +10,12 @@
     },
     "netcore50": {
       "dependencies": {
-        "System.Private.Uri": "4.0.1-rc2-24027"
+        "System.Private.Uri": "4.0.1-rc3-24113-00"
       }
     },
     "net99": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.1-rc2-24027"
+        "Microsoft.CSharp": "4.0.1-rc3-24113-00"
       }
     }
   }

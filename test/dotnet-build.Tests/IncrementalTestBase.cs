@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class IncrementalTestBase : TestBase
     {
-        protected readonly string _libraryFrameworkFullName = ".NETStandard,Version=v1.5";
+        protected readonly string _libraryFrameworkFullName = ".NETStandard,Version=v1.6";
         protected readonly string _appFrameworkFullName = ".NETCoreApp,Version=v1.0";
 
         protected virtual string MainProject

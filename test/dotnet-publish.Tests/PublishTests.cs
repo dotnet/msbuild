@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
             publishCommand.GetOutputDirectory().Delete(true);
 
-            publishCommand = new PublishCommand(lesserTestProject, "netstandard1.5", RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier());
+            publishCommand = new PublishCommand(lesserTestProject, "netstandard1.6", RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier());
             publishCommand.Execute().Should().Pass();
 
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");

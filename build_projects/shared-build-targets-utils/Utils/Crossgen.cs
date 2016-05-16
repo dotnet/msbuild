@@ -12,6 +12,11 @@ namespace Microsoft.DotNet.Cli.Build
     {
         private string _coreClrVersion;
         private string _crossGenPath;
+        private List<string> _excludedLibraries = new List<string>() 
+        {
+            "mscorlib.dll",
+            "mscorlib.ni.dll"
+        };
 
         // This is not always correct. The version of crossgen we need to pick up is whatever one was restored as part
         // of the Microsoft.NETCore.Runtime.CoreCLR package that is part of the shared library. For now, the version hardcoded
@@ -95,7 +100,8 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 string fileName = Path.GetFileName(file);
 
-                if (fileName == "mscorlib.dll" || fileName == "mscorlib.ni.dll" || !PEUtils.HasMetadata(file))
+                if (_excludedLibraries.Any(lib => String.Equals(lib, fileName, StringComparison.OrdinalIgnoreCase)) 
+                    || !PEUtils.HasMetadata(file))
                 {
                     continue;
                 }
