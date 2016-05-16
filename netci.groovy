@@ -9,6 +9,7 @@ def project = GithubProject
     ['Windows_NT', 'OSX', 'Ubuntu'].each {osName ->
         def isPR = false
         def newJobName = ''
+        def skipTestsWhenResultsNotFound = true
 
         if (branch == 'pr') {
             isPR = true
@@ -30,10 +31,9 @@ def project = GithubProject
                     steps{
                         batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && RebuildWithLocalMSBuild.cmd")
                     }
-                }
 
-                // Add xunit result archiving
-                Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml')
+                    skipTestsWhenResultsNotFound = false
+                }
 
                 break;
             case 'OSX':
@@ -43,21 +43,21 @@ def project = GithubProject
                     }
                 }
 
-                //no test archiving yet
-
                 break;
             case 'Ubuntu':
+
+                // Do not run tests on Ubuntu. We don't yet have a green test baseline.
                 newJob.with{
                     steps{
                         shell("./cibuild.sh --scope Compile")
                     }
                 }
 
-                //no test archiving yet
-
                 break;
         }
-        
+
+        // Add xunit result archiving. Skip if no results found.
+        Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
         Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
         Utilities.standardJobSetup(newJob, project, isPR, branch)
         // Add archiving of logs
