@@ -1909,14 +1909,10 @@ namespace Microsoft.Build.Construction
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (!ExceptionHandling.NotExpectedException(ex))
-                {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(projectFile), ex, "InvalidProjectFile", ex.Message);
-                }
-
-                throw;
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(projectFile), ex, "InvalidProjectFile", ex.Message);
+                throw; // Without this there's a spurious CS0161 because csc 1.2.0.60317 can't see that the above is an unconditional throw.
             }
         }
 

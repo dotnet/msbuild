@@ -86,10 +86,8 @@ namespace Microsoft.Build.Logging
 
                 _fileWriter.AutoFlush = _autoFlush;
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, e.Message);
@@ -119,10 +117,8 @@ namespace Microsoft.Build.Logging
             {
                 _fileWriter.Write(text);
             }
-            catch (Exception ex) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                    throw;
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, ex.Message);

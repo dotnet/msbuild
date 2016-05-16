@@ -610,14 +610,8 @@ namespace Microsoft.Build.Shared
             {
                 path = NormalizePath(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
 
             return path;
@@ -632,14 +626,8 @@ namespace Microsoft.Build.Shared
             {
                 File.Delete(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
         }
 
@@ -676,14 +664,8 @@ namespace Microsoft.Build.Shared
                         break;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
-                    }
-
-                    // Otherwise eat it.
                 }
 
                 if (i + 1 < retryCount) // should not wait for the final iteration since we not gonna check anyway
@@ -704,14 +686,8 @@ namespace Microsoft.Build.Shared
             {
                 result = Path.IsPathRooted(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
                 result = false;
             }
 
@@ -726,7 +702,7 @@ namespace Microsoft.Build.Shared
         /// for directories) was called - but with the advantage that a FileInfo object is returned
         /// that can be queried (e.g., for LastWriteTime) without hitting the disk again.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <returns>FileInfo around path if it is an existing /file/, else null</returns>
         internal static FileInfo GetFileInfoNoThrow(string filePath)
         {
@@ -738,11 +714,8 @@ namespace Microsoft.Build.Shared
             {
                 fileInfo = new FileInfo(filePath);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 // Invalid or inaccessible path: treat as if nonexistent file, just as File.Exists does
                 return null;
             }

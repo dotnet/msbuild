@@ -2200,13 +2200,8 @@ namespace Microsoft.Build.Evaluation
                 // Expand the wildcards and provide an alphabetical order list of import statements.
                 importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscaped);
             }
-            catch (Exception ex) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
                 ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(importExpressionEscaped), XMakeAttributes.project, XMakeElements.import, ex.Message);
             }
 
@@ -2225,13 +2220,8 @@ namespace Microsoft.Build.Evaluation
                     // Canonicalize to eg., eliminate "\..\"
                     importFileUnescaped = FileUtilities.NormalizePath(importFileUnescaped);
                 }
-                catch (Exception ex) // Catching Exception, but rethrowing unless it's an IO related exception.
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
-                    }
-
                     ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValueWithException", importFileUnescaped, XMakeAttributes.project, XMakeElements.import, ex.Message);
                 }
 
@@ -2304,7 +2294,7 @@ namespace Microsoft.Build.Evaluation
                             importFileUnescaped,
                             new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(
                                 _data.GlobalPropertiesDictionary,
-                                instance => ((IProperty)instance).EvaluatedValueEscaped),
+                                instance => ((IProperty) instance).EvaluatedValueEscaped),
                             _data.ExplicitToolsVersion,
                             _loggingService,
                             _projectRootElementCache,
@@ -2317,7 +2307,8 @@ namespace Microsoft.Build.Evaluation
                         // Only record the data if we want to record duplicate imports
                         if ((_loadSettings & ProjectLoadSettings.RecordDuplicateButNotCircularImports) != 0)
                         {
-                            _data.RecordImportWithDuplicates(importElement, importedProjectElement, importedProjectElement.Version);
+                            _data.RecordImportWithDuplicates(importElement, importedProjectElement,
+                                importedProjectElement.Version);
                         }
 
                         // Since we have already seen this we need to not continue on in the processing.
@@ -2329,32 +2320,30 @@ namespace Microsoft.Build.Evaluation
                         imports.Add(importedProjectElement);
                     }
                 }
-                catch (InvalidProjectFileException ex)
+                catch (InvalidProjectFileException ex) when (ExceptionHandling.IsIoRelatedException(ex.InnerException))
                 {
-                    if (ExceptionHandling.IsIoRelatedException(ex.InnerException))
+                    // The import couldn't be read from disk, or something similar. In that case,
+                    // the error message would be more useful if it pointed to the location in the importing project file instead.
+                    // Perhaps the import tag has a typo in, for example.
+
+                    // There's a specific message for file not existing
+                    if (!File.Exists(importFileUnescaped))
                     {
-                        // The import couldn't be read from disk, or something similar. In that case,
-                        // the error message would be more useful if it pointed to the location in the importing project file instead.
-                        // Perhaps the import tag has a typo in, for example.
-
-                        // There's a specific message for file not existing
-                        if (!File.Exists(importFileUnescaped))
+                        if (!throwOnFileNotExistsError ||
+                            (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
                         {
-                            if (!throwOnFileNotExistsError || (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound", importFileUnescaped);
-                        }
-                        else
-                        {
-                            // Otherwise a more generic message, still pointing to the location of the import tag
-                            ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile", importFileUnescaped, ex.InnerException.Message);
-                        }
+                        ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
+                            importFileUnescaped);
                     }
-
-                    throw;
+                    else
+                    {
+                        // Otherwise a more generic message, still pointing to the location of the import tag
+                        ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile",
+                            importFileUnescaped, ex.InnerException.Message);
+                    }
                 }
 
                 // Because these expressions will never be expanded again, we 
