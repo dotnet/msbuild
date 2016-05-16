@@ -21,6 +21,21 @@ sudo port -f uninstall openssl @0.9.8
 
 You can verify whether you have the right version using the  `openssl version` command from the Terminal. 
 
+## Users of zsh (z shell) don't get `dotnet` on the path after install
+There is a problem with the way `path_helper` interacts with `zsh` which makes `dotnet` not appear on the path even though 
+the install places the file properly in the `/etc/paths.d/` directory. 
+
+**Issues tracking this:**
+
+* [#1567](https://github.com/dotnet/cli/issues/1567)
+
+**Workaround:** symlink the `dotnet` binary in the installation directory to a place in the global path, e.g. `/usr/local/bin`. 
+The command you can use is:
+
+```console
+ln -s /usr/local/share/dotnet/dotnet /usr/local/bin
+```
+
 ## `dotnet restore` times out on Win7 x64
 If you have Virtual Box and you try to use the CLI on a Win7 x64 machine, `dotnet restore` will be really slow and will eventually time out without doing much restoring. 
 
@@ -73,4 +88,3 @@ get information and get unblocked.
 A "known issue" is a major issue that block users in doing their everyday tasks and that affect all or 
 most of the commands in the CLI tools. If you want to report or see minor issues, you can use the [issues list](https://github.com/dotnet/cli/issues). 
 
-  
