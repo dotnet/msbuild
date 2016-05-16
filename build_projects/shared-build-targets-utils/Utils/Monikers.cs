@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static string GetDebianSharedFrameworkPackageName(BuildTargetContext c)
         {
-            var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
+            var sharedFrameworkNugetVersion = DependencyVersions.SharedFrameworkVersion;
 
             return $"dotnet-sharedframework-{SharedFrameworkName}-{sharedFrameworkNugetVersion}".ToLower();
         }

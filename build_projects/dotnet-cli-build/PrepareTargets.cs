@@ -12,12 +12,13 @@ using Newtonsoft.Json.Linq;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Utils;
+using System.IO.Compression;
 
 namespace Microsoft.DotNet.Cli.Build
 {
     public class PrepareTargets
     {
-        [Target(nameof(Init), nameof(RestorePackages))]
+        [Target(nameof(Init), nameof(DownloadHostAndSharedFxArtifacts), nameof(RestorePackages))]
         public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
 
         [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
@@ -75,16 +76,10 @@ namespace Microsoft.DotNet.Cli.Build
                 ReleaseSuffix = branchInfo["RELEASE_SUFFIX"],
                 CommitCount = commitCount
             };
-
-            var hostVersion = new HostVersion()
-            {
-                CommitCount = commitCount
-            };
+            
 
             c.BuildContext["BuildVersion"] = buildVersion;
-            c.BuildContext["HostVersion"] = hostVersion;
             c.BuildContext["CommitHash"] = commitHash;
-            c.BuildContext["SharedFrameworkNugetVersion"] = buildVersion.NetCoreAppVersion;
 
             c.Info($"Building Version: {buildVersion.SimpleVersion} (NuGet Packages: {buildVersion.NuGetVersion})");
             c.Info($"From Commit: {commitHash}");
@@ -106,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (string templateFile in templateFiles)
             {
                 JObject projectRoot = JsonUtils.ReadProject(templateFile);
-                projectRoot["dependencies"]["Microsoft.NETCore.App"]["version"] = c.BuildContext.Get<BuildVersion>("BuildVersion").NetCoreAppVersion;
+                projectRoot["dependencies"]["Microsoft.NETCore.App"]["version"] = DependencyVersions.SharedFrameworkVersion;
                 JsonUtils.WriteProject(projectRoot, Path.ChangeExtension(templateFile, "template"));
             }
 
@@ -146,16 +141,90 @@ namespace Microsoft.DotNet.Cli.Build
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
             var cliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
-            var sharedFrameworkVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
+            var sharedFrameworkVersion = DependencyVersions.SharedFrameworkVersion;
+            var hostVersion = DependencyVersions.SharedHostVersion;
 
+            // Generated Installers + Archives
             AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk", cliVersion);
-            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
-            AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
             AddInstallerArtifactToContext(c, "dotnet-dev", "CombinedFrameworkSDKHost", cliVersion);
-            AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);
             AddInstallerArtifactToContext(c, "dotnet-sharedframework-sdk", "CombinedFrameworkSDK", cliVersion);
             AddInstallerArtifactToContext(c, "dotnet-sdk-debug", "SdkSymbols", cliVersion);
+
+            //Downloaded Installers + Archives
+            AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
+            AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
+            AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);
+
+            return c.Success();
+        }
+
+        [Target(
+            nameof(ExpectedBuildArtifacts), 
+            nameof(DownloadHostAndSharedFxArchives), 
+            nameof(DownloadHostAndSharedFxInstallers))]
+        public static BuildTargetResult DownloadHostAndSharedFxArtifacts(BuildTargetContext c) => c.Success();
+
+        [Target]
+        public static BuildTargetResult DownloadHostAndSharedFxArchives(BuildTargetContext c)
+        {
+            var sharedFrameworkVersion = DependencyVersions.SharedFrameworkVersion;
+            var sharedFrameworkChannel = DependencyVersions.SharedFrameworkChannel;
+
+            var combinedSharedHostAndFrameworkArchiveFile = c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile");
+
+            Mkdirp(Path.GetDirectoryName(combinedSharedHostAndFrameworkArchiveFile));
+
+            AzurePublisher.DownloadFile(
+                AzurePublisher.CalculateArchiveBlob(
+                    combinedSharedHostAndFrameworkArchiveFile, 
+                    sharedFrameworkChannel, 
+                    sharedFrameworkVersion), 
+                combinedSharedHostAndFrameworkArchiveFile).Wait();
+
+            // Unpack the combined archive to shared framework publish directory
+            Rmdir(Dirs.SharedFrameworkPublish);
+            Mkdirp(Dirs.SharedFrameworkPublish);
+            if(CurrentPlatform.IsWindows)
+            {
+                ZipFile.ExtractToDirectory(combinedSharedHostAndFrameworkArchiveFile, Dirs.SharedFrameworkPublish);
+            }
+            else
+            {
+                Exec("tar", "xf", combinedSharedHostAndFrameworkArchiveFile, "-C", Dirs.SharedFrameworkPublish);
+            }
+
+            return c.Success();
+        }
+
+        [Target]
+        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
+        public static BuildTargetResult DownloadHostAndSharedFxInstallers(BuildTargetContext c)
+        {
+            var sharedFrameworkVersion = DependencyVersions.SharedFrameworkVersion;
+            var hostVersion = DependencyVersions.SharedHostVersion;
+
+            var sharedFrameworkChannel = DependencyVersions.SharedFrameworkChannel;
+            var sharedHostChannel = DependencyVersions.SharedHostChannel;
+
+            var sharedFrameworkInstallerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
+            var sharedHostInstallerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
+
+            Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerFile));
+            Mkdirp(Path.GetDirectoryName(sharedHostInstallerFile));
+
+            AzurePublisher.DownloadFile(
+                AzurePublisher.CalculateInstallerBlob(
+                    sharedFrameworkInstallerFile,
+                    sharedFrameworkChannel,
+                    sharedFrameworkVersion),
+                sharedFrameworkInstallerFile).Wait();
+
+            AzurePublisher.DownloadFile(
+                AzurePublisher.CalculateInstallerBlob(
+                    sharedHostInstallerFile,
+                    sharedHostChannel,
+                    hostVersion),
+                sharedHostInstallerFile).Wait();
 
             return c.Success();
         }
@@ -231,7 +300,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var dotnet = DotNetCli.Stage0;
 
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel", "--fallbacksource", Dirs.CorehostLocalPackages)
+            dotnet.Restore("--verbosity", "verbose", "--disable-parallel")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "src"))
                 .Execute()
                 .EnsureSuccessful();
@@ -424,7 +493,14 @@ cmake is required to build the native host 'corehost'";
             switch (CurrentPlatform.Current)
             {
                 case BuildPlatform.Windows:
-                    installer = productName + ".exe";
+                    if (contextPrefix.Contains("Combined"))
+                    {
+                        installer = productName + ".exe";
+                    }
+                    else
+                    {
+                        installer = productName + ".msi";
+                    }
                     break;
                 case BuildPlatform.OSX:
                     installer = productName + ".pkg";

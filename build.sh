@@ -49,7 +49,6 @@ args=($temp)
 
 dockerbuild()
 {
-    BUILD_COMMAND=/opt/code/build_projects/dotnet-host-build/build.sh $DIR/scripts/dockerrun.sh --non-interactive "$@"
     BUILD_COMMAND=/opt/code/build_projects/dotnet-cli-build/build.sh $DIR/scripts/dockerrun.sh --non-interactive "$@"
 }
 
@@ -57,6 +56,5 @@ dockerbuild()
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
     dockerbuild "${args[@]}"
 else
-    $DIR/build_projects/dotnet-host-build/build.sh "${args[@]}"
     $DIR/build_projects/dotnet-cli-build/build.sh "${args[@]}"
 fi

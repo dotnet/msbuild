@@ -33,11 +33,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkMsi { get; set; }
 
-        private static string SharedFrameworkBundle { get; set; }
-
         private static string SdkEngine { get; set; }
-
-        private static string SharedFrameworkEngine { get; set; }
 
         private static string MsiVersion { get; set; }
 
@@ -85,10 +81,8 @@ namespace Microsoft.DotNet.Cli.Build
             SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
             SdkEngine = GetEngineName(SdkBundle);
 
-            SharedFrameworkBundle = c.BuildContext.Get<string>("CombinedFrameworkHostInstallerFile");
-            SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
             SharedFrameworkMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), "msi");
-            SharedFrameworkEngine = GetEngineName(SharedFrameworkBundle);
+            SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
 
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
             MsiVersion = buildVersion.GenerateMsiVersion();
@@ -100,8 +94,6 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target(nameof(MsiTargets.InitMsi),
-        nameof(GenerateDotnetSharedHostMsi),
-        nameof(GenerateDotnetSharedFrameworkMsi),
         nameof(GenerateCliSdkMsi))]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateMsis(BuildTargetContext c)
@@ -110,8 +102,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target(nameof(MsiTargets.InitMsi),
-        nameof(GenerateCliSdkBundle),
-        nameof(GenerateSharedFxBundle))]
+        nameof(GenerateCliSdkBundle))]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateBundles(BuildTargetContext c)
         {
@@ -134,58 +125,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateDotnetSharedHostMsi(BuildTargetContext c)
-        {
-            var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
-            var hostMsiVersion = hostVersion.GenerateMsiVersion();            
-            var hostNugetVersion = hostVersion.LockedHostVersion;
-            var inputDir = c.BuildContext.Get<string>("SharedHostPublishRoot");
-            var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedhost");
-            var sharedHostBrandName = $"'{Monikers.SharedHostBrandName}'";
-
-            if (Directory.Exists(wixObjRoot))
-            {
-                Utils.DeleteDirectory(wixObjRoot);
-            }
-            Directory.CreateDirectory(wixObjRoot);
-
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "host", "generatemsi.ps1"),
-                inputDir, SharedHostMsi, WixRoot, sharedHostBrandName, hostMsiVersion, hostNugetVersion, Arch, wixObjRoot)
-                    .Execute()
-                    .EnsureSuccessful();
-            return c.Success();
-        }
-
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateDotnetSharedFrameworkMsi(BuildTargetContext c)
-        {
-            var inputDir = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
-            var sharedFrameworkNuGetName = Monikers.SharedFrameworkName;
-            var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var msiVerison = sharedFrameworkNuGetVersion.Split('-')[0];
-            var upgradeCode = Utils.GenerateGuidFromName(SharedFrameworkMsi).ToString().ToUpper();
-            var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedframework");
-            var sharedFxBrandName = $"'{Monikers.SharedFxBrandName}'";
-
-            if (Directory.Exists(wixObjRoot))
-            {
-                Utils.DeleteDirectory(wixObjRoot);
-            }
-            Directory.CreateDirectory(wixObjRoot);
-
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatemsi.ps1"),
-                inputDir, SharedFrameworkMsi, WixRoot, sharedFxBrandName, msiVerison, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot)
-                    .Execute()
-                    .EnsureSuccessful();
-            return c.Success();
-        }
-
-
         [Target(nameof(MsiTargets.InitMsi))]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateCliSdkBundle(BuildTargetContext c)
@@ -204,27 +143,9 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(nameof(MsiTargets.InitMsi))]
         [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateSharedFxBundle(BuildTargetContext c)
-        {
-            var sharedFrameworkNuGetName = Monikers.SharedFrameworkName;
-            var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var upgradeCode = Utils.GenerateGuidFromName(SharedFrameworkBundle).ToString().ToUpper();
-            var sharedFxBrandName = $"'{Monikers.SharedFxBrandName}'";
-
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatebundle.ps1"),
-                SharedFrameworkMsi, SharedHostMsi, SharedFrameworkBundle, WixRoot, sharedFxBrandName, MsiVersion, CliDisplayVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch)
-                    .Execute()
-                    .EnsureSuccessful();
-            return c.Success();
-        }
-
-        [Target(nameof(MsiTargets.InitMsi))]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult ExtractEngineFromBundle(BuildTargetContext c)
         {
             ExtractEngineFromBundleHelper(SdkBundle, SdkEngine);
-            ExtractEngineFromBundleHelper(SharedFrameworkBundle, SharedFrameworkEngine);
             return c.Success();
         }
 
@@ -233,14 +154,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult ReattachEngineToBundle(BuildTargetContext c)
         {
             ReattachEngineToBundleHelper(SdkBundle, SdkEngine);
-            ReattachEngineToBundleHelper(SharedFrameworkBundle, SharedFrameworkEngine);
             return c.Success();
-        }
-
-        private static string GetEngineName(string bundle)
-        {
-            var engine = $"{Path.GetFileNameWithoutExtension(bundle)}-{ENGINE}";
-            return Path.Combine(Path.GetDirectoryName(bundle), engine);
         }
 
         private static void ExtractEngineFromBundleHelper(string bundle, string engine)
@@ -257,6 +171,12 @@ namespace Microsoft.DotNet.Cli.Build
                     .EnsureSuccessful();
 
             File.Delete(engine);
+        }
+
+        private static string GetEngineName(string bundle)
+        {
+            var engine = $"{Path.GetFileNameWithoutExtension(bundle)}-{ENGINE}";
+            return Path.Combine(Path.GetDirectoryName(bundle), engine);
         }
     }
 }

@@ -12,9 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class DebTargets
     {
-        [Target(nameof(GenerateSharedHostDeb),
-                nameof(GenerateSharedFrameworkDeb),
-                nameof(GenerateSdkDeb))]
+        [Target(nameof(GenerateSdkDeb))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult GenerateDebs(BuildTargetContext c)
         {
@@ -52,62 +50,9 @@ namespace Microsoft.DotNet.Cli.Build
                 "-m", manPagesDir, 
                 "--framework-debian-package-name", sharedFxDebianPackageName,
                 "--framework-nuget-name", Monikers.SharedFrameworkName,
-                "--framework-nuget-version", c.BuildContext.Get<string>("SharedFrameworkNugetVersion"),
+                "--framework-nuget-version", DependencyVersions.SharedFrameworkVersion,
                 "--previous-version-url", previousVersionURL, 
                 "--obj-root", objRoot)
-                    .Execute()
-                    .EnsureSuccessful();
-            return c.Success();
-        }
-
-        [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
-        public static BuildTargetResult GenerateSharedHostDeb(BuildTargetContext c)
-        {
-            var packageName = Monikers.GetDebianSharedHostPackageName(c);
-            var version = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
-            var inputRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
-            var debFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
-            var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedhost");
-            var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
-
-            if (Directory.Exists(objRoot))
-            {
-                Directory.Delete(objRoot, true);
-            }
-
-            Directory.CreateDirectory(objRoot);
-
-            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedhost-debian.sh"),
-                    "--input", inputRoot, "--output", debFile, "-b", Monikers.SharedHostBrandName,
-                    "--obj-root", objRoot, "--version", version, "-m", manPagesDir)
-                    .Execute()
-                    .EnsureSuccessful();
-            return c.Success();
-        }
-
-        [Target(nameof(InstallSharedHost))]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
-        public static BuildTargetResult GenerateSharedFrameworkDeb(BuildTargetContext c)
-        {
-            var packageName = Monikers.GetDebianSharedFrameworkPackageName(c);
-            var version = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var inputRoot = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
-            var debFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
-            var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sharedframework");
-
-            if (Directory.Exists(objRoot))
-            {
-                Directory.Delete(objRoot, true);
-            }
-
-            Directory.CreateDirectory(objRoot);
-
-            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-sharedframework-debian.sh"),
-                    "--input", inputRoot, "--output", debFile, "--package-name", packageName, "-b", Monikers.SharedFxBrandName,
-                    "--framework-nuget-name", Monikers.SharedFrameworkName,
-                    "--framework-nuget-version", c.BuildContext.Get<string>("SharedFrameworkNugetVersion"),
-                    "--obj-root", objRoot, "--version", version)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

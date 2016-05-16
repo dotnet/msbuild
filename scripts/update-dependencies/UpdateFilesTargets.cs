@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Scripts
             return c.Success();
         }
 
-        [Target(nameof(ReplaceProjectJson), nameof(ReplaceCrossGen), nameof(ReplaceCoreHostPackaging))]
+        [Target(nameof(ReplaceProjectJson), nameof(ReplaceCrossGen))]
         public static BuildTargetResult ReplaceVersions(BuildTargetContext c) => c.Success();
 
         /// <summary>
@@ -190,29 +190,12 @@ namespace Microsoft.DotNet.Scripts
         [Target]
         public static BuildTargetResult ReplaceCrossGen(BuildTargetContext c)
         {
-            ReplaceFileContents(@"build_projects\dotnet-cli-build\CompileTargets.cs", compileTargetsContent =>
+            ReplaceFileContents(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", compileTargetsContent =>
             {
                 DependencyInfo coreFXInfo = c.GetCoreFXDependency();
                 Regex regex = new Regex(@"CoreCLRVersion = ""(?<version>\d.\d.\d)-(?<release>.*)"";");
 
                 return regex.ReplaceGroupValue(compileTargetsContent, "release", coreFXInfo.NewReleaseVersion);
-            });
-
-            return c.Success();
-        }
-
-        /// <summary>
-        /// Replaces version number that is hard-coded in the corehost packaging dir.props file.
-        /// </summary>
-        [Target]
-        public static BuildTargetResult ReplaceCoreHostPackaging(BuildTargetContext c)
-        {
-            ReplaceFileContents(@"pkg\dir.props", contents =>
-            {
-                DependencyInfo coreFXInfo = c.GetCoreFXDependency();
-                Regex regex = new Regex(@"Microsoft\.NETCore\.Platforms\\(?<version>\d\.\d\.\d)-(?<release>.*)\\runtime\.json");
-
-                return regex.ReplaceGroupValue(contents, "release", coreFXInfo.NewReleaseVersion);
             });
 
             return c.Success();

@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "dependencies": {
     "L22": "1.0.0-*",
-    "Microsoft.NETCore.App": "1.0.0-rc3-*"
+    "Microsoft.NETCore.App": "1.0.0-rc3-004306"
   },
   "frameworks": {
     "netstandard1.5": {
