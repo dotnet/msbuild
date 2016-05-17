@@ -41,7 +41,7 @@ popd
 
 # Publish the app
 Write-Host "Compiling App $appPath..."
-dotnet publish "$appPath" -o "$appPath\bin" --framework netstandardapp1.5
+dotnet publish "$appPath" -o "$appPath\bin" --framework netcoreapp1.0
 if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
 
 # Run the app

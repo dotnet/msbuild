@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Scripts
         [Target]
         public static BuildTargetResult ReplaceCrossGen(BuildTargetContext c)
         {
-            ReplaceFileContents(@"scripts\dotnet-cli-build\CompileTargets.cs", compileTargetsContent =>
+            ReplaceFileContents(@"build_projects\dotnet-cli-build\CompileTargets.cs", compileTargetsContent =>
             {
                 DependencyInfo coreFXInfo = c.GetCoreFXDependency();
                 Regex regex = new Regex(@"CoreCLRVersion = ""(?<version>\d.\d.\d)-(?<release>.*)"";");
