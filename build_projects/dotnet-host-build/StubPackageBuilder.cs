@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Host.Build
         {
             var projectJson = new StringBuilder();
             projectJson.Append("{");
-            projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24008\" },");
+            projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24027\" },");
             projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { \"imports\": [\"netstandard1.5\", \"dnxcore50\"] } },");
             projectJson.Append("  \"runtimes\": { \"win7-x64\": { } },");
             projectJson.Append("}");
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Host.Build
             projectJson.Append("{");
             projectJson.Append($"  \"version\": \"{version}\",");
             projectJson.Append($"  \"name\": \"{packageId}\",");
-            projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24008\" },");
+            projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24027\" },");
             projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { \"imports\": [\"netstandard1.5\", \"dnxcore50\"] } },");
             projectJson.Append("}");
 
