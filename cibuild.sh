@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -8,14 +8,19 @@ usage()
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
     echo "  --host <host>                  CoreCLR or Mono (default: CoreCLR)"
+    echo "  --skip-bootstrap               Do not rebuild msbuild with local binaries"
 }
 
+restoreBuildTools(){
+    eval "$THIS_SCRIPT_PATH/init-tools.sh"
+}
+
+# home is not defined on CI machines
 setHome()
 {
     if [ -z ${HOME+x} ]
     then
-        BUILD_COMMAND="( export HOME=$HOME_DEFAULT ; $BUILD_COMMAND )"
-        INIT_BUILD_TOOLS_COMMAND="( export HOME=$HOME_DEFAULT ; $INIT_BUILD_TOOLS_COMMAND )"
+        export HOME=$HOME_DEFAULT
         mkdir -p $HOME_DEFAULT
     fi
 }
@@ -26,7 +31,7 @@ downloadMSBuildForMono()
     then
         mkdir -p $PACKAGES_DIR # Create packages dir if it doesn't exist.
 
-        echo "Downloading MSBUILD from $MSBUILD_DOWNLOAD_URL"
+        echo "** Downloading MSBUILD from $MSBUILD_DOWNLOAD_URL"
         curl -sL -o $MSBUILD_ZIP "$MSBUILD_DOWNLOAD_URL"
 
         unzip -q $MSBUILD_ZIP -d $PACKAGES_DIR
@@ -35,15 +40,26 @@ downloadMSBuildForMono()
     fi
 }
 
-build()
+runMSBuildWith()
 {
-	echo Build Command: "$BUILD_COMMAND"
+    local runtimeHost=$1
+    local runtimeHostArgs=$2
+    local msbuildExe=$3
+    local msbuildArgs=$4
+    local logPath=$5
 
-    eval "$BUILD_COMMAND"
+    local buildCommand="$runtimeHost $runtimeHostArgs $msbuildExe $msbuildArgs"" /fl "'"'"/flp:v=diag;logfile=$logPath"'"'
 
-	echo Build completed. Exit code: $?
-	egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$LOG_PATH_ARG"
-	echo "Log: $LOG_PATH_ARG"
+    echo
+    echo "** using MSBuild in path: $msbuildExe"
+    echo "** using runtime host in path: $runtimeHost"
+	echo "** $buildCommand"
+    eval "$buildCommand"
+
+    echo
+	echo "** Build completed. Exit code: $?"
+	egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$logPath"
+	echo "** Log: $logPath"
 }
 
 setMonoDir(){
@@ -53,6 +69,8 @@ setMonoDir(){
     fi
 }
 
+SKIP_BOOTSTRAP=false
+
 # Paths
 THIS_SCRIPT_PATH="`dirname \"$0\"`"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
@@ -61,10 +79,15 @@ MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mon
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="/tmp/msbuild-CI-home"
 
-LOG_PATH_ARG="$THIS_SCRIPT_PATH"/"msbuild.log"
-PROJECT_FILE_ARG="$THIS_SCRIPT_PATH"/"build.proj"
+BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build.log"
+LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build.log"
+MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
 
-# Default build arguments
+PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
+BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
+MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.exe"'"'
+
+# Default msbuild arguments
 TARGET_ARG="Build"
 EXTRA_ARGS=""
 
@@ -92,6 +115,11 @@ do
         --host)
         host=$2
         shift 2
+        ;;
+
+        --skip-bootstrap)
+        SKIP_BOOTSTRAP=true
+        shift 1
         ;;
 
         *)
@@ -168,16 +196,25 @@ case $host in
         ;;
 esac
 
-MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS /fl "' "'"/flp:v=diag;logfile=$LOG_PATH_ARG"'"'
+BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS"
 
-BUILD_COMMAND="$RUNTIME_HOST $RUNTIME_HOST_ARGS $MSBUILD_EXE $MSBUILD_ARGS"
-
-INIT_BUILD_TOOLS_COMMAND="$THIS_SCRIPT_PATH/init-tools.sh"
-
-#home is not defined on CI machines
 setHome
 
-#restore build tools
-eval "$INIT_BUILD_TOOLS_COMMAND"
+restoreBuildTools
 
-build
+echo
+echo "** Rebuilding MSBuild with binaries from BuildTools"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
+
+if [[ $SKIP_BOOTSTRAP = true ]]; then
+    exit $?
+fi
+
+echo
+echo "** Moving bootstrapped MSBuild to the bootstrap folder"
+MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUILD_ARGS" "$MOVE_LOG_PATH"
+
+echo
+echo "** Rebuilding MSBuild with locally built binaries"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "$BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
