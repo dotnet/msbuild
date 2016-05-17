@@ -48,6 +48,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 :: Rebuild with bootstrapped msbuild
 set MSBUILDLOGPATH=%~dp0msbuild_local_build.log
+set RUNTIME_HOST="%~dp0bin\Bootstrap\CoreRun.exe"
 set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild.exe"
 
 echo.
