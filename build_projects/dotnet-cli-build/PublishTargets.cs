@@ -550,6 +550,29 @@ namespace Microsoft.DotNet.Cli.Build
             File.WriteAllText(pushedSemaphore, $"Packages pushed for build {pathToDownload}");
             AzurePublisherTool.PublishFile(pathToDownload + "/" + PackagePushedSemaphoreFileName, pushedSemaphore);
         }
+
+        [Target(nameof(PrepareTargets.Init))]
+        public static BuildTargetResult UpdateVersionsRepo(BuildTargetContext c)
+        {
+            string nupkgFilePath = EnsureVariable("NUPKG_FILE_PATH");
+            string versionsRepoPath = EnsureVariable("VERSIONS_REPO_PATH");
+
+            VersionRepoUpdater repoUpdater = new VersionRepoUpdater();
+            repoUpdater.UpdatePublishedVersions(nupkgFilePath, versionsRepoPath).Wait();
+
+            return c.Success();
+        }
+
+        private static string EnsureVariable(string variableName)
+        {
+            string value = Environment.GetEnvironmentVariable(variableName);
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new BuildFailureException($"'{variableName}' environment variable was not found.");
+            }
+
+            return value;
+        }
     }
 }
 
