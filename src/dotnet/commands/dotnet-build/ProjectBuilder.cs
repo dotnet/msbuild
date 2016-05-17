@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         protected abstract CompilationResult RunCompile(ProjectGraphNode projectNode);
 
-        private CompilationResult Build(ProjectGraphNode projectNode)
+        protected virtual CompilationResult Build(ProjectGraphNode projectNode)
         {
             CompilationResult result;
             if (_compilationResults.TryGetValue(projectNode.ProjectContext.Identity, out result))

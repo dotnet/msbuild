@@ -133,6 +133,26 @@ namespace Microsoft.DotNet.Tools.Build
             }
         }
 
+        protected override CompilationResult Build(ProjectGraphNode projectNode)
+        {
+            var result = base.Build(projectNode);
+            AfterRootBuild(projectNode, result);
+            return result;
+        }
+
+        protected void AfterRootBuild(ProjectGraphNode projectNode, CompilationResult result)
+        {
+            if (result != CompilationResult.IncrementalSkip && projectNode.IsRoot)
+            {
+                var success = result == CompilationResult.Success;
+                if (success)
+                {
+                    MakeRunnable(projectNode);
+                }
+                PrintSummary(projectNode, success);
+            }
+        }
+
         protected override CompilationResult RunCompile(ProjectGraphNode projectNode)
         {
             try
@@ -140,15 +160,6 @@ namespace Microsoft.DotNet.Tools.Build
                 var managedCompiler = new ManagedCompiler(_scriptRunner, _commandFactory);
 
                 var success = managedCompiler.Compile(projectNode.ProjectContext, _args);
-                if (projectNode.IsRoot)
-                {
-                    if (success)
-                    {
-                        MakeRunnable(projectNode);
-                    }
-                    PrintSummary(projectNode, success);
-                }
-
                 return success ? CompilationResult.Success : CompilationResult.Failure;
             }
             finally

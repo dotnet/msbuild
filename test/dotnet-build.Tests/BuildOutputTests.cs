@@ -176,6 +176,25 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             informationalVersion.Should().BeEquivalentTo("1.0.0-85");
         }
 
+        [Fact]
+        public void BuildGlobbingMakesAllRunnable()
+        {
+            var testInstance = TestAssetsManager.CreateTestInstance("AppWithAppDependency")
+                                                .WithLockFiles();
+
+            var cmd = new BuildCommand(string.Format("*{0}project.json", Path.DirectorySeparatorChar), skipLoadProject: true)
+                .WithWorkingDirectory(testInstance.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
+
+            foreach (var project in new [] { "TestApp1", "TestApp2" })
+            {
+                new DirectoryInfo(Path.Combine(testInstance.TestRoot, project, "bin", "Debug", DefaultFramework))
+                    .Should().HaveFile($"{project}.deps.json");
+            }
+        }
+
         [Theory]
         //        [InlineData("net20", false, true)]
         //        [InlineData("net40", true, true)]
