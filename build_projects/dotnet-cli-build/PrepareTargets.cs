@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class PrepareTargets
     {
-        [Target(nameof(Init))]
+        [Target(nameof(Init), nameof(RestorePackages))]
         public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
 
         [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
@@ -38,8 +38,7 @@ namespace Microsoft.DotNet.Cli.Build
             nameof(UpdateTemplateVersions), 
             nameof(CheckPrereqs), 
             nameof(LocateStage0), 
-            nameof(ExpectedBuildArtifacts),
-            nameof(RestorePackages))]
+            nameof(ExpectedBuildArtifacts))]
         public static BuildTargetResult Init(BuildTargetContext c)
         {
             var configEnv = Environment.GetEnvironmentVariable("CONFIGURATION");
