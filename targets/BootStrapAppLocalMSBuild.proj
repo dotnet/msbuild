@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="../dir.props" />
+
+  <Target Name="Build">
+    <ItemGroup>
+      <DeployedItems Include="$(DeploymentDir)\**\*.*"/>
+    </ItemGroup>
+
+    <RemoveDir
+            Directories="$(BootstrapDestination)" />
+    
+    <Copy SourceFiles="@(DeployedItems)"
+          DestinationFolder="$(BootstrapDestination)\%(RecursiveDir)"
+          />
+
+    <RemoveDir
+            Directories="$(BaseOutputPathWithConfig)" />
+  </Target>
+</Project>
