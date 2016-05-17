@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
     {
         private string _coreClrVersion;
         private string _crossGenPath;
-        private List<string> _excludedLibraries = new List<string>() 
+        private static readonly string[] s_excludedLibraries = 
         {
             "mscorlib.dll",
             "mscorlib.ni.dll"
@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 string fileName = Path.GetFileName(file);
 
-                if (_excludedLibraries.Any(lib => String.Equals(lib, fileName, StringComparison.OrdinalIgnoreCase)) 
+                if (s_excludedLibraries.Any(lib => String.Equals(lib, fileName, StringComparison.OrdinalIgnoreCase)) 
                     || !PEUtils.HasMetadata(file))
                 {
                     continue;

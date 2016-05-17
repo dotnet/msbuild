@@ -41,8 +41,6 @@
     "Microsoft.Extensions.Testing.Abstractions": {
       "target": "project"
     },
-    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc3-24113-00",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc3-24113-00",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0-rc3-*"
