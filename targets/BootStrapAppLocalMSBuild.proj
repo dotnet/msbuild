@@ -14,6 +14,10 @@
           DestinationFolder="$(BootstrapDestination)\%(RecursiveDir)"
           />
 
+    <!-- Microsoft.Portable.CSharp.targets imports this file with a capital T -->
+    <Copy SourceFiles="$(DeploymentDir)\Microsoft.CSharp.targets"
+          DestinationFiles="$(BootstrapDestination)\Microsoft.CSharp.Targets" />
+
     <RemoveDir
             Directories="$(BaseOutputPathWithConfig)" />
   </Target>
