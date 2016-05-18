@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Build
             var tempPjFile = Path.Combine(tempPjDirectory, "project.json");
             File.WriteAllText(tempPjFile, projectJson);
 
-            DotNetCli.Stage0.Restore("--verbosity", "verbose", "--infer-runtimes",
+            DotNetCli.Stage0.Restore("--verbosity", "verbose",
                     "--fallbacksource", Dirs.CorehostLocalPackages,
                     "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(tempPjDirectory)

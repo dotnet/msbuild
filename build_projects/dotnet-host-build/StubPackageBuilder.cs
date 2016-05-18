@@ -42,9 +42,8 @@ namespace Microsoft.DotNet.Host.Build
         {
             var projectJson = new StringBuilder();
             projectJson.Append("{");
-            projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24027\" },");
-            projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { \"imports\": [\"netstandard1.5\", \"dnxcore50\"] } },");
-            projectJson.Append("  \"runtimes\": { \"win7-x64\": { } },");
+            projectJson.Append("  \"dependencies\": { \"System.Console\": \"4.0.0-*\" },");
+            projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { } },");
             projectJson.Append("}");
 
             var programCs = "using System; namespace ConsoleApplication { public class Program { public static void Main(string[] args) { Console.WriteLine(\"Hello World!\"); } } }";
@@ -82,8 +81,8 @@ namespace Microsoft.DotNet.Host.Build
             projectJson.Append("{");
             projectJson.Append($"  \"version\": \"{version}\",");
             projectJson.Append($"  \"name\": \"{packageId}\",");
-            projectJson.Append("  \"dependencies\": { \"NETStandard.Library\": \"1.5.0-rc2-24027\" },");
-            projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { \"imports\": [\"netstandard1.5\", \"dnxcore50\"] } },");
+            projectJson.Append("  \"dependencies\": { \"System.Console\": \"4.0.0-*\" },");
+            projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { } },");
             projectJson.Append("}");
 
             var tempPjDirectory = Path.Combine(intermediateDirectory, "dummyNuGetPackageIntermediate");
