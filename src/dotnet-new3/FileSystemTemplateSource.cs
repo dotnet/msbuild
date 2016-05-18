@@ -75,7 +75,19 @@ namespace dotnet_new3
                 _dir = dir;
             }
 
-            public override IEnumerable<ITemplateSourceEntry> Children => _dir.EnumerateFileSystemInfos().Select(x => EntryHelper.Create(_rootLength, this, x));
+            public override IEnumerable<ITemplateSourceEntry> Children
+            {
+                get
+                {
+                    _dir.Refresh();
+                    if (_dir.Exists)
+                    {
+                        return _dir.EnumerateFileSystemInfos().Select(x => EntryHelper.Create(_rootLength, this, x));
+                    }
+
+                    return Enumerable.Empty<ITemplateSourceEntry>();
+                }
+            }
 
             public override string FullPath => _dir.FullName.Substring(_rootLength);
 

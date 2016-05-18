@@ -67,11 +67,21 @@ namespace dotnet_new3
 
         public IDisposable<ITemplateSourceFolder> RootFor(string location)
         {
+            if (!System.IO.File.Exists(location))
+            {
+                return Directory.Empty.NoDispose();
+            }
+
             return new Directory(null, "", "", () => ZipFile.OpenRead(location)).NoDispose();
         }
 
         public IDisposable<ITemplateSourceFolder> RootFor(IConfiguredTemplateSource source, string location)
         {
+            if (!source.Root.Value.Exists(location))
+            {
+                return Directory.Empty.NoDispose();
+            }
+
             return new Directory(null, "", "", () => new ZipArchive(source.Root.Value.OpenFile(location), ZipArchiveMode.Read, false)).NoDispose();
         }
 
@@ -80,6 +90,12 @@ namespace dotnet_new3
             private readonly Func<ZipArchive> _opener;
             private readonly int _lastSlashIndex;
             private IReadOnlyList<ITemplateSourceEntry> _cachedChildren;
+
+            private Directory()
+                : base(null)
+            {
+                _cachedChildren = new ITemplateSourceEntry[0];
+            }
 
             public Directory(ITemplateSourceFolder parent, string fullPath, string name, Func<ZipArchive> opener)
                 : base(parent)
@@ -141,6 +157,8 @@ namespace dotnet_new3
             public override string FullPath { get; }
 
             public override string Name { get; }
+
+            public static Directory Empty { get; } = new Directory();
 
             private class File : TemplateSourceFile
             {

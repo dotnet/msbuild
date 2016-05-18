@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Mutant.Chicken.Abstractions;
+using Newtonsoft.Json.Linq;
+using NuGet.Frameworks;
 
 namespace dotnet_new3
 {
@@ -31,14 +33,26 @@ namespace dotnet_new3
             CommandOption dir = app.Option("-d|--dir", "Indicates whether to display create a directory for the generated content.", CommandOptionType.NoValue);
             CommandOption alias = app.Option("-a|--alias", "Creates an alias for the specified template", CommandOptionType.SingleValue);
             CommandOption parametersFiles = app.Option("-x|--extra-args", "Adds a parameters file.", CommandOptionType.MultipleValue);
-            CommandOption install = app.Option("-i|--install", "Installs a component or a source", CommandOptionType.MultipleValue);
-            CommandOption uninstall = app.Option("-u|--uninstall", "Uninstalls a component or a source", CommandOptionType.MultipleValue);
+            CommandOption install = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
+            CommandOption uninstall = app.Option("-u|--uninstall", "Uninstalls a source", CommandOptionType.MultipleValue);
             CommandOption source = app.Option("-s|--source", "The specific template source to get the template from.", CommandOptionType.SingleValue);
             CommandOption currentConfig = app.Option("-c|--current-config", "Lists the currently installed components and sources.", CommandOptionType.NoValue);
             CommandOption help = app.Option("-h|--help", "Indicates whether to display the help for the template's parameters instead of creating it.", CommandOptionType.NoValue);
 
+            CommandOption installComponent = app.Option("--install-component", "Installs a component.", CommandOptionType.MultipleValue);
+            CommandOption resetConfig = app.Option("--reset", "Resets the component cache and installed template sources.", CommandOptionType.NoValue);
+
             app.OnExecute(() =>
             {
+                if (resetConfig.HasValue())
+                {
+                    string componentsPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Components");
+                    Directory.Delete(componentsPath, true);
+                    string templatesPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Templates");
+                    Directory.Delete(templatesPath, true);
+                    return Task.FromResult(0);
+                }
+
                 if (currentConfig.HasValue())
                 {
                     ShowConfig();
@@ -47,12 +61,110 @@ namespace dotnet_new3
 
                 if (install.HasValue())
                 {
+                    JObject dependenciesObject = new JObject();
+                    JObject projJson = new JObject
+                    {
+                        {"version", "1.0.0-*"},
+                        {"dependencies", dependenciesObject },
+                        {
+                            "frameworks", new JObject
+                            {
+                                {
+                                    "netcoreapp1.0", new JObject
+                                    {
+                                        { "imports", "dnxcore50" }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    
                     foreach (string value in install.Values)
                     {
-                        if (!TryAddComponent(value) && !TryAddSource(value))
+                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && (File.Exists(value) || Directory.Exists(value)))
                         {
-                            Reporter.Error.WriteLine($"Couldn't add {value} as either a template source or an assembly.".Red().Bold());
+                            TryAddSource(value);
                         }
+                        else
+                        {
+                            dependenciesObject[value] = "*";
+                        }
+                    }
+
+                    if (dependenciesObject.Count > 0)
+                    {
+                        string scratchPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "scratch");
+                        Directory.CreateDirectory(scratchPath);
+                        string componentsPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Components");
+                        Directory.CreateDirectory(componentsPath);
+                        string templatesPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Templates");
+                        Directory.CreateDirectory(templatesPath);
+                        string projectFile = Path.Combine(scratchPath, "project.json");
+                        File.WriteAllText(projectFile, projJson.ToString());
+
+                        Reporter.Output.WriteLine("Installing...");
+                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", "..\\Components"}, NuGetFramework.AnyFramework).WorkingDirectory(scratchPath).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                        Reporter.Output.WriteLine("Done.");
+
+                        foreach (string value in install.Values)
+                        {
+                            MoveDirectory(componentsPath, templatesPath, value);
+                        }
+
+                        Directory.Delete(scratchPath, true);
+                    }
+
+                    return Task.FromResult(0);
+                }
+
+                if (installComponent.HasValue())
+                {
+                    JObject dependenciesObject = new JObject();
+                    JObject projJson = new JObject
+                    {
+                        {"version", "1.0.0-*"},
+                        {"dependencies", dependenciesObject },
+                        {
+                            "frameworks", new JObject
+                            {
+                                {
+                                    "netcoreapp1.0", new JObject
+                                    {
+                                        { "imports", "dnxcore50" }
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    foreach (string value in installComponent.Values)
+                    {
+                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && (File.Exists(value) || Directory.Exists(value)))
+                        {
+                            TryAddSource(value);
+                        }
+                        else
+                        {
+                            dependenciesObject[value] = "*";
+                        }
+                    }
+
+                    if (dependenciesObject.Count > 0)
+                    {
+                        string scratchPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "scratch");
+                        Directory.CreateDirectory(scratchPath);
+                        string componentsPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Components");
+                        Directory.CreateDirectory(componentsPath);
+                        string templatesPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Templates");
+                        Directory.CreateDirectory(templatesPath);
+                        string projectFile = Path.Combine(scratchPath, "project.json");
+                        File.WriteAllText(projectFile, projJson.ToString());
+
+                        Reporter.Output.WriteLine("Installing...");
+                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", "..\\Components" }, NuGetFramework.AnyFramework).WorkingDirectory(scratchPath).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                        Reporter.Output.WriteLine("Done.");
+
+                        Directory.Delete(scratchPath, true);
                     }
 
                     return Task.FromResult(0);
@@ -64,17 +176,7 @@ namespace dotnet_new3
                     {
                         if (value == "*")
                         {
-                            Assembly asm = Assembly.GetEntryAssembly();
-                            Uri codebase = new Uri(asm.CodeBase, UriKind.Absolute);
-                            string localPath = codebase.LocalPath;
-                            string targetDir = Path.GetDirectoryName(localPath);
-                            string manifest = Path.Combine(targetDir, "component_registry.json");
-                            string sources = Path.Combine(targetDir, "template_sources.json");
-
-                            if (File.Exists(manifest))
-                            {
-                                File.Delete(manifest);
-                            }
+                            string sources = Path.Combine(AssemblyLoadContextHelper.AppDir, "template_sources.json");
 
                             if (File.Exists(sources))
                             {
@@ -84,7 +186,7 @@ namespace dotnet_new3
                             return Task.FromResult(0);
                         }
 
-                        if (!TryRemoveComponent(value) && !TryRemoveSource(value))
+                        if (!TryRemoveSource(value))
                         {
                             Reporter.Error.WriteLine($"Couldn't remove {value} as either a template source or an assembly.".Red().Bold());
                         }
@@ -106,7 +208,19 @@ namespace dotnet_new3
                     return Task.FromResult(0);
                 }
 
-                IReadOnlyDictionary<string, string> parameters = app.ParseExtraArgs(parametersFiles);
+                IReadOnlyDictionary<string, string> parameters;
+
+                try
+                {
+                    parameters = app.ParseExtraArgs(parametersFiles);
+                }
+                catch(Exception ex)
+                {
+                    Reporter.Error.WriteLine(ex.Message.Red().Bold());
+                    app.ShowHelp();
+                    return Task.FromResult(-1);
+                }
+
                 return TemplateCreator.Instantiate(app, template, name, dir, source, help, alias, parameters);
             });
 
@@ -127,7 +241,7 @@ namespace dotnet_new3
 
                 Reporter.Error.WriteLine(ex.Message.Bold().Red());
 
-                while(ex.InnerException != null)
+                while (ex.InnerException != null)
                 {
                     ex = ex.InnerException;
                     ax = ex as AggregateException;
@@ -148,31 +262,24 @@ namespace dotnet_new3
             return result;
         }
 
+        private static void MoveDirectory(string componentsPath, string templatesPath, string value)
+        {
+            string templateSource = Path.Combine(componentsPath, value);
+
+            foreach (string dir in Directory.GetDirectories(templateSource, "*", SearchOption.TopDirectoryOnly))
+            {
+                foreach (string file in Directory.GetFiles(dir, "*.nupkg", SearchOption.TopDirectoryOnly))
+                {
+                    File.Copy(file, Path.Combine(templatesPath, Path.GetFileName(file)), true);
+                }
+            }
+
+            Directory.Delete(templateSource, true);
+        }
+
         private static bool TryRemoveSource(string value)
         {
             return Broker.RemoveConfiguredSource(value);
-        }
-
-        private static bool TryRemoveComponent(string value)
-        {
-            Assembly asm;
-            try
-            {
-                AssemblyName name = new AssemblyName(value);
-                asm = Assembly.Load(name);
-            }
-            catch
-            {
-                return false;
-            }
-
-            if (asm == null)
-            {
-                return false;
-            }
-
-            Broker.ComponentRegistry.RemoveAll(asm);
-            return true;
         }
 
         private static void ShowConfig()
@@ -214,52 +321,6 @@ namespace dotnet_new3
             }
 
             Broker.AddConfiguredSource(value, source.Name, value);
-            return true;
-        }
-
-        private static bool TryAddComponent(string value)
-        {
-            Assembly asm;
-            try
-            {
-                AssemblyName name = new AssemblyName(value);
-                asm = Assembly.Load(name);
-            }
-            catch
-            {
-                return false;
-            }
-
-            if (asm == null)
-            {
-                Assembly entry = Assembly.GetEntryAssembly();
-                Uri codebase = new Uri(entry.CodeBase, UriKind.Absolute);
-                string localPath = codebase.LocalPath;
-                string dir = Path.GetDirectoryName(localPath);
-                string sourceFile = value;
-                if (!Path.IsPathRooted(sourceFile))
-                {
-                    sourceFile = Path.Combine(Directory.GetCurrentDirectory(), sourceFile);
-                }
-
-                string file = Path.GetFileName(sourceFile);
-                File.Copy(sourceFile, Path.Combine(dir, file), true);
-                asm = Assembly.Load(new AssemblyName(file));
-            }
-
-            foreach (Type type in asm.ExportedTypes)
-            {
-                if (typeof(ITemplateSource).IsAssignableFrom(type))
-                {
-                    Broker.ComponentRegistry.Register<ITemplateSource>(type);
-                }
-
-                if (typeof(IGenerator).IsAssignableFrom(type))
-                {
-                    Broker.ComponentRegistry.Register<IGenerator>(type);
-                }
-            }
-
             return true;
         }
     }
@@ -307,7 +368,7 @@ namespace dotnet_new3
                 }
             }
 
-            int headerWidth = columnWidths.Sum() + columnPad.Length*(dictionary.Count - 1);
+            int headerWidth = columnWidths.Sum() + columnPad.Length * (dictionary.Count - 1);
 
             for (int i = 0; i < headers.Length - 1; ++i)
             {
