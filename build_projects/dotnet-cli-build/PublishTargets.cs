@@ -554,24 +554,14 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init))]
         public static BuildTargetResult UpdateVersionsRepo(BuildTargetContext c)
         {
-            string nupkgFilePath = EnsureVariable("NUPKG_FILE_PATH");
-            string versionsRepoPath = EnsureVariable("VERSIONS_REPO_PATH");
+            string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
+            string nupkgFilePath = EnvVars.EnsureVariable("NUPKG_FILE_PATH");
+            string versionsRepoPath = EnvVars.EnsureVariable("VERSIONS_REPO_PATH");
 
-            VersionRepoUpdater repoUpdater = new VersionRepoUpdater();
+            VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
             repoUpdater.UpdatePublishedVersions(nupkgFilePath, versionsRepoPath).Wait();
 
             return c.Success();
-        }
-
-        private static string EnsureVariable(string variableName)
-        {
-            string value = Environment.GetEnvironmentVariable(variableName);
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new BuildFailureException($"'{variableName}' environment variable was not found.");
-            }
-
-            return value;
         }
     }
 }

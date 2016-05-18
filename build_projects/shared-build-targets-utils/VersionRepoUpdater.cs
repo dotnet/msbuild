@@ -14,29 +14,29 @@ namespace Microsoft.DotNet.Cli.Build
     {
         private static Regex s_nugetFileRegex = new Regex("^(.*?)\\.(([0-9]+\\.)?[0-9]+\\.[0-9]+(-([A-z0-9-]+))?)\\.nupkg$");
 
+        private string _gitHubAuthToken;
         private string _gitHubUser;
         private string _gitHubEmail;
-        private string _gitHubAuthToken;
         private string _versionsRepoOwner;
         private string _versionsRepo;
 
         public VersionRepoUpdater(
+            string gitHubAuthToken,
             string gitHubUser = null,
             string gitHubEmail = null,
-            string gitHubAuthToken = null,
             string versionRepoOwner = null,
             string versionsRepo = null)
         {
+            if (string.IsNullOrEmpty(gitHubAuthToken))
+            {
+                throw new ArgumentNullException(nameof(gitHubAuthToken));
+            }
+
+            _gitHubAuthToken = gitHubAuthToken;
             _gitHubUser = gitHubUser ?? "dotnet-bot";
             _gitHubEmail = gitHubEmail ?? "dotnet-bot@microsoft.com";
             _versionsRepoOwner = versionRepoOwner ?? "dotnet";
             _versionsRepo = versionsRepo ?? "versions";
-
-            _gitHubAuthToken = gitHubAuthToken ?? Environment.GetEnvironmentVariable("GITHUB_PASSWORD");
-            if (string.IsNullOrEmpty(_gitHubAuthToken))
-            {
-                throw new ArgumentException("A GitHub auth token is required and wasn't provided. Set 'GITHUB_PASSWORD' environment variable.", nameof(gitHubAuthToken));
-            }
         }
 
         public async Task UpdatePublishedVersions(string nupkgFilePath, string versionsRepoPath)

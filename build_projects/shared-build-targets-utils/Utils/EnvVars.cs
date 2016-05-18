@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.DotNet.Cli.Build.Framework;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -27,6 +28,17 @@ namespace Microsoft.DotNet.Cli.Build
                 default:
                     return defaultValue;
             }
+        }
+
+        public static string EnsureVariable(string variableName)
+        {
+            string value = Environment.GetEnvironmentVariable(variableName);
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new BuildFailureException($"'{variableName}' environment variable was not found.");
+            }
+
+            return value;
         }
     }
 }
