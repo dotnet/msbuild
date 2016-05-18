@@ -14,55 +14,45 @@ namespace Microsoft.DotNet.Cli.Build
     {
         private static Regex s_nugetFileRegex = new Regex("^(.*?)\\.(([0-9]+\\.)?[0-9]+\\.[0-9]+(-([A-z0-9-]+))?)\\.nupkg$");
 
-        private HttpClient _client = new HttpClient();
         private string _gitHubUser;
         private string _gitHubEmail;
+        private string _gitHubAuthToken;
         private string _versionsRepoOwner;
         private string _versionsRepo;
 
         public VersionRepoUpdater(
-            string gitHubUser = null, 
-            string gitHubEmail = null, 
-            string versionRepoOwner = null, 
-            string versionsRepo = null, 
-            string gitHubAuthToken = null)
+            string gitHubUser = null,
+            string gitHubEmail = null,
+            string gitHubAuthToken = null,
+            string versionRepoOwner = null,
+            string versionsRepo = null)
         {
             _gitHubUser = gitHubUser ?? "dotnet-bot";
             _gitHubEmail = gitHubEmail ?? "dotnet-bot@microsoft.com";
             _versionsRepoOwner = versionRepoOwner ?? "dotnet";
             _versionsRepo = versionsRepo ?? "versions";
 
-            gitHubAuthToken = gitHubAuthToken ?? Environment.GetEnvironmentVariable("GITHUB_PASSWORD");
-
-            if (string.IsNullOrEmpty(gitHubAuthToken))
+            _gitHubAuthToken = gitHubAuthToken ?? Environment.GetEnvironmentVariable("GITHUB_PASSWORD");
+            if (string.IsNullOrEmpty(_gitHubAuthToken))
             {
                 throw new ArgumentException("A GitHub auth token is required and wasn't provided. Set 'GITHUB_PASSWORD' environment variable.", nameof(gitHubAuthToken));
             }
-
-            _client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-            _client.DefaultRequestHeaders.Add("Authorization", $"token {gitHubAuthToken}");
-            _client.DefaultRequestHeaders.Add("User-Agent", _gitHubUser);
         }
 
         public async Task UpdatePublishedVersions(string nupkgFilePath, string versionsRepoPath)
         {
-            List<Tuple<string, string>> publishedPackages = GetPackageInfo(nupkgFilePath);
+            List<NuGetPackageInfo> publishedPackages = GetPackageInfo(nupkgFilePath);
 
             string packageInfoFileContent = string.Join(
                 Environment.NewLine,
                 publishedPackages
-                    .OrderBy(t => t.Item1)
-                    .Select(t => $"{t.Item1} {t.Item2}"));
+                    .OrderBy(t => t.Id)
+                    .Select(t => $"{t.Id} {t.Version}"));
 
-            string firstVersionWithPrerelease = publishedPackages
-                .FirstOrDefault(t => t.Item2.Contains('-'))
-                ?.Item2;
-
-            string prereleaseVersion = null;
-            if (!string.IsNullOrEmpty(firstVersionWithPrerelease))
-            {
-                prereleaseVersion = firstVersionWithPrerelease.Substring(firstVersionWithPrerelease.IndexOf('-') + 1);
-            }
+            string prereleaseVersion = publishedPackages
+                .Where(t => !string.IsNullOrEmpty(t.Prerelease))
+                .Select(t => t.Prerelease)
+                .FirstOrDefault();
 
             string packageInfoFilePath = $"{versionsRepoPath}_Packages.txt";
             string message = $"Adding package info to {packageInfoFilePath} for {prereleaseVersion}";
@@ -70,15 +60,20 @@ namespace Microsoft.DotNet.Cli.Build
             await UpdateGitHubFile(packageInfoFilePath, packageInfoFileContent, message);
         }
 
-        private static List<Tuple<string, string>> GetPackageInfo(string nupkgFilePath)
+        private static List<NuGetPackageInfo> GetPackageInfo(string nupkgFilePath)
         {
-            List<Tuple<string, string>> packages = new List<Tuple<string, string>>();
+            List<NuGetPackageInfo> packages = new List<NuGetPackageInfo>();
 
             foreach (string filePath in Directory.GetFiles(nupkgFilePath, "*.nupkg"))
             {
                 Match match = s_nugetFileRegex.Match(Path.GetFileName(filePath));
 
-                packages.Add(Tuple.Create(match.Groups[1].Value, match.Groups[2].Value));
+                packages.Add(new NuGetPackageInfo()
+                {
+                    Id = match.Groups[1].Value,
+                    Version = match.Groups[2].Value,
+                    Prerelease = match.Groups[5].Value,
+                });
             }
 
             return packages;
@@ -86,19 +81,25 @@ namespace Microsoft.DotNet.Cli.Build
 
         private async Task UpdateGitHubFile(string path, string newFileContent, string commitMessage)
         {
-            string fileUrl = $"https://api.github.com/repos/{_versionsRepoOwner}/{_versionsRepo}/contents/{path}";
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                client.DefaultRequestHeaders.Add("Authorization", $"token {_gitHubAuthToken}");
+                client.DefaultRequestHeaders.Add("User-Agent", _gitHubUser);
 
-            Console.WriteLine($"Getting the 'sha' of the current contents of file '{_versionsRepoOwner}/{_versionsRepo}/{path}'");
+                string fileUrl = $"https://api.github.com/repos/{_versionsRepoOwner}/{_versionsRepo}/contents/{path}";
 
-            string currentFile = await _client.GetStringAsync(fileUrl);
-            string currentSha = JObject.Parse(currentFile)["sha"].ToString();
+                Console.WriteLine($"Getting the 'sha' of the current contents of file '{_versionsRepoOwner}/{_versionsRepo}/{path}'");
 
-            Console.WriteLine($"Got 'sha' value of '{currentSha}'");
+                string currentFile = await client.GetStringAsync(fileUrl);
+                string currentSha = JObject.Parse(currentFile)["sha"].ToString();
 
-            Console.WriteLine($"Request to update file '{_versionsRepoOwner}/{_versionsRepo}/{path}' contents to:");
-            Console.WriteLine(newFileContent);
+                Console.WriteLine($"Got 'sha' value of '{currentSha}'");
 
-            string updateFileBody = $@"{{
+                Console.WriteLine($"Request to update file '{_versionsRepoOwner}/{_versionsRepo}/{path}' contents to:");
+                Console.WriteLine(newFileContent);
+
+                string updateFileBody = $@"{{
   ""message"": ""{commitMessage}"",
   ""committer"": {{
     ""name"": ""{_gitHubUser}"",
@@ -108,19 +109,27 @@ namespace Microsoft.DotNet.Cli.Build
   ""sha"": ""{currentSha}""
 }}";
 
-            Console.WriteLine("Sending request...");
-            StringContent content = new StringContent(updateFileBody);
+                Console.WriteLine("Sending request...");
+                StringContent content = new StringContent(updateFileBody);
 
-            using (HttpResponseMessage response = await _client.PutAsync(fileUrl, content))
-            {
-                response.EnsureSuccessStatusCode();
-                Console.WriteLine("Updated the file successfully...");
+                using (HttpResponseMessage response = await client.PutAsync(fileUrl, content))
+                {
+                    response.EnsureSuccessStatusCode();
+                    Console.WriteLine("Updated the file successfully...");
+                }
             }
         }
 
         private static string ToBase64(string value)
         {
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+        }
+
+        private class NuGetPackageInfo
+        {
+            public string Id { get; set; }
+            public string Version { get; set; }
+            public string Prerelease { get; set; }
         }
     }
 }
