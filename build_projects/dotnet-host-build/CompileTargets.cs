@@ -106,6 +106,7 @@ namespace Microsoft.DotNet.Host.Build
                 var ridMacro = $"-DCLI_CMAKE_RUNTIME_ID:STRING={rid}";
                 var arch = IsWinx86 ? "x86" : "x64";
                 var baseSupportedRid = $"win7-{arch}";
+                var cmakeHostVer = $"-DCLI_CMAKE_HOST_VER:STRING={hostVersion.LatestHostVersion}";
                 var cmakeHostPolicyVer = $"-DCLI_CMAKE_HOST_POLICY_VER:STRING={hostVersion.LatestHostPolicyVersion}";
                 var cmakeHostFxrVer = $"-DCLI_CMAKE_HOST_FXR_VER:STRING={hostVersion.LatestHostFxrVersion}";
                 var cmakeBaseRid = $"-DCLI_CMAKE_PKG_RID:STRING={baseSupportedRid}";
@@ -115,6 +116,7 @@ namespace Microsoft.DotNet.Host.Build
                     corehostSrcDir,
                     archMacro,
                     ridMacro,
+                    cmakeHostVer,
                     cmakeHostFxrVer,
                     cmakeHostPolicyVer,
                     cmakeBaseRid,
@@ -149,6 +151,8 @@ namespace Microsoft.DotNet.Host.Build
                 ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"),
                         "--arch",
                         "x64",
+                        "--hostver",
+                        hostVersion.LatestHostVersion,
                         "--fxrver",
                         hostVersion.LatestHostFxrVersion,
                         "--policyver",
@@ -187,6 +191,7 @@ namespace Microsoft.DotNet.Host.Build
                     .Environment("__WorkaroundCliCoreHostFxrVer", hostVersion.LatestHostFxrVersionNoSuffix)
                     .Environment("__WorkaroundCliCoreHostVer", hostVersion.LatestHostVersionNoSuffix)
                     .Environment("__WorkaroundCliCoreHostBuildMajor", hostVersion.LatestHostBuildMajor)
+                    .Environment("__WorkaroundCliCoreHostBuildMinor", hostVersion.LatestHostBuildMinor)
                     .Environment("__WorkaroundCliCoreHostVersionTag", hostVersion.LatestHostPrerelease)
                     .ForwardStdOut()
                     .ForwardStdErr()
@@ -206,8 +211,10 @@ namespace Microsoft.DotNet.Host.Build
                     hostVersion.LatestHostFxrVersionNoSuffix,
                     "--hostver",
                     hostVersion.LatestHostVersionNoSuffix,
-                    "--build",
+                    "--build-major",
                     hostVersion.LatestHostBuildMajor,
+                    "--build-minor",
+                    hostVersion.LatestHostBuildMinor,
                     "--vertag",
                     hostVersion.LatestHostPrerelease);
             }
