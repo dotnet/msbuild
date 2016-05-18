@@ -1,18 +1,18 @@
 {
   "version": "1.0.0-*",
   "description": "Mutant Chicken Template Instantiation Commands for .NET Core CLI.",
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true,
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-rc2-002678",
+    "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-rc2-002678",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc3-20939",
     "Mutant.Chicken.Core": "1.0.0-*",
     "Mutant.Chicken.Abstractions": "1.0.0-*",
     "Microsoft.NETCore.App": {
-      "version": "1.0.0-rc2-23928"
+      "version": "1.0.0-rc2-3002702"
     }
   },
   "frameworks": {
