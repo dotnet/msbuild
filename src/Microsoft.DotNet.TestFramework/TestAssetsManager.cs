@@ -107,48 +107,12 @@ namespace Microsoft.DotNet.TestFramework
 
         private string GetTestDestinationDirectoryPath(string testProjectName, string callingMethod, string identifier)
         {
-// HACK: Make the TestAssetsManager create shorter paths for test assets.
-// This is a workaround for https://github.com/dotnet/coreclr/issues/5046
-// Remove this hack once the above issue is fixed.
-/*#if NET451
+#if NET451
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 #else
             string baseDirectory = AppContext.BaseDirectory;
-#endif*/
-
-            string path = Path.Combine(GetRepoRoot(), "bin", callingMethod + identifier, testProjectName);
-            Console.WriteLine($"[TestAssetsManager] The working directory for {testProjectName} is '{path}'");
-            return path;
-        }
-
-        private static string GetRepoRoot()
-        {
-
-            if (!string.IsNullOrEmpty(s_repoRoot))
-            {
-                return s_repoRoot;
-            }
-
-#if NET451
-            string directory = AppDomain.CurrentDomain.BaseDirectory;
-#else
-            string directory = AppContext.BaseDirectory;
 #endif
-
-            while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
-            {
-                directory = Directory.GetParent(directory).FullName;
-            }
-
-            if (directory == null)
-            {
-                throw new Exception("Cannot find the git repository root");
-            }
-
-            s_repoRoot = directory;
-            return s_repoRoot;
+            return Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
         }
-
-        private static string s_repoRoot;
     }
 }
