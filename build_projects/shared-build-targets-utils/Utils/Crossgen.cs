@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Cli.Build
             var env = new Dictionary<string, string>()
             {
                 // disable partial ngen
-                { "COMPLUS_ZapDisable", "0" }
+                { "COMPlus_PartialNGen", "0" }
             };
 
             foreach (var file in Directory.GetFiles(pathToAssemblies))
