@@ -56,6 +56,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion40 = new Version(4, 0);
         internal static readonly Version dotNetFrameworkVersion45 = new Version(4, 5);
         internal static readonly Version dotNetFrameworkVersion451 = new Version(4, 5, 1);
+        internal static readonly Version dotNetFrameworkVersion452 = new Version(4, 5, 2);
         internal static readonly Version dotNetFrameworkVersion46 = new Version(4, 6);
         internal static readonly Version dotNetFrameworkVersion461 = new Version(4, 6, 1);
 
@@ -194,6 +195,9 @@ namespace Microsoft.Build.Shared
             // v4.5.1
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion451, visualStudioVersion120),
 
+            // v4.5.2
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion452, visualStudioVersion120),
+
             // v4.6
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion46, visualStudioVersion140),
 
@@ -237,6 +241,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452
             }),
 
             // VS14
@@ -248,6 +253,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452,
                 dotNetFrameworkVersion46,
                 dotNetFrameworkVersion461
             }),
@@ -279,9 +285,11 @@ namespace Microsoft.Build.Shared
         {
             // VS12
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion120), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion120) },
+            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion120), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion120) },
 
             // VS14
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion140) },
+            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
             { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
             { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140) },
 
