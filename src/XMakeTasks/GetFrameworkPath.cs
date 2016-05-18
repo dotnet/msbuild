@@ -25,6 +25,7 @@ namespace Microsoft.Build.Tasks
             s_version452Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version452));
             s_version46Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version46));
             s_version461Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version461));
+            s_version462Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version462));
         }
 
         #region ITask Members
@@ -57,6 +58,7 @@ namespace Microsoft.Build.Tasks
         private static Lazy<string> s_version452Path;
         private static Lazy<string> s_version46Path;
         private static Lazy<string> s_version461Path;
+        private static Lazy<string> s_version462Path;
 
         /// <summary>
         /// Path to the latest framework, whatever version it happens to be
@@ -123,6 +125,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public string FrameworkVersion461Path => s_version461Path.Value;
+
+        /// <summary>
+        /// Path to the v4.6.2 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion462Path => s_version462Path.Value;
 
         #endregion
     }

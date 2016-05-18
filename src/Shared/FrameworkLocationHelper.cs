@@ -59,6 +59,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion452 = new Version(4, 5, 2);
         internal static readonly Version dotNetFrameworkVersion46 = new Version(4, 6);
         internal static readonly Version dotNetFrameworkVersion461 = new Version(4, 6, 1);
+        internal static readonly Version dotNetFrameworkVersion462 = new Version(4, 6, 2);
 
         // visual studio versions.
         internal static readonly Version visualStudioVersion100 = new Version(10, 0);
@@ -203,6 +204,9 @@ namespace Microsoft.Build.Shared
 
             // v4.6.1
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion461, visualStudioVersion140),
+
+            // v4.6.2
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion462, visualStudioVersion150),
         };
 
         /// <summary>
@@ -267,8 +271,10 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452,
                 dotNetFrameworkVersion46,
                 dotNetFrameworkVersion461,
+                dotNetFrameworkVersion462
             }),
         };
 
@@ -295,8 +301,10 @@ namespace Microsoft.Build.Shared
 
             // VS15
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150) },
        };
 
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
@@ -1173,6 +1181,10 @@ namespace Microsoft.Build.Shared
                 if (dotNetSdkVersion == dotNetFrameworkVersion461)
                 {
                     sdkVersionFolder = "4.6.1";
+                }
+                else if (dotNetSdkVersion == dotNetFrameworkVersion462)
+                {
+                    sdkVersionFolder = "4.6.2";
                 }
 
                 // If the path is formatted to include a version number if we need to include that.
