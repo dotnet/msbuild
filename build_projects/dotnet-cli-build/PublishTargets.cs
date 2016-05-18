@@ -550,6 +550,19 @@ namespace Microsoft.DotNet.Cli.Build
             File.WriteAllText(pushedSemaphore, $"Packages pushed for build {pathToDownload}");
             AzurePublisherTool.PublishFile(pathToDownload + "/" + PackagePushedSemaphoreFileName, pushedSemaphore);
         }
+
+        [Target(nameof(PrepareTargets.Init))]
+        public static BuildTargetResult UpdateVersionsRepo(BuildTargetContext c)
+        {
+            string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
+            string nupkgFilePath = EnvVars.EnsureVariable("NUPKG_FILE_PATH");
+            string versionsRepoPath = EnvVars.EnsureVariable("VERSIONS_REPO_PATH");
+
+            VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
+            repoUpdater.UpdatePublishedVersions(nupkgFilePath, versionsRepoPath).Wait();
+
+            return c.Success();
+        }
     }
 }
 

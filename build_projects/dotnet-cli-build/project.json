@@ -13,8 +13,8 @@
     "System.Xml.XmlSerializer": "4.0.11-rc2-24027",
     "WindowsAzure.Storage": "6.2.2-preview",
 
-    "Microsoft.DotNet.Cli.Build.Framework": {"target":"project"},
-    "shared-build-targets-utils": {"target": "project"}
+    "Microsoft.DotNet.Cli.Build.Framework": { "target": "project" },
+    "shared-build-targets-utils": { "target": "project" }
   },
   "frameworks": {
     "netcoreapp1.0": {
@@ -23,5 +23,14 @@
         "portable-net45+win8"
       ]
     }
+  },
+  "runtimes": {
+    "win7-x64": { },
+    "win7-x86": { },
+    "osx.10.11-x64": { },
+    "ubuntu.14.04-x64": { },
+    "centos.7-x64": { },
+    "rhel.7.2-x64": { },
+    "debian.8-x64": { }
   }
 }
