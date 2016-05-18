@@ -302,9 +302,7 @@ namespace Microsoft.DotNet.Cli.Build
                 c.Error($"Could not determine rid graph generation runtime for platform {RuntimeEnvironment.OperatingSystemPlatform}");
             }
 
-            File.Copy(
-                Path.Combine(Dirs.CorehostLocked, DotnetHostBaseName),
-                Path.Combine(SharedFrameworkNameAndVersionRoot, DotnetHostBaseName), true);
+            // TODO: Issue #2408: Remove corehost and hostfxr from the Shared FX.
             File.Copy(
                Path.Combine(Dirs.CorehostLocked, DotnetHostBaseName),
                Path.Combine(SharedFrameworkNameAndVersionRoot, $"corehost{Constants.ExeSuffix}"), true);
