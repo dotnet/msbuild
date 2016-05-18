@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 result.Should().Pass();
                 foreach (var expectedProject in expectedProjects)
                 {
-                    result.Should().HaveSkippedProjectCompilation(expectedProject, NuGetFramework.Parse("netstandard1.6").DotNetFrameworkName);
+                    result.Should().HaveSkippedProjectCompilation(expectedProject, NuGetFramework.Parse("netstandard1.5").DotNetFrameworkName);
                 }
             }
             else

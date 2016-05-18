@@ -193,20 +193,14 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
-        public void PublishedLibraryShouldOutputDependenciesAndNoHost()
+        public void PublishedLibraryWithoutRIDShouldFail()
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary"))
                                                      .WithLockFiles();
 
             var testProject = _getProjectJson(instance.TestRoot, "TestLibrary");
             var publishCommand = new PublishCommand(testProject);
-            publishCommand.Execute().Should().Pass();
-
-            publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibrary.exe");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibrary.dll");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibrary.pdb");
-            // dependencies should also be copied
-            publishCommand.GetOutputDirectory().Should().HaveFile("System.Runtime.dll");
+            publishCommand.Execute().Should().Fail();
         }
 
         [WindowsOnlyFact()]
@@ -221,16 +215,16 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var publishCommand = new PublishCommand(lesserTestProject, "net451");
             publishCommand.Execute().Should().Pass();
 
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.exe");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.pdb");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll.config");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.exe.config");
             publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryLesser.deps.json");
 
             // dependencies should also be copied
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
             publishCommand.GetOutputDirectory().Delete(true);
 
-            publishCommand = new PublishCommand(lesserTestProject, "netstandard1.6", RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier());
+            publishCommand = new PublishCommand(lesserTestProject, "netcoreapp1.0", RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier());
             publishCommand.Execute().Should().Pass();
 
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");

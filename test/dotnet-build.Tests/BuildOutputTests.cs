@@ -199,7 +199,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         //        [InlineData("net20", false, true)]
         //        [InlineData("net40", true, true)]
         //        [InlineData("net461", true, true)]
-        [InlineData("netstandard1.6", true, false)]
+        [InlineData("netstandard1.5", true, false)]
         public void MultipleFrameworks_ShouldHaveValidTargetFrameworkAttribute(string frameworkName, bool shouldHaveTargetFrameworkAttribute, bool windowsOnly)
         {
             var framework = NuGetFramework.Parse(frameworkName);
@@ -347,7 +347,8 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             buildResult.Should().Fail();
 
-            buildResult.StdErr.Should().Contain("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
+            buildResult.StdErr.Should().Contain("Can not find runtime target for framework '.NETCoreApp,Version=v1.0' compatible with one of the target runtimes");
+            buildResult.StdErr.Should().Contain("The project has not been restored or restore failed - run `dotnet restore`");
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

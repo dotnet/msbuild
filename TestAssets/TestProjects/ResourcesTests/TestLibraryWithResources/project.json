@@ -4,7 +4,7 @@
     "NETStandard.Library": "1.5.0-rc3-24113-00"
   },
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.5": {
       "imports": "dnxcore50"
     }
   }

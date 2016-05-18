@@ -82,8 +82,7 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore("--verbosity", "verbose",
-                "--infer-runtimes",
+            dotnet.Restore("--verbosity", "verbose",                
                 "--fallbacksource", Dirs.CorehostLocalPackages,
                 "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"))
@@ -103,8 +102,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var dotnet = DotNetCli.Stage2;
             dotnet.Restore(
-                "--verbosity", "verbose",
-                "--infer-runtimes",
+                "--verbosity", "verbose",                
                 "--fallbacksource", Dirs.TestPackages,
                 "--fallbacksource", Dirs.CorehostLocalPackages,
                 "--fallbacksource", Dirs.CorehostDummyPackages)
