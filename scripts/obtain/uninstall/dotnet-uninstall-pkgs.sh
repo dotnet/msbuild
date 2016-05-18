@@ -8,7 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 current_user=$(whoami)
 if [ $current_user != "root" ]; then
-    echo "`basename "$0"` uninstallation script requires superuser privileges to run"
+    echo "$(basename "$0") uninstallation script requires superuser privileges to run"
     exit 1
 fi
 
@@ -31,8 +31,8 @@ remove_dotnet_pkgs
 [ "$?" -ne 0 ] && echo "Failed to remove dotnet packages." && exit 1
 
 echo "Deleting install root - $dotnet_install_root"
-rm -rf $dotnet_install_location
-rm -f $dotnet_path_file
+rm -r "$dotnet_install_root"
+rm "$dotnet_path_file"
 
 echo "dotnet packages removal succeeded."
 exit 0

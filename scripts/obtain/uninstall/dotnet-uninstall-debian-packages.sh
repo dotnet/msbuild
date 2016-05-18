@@ -8,7 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 current_user=$(whoami)
 if [ $current_user != "root" ]; then
-    echo "$(basename $0) uninstallation script requires superuser privileges to run"
+    echo "$(basename "$0") uninstallation script requires superuser privileges to run"
     exit 1
 fi
 
