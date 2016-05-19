@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (Project.PackOptions.PackInclude != null)
             {
-                var files = IncludeFilesResolver.GetIncludeFiles(Project.PackOptions.PackInclude, "/", diagnostics: packDiagnostics, flatten: true);
+                var files = IncludeFilesResolver.GetIncludeFiles(Project.PackOptions.PackInclude, "/", diagnostics: packDiagnostics);
                 PackageBuilder.Files.AddRange(GetPackageFiles(files, packDiagnostics));
             }
             else if (Project.Files.PackInclude != null && Project.Files.PackInclude.Any())
