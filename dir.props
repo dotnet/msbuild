@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
          copying its dependencies (which are in the GAC). -->
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
