@@ -25,7 +25,7 @@ namespace dotnet_new3
             CommandLineApplication app = new CommandLineApplication(false)
             {
                 Name = "dotnet new3",
-                FullName = "Mutant Chicken Template Instantiation Commands for .NET Core CLI."
+                FullName = "Template Instantiation Commands for .NET Core CLI."
             };
 
             CommandArgument template = app.Argument("template", "The template to instantiate.");
