@@ -25,5 +25,19 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 .And
                 .HaveStdErrContaining("dotnet restore");
         }
+        
+        [Fact]
+        public void It_fails_correctly_with_invalid_runtime_parameter()
+        {
+            var instance = TestAssetsManager.CreateTestInstance(Path.Combine("ProjectsWithTests", "NetCoreAppOnlyProject"));
+
+            new DotnetTestCommand()
+                .WithLockFiles()
+                .ExecuteWithCapturedOutput(instance.TestRoot)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("Missing value for option 'runtime'");
+        }
     }
 }
