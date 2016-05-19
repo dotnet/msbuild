@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
-using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.DotNet.Cli.Build;
-
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
 namespace Microsoft.DotNet.Host.Build
 {
@@ -19,7 +10,7 @@ namespace Microsoft.DotNet.Host.Build
         private string _intermediateDirectory;
         private string _outputDirectory;
 
-        private bool _stubBitsBuilt = false;
+        private bool _dummyFileCreated;
 
         public StubPackageBuilder(DotNetCli dotnet, string intermediateDirectory, string outputDirectory)
         {
@@ -30,45 +21,28 @@ namespace Microsoft.DotNet.Host.Build
 
         public void GeneratePackage(string packageId, string version)
         {
-            if (! _stubBitsBuilt)
+            if (!_dummyFileCreated)
             {
-                BuildStubBits(_dotnet, _intermediateDirectory);
+                CreateDummyFile(_dotnet, _intermediateDirectory);
             }
 
             CreateStubPackage(_dotnet, packageId, version, _intermediateDirectory, _outputDirectory);
         }
 
-        private void BuildStubBits(DotNetCli dotnet, string intermediateDirectory)
+        private void CreateDummyFile(DotNetCli dotnet, string intermediateDirectory)
         {
-            var projectJson = new StringBuilder();
-            projectJson.Append("{");
-            projectJson.Append("  \"dependencies\": { \"System.Console\": \"4.0.0-*\" },");
-            projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { } },");
-            projectJson.Append("}");
-
-            var programCs = "using System; namespace ConsoleApplication { public class Program { public static void Main(string[] args) { Console.WriteLine(\"Hello World!\"); } } }";
+            var dummyTxt = "dummy text";
 
             var tempPjDirectory = Path.Combine(intermediateDirectory, "dummyNuGetPackageIntermediate");
             FS.Rmdir(tempPjDirectory);
 
             Directory.CreateDirectory(tempPjDirectory);
 
-            var tempPjFile = Path.Combine(tempPjDirectory, "project.json");
-            var tempSourceFile = Path.Combine(tempPjDirectory, "Program.cs");
+            var dummyTextFile = Path.Combine(tempPjDirectory, "dummy.txt");
 
-            File.WriteAllText(tempPjFile, projectJson.ToString());
-            File.WriteAllText(tempSourceFile, programCs.ToString());
+            File.WriteAllText(dummyTextFile, dummyTxt);
 
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel")
-                .WorkingDirectory(tempPjDirectory)
-                .Execute()
-                .EnsureSuccessful();
-            dotnet.Build(tempPjFile, "--runtime", "win7-x64")
-                .WorkingDirectory(tempPjDirectory)
-                .Execute()
-                .EnsureSuccessful();
-
-            _stubBitsBuilt = true;
+            _dummyFileCreated = true;
         }
 
         private static void CreateStubPackage(DotNetCli dotnet, 
@@ -81,7 +55,7 @@ namespace Microsoft.DotNet.Host.Build
             projectJson.Append("{");
             projectJson.Append($"  \"version\": \"{version}\",");
             projectJson.Append($"  \"name\": \"{packageId}\",");
-            projectJson.Append("  \"dependencies\": { \"System.Console\": \"4.0.0-*\" },");
+            projectJson.Append("  \"packOptions\": { \"files\": { \"include\": \"dummy.txt\" } },");
             projectJson.Append("  \"frameworks\": { \"netcoreapp1.0\": { } },");
             projectJson.Append("}");
 
