@@ -6,12 +6,14 @@
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254",
     "Microsoft.NETCore.Platforms": "1.0.0-rc2-24027"
   },
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "compile": {
+      "include": [
+        "../src/*.cs"
+      ]
+    }
   },
-  "compile": [
-    "../src/*.cs"
-  ],
   "frameworks": {
     "net451": {}
   }

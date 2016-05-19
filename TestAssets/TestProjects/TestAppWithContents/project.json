@@ -1,13 +1,18 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "copyToOutput": {
+      "include": "testcontentfile.txt"
+    }
   },
   "dependencies": {
     "Microsoft.NETCore.App": "1.0.0-rc3-*"
   },
-  "content": "testcontentfile.txt",
   "frameworks": {
-    "netcoreapp1.0": { }
+    "netcoreapp1.0": {}
+  },
+  "publishOptions": {
+    "include": "testcontentfile.txt"
   }
 }

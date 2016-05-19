@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true,
     "preserveCompilationContext": true
   },
@@ -8,7 +8,6 @@
     "DependencyContextValidator": "1.0.0-*"
   },
   "frameworks": {
-    "net451": {
-    }
+    "net451": {}
   }
 }

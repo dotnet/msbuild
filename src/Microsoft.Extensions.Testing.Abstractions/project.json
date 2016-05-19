@@ -1,18 +1,16 @@
 {
   "description": "Abstractions for test runners to communicate to a tool, such as Visual Studio.",
   "version": "1.0.0-preview2-*",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dotnet/cli"
-  },
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true,
     "allowUnsafe": true,
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
-    "Microsoft.DotNet.ProjectModel": { "target": "project" },
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
+    },
     "Microsoft.DiaSymReader": "1.0.6",
     "Microsoft.DiaSymReader.Native": "1.3.3"
   },
@@ -29,5 +27,11 @@
       }
     }
   },
-  "scripts": {}
+  "scripts": {},
+  "packOptions": {
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/dotnet/cli"
+    }
+  }
 }

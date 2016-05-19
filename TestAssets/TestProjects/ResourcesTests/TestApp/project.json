@@ -1,6 +1,6 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true
   },
   "dependencies": {
@@ -9,11 +9,15 @@
       "type": "platform",
       "version": "1.0.0-rc3-*"
     },
-    "TestLibraryWithResources": { "target": "project" }
+    "TestLibraryWithResources": {
+      "target": "project"
+    }
   },
   "frameworks": {
     "netcoreapp1.0": {
-        "imports": [ "portable-net45+win8" ]
+      "imports": [
+        "portable-net45+win8"
+      ]
     }
   }
 }

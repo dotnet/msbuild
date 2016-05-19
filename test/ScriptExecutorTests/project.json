@@ -25,8 +25,17 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/TestApp/**/*"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/TestApp/**/*"
+    ]
+  },
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/TestApp/**/*"
+      ]
+    }
+  }
 }

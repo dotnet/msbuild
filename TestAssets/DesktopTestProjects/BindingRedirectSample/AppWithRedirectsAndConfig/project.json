@@ -1,13 +1,15 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "compile": {
+      "include": [
+        "../src/*.cs"
+      ]
+    }
   },
-  "compile": [
-    "../src/*.cs"
-  ],
   "dependencies": {
-    "Newtonsoft.Json": "8.0.3",    
+    "Newtonsoft.Json": "8.0.3",
     "Microsoft.AspNet.Mvc": "3.0.50813.1",
     "Unity.Mvc": "3.0.1304",
     "dotnet-desktop-binding-redirects": "1.0.0-*"

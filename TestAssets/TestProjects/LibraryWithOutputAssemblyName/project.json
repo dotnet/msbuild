@@ -1,5 +1,5 @@
 {
-  "compilationOptions": {
+  "buildOptions": {
     "outputName": "MyLibrary"
   },
   "dependencies": {

@@ -22,12 +22,25 @@
       ]
     }
   },
-  "content": [
-    "../../TestAssets/TestProjects/FSharpTestProjects/CompileFailApp/**/*",
-    "../../TestAssets/TestProjects/FSharpTestProjects/TestApp/**/*",
-    "../../TestAssets/TestProjects/FSharpTestProjects/TestAppWithArgs/**/*",
-    "../../TestAssets/TestProjects/FSharpTestProjects/TestLibrary/**/*",
-    "../../TestAssets/TestProjects/FSharpTestProjects/global.json"
-  ],
-  "testRunner": "xunit"
+  "testRunner": "xunit",
+  "publishOptions": {
+    "include": [
+      "../../TestAssets/TestProjects/FSharpTestProjects/CompileFailApp/**/*",
+      "../../TestAssets/TestProjects/FSharpTestProjects/TestApp/**/*",
+      "../../TestAssets/TestProjects/FSharpTestProjects/TestAppWithArgs/**/*",
+      "../../TestAssets/TestProjects/FSharpTestProjects/TestLibrary/**/*",
+      "../../TestAssets/TestProjects/FSharpTestProjects/global.json"
+    ]
+  },
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "../../TestAssets/TestProjects/FSharpTestProjects/CompileFailApp/**/*",
+        "../../TestAssets/TestProjects/FSharpTestProjects/TestApp/**/*",
+        "../../TestAssets/TestProjects/FSharpTestProjects/TestAppWithArgs/**/*",
+        "../../TestAssets/TestProjects/FSharpTestProjects/TestLibrary/**/*",
+        "../../TestAssets/TestProjects/FSharpTestProjects/global.json"
+      ]
+    }
+  }
 }

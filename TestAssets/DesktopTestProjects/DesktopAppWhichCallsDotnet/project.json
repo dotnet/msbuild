@@ -1,9 +1,11 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": { "target": "project" }
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    }
   },
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true
   },
   "frameworks": {

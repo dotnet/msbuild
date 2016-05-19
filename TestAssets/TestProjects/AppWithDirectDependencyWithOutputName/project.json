@@ -1,5 +1,5 @@
 {
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true
   },
   "dependencies": {
@@ -13,9 +13,9 @@
     }
   },
   "frameworks": {
-    "netcoreapp1.0": { }
+    "netcoreapp1.0": {}
   },
-   "tools": {
+  "tools": {
     "dotnet-dependency-tool-invoker": {
       "version": "1.0.0-*",
       "imports": [

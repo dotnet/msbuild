@@ -1,11 +1,13 @@
 {
   "version": "1.0.0-rc3-*",
-  "compilationOptions": {
+  "buildOptions": {
     "keyFile": "../../tools/Key.snk"
   },
   "description": "Types to model a .NET Project",
   "dependencies": {
-    "Microsoft.Extensions.DependencyModel": { "target": "project" },
+    "Microsoft.Extensions.DependencyModel": {
+      "target": "project"
+    },
     "Newtonsoft.Json": "7.0.1",
     "NuGet.Packaging": "3.5.0-rc-1285",
     "NuGet.RuntimeModel": "3.5.0-rc-1285",

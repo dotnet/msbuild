@@ -1,13 +1,13 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true
   },
   "dependencies": {
     "Microsoft.NETCore.App": "1.0.0-rc3-*"
   },
   "frameworks": {
-    "netcoreapp1.0": { }
+    "netcoreapp1.0": {}
   },
   "scripts": {
     "prepublish": [

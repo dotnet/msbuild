@@ -5,12 +5,14 @@
     "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254"
   },
-  "compilationOptions": {
-    "emitEntryPoint": true
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "compile": {
+      "include": [
+        "../src/*.cs"
+      ]
+    }
   },
-  "compile": [
-    "../src/*.cs"
-  ],
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
