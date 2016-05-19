@@ -54,13 +54,25 @@ namespace Microsoft.Build.Tasks
         private readonly List<ITaskItem> _nonEmptyOutput = new List<ITaskItem>();
         private Encoding _standardErrorEncoding;
         private Encoding _standardOutputEncoding;
+        private string _command;
 
         #endregion
 
         #region Properties
 
         [Required]
-        public string Command { get; set; }
+        public string Command
+        {
+            get { return _command; }
+            set
+            {
+                _command = value;
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    _command = _command.Replace("\r\n", "\n");
+                }
+            }
+        }
 
         public string WorkingDirectory { get; set; }
 
