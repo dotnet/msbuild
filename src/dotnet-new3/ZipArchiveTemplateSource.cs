@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
 {

@@ -1,23 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using System.Threading.Tasks;
 
 namespace dotnet_new3
 {
     public static class AssemblyLoader
     {
-        public static IEnumerable<Assembly> LoadAllFromCodebase(string pattern = "*.dll", SearchOption searchOption = SearchOption.AllDirectories)
+        public static void Load(string path)
         {
-            return AssemblyLoadContext.Default.LoadAllFromCodebase(pattern, searchOption);
+            AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
         }
 
-        public static IEnumerable<Assembly> LoadAllFromPath(string path, string pattern = "*.dll", SearchOption searchOption = SearchOption.AllDirectories)
+        public static IEnumerable<Assembly> LoadAllAssemblies(out IEnumerable<string> loadFailures, string pattern = "*.dll", SearchOption searchOption = SearchOption.AllDirectories)
         {
-            return AssemblyLoadContext.Default.LoadAllFromPath(path, pattern, searchOption);
+            IEnumerable<string>
+                failures1,
+                failures2;
+
+            IEnumerable<Assembly> loaded = LoadAllFromUserDir(out failures1, pattern, searchOption).Union(LoadAllFromCodebase(out failures2, pattern, searchOption));
+            loadFailures = failures1.Union(failures2);
+            return loaded;
+        }
+
+        public static IEnumerable<Assembly> LoadAllFromCodebase(out IEnumerable<string> loadFailures, string pattern = "*.dll", SearchOption searchOption = SearchOption.AllDirectories)
+        {
+            return AssemblyLoadContext.Default.LoadAllFromCodebase(out loadFailures, pattern, searchOption);
+        }
+
+        public static IEnumerable<Assembly> LoadAllFromUserDir(out IEnumerable<string> loadFailures, string pattern = "*.dll", SearchOption searchOption = SearchOption.AllDirectories)
+        {
+            return LoadAllFromPath(out loadFailures, Paths.ComponentsDir, pattern, searchOption);
+        }
+
+        public static IEnumerable<Assembly> LoadAllFromPath(out IEnumerable<string> loadFailures, string path, string pattern = "*.dll", SearchOption searchOption = SearchOption.AllDirectories)
+        {
+            return AssemblyLoadContext.Default.LoadAllFromPath(out loadFailures, path, pattern, searchOption);
         }
     }
 }

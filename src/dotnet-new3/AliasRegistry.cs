@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
 
 namespace dotnet_new3
@@ -11,47 +11,29 @@ namespace dotnet_new3
     public static class AliasRegistry
     {
         private static JObject _source;
-        private static string _path;
-        private static Dictionary<string, string> _aliasesToTemplates = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        private static Dictionary<string, string> _templatesToAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        private static void Initialize()
-        {
-            if (_path != null)
-            {
-                return;
-            }
-
-            Assembly asm = Assembly.GetEntryAssembly();
-            Uri codebase = new Uri(asm.CodeBase, UriKind.Absolute);
-            string localPath = codebase.LocalPath;
-            string dir = Path.GetDirectoryName(localPath);
-            string manifest = Path.Combine(dir, "aliases.json");
-            _path = manifest;
-        }
+        private static readonly Dictionary<string, string> AliasesToTemplates = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, string> TemplatesToAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private static void Load()
         {
-            if (_templatesToAliases.Count > 0)
+            if (TemplatesToAliases.Count > 0)
             {
                 return;
             }
-
-            Initialize();
-
-            if (!File.Exists(_path))
+            
+            if (!Paths.AliasesFile.Exists())
             {
                 _source = new JObject();
                 return;
             }
 
-            string sourcesText = File.ReadAllText(_path);
+            string sourcesText = Paths.AliasesFile.ReadAllText("{}");
             _source = JObject.Parse(sourcesText);
 
             foreach (JProperty child in _source.Properties())
             {
-                _aliasesToTemplates[child.Name] = child.Value.ToString();
-                _templatesToAliases[child.Value.ToString()] = child.Name;
+                AliasesToTemplates[child.Name] = child.Value.ToString();
+                TemplatesToAliases[child.Value.ToString()] = child.Name;
             }
         }
 
@@ -64,7 +46,7 @@ namespace dotnet_new3
 
             Load();
             string templateName;
-            if (_aliasesToTemplates.TryGetValue(alias, out templateName))
+            if (AliasesToTemplates.TryGetValue(alias, out templateName))
             {
                 return templateName;
             }
@@ -82,7 +64,7 @@ namespace dotnet_new3
             Load();
             ITemplate match;
             string templateName;
-            if(_aliasesToTemplates.TryGetValue(alias, out templateName))
+            if(AliasesToTemplates.TryGetValue(alias, out templateName))
             {
                 match = templates.FirstOrDefault(x => string.Equals(x.Name, templateName, StringComparison.Ordinal));
 
@@ -92,7 +74,7 @@ namespace dotnet_new3
                 }
             }
 
-            HashSet<string> matchedAliases = new HashSet<string>(_aliasesToTemplates.Where(x => x.Key.IndexOf(alias, StringComparison.OrdinalIgnoreCase) > -1).Select(x => x.Value));
+            HashSet<string> matchedAliases = new HashSet<string>(AliasesToTemplates.Where(x => x.Key.IndexOf(alias, StringComparison.OrdinalIgnoreCase) > -1).Select(x => x.Value));
             List<ITemplate> results = new List<ITemplate>();
 
             foreach(ITemplate template in templates)
@@ -110,7 +92,7 @@ namespace dotnet_new3
         {
             Load();
             string alias;
-            if(!_templatesToAliases.TryGetValue(template.Name, out alias))
+            if(!TemplatesToAliases.TryGetValue(template.Name, out alias))
             {
                 return null;
             }
@@ -122,7 +104,7 @@ namespace dotnet_new3
         {
             Load();
             _source[alias] = template.Name;
-            File.WriteAllText(_path, _source.ToString());
+            File.WriteAllText(Paths.AliasesFile, _source.ToString());
         }
     }
 }

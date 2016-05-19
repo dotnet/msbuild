@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
 {

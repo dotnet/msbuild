@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
 {
@@ -17,7 +17,7 @@ namespace dotnet_new3
         {
             try
             {
-                return System.IO.Directory.Exists(location);
+                return location.DirectoryExists();
             }
             catch
             {

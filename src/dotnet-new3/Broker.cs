@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
 
 namespace dotnet_new3
@@ -12,7 +12,6 @@ namespace dotnet_new3
     {
         private IComponentRegistry _registry;
         private readonly Dictionary<string, TemplateSource> _configuredSources = new Dictionary<string, TemplateSource>(StringComparer.OrdinalIgnoreCase);
-        private string _path;
 
         private class TemplateSource
         {
@@ -21,21 +20,6 @@ namespace dotnet_new3
             public string Alias { get; set; }
 
             public string Location { get; set; }
-        }
-
-        private void Initialize()
-        {
-            if (_path != null)
-            {
-                return;
-            }
-
-            Assembly asm = Assembly.GetEntryAssembly();
-            Uri codebase = new Uri(asm.CodeBase, UriKind.Absolute);
-            string localPath = codebase.LocalPath;
-            string dir = Path.GetDirectoryName(localPath);
-            string manifest = Path.Combine(dir, "template_sources.json");
-            _path = manifest;
         }
 
         public IComponentRegistry ComponentRegistry => _registry ?? (_registry = new ComponentRegistry());
@@ -47,14 +31,7 @@ namespace dotnet_new3
                 return;
             }
 
-            Initialize();
-
-            if (!File.Exists(_path))
-            {
-                return;
-            }
-
-            string sourcesText = File.ReadAllText(_path);
+            string sourcesText = Paths.TemplateSourcesFile.ReadAllText("{}");
             JObject sources = JObject.Parse(sourcesText);
 
             foreach (JProperty child in sources.Properties())
@@ -106,7 +83,7 @@ namespace dotnet_new3
                 };
             }
 
-            File.WriteAllText(_path, result.ToString());
+            File.WriteAllText(Paths.TemplateSourcesFile, result.ToString());
             return true;
         }
 
@@ -116,7 +93,7 @@ namespace dotnet_new3
 
             if(alias == "*")
             {
-                File.WriteAllText(_path, "{}");
+                File.WriteAllText(Paths.TemplateSourcesFile, "{}");
                 return true;
             }
 
@@ -132,7 +109,7 @@ namespace dotnet_new3
                     };
                 }
 
-                File.WriteAllText(_path, result.ToString());
+                File.WriteAllText(Paths.TemplateSourcesFile, result.ToString());
                 return true;
             }
 

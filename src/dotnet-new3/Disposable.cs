@@ -1,5 +1,5 @@
 ﻿using System;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
 {

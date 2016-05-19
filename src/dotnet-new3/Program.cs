@@ -6,8 +6,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
-using Mutant.Chicken.Abstractions;
+using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
+using NuGet.Configuration;
 using NuGet.Frameworks;
 
 namespace dotnet_new3
@@ -41,15 +42,33 @@ namespace dotnet_new3
 
             CommandOption installComponent = app.Option("--install-component", "Installs a component.", CommandOptionType.MultipleValue);
             CommandOption resetConfig = app.Option("--reset", "Resets the component cache and installed template sources.", CommandOptionType.NoValue);
+            CommandOption rescan = app.Option("--rescan", "Rebuilds the component cache.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
+                if (rescan.HasValue())
+                {
+                    Broker.ComponentRegistry.ForceReinitialize();
+                    ShowConfig();
+                    return Task.FromResult(0);
+                }
+
                 if (resetConfig.HasValue())
                 {
-                    string componentsPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Components");
-                    Directory.Delete(componentsPath, true);
-                    string templatesPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Templates");
-                    Directory.Delete(templatesPath, true);
+                    Paths.ComponentsDir.Delete();
+                    Paths.TemplateCacheDir.Delete();
+                    Paths.ScratchDir.Delete();
+                    Paths.TemplateSourcesFile.Delete();
+                    Paths.AliasesFile.Delete();
+                    Paths.ComponentCacheFile.Delete();
+
+                    Paths.TemplateCacheDir.CreateDirectory();
+                    Paths.ComponentsDir.CreateDirectory();
+                    Broker.ComponentRegistry.ForceReinitialize();
+                    TryAddSource(Paths.TemplateCacheDir);
+
+                    ShowConfig();
+
                     return Task.FromResult(0);
                 }
 
@@ -81,7 +100,7 @@ namespace dotnet_new3
                     
                     foreach (string value in install.Values)
                     {
-                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && (File.Exists(value) || Directory.Exists(value)))
+                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && value.Exists())
                         {
                             TryAddSource(value);
                         }
@@ -93,25 +112,24 @@ namespace dotnet_new3
 
                     if (dependenciesObject.Count > 0)
                     {
-                        string scratchPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "scratch");
-                        Directory.CreateDirectory(scratchPath);
-                        string componentsPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Components");
-                        Directory.CreateDirectory(componentsPath);
-                        string templatesPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Templates");
-                        Directory.CreateDirectory(templatesPath);
-                        string projectFile = Path.Combine(scratchPath, "project.json");
+                        Paths.ScratchDir.CreateDirectory();
+                        Paths.ComponentsDir.CreateDirectory();
+                        Paths.TemplateCacheDir.CreateDirectory();
+                        string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
                         File.WriteAllText(projectFile, projJson.ToString());
 
                         Reporter.Output.WriteLine("Installing...");
-                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", "..\\Components"}, NuGetFramework.AnyFramework).WorkingDirectory(scratchPath).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", Paths.ComponentsDir}, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
                         Reporter.Output.WriteLine("Done.");
 
                         foreach (string value in install.Values)
                         {
-                            MoveDirectory(componentsPath, templatesPath, value);
+                            MoveTemplateToTemplatesCache(value);
                         }
 
-                        Directory.Delete(scratchPath, true);
+                        Paths.ScratchDir.Delete();
+                        Broker.ComponentRegistry.ForceReinitialize();
+                        ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
                     }
 
                     return Task.FromResult(0);
@@ -139,7 +157,7 @@ namespace dotnet_new3
 
                     foreach (string value in installComponent.Values)
                     {
-                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && (File.Exists(value) || Directory.Exists(value)))
+                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && value.Exists())
                         {
                             TryAddSource(value);
                         }
@@ -151,20 +169,18 @@ namespace dotnet_new3
 
                     if (dependenciesObject.Count > 0)
                     {
-                        string scratchPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "scratch");
-                        Directory.CreateDirectory(scratchPath);
-                        string componentsPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Components");
-                        Directory.CreateDirectory(componentsPath);
-                        string templatesPath = Path.Combine(AssemblyLoadContextHelper.AppDir, "Templates");
-                        Directory.CreateDirectory(templatesPath);
-                        string projectFile = Path.Combine(scratchPath, "project.json");
+                        Paths.ScratchDir.CreateDirectory();
+                        Paths.ComponentsDir.CreateDirectory();
+                        Paths.TemplateCacheDir.CreateDirectory();
+                        string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
                         File.WriteAllText(projectFile, projJson.ToString());
 
                         Reporter.Output.WriteLine("Installing...");
-                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", "..\\Components" }, NuGetFramework.AnyFramework).WorkingDirectory(scratchPath).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", "..\\Components" }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
                         Reporter.Output.WriteLine("Done.");
 
-                        Directory.Delete(scratchPath, true);
+                        Paths.ScratchDir.Delete();
+                        ShowConfig();
                     }
 
                     return Task.FromResult(0);
@@ -176,13 +192,9 @@ namespace dotnet_new3
                     {
                         if (value == "*")
                         {
-                            string sources = Path.Combine(AssemblyLoadContextHelper.AppDir, "template_sources.json");
-
-                            if (File.Exists(sources))
-                            {
-                                File.Delete(sources);
-                            }
-
+                            Paths.TemplateSourcesFile.Delete();
+                            Paths.AliasesFile.Delete();
+                            Paths.TemplateCacheDir.Delete();
                             return Task.FromResult(0);
                         }
 
@@ -197,14 +209,7 @@ namespace dotnet_new3
 
                 if (listOnly.HasValue())
                 {
-                    IEnumerable<ITemplate> results = TemplateCreator.List(template, source);
-                    TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
-                    {
-                        {"Templates", x => x.Name},
-                        {"Short Names", x => $"[{x.ShortName}]" },
-                        {"Alias", x => AliasRegistry.GetAliasForTemplate(x) ?? "" }
-                    });
-
+                    ListTemplates(template, source);
                     return Task.FromResult(0);
                 }
 
@@ -262,15 +267,26 @@ namespace dotnet_new3
             return result;
         }
 
-        private static void MoveDirectory(string componentsPath, string templatesPath, string value)
+        private static void ListTemplates(CommandArgument template, CommandOption source)
         {
-            string templateSource = Path.Combine(componentsPath, value);
+            IEnumerable<ITemplate> results = TemplateCreator.List(template, source);
+            TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
+            {
+                {"Templates", x => x.Name},
+                {"Short Names", x => $"[{x.ShortName}]"},
+                {"Alias", x => AliasRegistry.GetAliasForTemplate(x) ?? ""}
+            });
+        }
+
+        private static void MoveTemplateToTemplatesCache(string name)
+        {
+            string templateSource = Path.Combine(Paths.ComponentsDir, name);
 
             foreach (string dir in Directory.GetDirectories(templateSource, "*", SearchOption.TopDirectoryOnly))
             {
                 foreach (string file in Directory.GetFiles(dir, "*.nupkg", SearchOption.TopDirectoryOnly))
                 {
-                    File.Copy(file, Path.Combine(templatesPath, Path.GetFileName(file)), true);
+                    File.Copy(file, Path.Combine(Paths.TemplateCacheDir, Path.GetFileName(file)), true);
                 }
             }
 
