@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
@@ -94,6 +95,44 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var testCommand = new DotnetTestCommand();
             result = testCommand.Execute($"{_projectFilePath} -o {_defaultOutputPath} --no-build");
             result.Should().Pass();
+        }
+        
+        [Theory]
+        [MemberData("ArgumentNames")]
+        public void It_fails_correctly_with_unspecified_arguments_with_long_form(string argument)
+        {
+            new DotnetTestCommand()
+                .ExecuteWithCapturedOutput($"{_projectFilePath} --{argument}")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining($"Missing value for option '{argument}'");
+        }
+        
+        [Theory]
+        [MemberData("ArgumentNames")]
+        public void It_fails_correctly_with_unspecified_arguments_with_short_form(string argument)
+        {
+            new DotnetTestCommand()
+                .ExecuteWithCapturedOutput($"{_projectFilePath} -{argument[0]}")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining($"Missing value for option '{argument}'");
+        }
+        
+        public static IEnumerable<object[]> ArgumentNames
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { "output" },
+                    new object[] { "configuration" },
+                    new object[] { "runtime" },
+                    new object[] { "build-base-path" }
+                };
+            }
         }
 
         private string GetNotSoLongBuildBasePath()
