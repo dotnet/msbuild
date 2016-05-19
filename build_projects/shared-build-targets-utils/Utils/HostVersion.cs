@@ -24,7 +24,8 @@ namespace Microsoft.DotNet.Cli.Build
         public string LatestHostPolicyVersionNoSuffix => $"{Major}.{Minor}.{Patch}";
         public string LatestHostPrerelease => ReleaseSuffix;
         public string LatestHostBuildMajor => $"{CommitCountString}";
-        public string LatestHostSuffix => $"{ReleaseSuffix}-{LatestHostBuildMajor}-00";
+        public string LatestHostBuildMinor => "00";
+        public string LatestHostSuffix => $"{ReleaseSuffix}-{LatestHostBuildMajor}-{LatestHostBuildMinor}";
 
         // Full versions and package information.
         public string LatestHostVersion => $"{LatestHostVersionNoSuffix}-{LatestHostSuffix}";
