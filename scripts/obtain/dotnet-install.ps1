@@ -47,7 +47,7 @@
 #>
 [cmdletbinding()]
 param(
-   [string]$Channel="beta",
+   [string]$Channel="preview",
    [string]$Version="Latest",
    [string]$InstallDir="<auto>",
    [string]$Architecture="<auto>",
