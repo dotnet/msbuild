@@ -10,6 +10,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -302,11 +303,16 @@ namespace Microsoft.Build.UnitTests
             Assert.False(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("recursivedir"));
         }
 
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void GetExecutablePath()
         {
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "msbuild.exe").ToLowerInvariant();
+            // This test will fail when CurrentDirectory is changed in another test. We will change it here
+            // to the path to Microsoft.Build.dll (debug build output folder). This is what it *should* be
+            // anyway.
+            var msbuildPath = Path.GetDirectoryName(typeof(Project).Assembly.Location);
+            Directory.SetCurrentDirectory(msbuildPath);
 
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "msbuild.exe").ToLowerInvariant();
             string configPath = FileUtilities.CurrentExecutableConfigurationFilePath.ToLowerInvariant();
             string directoryName = FileUtilities.CurrentExecutableDirectory.ToLowerInvariant();
             string executablePath = FileUtilities.CurrentExecutablePath.ToLowerInvariant();
@@ -488,7 +494,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath));
@@ -530,7 +535,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.DirectoryExistsNoThrow(inputPath));
@@ -573,7 +577,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.FileExistsNoThrow(inputPath));
@@ -616,7 +619,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.GetFileInfoNoThrow(inputPath) != null);

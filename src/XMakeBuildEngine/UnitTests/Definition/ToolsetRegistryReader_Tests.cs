@@ -97,8 +97,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the tools version 4.0 is written to the the registry at install time
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact(Skip = "Test requires installed toolset.")]
         public void DefaultValuesInRegistryCreatedBySetup()
         {
             ToolsetReader reader = new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>());  //we don't use the test registry key because we want to verify the install
