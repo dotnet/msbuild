@@ -532,7 +532,7 @@ local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
 temporary_file_template="${TMPDIR:-/tmp}/dotnet.XXXXXXXXX"
 
-channel="beta"
+channel="preview"
 version="Latest"
 install_dir="<auto>"
 architecture="<auto>"
