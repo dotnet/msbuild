@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             if (project.LockFile == null)
             {
-                var errorMessage = $"Project {project.ProjectName()} does not have a lock file.";
+                var errorMessage = $"Project {project.ProjectName()} does not have a lock file. Please run \"dotnet restore\" to generate a new lock file.";
                 Reporter.Error.WriteLine(errorMessage);
                 throw new InvalidOperationException(errorMessage);
             }

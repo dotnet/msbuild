@@ -79,6 +79,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             buildResult = BuildProject(expectBuildFailure: true);
             Assert.Contains("does not have a lock file", buildResult.StdErr);
+            Assert.Contains("dotnet restore", buildResult.StdErr);
         }
 
         [Fact]
