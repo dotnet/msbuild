@@ -15,12 +15,27 @@ namespace dotnet_new3
         private static string _templateSourcesFile;
         private static string _aliasesFile;
         private static string _userDir;
+        private static string _userProfileDir;
+        private static string _packageCache;
 
-        public static string UserDir
+        public static string PackageCache
         {
             get
             {
-                if (_userDir == null)
+                if (_packageCache == null)
+                {
+                    _packageCache = Path.Combine(UserProfileDir, @".nuget\packages");
+                }
+
+                return _packageCache;
+            }
+        }
+
+        public static string UserProfileDir
+        {
+            get
+            {
+                if(_userProfileDir == null)
                 {
                     string profileDir;
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -32,7 +47,22 @@ namespace dotnet_new3
                         profileDir = Environment.GetEnvironmentVariable("HOME");
                     }
 
-                    _userDir = Path.Combine(profileDir, ".netnew");
+                    _userProfileDir = profileDir;
+                }
+
+                return _userProfileDir;
+            }
+        }
+
+        public static string UserDir
+        {
+            get
+            {
+                if (_userDir == null)
+                {
+
+
+                    _userDir = Path.Combine(UserProfileDir, ".netnew");
                 }
 
                 return _userDir;
@@ -87,6 +117,29 @@ namespace dotnet_new3
         {
             path.DeleteDirectory();
             path.DeleteFile();
+        }
+
+        public static void Copy(this string path, string targetPath)
+        {
+            if (File.Exists(path))
+            {
+                File.Copy(path, targetPath, true);
+                return;
+            }
+
+            foreach(string p in Directory.EnumerateFileSystemEntries(path, "*", SearchOption.AllDirectories))
+            {
+                string localPath = p.Substring(path.Length).TrimStart('\\', '/');
+
+                if (Directory.Exists(p))
+                {
+                    Directory.CreateDirectory(Path.Combine(targetPath, localPath));
+                }
+                else
+                {
+                    File.Copy(p, Path.Combine(targetPath, localPath), true);
+                }
+            }
         }
 
         public static bool FileExists(this string path)

@@ -109,7 +109,7 @@ namespace dotnet_new3
                 {
                     parameters = app.ParseExtraArgs(parametersFiles);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Reporter.Error.WriteLine(ex.Message.Red().Bold());
                     app.ShowHelp();
@@ -208,14 +208,25 @@ namespace dotnet_new3
 
             if (dependenciesObject.Count > 0)
             {
+                dependenciesObject["NETStandard.Library"] = new JObject
+                {
+                    {"version", "1.5.0-rc2-24103" },
+                    {"type", "platform" }
+                };
+
                 Paths.ScratchDir.CreateDirectory();
                 Paths.ComponentsDir.CreateDirectory();
                 Paths.TemplateCacheDir.CreateDirectory();
                 string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
                 File.WriteAllText(projectFile, projJson.ToString());
 
+                Reporter.Output.WriteLine("Downloading...");
+                Command.CreateDotNet("restore", new[] { "--ignore-failed-sources" }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
                 Reporter.Output.WriteLine("Installing...");
-                Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", Paths.ComponentsDir }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                Command.CreateDotNet("publish", new string[0], NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                Reporter.Output.WriteLine("Finishing up...");
+                string publishDir = Path.Combine(Paths.ScratchDir, @"bin\debug\netcoreapp1.0\publish");
+                publishDir.Copy(Paths.ComponentsDir);
                 Reporter.Output.WriteLine("Done.");
 
                 if (installingTemplates)
@@ -245,7 +256,7 @@ namespace dotnet_new3
 
         private static void MoveTemplateToTemplatesCache(string name)
         {
-            string templateSource = Path.Combine(Paths.ComponentsDir, name);
+            string templateSource = Path.Combine(Paths.PackageCache, name);
 
             foreach (string dir in Directory.GetDirectories(templateSource, "*", SearchOption.TopDirectoryOnly))
             {
