@@ -55,20 +55,7 @@ namespace dotnet_new3
 
                 if (resetConfig.HasValue())
                 {
-                    Paths.ComponentsDir.Delete();
-                    Paths.TemplateCacheDir.Delete();
-                    Paths.ScratchDir.Delete();
-                    Paths.TemplateSourcesFile.Delete();
-                    Paths.AliasesFile.Delete();
-                    Paths.ComponentCacheFile.Delete();
-
-                    Paths.TemplateCacheDir.CreateDirectory();
-                    Paths.ComponentsDir.CreateDirectory();
-                    Broker.ComponentRegistry.ForceReinitialize();
-                    TryAddSource(Paths.TemplateCacheDir);
-
-                    ShowConfig();
-
+                    PerformReset();
                     return Task.FromResult(0);
                 }
 
@@ -80,109 +67,13 @@ namespace dotnet_new3
 
                 if (install.HasValue())
                 {
-                    JObject dependenciesObject = new JObject();
-                    JObject projJson = new JObject
-                    {
-                        {"version", "1.0.0-*"},
-                        {"dependencies", dependenciesObject },
-                        {
-                            "frameworks", new JObject
-                            {
-                                {
-                                    "netcoreapp1.0", new JObject
-                                    {
-                                        { "imports", "dnxcore50" }
-                                    }
-                                }
-                            }
-                        }
-                    };
-                    
-                    foreach (string value in install.Values)
-                    {
-                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && value.Exists())
-                        {
-                            TryAddSource(value);
-                        }
-                        else
-                        {
-                            dependenciesObject[value] = "*";
-                        }
-                    }
-
-                    if (dependenciesObject.Count > 0)
-                    {
-                        Paths.ScratchDir.CreateDirectory();
-                        Paths.ComponentsDir.CreateDirectory();
-                        Paths.TemplateCacheDir.CreateDirectory();
-                        string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
-                        File.WriteAllText(projectFile, projJson.ToString());
-
-                        Reporter.Output.WriteLine("Installing...");
-                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", Paths.ComponentsDir}, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
-                        Reporter.Output.WriteLine("Done.");
-
-                        foreach (string value in install.Values)
-                        {
-                            MoveTemplateToTemplatesCache(value);
-                        }
-
-                        Paths.ScratchDir.Delete();
-                        Broker.ComponentRegistry.ForceReinitialize();
-                        ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
-                    }
-
+                    InstallPackage(install.Values, true);
                     return Task.FromResult(0);
                 }
 
                 if (installComponent.HasValue())
                 {
-                    JObject dependenciesObject = new JObject();
-                    JObject projJson = new JObject
-                    {
-                        {"version", "1.0.0-*"},
-                        {"dependencies", dependenciesObject },
-                        {
-                            "frameworks", new JObject
-                            {
-                                {
-                                    "netcoreapp1.0", new JObject
-                                    {
-                                        { "imports", "dnxcore50" }
-                                    }
-                                }
-                            }
-                        }
-                    };
-
-                    foreach (string value in installComponent.Values)
-                    {
-                        if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && value.Exists())
-                        {
-                            TryAddSource(value);
-                        }
-                        else
-                        {
-                            dependenciesObject[value] = "*";
-                        }
-                    }
-
-                    if (dependenciesObject.Count > 0)
-                    {
-                        Paths.ScratchDir.CreateDirectory();
-                        Paths.ComponentsDir.CreateDirectory();
-                        Paths.TemplateCacheDir.CreateDirectory();
-                        string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
-                        File.WriteAllText(projectFile, projJson.ToString());
-
-                        Reporter.Output.WriteLine("Installing...");
-                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", Paths.ComponentsDir }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
-                        Reporter.Output.WriteLine("Done.");
-
-                        Paths.ScratchDir.Delete();
-                        ShowConfig();
-                    }
-
+                    InstallPackage(installComponent.Values, false);
                     return Task.FromResult(0);
                 }
 
@@ -265,6 +156,81 @@ namespace dotnet_new3
             }
 
             return result;
+        }
+
+        private static void PerformReset()
+        {
+            Paths.ComponentsDir.Delete();
+            Paths.TemplateCacheDir.Delete();
+            Paths.ScratchDir.Delete();
+            Paths.TemplateSourcesFile.Delete();
+            Paths.AliasesFile.Delete();
+            Paths.ComponentCacheFile.Delete();
+
+            Paths.TemplateCacheDir.CreateDirectory();
+            Paths.ComponentsDir.CreateDirectory();
+            Broker.ComponentRegistry.ForceReinitialize();
+            TryAddSource(Paths.TemplateCacheDir);
+
+            ShowConfig();
+        }
+
+        private static void InstallPackage(List<string> packages, bool installingTemplates)
+        {
+            JObject dependenciesObject = new JObject();
+            JObject projJson = new JObject
+                    {
+                        {"version", "1.0.0-*"},
+                        {"dependencies", dependenciesObject },
+                        {
+                            "frameworks", new JObject
+                            {
+                                {
+                                    "netcoreapp1.0", new JObject
+                                    {
+                                        { "imports", "dnxcore50" }
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+            foreach (string value in packages)
+            {
+                if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && value.Exists())
+                {
+                    TryAddSource(value);
+                }
+                else
+                {
+                    dependenciesObject[value] = "*";
+                }
+            }
+
+            if (dependenciesObject.Count > 0)
+            {
+                Paths.ScratchDir.CreateDirectory();
+                Paths.ComponentsDir.CreateDirectory();
+                Paths.TemplateCacheDir.CreateDirectory();
+                string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
+                File.WriteAllText(projectFile, projJson.ToString());
+
+                Reporter.Output.WriteLine("Installing...");
+                Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", Paths.ComponentsDir }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                Reporter.Output.WriteLine("Done.");
+
+                if (installingTemplates)
+                {
+                    foreach (string value in packages)
+                    {
+                        MoveTemplateToTemplatesCache(value);
+                    }
+                }
+
+                Paths.ScratchDir.Delete();
+                Broker.ComponentRegistry.ForceReinitialize();
+                ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
+            }
         }
 
         private static void ListTemplates(CommandArgument template, CommandOption source)
