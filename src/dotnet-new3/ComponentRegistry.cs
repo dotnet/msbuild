@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
 
@@ -73,7 +74,7 @@ namespace dotnet_new3
 
             if(!loadSuccess)
             {
-                Console.WriteLine("Rebuilding component cache...");
+                Reporter.Verbose.WriteLine("Rebuilding component cache...");
                 Reinitialize(Paths.GlobalComponentCacheFile, Paths.GlobalComponentsDir);
                 Reinitialize(Paths.ComponentCacheFile, Paths.ComponentsDir);
             }

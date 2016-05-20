@@ -49,8 +49,15 @@ namespace dotnet_new3
                 if (!Paths.UserDir.Exists())
                 {
                     Reporter.Output.WriteLine("Getting things ready for first use...");
+
+                    if (!Paths.FirstRunCookie.Exists())
+                    {
+                        PerformReset(true, true);
+                        Paths.FirstRunCookie.WriteAllText("");
+                    }
+
                     ConfigureEnvironment();
-                    PerformReset(false);
+                    PerformReset(false, true);
                 }
 
                 if (rescan.HasValue())
@@ -107,7 +114,28 @@ namespace dotnet_new3
 
                         if (!TryRemoveSource(value))
                         {
-                            Reporter.Error.WriteLine($"Couldn't remove {value} as either a template source or an assembly.".Red().Bold());
+                            string cacheDir = global.HasValue() ? Paths.GlobalTemplateCacheDir : Paths.TemplateCacheDir;
+                            bool anyRemoved = false;
+
+                            foreach(string file in cacheDir.EnumerateFiles($"{value}.*.nupkg"))
+                            {
+                                int verStart = file.IndexOf(value, StringComparison.OrdinalIgnoreCase) + value.Length + 1;
+                                string ver = file.Substring(verStart);
+                                ver = ver.Substring(0, ver.Length - ".nupkg".Length);
+                                Version version;
+
+                                if (Version.TryParse(ver, out version))
+                                {
+                                    Reporter.Output.WriteLine($"Removing {value} version {version}...");
+                                    anyRemoved = true;
+                                    file.Delete();
+                                }
+                            }
+
+                            if (!anyRemoved)
+                            {
+                                Reporter.Error.WriteLine($"Couldn't remove {value} as a template source.".Red().Bold());
+                            }
                         }
                     }
 
@@ -188,17 +216,17 @@ namespace dotnet_new3
             string[] packages = Paths.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, false, true);
+                InstallPackage(packages, false, true, true);
             }
 
             packages = Paths.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, true, true);
+                InstallPackage(packages, true, true, true);
             }
         }
 
-        private static void PerformReset(bool global)
+        private static void PerformReset(bool global, bool quiet = false)
         {
             if (global)
             {
@@ -220,28 +248,31 @@ namespace dotnet_new3
             TryAddSource(Paths.TemplateCacheDir);
             TryAddSource(Paths.GlobalTemplateCacheDir);
 
-            ShowConfig();
+            if (!quiet)
+            {
+                ShowConfig();
+            }
         }
 
-        private static void InstallPackage(IReadOnlyList<string> packages, bool installingTemplates, bool global)
+        private static void InstallPackage(IReadOnlyList<string> packages, bool installingTemplates, bool global, bool quiet = false)
         {
             JObject dependenciesObject = new JObject();
             JObject projJson = new JObject
+            {
+                {"version", "1.0.0-*"},
+                {"dependencies", dependenciesObject },
+                {
+                    "frameworks", new JObject
                     {
-                        {"version", "1.0.0-*"},
-                        {"dependencies", dependenciesObject },
                         {
-                            "frameworks", new JObject
+                            "netcoreapp1.0", new JObject
                             {
-                                {
-                                    "netcoreapp1.0", new JObject
-                                    {
-                                        { "imports", "dnxcore50" }
-                                    }
-                                }
+                                { "imports", "dnxcore50" }
                             }
                         }
-                    };
+                    }
+                }
+            };
 
             foreach (string value in packages)
             {
@@ -272,14 +303,32 @@ namespace dotnet_new3
                 string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
                 File.WriteAllText(projectFile, projJson.ToString());
 
-                Reporter.Output.WriteLine("Downloading...");
+                if (!quiet)
+                {
+                    Reporter.Output.WriteLine("Downloading...");
+                }
+
                 Command.CreateDotNet("restore", new[] { "--ignore-failed-sources" }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
-                Reporter.Output.WriteLine("Installing...");
+
+                if (!quiet)
+                {
+                    Reporter.Output.WriteLine("Installing...");
+                }
+
                 Command.CreateDotNet("publish", new string[0], NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
-                Reporter.Output.WriteLine("Finishing up...");
+
+                if (!quiet)
+                {
+                    Reporter.Output.WriteLine("Finishing up...");
+                }
+
                 string publishDir = Path.Combine(Paths.ScratchDir, @"bin\debug\netcoreapp1.0\publish");
                 publishDir.Copy(componentsDir);
-                Reporter.Output.WriteLine("Done.");
+
+                if (!quiet)
+                {
+                    Reporter.Output.WriteLine("Done.");
+                }
 
                 if (installingTemplates)
                 {
@@ -291,7 +340,11 @@ namespace dotnet_new3
 
                 Paths.ScratchDir.Delete();
                 Broker.ComponentRegistry.ForceReinitialize();
-                ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
+
+                if (!quiet)
+                {
+                    ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
+                }
             }
         }
 

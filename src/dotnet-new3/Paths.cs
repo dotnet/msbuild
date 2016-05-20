@@ -26,6 +26,7 @@ namespace dotnet_new3
         private static string _userNuGetConfig;
         private static string _defaultInstallTemplateList;
         private static string _defaultInstallPackageList;
+        private static string _firstRunCookie;
 
         public static string PackageCache
         {
@@ -106,6 +107,8 @@ namespace dotnet_new3
         public static string TemplateCacheDir => _templateCacheDir ?? (_templateCacheDir = Path.Combine(UserDir, "Templates"));
 
         public static string GlobalTemplateCacheDir => _globalTemplateCacheDir ?? (_globalTemplateCacheDir = Path.Combine(AppDir, "Templates"));
+
+        public static string FirstRunCookie => _firstRunCookie ?? (_firstRunCookie = Path.Combine(AppDir, ".firstrun"));
 
         public static void DeleteDirectory(this string path)
         {
