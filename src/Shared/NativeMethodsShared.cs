@@ -17,6 +17,8 @@ using System.Text;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -890,6 +892,32 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("ole32.dll")]
         public static extern int CoWaitForMultipleHandles(COWAIT_FLAGS dwFlags, int dwTimeout, int cHandles, [MarshalAs(UnmanagedType.LPArray)] IntPtr[] pHandles, out int pdwIndex);
+
+        internal const uint GENERIC_READ = 0x80000000;
+        internal const uint FILE_SHARE_READ = 0x1;
+        internal const uint FILE_ATTRIBUTE_NORMAL = 0x80;
+        internal const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
+        internal const uint OPEN_EXISTING = 3;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall,
+            SetLastError = true)]
+        internal static extern SafeFileHandle CreateFile(
+            string lpFileName,
+            uint dwDesiredAccess,
+            uint dwShareMode,
+            IntPtr lpSecurityAttributes,
+            uint dwCreationDisposition,
+            uint dwFlagsAndAttributes,
+            IntPtr hTemplateFile
+            );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool GetFileTime(
+            SafeFileHandle hFile,
+            out FILETIME lpCreationTime,
+            out FILETIME lpLastAccessTime,
+            out FILETIME lpLastWriteTime
+            );
 
         #endregion
 
