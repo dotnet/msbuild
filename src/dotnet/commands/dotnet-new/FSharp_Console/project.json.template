@@ -10,11 +10,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160316",
-    "Microsoft.NETCore.App": {
-      "type": "platform",
-      "version": "1.0.0-rc3-004312"
-    }
+    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160316"
   },
   "tools": {
     "dotnet-compile-fsc": {
@@ -28,6 +24,12 @@
   },
   "frameworks": {
     "netstandard1.5": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0-rc3-004312"
+        }
+      },
       "imports": [
         "portable-net45+win8",
         "dnxcore50"

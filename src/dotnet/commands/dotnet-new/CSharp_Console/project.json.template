@@ -4,13 +4,15 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": {
-      "type": "platform",
-      "version": "1.0.0-rc3-004312"
-    }
   },
   "frameworks": {
     "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0-rc3-004312"
+        }
+      },
       "imports": "dnxcore50"
     }
   }
