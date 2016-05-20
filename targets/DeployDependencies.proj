@@ -78,6 +78,10 @@
   <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.Tasks.dll"/>
 
   <PropertyGroup>
+    <!--At build time, we target netstandard to be runnable on many runtimes.
+        To get a set of runnable bits, we need to deploy a specific one. On the xplat branch we are testing the .net core runtime platform, so we target netcoreapp -->
+    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">.NETCoreApp,Version=v1.0</NuGetTargetMoniker>
+
     <RuntimeProjectJson>$(MSBuildThisFileDirectory)runtimeDependencies\project.json</RuntimeProjectJson>
     <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)runtimeDependencies\project.lock.json</RuntimeProjectLockJson>
 

@@ -54,13 +54,17 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void GetTestExecutionInfo()
         {
-            // Get the executable we are running
-            var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
+            string program;
+
+#if FEATURE_GET_COMMANDLINE
+            //We may get better precision for the executable from the command line args, if the API is available
+            program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
 
             // Check if it matches the pattern
             s_runningTests = program != null
                            && s_testRunners.Any(
                                s => program.IndexOf(s, StringComparison.OrdinalIgnoreCase) == -1);
+#endif
 
             // Does not look like it's a test, but check the process name
             if (!s_runningTests)
@@ -301,15 +305,18 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Gets the canonicalized full path of the provided path.
-        /// Path.GetFullPath is slow and creates strings in its work: this version doesn't.
+        /// Path.GetFullPath The pre .Net 4.6.2 implementation of Path.GetFullPath is slow and creates strings in its work. 
+        /// Therefore MSBuild has its own implementation on full framework.
         /// Guidance for use: call this on all paths accepted through public entry
         /// points that need normalization. After that point, only verify the path
         /// is rooted, using ErrorUtilities.VerifyThrowPathRooted.
         /// ASSUMES INPUT IS ALREADY UNESCAPED.
         /// </summary>
-        internal unsafe static string NormalizePath(string path)
+        internal static string NormalizePath(string path)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+
+#if FEATURE_LEGACY_GETFULLPATH
 
             if (NativeMethodsShared.IsWindows)
             {
@@ -322,97 +329,103 @@ namespace Microsoft.Build.Shared
 #else
                 int lenDir = MaxPath;
 #endif
-
-                char* finalBuffer = stackalloc char[lenDir + 1]; // One extra for the null terminator
-
-                int length = NativeMethodsShared.GetFullPathName(path, lenDir + 1, finalBuffer, IntPtr.Zero);
-                errorCode = Marshal.GetLastWin32Error();
-
-                // If the length returned from GetFullPathName is greater than the length of the buffer we've
-                // allocated, then reallocate the buffer with the correct size, and repeat the call
-                if (length > lenDir)
+                unsafe
                 {
-                    lenDir = length;
-                    char* tempBuffer = stackalloc char[lenDir];
-                    finalBuffer = tempBuffer;
-                    length = NativeMethodsShared.GetFullPathName(path, lenDir, finalBuffer, IntPtr.Zero);
+                    char* finalBuffer = stackalloc char[lenDir + 1]; // One extra for the null terminator
+
+                    int length = NativeMethodsShared.GetFullPathName(path, lenDir + 1, finalBuffer, IntPtr.Zero);
                     errorCode = Marshal.GetLastWin32Error();
-                    // If we find that the length returned from GetFullPathName is longer than the buffer capacity, then
-                    // something very strange is going on!
-                    ErrorUtilities.VerifyThrow(
-                        length <= lenDir,
-                        "Final buffer capacity should be sufficient for full path name and null terminator.");
-                }
 
-                if (length > 0)
-                {
-                    // In order to prevent people from taking advantage of our ability to extend beyond MaxPath
-                    // since it is unlikely that the CLR fix will be a complete removal of maxpath madness
-                    // we reluctantly have to restrict things here.
-                    if (length >= MaxPath)
+                    // If the length returned from GetFullPathName is greater than the length of the buffer we've
+                    // allocated, then reallocate the buffer with the correct size, and repeat the call
+                    if (length > lenDir)
                     {
-                        throw new PathTooLongException(path);
+                        lenDir = length;
+                        char* tempBuffer = stackalloc char[lenDir];
+                        finalBuffer = tempBuffer;
+                        length = NativeMethodsShared.GetFullPathName(path, lenDir, finalBuffer, IntPtr.Zero);
+                        errorCode = Marshal.GetLastWin32Error();
+                        // If we find that the length returned from GetFullPathName is longer than the buffer capacity, then
+                        // something very strange is going on!
+                        ErrorUtilities.VerifyThrow(
+                            length <= lenDir,
+                            "Final buffer capacity should be sufficient for full path name and null terminator.");
                     }
 
-                    // Avoid creating new strings unnecessarily
-                    string finalFullPath = AreStringsEqual(finalBuffer, length, path) ? path : new string(
-                                               finalBuffer,
-                                               startIndex: 0,
-                                               length: length);
-
-                    // We really don't care about extensions here, but Path.HasExtension provides a great way to
-                    // invoke the CLR's invalid path checks (these are independent of path length)
-                    Path.HasExtension(finalFullPath);
-
-                    if (finalFullPath.StartsWith(@"\\", StringComparison.Ordinal))
+                    if (length > 0)
                     {
-                        // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
-                        // and security checks for strings like \\?\GlobalRoot
-                        int startIndex = 2;
-                        while (startIndex < finalFullPath.Length)
+                        // In order to prevent people from taking advantage of our ability to extend beyond MaxPath
+                        // since it is unlikely that the CLR fix will be a complete removal of maxpath madness
+                        // we reluctantly have to restrict things here.
+                        if (length >= MaxPath)
                         {
-                            if (finalFullPath[startIndex] == '\\')
-                            {
-                                startIndex++;
-                                break;
-                            }
-                            else
-                            {
-                                startIndex++;
-                            }
+                            throw new PathTooLongException(path);
                         }
 
-                        /*
-                          From Path.cs in the CLR
-                          Throw an ArgumentException for paths like \\, \\server, \\server\
-                          This check can only be properly done after normalizing, so
-                          \\foo\.. will be properly rejected.  Also, reject \\?\GLOBALROOT\
-                          (an internal kernel path) because it provides aliases for drives.
+                        // Avoid creating new strings unnecessarily
+                        string finalFullPath = AreStringsEqual(finalBuffer, length, path)
+                            ? path
+                            : new string(
+                                finalBuffer,
+                                startIndex: 0,
+                                length: length);
 
-                          throw new ArgumentException(Environment.GetResourceString("Arg_PathIllegalUNC"));
+                        // We really don't care about extensions here, but Path.HasExtension provides a great way to
+                        // invoke the CLR's invalid path checks (these are independent of path length)
+                        Path.HasExtension(finalFullPath);
 
-                           // Check for \\?\Globalroot, an internal mechanism to the kernel
-                           // that provides aliases for drives and other undocumented stuff.
-                           // The kernel team won't even describe the full set of what
-                           // is available here - we don't want managed apps mucking 
-                           // with this for security reasons.
-                        */
-                        if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(
+                        if (finalFullPath.StartsWith(@"\\", StringComparison.Ordinal))
+                        {
+                            // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
+                            // and security checks for strings like \\?\GlobalRoot
+                            int startIndex = 2;
+                            while (startIndex < finalFullPath.Length)
+                            {
+                                if (finalFullPath[startIndex] == '\\')
+                                {
+                                    startIndex++;
+                                    break;
+                                }
+                                else
+                                {
+                                    startIndex++;
+                                }
+                            }
+
+                            /*
+                              From Path.cs in the CLR
+
+                              Throw an ArgumentException for paths like \\, \\server, \\server\
+                              This check can only be properly done after normalizing, so
+                              \\foo\.. will be properly rejected.  Also, reject \\?\GLOBALROOT\
+                              (an internal kernel path) because it provides aliases for drives.
+
+                              throw new ArgumentException(Environment.GetResourceString("Arg_PathIllegalUNC"));
+
+                               // Check for \\?\Globalroot, an internal mechanism to the kernel
+                               // that provides aliases for drives and other undocumented stuff.
+                               // The kernel team won't even describe the full set of what
+                               // is available here - we don't want managed apps mucking 
+                               // with this for security reasons.
+                            */
+                            if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(
                                 @"\\?\globalroot",
                                 StringComparison.OrdinalIgnoreCase) != -1)
-                        {
-                            finalFullPath = Path.GetFullPath(finalFullPath);
+                            {
+                                finalFullPath = Path.GetFullPath(finalFullPath);
+                            }
                         }
-                    }
 
-                    return finalFullPath;
+                        return finalFullPath;
+                    }
                 }
 
                 NativeMethodsShared.ThrowExceptionForErrorCode(errorCode);
                 return null;
             }
-
+#endif
             return FixFilePath(Path.GetFullPath(path));
+
         }
 
         internal static string FixFilePath(string path)
@@ -547,23 +560,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get the currently executing assembly path
         /// </summary>
-        internal static string ExecutingAssemblyPath
-        {
-            get
-            {
-                try
-                {
-                    return Path.GetFullPath(typeof(FileUtilities).GetTypeInfo().Assembly.Location);
-                }
-                catch (InvalidOperationException e)
-                {
-                    // Workaround for issue where people are getting relative uri crash here.
-                    // Last resort. We may have a problem when the assembly is shadow-copied.
-                    ExceptionHandling.DumpExceptionToFile(e);
-                    return typeof(FileUtilities).GetTypeInfo().Assembly.Location;
-                }
-            }
-        }
+        internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
+
 
         /// <summary>
         /// Name of the current .exe without extension, such as "MSBuild" "Devenv" or "Blend".

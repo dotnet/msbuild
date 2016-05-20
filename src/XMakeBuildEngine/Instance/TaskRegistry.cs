@@ -971,7 +971,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Type filter to make sure we only look for taskFactoryClasses
             /// </summary>
-            private static readonly TypeFilter s_taskFactoryTypeFilter = new TypeFilter(IsTaskFactoryClass);
+            private static readonly Func<Type, object, bool> s_taskFactoryTypeFilter = IsTaskFactoryClass;
 
             /// <summary>
             /// Identity of this task.

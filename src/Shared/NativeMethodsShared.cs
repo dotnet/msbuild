@@ -567,8 +567,10 @@ namespace Microsoft.Build.Shared
             {
                 if (s_frameworkCurrentPath == null)
                 {
+                    var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).GetTypeInfo().Assembly);
+
                     s_frameworkCurrentPath =
-                        Path.GetDirectoryName(typeof(string).GetTypeInfo().Assembly.Location)
+                        Path.GetDirectoryName(baseTypeLocation)
                         ?? string.Empty;
                 }
 

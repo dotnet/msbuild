@@ -1158,7 +1158,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Set up a temporary project and add some items to it.
             ProjectInstance project = CreateTestProject();
 
-            TypeLoader typeLoader = new TypeLoader(new TypeFilter(IsTaskFactoryClass));
+            TypeLoader typeLoader = new TypeLoader(IsTaskFactoryClass);
 #if FEATURE_ASSEMBLY_LOADFROM
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
 #else
