@@ -54,13 +54,25 @@ namespace Microsoft.Build.Tasks
         private readonly List<ITaskItem> _nonEmptyOutput = new List<ITaskItem>();
         private Encoding _standardErrorEncoding;
         private Encoding _standardOutputEncoding;
+        private string _command;
 
         #endregion
 
         #region Properties
 
         [Required]
-        public string Command { get; set; }
+        public string Command
+        {
+            get { return _command; }
+            set
+            {
+                _command = value;
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    _command = _command.Replace("\r\n", "\n");
+                }
+            }
+        }
 
         public string WorkingDirectory { get; set; }
 
@@ -193,7 +205,6 @@ namespace Microsoft.Build.Tasks
         {
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
-            bool isUnix = Path.DirectorySeparatorChar == '/';
 
             // UNICODE Batch files are not allowed as of WinXP. We can't use normal ANSI code pages either,
             // since console-related apps use OEM code pages "for historical reasons". Sigh.
@@ -203,7 +214,7 @@ namespace Microsoft.Build.Tasks
             // Note: 8/12/15 - Switched to use UTF8 on OS newer than 6.1 (Windows 7)
             using (StreamWriter sw = FileUtilities.OpenWrite(_batchFile, false, GetEncodingWithOsFallback()))
             {
-                if (!isUnix)
+                if (!NativeMethodsShared.IsUnixLike)
                 {
                     // In some wierd setups, users may have set an env var actually called "errorlevel"
                     // this would cause our "exit %errorlevel%" to return false.
@@ -236,7 +247,7 @@ namespace Microsoft.Build.Tasks
                     sw.WriteLine("#!/bin/bash");
                 }
 
-                if (isUnix && NativeMethodsShared.IsMono)
+                if (NativeMethodsShared.IsUnixLike && NativeMethodsShared.IsMono)
                 {
                     // Extract the command we are going to run. Note that the command name may
                     // be preceded by whitespace
@@ -261,7 +272,7 @@ namespace Microsoft.Build.Tasks
 
                 sw.WriteLine(Command);
 
-                if (!isUnix)
+                if (!NativeMethodsShared.IsUnixLike)
                 {
                     if (workingDirectoryIsUNC)
                     {
@@ -485,7 +496,7 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             // Get the fully qualified path to cmd.exe
-            if (Path.DirectorySeparatorChar == '\\')
+            if (NativeMethodsShared.IsWindows)
             {
                 return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
             }

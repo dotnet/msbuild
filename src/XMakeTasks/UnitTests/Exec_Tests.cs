@@ -93,6 +93,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        public void WindowsNewLineCharactersInCommandOnUnix()
+        {
+            var exec = PrepareExec("echo hello\r\n\r\n");
+            bool result = exec.Execute();
+
+            Assert.Equal(true, result);
+            Assert.Equal(0, exec.ExitCode);
+            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Warnings);
+            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
+        }
+
+        [Fact]
         [Trait("Category", "netcore-osx-failing")]
         public void ExitCodeGetter()
         {
