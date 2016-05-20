@@ -479,6 +479,8 @@ namespace Microsoft.Build.Shared
             return status;
         }
 
+        private static readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
+
         /// <summary>
         /// Get the last write time of the fullpath to the file. 
         /// If the file does not exist, then DateTime.MinValue is returned
@@ -488,14 +490,37 @@ namespace Microsoft.Build.Shared
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
             DateTime fileModifiedTime = DateTime.MinValue;
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
 
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-            if (success)
+            if (UseSymlinkTimeInsteadOfTargetTime)
             {
-                long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
-                fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+                if (success)
+                {
+                    long dt = ((long) (data.ftLastWriteTimeHigh) << 32) | ((long) data.ftLastWriteTimeLow);
+                    fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                }
+            }
+            else
+            {
+                using (SafeFileHandle handle =
+                    CreateFile(fullPath, GENERIC_READ, FILE_SHARE_READ, IntPtr.Zero, OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, IntPtr.Zero))
+                {
+                    if (!handle.IsInvalid)
+                    {
+                        FILETIME ftCreationTime, ftLastAccessTime, ftLastWriteTime;
+                        if (!GetFileTime(handle, out ftCreationTime, out ftLastAccessTime, out ftLastWriteTime) != true)
+                        {
+                            long fileTime = ((long) (uint) ftLastWriteTime.dwHighDateTime) << 32 |
+                                            (long) (uint) ftLastWriteTime.dwLowDateTime;
+                            fileModifiedTime =
+                                DateTime.FromFileTimeUtc(fileTime);
+                        }
+                    }
+                }
             }
 
             return fileModifiedTime;
@@ -958,6 +983,6 @@ namespace Microsoft.Build.Shared
             return returnValue == 0;
         }
 
-        #endregion
+#endregion
     }
 }
