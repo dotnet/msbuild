@@ -55,17 +55,8 @@ namespace Microsoft.DotNet.Host.Build
         [Target]
         public static BuildTargetResult GenerateVersions(BuildTargetContext c)
         {
-            var gitResult = Cmd("git", "rev-list", "--count", "HEAD")
-                .CaptureStdOut()
-                .Execute();
-            gitResult.EnsureSuccessful();
-            var commitCount = int.Parse(gitResult.StdOut);
-
-            gitResult = Cmd("git", "rev-parse", "HEAD")
-                .CaptureStdOut()
-                .Execute();
-            gitResult.EnsureSuccessful();
-            var commitHash = gitResult.StdOut.Trim();
+            var commitCount = GitUtils.GetCommitCount();
+            var commitHash = GitUtils.GetCommitHash();
 
             var hostVersion = new HostVersion()
             {
