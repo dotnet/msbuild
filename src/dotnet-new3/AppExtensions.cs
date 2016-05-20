@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
@@ -43,11 +44,32 @@ namespace dotnet_new3
             for (int i = 0; i < app.RemainingArguments.Count; ++i)
             {
                 string key = app.RemainingArguments[i];
+                CommandOption arg = app.Options.FirstOrDefault(x => x.Template.Split('|').Any(y => string.Equals(y, key, StringComparison.OrdinalIgnoreCase)));
+                bool handled = false;
+
+                if (arg != null)
+                {
+                    if (arg.OptionType != CommandOptionType.NoValue)
+                    {
+                        handled = arg.TryParse(app.RemainingArguments[i + 1]);
+                        ++i;
+                    }
+                    else
+                    {
+                        handled = arg.TryParse(null);
+                    }
+                }
+
+                if (handled)
+                {
+                    continue;
+                }
 
                 if (!key.StartsWith("--", StringComparison.Ordinal))
                 {
                     throw new Exception("Parameter names must start with --");
                 }
+
 
                 string value = null;
                 if (app.RemainingArguments.Count > i + 1)

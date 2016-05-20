@@ -176,7 +176,7 @@ namespace dotnet_new3
                         File.WriteAllText(projectFile, projJson.ToString());
 
                         Reporter.Output.WriteLine("Installing...");
-                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", "..\\Components" }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
+                        Command.CreateDotNet("restore", new[] { "--ignore-failed-sources", "--packages", Paths.ComponentsDir }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
                         Reporter.Output.WriteLine("Done.");
 
                         Paths.ScratchDir.Delete();
