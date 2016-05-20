@@ -8,7 +8,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
-using NuGet.Configuration;
 using NuGet.Frameworks;
 
 namespace dotnet_new3
@@ -117,7 +116,7 @@ namespace dotnet_new3
                     return Task.FromResult(-1);
                 }
 
-                return TemplateCreator.Instantiate(app, template, name, dir, source, help, alias, parameters);
+                return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, source, help, alias, parameters);
             });
 
             int result;
@@ -235,7 +234,7 @@ namespace dotnet_new3
 
         private static void ListTemplates(CommandArgument template, CommandOption source)
         {
-            IEnumerable<ITemplate> results = TemplateCreator.List(template, source);
+            IEnumerable<ITemplate> results = TemplateCreator.List(template.Value, source);
             TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
             {
                 {"Templates", x => x.Name},

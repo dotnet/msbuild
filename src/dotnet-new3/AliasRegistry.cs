@@ -74,18 +74,25 @@ namespace dotnet_new3
                 }
             }
 
-            HashSet<string> matchedAliases = new HashSet<string>(AliasesToTemplates.Where(x => x.Key.IndexOf(alias, StringComparison.OrdinalIgnoreCase) > -1).Select(x => x.Value));
-            List<ITemplate> results = new List<ITemplate>();
 
-            foreach(ITemplate template in templates)
+            if (!string.IsNullOrWhiteSpace(alias))
             {
-                if (matchedAliases.Contains(template.Name))
+                HashSet<string> matchedAliases = new HashSet<string>(AliasesToTemplates.Where(x => x.Key.IndexOf(alias, StringComparison.OrdinalIgnoreCase) > -1).Select(x => x.Value));
+
+                List<ITemplate> results = new List<ITemplate>();
+
+                foreach (ITemplate template in templates)
                 {
-                    results.Add(template);
+                    if (matchedAliases.Contains(template.Name))
+                    {
+                        results.Add(template);
+                    }
                 }
+
+                return results;
             }
 
-            return results;
+            return templates;
         }
 
         public static string GetAliasForTemplate(ITemplate template)

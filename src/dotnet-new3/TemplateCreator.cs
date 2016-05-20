@@ -12,7 +12,7 @@ namespace dotnet_new3
 {
     public static class TemplateCreator
     {
-        public static IEnumerable<ITemplate> List(CommandArgument searchString, CommandOption source)
+        public static IEnumerable<ITemplate> List(string searchString, CommandOption source)
         {
             List<ITemplate> results = new List<ITemplate>();
             IReadOnlyList<IConfiguredTemplateSource> searchSources;
@@ -42,24 +42,18 @@ namespace dotnet_new3
                 }
             }
 
-            IReadOnlyList<ITemplate> aliasResults = AliasRegistry.GetTemplatesForAlias(searchString.Value, results);
+            IReadOnlyList<ITemplate> aliasResults = AliasRegistry.GetTemplatesForAlias(searchString, results);
 
-            if (!string.IsNullOrEmpty(searchString.Value))
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
-                results.RemoveAll(x => x.Name.IndexOf(searchString.Value, StringComparison.OrdinalIgnoreCase) < 0 && (x.ShortName?.IndexOf(searchString.Value, StringComparison.OrdinalIgnoreCase) ?? -1) < 0);
+                results.RemoveAll(x => x.Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) < 0 && (x.ShortName?.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) ?? -1) < 0);
             }
 
             return results.Union(aliasResults);
         }
 
-        public static async Task<int> Instantiate(CommandLineApplication app, CommandArgument template, CommandOption name, CommandOption dir, CommandOption source, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters)
+        public static async Task<int> Instantiate(CommandLineApplication app, string templateName, CommandOption name, CommandOption dir, CommandOption source, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters)
         {
-            if (string.IsNullOrEmpty(template.Value))
-            {
-                app.ShowHelp();
-                return help.HasValue() ? 0 : -1;
-            }
-
             IReadOnlyList<IConfiguredTemplateSource> searchSources;
 
             if (!source.HasValue())
@@ -81,13 +75,13 @@ namespace dotnet_new3
 
             IGenerator generator = null;
             ITemplate tmplt = null;
-            string aliasTemplateName = AliasRegistry.GetTemplateNameForAlias(template.Value);
+            string aliasTemplateName = AliasRegistry.GetTemplateNameForAlias(templateName);
 
             foreach (IGenerator gen in Program.Broker.ComponentRegistry.OfType<IGenerator>())
             {
                 foreach (IConfiguredTemplateSource target in searchSources)
                 {
-                    if (gen.TryGetTemplateFromSource(target, template.Value, out tmplt))
+                    if (gen.TryGetTemplateFromSource(target, templateName, out tmplt))
                     {
                         generator = gen;
                         break;
@@ -108,11 +102,11 @@ namespace dotnet_new3
 
             if (generator == null || tmplt == null)
             {
-                List<ITemplate> results = List(template, source).ToList();
+                List<ITemplate> results = List(templateName, source).ToList();
 
                 if (results.Count == 0)
                 {
-                    Reporter.Output.WriteLine($"No template containing \"{template.Value}\" was found in any of the configured sources.".Bold().Red());
+                    Reporter.Output.WriteLine($"No template containing \"{templateName}\" was found in any of the configured sources.".Bold().Red());
                     return -1;
                 }
 
