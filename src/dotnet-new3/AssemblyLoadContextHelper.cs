@@ -17,7 +17,7 @@ namespace dotnet_new3
             List<Assembly> loaded = new List<Assembly>();
             List<string> failures = new List<string>();
 
-            foreach (string file in Directory.EnumerateFiles(path, pattern, searchOption))
+            foreach (string file in path.EnumerateFiles(pattern, searchOption))
             {
                 try
                 {

@@ -42,9 +42,17 @@ namespace dotnet_new3
             CommandOption installComponent = app.Option("--install-component", "Installs a component.", CommandOptionType.MultipleValue);
             CommandOption resetConfig = app.Option("--reset", "Resets the component cache and installed template sources.", CommandOptionType.NoValue);
             CommandOption rescan = app.Option("--rescan", "Rebuilds the component cache.", CommandOptionType.NoValue);
+            CommandOption global = app.Option("--global", "Performs the --install or --install-component operation for all users.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
+                if (!Paths.UserDir.Exists())
+                {
+                    Reporter.Output.WriteLine("Getting things ready for first use...");
+                    ConfigureEnvironment();
+                    PerformReset(false);
+                }
+
                 if (rescan.HasValue())
                 {
                     Broker.ComponentRegistry.ForceReinitialize();
@@ -54,7 +62,7 @@ namespace dotnet_new3
 
                 if (resetConfig.HasValue())
                 {
-                    PerformReset();
+                    PerformReset(global.HasValue());
                     return Task.FromResult(0);
                 }
 
@@ -66,13 +74,13 @@ namespace dotnet_new3
 
                 if (install.HasValue())
                 {
-                    InstallPackage(install.Values, true);
+                    InstallPackage(install.Values, true, global.HasValue());
                     return Task.FromResult(0);
                 }
 
                 if (installComponent.HasValue())
                 {
-                    InstallPackage(installComponent.Values, false);
+                    InstallPackage(installComponent.Values, false, global.HasValue());
                     return Task.FromResult(0);
                 }
 
@@ -84,7 +92,16 @@ namespace dotnet_new3
                         {
                             Paths.TemplateSourcesFile.Delete();
                             Paths.AliasesFile.Delete();
-                            Paths.TemplateCacheDir.Delete();
+
+                            if (global.HasValue())
+                            {
+                                Paths.GlobalTemplateCacheDir.Delete();
+                            }
+                            else
+                            {
+                                Paths.TemplateCacheDir.Delete();
+                            }
+
                             return Task.FromResult(0);
                         }
 
@@ -157,8 +174,39 @@ namespace dotnet_new3
             return result;
         }
 
-        private static void PerformReset()
+        private static void ConfigureEnvironment()
         {
+            string userNuGetConfig = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>  
+  <packageSources>
+    <add key=""dotnet new3 builtins"" value = ""{Paths.BuiltInsFeed}""/>
+    <add key=""CLI Dependencies"" value=""https://dotnet.myget.org/F/cli-deps/api/v3/index.json"" />
+  </packageSources>
+</configuration>";
+
+            Paths.UserNuGetConfig.WriteAllText(userNuGetConfig);
+            string[] packages = Paths.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (packages.Length > 0)
+            {
+                InstallPackage(packages, false, true);
+            }
+
+            packages = Paths.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (packages.Length > 0)
+            {
+                InstallPackage(packages, true, true);
+            }
+        }
+
+        private static void PerformReset(bool global)
+        {
+            if (global)
+            {
+                Paths.GlobalComponentsDir.Delete();
+                Paths.GlobalComponentCacheFile.Delete();
+                Paths.GlobalTemplateCacheDir.Delete();
+            }
+
             Paths.ComponentsDir.Delete();
             Paths.TemplateCacheDir.Delete();
             Paths.ScratchDir.Delete();
@@ -170,11 +218,12 @@ namespace dotnet_new3
             Paths.ComponentsDir.CreateDirectory();
             Broker.ComponentRegistry.ForceReinitialize();
             TryAddSource(Paths.TemplateCacheDir);
+            TryAddSource(Paths.GlobalTemplateCacheDir);
 
             ShowConfig();
         }
 
-        private static void InstallPackage(List<string> packages, bool installingTemplates)
+        private static void InstallPackage(IReadOnlyList<string> packages, bool installingTemplates, bool global)
         {
             JObject dependenciesObject = new JObject();
             JObject projJson = new JObject
@@ -196,13 +245,14 @@ namespace dotnet_new3
 
             foreach (string value in packages)
             {
-                if (value.IndexOfAny(Path.GetInvalidPathChars()) < 0 && value.Exists())
+                string pkg = value.Trim();
+                if (pkg.IndexOfAny(Path.GetInvalidPathChars()) < 0 && pkg.Exists())
                 {
-                    TryAddSource(value);
+                    TryAddSource(pkg);
                 }
                 else
                 {
-                    dependenciesObject[value] = "*";
+                    dependenciesObject[pkg] = "*";
                 }
             }
 
@@ -215,8 +265,10 @@ namespace dotnet_new3
                 };
 
                 Paths.ScratchDir.CreateDirectory();
-                Paths.ComponentsDir.CreateDirectory();
-                Paths.TemplateCacheDir.CreateDirectory();
+                string componentsDir = global ? Paths.GlobalComponentsDir : Paths.ComponentsDir;
+                string templateCacheDir = global ? Paths.GlobalTemplateCacheDir : Paths.TemplateCacheDir;
+                componentsDir.CreateDirectory();
+                templateCacheDir.CreateDirectory();
                 string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
                 File.WriteAllText(projectFile, projJson.ToString());
 
@@ -226,14 +278,14 @@ namespace dotnet_new3
                 Command.CreateDotNet("publish", new string[0], NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
                 Reporter.Output.WriteLine("Finishing up...");
                 string publishDir = Path.Combine(Paths.ScratchDir, @"bin\debug\netcoreapp1.0\publish");
-                publishDir.Copy(Paths.ComponentsDir);
+                publishDir.Copy(componentsDir);
                 Reporter.Output.WriteLine("Done.");
 
                 if (installingTemplates)
                 {
                     foreach (string value in packages)
                     {
-                        MoveTemplateToTemplatesCache(value);
+                        MoveTemplateToTemplatesCache(value.Trim(), global);
                     }
                 }
 
@@ -254,15 +306,16 @@ namespace dotnet_new3
             });
         }
 
-        private static void MoveTemplateToTemplatesCache(string name)
+        private static void MoveTemplateToTemplatesCache(string name, bool global)
         {
             string templateSource = Path.Combine(Paths.PackageCache, name);
+            string cacheDir = global ? Paths.GlobalTemplateCacheDir : Paths.TemplateCacheDir;
 
             foreach (string dir in Directory.GetDirectories(templateSource, "*", SearchOption.TopDirectoryOnly))
             {
                 foreach (string file in Directory.GetFiles(dir, "*.nupkg", SearchOption.TopDirectoryOnly))
                 {
-                    File.Copy(file, Path.Combine(Paths.TemplateCacheDir, Path.GetFileName(file)), true);
+                    File.Copy(file, Path.Combine(cacheDir, Path.GetFileName(file)), true);
                 }
             }
 

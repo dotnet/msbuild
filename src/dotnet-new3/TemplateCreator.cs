@@ -54,6 +54,12 @@ namespace dotnet_new3
 
         public static async Task<int> Instantiate(CommandLineApplication app, string templateName, CommandOption name, CommandOption dir, CommandOption source, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters)
         {
+            if(string.IsNullOrWhiteSpace(templateName) && help.HasValue())
+            {
+                app.ShowHelp();
+                return 0;
+            }
+
             IReadOnlyList<IConfiguredTemplateSource> searchSources;
 
             if (!source.HasValue())
@@ -106,13 +112,26 @@ namespace dotnet_new3
 
                 if (results.Count == 0)
                 {
-                    Reporter.Output.WriteLine($"No template containing \"{templateName}\" was found in any of the configured sources.".Bold().Red());
+                    if (!string.IsNullOrWhiteSpace(templateName) || source.HasValue())
+                    {
+                        Reporter.Output.WriteLine($"No template containing \"{templateName}\" was found in any of the configured sources.".Bold().Red());
+                    }
+                    else
+                    {
+                        TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
+                        {
+                            {"#", x => $"0." },
+                            {"Templates", x => x.Name},
+                            {"Short Names", x => $"[{x.ShortName}]"}
+                        });
+                    }
+
                     return -1;
                 }
 
                 int index = 0;
 
-                if (results.Count != 1)
+                if (results.Count != 1 || string.IsNullOrWhiteSpace(templateName))
                 {
                     int counter = 0;
                     TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>

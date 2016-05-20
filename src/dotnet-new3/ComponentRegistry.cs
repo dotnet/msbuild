@@ -62,36 +62,9 @@ namespace dotnet_new3
 
             try
             {
-                if (Paths.ComponentCacheFile.Exists())
-                {
-                    string componentsCache = Paths.ComponentCacheFile.ReadAllText("{}");
-                    JObject obj = JObject.Parse(componentsCache);
-                    JArray loadItems = obj["toLoad"] as JArray;
-                    JArray parts = obj["parts"] as JArray;
+                loadSuccess &= Load(Paths.GlobalComponentCacheFile, Paths.GlobalComponentsDir);
+                loadSuccess &= Load(Paths.ComponentCacheFile, Paths.ComponentsDir);
 
-                    if (loadItems != null && parts != null)
-                    {
-                        foreach (JToken loadItem in loadItems)
-                        {
-                            string path = loadItem.ToString();
-                            AssemblyLoader.Load(path);
-                        }
-
-                        foreach (JToken part in parts)
-                        {
-                            string typeName = part.ToString();
-                            ProcessType(Type.GetType(typeName));
-                        }
-                    }
-                    else
-                    {
-                        loadSuccess = false;
-                    }
-                }
-                else
-                {
-                    loadSuccess = false;
-                }
             }
             catch
             {
@@ -101,39 +74,77 @@ namespace dotnet_new3
             if(!loadSuccess)
             {
                 Console.WriteLine("Rebuilding component cache...");
-                IEnumerable<string> failures;
-
-                JArray toLoad = new JArray();
-                JArray parts = new JArray();
-                JObject cache = new JObject
-                {
-                    {"toLoad", toLoad},
-                    {"parts", parts}
-                };
-
-                foreach (Assembly assembly in AssemblyLoader.LoadAllAssemblies(out failures))
-                {
-                    toLoad.Add(assembly.CodeBase.ToPath());
-                    foreach (Type type in ProcessAssembly(assembly))
-                    {
-                        parts.Add(type.AssemblyQualifiedName);
-                    }
-                }
-
-                //foreach (string failure in failures)
-                //{
-                //    Console.WriteLine($"Info: Unable to load {failure}");
-                //}
-
-                foreach (Type type in ProcessAssembly(typeof(Broker).GetTypeInfo().Assembly))
-                {
-                    parts.Add(type.AssemblyQualifiedName);
-                }
-
-                File.WriteAllText(Paths.ComponentCacheFile, cache.ToString());
+                Reinitialize(Paths.GlobalComponentCacheFile, Paths.GlobalComponentsDir);
+                Reinitialize(Paths.ComponentCacheFile, Paths.ComponentsDir);
             }
 
             _isInitialized = true;
+        }
+
+        private void Reinitialize(string componentCacheFile, string componentsDir)
+        {
+            IEnumerable<string> failures;
+
+            JArray toLoad = new JArray();
+            JArray parts = new JArray();
+            JObject cache = new JObject
+            {
+                {"toLoad", toLoad},
+                {"parts", parts}
+            };
+
+            foreach (Assembly assembly in AssemblyLoader.LoadAllAssemblies(out failures, componentsDir))
+            {
+                toLoad.Add(assembly.CodeBase.ToPath());
+                foreach (Type type in ProcessAssembly(assembly))
+                {
+                    parts.Add(type.AssemblyQualifiedName);
+                }
+            }
+
+            foreach (Type type in ProcessAssembly(typeof(Broker).GetTypeInfo().Assembly))
+            {
+                parts.Add(type.AssemblyQualifiedName);
+            }
+
+            File.WriteAllText(componentCacheFile, cache.ToString());
+        }
+
+        private bool Load(string componentCacheFile, string componentsDir)
+        {
+            bool loadSuccess = true;
+            if (Paths.ComponentCacheFile.Exists())
+            {
+                string componentsCache = componentCacheFile.ReadAllText("{}");
+                JObject obj = JObject.Parse(componentsCache);
+                JArray loadItems = obj["toLoad"] as JArray;
+                JArray parts = obj["parts"] as JArray;
+
+                if (loadItems != null && parts != null)
+                {
+                    foreach (JToken loadItem in loadItems)
+                    {
+                        string path = loadItem.ToString();
+                        AssemblyLoader.Load(path);
+                    }
+
+                    foreach (JToken part in parts)
+                    {
+                        string typeName = part.ToString();
+                        ProcessType(Type.GetType(typeName));
+                    }
+                }
+                else
+                {
+                    loadSuccess = false;
+                }
+            }
+            else
+            {
+                loadSuccess = false;
+            }
+
+            return loadSuccess;
         }
 
         public IEnumerable<TComponent> OfType<TComponent>()
@@ -151,6 +162,7 @@ namespace dotnet_new3
         public void ForceReinitialize()
         {
             Paths.ComponentCacheFile.Delete();
+            Paths.GlobalComponentCacheFile.Delete();
             _isInitialized = false;
         }
     }

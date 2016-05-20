@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -17,6 +19,13 @@ namespace dotnet_new3
         private static string _userDir;
         private static string _userProfileDir;
         private static string _packageCache;
+        private static string _globalComponentCacheFile;
+        private static string _globalComponentsDir;
+        private static string _globalTemplateCacheDir;
+        private static string _builtInsFeed;
+        private static string _userNuGetConfig;
+        private static string _defaultInstallTemplateList;
+        private static string _defaultInstallPackageList;
 
         public static string PackageCache
         {
@@ -54,20 +63,7 @@ namespace dotnet_new3
             }
         }
 
-        public static string UserDir
-        {
-            get
-            {
-                if (_userDir == null)
-                {
-
-
-                    _userDir = Path.Combine(UserProfileDir, ".netnew");
-                }
-
-                return _userDir;
-            }
-        }
+        public static string UserDir => _userDir ?? (_userDir = Path.Combine(UserProfileDir, ".netnew"));
 
         public static string AppDir
         {
@@ -85,6 +81,18 @@ namespace dotnet_new3
             }
         }
 
+        public static string UserNuGetConfig => _userNuGetConfig ?? (_userNuGetConfig = Path.Combine(UserDir, "NuGet.config"));
+
+        public static string BuiltInsFeed => _builtInsFeed ?? (_builtInsFeed = Path.Combine(AppDir, "BuiltIns"));
+        
+        public static string DefaultInstallTemplateList => _defaultInstallTemplateList ?? (_defaultInstallTemplateList = Path.Combine(AppDir, "defaultinstall.template.list"));
+
+        public static string DefaultInstallPackageList => _defaultInstallPackageList ?? (_defaultInstallPackageList = Path.Combine(AppDir, "defaultinstall.package.list"));
+
+        public static string GlobalComponentsDir => _globalComponentsDir ?? (_globalComponentsDir = Path.Combine(AppDir, "Components"));
+
+        public static string GlobalComponentCacheFile => _globalComponentCacheFile ?? (_globalComponentCacheFile = Path.Combine(AppDir, "components.json"));
+
         public static string ComponentsDir => _componentsDir ?? (_componentsDir = Path.Combine(UserDir, "Components"));
 
         public static string ComponentCacheFile => _componentCacheFile ?? (_componentCacheFile = Path.Combine(UserDir, "components.json"));
@@ -96,6 +104,8 @@ namespace dotnet_new3
         public static string ScratchDir => _scratchDir ?? (_scratchDir = Path.Combine(UserDir, "scratch"));
 
         public static string TemplateCacheDir => _templateCacheDir ?? (_templateCacheDir = Path.Combine(UserDir, "Templates"));
+
+        public static string GlobalTemplateCacheDir => _globalTemplateCacheDir ?? (_globalTemplateCacheDir = Path.Combine(AppDir, "Templates"));
 
         public static void DeleteDirectory(this string path)
         {
@@ -127,7 +137,7 @@ namespace dotnet_new3
                 return;
             }
 
-            foreach(string p in Directory.EnumerateFileSystemEntries(path, "*", SearchOption.AllDirectories))
+            foreach(string p in path.EnumerateFiles("*", SearchOption.AllDirectories))
             {
                 string localPath = p.Substring(path.Length).TrimStart('\\', '/');
 
@@ -140,6 +150,46 @@ namespace dotnet_new3
                     File.Copy(p, Path.Combine(targetPath, localPath), true);
                 }
             }
+        }
+
+        public static IEnumerable<string> EnumerateDirectories(this string path, string pattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        {
+            if (Directory.Exists(path))
+            {
+                return Directory.EnumerateDirectories(path, pattern, searchOption);
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        public static IEnumerable<string> EnumerateFileSystemEntries(this string path, string pattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        {
+            if (File.Exists(path))
+            {
+                return new[] { path };
+            }
+
+            if (Directory.Exists(path))
+            {
+                return Directory.EnumerateFileSystemEntries(path, pattern, searchOption);
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        public static IEnumerable<string> EnumerateFiles(this string path, string pattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        {
+            if (File.Exists(path))
+            {
+                return new[] { path };
+            }
+
+            if (Directory.Exists(path))
+            {
+                return Directory.EnumerateFiles(path, pattern, searchOption);
+            }
+
+            return Enumerable.Empty<string>();
         }
 
         public static bool FileExists(this string path)
@@ -165,6 +215,18 @@ namespace dotnet_new3
         public static string ReadAllText(this string path, string defaultValue = "")
         {
             return path.Exists() ? File.ReadAllText(path) : defaultValue;
+        }
+
+        public static void WriteAllText(this string path, string value)
+        {
+            string parentDir = Path.GetDirectoryName(path);
+
+            if (!parentDir.Exists())
+            {
+                Directory.CreateDirectory(parentDir);
+            }
+
+            File.WriteAllText(path, value);
         }
 
         public static string ToPath(this string codebase)
