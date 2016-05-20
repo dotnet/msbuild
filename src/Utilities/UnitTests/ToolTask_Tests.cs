@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
                 if (!NativeMethodsShared.IsWindows && string.IsNullOrEmpty(responseFileCommands) && string.IsNullOrEmpty(commandLineCommands))
                 {
                     // Unix makes sh interactive and it won't exit if there is nothing on the command line
-                    commandLineCommands = "echo";
+                    commandLineCommands = " -c \"echo\"";
                 }
                 int result = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
                 StartInfo = base.GetProcessStartInfo(
@@ -196,7 +196,6 @@ namespace Microsoft.Build.UnitTests
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
         public void HandleExecutionErrorsWhenToolDoesntLogError()
         {
             using (MyTool t = new MyTool())
@@ -647,7 +646,6 @@ namespace Microsoft.Build.UnitTests
         /// Not set should not wipe out other env vars
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
@@ -661,9 +659,9 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(
                 true,
 #if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
-                task.StartInfo.Environment[NativeMethodsShared.IsWindows ? "username" : "USER"].Length > 0);
+                task.StartInfo.Environment["PATH"].Length > 0);
 #else
-                task.StartInfo.EnvironmentVariables[NativeMethodsShared.IsWindows ? "username" : "USER"].Length > 0);
+                task.StartInfo.EnvironmentVariables["PATH"].Length > 0);
 #endif
         }
     }
