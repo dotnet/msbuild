@@ -631,7 +631,7 @@ install_dotnet
 bin_path=$(get_absolute_path $(combine_paths $install_root $bin_folder_relative_path))
 if [ "$no_path" = false ]; then
     say "Adding to current process PATH: ``$bin_path``. Note: This change will be visible only when sourcing script."
-    export PATH=$PATH:$bin_path
+    export PATH=$bin_path:$PATH
 else
     say "Binaries of dotnet can be found in $bin_path"
 fi
