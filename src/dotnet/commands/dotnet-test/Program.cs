@@ -26,10 +26,10 @@ namespace Microsoft.DotNet.Tools.Test
 
             var dotnetTestParams = new DotnetTestParams();
 
-            dotnetTestParams.Parse(args);
-
             try
             {
+                dotnetTestParams.Parse(args);
+            
                 if (dotnetTestParams.Help)
                 {
                     return 0;
