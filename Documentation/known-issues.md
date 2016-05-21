@@ -36,6 +36,23 @@ The command you can use is:
 ln -s /usr/local/share/dotnet/dotnet /usr/local/bin
 ```
 
+## On dev builds of the tools, restoring default project from dotnet new fails
+When using non-release versions of the CLI, `dotnet restore` will fail to restore `Microsoft.NETCore.App` because for that particular version it exists on a NuGet feed that is not configured on the machine. This behavior is by design and does not happen with public releases (such as RC2).
+
+**Workaround:** create a `NuGet.config` file in the project directory which contains the following:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <!--To inherit the global NuGet package sources remove the <clear/> line below -->
+    <clear />
+    <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+</configuration>
+```
+
 ## `dotnet restore` times out on Win7 x64
 If you have Virtual Box and you try to use the CLI on a Win7 x64 machine, `dotnet restore` will be really slow and will eventually time out without doing much restoring. 
 
