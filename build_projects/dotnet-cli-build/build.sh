@@ -85,7 +85,7 @@ done < "$REPOROOT/branchinfo.txt"
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$(uname)
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
-$REPOROOT/scripts/obtain/dotnet-install.sh --channel $CHANNEL --verbose --version 1.0.0-preview2-002818
+$REPOROOT/scripts/obtain/dotnet-install.sh --channel $CHANNEL --verbose
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
