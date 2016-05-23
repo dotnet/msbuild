@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.True(success);
 
-            // It should have actually skipped the "Build" target since some output metadata was missing
+            // It should not have skipped the "Build" target since some output metadata was missing
             ml.AssertLogContains("Running Build target");
 
             ml = new MockLogger();

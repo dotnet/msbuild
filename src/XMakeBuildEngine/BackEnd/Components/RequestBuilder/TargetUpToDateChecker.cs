@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         private int CompareLastWriteTimes(string path1, string path2, out bool path1DoesNotExist, out bool path2DoesNotExist)
         {
-            ErrorUtilities.VerifyThrow((path1 != null) && (path1.Length > 0) && (path2 != null) && (path2.Length > 0),
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(path1) && !string.IsNullOrEmpty(path2),
                 "Need to specify paths to compare.");
 
             FileInfo path1Info = null;
