@@ -914,7 +914,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static readonly DateTime Middle = new DateTime(2001, 1, 1);
         private static readonly DateTime New = new DateTime(2002, 1, 1);
 
-        [Fact]
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         public void NewSymlinkOldDestinationIsUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: New,
@@ -923,7 +923,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: false);
         }
 
-        [Fact]
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         public void OldSymlinkOldDestinationIsUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Old,
@@ -932,7 +932,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: false);
         }
 
-        [Fact]
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         public void OldSymlinkNewDestinationIsNotUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Old,
@@ -941,7 +941,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: true);
         }
 
-        [Fact]
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         public void NewSymlinkNewDestinationIsNotUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Middle,
