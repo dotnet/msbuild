@@ -77,8 +77,13 @@
   <!-- Set default Configuration and Platform -->
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' ==''">Debug</Configuration>
-    <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
-    <PlatformTarget Condition="'$(PlatformTarget)'==''">$(Platform)</PlatformTarget>
+    <Platform Condition="'$(Platform)'==''">x86</Platform>
+
+    <!-- Only build for specific platforms when PlatformSpecificBuild == true. Otherwise
+         build for AnyCPU. Only MSBuild.exe and MSBuildTaskHost.exe should need this -->
+    <PlatformTarget Condition="'$(PlatformSpecificBuild)'!='true'">AnyCPU</PlatformTarget>
+    <PlatformTarget Condition="'$(PlatformSpecificBuild)'=='true'">$(Platform)</PlatformTarget>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
 
   <!-- Setup Default symbol and optimization for Configuration -->
