@@ -1238,38 +1238,14 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(path1) && !string.IsNullOrEmpty(path2),
                 "Need to specify paths to compare.");
 
-            FileInfo path1Info = null;
-            try
-            {
-                path1 = Path.Combine(_project.Directory, path1);
-                path1Info = FileUtilities.GetFileInfoNoThrow(path1);
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-                path1Info = null;
-            }
+            path1 = Path.Combine(_project.Directory, path1);
+            var path1WriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(path1);
 
-            FileInfo path2Info = null;
-            try
-            {
-                path2 = Path.Combine(_project.Directory, path2);
-                path2Info = FileUtilities.GetFileInfoNoThrow(path2);
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-                path2Info = null;
-            }
+            path2 = Path.Combine(_project.Directory, path2);
+            var path2WriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(path2);
 
-            path1DoesNotExist = (path1Info == null);
-            path2DoesNotExist = (path2Info == null);
+            path1DoesNotExist = (path1WriteTime == DateTime.MinValue);
+            path2DoesNotExist = (path2WriteTime == DateTime.MinValue);
 
             if (path1DoesNotExist)
             {
@@ -1291,7 +1267,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Both exist
-            return DateTime.Compare(path1Info.LastWriteTime, path2Info.LastWriteTime);
+            return DateTime.Compare(path1WriteTime, path2WriteTime);
         }
 
         #endregion
