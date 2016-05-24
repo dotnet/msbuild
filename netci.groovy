@@ -60,8 +60,12 @@ def project = GithubProject
         Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
         Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
         Utilities.standardJobSetup(newJob, project, isPR, branch)
-        // Add archiving of logs
-        Utilities.addArchival(newJob, 'msbuild*.log')
+        // Add archiving of logs (even if the build failed)
+        Utilities.addArchival(newJob,
+                              'msbuild*.log', /* filesToArchive */
+                              '', /* filesToExclude */
+                              false, /* doNotFailIfNothingArchived */
+                              false, /* archiveOnlyIfSuccessful */)
         // Add trigger
         if (isPR) {
             Utilities.addGithubPRTrigger(newJob, "${osName} Build")

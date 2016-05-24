@@ -70,11 +70,22 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version461 = 8,
 
+        /// <summary>
+        /// version 4.5.2. Enum is out of order because it was shipped out of band from a Visual Studio update
+        /// without a corresponding SDK release.
+        /// </summary>
+        Version452 = 9,
+
+        /// <summary>
+        /// version 4.6.1
+        /// </summary>
+        Version462 = 10,
+
         // keep this up to date, this should always point to the last entry
         /// <summary>
         /// the latest version available at the time of release
         /// </summary>
-        VersionLatest = Version461
+        VersionLatest = Version462
     }
 
     /// <summary>
@@ -1756,11 +1767,17 @@ namespace Microsoft.Build.Utilities
                 case TargetDotNetFrameworkVersion.Version451:
                     return FrameworkLocationHelper.dotNetFrameworkVersion451;
 
+                case TargetDotNetFrameworkVersion.Version452:
+                    return FrameworkLocationHelper.dotNetFrameworkVersion452;
+
                 case TargetDotNetFrameworkVersion.Version46:
                     return FrameworkLocationHelper.dotNetFrameworkVersion46;
 
                 case TargetDotNetFrameworkVersion.Version461:
                     return FrameworkLocationHelper.dotNetFrameworkVersion461;
+
+                case TargetDotNetFrameworkVersion.Version462:
+                    return FrameworkLocationHelper.dotNetFrameworkVersion462;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
