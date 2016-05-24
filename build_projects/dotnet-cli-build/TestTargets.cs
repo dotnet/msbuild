@@ -34,7 +34,8 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-run.UnitTests",
             "dotnet-test.Tests",
             "dotnet-test.UnitTests",
-            "Kestrel.Tests",
+            // TODO: https://github.com/dotnet/cli/issues/3216
+            //"Kestrel.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
@@ -82,8 +83,7 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore("--verbosity", "verbose",
-                "--infer-runtimes",
+            dotnet.Restore("--verbosity", "verbose",                
                 "--fallbacksource", Dirs.CorehostLocalPackages,
                 "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"))
@@ -103,8 +103,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var dotnet = DotNetCli.Stage2;
             dotnet.Restore(
-                "--verbosity", "verbose",
-                "--infer-runtimes",
+                "--verbosity", "verbose",                
                 "--fallbacksource", Dirs.TestPackages,
                 "--fallbacksource", Dirs.CorehostLocalPackages,
                 "--fallbacksource", Dirs.CorehostDummyPackages)

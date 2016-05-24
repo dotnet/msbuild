@@ -347,7 +347,8 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             buildResult.Should().Fail();
 
-            buildResult.StdErr.Should().Contain("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
+            buildResult.StdErr.Should().Contain("Can not find runtime target for framework '.NETCoreApp,Version=v1.0' compatible with one of the target runtimes");
+            buildResult.StdErr.Should().Contain("The project has not been restored or restore failed - run `dotnet restore`");
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

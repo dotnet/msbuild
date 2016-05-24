@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests
     /// </summary>
     public class CrossgenTests : TestBase
     {
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/3059")]
         public void CLI_SDK_assemblies_must_be_crossgened()
         {
             string dotnetDir = FindDotnetDirInPath();
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tests
             CheckDirectoryIsCrossgened(cliPath);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/3059")]
         public void Shared_Fx_assemblies_must_be_crossgened()
         {
             string dotnetDir = FindDotnetDirInPath();

@@ -8,15 +8,9 @@
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-192208-24",
-    "Microsoft.DotNet.TestFramework": {
-      "target": "project"
-    },
-    "Microsoft.DotNet.Cli.Utils": {
-      "target": "project"
-    },
-    "Microsoft.DotNet.ProjectModel": {
-      "target": "project"
-    },
+    "Microsoft.DotNet.TestFramework": { "target": "project" },
+    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
+    "Microsoft.DotNet.ProjectModel": { "target": "project" },
     "Microsoft.DotNet.InternalAbstractions": {
       "target": "project"
     }
