@@ -783,6 +783,13 @@ class X
         {
             Console.WriteLine("Test: FileTrackerFindStrInX64X86ChainRepeatCommand");
 
+            if (!Environment.Is64BitOperatingSystem)
+            {
+                Console.WriteLine("FileTrackerFindStrInX64X86ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
+                Assert.IsTrue(true);
+                return;
+            }
+
             string[] tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
             foreach (string tlogFile in tlogFiles)
             {
@@ -801,6 +808,13 @@ class X
         public void FileTrackerFindStrInX86X64ChainRepeatCommand()
         {
             Console.WriteLine("Test: FileTrackerFindStrInX86X64ChainRepeatCommand");
+
+            if (!Environment.Is64BitOperatingSystem)
+            {
+                Console.WriteLine("FileTrackerFindStrInX86X64ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
+                Assert.IsTrue(true);
+                return;
+            }
 
             string[] tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
             foreach (string tlogFile in tlogFiles)
