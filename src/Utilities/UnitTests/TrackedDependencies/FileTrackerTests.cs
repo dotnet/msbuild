@@ -778,7 +778,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void FileTrackerFindStrInX64X86ChainRepeatCommand()
         {
             Console.WriteLine("Test: FileTrackerFindStrInX64X86ChainRepeatCommand");
@@ -786,7 +786,7 @@ class X
             if (!Environment.Is64BitOperatingSystem)
             {
                 Console.WriteLine("FileTrackerFindStrInX64X86ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
-                Assert.IsTrue(true);
+                Assert.True(true);
                 return;
             }
 
@@ -800,11 +800,11 @@ class X
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd64Path + " /c " + s_cmd32Path + " /c findstr /ip foo test.in");
             tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
             Console.WriteLine("");
-            Assert.AreEqual(0, exit);
+            Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void FileTrackerFindStrInX86X64ChainRepeatCommand()
         {
             Console.WriteLine("Test: FileTrackerFindStrInX86X64ChainRepeatCommand");
@@ -812,7 +812,7 @@ class X
             if (!Environment.Is64BitOperatingSystem)
             {
                 Console.WriteLine("FileTrackerFindStrInX86X64ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
-                Assert.IsTrue(true);
+                Assert.True(true);
                 return;
             }
 
@@ -826,7 +826,7 @@ class X
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd32Path + " /c " + s_cmd64Path + " /c findstr /ip foo test.in");
             tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
             Console.WriteLine("");
-            Assert.AreEqual(0, exit);
+            Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
 
