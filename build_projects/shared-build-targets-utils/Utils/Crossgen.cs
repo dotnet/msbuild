@@ -154,9 +154,14 @@ namespace Microsoft.DotNet.Cli.Build
 
                 IList<string> crossgenArgs = new List<string> {
                     "-readytorun", "-in", file, "-out", tempPathName,
-                    "-JITPath", GetLibCLRJitPathForVersion(),
                     "-platform_assemblies_paths", platformAssembliesPaths
                 };
+
+                if (CurrentPlatform.IsUnix)
+                {
+                    crossgenArgs.Add("-JITPath");
+                    crossgenArgs.Add(GetLibCLRJitPathForVersion());
+                }
 
                 ExecSilent(_crossGenPath, crossgenArgs, env);
 
