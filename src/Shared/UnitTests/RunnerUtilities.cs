@@ -1,33 +1,29 @@
 ﻿using Microsoft.Build.Shared;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.SharedUtilities
 {
 
     internal static class RunnerUtilities
     {
-        public static string PathToMsBuildExe => FileUtilities.CurrentExecutablePath;
+        public static string PathToCurrentlyRunningMsBuildExe => FileUtilities.CurrentExecutablePath;
 
         /// <summary>
-        /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
+        /// Invoke the currently running msbuild and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
         public static string ExecMSBuild(string msbuildParameters, out bool successfulExit)
         {
-            return ExecMSBuild(PathToMsBuildExe, msbuildParameters, out successfulExit);
+            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit);
         }
 
         /// <summary>
         /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
-        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit)
+        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false)
         {
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
@@ -36,7 +32,22 @@ namespace Microsoft.Build.SharedUtilities
             msbuildParameters = "\"" + pathToMsBuildExe + "\"" + " " + msbuildParameters;
 #endif
 
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute);
+        }
+
+        private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                var comSpec = Environment.GetEnvironmentVariable("ComSpec");
+
+                arguments = $"/C \"{pathToExecutable} {arguments}\"";
+                pathToExecutable = comSpec;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
 #if !FEATURE_RUN_EXE_IN_TESTS
@@ -52,18 +63,26 @@ namespace Microsoft.Build.SharedUtilities
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
-        private static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit)
+        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false)
         {
-            ProcessStartInfo psi = new ProcessStartInfo(process);
-            psi.CreateNoWindow = true;
-            psi.RedirectStandardInput = true;
-            psi.RedirectStandardOutput = true;
-            psi.RedirectStandardError = true;
-            psi.UseShellExecute = false;
-            psi.Arguments = parameters;
-            string output = String.Empty;
+            if (shellExecute)
+            {
+                // we adjust the psi data manually because on net core using ProcessStartInfo.UseShellExecute throws NotImplementedException
+                AdjustForShellExecution(ref process, ref parameters);
+            }
 
-            using (Process p = new Process { EnableRaisingEvents = true, StartInfo = psi })
+            var psi = new ProcessStartInfo(process)
+            {
+                CreateNoWindow = true,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                Arguments = parameters
+            };
+            var output = string.Empty;
+
+            using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
                 p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
                 {

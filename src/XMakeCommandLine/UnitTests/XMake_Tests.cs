@@ -816,7 +816,7 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
             Assert.False(successfulExit);
 
-            Assert.Contains(RunnerUtilities.PathToMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -830,7 +830,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(RunnerUtilities.PathToMsBuildExe));
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe));
 
                 var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
 
@@ -843,7 +843,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(current);
             }
 
-            Assert.Contains(RunnerUtilities.PathToMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -1845,9 +1845,9 @@ namespace Microsoft.Build.UnitTests
 
         private void CopyMSBuildExeToPath(string destPath)
         {
-            File.Copy(RunnerUtilities.PathToMsBuildExe, Path.Combine(destPath, "MSBuild.exe"));
+            File.Copy(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, Path.Combine(destPath, "MSBuild.exe"));
 
-            var msbuildExeDir = Path.GetDirectoryName(RunnerUtilities.PathToMsBuildExe);
+            var msbuildExeDir = Path.GetDirectoryName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
             var deps = new string[] {
                     "Microsoft.Build.dll",
                     "Microsoft.Build.Framework.dll",
