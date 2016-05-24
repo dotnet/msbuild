@@ -21,6 +21,32 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishDir.Should().NotHaveFile("StandaloneApp.runtimeconfig.dev.json");
         }
 
+        [Fact]
+        public void StandaloneAppHasResourceDependency()
+        {
+            // WindowsAzure.Services brings in en, zh etc. resource DLLs.
+            // The host has to be able to find these assemblies from the deps file
+            // from the standalone app base under the ietf tag directory.
+
+            var testName = "TestAppWithResourceDeps";
+            TestInstance instance =
+                TestAssetsManager
+                    .CreateTestInstance(testName)
+                    .WithLockFiles()
+                    .WithBuildArtifacts();
+
+            var publishCommand = new PublishCommand(instance.TestRoot);
+            publishCommand.Execute().Should().Pass();
+
+            var publishedDir = publishCommand.GetOutputDirectory();
+            var extension = publishCommand.GetExecutableExtension();
+            var outputExe = testName + extension;
+            publishedDir.Should().HaveFiles(new[] { $"{testName}.dll", outputExe });
+
+            var command = new TestCommand(Path.Combine(publishedDir.FullName, outputExe));
+            command.Execute("").Should().ExitWith(0);
+        }
+        
         private DirectoryInfo Publish(TestInstance testInstance)
         {
             var publishCommand = new PublishCommand(Path.Combine(testInstance.TestRoot, "StandaloneApp"));
