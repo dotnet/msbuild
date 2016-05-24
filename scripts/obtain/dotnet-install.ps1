@@ -336,7 +336,7 @@ foreach ($DownloadLink in $DownloadLinks) {
 $BinPath = Get-Absolute-Path $(Join-Path -Path $InstallRoot -ChildPath $BinFolderRelativePath)
 if (-Not $NoPath) {
     Say "Adding to current process PATH: `"$BinPath`". Note: This change will not be visible if PowerShell was run as a child process."
-    $env:path += ";$BinPath"
+    $env:path = "$BinPath;" + $env:path
 }
 else {
     Say "Binaries of dotnet can be found in $BinPath"
