@@ -148,10 +148,6 @@ namespace Microsoft.DotNet.Cli.Build
             string nugetFeedUrl = EnvVars.EnsureVariable("NUGET_FEED_URL");
             string apiKey = EnvVars.EnsureVariable("NUGET_API_KEY");
             NuGetUtil.PushPackages(Dirs.PackagesNoRID, nugetFeedUrl, apiKey);
-
-            string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
-            VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
-            repoUpdater.UpdatePublishedVersions(Dirs.PackagesNoRID, $"build-info/dotnet/cli/{GitUtils.GetBranchName()}/CORE_SETUP_LATEST").Wait();
         }
 
         private static bool CheckIfAllBuildsHavePublished()
