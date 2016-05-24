@@ -412,6 +412,7 @@ namespace ConsoleApplication4
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
                 string commandArgs = "/d \"" + fileTrackerPath + "\" /u /c \"" + outputFile + "\"";
 
+                Console.WriteLine($"{trackerPath} {commandArgs}");
                 int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
                 Console.WriteLine("");
                 Assert.Equal(0, exit);
@@ -2230,7 +2231,7 @@ namespace ConsoleApplication4
             const string tlogRootName = "foo_inline";
             const string sourceFile = "inlinetrackingtest.txt";
             const string trackerResponseFile = "test-tracker.rsp";
-            const string fileTrackerParameters = "/d FileTracker.dll /r \"" + rootingMarker + "\"";
+            const string fileTrackerParameters = "/d FileTracker32.dll /r \"" + rootingMarker + "\"";
 
             File.Delete(toolReadTlog);
             File.Delete(sourceFile);
