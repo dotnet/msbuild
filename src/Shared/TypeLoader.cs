@@ -48,19 +48,19 @@ namespace Microsoft.Build.Shared
 #endif
 
         /// <summary>
-        /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter.
+        /// Cache to keep track of the assemblyLoadInfos based on a given type filter.
         /// </summary>
-        private static ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
+        private static ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
 
         /// <summary>
-        /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter for assemblies which are to be loaded for reflectionOnlyLoads.
+        /// Cache to keep track of the assemblyLoadInfos based on a given type filter for assemblies which are to be loaded for reflectionOnlyLoads.
         /// </summary>
-        private static ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
+        private static ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
 
         /// <summary>
-        /// Typefilter for this typeloader
+        /// Type filter for this typeloader
         /// </summary>
-        private TypeFilter _isDesiredType;
+        private Func<Type, object, bool> _isDesiredType;
 
 #if !FEATURE_ASSEMBLY_LOADFROM
         static TypeLoader()
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Constructor.
         /// </summary>
-        internal TypeLoader(TypeFilter isDesiredType)
+        internal TypeLoader(Func<Type, object, bool> isDesiredType)
         {
             ErrorUtilities.VerifyThrow(isDesiredType != null, "need a type filter");
 
@@ -248,9 +248,9 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        private LoadedType GetLoadedType(object cacheLock, object loadInfoToTypeLock, ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
+        private LoadedType GetLoadedType(object cacheLock, object loadInfoToTypeLock, ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
         {
-            // A given typefilter have been used on a number of assemblies, Based on the typefilter we will get another dictionary which 
+            // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
             ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> loadInfoToType = null;
             lock (cacheLock)
@@ -277,7 +277,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given a type filter and an asssemblyInfo object keep track of what types in a given assembly which match the typefilter.
+        /// Given a type filter and an asssemblyInfo object keep track of what types in a given assembly which match the type filter.
         /// Also, use this information to determine if a given TypeName is in the assembly which is pointed to by the AssemblyLoadInfo object.
         /// 
         /// This type represents a combination of a type filter and an assemblyInfo object.
@@ -293,7 +293,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Type filter to pick the correct types out of an assembly
             /// </summary>
-            private TypeFilter _isDesiredType;
+            private Func<Type, object, bool> _isDesiredType;
 
             /// <summary>
             /// Assembly load information so we can load an assembly
@@ -306,7 +306,7 @@ namespace Microsoft.Build.Shared
             private Dictionary<string, Type> _typeNameToType;
 
             /// <summary>
-            /// List of public types in the assembly which match the typefilter and their corresponding types
+            /// List of public types in the assembly which match the type filter and their corresponding types
             /// </summary>
             private Dictionary<string, Type> _publicTypeNameToType;
 
@@ -325,7 +325,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Given a type filter, and an assembly to load the type information from determine if a given type name is in the assembly or not.
             /// </summary>
-            internal AssemblyInfoToLoadedTypes(TypeFilter typeFilter, AssemblyLoadInfo loadInfo)
+            internal AssemblyInfoToLoadedTypes(Func<Type, object, bool> typeFilter, AssemblyLoadInfo loadInfo)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
                 ErrorUtilities.VerifyThrowArgumentNull(loadInfo, "loadInfo");

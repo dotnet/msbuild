@@ -36,10 +36,9 @@ namespace Microsoft.Build.UnitTests
             <Target Name='YYY' AfterTargets='XXX'>
             </Target>
             <Target Name='GGG' AfterTargets='XXX'>
-               <Exec Command='where.exe where'/>
+               <Exec Command='echo a'/>
             </Target>
          </Project>";
-
 
         private class SimulatedConsole
         {
@@ -249,7 +248,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
-        public void EmptyTargetsOnDetailedButNotNotmal()
+        public void EmptyTargetsOnDetailedButNotNormal()
         {
             SimulatedConsole sc = new SimulatedConsole();
             ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
@@ -300,13 +299,15 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void ShowCommandLineWithNormalVerbosity()
         {
+            string command = "echo a";
+
             SimulatedConsole sc = new SimulatedConsole();
             ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
             logger.Parameters = "EnableMPLogging;ShowCommandLine";
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             string log = sc.ToString();
-            Assert.NotEqual(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
+            Assert.NotEqual(-1, log.IndexOf(command, StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
@@ -314,7 +315,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             log = sc.ToString();
-            Assert.NotEqual(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
+            Assert.NotEqual(-1, log.IndexOf(command, StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
@@ -322,14 +323,14 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             log = sc.ToString();
-            Assert.Equal(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(-1, log.IndexOf(command, StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
             logger.Parameters = "EnableMPLogging;ShowCommandLine=NotAbool";
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
             log = sc.ToString();
-            Assert.Equal(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(-1, log.IndexOf(command, StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
@@ -337,7 +338,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             log = sc.ToString();
-            Assert.NotEqual(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
+            Assert.NotEqual(-1, log.IndexOf(command, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

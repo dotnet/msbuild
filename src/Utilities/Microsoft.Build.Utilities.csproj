@@ -106,6 +106,10 @@
       <Link>NativeMethodsShared.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\AssemblyUtilities.cs">
+      <Link>AssemblyUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

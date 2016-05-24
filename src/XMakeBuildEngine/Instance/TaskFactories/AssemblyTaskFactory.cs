@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The type loader to load types which derrive from ITask or ITask2
         /// </summary>
-        private readonly TypeLoader _typeLoader = new TypeLoader(new TypeFilter(TaskLoader.IsTaskClass));
+        private readonly TypeLoader _typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
 
         /// <summary>
         /// Name of the task wrapped by the task factory

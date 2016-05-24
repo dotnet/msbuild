@@ -375,6 +375,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
@@ -391,6 +392,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+#endif
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -489,6 +491,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(@"c:\abc\def", FileUtilities.NormalizePath(@"c:\abc\" + longPart + @"\..\def"));
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         [Fact]
         public void NormalizePathBadGlobalroot()
         {
@@ -512,6 +515,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+#endif
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -882,19 +886,18 @@ namespace Microsoft.Build.UnitTests
         [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
         public void AbsolutePathLooksLikeUnixPathOnUnix()
         {
-            var absolutePathToThisAssembly = Path.GetFullPath(typeof (FileUtilities_Tests).GetTypeInfo().Assembly.Location);
-
-            Assert.True(FileUtilities.LooksLikeUnixFilePath(absolutePathToThisAssembly));
+            Assert.True(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
         }
 
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void PathDoesNotLookLikeUnixPathOnWindows()
         {
-            var absolutePathToThisAssembly = Path.GetFullPath(typeof(FileUtilities_Tests).GetTypeInfo().Assembly.Location);
-
-            Assert.False(FileUtilities.LooksLikeUnixFilePath(absolutePathToThisAssembly));
+            Assert.False(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
             Assert.False(FileUtilities.LooksLikeUnixFilePath("/path/that/looks/unixy"));
         }
+
+        private static string SystemSpecificAbsolutePath => FileUtilities.ExecutingAssemblyPath;
+
     }
 }

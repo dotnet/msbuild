@@ -139,6 +139,10 @@
       <Link>NativeMethodsShared.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\..\..\Shared\AssemblyUtilities.cs">
+      <Link>AssemblyUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\..\..\Shared\NodeBuildComplete.cs">
       <Link>NodeBuildComplete.cs</Link>
     </Compile>

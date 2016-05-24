@@ -34,7 +34,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Checks if the given type is a task factory.
         /// </summary>
-        /// <remarks>This method is used as a TypeFilter delegate.</remarks>
+        /// <remarks>This method is used as a type filter delegate.</remarks>
         /// <returns>true, if specified type is a task</returns>
         internal static bool IsTaskClass(Type type, object unused)
         {

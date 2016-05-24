@@ -178,27 +178,27 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
-        /// Make sure that when we load multiple types out of the same assembly with different typefilters that both the fullyqualified name matching and the 
+        /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the 
         /// partial name matching still work.
         /// </summary>
         [Fact]
         public void Regress640476PartialName()
         {
             string forwardingLoggerLocation = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger).Assembly.Location;
-            TypeLoader loader = new TypeLoader(new TypeFilter(IsForwardingLoggerClass));
+            TypeLoader loader = new TypeLoader(IsForwardingLoggerClass);
             LoadedType loadedType = loader.Load("ConfigurableForwardingLogger", AssemblyLoadInfo.Create(null, forwardingLoggerLocation));
             Assert.NotNull(loadedType);
             Assert.True(loadedType.Assembly.AssemblyLocation.Equals(forwardingLoggerLocation, StringComparison.OrdinalIgnoreCase));
 
             string fileLoggerLocation = typeof(Microsoft.Build.Logging.FileLogger).Assembly.Location;
-            loader = new TypeLoader(new TypeFilter(IsLoggerClass));
+            loader = new TypeLoader(IsLoggerClass);
             loadedType = loader.Load("FileLogger", AssemblyLoadInfo.Create(null, fileLoggerLocation));
             Assert.NotNull(loadedType);
             Assert.True(loadedType.Assembly.AssemblyLocation.Equals(fileLoggerLocation, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
-        /// Make sure that when we load multiple types out of the same assembly with different typefilters that both the fullyqualified name matching and the 
+        /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the 
         /// partial name matching still work.
         /// </summary>
         [Fact]
@@ -206,14 +206,14 @@ namespace Microsoft.Build.UnitTests
         {
             Type forwardingLoggerType = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger);
             string forwardingLoggerLocation = forwardingLoggerType.Assembly.Location;
-            TypeLoader loader = new TypeLoader(new TypeFilter(IsForwardingLoggerClass));
+            TypeLoader loader = new TypeLoader(IsForwardingLoggerClass);
             LoadedType loadedType = loader.Load(forwardingLoggerType.FullName, AssemblyLoadInfo.Create(null, forwardingLoggerLocation));
             Assert.NotNull(loadedType);
             Assert.True(loadedType.Assembly.AssemblyLocation.Equals(forwardingLoggerLocation, StringComparison.OrdinalIgnoreCase));
 
             Type fileLoggerType = typeof(Microsoft.Build.Logging.FileLogger);
             string fileLoggerLocation = fileLoggerType.Assembly.Location;
-            loader = new TypeLoader(new TypeFilter(IsLoggerClass));
+            loader = new TypeLoader(IsLoggerClass);
             loadedType = loader.Load(fileLoggerType.FullName, AssemblyLoadInfo.Create(null, fileLoggerLocation));
             Assert.NotNull(loadedType);
             Assert.True(loadedType.Assembly.AssemblyLocation.Equals(fileLoggerLocation, StringComparison.OrdinalIgnoreCase));
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Make sure if no typeName is passed in then pick the first type which matches the desired typefilter.
+        /// Make sure if no typeName is passed in then pick the first type which matches the desired type filter.
         /// This has been in since whidbey but there has been no test for it and it was broken in the last refactoring of TypeLoader.
         /// This test is to prevent that from happening again.
         /// </summary>
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests
         {
             Type forwardingLoggerType = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger);
             string forwardingLoggerAssemblyLocation = forwardingLoggerType.Assembly.Location;
-            TypeFilter forwardingLoggerfilter = new TypeFilter(IsForwardingLoggerClass);
+            Func<Type, object, bool> forwardingLoggerfilter = IsForwardingLoggerClass;
             Type firstPublicType = FirstPublicDesiredType(forwardingLoggerfilter, forwardingLoggerAssemblyLocation);
 
             TypeLoader loader = new TypeLoader(forwardingLoggerfilter);
@@ -242,7 +242,7 @@ namespace Microsoft.Build.UnitTests
 
             Type fileLoggerType = typeof(Microsoft.Build.Logging.FileLogger);
             string fileLoggerAssemblyLocation = forwardingLoggerType.Assembly.Location;
-            TypeFilter fileLoggerfilter = new TypeFilter(IsLoggerClass);
+            Func<Type, object, bool> fileLoggerfilter = IsLoggerClass;
             firstPublicType = FirstPublicDesiredType(fileLoggerfilter, fileLoggerAssemblyLocation);
 
             loader = new TypeLoader(fileLoggerfilter);
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        private static Type FirstPublicDesiredType(TypeFilter filter, string assemblyLocation)
+        private static Type FirstPublicDesiredType(Func<Type, object, bool> filter, string assemblyLocation)
         {
             Assembly loadedAssembly = Assembly.UnsafeLoadFrom(assemblyLocation);
 

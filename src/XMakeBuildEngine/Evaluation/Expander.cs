@@ -1001,7 +1001,7 @@ namespace Microsoft.Build.Evaluation
                             propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
                             // This is likely to be a function expression
-                            propertyValue = ExpandPropertyBody(propertyBody, propertyValue, properties, options, elementLocation, usedUninitializedProperties);
+                            propertyValue = ExpandPropertyBody(propertyBody, null, properties, options, elementLocation, usedUninitializedProperties);
                         }
                         else // This is a regular property
                         {
@@ -1105,7 +1105,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             // We will have either extracted the actual property name
                             // or realised that there is none (static function), and have recorded a null
-                            propertyName = function.ExpressionRootName;
+                            propertyName = function.Receiver;
                         }
                         else
                         {
@@ -2609,6 +2609,71 @@ namespace Microsoft.Build.Evaluation
         }
 #endif
 
+        private struct FunctionBuilder<T>
+            where T : class, IProperty
+        {
+            /// <summary>
+            /// The type of this function's receiver
+            /// </summary>
+            public Type ReceiverType { get; set; }
+
+            /// <summary>
+            /// The name of the function
+            /// </summary>
+            public string Name { get; set; }
+
+            /// <summary>
+            /// The arguments for the function
+            /// </summary>
+            public string[] Arguments { get; set; }
+
+            /// <summary>
+            /// The expression that this function is part of
+            /// </summary>
+            public string Expression { get; set; }
+
+            /// <summary>
+            /// The property name that this function is applied on
+            /// </summary>
+            public string Receiver { get; set; }
+
+            /// <summary>
+            /// The binding flags that will be used during invocation of this function
+            /// </summary>
+            public BindingFlags BindingFlags { get; set; }
+
+#if !FEATURE_TYPE_INVOKEMEMBER
+            public InvokeType InvokeType { get; set; }
+#endif
+
+            /// <summary>
+            /// The remainder of the body once the function and arguments have been extracted
+            /// </summary>
+            public string Remainder { get; set; }
+
+            /// <summary>
+            /// List of properties which have been used but have not been initialized yet.
+            /// </summary>
+            public UsedUninitializedProperties UsedUninitializedProperties { get; set; }
+
+            internal Function<T> Build()
+            {
+                return new Function<T>(
+                    ReceiverType,
+                    Expression,
+                    Receiver,
+                    Name,
+                    Arguments,
+                    BindingFlags,
+#if !FEATURE_TYPE_INVOKEMEMBER
+                    InvokeType,
+#endif
+                    Remainder,
+                    UsedUninitializedProperties
+                    );
+            }
+        }
+
         /// <summary>
         /// This class represents the function as extracted from an expression
         /// It is also responsible for executing the function
@@ -2618,14 +2683,14 @@ namespace Microsoft.Build.Evaluation
             where T : class, IProperty
         {
             /// <summary>
-            /// The type that this function will act on
+            /// The type of this function's receiver
             /// </summary>
-            private Type _objectType;
+            private Type _receiverType;
 
             /// <summary>
             /// The name of the function
             /// </summary>
-            private string _name;
+            private string _methodMethodName;
 
             /// <summary>
             /// The arguments for the function
@@ -2633,14 +2698,14 @@ namespace Microsoft.Build.Evaluation
             private string[] _arguments;
 
             /// <summary>
-            /// The expression that constitutes this function
+            /// The expression that this function is part of
             /// </summary>
             private string _expression;
 
             /// <summary>
-            /// The property name that is the context for this function
+            /// The property name that this function is applied on
             /// </summary>
-            private string _expressionRootName;
+            private string _receiver;
 
             /// <summary>
             /// The binding flags that will be used during invocation of this function
@@ -2664,13 +2729,13 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Construct a function that will be executed during property evaluation
             /// </summary>
-            internal Function(Type objectType, string expression, string expressionRootName, string name, string[] arguments, BindingFlags bindingFlags,
+            internal Function(Type receiverType, string expression, string receiver, string methodName, string[] arguments, BindingFlags bindingFlags,
 #if !FEATURE_TYPE_INVOKEMEMBER
                 InvokeType invokeType,
 #endif
                 string remainder, UsedUninitializedProperties usedUninitializedProperties)
             {
-                _name = name;
+                _methodMethodName = methodName;
                 if (arguments == null)
                 {
                     _arguments = new string[0];
@@ -2680,9 +2745,9 @@ namespace Microsoft.Build.Evaluation
                     _arguments = arguments;
                 }
 
-                _expressionRootName = expressionRootName;
+                _receiver = receiver;
                 _expression = expression;
-                _objectType = objectType;
+                _receiverType = receiverType;
                 _bindingFlags = bindingFlags;
 #if !FEATURE_TYPE_INVOKEMEMBER
                 _invokeType = invokeType;
@@ -2698,9 +2763,9 @@ namespace Microsoft.Build.Evaluation
             ///     [System.Diagnostics.Process]::Start
             ///     SomeMSBuildProperty
             /// </summary>
-            internal string ExpressionRootName
+            internal string Receiver
             {
-                get { return _expressionRootName; }
+                get { return _receiver; }
             }
 
             /// <summary>
@@ -2708,18 +2773,15 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal static Function<T> ExtractPropertyFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, UsedUninitializedProperties usedUnInitializedProperties)
             {
-                // If this a expression function rather than a static, then we'll capture the name of the property referenced
-                string propertyName = null;
-
-                // The type of the object that this function is part
-                Type objectType = null;
+                // Used to aggregate all the components needed for a Function
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T>();
 
                 // By default the expression root is the whole function expression
-                string expressionRoot = expressionFunction;
+                var expressionRoot = expressionFunction;
 
                 // The arguments for this function start at the first '('
                 // If there are no arguments, then we're a property getter
-                int argumentStartIndex = expressionFunction.IndexOf('(');
+                var argumentStartIndex = expressionFunction.IndexOf('(');
 
                 // If we have arguments, then we only want the content up to but not including the '('
                 if (argumentStartIndex > -1)
@@ -2730,15 +2792,14 @@ namespace Microsoft.Build.Evaluation
                 // In case we ended up with something we don't understand
                 ProjectErrorUtilities.VerifyThrowInvalidProject(!String.IsNullOrEmpty(expressionRoot), elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
-                // First we'll see if there is a static function being called
-                // A static method is the content that follows the last "::", the rest being
-                // the type
-                int methodStartIndex = -1;
+                functionBuilder.Expression = expressionFunction;
+                functionBuilder.UsedUninitializedProperties = usedUnInitializedProperties;
 
                 // This is a static method call
+                // A static method is the content that follows the last "::", the rest being the type
                 if (propertyValue == null && expressionRoot[0] == '[')
                 {
-                    int typeEndIndex = expressionRoot.IndexOf(']', 1);
+                    var typeEndIndex = expressionRoot.IndexOf(']', 1);
 
                     if (typeEndIndex < 1)
                     {
@@ -2746,18 +2807,8 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", expressionFunction, String.Empty);
                     }
 
-                    string typeName = expressionRoot.Substring(1, typeEndIndex - 1);
-                    methodStartIndex = typeEndIndex + 1;
-
-                    // Make an attempt to locate a type that matches the body of the expression.
-                    // We won't throw on error here
-                    objectType = GetTypeForStaticMethod(typeName);
-
-                    if (objectType == null)
-                    {
-                        // We ended up with something other than a type
-                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionTypeUnavailable", expressionFunction, typeName);
-                    }
+                    var typeName = expressionRoot.Substring(1, typeEndIndex - 1);
+                    var methodStartIndex = typeEndIndex + 1;
 
                     if (expressionRoot.Length > methodStartIndex + 2 && expressionRoot[methodStartIndex] == ':' && expressionRoot[methodStartIndex + 1] == ':')
                     {
@@ -2769,67 +2820,71 @@ namespace Microsoft.Build.Evaluation
                         // We ended up with something other than a static function expression
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", expressionFunction, String.Empty);
                     }
+
+                    ConstructFunction(elementLocation, expressionFunction, argumentStartIndex, methodStartIndex, ref functionBuilder);
+
+                    // Locate a type that matches the body of the expression.
+                    var receiverType = GetTypeForStaticMethod(typeName, functionBuilder.Name);
+
+                    if (receiverType == null)
+                    {
+                        // We ended up with something other than a type
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionTypeUnavailable", expressionFunction, typeName);
+                    }
+
+                    functionBuilder.ReceiverType = receiverType;
                 }
                 else if (expressionFunction[0] == '[') // We have an indexer
                 {
-                    objectType = propertyValue.GetType();
-                    int indexerEndIndex = expressionFunction.IndexOf(']', 1);
-
+                    var indexerEndIndex = expressionFunction.IndexOf(']', 1);
                     if (indexerEndIndex < 1)
                     {
                         // We ended up with something other than a function expression
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedSquareBrackets"));
                     }
 
-                    string argumentsContent = expressionFunction.Substring(1, indexerEndIndex - 1);
-                    methodStartIndex = indexerEndIndex + 1;
-                    Function<T> indexerFunction = ConstructIndexerFunction(expressionFunction, elementLocation, propertyValue, propertyName, objectType, methodStartIndex, argumentsContent, usedUnInitializedProperties);
+                    var methodStartIndex = indexerEndIndex + 1;
 
-                    return indexerFunction;
+                    functionBuilder.ReceiverType = propertyValue.GetType();
+
+                    ConstructIndexerFunction(expressionFunction, elementLocation, propertyValue, methodStartIndex, indexerEndIndex, ref functionBuilder);
                 }
-                else
+                else // This could be a property reference, or a chain of function calls
                 {
-                    // No static function call was found, look for an instance function call next, such as in SomeStuff.ToLower()
-                    methodStartIndex = expressionRoot.IndexOf('.');
+                    // Look for an instance function call next, such as in SomeStuff.ToLower()
+                    var methodStartIndex = expressionRoot.IndexOf('.');
                     if (methodStartIndex == -1)
                     {
                         // We don't have a function invocation in the expression root, return null
                         return null;
                     }
-                    else
-                    {
-                        // skip over the '.';
-                        methodStartIndex++;
-                    }
-                }
 
-                // No type matched, therefore the content must be a property reference, or a recursive call as functions
-                // are chained together
-                if (objectType == null)
-                {
-                    int rootEndIndex = expressionRoot.IndexOf('.');
-                    propertyName = expressionRoot.Substring(0, rootEndIndex);
+                    // skip over the '.';
+                    methodStartIndex++;
+
+                    var rootEndIndex = expressionRoot.IndexOf('.');
+
+                    // If this is an instance function rather than a static, then we'll capture the name of the property referenced
+                    var functionReceiver = expressionRoot.Substring(0, rootEndIndex);
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
-                    if (propertyValue == null && !IsValidPropertyName(propertyName))
+                    if (propertyValue == null && !IsValidPropertyName(functionReceiver))
                     {
                         // We extracted something that wasn't a valid property name, fail.
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
                     }
 
-                    objectType = typeof(string);
+                    // If we are recursively acting on a type that has been already produced then pass that type inwards (e.g. we are interpreting a function call chain)
+                    // Otherwise, the receiver of the function is a string
+                    var receiverType = propertyValue?.GetType() ?? typeof(string);
+
+                    functionBuilder.Receiver = functionReceiver;
+                    functionBuilder.ReceiverType = receiverType;
+
+                    ConstructFunction(elementLocation, expressionFunction, argumentStartIndex, methodStartIndex, ref functionBuilder);
                 }
 
-                // If we are recursively acting on a type that has been already produced
-                // then pass that type inwards
-                if (propertyValue != null)
-                {
-                    objectType = propertyValue.GetType();
-                }
-
-                Function<T> function = ConstructFunction(elementLocation, expressionFunction, propertyName, objectType, argumentStartIndex, methodStartIndex, usedUnInitializedProperties);
-
-                return function;
+                return functionBuilder.Build();
             }
 
 #if !FEATURE_TYPE_INVOKEMEMBER
@@ -2838,15 +2893,15 @@ namespace Microsoft.Build.Evaluation
                 StringComparison nameComparison =
                     ((_bindingFlags & BindingFlags.IgnoreCase) == BindingFlags.IgnoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
-                var matchingMembers = _objectType.GetFields(_bindingFlags)
+                var matchingMembers = _receiverType.GetFields(_bindingFlags)
                     .Cast<MemberInfo>()
-                    .Concat(_objectType.GetProperties(_bindingFlags))
-                    .Where(member => member.Name.Equals(_name, nameComparison))
+                    .Concat(_receiverType.GetProperties(_bindingFlags))
+                    .Where(member => member.Name.Equals(_methodMethodName, nameComparison))
                     .ToArray();
 
                 if (matchingMembers.Length == 0)
                 {
-                    throw new MissingMemberException(_name);
+                    throw new MissingMemberException(_methodMethodName);
                 }
                 else if (matchingMembers.Length == 1)
                 {
@@ -2854,7 +2909,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    throw new AmbiguousMatchException(_name);
+                    throw new AmbiguousMatchException(_methodMethodName);
                 }                
             }
 #endif
@@ -2873,16 +2928,16 @@ namespace Microsoft.Build.Evaluation
                     if (objectInstance == null)
                     {
                         // Check that the function that we're going to call is valid to call
-                        if (!IsStaticMethodAvailable(_objectType, _name))
+                        if (!IsStaticMethodAvailable(_receiverType, _methodMethodName))
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionMethodUnavailable", _name, _objectType.FullName);
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionMethodUnavailable", _methodMethodName, _receiverType.FullName);
                         }
 
                         _bindingFlags |= BindingFlags.Static;
 
                         // For our intrinsic function we need to support calling of internal methods
                         // since we don't want them to be public
-                        if (_objectType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                        if (_receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
                         {
                             _bindingFlags |= BindingFlags.NonPublic;
                         }
@@ -2913,8 +2968,8 @@ namespace Microsoft.Build.Evaluation
                         {
                             // Unescape the value since we're about to send it out of the engine and into
                             // the function being called. If a file or a directory function, fix the path
-                            if (_objectType == typeof(System.IO.File) || _objectType == typeof(System.IO.Directory)
-                                || _objectType == typeof(System.IO.Path))
+                            if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
+                                || _receiverType == typeof(System.IO.Path))
                             {
                                 argumentValue = FileUtilities.FixFilePath(argumentValue);
                             }
@@ -2933,7 +2988,7 @@ namespace Microsoft.Build.Evaluation
                     // This special casing is to realize that its a comparison that is taking place and handle the
                     // argument type coercion accordingly; effectively pre-preparing the argument type so 
                     // that it matches the left hand side ready for the default binder’s method invoke.
-                    if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _name, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _name, StringComparison.OrdinalIgnoreCase)))
+                    if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
                         // change the type of the final unescaped string into the destination
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
@@ -2941,7 +2996,7 @@ namespace Microsoft.Build.Evaluation
 
                     // If we've been asked to construct an instance, then we
                     // need to locate an appropriate constructor and invoke it
-                    if (String.Equals("new", _name, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
                         functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
                     }
@@ -2954,11 +3009,11 @@ namespace Microsoft.Build.Evaluation
                         {
 #if FEATURE_TYPE_INVOKEMEMBER
                             // First use InvokeMember using the standard binder - this will match and coerce as needed
-                            functionResult = _objectType.InvokeMember(_name, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                            functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
 #else
                             if (_invokeType == InvokeType.InvokeMethod)
                             {
-                                functionResult = _objectType.InvokeMember(_name, _bindingFlags, objectInstance, args, null, CultureInfo.InvariantCulture, null);
+                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, objectInstance, args, null, CultureInfo.InvariantCulture, null);
                             }
                             else if (_invokeType == InvokeType.GetPropertyOrField)
                             {
@@ -3005,7 +3060,7 @@ namespace Microsoft.Build.Evaluation
                     // If the result of the function call is a string, then we need to escape the result
                     // so that we maintain the "engine contains escaped data" state.
                     // The exception is that the user is explicitly calling MSBuild::Unescape or MSBuild::Escape
-                    if (functionResult is string && !String.Equals("Unescape", _name, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _name, StringComparison.OrdinalIgnoreCase))
+                    if (functionResult is string && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
                         functionResult = EscapingUtilities.Escape((string)functionResult);
                     }
@@ -3024,7 +3079,7 @@ namespace Microsoft.Build.Evaluation
                 catch (TargetInvocationException ex)
                 {
                     // We ended up with something other than a function expression
-                    string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _name, args);
+                    string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.InnerException.Message.Replace("\r\n", " "));
                     return null;
                 }
@@ -3046,7 +3101,7 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // We ended up with something other than a function expression
-                        string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _name, args);
+                        string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message);
                     }
 
@@ -3055,61 +3110,66 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Return a Type object for the type we're trying to call static methods on
+            /// Given a type name and method name, try to resolve the type.
             /// </summary>
-            private static Type GetTypeForStaticMethod(string typeName)
+            /// <param name="typeName">May be full name or assembly qualified name</param>
+            /// <param name="simpleMethodName">simple name of the method</param>
+            /// <returns></returns>
+            private static Type GetTypeForStaticMethod(string typeName, string simpleMethodName)
             {
-                // Ultimately this will be a more in-depth lookup, including assembly name etc.
-                // for now, we're only supporting a subset of what's in mscorlib + specific additional types
-                // If the env var MSBUILDENABLEALLPROPERTYFUNCTIONS=1 then we'll allow pretty much anything
-                Type objectType;
-                Tuple<string, Type> functionType;
+                Type receiverType;
+                Tuple<string, Type> cachedTypeInformation;
 
                 // If we don't have a type name, we already know that we won't be able to find a type.  
                 // Go ahead and return here -- otherwise the Type.GetType() calls below will throw.
-                if (String.IsNullOrEmpty(typeName))
+                if (string.IsNullOrWhiteSpace(typeName))
                 {
                     return null;
                 }
 
-                // For whole types we support them being in different assemblies than mscorlib
-                // Get the assembly qualified type name if one exists
-                if (AvailableStaticMethods.TryGetValue(typeName, out functionType) && functionType != null)
+                // Check if the type is in the whitelist cache. If it is, use it or load it.
+                cachedTypeInformation = AvailableStaticMethods.GetTypeInformationFromTypeCache(typeName, simpleMethodName);
+                if (cachedTypeInformation != null)
                 {
                     // We need at least one of these set
-                    ErrorUtilities.VerifyThrow(functionType.Item1 != null || functionType.Item2 != null, "Function type information needs either string or type represented.");
+                    ErrorUtilities.VerifyThrow(cachedTypeInformation.Item1 != null || cachedTypeInformation.Item2 != null, "Function type information needs either string or type represented.");
 
                     // If we have the type information in Type form, then just return that
-                    if (functionType.Item2 != null)
+                    if (cachedTypeInformation.Item2 != null)
                     {
-                        return functionType.Item2;
+                        return cachedTypeInformation.Item2;
                     }
-                    else if (functionType.Item1 != null)
+                    else if (cachedTypeInformation.Item1 != null)
                     {
                         // This is a case where the Type is not available at compile time, so
                         // we are forced to bind by name instead
-                        typeName = functionType.Item1;
+                        var assemblyQualifiedTypeName = cachedTypeInformation.Item1;
 
                         // Get the type from the assembly qualified type name from AvailableStaticMethods
-                        objectType = Type.GetType(typeName, false /* do not throw TypeLoadException if not found */, true /* ignore case */);
+                        receiverType = Type.GetType(assemblyQualifiedTypeName, false /* do not throw TypeLoadException if not found */, true /* ignore case */);
+
+                        // If the type information from the cache is not loadable, it means the cache information got corrupted somehow
+                        // Throw here to prevent adding null types in the cache
+                        ErrorUtilities.VerifyThrowInternalNull(receiverType, $"Type information for {typeName} was present in the whitelist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
 
                         // If we've used it once, chances are that we'll be using it again
                         // We can record the type here since we know it's available for calling from the fact that is was in the AvailableStaticMethods table
-                        AvailableStaticMethods.TryAdd(typeName, new Tuple<string, Type>(typeName, objectType));
+                        AvailableStaticMethods.TryAdd(typeName, simpleMethodName, new Tuple<string, Type>(assemblyQualifiedTypeName, receiverType));
 
-                        return objectType;
+                        return receiverType;
                     }
                 }
 
                 // Get the type from mscorlib (or the currently running assembly)
-                objectType = Type.GetType(typeName, false /* do not throw TypeLoadException if not found */, true /* ignore case */);
+                receiverType = Type.GetType(typeName, false /* do not throw TypeLoadException if not found */, true /* ignore case */);
 
-                if (objectType != null)
+                if (receiverType != null)
                 {
                     // DO NOT CACHE THE TYPE HERE!
                     // We don't add the resolved type here in the AvailableStaticMethods table. This is because that table is used
                     // during function parse, but only later during execution do we check for the ability to call specific methods on specific types.
-                    return objectType;
+                    // Caching it here would load any type into the white list.
+                    return receiverType;
                 }
 
                 // Note the following code path is only entered when MSBUILDENABLEALLPROPERTYFUNCTIONS == 1.
@@ -3117,32 +3177,32 @@ namespace Microsoft.Build.Evaluation
                 if (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1")
                 {
                     // We didn't find the type, so go probing. First in System
-                    if (objectType == null)
+                    if (receiverType == null)
                     {
-                        objectType = GetTypeFromAssembly(typeName, "System");
+                        receiverType = GetTypeFromAssembly(typeName, "System");
                     }
 
                     // Next in System.Core
-                    if (objectType == null)
+                    if (receiverType == null)
                     {
-                        objectType = GetTypeFromAssembly(typeName, "System.Core");
+                        receiverType = GetTypeFromAssembly(typeName, "System.Core");
                     }
 
                     // We didn't find the type, so try to find it using the namespace
-                    if (objectType == null)
+                    if (receiverType == null)
                     {
-                        objectType = GetTypeFromAssemblyUsingNamespace(typeName);
+                        receiverType = GetTypeFromAssemblyUsingNamespace(typeName);
                     }
 
-                    if (objectType != null)
+                    if (receiverType != null)
                     {
                         // If we've used it once, chances are that we'll be using it again
                         // We can cache the type here, since all functions are enabled
-                        AvailableStaticMethods.TryAdd(typeName, new Tuple<string, Type>(typeName, objectType));
+                        AvailableStaticMethods.TryAdd(typeName, new Tuple<string, Type>(typeName, receiverType));
                     }
                 }
 
-                return objectType;
+                return receiverType;
             }
 
             /// <summary>
@@ -3227,12 +3287,14 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Factory method to construct an indexer function for property evaluation
+            /// Extracts the name, arguments, binding flags, and invocation type for an indexer
+            /// Also extracts the remainder of the expression that is not part of this indexer
             /// </summary>
-            private static Function<T> ConstructIndexerFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, string propertyName, Type objectType, int methodStartIndex, string argumentsContent, UsedUninitializedProperties usedUnInitializedProperties)
+            private static void ConstructIndexerFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, int methodStartIndex, int indexerEndIndex, ref FunctionBuilder<T> functionBuilder)
             {
+                string argumentsContent = expressionFunction.Substring(1, indexerEndIndex - 1);
                 string remainder = expressionFunction.Substring(methodStartIndex);
-                string functionToInvoke;
+                string functionName;
                 string[] functionArguments;
 
                 // If there are no arguments, then just create an empty array
@@ -3250,39 +3312,39 @@ namespace Microsoft.Build.Evaluation
                 // are using.
                 if (propertyValue is Array)
                 {
-                    functionToInvoke = "GetValue";
+                    functionName = "GetValue";
                 }
                 else if (propertyValue is string)
                 {
-                    functionToInvoke = "get_Chars";
+                    functionName = "get_Chars";
                 }
                 else // a regular indexer
                 {
-                    functionToInvoke = "get_Item";
+                    functionName = "get_Item";
                 }
 
-                Function<T> indexerFunction;
-
-                indexerFunction = new Function<T>(objectType, expressionFunction, propertyName, functionToInvoke, functionArguments,
+                functionBuilder.Name = functionName;
+                functionBuilder.Arguments = functionArguments;
 #if FEATURE_TYPE_INVOKEMEMBER
-                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod,
+                functionBuilder.BindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod;
 #else
-                    BindingFlags.IgnoreCase | BindingFlags.Public, InvokeType.InvokeMethod,
+                functionBuilder.BindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
+                functionBuilder.InvokeType = InvokeType.InvokeMethod;
 #endif
-                    remainder, usedUnInitializedProperties);
-                return indexerFunction;
+                functionBuilder.Remainder = remainder;
             }
 
             /// <summary>
-            /// Factory method to construct a function for property evaluation
+            /// Extracts the name, arguments, binding flags, and invocation type for a static or instance function.
+            /// Also extracts the remainder of the expression that is not part of this function
             /// </summary>
-            private static Function<T> ConstructFunction(IElementLocation elementLocation, string expressionFunction, string expressionRootName, Type objectType, int argumentStartIndex, int methodStartIndex, UsedUninitializedProperties usedUninitializedProperties)
+            private static void ConstructFunction(IElementLocation elementLocation, string expressionFunction, int argumentStartIndex, int methodStartIndex, ref FunctionBuilder<T> functionBuilder)
             {
                 // The unevaluated and unexpanded arguments for this function
                 string[] functionArguments;
 
                 // The name of the function that will be invoked
-                string functionToInvoke;
+                string functionName;
 
                 // What's left of the expression once the function has been constructed
                 string remainder = String.Empty;
@@ -3299,7 +3361,7 @@ namespace Microsoft.Build.Evaluation
                     string argumentsContent;
 
                     // separate the function and the arguments
-                    functionToInvoke = expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Trim();
+                    functionName = expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Trim();
 
                     // Skip the '('
                     argumentStartIndex++;
@@ -3375,24 +3437,24 @@ namespace Microsoft.Build.Evaluation
                     defaultInvokeType = InvokeType.GetPropertyOrField;
 #endif
 
-                    functionToInvoke = netPropertyName;
+                    functionName = netPropertyName;
                 }
 
                 // either there are no functions left or what we have is another function or an indexer
                 if (String.IsNullOrEmpty(remainder) || remainder[0] == '.' || remainder[0] == '[')
                 {
-                    // Construct a FunctionInfo will all the content that we just gathered
-                    return new Function<T>(objectType, expressionFunction, expressionRootName, functionToInvoke, functionArguments, defaultBindingFlags,
+                    functionBuilder.Name = functionName;
+                    functionBuilder.Arguments = functionArguments;
+                    functionBuilder.BindingFlags = defaultBindingFlags;
+                    functionBuilder.Remainder = remainder;
 #if !FEATURE_TYPE_INVOKEMEMBER
-                        defaultInvokeType,
+                    functionBuilder.InvokeType = defaultInvokeType;
 #endif
-                        remainder, usedUninitializedProperties);
                 }
                 else
                 {
                     // We ended up with something other than a function expression
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
-                    return null;
                 }
             }
 
@@ -3490,11 +3552,11 @@ namespace Microsoft.Build.Evaluation
 
                 if (objectInstance == null)
                 {
-                    string typeName = _objectType.FullName;
+                    string typeName = _receiverType.FullName;
 
                     // We don't want to expose the real type name of our intrinsics
                     // so we'll replace it with "MSBuild"
-                    if (_objectType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                    if (_receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
                     {
                         typeName = "MSBuild";
                     }
@@ -3531,39 +3593,23 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// For this initial implementation of inline functions, only very specific static methods on specific types are
-            /// available
+            /// Check the property function whitelist whether this method is available.
             /// </summary>
-            private bool IsStaticMethodAvailable(Type objectType, string methodName)
+            private static bool IsStaticMethodAvailable(Type receiverType, string methodName)
             {
-                if (objectType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                if (receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
                 {
                     // These are our intrinsic functions, so we're OK with those
                     return true;
                 }
-                else
-                {
-                    string typeMethod = objectType.FullName + "::" + methodName;
 
-                    if (AvailableStaticMethods.ContainsKey(objectType.FullName))
-                    {
-                        // Check our set for the type name
-                        // This enables all statics on the given type
-                        return true;
-                    }
-                    else if (AvailableStaticMethods.ContainsKey(typeMethod))
-                    {
-                        // Check for specific methods on types
-                        return true;
-                    }
-                    else if (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1")
-                    {
-                        // If MSBUILDENABLEALLPROPERTYFUNCTION == 1, then anything goes
-                        return true;
-                    }
+                if (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1")
+                {
+                    // If MSBUILDENABLEALLPROPERTYFUNCTION == 1, then anything goes
+                    return true;
                 }
 
-                return false;
+                return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
             }
 
 #if !FEATURE_TYPE_INVOKEMEMBER
@@ -3601,16 +3647,16 @@ namespace Microsoft.Build.Evaluation
                 if (isConstructor)
                 {
 #if FEATURE_TYPE_INVOKEMEMBER
-                    memberInfo = _objectType.GetConstructor(bindingFlags, null, types, null);
+                    memberInfo = _receiverType.GetConstructor(bindingFlags, null, types, null);
 #else
-                    memberInfo = _objectType.GetConstructors(bindingFlags)
+                    memberInfo = _receiverType.GetConstructors(bindingFlags)
                         .Where(c => ParametersBindToNStringArguments(c.GetParameters(), args.Length))
                         .FirstOrDefault();
 #endif
                 }
                 else
                 {
-                    memberInfo = _objectType.GetMethod(_name, bindingFlags, null, types, null);
+                    memberInfo = _receiverType.GetMethod(_methodMethodName, bindingFlags, null, types, null);
                 }
 
                 // If we didn't get a match on all string arguments,
@@ -3620,11 +3666,11 @@ namespace Microsoft.Build.Evaluation
                     // Gather all methods that may match
                     if (isConstructor)
                     {
-                        members = _objectType.GetConstructors(bindingFlags);
+                        members = _receiverType.GetConstructors(bindingFlags);
                     }
                     else
                     {
-                        members = _objectType.GetMethods(bindingFlags);
+                        members = _receiverType.GetMethods(bindingFlags);
                     }
 
                     // Try to find a method with the right name, number of arguments and
@@ -3637,7 +3683,7 @@ namespace Microsoft.Build.Evaluation
                         // Simple match on name and number of params, we will be case insensitive
                         if (parameters.Length == _arguments.Length)
                         {
-                            if (isConstructor || String.Equals(member.Name, _name, StringComparison.OrdinalIgnoreCase))
+                            if (isConstructor || String.Equals(member.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase))
                             {
                                 // we have a match on the name and argument number
                                 // now let's try to coerce the arguments we have
