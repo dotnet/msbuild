@@ -35,11 +35,22 @@ namespace Microsoft.Build.UnitTests.FileTracking
 
         private static string s_oldPath = null;
 
+        private static string s_cmd32Path;
+        private static string s_cmd64Path;
+
         public FileTrackerTests()
         {
             s_defaultFileTrackerPathUnquoted = FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
             s_defaultFileTrackerPath = "\"" + s_defaultFileTrackerPathUnquoted + "\"";
             s_defaultTrackerPath = FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
+
+            s_cmd32Path = (IntPtr.Size == sizeof(Int32))
+                ? Environment.ExpandEnvironmentVariables(@"%windir%\System32\cmd.exe")
+                : Environment.ExpandEnvironmentVariables(@"%windir%\syswow64\cmd.exe");
+
+            s_cmd64Path = (IntPtr.Size == sizeof(Int32))
+                ? Environment.ExpandEnvironmentVariables(@"%windir%\sysnative\cmd.exe")
+                : Environment.ExpandEnvironmentVariables(@"%windir%\System32\cmd.exe");
 
             // blank out the path so that we know we're not inadvertently depending on it.
             s_oldPath = Environment.GetEnvironmentVariable("PATH");
@@ -412,7 +423,6 @@ namespace ConsoleApplication4
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
                 string commandArgs = "/d \"" + fileTrackerPath + "\" /u /c \"" + outputFile + "\"";
 
-                Console.WriteLine($"{trackerPath} {commandArgs}");
                 int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
                 Console.WriteLine("");
                 Assert.Equal(0, exit);
@@ -765,6 +775,44 @@ class X
             tlogFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
             Console.WriteLine("");
             Assert.Equal(0, exit);
+            FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
+        }
+
+        [TestMethod]
+        public void FileTrackerFindStrInX64X86ChainRepeatCommand()
+        {
+            Console.WriteLine("Test: FileTrackerFindStrInX64X86ChainRepeatCommand");
+
+            string[] tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
+            foreach (string tlogFile in tlogFiles)
+            {
+                File.Delete(tlogFile);
+            }
+            FileTrackerTestHelper.WriteAll("test.in", "foo");
+
+            int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd64Path + " /c " + s_cmd32Path + " /c findstr /ip foo test.in");
+            tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
+            Console.WriteLine("");
+            Assert.AreEqual(0, exit);
+            FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
+        }
+
+        [TestMethod]
+        public void FileTrackerFindStrInX86X64ChainRepeatCommand()
+        {
+            Console.WriteLine("Test: FileTrackerFindStrInX86X64ChainRepeatCommand");
+
+            string[] tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
+            foreach (string tlogFile in tlogFiles)
+            {
+                File.Delete(tlogFile);
+            }
+            FileTrackerTestHelper.WriteAll("test.in", "foo");
+
+            int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd32Path + " /c " + s_cmd64Path + " /c findstr /ip foo test.in");
+            tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
+            Console.WriteLine("");
+            Assert.AreEqual(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
 
@@ -2231,7 +2279,7 @@ namespace ConsoleApplication4
             const string tlogRootName = "foo_inline";
             const string sourceFile = "inlinetrackingtest.txt";
             const string trackerResponseFile = "test-tracker.rsp";
-            const string fileTrackerParameters = "/d FileTracker32.dll /r \"" + rootingMarker + "\"";
+            const string fileTrackerParameters = "/d FileTracker.dll /r \"" + rootingMarker + "\"";
 
             File.Delete(toolReadTlog);
             File.Delete(sourceFile);
