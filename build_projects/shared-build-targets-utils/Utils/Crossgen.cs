@@ -31,41 +31,82 @@ namespace Microsoft.DotNet.Cli.Build
 
         private string GetCrossgenPathForVersion()
         {
-            string arch = RuntimeEnvironment.RuntimeArchitecture;
-            string packageId;
-            if (CurrentPlatform.IsWindows)
-            {
-                packageId = $"runtime.win7-{arch}.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsUbuntu)
-            {
-                packageId = "runtime.ubuntu.14.04-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL)
-            {
-                // CentOS runtime is in the runtime.rhel.7-x64... package.
-                packageId = "runtime.rhel.7-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsOSX)
-            {
-                packageId = "runtime.osx.10.10-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else if (CurrentPlatform.IsDebian)
-            {
-                packageId = "runtime.debian.8-x64.Microsoft.NETCore.Runtime.CoreCLR";
-            }
-            else
+            var crossgenPackagePath = GetCrossGenPackagePathForVersion();
+
+            if (crossgenPackagePath == null)
             {
                 return null;
             }
 
             return Path.Combine(
-                Dirs.NuGetPackages,
-                packageId,
-                _coreClrVersion,
+                crossgenPackagePath,
                 "tools",
                 $"crossgen{Constants.ExeSuffix}");
         }
+
+        private string GetLibCLRJitPathForVersion()
+        {
+            var coreclrRid = GetCoreCLRRid();
+            var crossgenPackagePath = GetCrossGenPackagePathForVersion();
+
+            if (crossgenPackagePath == null)
+            {
+                return null;
+            }
+
+            return Path.Combine(
+                crossgenPackagePath,
+                "runtimes",
+                coreclrRid,
+                "native",
+                $"{Constants.DynamicLibPrefix}clrjit{Constants.DynamicLibSuffix}");
+        }        
+
+        private string GetCrossGenPackagePathForVersion()
+        {
+            string coreclrRid = GetCoreCLRRid();
+
+            if (coreclrRid == null)
+            {
+                return null;
+            }
+
+            string packageId = $"runtime.{coreclrRid}.Microsoft.NETCore.Runtime.CoreCLR";            
+
+            return Path.Combine(
+                Dirs.NuGetPackages,
+                packageId,
+                _coreClrVersion);
+        }
+
+        private string GetCoreCLRRid()
+        {
+            string rid = null;
+            if (CurrentPlatform.IsWindows)
+            {
+                var arch = RuntimeEnvironment.RuntimeArchitecture;
+                rid = $"win7-{arch}";
+            }
+            else if (CurrentPlatform.IsUbuntu)
+            {
+                rid = "ubuntu.14.04-x64";
+            }
+            else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL)
+            {
+                // CentOS runtime is in the runtime.rhel.7-x64... package.
+                rid = "rhel.7-x64";
+            }
+            else if (CurrentPlatform.IsOSX)
+            {
+                rid = "osx.10.10-x64";
+            }
+            else if (CurrentPlatform.IsDebian)
+            {
+                rid = "debian.8-x64";
+            }
+
+            return rid;
+        }   
 
         public void CrossgenDirectory(BuildTargetContext c, string pathToAssemblies)
         {
@@ -110,6 +151,7 @@ namespace Microsoft.DotNet.Cli.Build
 
                 IList<string> crossgenArgs = new List<string> {
                     "-readytorun", "-in", file, "-out", tempPathName,
+                    "-JITPath", GetLibCLRJitPathForVersion(),
                     "-platform_assemblies_paths", platformAssembliesPaths
                 };
 
