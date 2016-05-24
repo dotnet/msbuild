@@ -479,7 +479,6 @@ namespace Microsoft.Build.Utilities
         public static bool ForceOutOfProcTracking(ExecutableType toolType, string dllName, string cancelEventName)
         {
             bool trackOutOfProc = false;
-            string trackerPath = null;
 
             if (cancelEventName != null)
             {
@@ -489,37 +488,12 @@ namespace Microsoft.Build.Utilities
             else if (dllName != null)
             {
                 // If we have a DLL name, we need to track out of proc -- inproc tracking just uses
-                // the default FileTracker.dll from the path. 
+                // the default FileTracker
                 trackOutOfProc = true;
             }
-            else if (IntPtr.Size == sizeof(Int32))
-            {
-                // Current process is 32-bit.  So we need to spawn Tracker.exe if our tool is 
-                // explicitly marked as 64-bit OR is MSIL and we're installed on a 64-bit OS.  
-                if (toolType == ExecutableType.Managed64Bit || toolType == ExecutableType.Native64Bit)
-                {
-                    trackOutOfProc = true;
-                }
-                else if (toolType == ExecutableType.ManagedIL)
-                {
-                    trackerPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(s_TrackerFilename, TargetDotNetFrameworkVersion.VersionLatest, DotNetFrameworkArchitecture.Bitness64);
 
-                    if (trackerPath != null)
-                    {
-                        // If we found a 64-bit path, we're on a 64-bit OS and need to use it.  Otherwise, we're fine. 
-                        trackOutOfProc = true;
-                    }
-                }
-            }
-            else if (IntPtr.Size == sizeof(Int64))
-            {
-                // Current process is 64-bit.  We need to spawn Tracker.exe if our tool is
-                // explicitly marked as 32-bit.  
-                if (toolType == ExecutableType.Managed32Bit || toolType == ExecutableType.Native32Bit)
-                {
-                    trackOutOfProc = true;
-                }
-            }
+            // toolType is not relevant now that Detours can handle child processes of a different
+            // bitness than the parent.
 
             return trackOutOfProc;
         }
