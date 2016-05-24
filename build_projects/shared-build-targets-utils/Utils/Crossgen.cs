@@ -15,7 +15,9 @@ namespace Microsoft.DotNet.Cli.Build
         private static readonly string[] s_excludedLibraries = 
         {
             "mscorlib.dll",
-            "mscorlib.ni.dll"
+            "mscorlib.ni.dll",
+            "System.Private.CoreLib",
+            "System.Private.CoreLib.ni.dll"
         };
 
         // This is not always correct. The version of crossgen we need to pick up is whatever one was restored as part
