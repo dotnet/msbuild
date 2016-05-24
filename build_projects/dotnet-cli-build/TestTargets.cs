@@ -34,7 +34,8 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-run.UnitTests",
             "dotnet-test.Tests",
             "dotnet-test.UnitTests",
-            "Kestrel.Tests",
+            // TODO: https://github.com/dotnet/cli/issues/3216
+            //"Kestrel.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
