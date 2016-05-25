@@ -45,5 +45,7 @@
     </PropertyGroup>
   </Target>
 
+  <!-- MicroBuild plugin fails if GetNativeManifest is not found for some reason -->
+  <Target Name="GetNativeManifest" />
   <Import Project="$(MicroBuildDir)MicroBuild.Core.targets" />
 </Project>
