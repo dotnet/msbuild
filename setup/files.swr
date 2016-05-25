@@ -6,15 +6,15 @@ package name=MSBuild
         vs.package.language=neutral
 
 folder InstallDir:\MSBuild\15.0\Bin
-  file source=$(X86BinPath)Microsoft.Build.dll
-  file source=$(X86BinPath)Microsoft.Build.Framework.dll
-  file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll
-  file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll
-  file source=$(X86BinPath)MSBuild.exe
+  file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngen=yes
+  file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngen=yes
+  file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngen=yes
+  file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngen=yes
+  file source=$(X86BinPath)MSBuild.exe vs.file.ngen=yes
   file source=$(X86BinPath)MSBuild.exe.config
-  file source=$(X86BinPath)MSBuildTaskHost.exe
+  file source=$(X86BinPath)MSBuildTaskHost.exe vs.file.ngen=yes
   file source=$(X86BinPath)MSBuildTaskHost.exe.config
-  file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll
+  file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
@@ -30,15 +30,15 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.VisualBasic.targets
 
 folder InstallDir:\MSBuild\15.0\Bin\amd64
-  file source=$(X64BinPath)Microsoft.Build.dll
-  file source=$(X64BinPath)Microsoft.Build.Framework.dll
-  file source=$(X64BinPath)Microsoft.Build.Tasks.Core.dll
-  file source=$(X64BinPath)Microsoft.Build.Utilities.Core.dll
-  file source=$(X64BinPath)MSBuild.exe
+  file source=$(X64BinPath)Microsoft.Build.dll vs.file.ngen=yes
+  file source=$(X64BinPath)Microsoft.Build.Framework.dll vs.file.ngen=yes
+  file source=$(X64BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngen=yes
+  file source=$(X64BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngen=yes
+  file source=$(X64BinPath)MSBuild.exe vs.file.ngen=yes
   file source=$(X64BinPath)MSBuild.exe.config
-  file source=$(X64BinPath)MSBuildTaskHost.exe
+  file source=$(X64BinPath)MSBuildTaskHost.exe vs.file.ngen=yes
   file source=$(X64BinPath)MSBuildTaskHost.exe.config
-  file source=$(X64BinPath)System.Threading.Tasks.Dataflow.dll
+  file source=$(X64BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
