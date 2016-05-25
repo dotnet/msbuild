@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Tests.Performance
 
             var restoreCommand = new RestoreCommand();
             restoreCommand.WorkingDirectory = RestoredTestProjectDirectory;
-            restoreCommand.Execute("--quiet").Should().Pass();
+            restoreCommand.Execute().Should().Pass();
         }
     }
 }
