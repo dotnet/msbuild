@@ -32,9 +32,15 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
 $appPath = "$PSScriptRoot\update-dependencies"
 
-# Restore the build scripts
-Write-Host "Restoring Build Script projects..."
-pushd $PSScriptRoot
+# Restore the build_projects
+Write-Host "Restoring Microsoft.DotNet.Cli.Build.Framework..."
+pushd $PSScriptRoot\..\build_projects\Microsoft.DotNet.Cli.Build.Framework
+dotnet restore --infer-runtimes
+if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
+popd
+
+# Restore update-dependencies
+pushd $appPath
 dotnet restore --infer-runtimes
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 popd
