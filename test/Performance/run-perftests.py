@@ -177,7 +177,7 @@ def run_perf_test(runid, cli_path, xunitperf_src_path):
             print("# Deleting {file}".format(file = project_lock_path))
             os.remove(project_lock_path)
         run_command(
-            cli_path, 'restore',
+            cli_path, 'restore', '-f', 'https://dotnet.myget.org/f/dotnet-core',
             title = "Dotnet restore using \"{cli}\"".format(cli = cli_path),
             from_dir = SCRIPT_ROOT_PATH,
         )
