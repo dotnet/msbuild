@@ -12,7 +12,7 @@ On Windows, the only dependency is the VC++ Redistributable. Depending on the ve
 * Windows 10
     * [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145)
 * Pre-Windows 10
-    * Please make sure that your Windows installation is up-to-date with latest hotfixes installed through Windows Update.
+    * Please make sure that your Windows installation is up-to-date and includes hotfix [KB2533623] (https://support.microsoft.com/en-us/kb/2533623) installed through Windows Update.
     * [Visual C++ Redistributable for Visual Studio 2012 Update 4](https://www.microsoft.com/en-us/download/confirmation.aspx?id=30679)
 
 ## Ubuntu
