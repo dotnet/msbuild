@@ -17,14 +17,30 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static readonly string[] TestProjects = new[]
         {
+            "ArgumentForwardingTests",
+            "crossgen.Tests",
+            "EndToEnd",
+            "dotnet.Tests",
+            "dotnet-build.Tests",
+            "dotnet-compile.Tests",
+            "dotnet-compile.UnitTests",
+            "dotnet-compile-fsc.Tests",
             "dotnet-new.Tests",
+            "dotnet-pack.Tests",
+            "dotnet-projectmodel-server.Tests",
+            "dotnet-publish.Tests",
+            "dotnet-resgen.Tests",
+            "dotnet-run.Tests",
+            "dotnet-run.UnitTests",
+            "dotnet-test.Tests",
+            "dotnet-test.UnitTests",
             // TODO: https://github.com/dotnet/cli/issues/3216
             //"Kestrel.Tests",
-            //"Microsoft.DotNet.Cli.Utils.Tests",
-            //"Microsoft.DotNet.Compiler.Common.Tests",
-           // "Microsoft.DotNet.ProjectModel.Tests",
-           // "Microsoft.Extensions.DependencyModel.Tests",
-           // "Performance"
+            "Microsoft.DotNet.Cli.Utils.Tests",
+            "Microsoft.DotNet.Compiler.Common.Tests",
+            "Microsoft.DotNet.ProjectModel.Tests",
+            "Microsoft.Extensions.DependencyModel.Tests",
+            "Performance"
         };
 
         public static readonly string[] WindowsTestProjects = new[]
