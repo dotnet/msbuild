@@ -38,7 +38,8 @@ namespace Microsoft.DotNet.Cli.Build
             nameof(UpdateTemplateVersions), 
             nameof(CheckPrereqs), 
             nameof(LocateStage0), 
-            nameof(ExpectedBuildArtifacts))]
+            nameof(ExpectedBuildArtifacts),
+            nameof(SetTelemetryProfile))]
         public static BuildTargetResult Init(BuildTargetContext c)
         {
             var configEnv = Environment.GetEnvironmentVariable("CONFIGURATION");
@@ -355,6 +356,21 @@ cmake is required to build the native host 'corehost'";
                 }
                 return c.Failed(message);
             }
+
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult SetTelemetryProfile(BuildTargetContext c)
+        {
+            var gitResult = Cmd("git", "rev-parse", "HEAD")
+                .CaptureStdOut()
+                .Execute();
+            gitResult.EnsureSuccessful();
+
+            var commitHash = gitResult.StdOut.Trim();
+
+            Environment.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_PROFILE", $"https://github.com/dotnet/cli;{commitHash}");
 
             return c.Success();
         }
