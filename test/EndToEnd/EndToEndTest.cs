@@ -218,7 +218,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             Directory.SetCurrentDirectory(RestoredTestProjectDirectory);
 
             new NewCommand().Execute().Should().Pass();
-            new RestoreCommand().Execute("--quiet").Should().Pass();
+            new RestoreCommand().Execute().Should().Pass();
 
             Directory.SetCurrentDirectory(currentDirectory);
         }

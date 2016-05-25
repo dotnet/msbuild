@@ -24,16 +24,12 @@ namespace Microsoft.DotNet.Tools.Restore
                 Description = "Restores dependencies listed in project.json"
             };
 
-            // Parse --quiet, because we have to handle that specially since NuGet3 has a different
-            // "--verbosity" switch that goes BEFORE the command
-            var quiet = args.Any(s => s.Equals("--quiet", StringComparison.OrdinalIgnoreCase));
-            args = args.Where(s => !s.Equals("--quiet", StringComparison.OrdinalIgnoreCase)).ToArray();
 
             app.OnExecute(() =>
             {
                 try
                 {
-                    return NuGet3.Restore(args, quiet);
+                    return NuGet3.Restore(args);
                 }
                 catch (InvalidOperationException e)
                 {
