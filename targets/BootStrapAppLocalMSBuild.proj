@@ -5,6 +5,9 @@
   <Target Name="Build">
     <ItemGroup>
       <DeployedItems Include="$(DeploymentDir)\**\*.*"/>
+      <!-- Work around https://github.com/Microsoft/msbuild/issues/658
+           by making sure NuGet DLLs are next to MSBuild.exe -->
+      <DeployedItems Include="$(ToolsDir)\NuGet*.dll" />
     </ItemGroup>
 
     <RemoveDir
