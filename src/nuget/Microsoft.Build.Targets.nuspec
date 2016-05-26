@@ -16,7 +16,7 @@
     </description>
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
-      <group targetFramework="dotnet">
+      <group targetFramework="netstandard1.3">
         <dependency id="Microsoft.Build.Framework" />
         <dependency id="Microsoft.Build" />
         <dependency id="Microsoft.Build.Utilities.Core" />
@@ -29,7 +29,7 @@
     </contentFiles>
   </metadata>
   <files>
-    <file src="_._" target="lib\dotnet" />
+    <file src="_._" target="lib\netstandard1.3" />
     <file src="Microsoft.Common.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.targets" target="runtimes\any\native" />
     <file src="Microsoft.CSharp.CurrentVersion.targets" target="runtimes\any\native" />
