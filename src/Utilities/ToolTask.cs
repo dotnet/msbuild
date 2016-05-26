@@ -1506,7 +1506,8 @@ namespace Microsoft.Build.Utilities
 
                     if (!runningOnWindows)
                     {
-                        File.AppendAllText(_temporaryBatchFile, "#!/bin/bash\n"); // first line for UNIX is ANSI
+                        // Use sh rather than bash, as not all 'nix systems necessarily have Bash installed
+                        File.AppendAllText(_temporaryBatchFile, "#!/bin/sh\n"); // first line for UNIX is ANSI
                         // This is a hack..!
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands.Replace('\\', Path.DirectorySeparatorChar), EncodingUtilities.CurrentSystemOemEncoding);
                     }

@@ -244,7 +244,8 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    sw.WriteLine("#!/bin/bash");
+                    // Use sh rather than bash, as not all 'nix systems necessarily have Bash installed
+                    sw.WriteLine("#!/bin/sh");
                 }
 
                 if (NativeMethodsShared.IsUnixLike && NativeMethodsShared.IsMono)
