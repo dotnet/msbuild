@@ -13,7 +13,7 @@
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160316",
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "$(NetCoreAppVersion)"
+      "version": "1.0.0-rc3-004306"
     }
   },
   "tools": {

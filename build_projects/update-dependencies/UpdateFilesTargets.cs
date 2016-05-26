@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Scripts
 
             IEnumerable<string> projectJsonFiles = Enumerable.Union(
                 Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
-                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.pretemplate", SearchOption.AllDirectories))
+                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.template", SearchOption.AllDirectories))
                 .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), noUpdateFileName)));
 
             JObject projectRoot;
