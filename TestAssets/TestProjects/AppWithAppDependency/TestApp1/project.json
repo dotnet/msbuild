@@ -3,14 +3,16 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "TestApp2": { "target": "project" }
+    "TestApp2": {
+      "target": "project"
+    }
   },
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc3-004306"
+          "version": "1.0.0-rc3-004312"
         }
       }
     }
