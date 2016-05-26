@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Scripts
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
             dependencyInfos.Add(CreateDependencyInfo("CoreFx", Config.Instance.CoreFxVersionUrl).Result);
+            dependencyInfos.Add(CreateDependencyInfo("CoreSetup", Config.Instance.CoreSetupVersionUrl).Result);
 
             return c.Success();
         }
@@ -74,7 +75,7 @@ namespace Microsoft.DotNet.Scripts
             };
         }
 
-        [Target(nameof(ReplaceProjectJson), nameof(ReplaceCrossGen))]
+        [Target(nameof(ReplaceProjectJson), nameof(ReplaceDependencyVersions))]
         public static BuildTargetResult ReplaceVersions(BuildTargetContext c) => c.Success();
 
         /// <summary>
@@ -187,17 +188,21 @@ namespace Microsoft.DotNet.Scripts
         }
 
         /// <summary>
-        /// Replaces version number that is hard-coded in the CrossGen script.
+        /// Replaces version numbers that are hard-coded in DependencyVersions.cs.
         /// </summary>
         [Target]
-        public static BuildTargetResult ReplaceCrossGen(BuildTargetContext c)
+        public static BuildTargetResult ReplaceDependencyVersions(BuildTargetContext c)
         {
-            ReplaceFileContents(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", compileTargetsContent =>
+            ReplaceFileContents(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", fileContents =>
             {
                 DependencyInfo coreFXInfo = c.GetCoreFXDependency();
-                Regex regex = new Regex(@"CoreCLRVersion = ""(?<version>\d.\d.\d)-(?<release>.*)"";");
+                DependencyInfo coreSetupInfo = c.GetCoreSetupDependency();
 
-                return regex.ReplaceGroupValue(compileTargetsContent, "release", coreFXInfo.NewReleaseVersion);
+                fileContents = ReplaceDependencyVersion(fileContents, coreFXInfo, "CoreCLRVersion", "Microsoft.NETCore.Runtime.CoreCLR");
+                fileContents = ReplaceDependencyVersion(fileContents, coreSetupInfo, "SharedFrameworkVersion", "Microsoft.NETCore.App");
+                fileContents = ReplaceDependencyVersion(fileContents, coreSetupInfo, "SharedHostVersion", "Microsoft.NETCore.DotNetHost");
+
+                return fileContents;
             });
 
             return c.Success();
@@ -206,6 +211,29 @@ namespace Microsoft.DotNet.Scripts
         private static DependencyInfo GetCoreFXDependency(this BuildTargetContext c)
         {
             return c.GetDependencyInfos().Single(d => d.Name == "CoreFx");
+        }
+
+        private static DependencyInfo GetCoreSetupDependency(this BuildTargetContext c)
+        {
+            return c.GetDependencyInfos().Single(d => d.Name == "CoreSetup");
+        }
+
+        private static string ReplaceDependencyVersion(string fileContents, DependencyInfo dependencyInfo, string dependencyPropertyName, string packageId)
+        {
+            Regex regex = new Regex($@"{dependencyPropertyName} = ""(?<version>.*)"";");
+
+            string newVersion = dependencyInfo
+                .NewVersions
+                .FirstOrDefault(p => p.Id == packageId)
+                ?.Version
+                .ToNormalizedString();
+
+            if (string.IsNullOrEmpty(newVersion))
+            {
+                throw new InvalidOperationException($"Could not find package version information for '{packageId}'");
+            }
+
+            return regex.ReplaceGroupValue(fileContents, "version", newVersion);
         }
 
         private static void ReplaceFileContents(string repoRelativePath, Func<string, string> replacement)
