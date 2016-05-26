@@ -1,19 +1,19 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "TwoTargetLargeP5" : {
+    "TwoTargetLargeP5": {
       "target": "project"
     },
-    "TwoTargetLargeP6" : {
+    "TwoTargetLargeP6": {
       "target": "project"
     },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-*"
-    },
+      "version": "1.0.0-rc3-004312"
+    }
   },
   "frameworks": {
-    "netcoreapp1.0": { },
-    "netstandard1.5": { }
+    "netcoreapp1.0": {},
+    "netstandard1.5": {}
   }
 }

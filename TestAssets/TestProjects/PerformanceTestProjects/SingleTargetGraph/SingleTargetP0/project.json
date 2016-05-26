@@ -4,15 +4,15 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "SingleTargetP1" : {
+    "SingleTargetP1": {
       "target": "project"
     },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-*"
-    },
+      "version": "1.0.0-rc3-004312"
+    }
   },
   "frameworks": {
-    "netcoreapp1.0": { }
+    "netcoreapp1.0": {}
   }
 }

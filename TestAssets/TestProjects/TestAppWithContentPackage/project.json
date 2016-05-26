@@ -5,11 +5,16 @@
     "outputName": "AppWithContentPackage"
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc3-004306",
+    "Microsoft.NETCore.App": "1.0.0-rc3-004312",
     "SharedContentA": "1.0.0-*"
   },
   "frameworks": {
-    "netcoreapp1.0": { "imports": ["netstandardapp1.5", "dnxcore50"] }
+    "netcoreapp1.0": {
+      "imports": [
+        "netstandardapp1.5",
+        "dnxcore50"
+      ]
+    }
   },
   "runtimes": {
     "win7-x64": {},

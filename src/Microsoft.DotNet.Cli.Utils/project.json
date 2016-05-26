@@ -21,12 +21,12 @@
         }
       }
     },
-    "netstandard1.5": {
+    "netstandard1.6": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ],
       "dependencies": {
-        "System.Diagnostics.Process": "4.1.0-rc3-24123-01"
+        "System.Diagnostics.Process": "4.1.0-rc3-24126-00"
       }
     }
   }

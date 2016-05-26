@@ -14,7 +14,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc3-004306"
+    "Microsoft.NETCore.App": "1.0.0-rc3-004312"
   },
   "packOptions": {
     "files": {
@@ -26,7 +26,7 @@
   },
   "publishOptions": "testpublishfile.txt",
   "frameworks": {
-    "netcoreapp1.0": { }
+    "netcoreapp1.0": {}
   },
   "runtimes": {
     "win7-x64": {},

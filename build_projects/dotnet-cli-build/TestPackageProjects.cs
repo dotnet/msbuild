@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "net451", "netstandard1.5" }
+                Frameworks = new [] { "net451", "netstandard1.6" }
             },
             new TestPackageProject()
             {
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "net451", "netstandard1.5" }
+                Frameworks = new [] { "net451", "netstandard1.6" }
             },
             new TestPackageProject()
             {
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "netstandard1.5" }
+                Frameworks = new [] { "netstandard1.6" }
             },
             new TestPackageProject()
             {
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable =true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "netstandard1.5" }
+                Frameworks = new [] { "netstandard1.6" }
             },
             new TestPackageProject()
             {
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "net451", "netstandard1.5" }
+                Frameworks = new [] { "net451", "netstandard1.6" }
             },
             new TestPackageProject()
             {
@@ -185,7 +185,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "net451", "netstandard1.5" }
+                Frameworks = new [] { "net451", "netstandard1.6" }
             },
             new TestPackageProject()
             {
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "netstandard1.5" }
+                Frameworks = new [] { "netstandard1.6" }
             },
             new TestPackageProject()
             {
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.Cli.Build
                 IsApplicable = true,
                 VersionSuffix = s_testPackageBuildVersionSuffix,
                 Clean = false,
-                Frameworks = new [] { "netstandard1.5" }
+                Frameworks = new [] { "netstandard1.6" }
             },
             new TestPackageProject()
             {
