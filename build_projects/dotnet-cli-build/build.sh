@@ -102,7 +102,7 @@ fi
 echo "Restoring Build Script projects..."
 (
     cd "$DIR/.."
-    dotnet restore --infer-runtimes
+    dotnet restore
 )
 
 # Build the builder
