@@ -18,7 +18,7 @@ set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
 echo.
 echo ** Rebuilding MSBuild with binaries from BuildTools
 
-call "%~dp0build.cmd" /t:RebuildAndTest /p:Configuration=Debug-NetCore
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=Debug-NetCore
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
