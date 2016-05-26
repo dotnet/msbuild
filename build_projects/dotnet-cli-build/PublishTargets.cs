@@ -94,8 +94,19 @@ namespace Microsoft.DotNet.Cli.Build
                     // Copy the latest installer files
                     CopyBlobs($"{Channel}/Installers/{CliNuGetVersion}/", $"{Channel}/Installers/Latest/");
 
-                    // Generate the SDK Version text files
-                    List<string> versionFiles = new List<string>() { "win.x86.version", "win.x64.version", "ubuntu.x64.version", "rhel.x64.version", "osx.x64.version", "debian.x64.version", "centos.x64.version" };
+                    // Generate the CLI and SDK Version text files
+                    List<string> versionFiles = new List<string>()
+                    {
+                        "win.x86.version",
+                        "win.x64.version",
+                        "ubuntu.x64.version",
+                        "ubuntu.16.04.x64.version",
+                        "rhel.x64.version",
+                        "osx.x64.version",
+                        "debian.x64.version",
+                        "centos.x64.version"
+                    };
+
                     string cliVersion = Utils.GetCliVersionFileContent(c);
                     foreach (string version in versionFiles)
                     {
@@ -131,6 +142,7 @@ namespace Microsoft.DotNet.Cli.Build
                  { "Windows_x86", false },
                  { "Windows_x64", false },
                  { "Ubuntu_x64", false },
+                 { "Ubuntu_16_04_x64", false },
                  { "RHEL_x64", false },
                  { "OSX_x64", false },
                  { "Debian_x64", false },

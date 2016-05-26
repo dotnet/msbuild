@@ -181,6 +181,7 @@ The native installers are:
 |---------------------	|------------------	|----------	|--------------------	|
 | Windows             	| Bundle installer 	| Done     	| dotnet-{version};    	|
 | Ubuntu 14.04/Debian 	| apt-get feed     	| Done     	| dotnet; dotnet-dbg 	|
+| Ubuntu 16.04/Debian   | apt-get feed      | Done      | dotnet; dotnet-dbg  |
 | OS X                	| PKG              	| Done     	| dotnet             	|
 | OS X                	| Homebrew         	| Not done 	| dotnet             	|
 | CentOS/RH           	| RPM              	| Not done 	| dotnet             	|

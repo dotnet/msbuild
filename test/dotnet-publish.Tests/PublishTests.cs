@@ -41,6 +41,12 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 Rid="ubuntu.14.04-x64",
                 HostExtension="", 
                 ExpectedArtifacts=new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" } 
+            },
+            new
+            {
+                Rid="ubuntu.16.04-x64",
+                HostExtension="",
+                ExpectedArtifacts=new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" }
             }, 
             new 
             { 

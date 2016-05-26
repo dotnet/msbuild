@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string LibCoreClrName = LibCoreClrFileName + DynamicLibSuffix;
 
         public static readonly string RuntimeIdentifier = CurrentPlatform == Platform.Windows ? "win7-x64" :
-                                                          CurrentPlatform == Platform.Darwin ? "osx.10.10-x64" : "ubuntu.14.04-x64";
+                                                          CurrentPlatform == Platform.Darwin ? "osx.10.10-x64" : "ubuntu.{RuntimeEnvironment.OperatingSystemVersion}-x64";
 
         public static readonly string StaticLibSuffix = CurrentPlatform == Platform.Windows ? ".lib" : ".a";
 
