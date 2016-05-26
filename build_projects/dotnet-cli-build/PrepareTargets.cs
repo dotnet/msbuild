@@ -36,7 +36,6 @@ namespace Microsoft.DotNet.Cli.Build
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
         [Target(
             nameof(GenerateVersions), 
-            nameof(UpdateTemplateVersions), 
             nameof(CheckPrereqs), 
             nameof(LocateStage0), 
             nameof(ExpectedBuildArtifacts),
@@ -83,27 +82,6 @@ namespace Microsoft.DotNet.Cli.Build
 
             c.Info($"Building Version: {buildVersion.SimpleVersion} (NuGet Packages: {buildVersion.NuGetVersion})");
             c.Info($"From Commit: {commitHash}");
-
-            return c.Success();
-        }
-
-        /// <summary>
-        /// Updates the Microsoft.NETCore.App version number in the `dotnet new` project.json.template files.
-        /// </summary>
-        [Target]
-        public static BuildTargetResult UpdateTemplateVersions(BuildTargetContext c)
-        {
-            IEnumerable<string> templateFiles = Directory.GetFiles(
-                Path.Combine(Dirs.RepoRoot, "src", "dotnet", "commands", "dotnet-new"),
-                "project.json.pretemplate",
-                SearchOption.AllDirectories);
-
-            foreach (string templateFile in templateFiles)
-            {
-                JObject projectRoot = JsonUtils.ReadProject(templateFile);
-                projectRoot["dependencies"]["Microsoft.NETCore.App"]["version"] = DependencyVersions.SharedFrameworkVersion;
-                JsonUtils.WriteProject(projectRoot, Path.ChangeExtension(templateFile, "template"));
-            }
 
             return c.Success();
         }
