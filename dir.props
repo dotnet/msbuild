@@ -197,7 +197,7 @@
   <PropertyGroup>
     <CSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</CSharpTargets>
     <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
-    <CSharpPortableTargetsFallback>$(ToolsDir)extensions\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
+    <CSharpPortableTargetsFallback>$(ToolsDir)Extensions\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
