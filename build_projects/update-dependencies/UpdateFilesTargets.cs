@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -28,22 +29,49 @@ namespace Microsoft.DotNet.Scripts
         [Target]
         public static BuildTargetResult GetDependencies(BuildTargetContext c)
         {
-            string coreFxLkgVersion = s_client.GetStringAsync(Config.Instance.CoreFxVersionUrl).Result;
-            coreFxLkgVersion = coreFxLkgVersion.Trim();
-
-            const string coreFxIdPattern = @"^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore.*)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))$";
-            const string coreFxIdExclusionPattern = @"System.CommandLine|Microsoft.NETCore.App";
-
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
-            dependencyInfos.Add(new DependencyInfo()
-            {
-                Name = "CoreFx",
-                IdPattern = coreFxIdPattern,
-                IdExclusionPattern = coreFxIdExclusionPattern,
-                NewReleaseVersion = coreFxLkgVersion
-            });
+
+            dependencyInfos.Add(CreateDependencyInfo("CoreFx", Config.Instance.CoreFxVersionUrl).Result);
 
             return c.Success();
+        }
+
+        private static async Task<DependencyInfo> CreateDependencyInfo(string name, string packageVersionsUrl)
+        {
+            List<PackageInfo> newPackageVersions = new List<PackageInfo>();
+
+            using (Stream versionsStream = await s_client.GetStreamAsync(packageVersionsUrl))
+            using (StreamReader reader = new StreamReader(versionsStream))
+            {
+                string currentLine;
+                while ((currentLine = await reader.ReadLineAsync()) != null)
+                {
+                    int spaceIndex = currentLine.IndexOf(' ');
+
+                    newPackageVersions.Add(new PackageInfo()
+                    {
+                        Id = currentLine.Substring(0, spaceIndex),
+                        Version = new NuGetVersion(currentLine.Substring(spaceIndex + 1))
+                    });
+                }
+            }
+
+            string newReleaseVersion = newPackageVersions
+                .Where(p => p.Version.IsPrerelease)
+                .Select(p => p.Version.Release)
+                .FirstOrDefault()
+                ??
+                // if there are no prerelease versions, just grab the first version
+                newPackageVersions
+                    .Select(p => p.Version.ToNormalizedString())
+                    .FirstOrDefault();
+
+            return new DependencyInfo()
+            {
+                Name = name,
+                NewVersions = newPackageVersions,
+                NewReleaseVersion = newReleaseVersion
+            };
         }
 
         [Target(nameof(ReplaceProjectJson), nameof(ReplaceCrossGen))]
@@ -57,9 +85,12 @@ namespace Microsoft.DotNet.Scripts
         {
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
+            const string noUpdateFileName = ".noautoupdate";
+
             IEnumerable<string> projectJsonFiles = Enumerable.Union(
                 Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
-                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.pretemplate", SearchOption.AllDirectories));
+                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.pretemplate", SearchOption.AllDirectories))
+                .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), noUpdateFileName)));
 
             JObject projectRoot;
             foreach (string projectJsonFile in projectJsonFiles)
@@ -103,52 +134,23 @@ namespace Microsoft.DotNet.Scripts
             string id = dependencyProperty.Name;
             foreach (DependencyInfo dependencyInfo in dependencyInfos)
             {
-                if (Regex.IsMatch(id, dependencyInfo.IdPattern))
+                foreach (PackageInfo packageInfo in dependencyInfo.NewVersions)
                 {
-                    if (string.IsNullOrEmpty(dependencyInfo.IdExclusionPattern) || !Regex.IsMatch(id, dependencyInfo.IdExclusionPattern))
+                    if (id == packageInfo.Id)
                     {
-                        string version;
                         if (dependencyProperty.Value is JObject)
                         {
-                            version = dependencyProperty.Value["version"].Value<string>();
-                        }
-                        else if (dependencyProperty.Value is JValue)
-                        {
-                            version = dependencyProperty.Value.ToString();
+                            dependencyProperty.Value["version"] = packageInfo.Version.ToNormalizedString();
                         }
                         else
                         {
-                            throw new Exception($"Invalid package project.json version {dependencyProperty}");
+                            dependencyProperty.Value = packageInfo.Version.ToNormalizedString();
                         }
 
-                        VersionRange dependencyVersionRange = VersionRange.Parse(version);
-                        NuGetVersion dependencyVersion = dependencyVersionRange.MinVersion;
+                        // mark the DependencyInfo as updated so we can tell which dependencies were updated
+                        dependencyInfo.IsUpdated = true;
 
-                        string newReleaseVersion = dependencyInfo.NewReleaseVersion;
-
-                        if (!string.IsNullOrEmpty(dependencyVersion.Release) && dependencyVersion.Release != newReleaseVersion)
-                        {
-                            string newVersion = new NuGetVersion(
-                                dependencyVersion.Major,
-                                dependencyVersion.Minor,
-                                dependencyVersion.Patch,
-                                newReleaseVersion,
-                                dependencyVersion.Metadata).ToNormalizedString();
-
-                            if (dependencyProperty.Value is JObject)
-                            {
-                                dependencyProperty.Value["version"] = newVersion;
-                            }
-                            else
-                            {
-                                dependencyProperty.Value = newVersion;
-                            }
-
-                            // mark the DependencyInfo as updated so we can tell which dependencies were updated
-                            dependencyInfo.IsUpdated = true;
-
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }

@@ -15,7 +15,7 @@
     "System.Reflection.TypeExtensions": "4.1.0-rc3-24123-01"
   },
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.5": {
       "imports": "dnxcore50"
     }
   }
