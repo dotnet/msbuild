@@ -110,16 +110,17 @@ namespace Microsoft.DotNet.Cli.Build
             return rid;
         }   
 
-        public void CrossgenDirectory(BuildTargetContext c, string pathToAssemblies)
+        public void CrossgenDirectory(string sharedFxPath, string pathToAssemblies)
         {
             // Check if we need to skip crossgen
             if (string.Equals(Environment.GetEnvironmentVariable("DISABLE_CROSSGEN"), "1"))
             {
-                c.Warn("Skipping crossgen for because DISABLE_CROSSGEN is set to 1");
+                var originalColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Skipping crossgen for because DISABLE_CROSSGEN is set to 1");
+                Console.ForegroundColor = originalColor;
                 return;
             }
-
-            string sharedFxPath = c.BuildContext.Get<string>("SharedFrameworkPath");
 
             // HACK
             // The input directory can be a portable FAT app (example the CLI itself).

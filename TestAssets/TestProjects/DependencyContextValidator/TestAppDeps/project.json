@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc3-*",
+    "Microsoft.NETCore.App": "1.0.0-rc3-004306",
     "DependencyContextValidator": "1.0.0-*"
   },
   "frameworks": {

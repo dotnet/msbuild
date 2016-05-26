@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Cli.Build
         nameof(PackageTargets.CopySharedHostLayout),
         nameof(PackageTargets.CopySharedFxLayout),
         nameof(PackageTargets.CopyCombinedFrameworkSDKHostLayout),
-        nameof(PackageTargets.CopyCombinedFrameworkHostLayout),
         nameof(PackageTargets.CopyCombinedFrameworkSDKLayout))]
         public static BuildTargetResult InitPackage(BuildTargetContext c)
         {
@@ -143,26 +142,6 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        public static BuildTargetResult CopyCombinedFrameworkHostLayout(BuildTargetContext c)
-        {
-            var combinedRoot = Path.Combine(Dirs.Output, "obj", "combined-framework-host");
-            if (Directory.Exists(combinedRoot))
-            {
-                Utils.DeleteDirectory(combinedRoot);
-            }
-
-
-            string sharedFrameworkPublishRoot = c.BuildContext.Get<string>("SharedFrameworkPublishRoot");
-            Utils.CopyDirectoryRecursively(sharedFrameworkPublishRoot, combinedRoot);
-
-            string sharedHostPublishRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
-            Utils.CopyDirectoryRecursively(sharedHostPublishRoot, combinedRoot);
-
-            c.BuildContext["CombinedFrameworkHostRoot"] = combinedRoot;
-            return c.Success();
-        }
-
-        [Target]
         public static BuildTargetResult CopyCombinedFrameworkSDKLayout(BuildTargetContext c)
         {
             var combinedRoot = Path.Combine(Dirs.Output, "obj", "combined-framework-sdk");
@@ -192,7 +171,6 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateZip(BuildTargetContext c)
         {
             CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
-            CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile"));
             CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKCompressedFile"));
             CreateZipFromDirectory(Path.Combine(Dirs.Stage2Symbols, "sdk"), c.BuildContext.Get<string>("SdkSymbolsCompressedFile"));
 
@@ -204,7 +182,6 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateTarBall(BuildTargetContext c)
         {
             CreateTarBallFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
-            CreateTarBallFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile"));
 
             CreateTarBallFromDirectory(Path.Combine(Dirs.Stage2Symbols, "sdk"), c.BuildContext.Get<string>("SdkSymbolsCompressedFile"));
 
