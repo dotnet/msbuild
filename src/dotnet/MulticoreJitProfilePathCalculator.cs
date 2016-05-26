@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
 
             var rid = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
 
-            _multicoreJitProfilePath = Path.Combine(profileRoot, "optimizationdata", version, rid, "optimizationdata");
+            _multicoreJitProfilePath = Path.Combine(profileRoot, "optimizationdata", version, rid);
         }
 
         private string GetRuntimeDataRootPathString()

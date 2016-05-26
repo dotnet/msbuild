@@ -108,8 +108,8 @@ namespace Microsoft.DotNet.Tests
             var rid = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
             
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? $@"Microsoft\dotnet\optimizationdata\{version}\{rid}\optimizationdata" 
-                : $@".dotnet/optimizationdata/{version}/{rid}/optimizationdata";
+                ? $@"Microsoft\dotnet\optimizationdata\{version}\{rid}" 
+                : $@".dotnet/optimizationdata/{version}/{rid}";
         }
 
         private static string GetDotnetVersion()
