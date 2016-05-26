@@ -148,27 +148,36 @@ namespace Microsoft.DotNet.Cli.Build
             var sharedFrameworkVersion = DependencyVersions.SharedFrameworkVersion;
             var sharedFrameworkChannel = DependencyVersions.SharedFrameworkChannel;
 
-            var combinedSharedHostAndFrameworkArchiveFile = c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile");
+            var combinedSharedHostAndFrameworkArchiveDownloadFile =
+                Path.Combine(Dirs.CoreSetupDownload, "combinedSharedHostAndFrameworkArchive");
 
-            Mkdirp(Path.GetDirectoryName(combinedSharedHostAndFrameworkArchiveFile));
+            Mkdirp(Path.GetDirectoryName(combinedSharedHostAndFrameworkArchiveDownloadFile));
 
-            AzurePublisher.DownloadFile(
-                AzurePublisher.CalculateArchiveBlob(
-                    combinedSharedHostAndFrameworkArchiveFile, 
-                    sharedFrameworkChannel, 
-                    sharedFrameworkVersion), 
-                combinedSharedHostAndFrameworkArchiveFile).Wait();
-
-            // Unpack the combined archive to shared framework publish directory
-            Rmdir(Dirs.SharedFrameworkPublish);
-            Mkdirp(Dirs.SharedFrameworkPublish);
-            if(CurrentPlatform.IsWindows)
+            if ( ! File.Exists(combinedSharedHostAndFrameworkArchiveDownloadFile))
             {
-                ZipFile.ExtractToDirectory(combinedSharedHostAndFrameworkArchiveFile, Dirs.SharedFrameworkPublish);
-            }
-            else
-            {
-                Exec("tar", "xf", combinedSharedHostAndFrameworkArchiveFile, "-C", Dirs.SharedFrameworkPublish);
+                // Needed for computing the blob path
+                var combinedSharedHostAndFrameworkArchiveBuildContextFile = 
+                    c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile");
+
+                AzurePublisher.DownloadFile(
+                    AzurePublisher.CalculateArchiveBlob(
+                        combinedSharedHostAndFrameworkArchiveBuildContextFile,
+                        sharedFrameworkChannel,
+                        sharedFrameworkVersion),
+                    combinedSharedHostAndFrameworkArchiveDownloadFile).Wait();
+
+
+                // Unpack the combined archive to shared framework publish directory
+                Rmdir(Dirs.SharedFrameworkPublish);
+                Mkdirp(Dirs.SharedFrameworkPublish);
+                if (CurrentPlatform.IsWindows)
+                {
+                    ZipFile.ExtractToDirectory(combinedSharedHostAndFrameworkArchiveDownloadFile, Dirs.SharedFrameworkPublish);
+                }
+                else
+                {
+                    Exec("tar", "xf", combinedSharedHostAndFrameworkArchiveDownloadFile, "-C", Dirs.SharedFrameworkPublish);
+                }
             }
 
             return c.Success();
@@ -184,25 +193,42 @@ namespace Microsoft.DotNet.Cli.Build
             var sharedFrameworkChannel = DependencyVersions.SharedFrameworkChannel;
             var sharedHostChannel = DependencyVersions.SharedHostChannel;
 
-            var sharedFrameworkInstallerFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
-            var sharedHostInstallerFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
+            var sharedFrameworkInstallerDownloadFile = Path.Combine(Dirs.CoreSetupDownload, "sharedFrameworkInstaller");
+            var sharedHostInstallerDownloadFile = Path.Combine(Dirs.CoreSetupDownload, "sharedHostInstaller");
 
-            Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerFile));
-            Mkdirp(Path.GetDirectoryName(sharedHostInstallerFile));
+            Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDownloadFile));
+            Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));
+            
+            if ( ! File.Exists(sharedFrameworkInstallerDownloadFile))
+            {
+                var sharedFrameworkInstallerDestinationFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
+                Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDestinationFile));
+                
+                AzurePublisher.DownloadFile(
+                    AzurePublisher.CalculateInstallerBlob(
+                        sharedFrameworkInstallerDestinationFile,
+                        sharedFrameworkChannel,
+                        sharedFrameworkVersion),
+                    sharedFrameworkInstallerDownloadFile).Wait();
 
-            AzurePublisher.DownloadFile(
-                AzurePublisher.CalculateInstallerBlob(
-                    sharedFrameworkInstallerFile,
-                    sharedFrameworkChannel,
-                    sharedFrameworkVersion),
-                sharedFrameworkInstallerFile).Wait();
+                File.Copy(sharedFrameworkInstallerDownloadFile, sharedFrameworkInstallerDestinationFile, true);
+            }
+            
+            if ( ! File.Exists(sharedHostInstallerDownloadFile))
+            {
+                var sharedHostInstallerDestinationFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
+                Mkdirp(Path.GetDirectoryName(sharedHostInstallerDestinationFile));
 
-            AzurePublisher.DownloadFile(
-                AzurePublisher.CalculateInstallerBlob(
-                    sharedHostInstallerFile,
-                    sharedHostChannel,
-                    hostVersion),
-                sharedHostInstallerFile).Wait();
+                AzurePublisher.DownloadFile(
+                   AzurePublisher.CalculateInstallerBlob(
+                       sharedHostInstallerDestinationFile,
+                       sharedHostChannel,
+                       hostVersion),
+                   sharedHostInstallerDownloadFile).Wait();
+
+                File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
+
+            }
 
             return c.Success();
         }
