@@ -27,8 +27,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkNugetVersion { get; set; }
 
-        private static string SharedHostNugetVersion { get; set; }
-
         [Target]
         public static BuildTargetResult InitPublish(BuildTargetContext c)
         {
@@ -38,7 +36,6 @@ namespace Microsoft.DotNet.Cli.Build
             CliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             CliNuGetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             SharedFrameworkNugetVersion = DependencyVersions.SharedFrameworkVersion;
-            SharedHostNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
             Channel = c.BuildContext.Get<string>("Channel");
 
             return c.Success();
