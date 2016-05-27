@@ -5,7 +5,7 @@
     "preserveCompilationContext": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc3-004322",
+    "Microsoft.NETCore.App": "1.0.0-rc3-004324",
     "DependencyContextValidator": "1.0.0-*"
   },
   "frameworks": {
