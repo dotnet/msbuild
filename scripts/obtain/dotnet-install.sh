@@ -269,7 +269,12 @@ get_latest_version_info() {
     
     local osname=$(get_current_os_name)
     
-    local version_file_url="$azure_feed/$azure_channel/dnvm/latest.$osname.$normalized_architecture.version"
+    local version_file_url=null
+    if [ "$shared_runtime" = true ]; then
+        version_file_url="$azure_feed/$azure_channel/dnvm/latest.sharedfx.$osname.$normalized_architecture.version"
+    else
+        version_file_url="$azure_feed/$azure_channel/dnvm/latest.$osname.$normalized_architecture.version"
+    fi
     say_verbose "get_latest_version_info: latest url: $version_file_url"
     
     download $version_file_url
@@ -350,7 +355,13 @@ construct_download_link() {
     
     local osname=$(get_current_os_name)
     
-    local download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
+    local download_link=null
+    if [ "$shared_runtime" = true ]; then
+        download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-$osname-$normalized_architecture.$specific_version.tar.gz"
+    else
+        download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
+    fi
+    
     echo "$download_link"
     return 0
 }
@@ -540,6 +551,7 @@ dry_run=false
 no_path=false
 azure_feed="https://dotnetcli.blob.core.windows.net/dotnet"
 verbose=false
+shared_runtime=false
 
 while [ $# -ne 0 ]
 do
@@ -560,6 +572,9 @@ do
         --arch|--architecture|-[Aa]rch|-[Aa]rchitecture)
             shift
             architecture="$1"
+            ;;
+        --shared-runtime|-[Ss]hared[Rr]untime)
+            shared_runtime=true
             ;;
         --debug-symbols|-[Dd]ebug[Ss]ymbols)
             debug_symbols=true
@@ -594,6 +609,8 @@ do
             echo "      -InstallDir"
             echo "  --architecture <ARCHITECTURE>  Architecture of .NET Tools. Currently only x64 is supported."
             echo "      --arch,-Architecture,-Arch"
+            echo "  --shared-runtime               Installs just the shared runtime bits, not the entire SDK."
+            echo "      -SharedRuntime"
             echo "  --debug-symbols,-DebugSymbols  Specifies if symbols should be included in the installation."
             echo "  --dry-run,-DryRun              Do not perform installation. Display download link."
             echo "  --no-path, -NoPath             Do not set PATH for the current process."

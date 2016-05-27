@@ -29,6 +29,9 @@
     Default: <auto> - this value represents currently running OS architecture
     Architecture of dotnet binaries to be installed.
     Possible values are: <auto>, x64 and x86
+.PARAMETER SharedRuntime
+    Default: false
+    Installs just the shared runtime bits, not the entire SDK
 .PARAMETER DebugSymbols
     If set the installer will include symbols in the installation.
 .PARAMETER DryRun
@@ -51,6 +54,7 @@ param(
    [string]$Version="Latest",
    [string]$InstallDir="<auto>",
    [string]$Architecture="<auto>",
+   [switch]$SharedRuntime,
    [switch]$DebugSymbols, # TODO: Switch does not work yet. Symbols zip is not being uploaded yet.
    [switch]$DryRun,
    [switch]$NoPath,
@@ -114,7 +118,14 @@ function Get-Version-Info-From-Version-Text([string]$VersionText) {
 function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [string]$CLIArchitecture) {
     Say-Invocation $MyInvocation
 
-    $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.win.$CLIArchitecture.version"
+    $VersionFileUrl = $null
+    if ($SharedRuntime) {
+        $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.sharedfx.win.$CLIArchitecture.version"
+    }
+    else {
+        $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.win.$CLIArchitecture.version"
+    }
+    
     $Response = Invoke-WebRequest -UseBasicParsing $VersionFileUrl
 
     switch ($Response.Headers.'Content-Type'){
@@ -160,7 +171,13 @@ function Get-Download-Links([string]$AzureFeed, [string]$AzureChannel, [string]$
     Say-Invocation $MyInvocation
     
     $ret = @()
-    $files = @("dotnet-dev")
+    $files = @()
+    if ($SharedRuntime) {
+        $files += "dotnet";
+    }
+    else {
+        $files += "dotnet-dev";
+    }
     
     foreach ($file in $files) {
         $PayloadURL = "$AzureFeed/$AzureChannel/Binaries/$SpecificVersion/$file-win-$CLIArchitecture.$SpecificVersion.zip"
