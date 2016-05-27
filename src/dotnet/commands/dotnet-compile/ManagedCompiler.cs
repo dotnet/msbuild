@@ -15,6 +15,7 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
+using Microsoft.DotNet.ProjectModel.Graph;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -125,9 +126,15 @@ namespace Microsoft.DotNet.Tools.Compiler
             if (compilationOptions.PreserveCompilationContext == true)
             {
                 var allExports = exporter.GetAllExports().ToList();
+                var exportsLookup = allExports.ToDictionary(e => e.Library.Identity.Name);
+                var buildExclusionList = context.GetTypeBuildExclusionList(exportsLookup);
+                var filteredExports = allExports
+                    .Where(e => e.Library.Identity.Type.Equals(LibraryType.ReferenceAssembly) ||
+                        !buildExclusionList.Contains(e.Library.Identity.Name));
+
                 var dependencyContext = new DependencyContextBuilder().Build(compilationOptions,
-                    allExports,
-                    allExports,
+                    filteredExports,
+                    filteredExports,
                     false, // For now, just assume non-portable mode in the legacy deps file (this is going away soon anyway)
                     context.TargetFramework,
                     context.RuntimeIdentifier ?? string.Empty);

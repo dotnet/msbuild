@@ -5,9 +5,13 @@
     "preserveCompilationContext": true
   },
   "dependencies": {
-    "DependencyContextValidator": "1.0.0-*"
+    "DependencyContextValidator": "1.0.0-*",
+    "System.Diagnostics.Process": {
+      "version": "4.1.0-*",
+      "type": "build"
+    }
   },
   "frameworks": {
-    "net451": {}
+    "net46": {}
   }
 }
