@@ -104,7 +104,8 @@ namespace Microsoft.DotNet.Cli.Build
                         "rhel.x64.version",
                         "osx.x64.version",
                         "debian.x64.version",
-                        "centos.x64.version"
+                        "centos.x64.version",
+                        "fedora.23.x64.version"
                     };
 
                     string cliVersion = Utils.GetCliVersionFileContent(c);

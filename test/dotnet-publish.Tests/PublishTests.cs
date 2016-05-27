@@ -59,6 +59,12 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 Rid="osx.10.11-x64",
                 HostExtension="", 
                 ExpectedArtifacts=new string[] { "libhostfxr.dylib", "libcoreclr.dylib", "libhostpolicy.dylib" } 
+            },
+            new
+            {
+                Rid="fedora.23-x64",
+                HostExtension="",
+                ExpectedArtifacts=new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" }
             }
         };
 
