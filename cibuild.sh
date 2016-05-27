@@ -85,6 +85,7 @@ MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
+CORERUN_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/corerun"'"'
 MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.exe"'"'
 
 # Default msbuild arguments
@@ -171,30 +172,28 @@ case $target in
 esac
 
 # Determine runtime host
-case $host in
-    CoreCLR)
-        RUNTIME_HOST="$TOOLS_DIR/corerun"
-        RUNTIME_HOST_ARGS=""
-        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
-        EXTRA_ARGS="$EXTRA_ARGS /m"
-        ;;
+until [[ "$RUNTIME_HOST" != "" ]]; do
+      case $host in
+          CoreCLR)
+              RUNTIME_HOST="$TOOLS_DIR/corerun"
+              RUNTIME_HOST_ARGS=""
+              MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
+              EXTRA_ARGS="$EXTRA_ARGS /m"
+              ;;
 
-    Mono)
-        setMonoDir
-        RUNTIME_HOST="${MONO_BIN_DIR}mono"
-        MSBUILD_EXE="$PACKAGES_DIR/msbuild/MSBuild.exe"
+          Mono)
+              setMonoDir
+              RUNTIME_HOST="${MONO_BIN_DIR}mono"
+              MSBUILD_EXE="$PACKAGES_DIR/msbuild/MSBuild.exe"
 
-        downloadMSBuildForMono
-        ;;
-    *)
-        echo "Unsupported host detected: $host. Configuring as if for CoreCLR"
-        RUNTIME_HOST="$TOOLS_DIR/corerun"
-        RUNTIME_HOST_ARGS=""
-        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
-        EXTRA_ARGS="$EXTRA_ARGS /m"
-
-        ;;
-esac
+              downloadMSBuildForMono
+              ;;
+          *)
+              echo "Unsupported host detected: $host. Configuring as if for CoreCLR"
+              host=CoreCLR
+              ;;
+      esac
+done
 
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS"
 
@@ -214,6 +213,12 @@ echo
 echo "** Moving bootstrapped MSBuild to the bootstrap folder"
 MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUILD_ARGS" "$MOVE_LOG_PATH"
+
+# Use the "current" coreclr runtime host; the one in tools/ may be
+# stale and incompatible.
+if [[ "$host" = "CoreCLR" ]]; then
+    RUNTIME_HOST=$CORERUN_BOOTSTRAPPED_EXE
+fi
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"

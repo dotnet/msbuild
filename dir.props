@@ -32,9 +32,7 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <SourceDir>$(RepoRoot)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
     <SamplesDir>$(RepoRoot)Samples$([System.IO.Path]::DirectorySeparatorChar)</SamplesDir>
-    <ToolsDir Condition="'$(MSBuildRuntimeType)'!='Core'">$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
-    <!-- When running in .NET Core, use the MSBuild bin path as the ToolsDir.  This supports the bootstrap scenario -->
-    <ToolsDir Condition="'$(MSBuildRuntimeType)'=='Core'">$(MSBuildBinPath)$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
+    <ToolsDir>$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
     <MicroBuildDir>$(ToolPackagesDir)\MicroBuild.Core\$(MicroBuildVersion)\build\</MicroBuildDir>
 
@@ -205,7 +203,7 @@
   <PropertyGroup>
     <CSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</CSharpTargets>
     <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
-    <CSharpPortableTargetsFallback>$(ToolsDir)extensions\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
+    <CSharpPortableTargetsFallback>$(ToolsDir)Extensions\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">

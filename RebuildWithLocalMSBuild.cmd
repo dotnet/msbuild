@@ -18,7 +18,7 @@ set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
 echo.
 echo ** Rebuilding MSBuild with binaries from BuildTools
 
-call "%~dp0build.cmd" /t:RebuildAndTest /p:Configuration=Debug-NetCore
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=Debug-NetCore
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -48,6 +48,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 :: Rebuild with bootstrapped msbuild
 set MSBUILDLOGPATH=%~dp0msbuild_local_build.log
+set RUNTIME_HOST="%~dp0bin\Bootstrap\CoreRun.exe"
 set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild.exe"
 
 echo.
