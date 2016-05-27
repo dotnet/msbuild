@@ -227,3 +227,6 @@ ApiPort/
 ref/
 Differences.txt
 Tools/
+
+# Visual Studio Code
+.vscode/
