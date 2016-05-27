@@ -16,8 +16,7 @@
     </description>
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
-      <group targetFramework="dotnet">
-        <dependency id="System.Runtime.InteropServices.PInvoke" version="4.0.0-rc3-23908" />
+      <group targetFramework="netstandard1.3">
         <dependency id="System.Collections" version="4.0.11-rc3-24109-00" />
         <dependency id="System.Diagnostics.Debug" version="4.0.11-rc3-24109-00" />
         <dependency id="System.Globalization" version="4.0.11-rc3-24109-00" />
@@ -29,6 +28,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Microsoft.Build.Framework.dll" target="lib\dotnet" />
+    <file src="Microsoft.Build.Framework.dll" target="lib\netstandard1.3" />
   </files>
 </package>

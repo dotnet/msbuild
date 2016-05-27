@@ -16,12 +16,8 @@
     </description>
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
-      <group targetFramework="dotnet">
+      <group targetFramework="netstandard1.3">
         <dependency id="Microsoft.Build.Framework" />
-        <dependency id="System.IO.FileSystem.DriveInfo" version="4.0.0-beta-23302" />
-        <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23516" />
-        <dependency id="System.Threading.Tasks.Parallel" version="4.0.1-beta-23516" />
-        <dependency id="System.Runtime.InteropServices.PInvoke" version="4.0.0-rc3-23908" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1-rc3-24109-00" />
         <dependency id="System.Collections" version="4.0.11-rc3-24109-00" />
         <dependency id="System.Collections.Concurrent" version="4.0.12-rc2-23805" />
@@ -60,6 +56,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Microsoft.Build.Tasks.Core.dll" target="lib\dotnet" />
+    <file src="Microsoft.Build.Tasks.Core.dll" target="lib\netstandard1.3" />
   </files>
 </package>
