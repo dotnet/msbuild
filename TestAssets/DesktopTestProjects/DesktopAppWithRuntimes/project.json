@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.NETCore.Windows.ApiSets": "1.0.1-rc3-24126-00"
+    "Microsoft.NETCore.Windows.ApiSets": "1.0.1-rc3-24126-01"
   },
   "buildOptions": {
     "emitEntryPoint": true
