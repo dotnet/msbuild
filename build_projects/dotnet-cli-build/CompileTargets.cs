@@ -229,7 +229,7 @@ namespace Microsoft.DotNet.Cli.Build
                 deleteDepsJson: true);
 
             // Crossgen SDK directory
-            var sharedFrameworkNugetVersion = DependencyVersions.SharedFrameworkVersion;
+            var sharedFrameworkNugetVersion = CliDependencyVersions.SharedFrameworkVersion;
             var sharedFrameworkNameVersionPath = SharedFrameworkPublisher.GetSharedFrameworkPublishPath(
                 rootOutputDirectory,
                 sharedFrameworkNugetVersion);

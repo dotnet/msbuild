@@ -119,8 +119,8 @@ namespace Microsoft.DotNet.Cli.Build
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
             var cliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
-            var sharedFrameworkVersion = DependencyVersions.SharedFrameworkVersion;
-            var hostVersion = DependencyVersions.SharedHostVersion;
+            var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
+            var hostVersion = CliDependencyVersions.SharedHostVersion;
 
             // Generated Installers + Archives
             AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk", cliVersion);
@@ -145,11 +145,11 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult DownloadHostAndSharedFxArchives(BuildTargetContext c)
         {
-            var sharedFrameworkVersion = DependencyVersions.SharedFrameworkVersion;
-            var sharedFrameworkChannel = DependencyVersions.SharedFrameworkChannel;
+            var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
+            var sharedFrameworkChannel = CliDependencyVersions.SharedFrameworkChannel;
 
             var combinedSharedHostAndFrameworkArchiveDownloadFile =
-                Path.Combine(Dirs.CoreSetupDownload, "combinedSharedHostAndFrameworkArchive");
+                Path.Combine(CliDirs.CoreSetupDownload, "combinedSharedHostAndFrameworkArchive");
 
             Mkdirp(Path.GetDirectoryName(combinedSharedHostAndFrameworkArchiveDownloadFile));
 
@@ -187,14 +187,14 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
         public static BuildTargetResult DownloadHostAndSharedFxInstallers(BuildTargetContext c)
         {
-            var sharedFrameworkVersion = DependencyVersions.SharedFrameworkVersion;
-            var hostVersion = DependencyVersions.SharedHostVersion;
+            var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
+            var hostVersion = CliDependencyVersions.SharedHostVersion;
 
-            var sharedFrameworkChannel = DependencyVersions.SharedFrameworkChannel;
-            var sharedHostChannel = DependencyVersions.SharedHostChannel;
+            var sharedFrameworkChannel = CliDependencyVersions.SharedFrameworkChannel;
+            var sharedHostChannel = CliDependencyVersions.SharedHostChannel;
 
-            var sharedFrameworkInstallerDownloadFile = Path.Combine(Dirs.CoreSetupDownload, "sharedFrameworkInstaller");
-            var sharedHostInstallerDownloadFile = Path.Combine(Dirs.CoreSetupDownload, "sharedHostInstaller");
+            var sharedFrameworkInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedFrameworkInstaller");
+            var sharedHostInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedHostInstaller");
 
             Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDownloadFile));
             Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));

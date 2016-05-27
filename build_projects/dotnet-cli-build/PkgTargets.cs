@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.Build
             SharedHostComponentId = $"com.microsoft.dotnet.sharedhost.component.osx.x64";
 
             string sharedFrameworkNugetName = Monikers.SharedFrameworkName;
-            SharedFrameworkNugetVersion = DependencyVersions.SharedFrameworkVersion;
+            SharedFrameworkNugetVersion = CliDependencyVersions.SharedFrameworkVersion;
             SharedFxComponentId = $"com.microsoft.dotnet.sharedframework.{sharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.component.osx.x64";
             SharedFxPkgId = $"com.microsoft.dotnet.{sharedFrameworkNugetName}.{SharedFrameworkNugetVersion}.osx.x64";
 
