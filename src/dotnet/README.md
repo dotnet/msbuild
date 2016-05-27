@@ -65,7 +65,7 @@ The following commands exist for dotnet.
 
 `dotnet new`
 
-    Initializes a sample .NET Core console application that can be compiled and ran.
+    Initializes sample applications that can be compiled and run.
 
 `dotnet restore`
 

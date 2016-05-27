@@ -4,18 +4,16 @@
     "emitEntryPoint": true,
     "embed": {
       "include": [
-        "commands/dotnet-new/CSharp_Console/NuGet.Config",
-        "commands/dotnet-new/CSharp_Console/Program.cs",
-        "commands/dotnet-new/CSharp_Console/project.json.template",
-        "commands/dotnet-new/FSharp_Console/NuGet.config",
-        "commands/dotnet-new/FSharp_Console/Program.fs",
-        "commands/dotnet-new/FSharp_Console/project.json.template"
+        "commands/dotnet-new/CSharp_Console.zip",
+        "commands/dotnet-new/FSharp_Console.zip",
+        "commands/dotnet-new/CSharp_Web.zip"
       ]
     },
     "compile": {
       "exclude": [
         "commands/dotnet-new/CSharp_Console/**",
-        "commands/dotnet-new/FSharp_Console/**"
+        "commands/dotnet-new/FSharp_Console/**",
+        "commands/dotnet-new/CSharp_Web/**"
       ]
     }
   },
