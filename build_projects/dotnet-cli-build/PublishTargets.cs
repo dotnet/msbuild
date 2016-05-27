@@ -147,7 +147,8 @@ namespace Microsoft.DotNet.Cli.Build
                  { "RHEL_x64", false },
                  { "OSX_x64", false },
                  { "Debian_x64", false },
-                 { "CentOS_x64", false }
+                 { "CentOS_x64", false },
+                 { "Fedora_23_x64", false }
              };
 
             List<string> blobs = new List<string>(AzurePublisherTool.ListBlobs($"{Channel}/Binaries/{CliNuGetVersion}/"));
