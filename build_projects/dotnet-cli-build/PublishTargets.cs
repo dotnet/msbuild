@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             CliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             CliNuGetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
-            SharedFrameworkNugetVersion = DependencyVersions.SharedFrameworkVersion;
+            SharedFrameworkNugetVersion = CliDependencyVersions.SharedFrameworkVersion;
             Channel = c.BuildContext.Get<string>("Channel");
 
             return c.Success();

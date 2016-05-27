@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Scripts
         }
 
         /// <summary>
-        /// Replaces version numbers that are hard-coded in DependencyVersions.cs.
+        /// Replaces version numbers that are hard-coded in DependencyVersions.cs and CliDependencyVersions.cs.
         /// </summary>
         [Target]
         public static BuildTargetResult ReplaceDependencyVersions(BuildTargetContext c)
@@ -196,9 +196,16 @@ namespace Microsoft.DotNet.Scripts
             ReplaceFileContents(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", fileContents =>
             {
                 DependencyInfo coreFXInfo = c.GetCoreFXDependency();
-                DependencyInfo coreSetupInfo = c.GetCoreSetupDependency();
 
                 fileContents = ReplaceDependencyVersion(fileContents, coreFXInfo, "CoreCLRVersion", "Microsoft.NETCore.Runtime.CoreCLR");
+
+                return fileContents;
+            });
+
+            ReplaceFileContents(@"build_projects\dotnet-cli-build\CliDependencyVersions.cs", fileContents =>
+            {
+                DependencyInfo coreSetupInfo = c.GetCoreSetupDependency();
+
                 fileContents = ReplaceDependencyVersion(fileContents, coreSetupInfo, "SharedFrameworkVersion", "Microsoft.NETCore.App");
                 fileContents = ReplaceDependencyVersion(fileContents, coreSetupInfo, "SharedHostVersion", "Microsoft.NETCore.DotNetHost");
 

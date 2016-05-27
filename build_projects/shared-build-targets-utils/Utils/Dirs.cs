@@ -8,6 +8,8 @@ namespace Microsoft.DotNet.Cli.Build
     public static class Dirs
     {
         public static readonly string RepoRoot = Directory.GetCurrentDirectory();
+
+        public static readonly string DebPackagingConfig = Path.Combine(Dirs.RepoRoot, "packaging", "deb");
         public static readonly string Output = Path.Combine(
             RepoRoot,
             "artifacts",
@@ -27,8 +29,6 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string CorehostLocked = Path.Combine(Output, "corehost", "locked");
         public static readonly string CorehostLocalPackages = Path.Combine(Output, "corehost");
         public static readonly string CorehostDummyPackages = Path.Combine(Output, "corehostdummypackages");
-
-        public static readonly string CoreSetupDownload = Path.Combine(Intermediate, "coreSetupDownload", DependencyVersions.SharedFrameworkVersion);
         public static readonly string SharedFrameworkPublish = Path.Combine(Intermediate, "sharedFrameworkPublish");
         public static readonly string TestOutput = Path.Combine(Output, "tests");
         public static readonly string TestArtifacts = Path.Combine(TestOutput, "artifacts");

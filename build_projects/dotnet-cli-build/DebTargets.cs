@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Build
             var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
             var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
             var sdkPublishRoot = c.BuildContext.Get<string>("CLISDKRoot");
-            var sharedFxDebianPackageName = Monikers.GetDebianSharedFrameworkPackageName(c);
+            var sharedFxDebianPackageName = Monikers.GetDebianSharedFrameworkPackageName(CliDependencyVersions.SharedFrameworkVersion);
 
             var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sdk");
 
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli.Build
                 "-m", manPagesDir, 
                 "--framework-debian-package-name", sharedFxDebianPackageName,
                 "--framework-nuget-name", Monikers.SharedFrameworkName,
-                "--framework-nuget-version", DependencyVersions.SharedFrameworkVersion,
+                "--framework-nuget-version", CliDependencyVersions.SharedFrameworkVersion,
                 "--previous-version-url", previousVersionURL, 
                 "--obj-root", objRoot)
                     .Execute()
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Cli.Build
             IEnumerable<string> orderedPackageNames = new List<string>()
             {
                 Monikers.GetSdkDebianPackageName(c),
-                Monikers.GetDebianSharedFrameworkPackageName(c),
+                Monikers.GetDebianSharedFrameworkPackageName(CliDependencyVersions.SharedFrameworkVersion),
                 Monikers.GetDebianSharedHostPackageName(c)
             };
             
