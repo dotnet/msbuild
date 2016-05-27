@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
             else if (CurrentPlatform.IsFedora)
             {
-                rid = "fedora.{RuntimeEnvironment.OperatingSystemVersion}-x64";
+                rid = $"fedora.{RuntimeEnvironment.OperatingSystemVersion}-x64";
             }
 
             return rid;
