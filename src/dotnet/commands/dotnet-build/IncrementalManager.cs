@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Tools.Build
         private readonly string _configuration;
         private readonly string _buildBasePath;
         private readonly string _outputPath;
+        private readonly IDictionary<string, string> _incrementalAffectingArguments;
 
         public IncrementalManager(
             ProjectBuilder projectBuilder,
@@ -28,7 +29,8 @@ namespace Microsoft.DotNet.Tools.Build
             bool shouldSkipDependencies,
             string configuration,
             string buildBasePath,
-            string outputPath)
+            string outputPath,
+            IDictionary<string, string> incrementalAffectingArguments)
         {
             _projectBuilder = projectBuilder;
             _compilerIoManager = compilerIOManager;
@@ -37,6 +39,7 @@ namespace Microsoft.DotNet.Tools.Build
             _configuration = configuration;
             _buildBasePath = buildBasePath;
             _outputPath = outputPath;
+            _incrementalAffectingArguments = incrementalAffectingArguments;
         }
 
         public IncrementalResult NeedsRebuilding(ProjectGraphNode graphNode)
@@ -156,6 +159,21 @@ namespace Microsoft.DotNet.Tools.Build
                 return new IncrementalResult("Input items added from last build", diffResult.Additions);
             }
 
+            var keys = incrementalCache.BuildArguments.Keys.Union(_incrementalAffectingArguments.Keys);
+            var mismatchedKeys = keys.Where(k =>
+            {
+                string cachedVal;
+                string currentVal;
+
+                return !incrementalCache.BuildArguments.TryGetValue(k, out cachedVal) ||
+                    !_incrementalAffectingArguments.TryGetValue(k, out currentVal) ||
+                    !string.Equals(cachedVal ?? string.Empty, currentVal ?? string.Empty, StringComparison.Ordinal);
+            });
+            if (mismatchedKeys.Any())
+            {
+                return new IncrementalResult("Build arguments changed since last build", mismatchedKeys);
+            }
+
             return IncrementalResult.DoesNotNeedRebuild;
         }
 
@@ -195,7 +213,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             var incrementalCacheFile = graphNode.ProjectContext.IncrementalCacheFile(_configuration, _buildBasePath, _outputPath);
 
-            var incrementalCache = new IncrementalCache(_compilerIoManager.GetCompileIO(graphNode));
+            var incrementalCache = new IncrementalCache(_compilerIoManager.GetCompileIO(graphNode), _incrementalAffectingArguments);
             incrementalCache.WriteToFile(incrementalCacheFile);
         }
     }

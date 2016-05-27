@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Compiler.Common;
@@ -44,13 +45,19 @@ namespace Microsoft.DotNet.Tools.Build
                 _args.ShouldSkipDependencies,
                 _args.ConfigValue,
                 _args.BuildBasePathValue,
-                _args.OutputValue
+                _args.OutputValue,
+                BuildIncrementalArgumentList(_args)
                 );
 
             _scriptRunner = new ScriptRunner();
 
             _commandFactory = new DotNetCommandFactory();
         }
+
+        private static IDictionary<string, string> BuildIncrementalArgumentList(BuildCommandApp args) => new Dictionary<string, string>()
+        {
+            ["version-suffix"] = args.VersionSuffixValue
+        };
 
         private void StampProjectWithSDKVersion(ProjectContext project)
         {

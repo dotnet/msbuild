@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.TestFramework
 {
     public class TestInstance: TestDirectory
     {
-        // made tolower because the rest of the class works with normalized tolower strings 
+        // made tolower because the rest of the class works with normalized tolower strings
         private static readonly IEnumerable<string> BuildArtifactBlackList = new List<string>() {".IncrementalCache", ".SDKVersion"}.Select(s => s.ToLower()).ToArray();
 
         private string _testAssetRoot;
@@ -78,9 +78,9 @@ namespace Microsoft.DotNet.TestFramework
                                  .Where(dir =>
                                  {
                                      dir = dir.ToLower();
-                                     return dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}bin") 
+                                     return dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}bin")
                                             || dir.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}")
-                                            || dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}obj") 
+                                            || dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}obj")
                                             || dir.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}");
                                  });
 
@@ -94,10 +94,10 @@ namespace Microsoft.DotNet.TestFramework
                                  {
                                      file = file.ToLower();
 
-                                     var isArtifact = file.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}") 
+                                     var isArtifact = file.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}")
                                             || file.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}");
  
-                                     var isBlackListed = BuildArtifactBlackList.Any(b => file.Contains(b)); 
+                                     var isBlackListed = BuildArtifactBlackList.Any(b => file.Contains(b));
  
                                      return isArtifact && !isBlackListed;
                                  });
