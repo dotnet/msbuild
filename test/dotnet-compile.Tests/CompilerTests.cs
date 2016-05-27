@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             Assert.True(File.Exists(generatedSatelliteAssemblyPath), $"File {generatedSatelliteAssemblyPath} was not found.");
         }
 
-        [Fact]
+        //[Fact] https://github.com/dotnet/cli/issues/3269
         public void LibraryWithAnalyzer()
         {
             var root = Temp.CreateDirectory();

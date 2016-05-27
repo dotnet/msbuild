@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
                 .Pass();
         }
 
-        [Fact]
+        //[Fact] https://github.com/dotnet/cli/issues/3269
         public void It_builds_projects_with_ruleset_relative_path()
         {
             var testInstance = TestAssetsManager
