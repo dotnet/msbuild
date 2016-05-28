@@ -13,7 +13,7 @@
     "Microsoft.DiaSymReader.Native": "1.4.0-rc"
   },
   "frameworks": {
-    "netstandard1.5": {
+    "netcoreapp1.0": {
       "imports": [
         "dnxcore50",
         "portable-net45+win8"

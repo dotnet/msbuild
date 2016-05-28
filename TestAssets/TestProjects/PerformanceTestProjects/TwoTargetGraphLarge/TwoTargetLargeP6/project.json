@@ -1,13 +1,19 @@
 {
   "version": "1.0.0-*",
-  "dependencies": {
-    "Microsoft.NETCore.App": {
-      "type": "platform",
-      "version": "1.0.0-rc3-004336"
-    }
-  },
+  "dependencies": { },
   "frameworks": {
-    "netcoreapp1.0": {},
-    "netstandard1.5": {}
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0-rc3-004336"
+        }
+      }
+    },
+    "netstandard1.5": {
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-rc3-24127-01"
+      }
+    }
   }
 }
