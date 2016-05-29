@@ -63,8 +63,8 @@ namespace dotnet_new3
 
             try
             {
-                loadSuccess &= Load(Paths.GlobalComponentCacheFile, Paths.GlobalComponentsDir);
-                loadSuccess &= Load(Paths.ComponentCacheFile, Paths.ComponentsDir);
+                loadSuccess &= Load(Paths.GlobalComponentCacheFile);
+                loadSuccess &= Load(Paths.ComponentCacheFile);
 
             }
             catch
@@ -75,14 +75,14 @@ namespace dotnet_new3
             if(!loadSuccess)
             {
                 Reporter.Verbose.WriteLine("Rebuilding component cache...");
-                Reinitialize(Paths.GlobalComponentCacheFile, Paths.GlobalComponentsDir);
-                Reinitialize(Paths.ComponentCacheFile, Paths.ComponentsDir);
+                Reinitialize(Paths.GlobalComponentCacheFile, Paths.GlobalComponentsDir, true);
+                Reinitialize(Paths.ComponentCacheFile, Paths.ComponentsDir, false);
             }
 
             _isInitialized = true;
         }
 
-        private void Reinitialize(string componentCacheFile, string componentsDir)
+        private void Reinitialize(string componentCacheFile, string componentsDir, bool global)
         {
             IEnumerable<string> failures;
 
@@ -96,22 +96,30 @@ namespace dotnet_new3
 
             foreach (Assembly assembly in AssemblyLoader.LoadAllAssemblies(out failures, componentsDir))
             {
-                toLoad.Add(assembly.CodeBase.ToPath());
-                foreach (Type type in ProcessAssembly(assembly))
+                string loadedFrom = assembly.CodeBase.ToPath();
+
+                if (loadedFrom.IndexOf(componentsDir, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    toLoad.Add(loadedFrom);
+                    foreach (Type type in ProcessAssembly(assembly))
+                    {
+                        parts.Add(type.AssemblyQualifiedName);
+                    }
+                }
+            }
+
+            if (global)
+            {
+                foreach (Type type in ProcessAssembly(typeof(Broker).GetTypeInfo().Assembly))
                 {
                     parts.Add(type.AssemblyQualifiedName);
                 }
             }
 
-            foreach (Type type in ProcessAssembly(typeof(Broker).GetTypeInfo().Assembly))
-            {
-                parts.Add(type.AssemblyQualifiedName);
-            }
-
             File.WriteAllText(componentCacheFile, cache.ToString());
         }
 
-        private bool Load(string componentCacheFile, string componentsDir)
+        private bool Load(string componentCacheFile)
         {
             bool loadSuccess = true;
             if (Paths.ComponentCacheFile.Exists())

@@ -46,7 +46,7 @@ namespace dotnet_new3
 
             app.OnExecute(() =>
             {
-                if (!Paths.UserDir.Exists())
+                if (!Paths.UserDir.Exists() || !Paths.FirstRunCookie.Exists())
                 {
                     Reporter.Output.WriteLine("Getting things ready for first use...");
 
