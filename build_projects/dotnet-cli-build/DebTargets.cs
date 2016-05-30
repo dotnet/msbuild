@@ -13,14 +13,14 @@ namespace Microsoft.DotNet.Cli.Build
     public class DebTargets
     {
         [Target(nameof(GenerateSdkDeb))]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult GenerateDebs(BuildTargetContext c)
         {
             return c.Success();
         }
 
         [Target(nameof(InstallSharedFramework))]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult GenerateSdkDeb(BuildTargetContext c)
         {
             var channel = c.BuildContext.Get<string>("Channel").ToLower();
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(InstallSDK),
                 nameof(RunE2ETest),
                 nameof(RemovePackages))]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult TestDebInstaller(BuildTargetContext c)
         {
             return c.Success();
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
         
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult RunE2ETest(BuildTargetContext c)
         {
             Directory.SetCurrentDirectory(Path.Combine(Dirs.RepoRoot, "test", "EndToEnd"));
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
         
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult RemovePackages(BuildTargetContext c)
         {
             IEnumerable<string> orderedPackageNames = new List<string>()
