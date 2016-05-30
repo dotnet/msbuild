@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             _versionSuffixOption = _app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
             _projectArgument = _app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. " +
                                                           "Can be one or multiple paths to project.json, project directory " +
-                                                          "or globbing patter that matches project.json files", multipleValues: true);
+                                                          "or globbing pattern that matches project.json files", multipleValues: true);
 
             _shouldPrintIncrementalPreconditionsArgument = _app.Option(BuildProfileFlag, "Set this flag to print the incremental safety checks that prevent incremental compilation", CommandOptionType.NoValue);
             _shouldNotUseIncrementalityArgument = _app.Option(NoIncrementalFlag, "Set this flag to turn off incremental build", CommandOptionType.NoValue);
