@@ -57,11 +57,6 @@ Ubuntu Installers
 |**Sdk**|[![](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/preview/dnvm/latest.ubuntu.x64.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-sdk-ubuntu-x64.latest.deb)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-dev-ubuntu-x64.latest.tar.gz)|
 
 
-Interested in .NET Core + ASP.NET Core 1.0 RC1 bits?
-----------------------------------------------------
-
-This toolchain is independent from the DNX-based .NET Core + ASP.NET Core 1.0 RC1 bits. If you are looking for .NET Core + ASP.NET Core 1.0 RC1 bits, you can find instructions on the http://get.asp.net/.  
-
 Docker
 ------
 
