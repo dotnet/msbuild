@@ -24,8 +24,6 @@
           BeforeTargets="Build;BuildAllProjects"
           DependsOnTargets="_RestoreBuildToolsPackagesConfig"
           Condition="'$(SkipBulkRestore)' != 'true'">
-    <Message Importance="High" Text="Restoring NuGet packages..." />
-    <Exec Command="$(NugetToolPath) restore &quot;$(SourceDir)MSBuild.sln&quot;" StandardOutputImportance="Low" />
   </Target>
 
   <!-- Create Project ItemGroup (from ProjectWithoutConfiguration) with Platform metadata -->
