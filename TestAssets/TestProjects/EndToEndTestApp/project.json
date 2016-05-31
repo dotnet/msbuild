@@ -14,7 +14,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc3-004324"
+    "Microsoft.NETCore.App": "1.0.0-rc3-004336"
   },
   "packOptions": {
     "files": {

@@ -9,7 +9,7 @@
     "netstandard1.6": {
       "imports": "dnxcore50",
       "dependencies": {
-        "Microsoft.NETCore.App": "1.0.0-rc3-004324"
+        "NETStandard.Library": "1.5.0-rc3-24127-01"
       }
     },
     "net451": {}
