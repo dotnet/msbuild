@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Build
             CleanNuGetTempCache();
 
             var dotnet = DotNetCli.Stage2;
-            dotnet.Restore("--verbosity", "verbose", "--disable-parallel")
+            dotnet.Restore("--verbosity", "verbose")
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"))
                 .Execute()
                 .EnsureSuccessful();
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var dotnet = DotNetCli.Stage2;
             dotnet.Restore(
-                "--verbosity", "verbose", "--disable-parallel",
+                "--verbosity", "verbose",
                 "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
                 .Execute()

@@ -110,6 +110,10 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 rid = $"fedora.{RuntimeEnvironment.OperatingSystemVersion}-x64";
             }
+            else if (CurrentPlatform.IsOpenSuse)
+            {
+                rid = $"opensuse.{RuntimeEnvironment.OperatingSystemVersion}-x64";
+            }
 
             return rid;
         }   

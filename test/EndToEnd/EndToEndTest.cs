@@ -232,7 +232,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 case "centos":
                 case "rhel":
                 case "fedora":
-                    Console.WriteLine("Skipping native compilation tests on Fedora/CentOS/RHEL - https://github.com/dotnet/cli/issues/453");
+                case "opensuse":
+                    Console.WriteLine("Skipping native compilation tests on OpenSUSE/Fedora/CentOS/RHEL - https://github.com/dotnet/cli/issues/453");
                     isSupported = false;
                     break;
                 case "debian":

@@ -76,6 +76,12 @@ if [ -z "$DOCKERFILE" ]; then
                 echo "using 'fedora.23' image"
                 export DOCKERFILE=scripts/docker/fedora.23
             fi
+        elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
+            echo "Detected current OS as openSUSE, determining openSUSE version to use..."
+            if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
+                echo "using 'openSUSE.13.2' image"
+                export DOCKERFILE=scripts/docker/opensuse.13.2
+            fi
         else
             echo "Unknown Linux Distro. Using 'ubuntu' image"
             export DOCKERFILE=scripts/docker/ubuntu

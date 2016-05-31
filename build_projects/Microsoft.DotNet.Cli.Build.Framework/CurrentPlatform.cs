@@ -66,6 +66,15 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
         }
 
+        public static bool IsOpenSuse
+        {
+            get
+            {
+                var osname = RuntimeEnvironment.OperatingSystem;
+                return string.Equals(osname, "opensuse", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         public static bool IsUnix
         {
             get
@@ -87,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         {
             get
             {
-                return IsUbuntu || IsCentOS || IsRHEL || IsDebian || IsFedora;
+                return IsUbuntu || IsCentOS || IsRHEL || IsDebian || IsFedora || IsOpenSuse;
             }
         }
 
@@ -114,6 +123,8 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                     return IsDebian;
                 case BuildPlatform.Fedora:
                     return IsFedora;
+                case BuildPlatform.OpenSuse:
+                    return IsOpenSuse;
                 case BuildPlatform.Unix:
                     return IsUnix;
                 case BuildPlatform.Linux:
@@ -157,6 +168,10 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             else if (IsFedora)
             {
                 return BuildPlatform.Fedora;
+            }
+            else if (IsOpenSuse)
+            {
+                return BuildPlatform.OpenSuse;
             }
             else
             {

@@ -50,7 +50,8 @@ namespace Microsoft.DotNet.Cli.Build
             { "rhel.7-x64", "rhel.7-x64" },
             { "rhel.7.2-x64", "rhel.7-x64" },
             { "debian.8-x64", "debian.8-x64" },
-            { "fedora.23-x64", "fedora.23-x64" }
+            { "fedora.23-x64", "fedora.23-x64" },
+            { "opensuse.13.2-x64", "opensuse.13.2-x64" }
         };
 
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
