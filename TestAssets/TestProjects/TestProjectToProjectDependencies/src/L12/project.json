@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "dependencies": {
     "L22": "1.0.0-*",
-    "NETStandard.Library": "1.5.0-rc3-24127-01"
+    "NETStandard.Library": "1.6.0-rc3-24128-00"
   },
   "frameworks": {
     "netstandard1.5": {
