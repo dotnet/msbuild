@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             foreach (var projectContext in projectContextsCollection.FrameworkOnlyContexts)
             {
                 snapshot.ProjectContexts[projectContext.TargetFramework] =
-                    ProjectContextSnapshot.Create(projectContext, configuration, currentSearchPaths);
+                    ProjectContextSnapshot.Create(projectContext, configuration, projectSearchPaths);
             }
 
             return snapshot;
