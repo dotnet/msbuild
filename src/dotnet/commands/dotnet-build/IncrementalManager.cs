@@ -201,7 +201,7 @@ namespace Microsoft.DotNet.Tools.Build
                 }
             }
 
-            // find inputs that are older than the earliest output
+            // find inputs that are newer than the earliest output
             var newInputs = compilerIO.Inputs.Where(p => File.GetLastWriteTimeUtc(p) >= minDateUtc);
 
             return newInputs.Any()
