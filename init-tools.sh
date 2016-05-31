@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __init_tools_log=$__scriptpath/init-tools.log
 __PACKAGES_DIR=$__scriptpath/packages
@@ -72,11 +74,11 @@ if [ ! -e $__PROJECT_JSON_FILE ]; then
     if [ ! -d "$__PROJECT_JSON_PATH" ]; then mkdir "$__PROJECT_JSON_PATH"; fi
     echo $__PROJECT_JSON_CONTENTS > "$__PROJECT_JSON_FILE"
 
-    if [ ! -e $__BUILD_TOOLS_PATH ]; then
+    if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then
         echo "Restoring BuildTools version $__BUILD_TOOLS_PACKAGE_VERSION..."
         echo "Running: $__DOTNET_CMD restore \"$__PROJECT_JSON_FILE\" --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE" >> $__init_tools_log
         $__DOTNET_CMD restore "$__PROJECT_JSON_FILE" --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE >> $__init_tools_log
-        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."; fi
+        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."; rm "$__PROJECT_JSON_FILE"; exit 1; fi
     fi
 
     echo "Initializing BuildTools..."

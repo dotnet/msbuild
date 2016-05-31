@@ -16,10 +16,8 @@
     </description>
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
-      <group targetFramework="dotnet">
+      <group targetFramework="netstandard1.3">
         <dependency id="Microsoft.Build.Framework" />
-        <dependency id="Microsoft.Tpl.Dataflow" version="4.5.24" />
-        <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23516" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1-rc3-24109-00" />
         <dependency id="System.AppContext" version="4.1.0-rc3-24109-00" />
         <dependency id="System.Collections" version="4.0.11-rc3-24109-00" />
@@ -66,6 +64,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Microsoft.Build.dll" target="lib\dotnet" />
+    <file src="Microsoft.Build.dll" target="lib\netstandard1.3" />
   </files>
 </package>
