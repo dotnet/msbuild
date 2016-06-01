@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-rc4-*",
+  "version": "1.0.0-rc3-*",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk"
   },
