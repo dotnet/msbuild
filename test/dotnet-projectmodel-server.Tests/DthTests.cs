@@ -337,16 +337,8 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                     Path.Combine(projectPath, "home", GlobalSettings.FileName),
                     JsonConvert.SerializeObject(new { projects = new string[] { "src", "../ext" } }));
 
-                // Console.WriteLine($"attach to {System.Diagnostics.Process.GetCurrentProcess().Id}");
-                // while(!System.Diagnostics.Debugger.IsAttached)
-                // {
-                //     System.Threading.Thread.Sleep(100);
-                // }
-
                 client.SendPayload(testProject, "RefreshDependencies");
                 
-                // var messages = client.DrainAllMessages(TimeSpan.FromDays(1));
-
                 client.DrainTillFirst("ProjectInformation")
                       .RetrievePayloadAs<JObject>()
                       .RetrievePropertyAs<JArray>("ProjectSearchPaths")
