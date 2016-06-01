@@ -1,8 +1,10 @@
 {
   "dependencies": {
-    "Newtonsoft.Json": "6.0.8"
+    "Newtonsoft.Json": "8.0.3"
   },
   "frameworks": {
-    "dnx451": { }
+    "netstandard1.5": {
+      "imports": "portable-net45+win8"
+     }
   }
 }
