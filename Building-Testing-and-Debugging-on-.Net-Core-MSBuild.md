@@ -15,12 +15,12 @@ For debugging tests, use the `/d` switch for CoreRun.exe. This prompts the core 
 
 **Required packages for OSX & Ubuntu**
 
-* [Mono](http://www.mono-project.com/download/#download-lin), when doing a Mono-hosted version of MSBuild
+* *OpenSSL*: MSBuild uses the .Net CLI to download Nuget packages during its build process. The CLI requires a recent OpenSSL library available in `/usr/lib`. This can be downloaded using [brew](http://brew.sh/) on OS X (`brew install openssl`) and apt-get (`apt-get install openssl`) on Ubuntu, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac). If you use a different package manager and see an error that says `Unable to load DLL 'System.Security.Cryptography.Native'`, `dotnet` may be looking in the wrong place for the library.
 
-* MSBuild uses the .Net CLI to download Nuget packages during its build process, therefore you must have a dynamic OpenSSL library available. This can be downloaded using [brew](http://brew.sh/), `brew install openssl`, apt-get, `apt-get install openssl`, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac).
+* [Mono](http://www.mono-project.com/download/#download-lin) when doing a Mono-hosted version of MSBuild
 
 **Required packages for Ubuntu**
-* Libunwind is also a dependency of .Net CLI. Install [libunwind8](http://www.nongnu.org/libunwind/index.html) using ```sudo apt-get install libunwind8```
+* [libunwind](http://www.nongnu.org/libunwind/index.html) is required by .NET Core. Install it using `sudo apt-get install libunwind8`
 
 ##Build process##
 Clone the xplat branch:
