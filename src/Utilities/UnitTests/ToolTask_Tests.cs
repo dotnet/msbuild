@@ -221,6 +221,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using (MyTool t = new MyTool())

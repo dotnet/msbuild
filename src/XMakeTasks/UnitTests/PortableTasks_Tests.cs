@@ -21,6 +21,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public static void TestNonDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(false);

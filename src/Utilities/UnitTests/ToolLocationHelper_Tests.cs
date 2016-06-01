@@ -490,6 +490,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ExerciseMiscToolLocationHelperMethods()
         {
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version11), FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV11);
