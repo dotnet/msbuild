@@ -66,6 +66,11 @@ get_current_os_name() {
     else
         # Detect Distro
         if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
+            if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
+                echo "ubuntu.16.04"
+                return 0
+            fi
+
             echo "ubuntu"
             return 0
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
@@ -77,6 +82,16 @@ get_current_os_name() {
         elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
             echo "debian"
             return 0
+        elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
+            if [ "$(cat /etc/*-release | grep -cim1 23)" -eq 1 ]; then
+                echo "fedora.23"
+                return 0
+            fi
+        elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
+            if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
+                echo "opensuse.13.2"
+                return 0
+            fi
         fi
     fi
     

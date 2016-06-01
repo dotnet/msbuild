@@ -56,14 +56,32 @@ if [ -z "$DOCKERFILE" ]; then
             echo "Defaulting to 'ubuntu' image for Darwin"
             export DOCKERFILE=scripts/docker/ubuntu
         elif [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
-            echo "Detected current OS as Ubuntu, using 'ubuntu' image"
-            export DOCKERFILE=scripts/docker/ubuntu
+            echo "Detected current OS as Ubuntu, determining ubuntu version to use..."
+            if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
+                echo "using 'ubuntu.16.04' image"
+                export DOCKERFILE=scripts/docker/ubuntu.16.04
+            else
+                echo "using 'ubuntu' image"
+                export DOCKERFILE=scripts/docker/ubuntu
+            fi
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             echo "Detected current OS as CentOS, using 'centos' image"
             export DOCKERFILE=scripts/docker/centos
         elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
             echo "Detected current OS as Debian, using 'debian' image"
             export DOCKERFILE=scripts/docker/debian
+        elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
+            echo "Detected current OS as Fedora, determining fedora version to use..."
+            if [ "$(cat /etc/*-release | grep -cim1 23)" -eq 1 ]; then
+                echo "using 'fedora.23' image"
+                export DOCKERFILE=scripts/docker/fedora.23
+            fi
+        elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
+            echo "Detected current OS as openSUSE, determining openSUSE version to use..."
+            if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
+                echo "using 'openSUSE.13.2' image"
+                export DOCKERFILE=scripts/docker/opensuse.13.2
+            fi
         else
             echo "Unknown Linux Distro. Using 'ubuntu' image"
             export DOCKERFILE=scripts/docker/ubuntu

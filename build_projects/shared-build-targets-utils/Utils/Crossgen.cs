@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
             else if (CurrentPlatform.IsUbuntu)
             {
-                rid = "ubuntu.14.04-x64";
+                rid = $"ubuntu.{RuntimeEnvironment.OperatingSystemVersion}-x64";
             }
             else if (CurrentPlatform.IsCentOS || CurrentPlatform.IsRHEL)
             {
@@ -105,6 +105,14 @@ namespace Microsoft.DotNet.Cli.Build
             else if (CurrentPlatform.IsDebian)
             {
                 rid = "debian.8-x64";
+            }
+            else if (CurrentPlatform.IsFedora)
+            {
+                rid = $"fedora.{RuntimeEnvironment.OperatingSystemVersion}-x64";
+            }
+            else if (CurrentPlatform.IsOpenSuse)
+            {
+                rid = $"opensuse.{RuntimeEnvironment.OperatingSystemVersion}-x64";
             }
 
             return rid;

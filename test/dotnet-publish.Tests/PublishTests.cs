@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 Rid="ubuntu.14.04-x64",
                 HostExtension="", 
                 ExpectedArtifacts=new string[] { "libhostfxr.so", "libcoreclr.so", "libhostpolicy.so" } 
-            }, 
+            },
             new 
             { 
                 Rid="win7-x64",
@@ -51,9 +51,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             new 
             { 
                 Rid="osx.10.11-x64",
-                HostExtension="", 
-                ExpectedArtifacts=new string[] { "libhostfxr.dylib", "libcoreclr.dylib", "libhostpolicy.dylib" } 
-            }
+                HostExtension="",
+                ExpectedArtifacts=new string[] { "libhostfxr.dylib", "libcoreclr.dylib", "libhostpolicy.dylib" }
+            },
         };
 
         public static IEnumerable<object[]> PublishOptions

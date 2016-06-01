@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var dotnet = DotNetCli.Stage2;
             dotnet.Restore(
-                "--verbosity", "verbose",                
+                "--verbosity", "verbose",
                 "--fallbacksource", Dirs.TestPackages)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
                 .Execute()

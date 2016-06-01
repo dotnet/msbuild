@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult ExpectedBuildArtifacts(BuildTargetContext c)
         {
             var config = Environment.GetEnvironmentVariable("CONFIGURATION");
-            var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}_{config}_version_badge.svg";
+            var versionBadgeName = $"{Monikers.GetBadgeMoniker()}_{config}_version_badge.svg";
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
             var cliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
@@ -317,7 +317,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult CheckUbuntuDebianPackageBuildDependencies(BuildTargetContext c)
         {
 
@@ -347,7 +347,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult CheckUbuntuCoreclrAndCoreFxDependencies(BuildTargetContext c)
         {
             var errorMessageBuilder = new StringBuilder();

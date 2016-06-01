@@ -94,8 +94,21 @@ namespace Microsoft.DotNet.Cli.Build
                     // Copy the latest installer files
                     CopyBlobs($"{Channel}/Installers/{CliNuGetVersion}/", $"{Channel}/Installers/Latest/");
 
-                    // Generate the SDK Version text files
-                    List<string> versionFiles = new List<string>() { "win.x86.version", "win.x64.version", "ubuntu.x64.version", "rhel.x64.version", "osx.x64.version", "debian.x64.version", "centos.x64.version" };
+                    // Generate the CLI and SDK Version text files
+                    List<string> versionFiles = new List<string>()
+                    {
+                        "win.x86.version",
+                        "win.x64.version",
+                        "ubuntu.x64.version",
+                        "ubuntu.16.04.x64.version",
+                        "rhel.x64.version",
+                        "osx.x64.version",
+                        "debian.x64.version",
+                        "centos.x64.version",
+                        "fedora.23.x64.version",
+                        "opensuse.13.2.x64.version"
+                    };
+
                     string cliVersion = Utils.GetCliVersionFileContent(c);
                     foreach (string version in versionFiles)
                     {
@@ -131,15 +144,18 @@ namespace Microsoft.DotNet.Cli.Build
                  { "Windows_x86", false },
                  { "Windows_x64", false },
                  { "Ubuntu_x64", false },
+                 { "Ubuntu_16_04_x64", false },
                  { "RHEL_x64", false },
                  { "OSX_x64", false },
                  { "Debian_x64", false },
-                 { "CentOS_x64", false }
+                 { "CentOS_x64", false },
+                 { "Fedora_23_x64", false },
+                 { "openSUSE_13_2_x64", false }
              };
 
             List<string> blobs = new List<string>(AzurePublisherTool.ListBlobs($"{Channel}/Binaries/{CliNuGetVersion}/"));
 
-            var versionBadgeName = $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}";
+            var versionBadgeName = $"{Monikers.GetBadgeMoniker()}";
             if (badges.ContainsKey(versionBadgeName) == false)
             {
                 throw new ArgumentException("A new OS build was added without adding the moniker to the {nameof(badges)} lookup");
@@ -188,7 +204,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(
             nameof(PublishSdkDebToDebianRepo))]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult PublishDebFilesToDebianRepo(BuildTargetContext c)
         {
             return c.Success();
@@ -204,7 +220,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
         
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult PublishSdkInstallerFileToAzure(BuildTargetContext c)
         {
             var version = CliNuGetVersion;
@@ -262,7 +278,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult PublishSdkDebToDebianRepo(BuildTargetContext c)
         {
             var version = CliNuGetVersion;
