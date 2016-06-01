@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
@@ -67,7 +70,7 @@ namespace dotnet_new3
 
         public IDisposable<ITemplateSourceFolder> RootFor(string location)
         {
-            if (!System.IO.File.Exists(location))
+            if (!File.Exists(location))
             {
                 return Directory.Empty.NoDispose();
             }
@@ -83,6 +86,104 @@ namespace dotnet_new3
             }
 
             return new Directory(null, "", "", () => new ZipArchive(source.Root.Value.OpenFile(location), ZipArchiveMode.Read, false)).NoDispose();
+        }
+
+        public async Task<bool> CheckForUpdatesAsync(string location)
+        {
+            if(Path.GetExtension(location).ToUpperInvariant() == ".NUPKG")
+            {
+                using (IDisposable<ITemplateSourceFolder> root = RootFor(location))
+                {
+                    ITemplateSourceFile nuspec = root.Value.EnumerateFiles("*.nuspec", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                    
+                    if(nuspec != null)
+                    {
+                        string id, version;
+                        GetPackageIdAndVersion(nuspec, out id, out version);
+
+                        NuGetUtil.Init();
+                        string newerVersion = await NuGetUtil.GetCurrentVersionOfPackageAsync(id, version);
+                        return newerVersion != null;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> CheckForUpdatesAsync(IConfiguredTemplateSource source, string location)
+        {
+            if (Path.GetExtension(location).ToUpperInvariant() == ".NUPKG")
+            {
+                using (IDisposable<ITemplateSourceFolder> root = RootFor(source, location))
+                {
+                    ITemplateSourceFile nuspec = root.Value.EnumerateFiles("*.nuspec", SearchOption.TopDirectoryOnly).FirstOrDefault();
+
+                    if (nuspec != null)
+                    {
+                        string id, version;
+                        GetPackageIdAndVersion(nuspec, out id, out version);
+
+                        NuGetUtil.Init();
+                        string newerVersion = await NuGetUtil.GetCurrentVersionOfPackageAsync(id, version);
+                        return newerVersion != null;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void GetPackageIdAndVersion(ITemplateSourceFile nuspec, out string id, out string version)
+        {
+            using (Stream s = nuspec.OpenRead())
+            using (TextReader reader = new StreamReader(s, Encoding.UTF8, true, 8192, true))
+            {
+                XDocument doc = XDocument.Load(reader);
+                XElement metadata = doc.Descendants().First(x => x.Name.LocalName == "metadata");
+                id = metadata.Descendants().First(x => x.Name.LocalName == "id").Value;
+                version = metadata.Descendants().First(x => x.Name.LocalName == "version").Value;
+            }
+        }
+
+        public string GetInstallPackageId(string location)
+        {
+            if (Path.GetExtension(location).ToUpperInvariant() == ".NUPKG")
+            {
+                using (IDisposable<ITemplateSourceFolder> root = RootFor(location))
+                {
+                    ITemplateSourceFile nuspec = root.Value.EnumerateFiles("*.nuspec", SearchOption.TopDirectoryOnly).FirstOrDefault();
+
+                    if (nuspec != null)
+                    {
+                        string id, version;
+                        GetPackageIdAndVersion(nuspec, out id, out version);
+                        return id;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public string GetInstallPackageId(IConfiguredTemplateSource source, string location)
+        {
+            if (Path.GetExtension(location).ToUpperInvariant() == ".NUPKG")
+            {
+                using (IDisposable<ITemplateSourceFolder> root = RootFor(source, location))
+                {
+                    ITemplateSourceFile nuspec = root.Value.EnumerateFiles("*.nuspec", SearchOption.TopDirectoryOnly).FirstOrDefault();
+
+                    if (nuspec != null)
+                    {
+                        string id, version;
+                        GetPackageIdAndVersion(nuspec, out id, out version);
+                        return id;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private class Directory : TemplateSourceFolder

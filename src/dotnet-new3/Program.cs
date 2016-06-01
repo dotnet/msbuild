@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
-using Newtonsoft.Json.Linq;
-using NuGet.Frameworks;
 
 namespace dotnet_new3
 {
@@ -43,12 +40,18 @@ namespace dotnet_new3
             CommandOption resetConfig = app.Option("--reset", "Resets the component cache and installed template sources.", CommandOptionType.NoValue);
             CommandOption rescan = app.Option("--rescan", "Rebuilds the component cache.", CommandOptionType.NoValue);
             CommandOption global = app.Option("--global", "Performs the --install or --install-component operation for all users.", CommandOptionType.NoValue);
+            CommandOption quiet = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
+            CommandOption skipUpdateCheck = app.Option("--skip-update-check", "Don't check for updates.", CommandOptionType.NoValue);
+            CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
                 if (!Paths.UserDir.Exists() || !Paths.FirstRunCookie.Exists())
                 {
-                    Reporter.Output.WriteLine("Getting things ready for first use...");
+                    if (!quiet.HasValue())
+                    {
+                        Reporter.Output.WriteLine("Getting things ready for first use...");
+                    }
 
                     if (!Paths.FirstRunCookie.Exists())
                     {
@@ -81,14 +84,19 @@ namespace dotnet_new3
 
                 if (install.HasValue())
                 {
-                    InstallPackage(install.Values, true, global.HasValue());
+                    InstallPackage(install.Values, true, global.HasValue(), quiet.HasValue());
                     return Task.FromResult(0);
                 }
 
                 if (installComponent.HasValue())
                 {
-                    InstallPackage(installComponent.Values, false, global.HasValue());
+                    InstallPackage(installComponent.Values, false, global.HasValue(), quiet.HasValue());
                     return Task.FromResult(0);
+                }
+
+                if (update.HasValue())
+                {
+                    return PerformUpdateAsync(template.Value, quiet.HasValue(), source);
                 }
 
                 if (uninstall.HasValue())
@@ -126,13 +134,17 @@ namespace dotnet_new3
 
                                 if (Version.TryParse(ver, out version))
                                 {
-                                    Reporter.Output.WriteLine($"Removing {value} version {version}...");
+                                    if (!quiet.HasValue())
+                                    {
+                                        Reporter.Output.WriteLine($"Removing {value} version {version}...");
+                                    }
+
                                     anyRemoved = true;
                                     file.Delete();
                                 }
                             }
 
-                            if (!anyRemoved)
+                            if (!anyRemoved && !quiet.HasValue())
                             {
                                 Reporter.Error.WriteLine($"Couldn't remove {value} as a template source.".Red().Bold());
                             }
@@ -161,7 +173,7 @@ namespace dotnet_new3
                     return Task.FromResult(-1);
                 }
 
-                return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, source, help, alias, parameters);
+            return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, source, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue());
             });
 
             int result;
@@ -202,6 +214,97 @@ namespace dotnet_new3
             return result;
         }
 
+        private static async Task<int> PerformUpdateAsync(string name, bool quiet, CommandOption source)
+        {
+            HashSet<IConfiguredTemplateSource> allSources = new HashSet<IConfiguredTemplateSource>();
+            HashSet<string> toInstall = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (ITemplate template in TemplateCreator.List(name, source))
+            {
+                allSources.Add(template.Source);
+            }
+
+            foreach (IConfiguredTemplateSource src in allSources)
+            {
+                if (!quiet)
+                {
+                    Reporter.Output.WriteLine($"Checking for updates for {src.Alias}...");
+                }
+
+                bool updatesReady = false;
+
+                if (src.ParentSource != null)
+                {
+                    updatesReady = await src.Source.CheckForUpdatesAsync(src.ParentSource, src.Location);
+                }
+                else
+                {
+                    updatesReady = await src.Source.CheckForUpdatesAsync(src.Location);
+                }
+
+                if (updatesReady)
+                {
+                    if (!quiet)
+                    {
+                        Reporter.Output.WriteLine($"An update for {src.Alias} is available...");
+                    }
+
+                    string packageId;
+                    if (src.ParentSource != null)
+                    {
+                        packageId = src.Source.GetInstallPackageId(src.ParentSource, src.Location);
+                    }
+                    else
+                    {
+                        packageId = src.Source.GetInstallPackageId(src.Location);
+                    }
+
+                    toInstall.Add(packageId);
+                }
+            }
+
+            if(toInstall.Count == 0)
+            {
+                if (!quiet)
+                {
+                    Reporter.Output.WriteLine($"No updates were found.");
+                }
+
+                return 0;
+            }
+
+            if (!quiet)
+            {
+                Reporter.Output.WriteLine($"Installing updates...");
+            }
+
+            List<string> installCommands = new List<string>();
+            List<string> uninstallCommands = new List<string>();
+
+            foreach (string packageId in toInstall)
+            {
+                installCommands.Add("-i");
+                installCommands.Add(packageId);
+
+                uninstallCommands.Add("-i");
+                uninstallCommands.Add(packageId);
+            }
+
+            installCommands.Add("--quiet");
+            uninstallCommands.Add("--quiet");
+
+            Command.CreateDotNet("new3", uninstallCommands).ForwardStdOut().ForwardStdErr().Execute();
+            Command.CreateDotNet("new3", installCommands).ForwardStdOut().ForwardStdErr().Execute();
+            Broker.ComponentRegistry.ForceReinitialize();
+
+            if (!quiet)
+            {
+                Reporter.Output.WriteLine($"Done.");
+            }
+
+            return 0;
+        }
+
         private static void ConfigureEnvironment()
         {
             string userNuGetConfig = $@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -223,6 +326,17 @@ namespace dotnet_new3
             if (packages.Length > 0)
             {
                 InstallPackage(packages, true, true, true);
+            }
+        }
+
+        private static void InstallPackage(IReadOnlyList<string> packages, bool installingTemplates, bool global, bool quiet = false)
+        {
+            NuGetUtil.InstallPackage(packages, installingTemplates, global, quiet, TryAddSource);
+            Broker.ComponentRegistry.ForceReinitialize();
+
+            if (!quiet)
+            {
+                ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
             }
         }
 
@@ -254,100 +368,6 @@ namespace dotnet_new3
             }
         }
 
-        private static void InstallPackage(IReadOnlyList<string> packages, bool installingTemplates, bool global, bool quiet = false)
-        {
-            JObject dependenciesObject = new JObject();
-            JObject projJson = new JObject
-            {
-                {"version", "1.0.0-*"},
-                {"dependencies", dependenciesObject },
-                {
-                    "frameworks", new JObject
-                    {
-                        {
-                            "netcoreapp1.0", new JObject
-                            {
-                                { "imports", "dnxcore50" }
-                            }
-                        }
-                    }
-                }
-            };
-
-            foreach (string value in packages)
-            {
-                string pkg = value.Trim();
-                if (pkg.IndexOfAny(Path.GetInvalidPathChars()) < 0 && pkg.Exists())
-                {
-                    TryAddSource(pkg);
-                }
-                else
-                {
-                    dependenciesObject[pkg] = "*";
-                }
-            }
-
-            if (dependenciesObject.Count > 0)
-            {
-                dependenciesObject["NETStandard.Library"] = new JObject
-                {
-                    {"version", "1.5.0-rc2-24103" },
-                    {"type", "platform" }
-                };
-
-                Paths.ScratchDir.CreateDirectory();
-                string componentsDir = global ? Paths.GlobalComponentsDir : Paths.ComponentsDir;
-                string templateCacheDir = global ? Paths.GlobalTemplateCacheDir : Paths.TemplateCacheDir;
-                componentsDir.CreateDirectory();
-                templateCacheDir.CreateDirectory();
-                string projectFile = Path.Combine(Paths.ScratchDir, "project.json");
-                File.WriteAllText(projectFile, projJson.ToString());
-
-                if (!quiet)
-                {
-                    Reporter.Output.WriteLine("Downloading...");
-                }
-
-                Command.CreateDotNet("restore", new[] { "--ignore-failed-sources" }, NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
-
-                if (!quiet)
-                {
-                    Reporter.Output.WriteLine("Installing...");
-                }
-
-                Command.CreateDotNet("publish", new string[0], NuGetFramework.AnyFramework).WorkingDirectory(Paths.ScratchDir).OnErrorLine(x => Reporter.Error.WriteLine(x.Red().Bold())).Execute();
-
-                if (!quiet)
-                {
-                    Reporter.Output.WriteLine("Finishing up...");
-                }
-
-                string publishDir = Path.Combine(Paths.ScratchDir, @"bin\debug\netcoreapp1.0\publish");
-                publishDir.Copy(componentsDir);
-
-                if (!quiet)
-                {
-                    Reporter.Output.WriteLine("Done.");
-                }
-
-                if (installingTemplates)
-                {
-                    foreach (string value in packages)
-                    {
-                        MoveTemplateToTemplatesCache(value.Trim(), global);
-                    }
-                }
-
-                Paths.ScratchDir.Delete();
-                Broker.ComponentRegistry.ForceReinitialize();
-
-                if (!quiet)
-                {
-                    ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
-                }
-            }
-        }
-
         private static void ListTemplates(CommandArgument template, CommandOption source)
         {
             IEnumerable<ITemplate> results = TemplateCreator.List(template.Value, source);
@@ -357,22 +377,6 @@ namespace dotnet_new3
                 {"Short Names", x => $"[{x.ShortName}]"},
                 {"Alias", x => AliasRegistry.GetAliasForTemplate(x) ?? ""}
             });
-        }
-
-        private static void MoveTemplateToTemplatesCache(string name, bool global)
-        {
-            string templateSource = Path.Combine(Paths.PackageCache, name);
-            string cacheDir = global ? Paths.GlobalTemplateCacheDir : Paths.TemplateCacheDir;
-
-            foreach (string dir in Directory.GetDirectories(templateSource, "*", SearchOption.TopDirectoryOnly))
-            {
-                foreach (string file in Directory.GetFiles(dir, "*.nupkg", SearchOption.TopDirectoryOnly))
-                {
-                    File.Copy(file, Path.Combine(cacheDir, Path.GetFileName(file)), true);
-                }
-            }
-
-            Directory.Delete(templateSource, true);
         }
 
         private static bool TryRemoveSource(string value)

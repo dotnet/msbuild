@@ -6,9 +6,9 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-rc2-002678",
-    "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-rc2-002678",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc3-21071",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-002702",
+    "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-preview1-002702",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-final",
     "Microsoft.TemplateEngine.Core": "1.0.0-*",
     "Microsoft.TemplateEngine.Abstractions": "1.0.0-*",
     "Microsoft.NETCore.App": {

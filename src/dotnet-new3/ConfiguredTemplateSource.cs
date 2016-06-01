@@ -24,5 +24,7 @@ namespace dotnet_new3
         public string Location => _location;
 
         public ITemplateSource Source { get; }
+
+        public IConfiguredTemplateSource ParentSource => null;
     }
 }

@@ -28,6 +28,8 @@ namespace dotnet_new3
 
         public string Location => _entry.FullPath;
 
+        public IConfiguredTemplateSource ParentSource => _parent;
+
         public IDisposable<ITemplateSourceFolder> Root => _source.RootFor(_parent, _entry.FullPath);
 
         public ITemplateSource Source => _source;

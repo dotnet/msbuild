@@ -54,7 +54,7 @@ namespace dotnet_new3
             return null;
         }
 
-        public static IReadOnlyList<ITemplate> GetTemplatesForAlias(string alias, IReadOnlyList<ITemplate> templates)
+        public static IReadOnlyCollection<ITemplate> GetTemplatesForAlias(string alias, IReadOnlyCollection<ITemplate> templates)
         {
             if(alias == null)
             {

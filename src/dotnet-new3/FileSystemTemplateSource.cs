@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
@@ -44,6 +45,26 @@ namespace dotnet_new3
         }
 
         public IDisposable<ITemplateSourceFolder> RootFor(IConfiguredTemplateSource source, string location)
+        {
+            return null;
+        }
+
+        public Task<bool> CheckForUpdatesAsync(string location)
+        {
+            return Task.FromResult(false);
+        }
+
+        public Task<bool> CheckForUpdatesAsync(IConfiguredTemplateSource source, string location)
+        {
+            return Task.FromResult(false);
+        }
+
+        public string GetInstallPackageId(string location)
+        {
+            return null;
+        }
+
+        public string GetInstallPackageId(IConfiguredTemplateSource source, string location)
         {
             return null;
         }
