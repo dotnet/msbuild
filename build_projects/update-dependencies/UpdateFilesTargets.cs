@@ -139,19 +139,33 @@ namespace Microsoft.DotNet.Scripts
                 {
                     if (id == packageInfo.Id)
                     {
+                        string oldVersion;
                         if (dependencyProperty.Value is JObject)
                         {
-                            dependencyProperty.Value["version"] = packageInfo.Version.ToNormalizedString();
+                            oldVersion = (string)dependencyProperty.Value["version"];
                         }
                         else
                         {
-                            dependencyProperty.Value = packageInfo.Version.ToNormalizedString();
+                            oldVersion = (string)dependencyProperty.Value;
                         }
 
-                        // mark the DependencyInfo as updated so we can tell which dependencies were updated
-                        dependencyInfo.IsUpdated = true;
+                        string newVersion = packageInfo.Version.ToNormalizedString();
+                        if (oldVersion != newVersion)
+                        {
+                            if (dependencyProperty.Value is JObject)
+                            {
+                                dependencyProperty.Value["version"] = newVersion;
+                            }
+                            else
+                            {
+                                dependencyProperty.Value = newVersion;
+                            }
 
-                        return true;
+                            // mark the DependencyInfo as updated so we can tell which dependencies were updated
+                            dependencyInfo.IsUpdated = true;
+
+                            return true;
+                        }
                     }
                 }
             }
