@@ -56,6 +56,14 @@ namespace Microsoft.DotNet.Cli.Build
             string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "clisdk", "resources");
             string outFilePath = Path.Combine(Dirs.Packages, c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile"));
 
+            // Copy SharedFX and host installers in the correct place
+            var sharedFrameworkPkgIntermediatePath = Path.Combine(PkgsIntermediateDir, $"{SharedFxComponentId}.pkg");
+            var sharedHostPkgIntermediatePath = Path.Combine(PkgsIntermediateDir, $"{SharedHostComponentId}.pkg");
+
+            File.Copy(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), sharedFrameworkPkgIntermediatePath, true);
+            File.Copy(c.BuildContext.Get<string>("SharedHostInstallerFile"), sharedHostPkgIntermediatePath, true);
+
+
             string inputDistTemplatePath = Path.Combine(
                 Dirs.RepoRoot,
                 "packaging",
