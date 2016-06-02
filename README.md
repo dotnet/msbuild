@@ -4,14 +4,17 @@
 
 This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms as well as documentation. 
 
-New to .NET CLI?
-------------
-Check out our [Getting started page](https://aka.ms/dotnetcoregs).
+RC2 and Preview 1 bits
+---------------------
+To get the latest released bits (RC2 for .NET Core and Preview for tooling), 
+check out our [Getting started page](http://go.microsoft.com/fwlink/?LinkID=798306&clcid=0x409).
+
+Also, don't forget to check out [the documentation](http://dotnet.github.io/docs/core-concepts/core-sdk/index.html). 
 
 Release schedule
 ----------------
 
-There have been some changes in the schedule for .NET Core and .NET Core CLI tools. You can read more about them in the [.NET Core RC2 – Improvements, Schedule, and Roadmap](https://blogs.msdn.microsoft.com/dotnet/2016/05/06/net-core-rc2-improvements-schedule-and-roadmap/) blog post. 
+There have been some changes in the schedule for .NET Core and .NET Core CLI tools. You can read more about them in the [.NET Core RC2 � Improvements, Schedule, and Roadmap](https://blogs.msdn.microsoft.com/dotnet/2016/05/06/net-core-rc2-improvements-schedule-and-roadmap/) blog post. 
 
 Found an issue?
 ---------------
@@ -34,6 +37,9 @@ You can download .NET Core as either an installer (MSI, PKG) or a zip (zip, gzip
 
 - .NET Core - .NET Core runtime and framework
 - .NET Core SDK - .NET Core + CLI tools
+
+> **Note:** please be aware that below installers are the **latest bits**. If you 
+> want to install the latest released versions, please check out the [section above](#rc2-and-preview-1-bits).)
 
 |         |Version |.NET Core Installer|.NET Core SDK Installer|.NET Core Binaries|.NET Core SDK Binaries|
 |---------|:------:|:------:|:------:|:------:|:------:|
@@ -89,16 +95,17 @@ Compiling to IL is done using:
 	
 	dotnet build
 
-This will drop a binary in `./bin/[configuration]/[framework]/[rid]/[binary name]` that you can just run.
+This will drop an IL assembly in `./bin/[configuration]/[framework]/[binary name]` 
+that you can run using `dotnet bin/[configuration]/[framework]/[binaryname.dll]`.
 
-For more details, please refer to the [documentation](Documentation).
+For more details, please refer to the [documentation](http://dotnet.github.io/docs/core-concepts/core-sdk/index.html).
 
 Building from source
 --------------------
 
 If you are building from source, take note that the build depends on NuGet packages hosted on MyGet, so if it is down, the build may fail. If that happens, you can always see the [MyGet status page](http://status.myget.org/) for more info. 
 
-Read over the [contributing guidelines](CONTRIBUTING.md) and [developer documentation](Documentation) for prerequisites for building from source.
+Read over the [contributing guidelines](https://github.com/dotnet/cli/tree/master/CONTRIBUTING.md) and [developer documentation](https://github.com/dotnet/cli/tree/master/Documentation) for prerequisites for building from source.
 
 Questions & Comments
 --------------------
@@ -109,3 +116,4 @@ License
 --------------------
 
 By downloading the .zip you are agreeing to the terms in the project [EULA](https://aka.ms/dotnet-cli-eula).
+
