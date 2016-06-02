@@ -66,7 +66,8 @@ namespace Microsoft.DotNet.ProjectModel
                 throw new InvalidOperationException($"Can not find runtime target for framework '{context.TargetFramework}' compatible with one of the target runtimes: '{rids}'. " +
                                                     "Possible causes:" + Environment.NewLine +
                                                     "1. The project has not been restored or restore failed - run `dotnet restore`" + Environment.NewLine +
-                                                    $"2. The project does not list one of '{rids}' in the 'runtimes' section.");
+                                                    $"2. The project does not list one of '{rids}' in the 'runtimes' section." + Environment.NewLine +
+                                                    "3. You may be trying to publish a library, which is not supported. Use `dotnet pack` to distribute libraries.");
             }
 
             return runtimeContext;
