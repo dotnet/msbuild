@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void It_returns_a_CommandSpec_with_CoreHost_as_FileName_and_CommandName_in_Args_when_CommandName_exists_in_ProjectDependencies()
+        public void It_returns_a_CommandSpec_with_Dotnet_as_FileName_and_CommandName_in_Args_when_CommandName_exists_in_ProjectDependencies()
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var commandFile = Path.GetFileNameWithoutExtension(result.Path);
 
-            commandFile.Should().Be("corehost");
+            commandFile.Should().Be("dotnet");
 
             result.Args.Should().Contain(commandResolverArguments.CommandName);
         }
@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void It_passes_depsfile_arg_to_corehost_when_returning_a_commandspec()
+        public void It_passes_depsfile_arg_to_host_when_returning_a_commandspec()
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
