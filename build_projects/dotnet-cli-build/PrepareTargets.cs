@@ -232,7 +232,6 @@ namespace Microsoft.DotNet.Cli.Build
                    sharedHostInstallerDownloadFile).Wait();
 
                 File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
-
             }
 
             return c.Success();
