@@ -36,6 +36,8 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             // Prior to `type:platform` trimming, this would have been published.
             publishDir.Should().NotHaveFile("System.Linq.dll");
 
+            // PortableAppWithNative references a Libuv version that is explicitly
+            // not what is in Microsoft.NETCore.App.
             var runtimesOutput = publishDir.Sub("runtimes");
 
             runtimesOutput.Should().Exist();
