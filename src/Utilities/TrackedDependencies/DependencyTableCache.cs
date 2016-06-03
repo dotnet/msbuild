@@ -53,7 +53,7 @@ namespace Microsoft.Build.Utilities
             {
                 string tlogFilename = FileUtilities.NormalizePath(tlogFile.ItemSpec);
 
-                DateTime lastWriteTime = NativeMethods.GetLastWriteTimeUtc(tlogFilename);
+                DateTime lastWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(tlogFilename);
                 if (lastWriteTime > tableTime)
                 {
                     // one of the tlog files is newer than the table, so return false
@@ -293,7 +293,7 @@ namespace Microsoft.Build.Utilities
                 _tlogFiles[tlogItemCount] = new TaskItem(tlogFilename);
                 // Our cache entry needs to use the last modified time of the latest tlog
                 // involved so that our cache can be invalidated if any tlog is updated
-                DateTime modifiedTime = NativeMethods.GetLastWriteTimeUtc(tlogFilename);
+                DateTime modifiedTime = NativeMethodsShared.GetLastWriteFileUtcTime(tlogFilename);
                 if (modifiedTime > _tableTime)
                 {
                     _tableTime = modifiedTime;
