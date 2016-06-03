@@ -15,7 +15,7 @@ namespace NuGet
         public const int TargetFrameworkSupportForDependencyContentsAndToolsVersion = 4;
         public const int TargetFrameworkSupportForReferencesVersion = 5;
         public const int XdtTransformationVersion = 6;
-        public const int ServiceableVersion = 7;
+        public const int ServiceableVersion = 8;
 
         public static int GetManifestVersion(ManifestMetadata metadata)
         {
