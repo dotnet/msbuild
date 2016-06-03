@@ -68,6 +68,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public PackOptions PackOptions { get; set; }
 
+        public bool Serviceable { get; set; }
+
         public RuntimeOptions RuntimeOptions { get; set; }
 
         public IDictionary<string, string> Commands { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

@@ -87,6 +87,12 @@ namespace NuGet
             set;
         }
 
+        public bool Serviceable
+        {
+            get;
+            set;
+        }
+
         public bool DevelopmentDependency
         {
             get;
@@ -284,6 +290,7 @@ namespace NuGet
             ProjectUrl = manifestMetadata.ProjectUrl;
             RequireLicenseAcceptance = manifestMetadata.RequireLicenseAcceptance;
             DevelopmentDependency = manifestMetadata.DevelopmentDependency;
+            Serviceable = manifestMetadata.Serviceable;
             Description = manifestMetadata.Description;
             Summary = manifestMetadata.Summary;
             ReleaseNotes = manifestMetadata.ReleaseNotes;

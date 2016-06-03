@@ -77,6 +77,8 @@ namespace NuGet
 
         public string Tags { get; set; }
 
+        public bool Serviceable { get; set; }
+
         public IEnumerable<PackageDependencySet> DependencySets { get; set; } = new List<PackageDependencySet>();
 
         public ICollection<PackageReferenceSet> PackageAssemblyReferences { get; set; } = new List<PackageReferenceSet>();
