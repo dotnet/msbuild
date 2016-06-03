@@ -2,14 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -44,7 +38,6 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(nameof(PrepareTargets.Init),
         nameof(PublishTargets.InitPublish),
         nameof(PublishTargets.PublishArtifacts),
-        nameof(PublishTargets.TriggerDockerHubBuilds),
         nameof(PublishTargets.FinalizeBuild))]
         [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
         public static BuildTargetResult Publish(BuildTargetContext c)
@@ -218,7 +211,7 @@ namespace Microsoft.DotNet.Cli.Build
             AzurePublisherTool.PublishFile(versionBadgeBlob, versionBadge);
             return c.Success();
         }
-        
+
         [Target]
         [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult PublishSdkInstallerFileToAzure(BuildTargetContext c)
@@ -292,45 +285,6 @@ namespace Microsoft.DotNet.Cli.Build
                 version,
                 uploadUrl);
 
-            return c.Success();
-        }
-
-        [Target]
-        [Environment("DOCKER_HUB_REPO")]
-        [Environment("DOCKER_HUB_TRIGGER_TOKEN")]
-        public static BuildTargetResult TriggerDockerHubBuilds(BuildTargetContext c)
-        {
-            string dockerHubRepo = Environment.GetEnvironmentVariable("DOCKER_HUB_REPO");
-            string dockerHubTriggerToken = Environment.GetEnvironmentVariable("DOCKER_HUB_TRIGGER_TOKEN");
-
-            Uri baseDockerHubUri = new Uri("https://registry.hub.docker.com/u/");
-            Uri dockerHubTriggerUri;
-            if (!Uri.TryCreate(baseDockerHubUri, $"{dockerHubRepo}/trigger/{dockerHubTriggerToken}/", out dockerHubTriggerUri))
-            {
-                return c.Failed("Invalid DOCKER_HUB_REPO and/or DOCKER_HUB_TRIGGER_TOKEN");
-            }
-
-            c.Info($"Triggering automated DockerHub builds for {dockerHubRepo}");
-            using (HttpClient client = new HttpClient())
-            {
-                StringContent requestContent = new StringContent("{\"build\": true}", Encoding.UTF8, "application/json");
-                try
-                {
-                    HttpResponseMessage response = client.PostAsync(dockerHubTriggerUri, requestContent).Result;
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendLine($"HTTP request to {dockerHubTriggerUri.ToString()} was unsuccessful.");
-                        sb.AppendLine($"Response status code: {response.StatusCode}. Reason phrase: {response.ReasonPhrase}.");
-                        sb.Append($"Respone content: {response.Content.ReadAsStringAsync().Result}");
-                        return c.Failed(sb.ToString());
-                    }
-                }
-                catch (AggregateException e)
-                {
-                    return c.Failed($"HTTP request to {dockerHubTriggerUri.ToString()} failed. {e.ToString()}");
-                }
-            }
             return c.Success();
         }
 
