@@ -109,6 +109,7 @@ namespace NuGet
             metadata.Authors = copy.Authors.Distinct();
             metadata.Owners = copy.Owners.Distinct();
             metadata.Tags = string.Join(",", copy.Tags).Trim();
+            metadata.Serviceable = copy.Serviceable;
             metadata.LicenseUrl = copy.LicenseUrl;
             metadata.ProjectUrl = copy.ProjectUrl;
             metadata.IconUrl = copy.IconUrl;

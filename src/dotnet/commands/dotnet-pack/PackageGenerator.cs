@@ -390,6 +390,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             builder.ReleaseNotes = project.PackOptions.ReleaseNotes;
             builder.Language = project.Language;
             builder.Tags.AddRange(project.PackOptions.Tags);
+            builder.Serviceable = project.Serviceable;
 
             if (!string.IsNullOrEmpty(project.PackOptions.IconUrl))
             {
