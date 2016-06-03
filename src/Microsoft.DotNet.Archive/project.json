@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0-preview3-*",
+  "buildOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
+  "description": "Archive and compression types.",
+  "dependencies": {
+    "NETStandard.Library": "1.6.0-rc3-24201-00"
+  },
+  "frameworks": {
+    "netstandard1.0": {}
+  },
+  "scripts": {}
+}
