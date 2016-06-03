@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Scripts
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
             dependencyInfos.Add(CreateDependencyInfo("CoreFx", Config.Instance.CoreFxVersionUrl).Result);
+            dependencyInfos.Add(CreateDependencyInfo("Roslyn", Config.Instance.RoslynVersionUrl).Result);
             dependencyInfos.Add(CreateDependencyInfo("CoreSetup", Config.Instance.CoreSetupVersionUrl).Result);
 
             return c.Success();
