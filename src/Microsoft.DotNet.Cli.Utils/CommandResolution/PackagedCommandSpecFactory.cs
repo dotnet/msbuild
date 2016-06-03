@@ -36,15 +36,12 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var isPortable = IsPortableApp(commandPath, runtimeConfigPath);
-
-            return CreateCommandSpecWrappingWithCorehostIfDll(
+            return CreateCommandSpecWrappingWithMuxerIfDll(
                 commandPath, 
                 commandArguments, 
                 depsFilePath, 
                 commandResolutionStrategy,
                 nugetPackagesRoot,
-                isPortable,
                 runtimeConfigPath);
         }
 
@@ -58,65 +55,57 @@ namespace Microsoft.DotNet.Cli.Utils
             return filePath;
         }
 
-        private CommandSpec CreateCommandSpecWrappingWithCorehostIfDll(
+        private CommandSpec CreateCommandSpecWrappingWithMuxerIfDll(
             string commandPath, 
             IEnumerable<string> commandArguments, 
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
-            bool isPortable,
             string runtimeConfigPath)
         {
             var commandExtension = Path.GetExtension(commandPath);
 
             if (commandExtension == FileNameSuffixes.DotNet.DynamicLib)
             {
-                return CreatePackageCommandSpecUsingCorehost(
+                return CreatePackageCommandSpecUsingMuxer(
                     commandPath, 
                     commandArguments, 
                     depsFilePath, 
                     commandResolutionStrategy,
                     nugetPackagesRoot,
-                    isPortable,
                     runtimeConfigPath);
             }
             
             return CreateCommandSpec(commandPath, commandArguments, commandResolutionStrategy);
         }
 
-        private CommandSpec CreatePackageCommandSpecUsingCorehost(
+        private CommandSpec CreatePackageCommandSpecUsingMuxer(
             string commandPath, 
             IEnumerable<string> commandArguments, 
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
-            bool isPortable,
             string runtimeConfigPath)
         {
             var host = string.Empty;
             var arguments = new List<string>();
 
-            if (isPortable)
-            {
-                var muxer = new Muxer();
+            var muxer = new Muxer();
 
-                host = muxer.MuxerPath;
-                if (host == null)
-                {
-                    throw new Exception("Unable to locate dotnet multiplexer");
-                }
-
-                arguments.Add("exec");
-            }
-            else
+            host = muxer.MuxerPath;
+            if (host == null)
             {
-                host = CoreHost.HostExePath;
+                throw new Exception("Unable to locate dotnet multiplexer");
             }
+
+            arguments.Add("exec");
+
             if (runtimeConfigPath != null)
             {
                 arguments.Add("--runtimeconfig");
                 arguments.Add(runtimeConfigPath);
             }
+            
             if (depsFilePath != null)
             {
                 arguments.Add("--depsfile");
@@ -140,24 +129,6 @@ namespace Microsoft.DotNet.Cli.Utils
             var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(commandArguments);
 
             return new CommandSpec(commandPath, escapedArgs, commandResolutionStrategy);
-        }
-
-        private bool IsPortableApp(string commandPath, string runtimeConfigPath)
-        {
-            var commandDir = Path.GetDirectoryName(commandPath);
-
-            runtimeConfigPath = string.IsNullOrEmpty(runtimeConfigPath)
-                ? Directory.EnumerateFiles(commandDir).FirstOrDefault(x => x.EndsWith("runtimeconfig.json"))
-                : runtimeConfigPath;
-    
-            if (runtimeConfigPath == null || !File.Exists(runtimeConfigPath))
-            {
-                return false;
-            }
-
-            var runtimeConfig = new RuntimeConfig(runtimeConfigPath);
-
-            return runtimeConfig.IsPortable;
         }
     }
 }

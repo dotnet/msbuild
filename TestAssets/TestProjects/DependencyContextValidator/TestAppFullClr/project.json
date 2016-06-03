@@ -7,7 +7,7 @@
   "dependencies": {
     "DependencyContextValidator": "1.0.0-*",
     "System.Diagnostics.Process": {
-      "version": "4.1.0-rc3-24131-00",
+      "version": "4.1.0-rc3-24201-00",
       "type": "build"
     }
   },

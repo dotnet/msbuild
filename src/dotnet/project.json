@@ -26,8 +26,8 @@
     },
     "NuGet.CommandLine.XPlat": "3.5.0-rc-1285",
     "Newtonsoft.Json": "7.0.1",
-    "System.Text.Encoding.CodePages": "4.0.1-rc3-24131-00",
-    "System.Diagnostics.FileVersionInfo": "4.0.0-rc3-24131-00",
+    "System.Text.Encoding.CodePages": "4.0.1-rc3-24201-00",
+    "System.Diagnostics.FileVersionInfo": "4.0.0-rc3-24201-00",
     "Microsoft.ApplicationInsights": "2.0.0",
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
@@ -43,16 +43,16 @@
     },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004363"
+      "version": "1.0.0-rc3-004391"
     },
-    "System.Diagnostics.TraceSource": "4.0.0-rc3-24131-00",
-    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc3-24131-00",
-    "System.Resources.Writer": "4.0.0-rc3-24131-00",
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc3-24131-00",
-    "System.Private.DataContractSerialization": "4.1.1-rc3-24131-00",
-    "System.Text.RegularExpressions": "4.1.0-rc3-24131-00",
+    "System.Diagnostics.TraceSource": "4.0.0-rc3-24201-00",
+    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc3-24201-00",
+    "System.Resources.Writer": "4.0.0-rc3-24201-00",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc3-24201-00",
+    "System.Private.DataContractSerialization": "4.1.1-rc3-24201-00",
+    "System.Text.RegularExpressions": "4.1.0-rc3-24201-00",
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc3-24131-00",
+      "version": "4.0.0-rc3-24201-00",
       "exclude": "compile"
     }
   },

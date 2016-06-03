@@ -3,7 +3,7 @@
   "dependencies": {
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-192208-24",
-    "Microsoft.NETCore.Platforms": "1.0.1-rc3-24131-00",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc3-24201-00",
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     }

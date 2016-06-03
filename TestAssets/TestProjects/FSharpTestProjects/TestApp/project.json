@@ -14,7 +14,7 @@
       "version": "1.0.0-*",
       "target": "project"
     },
-    "Microsoft.NETCore.App": "1.0.0-rc3-004363",
+    "Microsoft.NETCore.App": "1.0.0-rc3-004391",
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221"
   },
   "tools": {

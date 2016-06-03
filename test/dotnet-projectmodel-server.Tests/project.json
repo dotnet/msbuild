@@ -2,13 +2,13 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004363"
+      "version": "1.0.0-rc3-004391"
     },
     "dotnet": {
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc3-24131-00",
+      "version": "4.0.0-rc3-24201-00",
       "exclude": "Compile"
     },
     "Microsoft.DotNet.Tools.Tests.Utilities": {
@@ -19,7 +19,7 @@
     },
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-192208-24",
-    "System.Net.NameResolution": "4.0.0-rc3-24131-00"
+    "System.Net.NameResolution": "4.0.0-rc3-24201-00"
   },
   "frameworks": {
     "netcoreapp1.0": {

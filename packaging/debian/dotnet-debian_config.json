@@ -29,7 +29,6 @@
     },
 
     "debian_dependencies":{
-        "clang-3.5" : {},
         "%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%" : {}
     }
 }

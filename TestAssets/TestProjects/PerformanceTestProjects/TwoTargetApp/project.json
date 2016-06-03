@@ -9,14 +9,14 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc3-004363"
+          "version": "1.0.0-rc3-004391"
         }
       }
     },
     "netstandard1.6": {
       "dependencies": {
-        "NETStandard.Library": "1.6.0-rc3-24131-00",
-        "Microsoft.NETCore.Runtime": "1.0.2-rc3-24131-00"
+        "NETStandard.Library": "1.6.0-rc3-24201-00",
+        "Microsoft.NETCore.Runtime": "1.0.2-rc3-24201-00"
       }
     }
   },

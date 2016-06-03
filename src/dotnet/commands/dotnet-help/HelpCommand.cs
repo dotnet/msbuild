@@ -8,16 +8,22 @@ namespace Microsoft.DotNet.Tools.Help
 {
     public class HelpCommand
     {
-        private const string UsageText = @"Usage: dotnet [common-options] [command] [arguments]
+        private const string UsageText = @"Usage: dotnet [host-options] [command] [arguments] [common-options]
 
 Arguments:
-  [command]     The command to execute
-  [arguments]   Arguments to pass to the command
+  [command]             The command to execute
+  [arguments]           Arguments to pass to the command
+  [host-options]        Options specific to dotnet (host)
+  [common-options]      Options common to all commands
 
-Common Options (passed before the command):
-  -v|--verbose  Enable verbose output
-  --version     Display .NET CLI Version Number
-  --info        Display .NET CLI Info
+Common options:
+  -v|--verbose          Enable verbose output
+  -h|--help             Show help 
+
+Host options (passed before the command):
+  -v|--verbose          Enable verbose output
+  --version             Display .NET CLI Version Number
+  --info                Display .NET CLI Info
 
 Common Commands:
   new           Initialize a basic .NET project

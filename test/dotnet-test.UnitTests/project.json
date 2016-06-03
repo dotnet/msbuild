@@ -3,14 +3,14 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004363"
+      "version": "1.0.0-rc3-004391"
     },
     "Newtonsoft.Json": "7.0.1",
     "dotnet": {
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc3-24131-00",
+      "version": "4.0.0-rc3-24201-00",
       "exclude": "Compile"
     },
     "xunit": "2.1.0",

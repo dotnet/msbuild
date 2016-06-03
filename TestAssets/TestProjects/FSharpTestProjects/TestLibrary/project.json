@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "dependencies": {
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-    "NETStandard.Library": "1.6.0-rc3-24131-00"
+    "NETStandard.Library": "1.6.0-rc3-24201-00"
   },
   "tools": {
     "dotnet-compile-fsc": {
