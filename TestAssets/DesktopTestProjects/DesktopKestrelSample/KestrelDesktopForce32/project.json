@@ -4,7 +4,7 @@
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20113",
     "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20113",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-20254",
-    "Microsoft.NETCore.Platforms": "1.0.1-rc3-24131-00"
+    "Microsoft.NETCore.Platforms": "1.0.1-rc3-24201-00"
   },
   "buildOptions": {
     "platform": "anycpu32bitpreferred",
