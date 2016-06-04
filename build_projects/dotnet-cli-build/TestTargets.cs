@@ -40,6 +40,7 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
             "Microsoft.Extensions.DependencyModel.Tests",
+            "Microsoft.DotNet.Configurer.UnitTests",
             "Performance"
         };
 
