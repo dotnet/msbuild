@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _tempOutputDirectory;
         private string _configuration;
         private string _versionSuffix;
-        private string _serviceable;
+        private bool _serviceable;
 
         private string OutputOption
         {
@@ -69,9 +69,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             get
             {
-                return _serviceable == string.Empty ?
-                                           "" :
-                                           $"--serviceable";
+                return _serviceable ?
+                                $"--serviceable" :
+                                "";
             }
         }
 
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string tempOutput="", 
             string configuration="", 
             string versionSuffix="",
-            string serviceable = "")
+            bool serviceable = false)
             : base("dotnet")
         {
             _projectPath = projectPath;
