@@ -15,7 +15,9 @@ namespace NuGet
         public const int TargetFrameworkSupportForDependencyContentsAndToolsVersion = 4;
         public const int TargetFrameworkSupportForReferencesVersion = 5;
         public const int XdtTransformationVersion = 6;
-        public const int ServiceableVersion = 8;
+        // Note that this version should change from 7 to 8 when the PackageType
+        // schema is merged into here
+        public const int ServiceableVersion = 7;
 
         public static int GetManifestVersion(ManifestMetadata metadata)
         {

@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             CopyProjectToTempDir(sourceTestLibDir, testLibDir);
 
             var testProject = GetProjectPath(testLibDir);
-            var packCommand = new PackCommand(testProject, configuration: "Debug", serviceable: "true");
+            var packCommand = new PackCommand(testProject, configuration: "Debug", serviceable: true);
             var result = packCommand.Execute();
             result.Should().Pass();
 
