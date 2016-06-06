@@ -3,8 +3,8 @@
 
 namespace Microsoft.DotNet.Configurer
 {
-	public interface INuGetCacheResolver
+	public interface INuGetCacheSentinel
 	{
-		string ResolveNugetCachePath();
+		bool Exists();
 	}
 }

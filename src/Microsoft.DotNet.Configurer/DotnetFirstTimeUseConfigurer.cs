@@ -9,25 +9,13 @@ namespace Microsoft.DotNet.Configurer
 {
     public class DotnetFirstTimeUseConfigurer
     {
-        public static readonly string SENTINEL = $"{Product.Version}.dotnetSentinel";
-
-        private IFile _file;
         private INuGetCachePrimer _nugetCachePrimer;
-        private INuGetCacheResolver _nugetCacheResolver;
+        private INuGetCacheSentinel _nugetCacheSentinel;
 
-        public DotnetFirstTimeUseConfigurer(INuGetCachePrimer nugetCachePrimer, INuGetCacheResolver nugetCacheResolver)
-            : this(nugetCachePrimer, nugetCacheResolver, FileSystemWrapper.Default.File)
+        public DotnetFirstTimeUseConfigurer(INuGetCachePrimer nugetCachePrimer, INuGetCacheSentinel nugetCacheSentinel)
         {
-        }
-
-        internal DotnetFirstTimeUseConfigurer(
-            INuGetCachePrimer nugetCachePrimer,
-            INuGetCacheResolver nugetCacheResolver,
-            IFile file)
-        {
-            _file = file;
             _nugetCachePrimer = nugetCachePrimer;
-            _nugetCacheResolver = nugetCacheResolver;
+            _nugetCacheSentinel = nugetCacheSentinel;
         }
 
         public void Configure()
@@ -40,10 +28,7 @@ namespace Microsoft.DotNet.Configurer
 
         private bool ShouldPrimeNugetCache()
         {
-            var nugetCachePath = _nugetCacheResolver.ResolveNugetCachePath();
-            var sentinel = Path.Combine(nugetCachePath, SENTINEL);
-
-            return !_file.Exists(sentinel);
+            return !_nugetCacheSentinel.Exists();
         }
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.Extensions.DependencyModel.Tests;
-using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using Xunit;
 
@@ -14,36 +13,23 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 {
     public class GivenADotnetFirstTimeUseConfigurer
     {
-        private const string NUGET_CACHE_PATH = "some path";
-
         private Mock<INuGetCachePrimer> _nugetCachePrimerMock;
-        private Mock<INuGetCacheResolver> _nugetCacheResolverMock;
+        private Mock<INuGetCacheSentinel> _nugetCacheSentinelMock;
 
         public GivenADotnetFirstTimeUseConfigurer()
         {
             _nugetCachePrimerMock = new Mock<INuGetCachePrimer>();
-            _nugetCacheResolverMock = new Mock<INuGetCacheResolver>();
-            _nugetCacheResolverMock.Setup(n => n.ResolveNugetCachePath()).Returns(NUGET_CACHE_PATH);
-        }
-
-        [Fact]
-        public void The_sentinel_has_the_current_version_in_its_name()
-        {
-            DotnetFirstTimeUseConfigurer.SENTINEL.Should().Contain($"{Product.Version}");
+            _nugetCacheSentinelMock = new Mock<INuGetCacheSentinel>();
         }
 
         [Fact]
         public void It_does_not_prime_the_cache_if_the_sentinel_exists()
         {
-            var fileSystemMockBuilder = FileSystemMockBuilder.Create();
-            fileSystemMockBuilder.AddFiles(NUGET_CACHE_PATH, DotnetFirstTimeUseConfigurer.SENTINEL);
-
-            var fileSystemMock = fileSystemMockBuilder.Build();
+            _nugetCacheSentinelMock.Setup(n => n.Exists()).Returns(true);
 
             var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
                 _nugetCachePrimerMock.Object,
-                _nugetCacheResolverMock.Object,
-                fileSystemMock.File);
+                _nugetCacheSentinelMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -53,13 +39,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         [Fact]
         public void It_primes_the_cache_if_the_sentinel_does_not_exist()
         {
-            var fileSystemMockBuilder = FileSystemMockBuilder.Create();
-            var fileSystemMock = fileSystemMockBuilder.Build();
+            _nugetCacheSentinelMock.Setup(n => n.Exists()).Returns(false);
 
             var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
                 _nugetCachePrimerMock.Object,
-                _nugetCacheResolverMock.Object,
-                fileSystemMock.File);
+                _nugetCacheSentinelMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
