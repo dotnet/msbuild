@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         private Mock<ICommand> _dotnetNewCommandMock;
         private Mock<ICommand> _dotnetRestoreCommandMock;
         private Mock<INuGetPackagesArchiver> _nugetPackagesArchiverMock;
+        private Mock<INuGetCacheSentinel> _nugetCacheSentinel;
 
         public GivenANuGetCachePrimer()
         {
@@ -39,9 +40,12 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _nugetPackagesArchiverMock = new Mock<INuGetPackagesArchiver>();
             _nugetPackagesArchiverMock.Setup(n => n.ExtractArchive()).Returns(PACKAGES_ARCHIVE_PATH);
 
+            _nugetCacheSentinel = new Mock<INuGetCacheSentinel>();
+
             var nugetCachePrimer = new NuGetCachePrimer(
                 _commandFactoryMock.Object,
                 _nugetPackagesArchiverMock.Object,
+                _nugetCacheSentinel.Object,
                 _fileSystemMock.Directory);
 
             nugetCachePrimer.PrimeCache();
@@ -124,12 +128,13 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         [Fact]
         public void It_does_not_run_restore_if_dotnet_new_fails()
         {
-            var commandFactoryMock = SetupCommandFactoryMock();;
+            var commandFactoryMock = SetupCommandFactoryMock();
             _dotnetNewCommandMock.Setup(c => c.Execute()).Returns(new CommandResult(null, -1, null, null));
 
             var nugetCachePrimer = new NuGetCachePrimer(
                 commandFactoryMock.Object,
                 _nugetPackagesArchiverMock.Object,
+                _nugetCacheSentinel.Object,
                 _fileSystemMock.Directory);
 
             nugetCachePrimer.PrimeCache();
@@ -165,6 +170,29 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void It_actually_runs_dotnet_restore()
         {
             _dotnetRestoreCommandMock.Verify(c => c.Execute(), Times.Once);
+        }
+
+        [Fact]
+        public void It_creates_a_sentinel_when_restore_succeeds()
+        {
+            _nugetCacheSentinel.Verify(n => n.CreateIfNotExists(), Times.Once);
+        }
+
+        [Fact]
+        public void It_does_not_create_a_sentinel_when_restore_fails()
+        {
+            var nugetCacheSentinel = new Mock<INuGetCacheSentinel>();
+            _dotnetRestoreCommandMock.Setup(c => c.Execute()).Returns(new CommandResult(null, -1, null, null));
+
+            var nugetCachePrimer = new NuGetCachePrimer(
+                _commandFactoryMock.Object,
+                _nugetPackagesArchiverMock.Object,
+                nugetCacheSentinel.Object,
+                _fileSystemMock.Directory);
+
+            nugetCachePrimer.PrimeCache();
+
+            nugetCacheSentinel.Verify(n => n.CreateIfNotExists(), Times.Never);
         }
     }
 }

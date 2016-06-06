@@ -6,5 +6,7 @@ namespace Microsoft.DotNet.Configurer
 	public interface INuGetCacheSentinel
 	{
 		bool Exists();
+
+	    void CreateIfNotExists();
 	}
 }

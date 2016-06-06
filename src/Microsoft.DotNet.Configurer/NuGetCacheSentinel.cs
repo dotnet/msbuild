@@ -14,21 +14,44 @@ namespace Microsoft.DotNet.Configurer
 
         private readonly IFile _file;
 
-        public NuGetCacheSentinel() : this(FileSystemWrapper.Default.File)
+        private string _nugetCachePath;
+
+        private string NuGetCachePath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_nugetCachePath))
+                {
+                    _nugetCachePath = PackageDependencyProvider.ResolvePackagesPath(null, null);
+                }
+
+                return _nugetCachePath;
+            }
+        }
+
+        private string Sentinel => Path.Combine(NuGetCachePath, SENTINEL);
+
+        public NuGetCacheSentinel() : this(string.Empty, FileSystemWrapper.Default.File)
         {
         }
 
-        internal NuGetCacheSentinel(IFile file)
+        internal NuGetCacheSentinel(string nugetCachePath, IFile file)
         {
             _file = file;
+            _nugetCachePath = nugetCachePath;
         }
 
         public bool Exists()
         {
-            var nugetCachePath = PackageDependencyProvider.ResolvePackagesPath(null, null);
-            var sentinel = Path.Combine(nugetCachePath, SENTINEL);
+            return _file.Exists(Sentinel);
+        }
 
-            return !_file.Exists(sentinel);
+        public void CreateIfNotExists()
+        {
+            if (!Exists())
+            {
+                _file.CreateEmptyFile(Sentinel);
+            }
         }
     }
 }

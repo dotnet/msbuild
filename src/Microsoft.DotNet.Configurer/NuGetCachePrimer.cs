@@ -14,20 +14,26 @@ namespace Microsoft.DotNet.Configurer
         private readonly ICommandFactory _commandFactory;
         private readonly IDirectory _directory;
         private readonly INuGetPackagesArchiver _nugetPackagesArchiver;
+        private readonly INuGetCacheSentinel _nuGetCacheSentinel;
 
-        public NuGetCachePrimer(ICommandFactory commandFactory, INuGetPackagesArchiver nugetPackagesArchiver)
-            : this(commandFactory, nugetPackagesArchiver, FileSystemWrapper.Default.Directory)
+        public NuGetCachePrimer(
+            ICommandFactory commandFactory,
+            INuGetPackagesArchiver nugetPackagesArchiver,
+            INuGetCacheSentinel nuGetCacheSentinel)
+            : this(commandFactory, nugetPackagesArchiver, nuGetCacheSentinel, FileSystemWrapper.Default.Directory)
         {
         }
 
         internal NuGetCachePrimer(
             ICommandFactory commandFactory,
             INuGetPackagesArchiver nugetPackagesArchiver,
+            INuGetCacheSentinel nuGetCacheSentinel,
             IDirectory directory)
         {
             _commandFactory = commandFactory;
             _directory = directory;
             _nugetPackagesArchiver = nugetPackagesArchiver;
+            _nuGetCacheSentinel = nuGetCacheSentinel;
         }
 
         public void PrimeCache()
@@ -42,18 +48,17 @@ namespace Microsoft.DotNet.Configurer
             using (var temporaryDotnetNewDirectory = _directory.CreateTemporaryDirectory())
             {
                 var workingDirectory = temporaryDotnetNewDirectory.DirectoryPath;
-                var dotnetNewSucceeded = CreateTemporaryProject(workingDirectory);
+                var createProjectSucceeded = CreateTemporaryProject(workingDirectory);
 
-                if (dotnetNewSucceeded)
+                if (createProjectSucceeded)
                 {
-                    RestoreTemporaryProject(pathToPackagesArchive, workingDirectory);
+                    var restoreProjectSucceeded = RestoreTemporaryProject(pathToPackagesArchive, workingDirectory);
+                    if (restoreProjectSucceeded)
+                    {
+                        _nuGetCacheSentinel.CreateIfNotExists();
+                    }
                 }
             }
-            // -- PrimeCache(<path to archive>)
-            //      (done) Create temporary project under a temporary folder using dotnet new
-            //      (done) Restore that project using dotnet restore -s parameter pointing to the <path to archive>
-            //      Create sentinel
-            //      (done) Delete temporary folder (should be done automatically if using abstraction).
         }
 
         private bool CreateTemporaryProject(string workingDirectory)

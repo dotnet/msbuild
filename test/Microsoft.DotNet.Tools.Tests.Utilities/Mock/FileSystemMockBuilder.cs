@@ -84,6 +84,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             {
                 return new MemoryStream(Encoding.UTF8.GetBytes(ReadAllText(path)));
             }
+
+            public void CreateEmptyFile(string path)
+            {
+                _files.Add(path, string.Empty);
+            }
         }
 
         private class DirectoryMock : IDirectory
