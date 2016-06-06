@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "buildOptions": {
     "keyFile": "../../tools/test_key.snk"
@@ -6,7 +6,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004363"
+      "version": "1.0.0-rc3-004408"
     },
     "Microsoft.DotNet.ProjectModel.Loader": {
       "target": "project"
