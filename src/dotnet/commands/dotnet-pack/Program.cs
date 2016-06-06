@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var buildBasePath = app.Option("-b|--build-base-path <OUTPUT_DIR>", "Directory in which to place temporary build outputs", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var versionSuffix = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
+            var serviceable = app.Option("-s|--serviceable", "Set the serviceable flag in the package", CommandOptionType.NoValue);
             var path = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             app.OnExecute(() =>
@@ -63,6 +64,8 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 var artifactPathsCalculator = new ArtifactPathsCalculator(project, buildBasePathValue, outputValue, configValue);
                 var packageBuilder = new PackagesGenerator(contexts, artifactPathsCalculator, configValue);
+
+                project.Serviceable = serviceable.HasValue();
 
                 int buildResult = 0;
                 if (!noBuild.HasValue())

@@ -41,13 +41,19 @@ namespace NuGet
         /// </summary>
         internal const string SchemaVersionV6 = "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd";
 
+        /// <summary>
+        /// Added serviceble element under metadata.
+        /// </summary>
+        internal const string SchemaVersionV8 = "http://schemas.microsoft.com/packaging/2016/06/nuspec.xsd";
+
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,
             SchemaVersionV2,
             SchemaVersionV3,
             SchemaVersionV4,
             SchemaVersionV5,
-            SchemaVersionV6
+            SchemaVersionV6,
+            SchemaVersionV8
         };
 
         public static int GetVersionFromNamespace(string @namespace)
