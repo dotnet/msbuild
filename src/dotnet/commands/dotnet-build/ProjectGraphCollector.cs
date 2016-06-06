@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Build
                 foreach (var dependency in project.Dependencies)
                 {
                     LibraryDescription libraryDescription;
-                    if (lookup.TryGetValue(dependency.Name, out libraryDescription))
+                    if ((lookup.TryGetValue(dependency.Name, out libraryDescription)) && (!libraryDescription.Identity.Name.Equals(project.Identity.Name)))
                     {
                         if (libraryDescription.Resolved && libraryDescription.Identity.Type.Equals(LibraryType.Project))
                         {
