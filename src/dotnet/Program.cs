@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Loader;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
@@ -56,6 +57,14 @@ namespace Microsoft.DotNet.Cli
             {
                 using (PerfTrace.Current.CaptureTiming())
                 {
+                    var nugetCacheSentinel = new NuGetCacheSentinel();
+                    var nugetPackagesArchiver = new NuGetPackagesArchiver();
+                    var commandFactory = new DotNetCommandFactory();
+                    var nugetCachePrimer = new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
+                    var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(nugetCachePrimer, nugetCacheSentinel);
+
+                    dotnetConfigurer.Configure();
+
                     return ProcessArgs(args, new Telemetry());
                 }
             }

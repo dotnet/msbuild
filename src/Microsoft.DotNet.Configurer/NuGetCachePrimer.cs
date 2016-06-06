@@ -63,13 +63,13 @@ namespace Microsoft.DotNet.Configurer
 
         private bool CreateTemporaryProject(string workingDirectory)
         {
-            return RunCommand("dotnet new", Enumerable.Empty<string>(), workingDirectory);
+            return RunCommand("new", Enumerable.Empty<string>(), workingDirectory);
         }
 
         private bool RestoreTemporaryProject(string pathToPackagesArchive, string workingDirectory)
         {
             return RunCommand(
-                "dotnet restore",
+                "restore",
                 new[] {NUGET_SOURCE_PARAMETER, $"{pathToPackagesArchive}"},
                 workingDirectory);
         }

@@ -119,6 +119,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Configurer
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Configurer.UnitTests", "test\Microsoft.DotNet.Configurer.UnitTests\Microsoft.DotNet.Configurer.UnitTests.xproj", "{4C3B06D5-B6D5-4E5B-A44F-3EBE52A1C759}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Archive", "src\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.xproj", "{35B19F22-B8C0-4849-9C35-3F809B7588B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -883,6 +885,22 @@ Global
 		{4C3B06D5-B6D5-4E5B-A44F-3EBE52A1C759}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
 		{4C3B06D5-B6D5-4E5B-A44F-3EBE52A1C759}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
 		{4C3B06D5-B6D5-4E5B-A44F-3EBE52A1C759}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Debug|x64.Build.0 = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.MinSizeRel|Any CPU.ActiveCfg = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.MinSizeRel|Any CPU.Build.0 = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.MinSizeRel|x64.ActiveCfg = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.MinSizeRel|x64.Build.0 = Debug|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Release|x64.ActiveCfg = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.Release|x64.Build.0 = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -940,5 +958,6 @@ Global
 		{5DF6C9DA-6909-4EC0-909E-6913580BB4A4} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{E5ED47EF-BF25-4DA9-A7FE-290C642CBF0F} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{4C3B06D5-B6D5-4E5B-A44F-3EBE52A1C759} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{35B19F22-B8C0-4849-9C35-3F809B7588B8} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 	EndGlobalSection
 EndGlobal

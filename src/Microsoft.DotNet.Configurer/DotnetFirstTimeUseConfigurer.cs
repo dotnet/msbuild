@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Configurer
         {
             if(ShouldPrimeNugetCache())
             {
+                Reporter.Output.WriteLine("Configuring dotnet CLI for first time use.");
                 _nugetCachePrimer.PrimeCache();
             }
         }
