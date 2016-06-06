@@ -7,7 +7,7 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "System.Runtime.Loader": "4.0.0-rc3-24204-00"
+    "System.Runtime.Loader": "4.0.0-rc3-24206-00"
   },
   "frameworks": {
     "netstandard1.6": {
