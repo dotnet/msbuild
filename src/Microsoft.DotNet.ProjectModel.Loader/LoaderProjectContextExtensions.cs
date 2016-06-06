@@ -3,45 +3,97 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.ProjectModel.Loader
 {
     public static class LoaderProjectContextExtensions
     {
         public static AssemblyLoadContext CreateLoadContext(
-            this ProjectContext context, 
-            string configuration = "Debug", 
-            string outputPath = null)
+            this ProjectContext context,
+            string configuration) => CreateLoadContext(context, context.RuntimeIdentifier, configuration);
+
+        public static AssemblyLoadContext CreateLoadContext(
+            this ProjectContext context,
+            string runtimeIdentifier,
+            string configuration) => CreateLoadContext(context, runtimeIdentifier, configuration);
+
+        public static AssemblyLoadContext CreateLoadContext(
+            this ProjectContext context,
+            string runtimeIdentifier,
+            string configuration,
+            string outputPath)
         {
             var exporter = context.CreateExporter(configuration);
             var assemblies = new Dictionary<AssemblyName, string>(AssemblyNameComparer.OrdinalIgnoreCase);
-            var dllImports = new Dictionary<string, string>();
+            var nativeLibs = new Dictionary<string, string>();
+            var rids = DependencyContext.Default?.RuntimeGraph ?? Enumerable.Empty<RuntimeFallbacks>();
+            var fallbacks = rids.FirstOrDefault(r => r.Runtime.Equals(runtimeIdentifier));
 
             foreach (var export in exporter.GetAllExports())
             {
-                // TODO: Handle resource assemblies
-                foreach (var asset in export.RuntimeAssemblyGroups.GetDefaultAssets())
+                // Process managed assets
+                var group = string.IsNullOrEmpty(runtimeIdentifier) ?
+                    export.RuntimeAssemblyGroups.GetDefaultGroup() :
+                    GetGroup(export.RuntimeAssemblyGroups, runtimeIdentifier, fallbacks);
+                if(group != null)
                 {
-                    // REVIEW: Should we use the following?
-                    // AssemblyLoadContext.GetAssemblyName(asset.ResolvedPath);
-                    var assemblyName = new AssemblyName(asset.Name);
-                    assemblies[assemblyName] = asset.ResolvedPath;
+                    foreach(var asset in group.Assets)
+                    {
+                        assemblies[asset.GetAssemblyName()] = asset.ResolvedPath;
+                    }
                 }
 
-                foreach (var asset in export.NativeLibraryGroups.GetDefaultAssets())
+                // Process native assets
+                group = string.IsNullOrEmpty(runtimeIdentifier) ?
+                    export.NativeLibraryGroups.GetDefaultGroup() :
+                    GetGroup(export.NativeLibraryGroups, runtimeIdentifier, fallbacks);
+                if(group != null)
                 {
-                    dllImports[asset.Name] = asset.ResolvedPath;
+                    foreach(var asset in group.Assets)
+                    {
+                        nativeLibs[asset.Name] = asset.ResolvedPath;
+                    }
+                }
+
+                // Process resource assets
+                foreach(var asset in export.ResourceAssemblies)
+                {
+                    var name = asset.Asset.GetAssemblyName();
+                    name.CultureName = asset.Locale;
+                    assemblies[name] = asset.Asset.ResolvedPath;
                 }
             }
 
             return new ProjectLoadContext(
                 assemblies,
-                dllImports,
+                nativeLibs,
 
                 // Add the project's output directory path to ensure project-to-project references get located
                 new[] { context.GetOutputPaths(configuration, outputPath: outputPath).CompilationOutputPath });
+        }
+
+        private static LibraryAssetGroup GetGroup(IEnumerable<LibraryAssetGroup> groups, string runtimeIdentifier, RuntimeFallbacks fallbacks)
+        {
+            IEnumerable<string> rids = new[] { runtimeIdentifier };
+            if(fallbacks != null)
+            {
+                rids = Enumerable.Concat(rids, fallbacks.Fallbacks);
+            }
+
+            foreach(var rid in rids)
+            {
+                var group = groups.GetRuntimeGroup(rid);
+                if(group != null)
+                {
+                    return group;
+                }
+            }
+            return null;
         }
 
         private class AssemblyNameComparer : IEqualityComparer<AssemblyName>
