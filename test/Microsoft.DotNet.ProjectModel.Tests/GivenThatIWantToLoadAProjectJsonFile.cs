@@ -747,7 +747,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             dependency.Type.Should().Be(LibraryDependencyType.Default);
             dependency.SourceFilePath.Should().Be(ProjectFilePath);
             dependency.SourceLine.Should().Be(3);
-            dependency.SourceColumn.Should().Be(31);
+            dependency.SourceColumn.Should().Be(30);
         }
 
         [Fact]
@@ -769,7 +769,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             dependency.Type.Should().Be(LibraryDependencyType.Default);
             dependency.SourceFilePath.Should().Be(ProjectFilePath);
             dependency.SourceLine.Should().Be(3);
-            dependency.SourceColumn.Should().Be(25);
+            dependency.SourceColumn.Should().Be(24);
         }
 
         [Fact]
@@ -909,7 +909,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             tool.Type.Should().Be(LibraryDependencyType.Default);
             tool.SourceFilePath.Should().Be(ProjectFilePath);
             tool.SourceLine.Should().Be(3);
-            tool.SourceColumn.Should().Be(25);
+            tool.SourceColumn.Should().Be(24);
         }
 
         [Fact]
@@ -931,7 +931,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             tool.Type.Should().Be(LibraryDependencyType.Default);
             tool.SourceFilePath.Should().Be(ProjectFilePath);
             tool.SourceLine.Should().Be(3);
-            tool.SourceColumn.Should().Be(19);
+            tool.SourceColumn.Should().Be(18);
         }
 
         [Fact]

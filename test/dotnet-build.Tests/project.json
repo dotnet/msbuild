@@ -12,7 +12,7 @@
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },
-    "Newtonsoft.Json": "7.0.1",
+    "Newtonsoft.Json": "9.0.1-beta1",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-192208-24"
   },
