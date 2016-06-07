@@ -212,6 +212,7 @@ namespace Microsoft.DotNet.Scripts
             ReplaceFileContents(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", fileContents =>
             {
                 fileContents = ReplaceDependencyVersion(c, fileContents, "CoreCLRVersion", "Microsoft.NETCore.Runtime.CoreCLR");
+                fileContents = ReplaceDependencyVersion(c, fileContents, "JitVersion", "Microsoft.NETCore.Jit");
 
                 return fileContents;
             });
