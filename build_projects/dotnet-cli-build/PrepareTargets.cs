@@ -187,6 +187,11 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
         public static BuildTargetResult DownloadHostAndSharedFxInstallers(BuildTargetContext c)
         {
+            if (CurrentPlatform.IsUbuntu && !CurrentPlatform.IsVersion("14.04"))
+            {
+                return c.Success();
+            }
+
             var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
             var hostVersion = CliDependencyVersions.SharedHostVersion;
 
@@ -198,7 +203,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDownloadFile));
             Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));
-            
+
             if ( ! File.Exists(sharedFrameworkInstallerDownloadFile))
             {
                 var sharedFrameworkInstallerDestinationFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
@@ -227,7 +232,6 @@ namespace Microsoft.DotNet.Cli.Build
                    sharedHostInstallerDownloadFile).Wait();
 
                 File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
-
             }
 
             return c.Success();

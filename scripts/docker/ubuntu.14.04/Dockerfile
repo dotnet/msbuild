@@ -4,7 +4,7 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM debian:jessie
+FROM ubuntu:14.04
 
 # Misc Dependencies for build
 RUN apt-get update && \
@@ -17,7 +17,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # This could become a "microsoft/coreclr" image, since it just installs the dependencies for CoreCLR (and stdlib)
-RUN apt-get update &&\
+RUN apt-get update && \
     apt-get -qqy install \
         libunwind8 \
         libkrb5-3 \
@@ -37,7 +37,8 @@ RUN apt-get update && \
         devscripts \
         git \
         cmake \
-        clang-3.5 && \
+        clang-3.5 \
+        lldb-3.6 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -60,9 +61,3 @@ USER ${USER_ID}
 
 # Set working directory
 WORKDIR /opt/code
-
-# Work around https://github.com/dotnet/cli/issues/1582 until Docker releases a
-# fix (https://github.com/docker/docker/issues/20818). This workaround allows
-# the container to be run with the default seccomp Docker settings by avoiding
-# the restart_syscall made by LTTng which causes a failed assertion.
-ENV LTTNG_UST_REGISTER_TIMEOUT 0

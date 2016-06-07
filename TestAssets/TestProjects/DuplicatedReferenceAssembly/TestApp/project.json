@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "dependencies": {
     "TestLibrary": "1.0.0",
-    "System.IO.Compression": "4.1.0-rc3-24131-00"
+    "System.IO.Compression": "4.1.0-rc3-24201-00"
   },
   "frameworks": {
     "net461": {}

@@ -11,7 +11,7 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "System.Linq.Expressions": "4.1.0-rc3-24131-00"
+    "System.Linq.Expressions": "4.1.0-rc3-24201-00"
   },
   "frameworks": {
     "net451": {

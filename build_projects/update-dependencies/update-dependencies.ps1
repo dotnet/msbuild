@@ -17,6 +17,8 @@ if($Help)
     exit 0
 }
 
+$Architecture='x64'
+
 $RepoRoot = "$PSScriptRoot\..\.."
 $AppPath = "$PSScriptRoot"
 
@@ -28,7 +30,7 @@ if (!$env:DOTNET_INSTALL_DIR)
 
 # Install a stage 0
 Write-Host "Installing .NET Core CLI Stage 0"
-& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Architecture x64
+& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Architecture $Architecture
 if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 
 # Put the stage0 on the path

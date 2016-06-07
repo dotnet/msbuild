@@ -21,8 +21,8 @@ RUN dnf install -y git \
         zip \
         tar \
         nodejs \
+        findutils \
         npm && \
-        findutils && \
     dnf clean all && \
     npm install -g azure-cli && \
     npm cache clean

@@ -11,7 +11,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004363"
+      "version": "1.0.0-rc3-004391"
     },
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
@@ -23,7 +23,7 @@
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
-      "version": "4.0.0-rc3-24131-00",
+      "version": "4.0.0-rc3-24201-00",
       "exclude": "Compile"
     },
     "Microsoft.DotNet.ProjectModel": {
