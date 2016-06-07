@@ -9,7 +9,7 @@
       "target": "project",
       "version": "1.0.0-*"
     },
-    "Microsoft.NETCore.App": "1.0.0-rc3-004406"
+    "Microsoft.NETCore.App": "1.0.0-rc3-004408"
   },
   "frameworks": {
     "netcoreapp1.0": {}
