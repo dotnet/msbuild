@@ -276,7 +276,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var version = CliNuGetVersion;
 
-            var packageName = Monikers.GetSdkDebianPackageName(c);
+            var packageName = CliMonikers.GetSdkDebianPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
             var uploadUrl = AzurePublisherTool.CalculateInstallerUploadUrl(installerFile, Channel, version);
 
