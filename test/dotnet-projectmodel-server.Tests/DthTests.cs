@@ -8,7 +8,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -55,6 +54,38 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
 
                 Assert.Contains("netcoreapp1.0", frameworkShortNames);
                 Assert.Contains("dnx451", frameworkShortNames);
+            }
+        }
+
+        [Theory]
+        [InlineData(MessageTypes.RefreshDependencies, null)]
+        [InlineData(MessageTypes.RestoreComplete, null)]
+        [InlineData(MessageTypes.RestoreComplete, true)]
+        [InlineData(MessageTypes.RestoreComplete, false)]
+        public void RefreshDependenciesResultsAreConsistent(string messageType, bool? clearCache)
+        {
+            var projectPath = Path.Combine(_testAssetsManager.AssetsRoot, "EmptyNetCoreApp");
+            Assert.True(Directory.Exists(projectPath));
+
+            using (var server = new DthTestServer())
+            using (var client = new DthTestClient(server))
+            {
+                client.Initialize(projectPath);
+                var originalDependencies = client.DrainMessage(7).Single(m => m.MessageType == MessageTypes.Dependencies)
+                                 .RetrievePayloadAs<JObject>();
+
+                if (clearCache.HasValue)
+                {
+                    client.SendPayload(projectPath, messageType, new { Reset = clearCache.Value });
+                }
+                else
+                {
+                    client.SendPayload(projectPath, messageType);
+                }
+
+                var refreshedDependencies = client.DrainTillFirst(MessageTypes.Dependencies).Payload.ToString();
+
+                Assert.Equal(originalDependencies.ToString(), refreshedDependencies.ToString());
             }
         }
 

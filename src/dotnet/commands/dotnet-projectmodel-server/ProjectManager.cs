@@ -200,15 +200,10 @@ namespace Microsoft.DotNet.ProjectModel.Server
                     _configure.Value = message.Payload.GetValue("Configuration");
                     break;
                 case MessageTypes.RefreshDependencies:
+                    _refreshDependencies.Value = false;
+                    break;
                 case MessageTypes.RestoreComplete:
-                    if (message.Payload.HasValues)
-                    {
-                        _refreshDependencies.Value = message.Payload.Value<bool>("Reset");
-                    }
-                    else
-                    {
-                        _refreshDependencies.Value = true;
-                    }
+                    _refreshDependencies.Value = message.Payload.HasValues ? message.Payload.Value<bool>("Reset") : true;
                     break;
                 case MessageTypes.FilesChanged:
                     _filesChanged.Value = 0;
