@@ -19,9 +19,13 @@ namespace Microsoft.DotNet.ProjectModel.Server
         public ErrorMessage GlobalErrorMessage { get; set; }
         public Dictionary<NuGetFramework, ProjectContextSnapshot> ProjectContexts { get; } = new Dictionary<NuGetFramework, ProjectContextSnapshot>();
 
-        public static ProjectSnapshot Create(string projectDirectory, string configuration, DesignTimeWorkspace workspaceContext, IReadOnlyList<string> projectSearchPaths)
+        public static ProjectSnapshot Create(string projectDirectory,
+                                             string configuration,
+                                             DesignTimeWorkspace workspaceContext,
+                                             IReadOnlyList<string> projectSearchPaths,
+                                             bool clearWorkspaceContextCache)
         {
-            var projectContextsCollection = workspaceContext.GetProjectContextCollection(projectDirectory);
+            var projectContextsCollection = workspaceContext.GetProjectContextCollection(projectDirectory, clearWorkspaceContextCache);
             if (!projectContextsCollection.ProjectContexts.Any())
             {
                 throw new InvalidOperationException($"Unable to find project.json in '{projectDirectory}'");

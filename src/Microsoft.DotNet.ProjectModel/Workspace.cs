@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.ProjectModel
                 .FirstOrDefault(c => Equals(c.TargetFramework, framework) && string.IsNullOrEmpty(c.RuntimeIdentifier));
         }
 
-        public ProjectContextCollection GetProjectContextCollection(string projectPath)
+        public ProjectContextCollection GetProjectContextCollection(string projectPath, bool clearCache)
         {
             var normalizedPath = ProjectPathHelper.NormalizeProjectDirectoryPath(projectPath);
             if (normalizedPath == null)
@@ -61,10 +61,22 @@ namespace Microsoft.DotNet.ProjectModel
                 return null;
             }
 
+            if (clearCache)
+            {
+                _projectContextsCache.Clear();
+                _projectsCache.Clear();
+                _lockFileCache.Clear();
+            }
+
             return _projectContextsCache.AddOrUpdate(
                 normalizedPath,
                 key => AddProjectContextEntry(key, null),
                 (key, oldEntry) => AddProjectContextEntry(key, oldEntry));
+        }
+
+        public ProjectContextCollection GetProjectContextCollection(string projectPath)
+        {
+            return GetProjectContextCollection(projectPath, clearCache: false);
         }
 
         public Project GetProject(string projectDirectory) => GetProjectCore(projectDirectory)?.Model;

@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
         // triggers
         private readonly Trigger<string> _appPath = new Trigger<string>();
         private readonly Trigger<string> _configure = new Trigger<string>();
-        private readonly Trigger<int> _refreshDependencies = new Trigger<int>();
+        private readonly Trigger<bool> _refreshDependencies = new Trigger<bool>();
         private readonly Trigger<int> _filesChanged = new Trigger<int>();
 
         private ProjectSnapshot _local = new ProjectSnapshot();
@@ -201,7 +201,14 @@ namespace Microsoft.DotNet.ProjectModel.Server
                     break;
                 case MessageTypes.RefreshDependencies:
                 case MessageTypes.RestoreComplete:
-                    _refreshDependencies.Value = 0;
+                    if (message.Payload.HasValues)
+                    {
+                        _refreshDependencies.Value = message.Payload.Value<bool>("Reset");
+                    }
+                    else
+                    {
+                        _refreshDependencies.Value = true;
+                    }
                     break;
                 case MessageTypes.FilesChanged:
                     _filesChanged.Value = 0;
@@ -240,9 +247,15 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 _appPath.ClearAssigned();
                 _configure.ClearAssigned();
                 _filesChanged.ClearAssigned();
+
+                bool resetCache = _refreshDependencies.WasAssigned ? _refreshDependencies.Value : false;
                 _refreshDependencies.ClearAssigned();
 
-                newSnapshot = ProjectSnapshot.Create(_appPath.Value, _configure.Value, _workspaceContext, _remote.ProjectSearchPaths);
+                newSnapshot = ProjectSnapshot.Create(_appPath.Value,
+                                                     _configure.Value,
+                                                     _workspaceContext,
+                                                     _remote.ProjectSearchPaths,
+                                                     clearWorkspaceContextCache: resetCache);
             }
 
             if (newSnapshot == null)
