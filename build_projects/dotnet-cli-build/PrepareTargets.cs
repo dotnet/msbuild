@@ -75,9 +75,9 @@ namespace Microsoft.DotNet.Cli.Build
                 ReleaseSuffix = branchInfo["RELEASE_SUFFIX"],
                 CommitCount = commitCount
             };
-
-
             c.BuildContext["BuildVersion"] = buildVersion;
+
+            c.BuildContext["BranchName"] = branchInfo["BRANCH_NAME"];
             c.BuildContext["CommitHash"] = commitHash;
 
             c.Info($"Building Version: {buildVersion.SimpleVersion} (NuGet Packages: {buildVersion.NuGetVersion})");
