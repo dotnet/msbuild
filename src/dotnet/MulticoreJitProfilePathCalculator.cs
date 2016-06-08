@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli
 
             var version = Product.Version;
 
-            var rid = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
 
             _multicoreJitProfilePath = Path.Combine(profileRoot, "optimizationdata", version, rid);
         }
