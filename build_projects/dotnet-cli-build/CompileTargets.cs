@@ -107,14 +107,15 @@ namespace Microsoft.DotNet.Cli.Build
             }
             Directory.CreateDirectory(Dirs.Stage2);
 
-            var result = CompileCliSdk(c,
+            var result = CompileCliSdkAndGenerateNuGetPackagesArchive(c,
                 dotnet: DotNetCli.Stage1,
-                rootOutputDirectory: Dirs.Stage2);
+                rootOutputDirectory: Dirs.Stage2,
+                currentDotnet: DotNetCli.Stage2);
 
             if (!result.Success)
             {
                 return result;
-            }
+            }            
 
             if (CurrentPlatform.IsWindows)
             {
@@ -157,7 +158,26 @@ namespace Microsoft.DotNet.Cli.Build
             FS.RmFilesInDirRecursive(directory, "*.pdb");
         }
 
-        private static BuildTargetResult CompileCliSdk(BuildTargetContext c, DotNetCli dotnet, string rootOutputDirectory)
+        private static BuildTargetResult CompileCliSdkAndGenerateNuGetPackagesArchive(
+            BuildTargetContext c,
+            DotNetCli dotnet,
+            string rootOutputDirectory,
+            DotNetCli currentDotnet)
+        {
+            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+            var sdkOutputDirectory = Path.Combine(rootOutputDirectory, "sdk", buildVersion.NuGetVersion);
+
+            CompileCliSdk(c, dotnet, rootOutputDirectory);
+
+            GenerateNuGetPackagesArchive(c, currentDotnet, sdkOutputDirectory);
+
+            return c.Success();
+        }
+
+        private static BuildTargetResult CompileCliSdk(
+            BuildTargetContext c,
+            DotNetCli dotnet,
+            string rootOutputDirectory)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
@@ -236,7 +256,7 @@ namespace Microsoft.DotNet.Cli.Build
             var sharedFrameworkNameVersionPath = SharedFrameworkPublisher.GetSharedFrameworkPublishPath(
                 rootOutputDirectory,
                 sharedFrameworkNugetVersion);
-            
+
             // Copy Host to SDK Directory
             File.Copy(
                 Path.Combine(sharedFrameworkNameVersionPath, HostArtifactNames.DotnetHostBaseName), 
@@ -250,7 +270,7 @@ namespace Microsoft.DotNet.Cli.Build
                 Path.Combine(sharedFrameworkNameVersionPath, HostArtifactNames.HostPolicyBaseName), 
                 Path.Combine(sdkOutputDirectory, HostArtifactNames.HostPolicyBaseName), 
                 overwrite: true);
-            
+
             CrossgenUtil.CrossgenDirectory(
                 sharedFrameworkNameVersionPath,
                 sdkOutputDirectory);
@@ -258,9 +278,77 @@ namespace Microsoft.DotNet.Cli.Build
             // Generate .version file
             var version = buildVersion.NuGetVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
-            File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);
+            File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);        
 
             return c.Success();
+        }        
+
+        private static void GenerateNuGetPackagesArchive(
+            BuildTargetContext c,
+            DotNetCli dotnet,
+            string sdkOutputDirectory)
+        {
+            var nuGetPackagesArchiveProject = Path.Combine(Dirs.Intermediate, "NuGetPackagesArchiveProject");
+            var nuGetPackagesArchiveFolder = Path.Combine(Dirs.Intermediate, "nuGetPackagesArchiveFolder");
+
+            RestoreNuGetPackagesArchive(dotnet, nuGetPackagesArchiveProject, nuGetPackagesArchiveFolder);
+
+            CompressNuGetPackagesArchive(c, dotnet, nuGetPackagesArchiveFolder, sdkOutputDirectory);
+        }
+
+        private static void RestoreNuGetPackagesArchive(
+            DotNetCli dotnet,
+            string nuGetPackagesArchiveProject,
+            string nuGetPackagesArchiveFolder)
+        {
+            Rmdir(nuGetPackagesArchiveProject);
+            Mkdirp(nuGetPackagesArchiveProject);
+
+            Rmdir(nuGetPackagesArchiveFolder);
+            Mkdirp(nuGetPackagesArchiveFolder);
+
+            dotnet.New()
+                .WorkingDirectory(nuGetPackagesArchiveProject)
+                .Execute()
+                .EnsureSuccessful();
+
+            dotnet.Restore("--packages", nuGetPackagesArchiveFolder)
+                .WorkingDirectory(nuGetPackagesArchiveProject)
+                .Execute()
+                .EnsureSuccessful();
+        }
+
+        private static void CompressNuGetPackagesArchive(
+            BuildTargetContext c,
+            DotNetCli dotnet,
+            string nuGetPackagesArchiveFolder,
+            string sdkOutputDirectory)
+        {
+            var configuration = c.BuildContext.Get<string>("Configuration");
+            var archiver = Path.Combine(Dirs.Output, "tools", $"Archiver{Constants.ExeSuffix}");
+            var intermediateArchive = Path.Combine(Dirs.Intermediate, "nuGetPackagesArchive.lzma");
+            var finalArchive = Path.Combine(sdkOutputDirectory, "nuGetPackagesArchive.lzma");
+
+            Rm(intermediateArchive);
+            Rm($"{intermediateArchive}.zip");
+
+            c.Info("Publishing Archiver");
+            dotnet.Publish("--output", Path.Combine(Dirs.Output, "tools"), "--configuration", configuration)
+                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools", "Archiver"))
+                .Execute()
+                .EnsureSuccessful();            
+
+            var packagesToArchive = new List<string> { "-a", intermediateArchive };
+            var nuGetPackagesArchiveDirectory = new DirectoryInfo(nuGetPackagesArchiveFolder);
+            foreach (var directory in nuGetPackagesArchiveDirectory.GetDirectories())
+            {
+                packagesToArchive.Add(directory.FullName);
+            }
+
+            Cmd(archiver, packagesToArchive)
+                .Execute();            
+
+            File.Copy(intermediateArchive, finalArchive);
         }
 
         private static void RemoveAssetFromDepsPackages(string depsFile, string sectionName, string assetPath)
