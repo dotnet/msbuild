@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
 
-        public static Crossgen CrossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion);
+        public static Crossgen CrossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion, DependencyVersions.JitVersion);
 
         // Updates the stage 2 with recent changes.
         [Target(nameof(PrepareTargets.Init), nameof(CompileStage2))]
