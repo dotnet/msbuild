@@ -45,6 +45,8 @@ To get a clearer idea of what's going on in your build, check out [MSBuildStruct
 
 ![](https://github.com/KirillOsenkov/MSBuildStructuredLog/blob/master/docs/Screenshot1.png) 
 
+More debugging tools listed [here](https://github.com/KirillOsenkov/MSBuildStructuredLog/wiki/MSBuild-Resources#tools).
+
 ##Tests##
 
 Tests are currently disabled on platforms other than Windows. If you'd like to run them, explicitly opt in with
