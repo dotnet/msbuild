@@ -24,7 +24,7 @@
     },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004415"
+      "version": "1.0.0-rc3-004425"
     }
   },
   "frameworks": {

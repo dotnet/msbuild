@@ -13,13 +13,13 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc3-004415"
+          "version": "1.0.0-rc3-004425"
         }
       }
     },
     "netstandard1.5": {
       "dependencies": {
-        "NETStandard.Library": "1.6.0-rc3-24207-03"
+        "NETStandard.Library": "1.6.0-rc3-24208-04"
       }
     }
   }

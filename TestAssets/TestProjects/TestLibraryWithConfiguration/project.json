@@ -10,7 +10,7 @@
     ]
   },
   "dependencies": {
-    "NETStandard.Library": "1.6.0-rc3-24207-03"
+    "NETStandard.Library": "1.6.0-rc3-24208-04"
   },
   "configurations": {
     "Test": {}

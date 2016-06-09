@@ -13,7 +13,7 @@
     "net451": {},
     "netcoreapp1.0": {
       "dependencies": {
-        "Microsoft.NETCore.App": "1.0.0-rc3-004415"
+        "Microsoft.NETCore.App": "1.0.0-rc3-004425"
       },
       "imports": "portable-net45+win8"
     }
