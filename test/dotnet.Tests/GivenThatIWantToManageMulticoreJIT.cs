@@ -4,13 +4,13 @@
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Tests
 
         private static string GetOptimizationRootPath(string version)
         {
-            var rid = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
             
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? $@"Microsoft\dotnet\optimizationdata\{version}\{rid}" 
