@@ -10,7 +10,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160316"
+    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160509"
   },
   "tools": {
     "dotnet-compile-fsc": {
@@ -23,7 +23,7 @@
     }
   },
   "frameworks": {
-    "netstandard1.5": {
+    "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
