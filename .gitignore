@@ -9,6 +9,9 @@
 # NuGet keeps dropping
 Library/
 
+# local nuget cache
+.nuget/
+
 # NuGet v3 restore drops these even though we don't use MSBuild :(
 *.nuget.targets
 *.nuget.props

@@ -261,21 +261,9 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CheckPackageCache(BuildTargetContext c)
         {
             var ciBuild = string.Equals(Environment.GetEnvironmentVariable("CI_BUILD"), "1", StringComparison.Ordinal);
-
-            if (ciBuild)
-            {
-                // On CI, HOME is redirected under the repo, which gets deleted after every build.
-                // So make NUGET_PACKAGES outside of the repo.
-                var nugetPackages = Path.GetFullPath(Path.Combine(c.BuildContext.BuildDirectory, "..", ".nuget", "packages"));
-                Environment.SetEnvironmentVariable("NUGET_PACKAGES", nugetPackages);
-                Dirs.NuGetPackages = nugetPackages;
-            }
-
-            // Set the package cache location in NUGET_PACKAGES just to be safe
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NUGET_PACKAGES")))
-            {
-                Environment.SetEnvironmentVariable("NUGET_PACKAGES", Dirs.NuGetPackages);
-            }
+            
+            // Always set the package cache location local to the build
+            Environment.SetEnvironmentVariable("NUGET_PACKAGES", Dirs.NuGetPackages);
 
             CleanNuGetTempCache();
 
