@@ -3,7 +3,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160606-02"
+    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160608-03"
   },
   "frameworks": {
     "net46": {}
