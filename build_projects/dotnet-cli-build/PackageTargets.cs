@@ -199,7 +199,6 @@ namespace Microsoft.DotNet.Cli.Build
 
             var packagingBuildBasePath = Path.Combine(Dirs.Stage2Compilation, "forPackaging");
 
-            FS.Mkdirp(Dirs.PackagesIntermediate);
             FS.Mkdirp(Dirs.Packages);
 
             foreach (var projectName in ProjectsToPack)
@@ -210,22 +209,11 @@ namespace Microsoft.DotNet.Cli.Build
                     projectFile,
                     "--no-build",
                     "--build-base-path", packagingBuildBasePath,
-                    "--output", Dirs.PackagesIntermediate,
+                    "--output", Dirs.Packages,
                     "--configuration", configuration,
                     "--version-suffix", versionSuffix)
                     .Execute()
                     .EnsureSuccessful();
-            }
-
-            var packageFiles = Directory.EnumerateFiles(Dirs.PackagesIntermediate, "*.nupkg");
-
-            foreach (var packageFile in packageFiles)
-            {
-                if (!packageFile.EndsWith(".symbols.nupkg"))
-                {
-                    var destinationPath = Path.Combine(Dirs.Packages, Path.GetFileName(packageFile));
-                    File.Copy(packageFile, destinationPath, overwrite: true);
-                }
             }
 
             return c.Success();
