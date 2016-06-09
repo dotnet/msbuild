@@ -15,11 +15,15 @@
     
     <choices-outline>
         <line choice="{SharedFxComponentId}.pkg" />
+        <line choice="{HostFxrComponentId}.pkg" />
         <line choice="{SharedHostComponentId}.pkg" />
         <line choice="{CLISdkComponentId}.pkg"/>
     </choices-outline>
     <choice id="{SharedFxComponentId}.pkg" visible="true" title="{SharedFxBrandName} (x64)" description="The .NET Core Shared Framework">
         <pkg-ref id="{SharedFxComponentId}.pkg" />
+    </choice>
+    <choice id="{HostFxrComponentId}.pkg" visible="true" title="{HostFxrBrandName} (x64)" description="The .NET Core HostFxr">
+        <pkg-ref id="{HostFxrComponentId}.pkg" />
     </choice>
     <choice id="{SharedHostComponentId}.pkg" visible="true" title="{SharedHostBrandName} (x64)" description="The .NET Core Shared Host." >
         <pkg-ref id="{SharedHostComponentId}.pkg" />
@@ -28,6 +32,7 @@
         <pkg-ref id="{CLISdkComponentId}.pkg"/>
     </choice>
     <pkg-ref id="{SharedFxComponentId}.pkg">{SharedFxComponentId}.pkg</pkg-ref>
+    <pkg-ref id="{HostFxrComponentId}.pkg">{HostFxrComponentId}.pkg</pkg-ref>
     <pkg-ref id="{SharedHostComponentId}.pkg">{SharedHostComponentId}.pkg</pkg-ref>
     <pkg-ref id="{CLISdkComponentId}.pkg">{CLISdkComponentId}.pkg</pkg-ref>
 </installer-gui-script>

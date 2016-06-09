@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Cli.Build
         public const string CLISdkBrandName = "Microsoft .NET Core 1.0.0 - SDK Preview 2";
         public const string SharedFxBrandName = "Microsoft .NET Core 1.0.0 - Runtime";
         public const string SharedHostBrandName = "Microsoft .NET Core 1.0.0 - Host";
+        public const string HostFxrBrandName = "Microsoft .NET Core 1.0.0 - Host FX Resolver";
 
         public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix, string version)
         {
@@ -45,29 +46,6 @@ namespace Microsoft.DotNet.Cli.Build
             return $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}";
         }
 
-        public static string GetDebianPackageName(BuildTargetContext c)
-        {
-            var channel = c.BuildContext.Get<string>("Channel").ToLower();
-            var packageName = "";
-            switch (channel)
-            {
-                case "dev":
-                    packageName = "dotnet-nightly";
-                    break;
-                case "beta":
-                case "rc1":
-                case "rc2":
-                case "preview":
-                case "rtm":
-                    packageName = "dotnet";
-                    break;
-                default:
-                    throw new Exception($"Unknown channel - {channel}");
-            }
-
-            return packageName;
-        }
-
         public static string GetSdkDebianPackageName(BuildTargetContext c)
         {
             var channel = c.BuildContext.Get<string>("Channel").ToLower();
@@ -91,6 +69,11 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return $"{packagePrefix}-dev-{nugetVersion}";
+        }
+
+        public static string GetDebianHostFxrPackageName(BuildTargetContext c)
+        {
+            return $"dotnet-hostfxr".ToLower();
         }
 
         public static string GetDebianSharedFrameworkPackageName(string sharedFrameworkNugetVersion)
