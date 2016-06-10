@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Build
             if (!result.Success)
             {
                 return result;
-            }            
+            }
 
             if (CurrentPlatform.IsWindows)
             {
@@ -278,7 +278,7 @@ namespace Microsoft.DotNet.Cli.Build
             // Generate .version file
             var version = buildVersion.NuGetVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
-            File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);        
+            File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);
 
             return c.Success();
         }        
