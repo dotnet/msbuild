@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests
             AssertParse("namespace i { [MyChar('a')] class a { } }", "i.a");
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
+        [Fact]
         public void ClassAttributeCharIsCloseScope()
         {
             AssertParse("namespace i { [MyChar('\x0000')] class a { } }", "i.a");

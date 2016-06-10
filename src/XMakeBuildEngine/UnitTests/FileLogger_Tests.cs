@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check the ability of the distributed logger to correctly tell its internal file logger where to log the file
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void DistributedFileLoggerParameters()
         {
             DistributedFileLogger fileLogger = new DistributedFileLogger();

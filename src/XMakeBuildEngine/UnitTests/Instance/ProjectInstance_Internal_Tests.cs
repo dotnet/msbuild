@@ -285,8 +285,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ProjectInstance's surfacing of the sub-toolset version
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void GetSubToolsetVersion()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -506,7 +505,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests building a simple project and verifying the log looks as expected.
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void Build()
         {
             string projectFileContent = @"

@@ -1287,6 +1287,7 @@ class X
             }
            );
         }
+
         [Fact(Skip = "Test fails in xunit because tracker includes the PID in the log file.")]
         public void InProcTrackingStartProcessFindStrIn()
         {
@@ -1750,8 +1751,7 @@ class X
             }
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Needs investigation
+        [Fact(Skip = "Needs investigation")]
         public void MoveAlwaysRecordsWrites()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "MoveAlwaysRecordsWrites");
@@ -1999,10 +1999,7 @@ class X
             }
             finally
             {
-                if (oldCurrentDirectory != null)
-                {
-                    Directory.SetCurrentDirectory(oldCurrentDirectory);
-                }
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
 
                 if (FileUtilities.DirectoryExistsNoThrow(testDir))
                 {
@@ -2158,8 +2155,7 @@ class X
 
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Needs investigation
+        [Fact(Skip = "Needs investigation")]
         public void LaunchMultipleOfSameTool_ToolLaunchesOthers()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_ToolLaunchesOthers");
