@@ -164,12 +164,7 @@ namespace Microsoft.DotNet.Cli.Build
             string rootOutputDirectory,
             DotNetCli currentDotnet)
         {
-            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            var sdkOutputDirectory = Path.Combine(rootOutputDirectory, "sdk", buildVersion.NuGetVersion);
-
-            CompileCliSdk(c, dotnet, rootOutputDirectory);
-
-            GenerateNuGetPackagesArchive(c, currentDotnet, sdkOutputDirectory);
+            CompileCliSdk(c, dotnet, rootOutputDirectory, currentDotnet);
 
             return c.Success();
         }
@@ -177,7 +172,8 @@ namespace Microsoft.DotNet.Cli.Build
         private static BuildTargetResult CompileCliSdk(
             BuildTargetContext c,
             DotNetCli dotnet,
-            string rootOutputDirectory)
+            string rootOutputDirectory,
+            DotNetCli dotnetToGenerateNuGetPackagesArchive = null)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
@@ -280,8 +276,13 @@ namespace Microsoft.DotNet.Cli.Build
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);
 
+            if(dotnetToGenerateNuGetPackagesArchive != null)
+            {
+                GenerateNuGetPackagesArchive(c, dotnetToGenerateNuGetPackagesArchive, sdkOutputDirectory);
+            }
+
             return c.Success();
-        }        
+        }
 
         private static void GenerateNuGetPackagesArchive(
             BuildTargetContext c,
@@ -325,7 +326,7 @@ namespace Microsoft.DotNet.Cli.Build
             string sdkOutputDirectory)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");
-            var archiver = Path.Combine(Dirs.Output, "tools", $"Archiver{Constants.ExeSuffix}");
+            var archiverExe = Path.Combine(Dirs.Output, "tools", $"Archiver{Constants.ExeSuffix}");
             var intermediateArchive = Path.Combine(Dirs.Intermediate, "nuGetPackagesArchive.lzma");
             var finalArchive = Path.Combine(sdkOutputDirectory, "nuGetPackagesArchive.lzma");
 
@@ -334,14 +335,14 @@ namespace Microsoft.DotNet.Cli.Build
 
             c.Info("Publishing Archiver");
             dotnet.Publish("--output", Path.Combine(Dirs.Output, "tools"), "--configuration", configuration)
-                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools", "Archiver"))
+                .WorkingDirectory(Path.Combine(Dirs.RepoRoot, "tools", "Archiver"))
                 .Execute()
                 .EnsureSuccessful();
 
-            Cmd(archiver,
+            Cmd(archiverExe,
                 "-a", intermediateArchive,
                 nuGetPackagesArchiveFolder)
-                .Execute();            
+                .Execute();
 
             File.Copy(intermediateArchive, finalArchive);
         }

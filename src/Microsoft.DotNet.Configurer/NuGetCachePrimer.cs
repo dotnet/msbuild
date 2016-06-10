@@ -50,9 +50,9 @@ namespace Microsoft.DotNet.Configurer
                 return;
             }
 
-            var pathToPackagesArchive = _nugetPackagesArchiver.ExtractArchive();
+            var extractedPackagesArchiveDirectory = _nugetPackagesArchiver.ExtractArchive();
 
-            PrimeCacheUsingArchive(pathToPackagesArchive);
+            PrimeCacheUsingArchive(extractedPackagesArchiveDirectory);
         }
 
         private bool SkipPrimingTheCache()
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Configurer
             return !_file.Exists(_nugetPackagesArchiver.NuGetPackagesArchive);
         }
 
-        private void PrimeCacheUsingArchive(string pathToPackagesArchive)
+        private void PrimeCacheUsingArchive(string extractedPackagesArchiveDirectory)
         {
             using (var temporaryDotnetNewDirectory = _directory.CreateTemporaryDirectory())
             {
@@ -69,7 +69,8 @@ namespace Microsoft.DotNet.Configurer
 
                 if (createProjectSucceeded)
                 {
-                    var restoreProjectSucceeded = RestoreTemporaryProject(pathToPackagesArchive, workingDirectory);
+                    var restoreProjectSucceeded =
+                        RestoreTemporaryProject(extractedPackagesArchiveDirectory, workingDirectory);
                     if (restoreProjectSucceeded)
                     {
                         _nuGetCacheSentinel.CreateIfNotExists();
@@ -83,11 +84,11 @@ namespace Microsoft.DotNet.Configurer
             return RunCommand("new", Enumerable.Empty<string>(), workingDirectory);
         }
 
-        private bool RestoreTemporaryProject(string pathToPackagesArchive, string workingDirectory)
+        private bool RestoreTemporaryProject(string extractedPackagesArchiveDirectory, string workingDirectory)
         {
             return RunCommand(
                 "restore",
-                new[] {NUGET_SOURCE_PARAMETER, $"{pathToPackagesArchive}"},
+                new[] {NUGET_SOURCE_PARAMETER, $"{extractedPackagesArchiveDirectory}"},
                 workingDirectory);
         }
 
