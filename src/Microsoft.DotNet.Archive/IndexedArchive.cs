@@ -404,25 +404,26 @@ namespace Microsoft.DotNet.Archive
             int filesAdded = 0;
             sourceFiles.AsParallel().ForAll(sourceFile =>
                 {
-                    string destinationPath = sourceFile.Substring(sourceDirectory.Length + 1);
+                    // path relative to the destination/extracted directory to write the file
+                    string destinationRelativePath = sourceFile.Substring(sourceDirectory.Length + 1);
 
                     if (destinationDirectory != null)
                     {
-                        destinationPath = Path.Combine(destinationDirectory, destinationPath);
+                        destinationRelativePath = Path.Combine(destinationDirectory, destinationRelativePath);
                     }
 
                     string extension = Path.GetExtension(sourceFile);
 
                     if (ZipExtensions.Any(ze => ze.Equals(extension, StringComparison.OrdinalIgnoreCase)))
                     {
-                        AddZip(sourceFile, destinationPath);
+                        AddZip(sourceFile, destinationRelativePath);
                     }
                     else
                     {
-                        AddFile(sourceFile, destinationPath);
+                        AddFile(sourceFile, destinationRelativePath);
                     }
 
-                    progress.Report($"Adding {sourceDirectory}", ++filesAdded, sourceFiles.Length);
+                    progress.Report($"Adding {sourceDirectory}", Interlocked.Increment(ref filesAdded), sourceFiles.Length);
                 });
         }
 
