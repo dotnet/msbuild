@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "TestLibrary": "1.0.0-*",
-    "Microsoft.NETCore.App": "1.0.0-rc3-004425"
+    "Microsoft.NETCore.App": "1.0.0-rc3-004442-00"
   },
   "frameworks": {
     "netcoreapp1.0": {}
