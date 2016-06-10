@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Configurer
         private const string NUGET_SOURCE_PARAMETER = "-s";
         private readonly ICommandFactory _commandFactory;
         private readonly IDirectory _directory;
+        private readonly IFile _file;
         private readonly INuGetPackagesArchiver _nugetPackagesArchiver;
         private readonly INuGetCacheSentinel _nuGetCacheSentinel;
 
@@ -20,7 +21,11 @@ namespace Microsoft.DotNet.Configurer
             ICommandFactory commandFactory,
             INuGetPackagesArchiver nugetPackagesArchiver,
             INuGetCacheSentinel nuGetCacheSentinel)
-            : this(commandFactory, nugetPackagesArchiver, nuGetCacheSentinel, FileSystemWrapper.Default.Directory)
+            : this(commandFactory,
+                nugetPackagesArchiver,
+                nuGetCacheSentinel,
+                FileSystemWrapper.Default.Directory,
+                FileSystemWrapper.Default.File)
         {
         }
 
@@ -28,19 +33,31 @@ namespace Microsoft.DotNet.Configurer
             ICommandFactory commandFactory,
             INuGetPackagesArchiver nugetPackagesArchiver,
             INuGetCacheSentinel nuGetCacheSentinel,
-            IDirectory directory)
+            IDirectory directory,
+            IFile file)
         {
             _commandFactory = commandFactory;
             _directory = directory;
             _nugetPackagesArchiver = nugetPackagesArchiver;
             _nuGetCacheSentinel = nuGetCacheSentinel;
+            _file = file;
         }
 
         public void PrimeCache()
         {
+            if(SkipPrimingTheCache())
+            {
+                return;
+            }
+
             var pathToPackagesArchive = _nugetPackagesArchiver.ExtractArchive();
 
             PrimeCacheUsingArchive(pathToPackagesArchive);
+        }
+
+        private bool SkipPrimingTheCache()
+        {
+            return !_file.Exists(_nugetPackagesArchiver.NuGetPackagesArchive);
         }
 
         private void PrimeCacheUsingArchive(string pathToPackagesArchive)

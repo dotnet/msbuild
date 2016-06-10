@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         public static string VersionFile => Path.GetFullPath(Path.Combine(typeof(DotnetFiles).GetTypeInfo().Assembly.Location, "..", ".version"));
 
+        public static string NuGetPackagesArchive => Path.GetFullPath(Path.Combine(typeof(DotnetFiles).GetTypeInfo().Assembly.Location, "..", "nuGetPackagesArchive.lzma"));
+
         /// <summary>
         /// Reads the version file and adds runtime specific information
         /// </summary>

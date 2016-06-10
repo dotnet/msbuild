@@ -336,16 +336,11 @@ namespace Microsoft.DotNet.Cli.Build
             dotnet.Publish("--output", Path.Combine(Dirs.Output, "tools"), "--configuration", configuration)
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools", "Archiver"))
                 .Execute()
-                .EnsureSuccessful();            
+                .EnsureSuccessful();
 
-            var packagesToArchive = new List<string> { "-a", intermediateArchive };
-            var nuGetPackagesArchiveDirectory = new DirectoryInfo(nuGetPackagesArchiveFolder);
-            foreach (var directory in nuGetPackagesArchiveDirectory.GetDirectories())
-            {
-                packagesToArchive.Add(directory.FullName);
-            }
-
-            Cmd(archiver, packagesToArchive)
+            Cmd(archiver,
+                "-a", intermediateArchive,
+                nuGetPackagesArchiveFolder)
                 .Execute();            
 
             File.Copy(intermediateArchive, finalArchive);

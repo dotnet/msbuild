@@ -16,6 +16,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 {
     public class GivenANuGetCachePrimer
     {
+        private const string COMPRESSED_ARCHIVE_PATH = "a path to somewhere";
         private const string TEMPORARY_FOLDER_PATH = "some path";
         private const string PACKAGES_ARCHIVE_PATH = "some other path";
 
@@ -32,6 +33,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         {
             var fileSystemMockBuilder = FileSystemMockBuilder.Create();
             fileSystemMockBuilder.TemporaryFolder = TEMPORARY_FOLDER_PATH;
+            fileSystemMockBuilder.AddFile(COMPRESSED_ARCHIVE_PATH);
             _fileSystemMock = fileSystemMockBuilder.Build();
             _temporaryDirectoryMock = (ITemporaryDirectoryMock)_fileSystemMock.Directory.CreateTemporaryDirectory();
 
@@ -39,6 +41,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             _nugetPackagesArchiverMock = new Mock<INuGetPackagesArchiver>();
             _nugetPackagesArchiverMock.Setup(n => n.ExtractArchive()).Returns(PACKAGES_ARCHIVE_PATH);
+            _nugetPackagesArchiverMock.Setup(n => n.NuGetPackagesArchive).Returns(COMPRESSED_ARCHIVE_PATH);
 
             _nugetCacheSentinel = new Mock<INuGetCacheSentinel>();
 
@@ -46,7 +49,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _commandFactoryMock.Object,
                 _nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                _fileSystemMock.Directory);
+                _fileSystemMock.Directory,
+                _fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
         }
@@ -81,6 +85,34 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 .Returns(commandMock.Object);
             commandMock.Setup(c => c.CaptureStdOut()).Returns(commandMock.Object);
             commandMock.Setup(c => c.CaptureStdErr()).Returns(commandMock.Object);
+        }
+
+        [Fact]
+        public void It_does_not_prime_the_NuGet_cache_if_the_archive_is_not_found_so_that_we_do_not_need_to_generate_the_archive_for_stage1()
+        {
+            var fileSystemMockBuilder = FileSystemMockBuilder.Create();
+            var fileSystemMock = fileSystemMockBuilder.Build();
+
+            var commandFactoryMock = SetupCommandFactoryMock();
+
+            var nugetPackagesArchiverMock = new Mock<INuGetPackagesArchiver>();            
+            nugetPackagesArchiverMock.Setup(n => n.NuGetPackagesArchive).Returns(COMPRESSED_ARCHIVE_PATH);
+
+            var nugetCachePrimer = new NuGetCachePrimer(
+                commandFactoryMock.Object,
+                nugetPackagesArchiverMock.Object,
+                _nugetCacheSentinel.Object,
+                fileSystemMock.Directory,
+                fileSystemMock.File);
+
+            nugetCachePrimer.PrimeCache();
+
+            nugetPackagesArchiverMock.Verify(n => n.ExtractArchive(), Times.Never);
+            commandFactoryMock.Verify(c => c.Create(
+                It.IsAny<string>(),
+                It.IsAny<IEnumerable<string>>(),
+                null,
+                Constants.DefaultConfiguration), Times.Never);
         }
 
         [Fact]
@@ -135,7 +167,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 commandFactoryMock.Object,
                 _nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                _fileSystemMock.Directory);
+                _fileSystemMock.Directory,
+                _fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
 
@@ -188,7 +221,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _commandFactoryMock.Object,
                 _nugetPackagesArchiverMock.Object,
                 nugetCacheSentinel.Object,
-                _fileSystemMock.Directory);
+                _fileSystemMock.Directory,
+                _fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
 

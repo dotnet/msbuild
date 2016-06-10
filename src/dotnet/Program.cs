@@ -57,13 +57,7 @@ namespace Microsoft.DotNet.Cli
             {
                 using (PerfTrace.Current.CaptureTiming())
                 {
-                    var nugetCacheSentinel = new NuGetCacheSentinel();
-                    var nugetPackagesArchiver = new NuGetPackagesArchiver();
-                    var commandFactory = new DotNetCommandFactory();
-                    var nugetCachePrimer = new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
-                    var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(nugetCachePrimer, nugetCacheSentinel);
-
-                    dotnetConfigurer.Configure();
+                    ConfigureDotNetForFirstTimeUse();
 
                     return ProcessArgs(args, new Telemetry());
                 }
@@ -166,6 +160,18 @@ namespace Microsoft.DotNet.Cli
 
         }
 
+        private static void ConfigureDotNetForFirstTimeUse()
+        {
+            using (var nugetPackagesArchiver = new NuGetPackagesArchiver())
+            {
+                var nugetCacheSentinel = new NuGetCacheSentinel();            
+                var commandFactory = new DotNetCommandFactory();
+                var nugetCachePrimer = new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
+                var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(nugetCachePrimer, nugetCacheSentinel);
+
+                dotnetConfigurer.Configure();
+            }            
+        }
 
         private static void InitializeProcess()
         {

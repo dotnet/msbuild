@@ -13,14 +13,14 @@
     },
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
+    },
+    "Microsoft.DotNet.Archive": {
+      "target": "project"
     }
   },
   "frameworks": {
-    "netcoreapp1.0": {
+    "netstandard1.6": {
       "imports": [
-        "dnxcore50",
-        "netstandardapp1.5",
-        "portable-net45+win8",
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ]
     }

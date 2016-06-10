@@ -22,9 +22,32 @@ namespace Microsoft.DotNet.Configurer
         {
             if(ShouldPrimeNugetCache())
             {
-                Reporter.Output.WriteLine("Configuring dotnet CLI for first time use.");
+                PrintFirstTimeUseNotice();
+
                 _nugetCachePrimer.PrimeCache();
             }
+        }
+
+        private void PrintFirstTimeUseNotice()
+        {
+            Reporter.Output.WriteLine();
+            Reporter.Output.WriteLine("Welcome to .NET Core!");
+            Reporter.Output.WriteLine("---------------------");
+            Reporter.Output.WriteLine("Learn more about .NET Core @ https://aka.ms/dotnet-docs. " +
+                "Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.");
+            Reporter.Output.WriteLine("Telemetry");
+            Reporter.Output.WriteLine("--------------");
+            Reporter.Output.WriteLine("The .NET Core tools collect usage data in order to improve your experience. " +
+                "The data is anonymous and does not include commandline arguments. " +
+                "The data is collected by Microsoft and shared with the community.");
+            Reporter.Output.WriteLine();
+            Reporter.Output.WriteLine("You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT " +
+                "environment variable to 1 using your favorite shell.");
+            Reporter.Output.WriteLine("You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.");
+            Reporter.Output.WriteLine("Configuring...");
+            Reporter.Output.WriteLine("-------------------");
+            Reporter.Output.WriteLine("A command is running to initially populate your local package cache, to improve restore" +
+                "speed and enable offline access. This command will take up to a minute to complete and will only happen once.");
         }
 
         private bool ShouldPrimeNugetCache()

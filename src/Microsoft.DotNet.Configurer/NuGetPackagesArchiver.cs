@@ -1,20 +1,40 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Archive;
+using Microsoft.Extensions.EnvironmentAbstractions;
+
 namespace Microsoft.DotNet.Configurer
 {
     public class NuGetPackagesArchiver : INuGetPackagesArchiver
     {
-        public string ExtractArchive()
-        {
-            // -- ExtractArchive
-            // find archive
-            // extract archive to temporary folder
-            //      Path.GetTempPath();
-            //      Path.GetRandomFileName();
-            //      Consider putting this inside an abstraction that will delete the folder automatically once it is done.
+        private ITemporaryDirectory _temporaryDirectory;
 
-            return @"C:\Users\licavalc\git\temp\feed";
+        public string NuGetPackagesArchive => DotnetFiles.NuGetPackagesArchive;
+        
+        public NuGetPackagesArchiver() : this(FileSystemWrapper.Default.Directory)
+        {            
         }
+
+        internal NuGetPackagesArchiver(IDirectory directory)
+        {
+            _temporaryDirectory = directory.CreateTemporaryDirectory();
+        }
+
+        public string ExtractArchive()
+        {        
+            var progress = new ConsoleProgressReport();
+            var archive = new IndexedArchive();
+
+            archive.Extract(NuGetPackagesArchive, _temporaryDirectory.DirectoryPath, progress);
+
+            return _temporaryDirectory.DirectoryPath;
+        }
+
+        public void Dispose()
+        {
+            _temporaryDirectory.Dispose();
+        }        
     }
 }
