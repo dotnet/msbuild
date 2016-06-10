@@ -45,7 +45,7 @@ You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environmen
 You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
 Configuring...
 -------------------
-A command is running to initially populate your local package cache, to improve restorespeed and enable offline access. This command will take up to a minute to complete and will only happen once.";
+A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.";
 
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine(firstTimeUseWelcomeMessage);
@@ -54,9 +54,11 @@ A command is running to initially populate your local package cache, to improve 
         private bool ShouldPrimeNugetCache()
         {
             var skipFirstTimeExperience = 
-                _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false));
+                _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
 
-            return !skipFirstTimeExperience && !_nugetCacheSentinel.Exists();
+            return !skipFirstTimeExperience &&
+                !_nugetCacheSentinel.Exists() &&
+                !_nugetCacheSentinel.InProgressSentinelAlreadyExists();
         }
     }
 }

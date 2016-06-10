@@ -166,17 +166,19 @@ namespace Microsoft.DotNet.Cli
             {
                 using (var nugetPackagesArchiver = new NuGetPackagesArchiver())
                 {
-                    var environmentProvider = new EnvironmentProvider();
-                    var nugetCacheSentinel = new NuGetCacheSentinel();            
-                    var commandFactory = new DotNetCommandFactory();
-                    var nugetCachePrimer = 
-                        new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
-                    var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
-                        nugetCachePrimer,
-                        nugetCacheSentinel,
-                        environmentProvider);
+                    using (var nugetCacheSentinel = new NuGetCacheSentinel())
+                    {
+                        var environmentProvider = new EnvironmentProvider();
+                        var commandFactory = new DotNetCommandFactory();
+                        var nugetCachePrimer = 
+                            new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
+                        var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
+                            nugetCachePrimer,
+                            nugetCacheSentinel,
+                            environmentProvider);
 
-                    dotnetConfigurer.Configure();
+                        dotnetConfigurer.Configure();
+                    }
                 }
             }
         }

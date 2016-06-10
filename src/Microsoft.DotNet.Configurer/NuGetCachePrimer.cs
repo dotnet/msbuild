@@ -10,7 +10,6 @@ namespace Microsoft.DotNet.Configurer
 {
     public class NuGetCachePrimer : INuGetCachePrimer
     {
-        private const string NUGET_SOURCE_PARAMETER = "-s";
         private readonly ICommandFactory _commandFactory;
         private readonly IDirectory _directory;
         private readonly IFile _file;
@@ -88,7 +87,7 @@ namespace Microsoft.DotNet.Configurer
         {
             return RunCommand(
                 "restore",
-                new[] {NUGET_SOURCE_PARAMETER, $"{extractedPackagesArchiveDirectory}"},
+                new[] {"-s", $"{extractedPackagesArchiveDirectory}"},
                 workingDirectory);
         }
 

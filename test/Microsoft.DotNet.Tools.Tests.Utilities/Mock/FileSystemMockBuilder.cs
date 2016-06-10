@@ -85,6 +85,17 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 return new MemoryStream(Encoding.UTF8.GetBytes(ReadAllText(path)));
             }
 
+            public Stream OpenFile(
+                string path,
+                FileMode fileMode,
+                FileAccess fileAccess,
+                FileShare fileShare,
+                int bufferSize,
+                FileOptions fileOptions)
+            {
+                throw new NotImplementedException();
+            }
+
             public void CreateEmptyFile(string path)
             {
                 _files.Add(path, string.Empty);
