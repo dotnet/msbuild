@@ -1,4 +1,7 @@
-﻿using Microsoft.DotNet.Cli.CommandLine;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.DotNet.Cli.CommandLine;
 //using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Archive;
 using System;
@@ -28,7 +31,6 @@ namespace Microsoft.DotNet.Tools.Archive
             var externals = app.Option("--external <external>...", "External files and directories to consider for extraction", CommandOptionType.MultipleValue);
             var sources = app.Argument("<sources>...", "Files & directory to include in the archive", multipleValues:true);
 
-            var dotnetNew = new ArchiveCommand();
             app.OnExecute(() => {
 
                 if (extract.HasValue() && sources.Values.Any())
@@ -79,7 +81,7 @@ namespace Microsoft.DotNet.Tools.Archive
 
                     archive.Save(archiveFile.Value(), progress);
                 }
-                else  // extract.HasValue()
+                else  // sources not specified, extract must have been specified
                 {
                     archive.Extract(archiveFile.Value(), extract.Value(), progress);
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -47,24 +50,19 @@ namespace Microsoft.DotNet.Archive
 
         // maps file hash to archve path
         // $ prefix indicates that the file is not in the archive and path is a hash
-        Dictionary<string, ArchiveFileInfo> archiveFiles = new Dictionary<string, ArchiveFileInfo>();
+        private Dictionary<string, ArchiveFileInfo> _archiveFiles = new Dictionary<string, ArchiveFileInfo>();
         // maps file hash to external path
-        Dictionary<string, string> externalFiles = new Dictionary<string, string>();
+        private Dictionary<string, string> _externalFiles = new Dictionary<string, string>();
         // lists all extracted files & hashes
-        List<DestinationFileInfo> destFiles = new List<DestinationFileInfo>();
-        bool disposed = false;
-        ThreadLocal<SHA256> sha = new ThreadLocal<SHA256>(() => SHA256.Create());
+        private List<DestinationFileInfo> _destFiles = new List<DestinationFileInfo>();
+        private bool _disposed = false;
+        private ThreadLocal<SHA256> _sha = new ThreadLocal<SHA256>(() => SHA256.Create());
 
         public IndexedArchive()
-        {
-
-        }
-
-
+        { }
+        
         private static Stream CreateTemporaryStream()
         {
-            // return new MemoryStream();
-
             string temp = Path.GetTempPath();
             string tempFile = Path.Combine(temp, Guid.NewGuid().ToString());
             return File.Create(tempFile, 4096, FileOptions.DeleteOnClose);
@@ -74,7 +72,6 @@ namespace Microsoft.DotNet.Archive
         {
             string temp = Path.GetTempPath();
             string tempFile = Path.Combine(temp, Guid.NewGuid().ToString());
-            //return File.Create(tempFile, 4096, FileOptions.DeleteOnClose);
             return new FileStream(tempFile, FileMode.Create, FileAccess.ReadWrite, FileShare.Read | FileShare.Delete, 4096, FileOptions.DeleteOnClose);
         }
 
@@ -82,8 +79,7 @@ namespace Microsoft.DotNet.Archive
         {
             CheckDisposed();
 
-            //using (var archiveStream = CreateTemporaryStream())
-            using (var archiveStream = File.Create(archivePath + ".zip"))
+            using (var archiveStream = CreateTemporaryStream())
             {
                 using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, true))
                 {
@@ -107,10 +103,10 @@ namespace Microsoft.DotNet.Archive
             using (var stream = indexEntry.Open())
             using (var textWriter = new StreamWriter(stream))
             {
-                foreach (var entry in destFiles)
+                foreach (var entry in _destFiles)
                 {
-                    var archiveFile = archiveFiles[entry.Hash];
-                    string archivePath = archiveFiles[entry.Hash].ArchivePath;
+                    var archiveFile = _archiveFiles[entry.Hash];
+                    string archivePath = _archiveFiles[entry.Hash].ArchivePath;
                     if (archiveFile.Stream == null)
                     {
                         archivePath = "$" + archivePath;
@@ -121,7 +117,7 @@ namespace Microsoft.DotNet.Archive
             }
 
             // sort the files so that similar files are close together
-            var filesToArchive = archiveFiles.Values.ToList();
+            var filesToArchive = _archiveFiles.Values.ToList();
             filesToArchive.Sort((f1, f2) =>
             {
                 // first sort by extension
@@ -337,7 +333,7 @@ namespace Microsoft.DotNet.Archive
                             ExtractSource extractSource;
                             if (!sourceCache.TryGetValue(source, out extractSource))
                             {
-                                sourceCache[source] = extractSource = new ExtractSource(source, externalFiles, tlArchive);
+                                sourceCache[source] = extractSource = new ExtractSource(source, _externalFiles, tlArchive);
                             }
 
                             var zipSeperatorIndex = target.IndexOf("::", StringComparison.OrdinalIgnoreCase);
@@ -394,8 +390,8 @@ namespace Microsoft.DotNet.Archive
             {
                 string hash = GetHash(fs); 
                 // $ prefix indicates that the file is not in the archive and path is relative to an external directory
-                archiveFiles[hash] = new ArchiveFileInfo(null, "$" + hash , hash);
-                externalFiles[hash] = externalFile;
+                _archiveFiles[hash] = new ArchiveFileInfo(null, "$" + hash , hash);
+                _externalFiles[hash] = externalFile;
             }
         }
         public void AddDirectory(string sourceDirectory, IProgress<ProgressReport> progress, string destinationDirectory = null)
@@ -463,24 +459,20 @@ namespace Microsoft.DotNet.Archive
             else
             {
                 var copy = CreateTemporaryStream();
-#if NET45
-                hash = CopyWithHash(stream, copy);
-#else
                 stream.CopyTo(copy);
                 copy.Seek(0, SeekOrigin.Begin);
                 hash = GetHash(copy);
-#endif
                 stream.Dispose();
                 stream = copy;
             }
 
-            lock (archiveFiles)
+            lock (_archiveFiles)
             {
-                destFiles.Add(new DestinationFileInfo(destinationPath, hash));
+                _destFiles.Add(new DestinationFileInfo(destinationPath, hash));
 
                 // see if we already have this file in the archive/external
                 ArchiveFileInfo existing = null;
-                if (archiveFiles.TryGetValue(hash, out existing))
+                if (_archiveFiles.TryGetValue(hash, out existing))
                 {
                     // reduce memory pressure
                     if (!(stream is MemoryStream) && (existing.Stream is MemoryStream))
@@ -502,39 +494,14 @@ namespace Microsoft.DotNet.Archive
                     stream.Seek(0, SeekOrigin.Begin);
                     var archivePath = Path.Combine(hash, Path.GetFileName(destinationPath));
 
-                    archiveFiles.Add(hash, new ArchiveFileInfo(stream, archivePath, hash));
+                    _archiveFiles.Add(hash, new ArchiveFileInfo(stream, archivePath, hash));
                 }
             }
         }
 
-#if NET45
-        /// <summary>
-        /// Calculates the hash while copying the file to avoid multiple reads
-        /// </summary>
-        private const int _DefaultCopyBufferSize = 81920;
-        public string CopyWithHash(Stream source, Stream destination)
-        {
-            byte[] buffer = new byte[_DefaultCopyBufferSize];
-            int read;
-            while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
-            {
-                sha.Value.TransformBlock(buffer, 0, read, null, 0);
-                destination.Write(buffer, 0, read);
-            }
-            sha.Value.TransformFinalBlock(buffer, 0, 0);
-            var hash = sha.Value.Hash;
-
-            // follow pattern in ComputeHash(stream) where it re-initializes after finishing.
-            sha.Value.Initialize();
-
-            return GetHashString(hash);
-        }
-#endif
-
-
         public string GetHash(Stream stream)
         {
-            var hashBytes = sha.Value.ComputeHash(stream);
+            var hashBytes = _sha.Value.ComputeHash(stream);
 
             return GetHashString(hashBytes);
         }
@@ -551,11 +518,11 @@ namespace Microsoft.DotNet.Archive
 
         public void Dispose()
         {
-            if (!disposed)
+            if (!_disposed)
             {
-                if (archiveFiles != null)
+                if (_archiveFiles != null)
                 {
-                    foreach(var archiveFile in archiveFiles.Values)
+                    foreach(var archiveFile in _archiveFiles.Values)
                     {
                         if (archiveFile.Stream != null)
                         {
@@ -565,17 +532,17 @@ namespace Microsoft.DotNet.Archive
                     }
                 }
 
-                if (sha != null)
+                if (_sha != null)
                 {
-                    sha.Dispose();
-                    sha = null;
+                    _sha.Dispose();
+                    _sha = null;
                 }
             }
         }
 
         private void CheckDisposed()
         {
-            if (disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(IndexedArchive));
             }

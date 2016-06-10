@@ -5,15 +5,11 @@
   },
   "description": "Archive and compression types.",
   "dependencies": {
-    "NETStandard.Library": "1.6.0-rc3-24201-00"
+    "NETStandard.Library": "1.6.0-rc3-24201-00",
+     "System.Linq.Parallel": "4.0.1-rc3-24201-00"
   },
   "frameworks": {
-    "net45": {},
-    "netstandard1.3": {
-      "dependencies": {
-        "System.Linq.Parallel": "4.0.1-rc3-24201-00"
-      }
-    }
+    "netstandard1.3": {}
   },
   "scripts": {}
 }

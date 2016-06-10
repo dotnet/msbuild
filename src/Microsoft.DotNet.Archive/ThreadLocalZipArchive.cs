@@ -1,15 +1,20 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
 
 namespace Microsoft.DotNet.Archive
 {
-    // wraps ThreadLocal<ZipArchive> and exposes Dispose semantics that dispose all archives
-    class ThreadLocalZipArchive : IDisposable
+    /// <summary>
+    /// Wraps ThreadLocal<ZipArchive> and exposes Dispose semantics that dispose all archives
+    /// </summary>
+    internal class ThreadLocalZipArchive : IDisposable
     {
         private ThreadLocal<ZipArchive> _archive;
-        private bool disposed = false;
+        private bool _disposed = false;
 
         public ThreadLocalZipArchive(string archivePath, ZipArchive local = null)
         {
@@ -28,7 +33,7 @@ namespace Microsoft.DotNet.Archive
 
         public void Dispose()
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (_archive != null)
                 {
