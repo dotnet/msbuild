@@ -490,12 +490,13 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
 #if RUNTIME_TYPE_NETCORE
-            string coreRunName = NativeMethodsShared.IsUnixLike ? "corerun" : "CoreRun.exe";
-            string exeName = Path.Combine(Path.GetDirectoryName(msbuildLocation), coreRunName);
+            // Run the child process with the same host as the currently-running process.
+            string pathToHost;
+            using (Process currentProcess = Process.GetCurrentProcess()) pathToHost = currentProcess.MainModule.FileName;
             commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = exeName;
+            processStartInfo.FileName = pathToHost;
             processStartInfo.Arguments = commandLineArgs;
             processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
             processStartInfo.UseShellExecute = false;
