@@ -2732,29 +2732,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static void VerifyExceptionOnEmptyOrNullPlatformAttributes(string identifier, Version version)
         {
-            bool caughtCorrectException = false;
-            try
-            {
-                ToolLocationHelper.GetPlatformExtensionSDKLocations(identifier, version);
-            }
-            catch (ArgumentException)
-            {
-                caughtCorrectException = true;
-            }
 
-            Assert.True(caughtCorrectException);
+            Assert.Throws<ArgumentException>(
+                () => ToolLocationHelper.GetPlatformExtensionSDKLocations(identifier, version));
 
-            caughtCorrectException = false;
-            try
-            {
-                ToolLocationHelper.GetPlatformSDKLocation(identifier, version);
-            }
-            catch (ArgumentException)
-            {
-                caughtCorrectException = true;
-            }
-
-            Assert.True(caughtCorrectException);
+            Assert.Throws<ArgumentException>(
+                () => ToolLocationHelper.GetPlatformSDKLocation(identifier, version));
         }
 
         /// <summary>
@@ -2881,31 +2864,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifySDKManifestWithNullOrEmptyParameter()
         {
-            bool exceptionCaught = false;
-            try
-            {
-                SDKManifest manifestObject = new SDKManifest(null);
-                Assert.True(false);
-            }
-            catch (ArgumentNullException)
-            {
-                exceptionCaught = true;
-            }
+            Assert.Throws<ArgumentNullException>(() =>
+                new SDKManifest(null));
 
-            Assert.True(exceptionCaught);
-
-            exceptionCaught = false;
-            try
-            {
-                SDKManifest manifestObject = new SDKManifest("");
-                Assert.True(false);
-            }
-            catch (ArgumentException)
-            {
-                exceptionCaught = true;
-            }
-
-            Assert.True(exceptionCaught);
+            Assert.Throws<ArgumentException>(() =>
+                new SDKManifest(""));
         }
 
         /// <summary>
