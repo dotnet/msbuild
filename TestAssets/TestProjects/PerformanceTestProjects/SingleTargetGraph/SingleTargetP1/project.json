@@ -6,7 +6,7 @@
     },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004442-00"
+      "version": "1.0.0-rc3-004443-00"
     }
   },
   "frameworks": {
