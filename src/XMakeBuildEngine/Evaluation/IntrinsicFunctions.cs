@@ -364,6 +364,17 @@ namespace Microsoft.Build.Evaluation
             return false;
         }
 
+        internal static bool IsOSPlatform(string os)
+        {
+            switch (os.ToLower())
+            {
+                case "windows": return NativeMethodsShared.IsWindows;
+                case "osx": return NativeMethodsShared.IsOSX;
+                case "unix": return NativeMethodsShared.IsUnixLike;
+                default: return false;
+            }
+        }
+
         #region Debug only intrinsics
 
         /// <summary>
