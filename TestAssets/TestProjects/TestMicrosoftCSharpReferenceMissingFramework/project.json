@@ -5,17 +5,17 @@
     "netcoreapp1.0": {
       "imports": "dnxcore50",
       "dependencies": {
-        "Microsoft.NETCore.App": "1.0.0-rc3-004443-00"
+        "Microsoft.NETCore.App": "1.0.0-rc3-004449-00"
       }
     },
     "netcore50": {
       "dependencies": {
-        "System.Private.Uri": "4.0.1-rc3-24209-08"
+        "System.Private.Uri": "4.0.1-rc3-24210-06"
       }
     },
     "net99": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.1-rc3-24209-08"
+        "Microsoft.CSharp": "4.0.1-rc3-24210-06"
       }
     }
   },
