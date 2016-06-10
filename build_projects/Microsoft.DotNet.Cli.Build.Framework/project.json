@@ -10,9 +10,9 @@
     ]
   },
   "dependencies": {
-    "NETStandard.Library": "1.6.0-rc3-24208-04",
-    "System.Diagnostics.Process": "4.1.0-rc3-24208-04",
-    "System.Reflection.TypeExtensions": "4.1.0-rc3-24208-04"
+    "NETStandard.Library": "1.6.0-rc3-24209-08",
+    "System.Diagnostics.Process": "4.1.0-rc3-24209-08",
+    "System.Reflection.TypeExtensions": "4.1.0-rc3-24209-08"
   },
   "frameworks": {
     "netstandard1.5": {

@@ -3,12 +3,12 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004425"
+      "version": "1.0.0-rc3-004442-00"
     },
     "Microsoft.Extensions.Testing.Abstractions": {
       "target": "project"
     },
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc3-24208-04",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc3-24209-08",
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
