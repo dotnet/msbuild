@@ -107,10 +107,10 @@ namespace Microsoft.DotNet.Cli.Build
             }
             Directory.CreateDirectory(Dirs.Stage2);
 
-            var result = CompileCliSdkAndGenerateNuGetPackagesArchive(c,
+            var result = CompileCliSdk(c,
                 dotnet: DotNetCli.Stage1,
                 rootOutputDirectory: Dirs.Stage2,
-                currentDotnet: DotNetCli.Stage2);
+                generateNugetPackagesArchive: true);
 
             if (!result.Success)
             {
@@ -158,22 +158,11 @@ namespace Microsoft.DotNet.Cli.Build
             FS.RmFilesInDirRecursive(directory, "*.pdb");
         }
 
-        private static BuildTargetResult CompileCliSdkAndGenerateNuGetPackagesArchive(
-            BuildTargetContext c,
-            DotNetCli dotnet,
-            string rootOutputDirectory,
-            DotNetCli currentDotnet)
-        {
-            CompileCliSdk(c, dotnet, rootOutputDirectory, currentDotnet);
-
-            return c.Success();
-        }
-
         private static BuildTargetResult CompileCliSdk(
             BuildTargetContext c,
             DotNetCli dotnet,
             string rootOutputDirectory,
-            DotNetCli dotnetToGenerateNuGetPackagesArchive = null)
+            bool generateNugetPackagesArchive = false)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
@@ -276,9 +265,9 @@ namespace Microsoft.DotNet.Cli.Build
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);
 
-            if(dotnetToGenerateNuGetPackagesArchive != null)
+            if(generateNugetPackagesArchive)
             {
-                GenerateNuGetPackagesArchive(c, dotnetToGenerateNuGetPackagesArchive, sdkOutputDirectory);
+                GenerateNuGetPackagesArchive(c, dotnet, sdkOutputDirectory);
             }
 
             return c.Success();
