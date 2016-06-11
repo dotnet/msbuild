@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks
         {
             if (SuggestedRedirects == null || SuggestedRedirects.Length == 0)
             {
-                Log.LogMessageFromResources("GenerateBindingRedirects.NoSuggestedRedirects");
+                Log.LogMessageFromResources("GenerateBindingRedirects.NoSuggestedRedirects", new object[0]);
                 OutputAppConfigFile = null;
                 return true;
             }
@@ -326,7 +326,7 @@ namespace Microsoft.Build.Tasks
                 document = XDocument.Load(appConfigItem.ItemSpec);
                 if (document.Root == null || document.Root.Name != "configuration")
                 {
-                    Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");
+                    Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode", new object[0]);
                     return null;
                 }
             }

@@ -154,7 +154,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "CreateManifestResourceName.NoRootNamespace");
+                Log.LogMessageFromResources(MessageImportance.Low, "CreateManifestResourceName.NoRootNamespace", new object[0]);
             }
 
 

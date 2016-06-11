@@ -391,7 +391,7 @@ namespace Microsoft.Build.Tasks
 
             // Parse the global properties into a hashtable.
             Hashtable propertiesTable;
-            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.FormatResourceString("General.GlobalProperties"), "Properties", this.Properties, out propertiesTable))
+            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.FormatResourceString("General.GlobalProperties", new object[0]), "Properties", this.Properties, out propertiesTable))
             {
                 return false;
             }
@@ -400,7 +400,7 @@ namespace Microsoft.Build.Tasks
             string[] undefinePropertiesArray = null;
             if (!String.IsNullOrEmpty(_undefineProperties))
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
+                Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties", new object[0]);
                 undefinePropertiesArray = _undefineProperties.Split(new char[] { ';' });
                 foreach (string property in undefinePropertiesArray)
                 {
@@ -415,7 +415,7 @@ namespace Microsoft.Build.Tasks
             if (!isRunningMultipleNodes && _stopOnFirstFailure && _buildInParallel)
             {
                 _buildInParallel = false;
-                Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NotBuildingInParallel");
+                Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NotBuildingInParallel", new object[0]);
             }
 
             // When the condition below is met, provide an information message indicating stopOnFirstFailure
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Tasks
             // therefore the first failure seen will be the only failure seen.
             if (isRunningMultipleNodes && _buildInParallel && _stopOnFirstFailure && !_runEachTargetSeparately)
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NoStopOnFirstFailure");
+                Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NoStopOnFirstFailure", new object[0]);
             }
 
             // This is a list of string[].  That is, each element in the list is a string[].  Each
@@ -466,7 +466,7 @@ namespace Microsoft.Build.Tasks
                 if (_stopOnFirstFailure && !success)
                 {
                     // Inform the user that we skipped the remaining projects because StopOnFirstFailure=true.
-                    Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingProjects");
+                    Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingProjects", new object[0]);
 
                     // We have encountered a failure.  Caller has requested that we not 
                     // continue with remaining projects.
@@ -790,7 +790,7 @@ namespace Microsoft.Build.Tasks
                 if (stopOnFirstFailure && !success)
                 {
                     // Inform the user that we skipped the remaining targets StopOnFirstFailure=true.
-                    log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingTargets");
+                    log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingTargets", new object[0]);
 
                     // We have encountered a failure.  Caller has requested that we not 
                     // continue with remaining targets.

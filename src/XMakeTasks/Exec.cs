@@ -381,11 +381,11 @@ namespace Microsoft.Build.Tasks
         {
             if (OutputMatchesRegex(singleLine, ref _customErrorRegex))
             {
-                Log.LogError(singleLine);
+                Log.LogError(singleLine, new object[0]);
             }
             else if (OutputMatchesRegex(singleLine, ref _customWarningRegex))
             {
-                Log.LogWarning(singleLine);
+                Log.LogWarning(singleLine, new object[0]);
             }
             else if (_ignoreStandardErrorWarningFormat)
             {
@@ -456,7 +456,7 @@ namespace Microsoft.Build.Tasks
             // Make sure that at least the Command property was set
             if (Command.Trim().Length == 0)
             {
-                Log.LogErrorWithCodeFromResources("Exec.MissingCommandError");
+                Log.LogErrorWithCodeFromResources("Exec.MissingCommandError", new object[0]);
                 return false;
             }
 

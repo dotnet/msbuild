@@ -174,7 +174,7 @@ namespace Microsoft.Build.Collections
         {
             if (immutable)
             {
-                ErrorUtilities.ThrowInternalError("immutable");
+                ErrorUtilities.ThrowInternalError("immutable", new object[0]);
             }
 
             ErrorUtilities.VerifyThrowInternalNull(dictionary, "dictionary");
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Collections
 
                         if (!constraintInX && !constraintInY)
                         {
-                            ErrorUtilities.ThrowInternalError("Expected to compare to constraint");
+                            ErrorUtilities.ThrowInternalError("Expected to compare to constraint", new object[0]);
                         }
 
                         // Put constrained string in 'y', regular in 'x'
@@ -410,7 +410,7 @@ namespace Microsoft.Build.Collections
         {
             if (immutable)
             {
-                ErrorUtilities.ThrowInternalError("immutable");
+                ErrorUtilities.ThrowInternalError("immutable", new object[0]);
             }
 
             if (startIndex < 0)
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Collections
         {
             if (immutable)
             {
-                ErrorUtilities.ThrowInternalError("immutable");
+                ErrorUtilities.ThrowInternalError("immutable", new object[0]);
             }
 
             lock (lockObject)

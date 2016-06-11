@@ -96,7 +96,7 @@ namespace Microsoft.Build.Tasks
 
             if (OutputFile == null && OutputDirectory == null)
             {
-                Log.LogErrorWithCodeFromResources("WriteCodeFragment.MustSpecifyLocation");
+                Log.LogErrorWithCodeFromResources("WriteCodeFragment.MustSpecifyLocation", new object[0]);
                 return false;
             }
 
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks
 
             if (code.Length == 0)
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "WriteCodeFragment.NoWorkToDo");
+                Log.LogMessageFromResources(MessageImportance.Low, "WriteCodeFragment.NoWorkToDo", new object[0]);
                 OutputFile = null;
                 return true;
             }
@@ -311,7 +311,7 @@ namespace Microsoft.Build.Tasks
                         string args = GetAttributeArguments(attributeItem, "=");
                         if (args == null) return null;
 
-                        code.AppendLine(string.Format($"[assembly: {attributeItem.ItemSpec}({args})];"));
+                        code.AppendLine(string.Format($"[assembly: {attributeItem.ItemSpec}({args})];", new object[0]));
                         haveGeneratedContent = true;
                     }
 
@@ -334,7 +334,7 @@ namespace Microsoft.Build.Tasks
                         string args = GetAttributeArguments(attributeItem, ":=");
                         if (args == null) return null;
 
-                        code.AppendLine(string.Format($"<Assembly: {attributeItem.ItemSpec}({args})>"));
+                        code.AppendLine(string.Format($"<Assembly: {attributeItem.ItemSpec}({args})>", new object[0]));
                         haveGeneratedContent = true;
                     }
                     break;

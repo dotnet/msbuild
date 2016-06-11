@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks
         {
             if (Text != null || Code != null)
             {
-                Log.LogWarning(null, Code, HelpKeyword, File, 0, 0, 0, 0, (Text == null) ? String.Empty : Text);
+                Log.LogWarning(null, Code, HelpKeyword, File, 0, 0, 0, 0, (Text == null) ? String.Empty : Text, new object[0]);
             }
 
             return true;

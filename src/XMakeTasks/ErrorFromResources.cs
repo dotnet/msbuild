@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
                 // If the user specifies a code, that should override. 
                 Code = Code ?? errorCode;
 
-                Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, message);
+                Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, message, new object[0]);
             }
             catch (Exception e)
             {

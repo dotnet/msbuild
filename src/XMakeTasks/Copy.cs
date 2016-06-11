@@ -642,7 +642,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                LogDiagnostic("Retrying on ERROR_ACCESS_DENIED because MSBUILDALWAYSRETRY = 1");
+                                LogDiagnostic("Retrying on ERROR_ACCESS_DENIED because MSBUILDALWAYSRETRY = 1", new object[0]);
                             }
                         }
                     }

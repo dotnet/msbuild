@@ -1227,7 +1227,7 @@ namespace Microsoft.Build.Utilities
                     }
                     else if (LogStandardErrorAsError && queueType == StandardOutputOrErrorQueueType.StandardError)
                     {
-                        Log.LogError(errorOrOutMessage);
+                        Log.LogError(errorOrOutMessage, new object[0]);
                     }
                 }
 
@@ -1722,7 +1722,7 @@ namespace Microsoft.Build.Utilities
         {
             if (!alreadyLoggedEnvironmentHeader)
             {
-                LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.EnvironmentVariableHeader");
+                LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.EnvironmentVariableHeader", new object[0]);
                 alreadyLoggedEnvironmentHeader = true;
             }
 

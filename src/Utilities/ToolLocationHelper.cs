@@ -2715,7 +2715,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerDiskRoots", "Getting default disk roots");
+                    ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerDiskRoots", "Getting default disk roots", new object[0]);
                     GetDefaultSDKDiskRoots(sdkDiskRoots);
                 }
             }
@@ -2769,7 +2769,7 @@ namespace Microsoft.Build.Utilities
             }
             else
             {
-                ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "MSBUILDDISABLEREGISTRYFORSDKLOOKUP is set registry sdk lookup is disabled");
+                ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "MSBUILDDISABLEREGISTRYFORSDKLOOKUP is set registry sdk lookup is disabled", new object[0]);
             }
 
 
