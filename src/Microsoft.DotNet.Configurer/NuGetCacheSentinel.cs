@@ -74,6 +74,11 @@ namespace Microsoft.DotNet.Configurer
         {
             try
             {
+                if(!Directory.Exists(NuGetCachePath))
+                {
+                    Directory.CreateDirectory(NuGetCachePath);
+                }
+
                 // open an exclusive handle to the in-progress sentinel and mark it for delete on close.
                 // we open with exclusive FileShare.None access to indicate that the operation is in progress.
                 // buffer size is minimum since we won't be reading or writing from the file.
