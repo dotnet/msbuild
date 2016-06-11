@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.ProjectModel.Loader
         public static AssemblyLoadContext CreateLoadContext(
             this ProjectContext context,
             string runtimeIdentifier,
-            string configuration) => CreateLoadContext(context, runtimeIdentifier, configuration);
+            string configuration) => CreateLoadContext(context, runtimeIdentifier, configuration, outputPath: null);
 
         public static AssemblyLoadContext CreateLoadContext(
             this ProjectContext context,
