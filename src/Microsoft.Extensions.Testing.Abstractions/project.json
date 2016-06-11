@@ -11,7 +11,7 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "Microsoft.DiaSymReader": "1.0.8-rc2-60608-04",
+    "Microsoft.DiaSymReader": "1.0.8-rc2-60610-01",
     "Microsoft.DiaSymReader.Native": "1.4.0-rc2"
   },
   "frameworks": {
@@ -22,8 +22,8 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "System.Resources.ResourceManager": "4.0.1-rc3-24210-06",
-        "System.Reflection.TypeExtensions": "4.1.0-rc3-24210-06"
+        "System.Resources.ResourceManager": "4.0.1-rc3-24210-10",
+        "System.Reflection.TypeExtensions": "4.1.0-rc3-24210-10"
       }
     }
   },

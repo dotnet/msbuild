@@ -6,10 +6,10 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004449-00"
+      "version": "1.0.0-rc3-004459-00"
     },
-    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160608-03",
-    "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160608-03",
+    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160610-04",
+    "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160610-04",
     "Microsoft.DiaSymReader.Native": "1.4.0-rc2"
   },
   "frameworks": {
