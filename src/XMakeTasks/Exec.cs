@@ -475,7 +475,10 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             // Get the fully qualified path to cmd.exe
-            return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
+            if (PlatformUtilities.IsUnix)
+                return "sh";
+            else 
+                return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
         }
 
         /// <summary>

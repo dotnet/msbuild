@@ -27,6 +27,10 @@ namespace Microsoft.Build.Shared
                 // fall back to default ANSI encoding if we have problems
                 s_currentOemEncoding = Encoding.Default;
 
+                if (PlatformUtilities.IsUnix){
+                        // The Mono default encoding is already the system encoding.
+                        return s_currentOemEncoding;
+                }
                 try
                 {
                     // get the current OEM code page

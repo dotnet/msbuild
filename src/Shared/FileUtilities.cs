@@ -337,6 +337,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal unsafe static string NormalizePath(string path)
         {
+            if (PlatformUtilities.IsUnix)
+                return Path.GetFullPath (path);
+            
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
 
             int errorCode = 0; // 0 == success in Win32
@@ -741,6 +744,9 @@ namespace Microsoft.Build.Shared
         {
             fullPath = AttemptToShortenPath(fullPath);
 
+            if (PlatformUtilities.IsUnix)
+                return Directory.Exists (fullPath);
+            
             NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
             bool success = false;
 
@@ -762,6 +768,9 @@ namespace Microsoft.Build.Shared
         internal static bool FileExistsNoThrow(string fullPath)
         {
             fullPath = AttemptToShortenPath(fullPath);
+
+            if (PlatformUtilities.IsUnix)
+                    return File.Exists (fullPath);
 
             NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
             bool success = false;
@@ -785,6 +794,9 @@ namespace Microsoft.Build.Shared
         {
             fullPath = AttemptToShortenPath(fullPath);
 
+            if (PlatformUtilities.IsUnix)
+                return Directory.Exists (fullPath) || File.Exists (fullPath);
+            
             NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
             bool success = false;
 
