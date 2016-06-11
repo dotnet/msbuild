@@ -11,9 +11,9 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004449-00"
+      "version": "1.0.0-rc3-004459-00"
     },
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc3-24210-06",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc3-24210-10",
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
