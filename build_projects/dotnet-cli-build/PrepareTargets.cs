@@ -141,6 +141,7 @@ namespace Microsoft.DotNet.Cli.Build
             var cliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
             var hostVersion = CliDependencyVersions.SharedHostVersion;
+            var hostFxrVersion = CliDependencyVersions.HostFxrVersion;
 
             // Generated Installers + Archives
             AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk", cliVersion);
@@ -150,6 +151,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             //Downloaded Installers + Archives
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
+            AddInstallerArtifactToContext(c, "dotnet-hostfxr", "HostFxr", hostFxrVersion);
             AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
             AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);
 
@@ -214,15 +216,19 @@ namespace Microsoft.DotNet.Cli.Build
 
             var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
             var hostVersion = CliDependencyVersions.SharedHostVersion;
+            var hostFxrVersion = CliDependencyVersions.HostFxrVersion;
 
             var sharedFrameworkChannel = CliDependencyVersions.SharedFrameworkChannel;
             var sharedHostChannel = CliDependencyVersions.SharedHostChannel;
+            var hostFxrChannel = CliDependencyVersions.HostFxrChannel;
 
             var sharedFrameworkInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedFrameworkInstaller");
             var sharedHostInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedHostInstaller");
+            var hostFxrInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "hostFxrInstaller");
 
             Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDownloadFile));
             Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));
+            Mkdirp(Path.GetDirectoryName(hostFxrInstallerDownloadFile));
 
             if ( ! File.Exists(sharedFrameworkInstallerDownloadFile))
             {
@@ -252,6 +258,21 @@ namespace Microsoft.DotNet.Cli.Build
                    sharedHostInstallerDownloadFile).Wait();
 
                 File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
+            }
+
+            if ( ! File.Exists(hostFxrInstallerDownloadFile))
+            {
+                var hostFxrInstallerDestinationFile = c.BuildContext.Get<string>("HostFxrInstallerFile");
+                Mkdirp(Path.GetDirectoryName(hostFxrInstallerDestinationFile));
+
+                AzurePublisher.DownloadFile(
+                   AzurePublisher.CalculateInstallerBlob(
+                       hostFxrInstallerDestinationFile,
+                       hostFxrChannel,
+                       hostFxrVersion),
+                   hostFxrInstallerDownloadFile).Wait();
+
+                File.Copy(hostFxrInstallerDownloadFile, hostFxrInstallerDestinationFile, true);
             }
 
             return c.Success();

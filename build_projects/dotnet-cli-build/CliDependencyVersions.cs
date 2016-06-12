@@ -12,5 +12,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static readonly string SharedFrameworkChannel = "preview";
         public static readonly string SharedHostChannel = "preview";
+        public static readonly string HostFxrChannel = "preview";
     }
 }
