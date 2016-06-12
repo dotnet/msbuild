@@ -173,7 +173,7 @@ namespace dotnet_new3
                     return Task.FromResult(-1);
                 }
 
-            return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, source, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue());
+                return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, source, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue());
             });
 
             int result;
