@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Microsoft.TemplateEngine;
 
 namespace dotnet_new3
 {
@@ -34,7 +35,7 @@ namespace dotnet_new3
             {
                 if (_packageCache == null)
                 {
-                    _packageCache = Path.Combine(UserProfileDir, @".nuget\packages");
+                    _packageCache = Path.Combine(UserProfileDir, ".nuget", "packages");
                 }
 
                 return _packageCache;
@@ -174,7 +175,7 @@ namespace dotnet_new3
 
             if (Directory.Exists(path))
             {
-                return Directory.EnumerateFileSystemEntries(path, pattern, searchOption);
+                return Directory.EnumerateFileSystemEntries(path.ProcessPath(), pattern, searchOption);
             }
 
             return Enumerable.Empty<string>();
@@ -189,7 +190,7 @@ namespace dotnet_new3
 
             if (Directory.Exists(path))
             {
-                return Directory.EnumerateFiles(path, pattern, searchOption);
+                return Directory.EnumerateFiles(path.ProcessPath(), pattern, searchOption);
             }
 
             return Enumerable.Empty<string>();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.TemplateEngine;
 using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
 
@@ -69,7 +70,7 @@ namespace dotnet_new3
             _configuredSources[alias] = new TemplateSource
             {
                 Alias = alias,
-                Location = location,
+                Location = location.ProcessPath(),
                 Source = component
             };
 

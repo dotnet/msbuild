@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.TemplateEngine;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
@@ -125,22 +126,25 @@ namespace dotnet_new3
                             string cacheDir = global.HasValue() ? Paths.GlobalTemplateCacheDir : Paths.TemplateCacheDir;
                             bool anyRemoved = false;
 
-                            foreach(string file in cacheDir.EnumerateFiles($"{value}.*.nupkg"))
+                            if (!value.Exists())
                             {
-                                int verStart = file.IndexOf(value, StringComparison.OrdinalIgnoreCase) + value.Length + 1;
-                                string ver = file.Substring(verStart);
-                                ver = ver.Substring(0, ver.Length - ".nupkg".Length);
-                                Version version;
-
-                                if (Version.TryParse(ver, out version))
+                                foreach(string file in cacheDir.EnumerateFiles($"{value}.*.nupkg"))
                                 {
-                                    if (!quiet.HasValue())
-                                    {
-                                        Reporter.Output.WriteLine($"Removing {value} version {version}...");
-                                    }
+                                    int verStart = file.IndexOf(value, StringComparison.OrdinalIgnoreCase) + value.Length + 1;
+                                    string ver = file.Substring(verStart);
+                                    ver = ver.Substring(0, ver.Length - ".nupkg".Length);
+                                    Version version;
 
-                                    anyRemoved = true;
-                                    file.Delete();
+                                    if (Version.TryParse(ver, out version))
+                                    {
+                                        if (!quiet.HasValue())
+                                        {
+                                            Reporter.Output.WriteLine($"Removing {value} version {version}...");
+                                        }
+
+                                        anyRemoved = true;
+                                        file.Delete();
+                                    }
                                 }
                             }
 
