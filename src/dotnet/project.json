@@ -43,6 +43,9 @@
     "Microsoft.Extensions.Testing.Abstractions": {
       "target": "project"
     },
+    "Microsoft.DotNet.Configurer": {
+      "target": "project"
+    },
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0-rc3-004459-00"

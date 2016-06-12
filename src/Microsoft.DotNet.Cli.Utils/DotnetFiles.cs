@@ -10,10 +10,15 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public static class DotnetFiles
     {
+        private static string SdkRootFolder => Path.Combine(typeof(DotnetFiles).GetTypeInfo().Assembly.Location, "..");
+
         /// <summary>
         /// The CLI ships with a .version file that stores the commit information and CLI version
         /// </summary>
-        public static string VersionFile => Path.GetFullPath(Path.Combine(typeof(DotnetFiles).GetTypeInfo().Assembly.Location, "..", ".version"));
+        public static string VersionFile => Path.GetFullPath(Path.Combine(SdkRootFolder, ".version"));
+
+        public static string NuGetPackagesArchive =>
+            Path.GetFullPath(Path.Combine(SdkRootFolder, "nuGetPackagesArchive.lzma"));
 
         /// <summary>
         /// Reads the version file and adds runtime specific information

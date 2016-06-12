@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Cli.Build
         public Command Pack(params string[] args) => Exec("pack", args);
         public Command Test(params string[] args) => Exec("test", args);
         public Command Publish(params string[] args) => Exec("publish", args);
+        public Command New(params string[] args) => Exec("new", args);
 
         public string GetRuntimeId()
         {
