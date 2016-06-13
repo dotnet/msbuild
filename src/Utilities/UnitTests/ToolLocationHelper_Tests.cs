@@ -2733,10 +2733,10 @@ namespace Microsoft.Build.UnitTests
         private static void VerifyExceptionOnEmptyOrNullPlatformAttributes(string identifier, Version version)
         {
 
-            Assert.Throws<ArgumentException>(
+            Assert.ThrowsAny<ArgumentException>(
                 () => ToolLocationHelper.GetPlatformExtensionSDKLocations(identifier, version));
 
-            Assert.Throws<ArgumentException>(
+            Assert.ThrowsAny<ArgumentException>(
                 () => ToolLocationHelper.GetPlatformSDKLocation(identifier, version));
         }
 
