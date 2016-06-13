@@ -156,6 +156,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks> 
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResX2ResourcesWithReferences()
         {
             string systemDll = Utilities.GetPathToCopiedSystemDLL();
@@ -271,6 +272,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ForceOutOfDate()
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
@@ -323,6 +325,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ForceOutOfDateLinked()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -378,6 +381,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ForceSomeOutOfDate()
         {
             string resxFile = null;

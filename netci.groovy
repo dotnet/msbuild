@@ -42,7 +42,7 @@ def project = GithubProject
             case 'Ubuntu':
                 newJob.with{
                     steps{
-                        shell("./cibuild.sh --scope Compile")
+                        shell("./cibuild.sh --scope Test")
                     }
                 }
                 break;

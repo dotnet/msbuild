@@ -462,6 +462,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void MoveLockedFile()
         {
             string file = null;

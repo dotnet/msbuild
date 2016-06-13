@@ -807,6 +807,7 @@ namespace Microsoft.Build.UnitTests
         /// Basic case
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void GetCommandLine()
         {
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
@@ -823,6 +824,7 @@ namespace Microsoft.Build.UnitTests
         /// On path
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void GetCommandLineQuotedExeOnPath()
         {
             string output = null;
@@ -851,6 +853,7 @@ namespace Microsoft.Build.UnitTests
         /// take priority over any other response files.
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryFoundImplicitly()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -892,6 +895,7 @@ namespace Microsoft.Build.UnitTests
         /// take priority over any other response files.
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryExplicit()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -928,6 +932,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and not any random .rsp
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryRandomName()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -965,6 +970,7 @@ namespace Microsoft.Build.UnitTests
         /// but lower precedence than the actual command line
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryCommandLineWins()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1003,6 +1009,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-windows-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1050,6 +1057,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-windows-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ProjectDirectoryIsMSBuildExeDirectory()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1086,6 +1094,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution with /noautoresponse in, is an error
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryItselfWithNoAutoResponseSwitch()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1122,6 +1131,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be ignored if cmd line has /noautoresponse
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryButCommandLineNoAutoResponseSwitch()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1159,6 +1169,7 @@ namespace Microsoft.Build.UnitTests
         /// take priority over any other response files. Sanity test when there isn't one.
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResponseFileInProjectDirectoryNullCase()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
