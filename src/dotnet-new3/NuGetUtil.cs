@@ -165,9 +165,9 @@ namespace dotnet_new3
 
             if (dependenciesObject.Count > 0)
             {
-                dependenciesObject["NETStandard.Library"] = new JObject
+                dependenciesObject["Microsoft.NETCore.App"] = new JObject
                 {
-                    {"version", "1.5.0-rc2-24103" },
+                    {"version", "1.0.0-rc2-3002702" },
                     {"type", "platform" }
                 };
 
@@ -198,7 +198,7 @@ namespace dotnet_new3
                     Reporter.Output.WriteLine("Finishing up...");
                 }
 
-                string publishDir = Path.Combine(Paths.ScratchDir, @"bin\debug\netcoreapp1.0\publish");
+                string publishDir = Path.Combine(Paths.ScratchDir, @"bin/debug/netcoreapp1.0/publish");
                 publishDir.Copy(componentsDir);
 
                 if (!quiet)
