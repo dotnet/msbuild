@@ -155,10 +155,12 @@ namespace dotnet_new3
                 string pkg = value.Trim();
                 if (pkg.IndexOfAny(Path.GetInvalidPathChars()) < 0 && pkg.Exists())
                 {
+                    // Console.WriteLine($"Adding {value} as a source");
                     tryAddSource(pkg);
                 }
                 else
                 {
+                    // Console.WriteLine($"Adding {value} as a package");
                     dependenciesObject[pkg] = "*";
                 }
             }
@@ -198,7 +200,7 @@ namespace dotnet_new3
                     Reporter.Output.WriteLine("Finishing up...");
                 }
 
-                string publishDir = Path.Combine(Paths.ScratchDir, @"bin/debug/netcoreapp1.0/publish");
+                string publishDir = Path.Combine(Paths.ScratchDir, @"bin/Debug/netcoreapp1.0/publish");
                 publishDir.Copy(componentsDir);
 
                 if (!quiet)

@@ -5,6 +5,7 @@
     "warningsAsErrors": true,
     "emitEntryPoint": true
   },
+  "content": "**/*.list",
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview1-002702",
     "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-preview1-002702",

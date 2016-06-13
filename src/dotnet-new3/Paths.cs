@@ -141,19 +141,40 @@ namespace dotnet_new3
                 return;
             }
 
-            foreach(string p in path.EnumerateFiles("*", SearchOption.AllDirectories))
+            foreach(string p in path.EnumerateFiles("*", SearchOption.AllDirectories).OrderBy(x => x.Length))
             {
                 string localPath = p.Substring(path.Length).TrimStart('\\', '/');
 
                 if (Directory.Exists(p))
                 {
-                    Directory.CreateDirectory(Path.Combine(targetPath, localPath));
+                    localPath.CreateDirectory(targetPath);
                 }
                 else
                 {
-                    File.Copy(p, Path.Combine(targetPath, localPath), true);
+                    int parentDirEndIndex = localPath.LastIndexOfAny(new[] {'/', '\\'});
+                    string wholeTargetPath = Path.Combine(targetPath, localPath);
+
+                    if (parentDirEndIndex > -1)
+                    {
+                        string parentDir = localPath.Substring(0, parentDirEndIndex);
+                        parentDir.CreateDirectory(targetPath);
+                    }
+                     
+                    File.Copy(p, wholeTargetPath, true);
                 }
             }
+        }
+
+        public static void CreateDirectory(this string path, string parent)
+        {
+            string[] parts = path.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
+            string current = parent;
+
+            for(int i = 0; i < parts.Length; ++i)
+            {
+                current = Path.Combine(current, parts[i]);
+                Directory.CreateDirectory(current);
+            }            
         }
 
         public static IEnumerable<string> EnumerateDirectories(this string path, string pattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
