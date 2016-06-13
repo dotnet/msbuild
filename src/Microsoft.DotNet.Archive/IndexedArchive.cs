@@ -238,7 +238,7 @@ namespace Microsoft.DotNet.Archive
         private class ExtractSource
         {
             private string _entryName;
-            private string _localPath;
+            private readonly string _localPath;
             private ThreadLocalZipArchive _archive;
 
             public ExtractSource(string sourceString, Dictionary<string, string> externalFiles, ThreadLocalZipArchive archive)
@@ -271,20 +271,9 @@ namespace Microsoft.DotNet.Archive
                 }
                 else
                 {
-                    // we open the archive each time since ZipArchive is not thread safe and we want to be able
-                    // to extract from many threads
-                    //using (var archive = new ZipArchive(File.Open(_archivePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)))
                     using (var sourceStream = _archive.Archive.GetEntry(_entryName).Open())
                     {
                         sourceStream.CopyTo(destinationStream);
-
-                        var destinationFileStream = destinationStream as FileStream;
-                        if (destinationFileStream != null)
-                        {
-                            // Set Local path  so that the next copy operation using the same source will
-                            // do a copy instead of a write.
-                            _localPath = destinationFileStream.Name;
-                        }
                     }
                 }
 
