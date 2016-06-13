@@ -14,6 +14,7 @@ using Microsoft.Build.Framework;
 
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Xunit;
+using Xunit.Abstractions;
 
 
 namespace Microsoft.Build.UnitTests
@@ -45,6 +46,7 @@ namespace Microsoft.Build.UnitTests
         private List<BuildMessageEventArgs> _buildMessageEvents = new List<BuildMessageEventArgs>();
         private List<BuildStartedEventArgs> _buildStartedEvents = new List<BuildStartedEventArgs>();
         private List<BuildFinishedEventArgs> _buildFinishedEvents = new List<BuildFinishedEventArgs>();
+        private ITestOutputHelper _testOutputHelper;
 
         /// <summary>
         /// Should the build finished event be logged in the log file. This is to work around the fact we have different
@@ -280,6 +282,16 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
+        public MockLogger()
+        {
+            _testOutputHelper = null;
+        }
+
+        public MockLogger(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         /*
          * Method:  LoggerEventHandler
          *
@@ -465,7 +477,14 @@ namespace Microsoft.Build.UnitTests
             }
             if (index != contains.Length)
             {
-                Console.WriteLine(FullLog);
+                if (_testOutputHelper != null)
+                {
+                    _testOutputHelper.WriteLine(FullLog);
+                }
+                else
+                {
+                    Console.WriteLine(FullLog);
+                }
                 Assert.True(false, String.Format(CultureInfo.CurrentCulture, "Log was expected to contain '{0}', but did not.\n=======\n{1}\n=======", contains[index], FullLog));
             }
         }
@@ -478,7 +497,14 @@ namespace Microsoft.Build.UnitTests
         {
             if (FullLog.Contains(contains))
             {
-                Console.WriteLine(FullLog);
+                if (_testOutputHelper != null)
+                {
+                    _testOutputHelper.WriteLine(FullLog);
+                }
+                else
+                {
+                    Console.WriteLine(FullLog);
+                }
                 Assert.True(false, String.Format("Log was not expected to contain '{0}', but did.", contains));
             }
         }
