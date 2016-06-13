@@ -9,8 +9,8 @@
       "target": "project"
     },
     "Newtonsoft.Json": "9.0.1-beta1",
-    "NuGet.Packaging": "3.5.0-beta2-1480",
-    "NuGet.RuntimeModel": "3.5.0-beta2-1480",
+    "NuGet.Packaging": "3.5.0-beta2-1484",
+    "NuGet.RuntimeModel": "3.5.0-beta2-1484",
     "System.Reflection.Metadata": "1.3.0"
   },
   "frameworks": {
