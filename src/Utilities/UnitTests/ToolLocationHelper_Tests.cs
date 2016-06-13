@@ -2437,6 +2437,88 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
+        [Fact]
+        public void GetPathToStandardLibrariesWithCustomTargetFrameworkRoot()
+        {
+            string frameworkName = "Foo Framework";
+            string frameworkVersion = "v0.1";
+            string rootDir = Path.Combine(Path.GetTempPath(), "framework-root");
+
+            try {
+                string asmPath = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersion, rootDir);
+
+                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, rootDir);
+                Assert.Equal(asmPath, stdLibPath);
+            } finally {
+                FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
+            }
+        }
+
+        [Fact]
+        public void GetPathToStandardLibrariesWithNullTargetFrameworkRootPath()
+        {
+            string frameworkName = ".NETFramework";
+            string frameworkVersion = "v4.5";
+
+            string v45Path = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty);
+            // This look up should fall back the default path with the .NET frameworks
+            string v45PathWithNullRoot = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null);
+
+            Assert.Equal(v45Path, v45PathWithNullRoot);
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkRoot()
+        {
+            string frameworkName = "Foo Framework";
+            string frameworkVersion = "v0.1";
+            string rootDir = Path.Combine(Path.GetTempPath(), "framework-root");
+
+            try {
+                string asmPath = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersion, rootDir);
+
+                var stdLibPaths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, rootDir);
+                Assert.Equal(2, stdLibPaths.Count);
+
+                Assert.Equal(Path.Combine(rootDir, frameworkName, frameworkVersion) + Path.DirectorySeparatorChar.ToString(), stdLibPaths[0]);
+                Assert.Equal(asmPath + Path.DirectorySeparatorChar.ToString(), stdLibPaths[1]);
+            } finally {
+                FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
+            }
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithNullTargetFrameworkRootPath()
+        {
+            string frameworkName = ".NETFramework";
+            string frameworkVersion = "v4.5";
+
+            var v45Paths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty);
+
+            // This look up should fall back the default path with the .NET frameworks
+            var v45PathsWithNullRoot = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, null);
+
+            Assert.Equal(v45Paths, v45PathsWithNullRoot);
+        }
+
+        string CreateNewFrameworkAndGetAssembliesPath(string frameworkName, string frameworkVersion, string rootDir)
+        {
+            string frameworkListXml = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<FileList  Name=""{0}"" TargetFrameworkDirectory=""..\assemblies"">
+</FileList>";
+
+            string redistPath = Path.Combine(rootDir, frameworkName, frameworkVersion, "RedistList");
+            string asmPath = Path.Combine(rootDir, frameworkName, frameworkVersion, "assemblies");
+
+            Directory.CreateDirectory(redistPath);
+            Directory.CreateDirectory(Path.Combine(rootDir, frameworkName, frameworkVersion, "assemblies"));
+
+            File.WriteAllText(Path.Combine(redistPath, "FrameworkList.xml"), String.Format(frameworkListXml, frameworkName));
+            File.WriteAllText(Path.Combine(asmPath, "mscorlib.dll"), String.Empty);
+
+            return asmPath;
+        }
+
         /*
         * Method:   GetDirectories
         *
