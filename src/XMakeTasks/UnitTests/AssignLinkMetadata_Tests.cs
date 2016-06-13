@@ -10,20 +10,25 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Evaluation;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssignLinkMetadata_Tests
+    public sealed class AssignLinkMetadata_Tests
     {
+        private readonly string _defaultItemSpec = Path.Combine(Path.GetTempPath(), "SubFolder", "a.cs");
+
         /// <summary>
         /// AssignLinkMetadata should behave nicely when no items are set to it
         /// </summary>
         [Fact]
         public void NoItems()
         {
-            AssignLinkMetadata t = new AssignLinkMetadata();
-            t.BuildEngine = new MockEngine();
+            AssignLinkMetadata t = new AssignLinkMetadata
+            {
+                BuildEngine = new MockEngine()
+            };
             bool success = t.Execute();
 
             Assert.True(success);
@@ -37,12 +42,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidItemPath()
         {
-            ITaskItem item = GetParentedTaskItem();
+            ITaskItem item = GetParentedTaskItem(_defaultItemSpec);
             item.ItemSpec = "|||";
 
-            AssignLinkMetadata t = new AssignLinkMetadata();
-            t.BuildEngine = new MockEngine();
-            t.Items = new ITaskItem[] { new TaskItem(item) };
+            AssignLinkMetadata t = new AssignLinkMetadata
+            {
+                BuildEngine = new MockEngine(),
+                Items = new ITaskItem[] {new TaskItem(item)}
+            };
             bool success = t.Execute();
 
             Assert.True(success);
@@ -56,11 +63,13 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void Basic()
         {
-            ITaskItem item = GetParentedTaskItem();
+            ITaskItem item = GetParentedTaskItem(_defaultItemSpec);
 
-            AssignLinkMetadata t = new AssignLinkMetadata();
-            t.BuildEngine = new MockEngine();
-            t.Items = new ITaskItem[] { new TaskItem(item) };
+            AssignLinkMetadata t = new AssignLinkMetadata
+            {
+                BuildEngine = new MockEngine(),
+                Items = new ITaskItem[] {new TaskItem(item)}
+            };
             bool success = t.Execute();
 
             Assert.True(success);
@@ -69,7 +78,7 @@ namespace Microsoft.Build.UnitTests
 
             // Link metadata should have been added by the task, and OriginalItemSpec was added by the copy 
             Assert.Equal(item.MetadataCount + 2, t.OutputItems[0].MetadataCount);
-            Assert.Equal(@"SubFolder\a.cs", t.OutputItems[0].GetMetadata("Link"));
+            Assert.Equal(Path.Combine("SubFolder", "a.cs"), t.OutputItems[0].GetMetadata("Link"));
         }
 
         /// <summary>
@@ -82,11 +91,13 @@ namespace Microsoft.Build.UnitTests
         public void InvalidItemPathWithOtherValidItem()
         {
             ITaskItem item1 = GetParentedTaskItem(itemSpec: "|||");
-            ITaskItem item2 = GetParentedTaskItem();
+            ITaskItem item2 = GetParentedTaskItem(_defaultItemSpec);
 
-            AssignLinkMetadata t = new AssignLinkMetadata();
-            t.BuildEngine = new MockEngine();
-            t.Items = new ITaskItem[] { new TaskItem(item1), new TaskItem(item2) };
+            AssignLinkMetadata t = new AssignLinkMetadata
+            {
+                BuildEngine = new MockEngine(),
+                Items = new ITaskItem[] {new TaskItem(item1), new TaskItem(item2)}
+            };
             bool success = t.Execute();
 
             Assert.True(success);
@@ -95,7 +106,7 @@ namespace Microsoft.Build.UnitTests
 
             // Link metadata should have been added by the task, and OriginalItemSpec was added by the copy 
             Assert.Equal(item2.MetadataCount + 2, t.OutputItems[0].MetadataCount);
-            Assert.Equal(@"SubFolder\a.cs", t.OutputItems[0].GetMetadata("Link"));
+            Assert.Equal(Path.Combine("SubFolder", "a.cs"), t.OutputItems[0].GetMetadata("Link"));
         }
 
         /// <summary>
@@ -104,11 +115,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DontOverrideLink()
         {
-            ITaskItem item = GetParentedTaskItem(linkMetadata: @"SubFolder2\SubSubFolder\a.cs");
+            ITaskItem item = GetParentedTaskItem(_defaultItemSpec, Path.Combine("SubFolder2", "SubSubFolder", "a.cs"));
 
-            AssignLinkMetadata t = new AssignLinkMetadata();
-            t.BuildEngine = new MockEngine();
-            t.Items = new ITaskItem[] { new TaskItem(item) };
+            AssignLinkMetadata t = new AssignLinkMetadata
+            {
+                BuildEngine = new MockEngine(),
+                Items = new ITaskItem[] {new TaskItem(item)}
+            };
             bool success = t.Execute();
 
             Assert.True(success);
@@ -122,11 +135,15 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OutsideDefiningProjectCone()
         {
-            ITaskItem item = GetParentedTaskItem(itemSpec: @"c:\subfolder\a.cs");
+            var item = GetParentedTaskItem(NativeMethodsShared.IsUnixLike
+                ? Path.Combine("//subfolder/a.cs")
+                : @"c:\subfolder\a.cs");
 
-            AssignLinkMetadata t = new AssignLinkMetadata();
-            t.BuildEngine = new MockEngine();
-            t.Items = new ITaskItem[] { new TaskItem(item) };
+            AssignLinkMetadata t = new AssignLinkMetadata
+            {
+                BuildEngine = new MockEngine(),
+                Items = new ITaskItem[] {new TaskItem(item)}
+            };
             bool success = t.Execute();
 
             Assert.True(success);
@@ -140,11 +157,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoDefiningProjectMetadata()
         {
-            ITaskItem item = new TaskItem(@"SubFolder\a.cs");
+            ITaskItem item = new TaskItem(Path.Combine("SubFolder", "a.cs"));
 
-            AssignLinkMetadata t = new AssignLinkMetadata();
-            t.BuildEngine = new MockEngine();
-            t.Items = new ITaskItem[] { item };
+            AssignLinkMetadata t = new AssignLinkMetadata
+            {
+                BuildEngine = new MockEngine(),
+                Items = new ITaskItem[] {item}
+            };
             bool success = t.Execute();
 
             Assert.True(success);
@@ -154,18 +173,12 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Helper function creating a task item that is associated with a parent project
         /// </summary>
-        private ITaskItem GetParentedTaskItem(string linkMetadata = null)
-        {
-            return GetParentedTaskItem(Path.Combine(Path.GetTempPath(), "SubFolder", "a.cs"), linkMetadata);
-        }
-
-        /// <summary>
-        /// Helper function creating a task item that is associated with a parent project
-        /// </summary>
         private ITaskItem GetParentedTaskItem(string itemSpec, string linkMetadata = null)
         {
-            Project p = new Project(new ProjectCollection());
-            p.FullPath = Path.Combine(Path.GetTempPath(), "a.proj");
+            Project p = new Project(new ProjectCollection())
+            {
+                FullPath = Path.Combine(Path.GetTempPath(), "a.proj")
+            };
             ProjectInstance pi = p.CreateProjectInstance();
 
             IDictionary<string, string> metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

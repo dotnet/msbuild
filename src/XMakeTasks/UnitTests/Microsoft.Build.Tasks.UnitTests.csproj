@@ -44,6 +44,7 @@
     <Compile Include="AssemblyIdentity_Tests.cs" />
     <Compile Include="AssemblyRefs.cs" />
     <Compile Include="AssignCulture_Tests.cs" />
+    <Compile Include="AssignLinkMetadata_Tests.cs" />
     <Compile Include="AssignTargetPath_Tests.cs" />
     <Compile Include="CallTarget_Tests.cs" />
     <Compile Include="CombinePath_Tests.cs" />
@@ -100,7 +101,6 @@
     <Compile Include="AppConfig_Tests.cs" />
     <Compile Include="AspNetCompiler_Tests.cs" />
     <Compile Include="AssemblyRegistrationCache_Tests.cs" />
-    <Compile Include="AssignLinkMetadata_Tests.cs" />
     <Compile Include="AssignProjectConfiguration_Tests.cs" />
     <Compile Include="AxImp_Tests.cs" />
     <Compile Include="AxTlbBaseTask_Tests.cs" />
