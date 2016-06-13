@@ -11,18 +11,14 @@
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-final",
     "Microsoft.TemplateEngine.Core": "1.0.0-*",
     "Microsoft.TemplateEngine.Abstractions": "1.0.0-*",
+    "Newtonsoft.Json": "8.0.3",
     "Microsoft.NETCore.App": {
       "version": "1.0.0-rc2-3002702"
     }
   },
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": [
-        "dnxcore50",
-        "netstandardapp1.5",
-        "portable-net45+win8",
-        "portable-net45+wp80+win8+wpa81+dnxcore50"
-      ]
+      "imports": "portable-dnxcore50+net45+win8+wp8+wpa81"
     }
   },
   "runtimes": {
