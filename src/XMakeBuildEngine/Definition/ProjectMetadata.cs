@@ -21,7 +21,7 @@ namespace Microsoft.Build.Evaluation
     /// <remarks>
     /// Never used to represent built-in metadata, like %(Filename). There is always a backing XML object.
     /// </remarks>
-    [DebuggerDisplay("{Name}={EvaluatedValue} [{xml.Value}]")]
+    [DebuggerDisplay("{Name}={EvaluatedValue} [{_xml.Value}]")]
     public class ProjectMetadata : IKeyed, IValued, IEquatable<ProjectMetadata>, IMetadatum
     {
         /// <summary>

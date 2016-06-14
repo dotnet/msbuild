@@ -55,13 +55,14 @@
            ForceTouch="true" />
 
     <!-- Restore tools from packages/project.json -->
+    
     <Exec Condition="Exists('$(NuGetProjectJsonFile)')" 
           Command="$(DnuCoreRestoreCommand) --packages $(ToolPackagesDir) &quot;$(NuGetProjectJsonFile)&quot;"/>
 
 <!--     <Exec Condition="Exists('$(NuGetProjectJsonFile)')" 
           Command="$(DotnetToolCommand) publish -f dnxcore50 -r $(NuGetRuntimeIdentifier) -o $(ToolPackagesDir) &quot;$(NuGetProjectJsonFile)&quot;"
           WorkingDirectory="$(NuGetConfigDir)" /> -->
-
+    
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
 

@@ -972,7 +972,7 @@ namespace Microsoft.Build.Execution
                 _detailedSummary = true;
             }
 
-            FindMSBuildExe();
+            _nodeExeLocation = FindMSBuildExe();
         }
 
         /// <summary>
@@ -991,34 +991,22 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// This method determines where MSBuild.Exe is and sets the NodeExePath to that by default.
         /// </summary>
-        private void FindMSBuildExe()
+        private string FindMSBuildExe()
         {
+            string location = _nodeExeLocation;
+
             // Use the location specified by the user in code.
-            if (_nodeExeLocation != null && CheckMSBuildExeExistsAt(_nodeExeLocation))
+            if (!string.IsNullOrEmpty(location) && CheckMSBuildExeExistsAt(location))
             {
-                return;
+                return location;
             }
 
-            // Use the location specified in the environment.
-            // MSBUILD_EXE_PATH optionally contains the full path to msbuild.exe, and if present
-            // overrides the rest
-            string path = Environment.GetEnvironmentVariable("MSBUILD_EXE_PATH");
-            if (path != null && CheckMSBuildExeExistsAt(path))
-            {
-                _nodeExeLocation = path;
-                return;
-            }
+            // Try what we think is the current executable path.
+            location = FileUtilities.CurrentExecutablePath;
 
-            // Use the default location of the directory from which the engine was loaded.
-#if FEATURE_APPDOMAIN
-            path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MSBuild.exe");
-#else
-            path = Path.Combine(Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath), "MSBuild.exe");
-#endif
-            if (path != null && CheckMSBuildExeExistsAt(path))
+            if (CheckMSBuildExeExistsAt(location))
             {
-                _nodeExeLocation = path;
-                return;
+                return location;
             }
 
             // Get the location pointed to by the MSBuildToolsPath in the "current" ToolsVersion 
@@ -1027,58 +1015,16 @@ namespace Microsoft.Build.Execution
             EnsureToolsets();
             Toolset currentToolset = _toolsetProvider.GetToolset(MSBuildConstants.CurrentToolsVersion);
 
-            if (currentToolset != null)
+            if (currentToolset != null && !string.IsNullOrEmpty(currentToolset.ToolsPath))
             {
-                path = Path.Combine(currentToolset.ToolsPath, "MSBuild.exe");
-                if (path != null && CheckMSBuildExeExistsAt(path))
+                location = Path.Combine(currentToolset.ToolsPath, "MSBuild.exe");
+                if (CheckMSBuildExeExistsAt(location))
                 {
-                    _nodeExeLocation = path;
-                    return;
+                    return location;
                 }
             }
 
-#if FEATURE_APPDOMAIN
-            // Search in the location of any assemblies we have loaded.
-            foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                if (!assembly.IsDynamic)
-                {
-                    try
-                    {
-                        path = Path.GetDirectoryName(assembly.Location);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ExceptionHandling.IsCriticalException(ex))
-                        {
-                            throw;
-                        }
-
-                        // In some circumstances, assembly.Location throws NotSupportedException (ex. when 
-                        // it's an anonymous dynamic assembly -- which we're already protecting against, but 
-                        // there could be other examples we don't know of). If there's an error here, we really don't 
-                        // care -- it's just one fewer place we can look for the path to MSBuild.exe.  So 
-                        // just continue. 
-                        continue;
-                    }
-
-                    if (CheckMSBuildExeExistsAt(Path.Combine(path, "MSBuild.exe")))
-                    {
-                        _nodeExeLocation = Path.Combine(path, "MSBuild.exe");
-                        return;
-                    }
-                }
-            }
-#endif
-
-            // Search in the framework directory.  Checks the COMPLUS_INSTALL_ROOT among other things.
-            path = FrameworkLocationHelper.PathToDotNetFrameworkV40;
-            if (path != null && CheckMSBuildExeExistsAt(Path.Combine(path, "MSBuild.exe")))
-            {
-                _nodeExeLocation = Path.Combine(path, "MSBuild.exe");
-            }
-
-            // Well, we just can't find it.  Maybe they will only build in-proc and won't need it...
+            return location;
         }
 
         /// <summary>
@@ -1089,7 +1035,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool CheckMSBuildExeExistsAt(string path)
         {
-            if (s_msbuildExeKnownToExistAt != null && String.Equals(path, s_msbuildExeKnownToExistAt, StringComparison.OrdinalIgnoreCase))
+            if (s_msbuildExeKnownToExistAt != null && string.Equals(path, s_msbuildExeKnownToExistAt, StringComparison.OrdinalIgnoreCase))
             {
                 // We found it there last time: it must exist there.
                 return true;

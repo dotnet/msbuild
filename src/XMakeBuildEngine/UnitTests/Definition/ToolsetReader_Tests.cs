@@ -319,8 +319,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"");
 
-                ToolsetReader reader = new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
-                    ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
+                ToolsetReader reader = new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -2140,7 +2139,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Project project = projectCollection.LoadProject(projectPath);
 
-                string defaultExpected = "14.1";
+                string defaultExpected = "15.0";
                 if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
                 {
                     defaultExpected = ObjectModelHelpers.MSBuildDefaultToolsVersion;
@@ -2857,8 +2856,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #if FEATURE_SYSTEM_CONFIGURATION
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
-                ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
+            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
 #endif
     }

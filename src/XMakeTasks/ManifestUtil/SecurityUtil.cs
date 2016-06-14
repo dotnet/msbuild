@@ -703,9 +703,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static void SignPEFile(X509Certificate2 cert, System.Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
         {
-            if (GetPathToTool() == null) throw new ApplicationException(resources.GetString("SecurityUtil.SigntoolNotFound"));
-
-            ProcessStartInfo startInfo = new ProcessStartInfo(GetPathToTool(), GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256));
+            ProcessStartInfo startInfo = new ProcessStartInfo(GetPathToTool(resources), GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256));
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardError = true;
@@ -760,7 +758,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return commandLine.ToString();
         }
 
-        internal static string GetPathToTool()
+        internal static string GetPathToTool(System.Resources.ResourceManager resources)
         {
 #pragma warning disable 618 // Disabling warning on using internal ToolLocationHelper API. At some point we should migrate this.
             string toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
@@ -771,7 +769,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (toolPath == null)
                 toolPath = Path.Combine(Directory.GetCurrentDirectory(), ToolName);
             if (!File.Exists(toolPath))
-                toolPath = null;
+                throw new ApplicationException(String.Format(CultureInfo.CurrentCulture, resources.GetString("SecurityUtil.SigntoolNotFound"), toolPath));
             return toolPath;
 #pragma warning restore 618
         }

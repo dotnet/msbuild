@@ -21,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// This is an immutable class.
     /// </remarks>
-    [DebuggerDisplay("Name={name} Count={children.Count} Condition={condition} Inputs={inputs} Outputs={outputs} DependsOnTargets={dependsOnTargets}")]
+    [DebuggerDisplay("Name={_name} Count={_children.Count} Condition={_condition} Inputs={_inputs} Outputs={_outputs} DependsOnTargets={_dependsOnTargets}")]
     public sealed class ProjectTargetInstance : IImmutable, IKeyed
     {
         /// <summary>

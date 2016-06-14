@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
         {
             string projectFileContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=14.1.0.0` >
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=15.1.0.0` >
                          <ParameterGroup>     
                              <Text/>
                           </ParameterGroup>
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("Hello, World!");
-            mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=14.1.0.0");
+            mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=15.1.0.0");
         }
 
         /// <summary>

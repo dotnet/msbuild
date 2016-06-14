@@ -31,6 +31,10 @@ def project = GithubProject
                         batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && RebuildWithLocalMSBuild.cmd")
                     }
                 }
+
+                // Add xunit result archiving
+                Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml')
+
                 break;
             case 'OSX':
                 newJob.with{
@@ -38,6 +42,9 @@ def project = GithubProject
                         shell("./cibuild.sh --scope Test")
                     }
                 }
+
+                //no test archiving yet
+
                 break;
             case 'Ubuntu':
                 newJob.with{
@@ -45,15 +52,16 @@ def project = GithubProject
                         shell("./cibuild.sh --scope Compile")
                     }
                 }
+
+                //no test archiving yet
+
                 break;
         }
         
-        Utilities.setMachineAffinity(newJob, osName)
+        Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
         Utilities.standardJobSetup(newJob, project, isPR, branch)
-        // Add xunit result archiving
-        Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml')
         // Add archiving of logs
-        Utilities.addArchival(newJob, 'msbuild.log')
+        Utilities.addArchival(newJob, 'msbuild*.log')
         // Add trigger
         if (isPR) {
             Utilities.addGithubPRTrigger(newJob, "${osName} Build")

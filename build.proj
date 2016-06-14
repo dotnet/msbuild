@@ -8,17 +8,32 @@
   <Import Project="src\dir.props" />
 
   <ItemGroup>
-    <Project Include="src\dirs.proj" />
-    <Project Include="Samples\dirs.proj" Condition="'$(BuildSamples)'!='false'" />
+    <ProjectWithoutConfiguration Include="src\dirs.proj" />
+    <ProjectWithoutConfiguration Include="Samples\dirs.proj" Condition="'$(BuildSamples)'!='false'" />
   </ItemGroup>
 
   <Import Project="dir.targets" />
-
   <Import Project="dir.traversal.targets" />
-
+  
+  <!-- Ensure the BuildTools package has been restored when doing a Rebuild. This needs to happen 
+       after import dir.traversal.targets. If this isn't done, Imports will fail because the Clean 
+       target will load all projects. -->
+  <Target Name="Rebuild" DependsOnTargets="_RestoreBuildToolsPackagesConfig;Clean;Build" />
+  
   <Target Name="BulkRestoreNugetPackages"
           BeforeTargets="Build;BuildAllProjects"
           DependsOnTargets="_RestoreBuildToolsPackagesConfig"
           Condition="'$(SkipBulkRestore)' != 'true'">
+  </Target>
+
+  <!-- Create Project ItemGroup (from ProjectWithoutConfiguration) with Platform metadata -->
+  <Target Name="MapProjectAndPlatform" BeforeTargets="BuildAllProjects">
+    <ItemGroup>
+      <Platforms Include="$(Platform)" />
+      <Project Include="@(ProjectWithoutConfiguration)">
+        <Properties>Platform=%(Platforms.Identity)</Properties>
+      </Project>
+    </ItemGroup>
+    <Message Text="Building Project(s): %(Project.Identity) : Configuration=$(Configuration), %(Project.Properties) " Importance="High" />
   </Target>
 </Project>

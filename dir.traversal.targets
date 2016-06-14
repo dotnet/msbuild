@@ -17,8 +17,7 @@
 
   <Target Name="TestAllProjects">
     <!-- MSBuild tests must be sequential -->
-    <MSBuild Targets="Test" Projects="@(Project)" Condition="'$(SerializeProjects)'=='true'" Properties="Dummy=%(Identity)"/>
-    <MSBuild Targets="Test" Projects="@(Project)" Condition="'$(SerializeProjects)'!='true'" BuildInParallel="false" />
+    <MSBuild Targets="Test" Projects="@(Project)" BuildInParallel="false" />
   </Target>
 
   <PropertyGroup>

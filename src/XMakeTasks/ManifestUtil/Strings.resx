@@ -145,7 +145,7 @@
     <value xml:space="preserve">Warning while signing {0}. {1}</value>
   </data>
   <data name="SecurityUtil.SigntoolNotFound">
-    <value xml:space="preserve">SignTool.exe not found.</value>
+    <value xml:space="preserve">SignTool.exe was not found at path {0}.</value>
   </data>
   <data name="SecurityUtil.TimestampUrlNotFound">
     <value xml:space="preserve">Timestamp URL server name or address could not be resolved.</value>

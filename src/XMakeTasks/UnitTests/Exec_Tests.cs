@@ -317,34 +317,112 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Tests that Exec still executes properly when there's a non-ansi character in the command
+        /// Tests that Exec still executes properly when there's a non-ANSI character in the command
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
         public void ExecTaskUnicodeCharacterInCommand()
         {
+            RunExec(true, new UTF8Encoding(false).EncodingName);
+        }
+
+        /// <summary>
+        /// Tests that Exec task will choose the default code page when UTF8 is not needed.
+        /// </summary>
+        [Fact]
+        public void ExecTaskWithoutUnicodeCharacterInCommand()
+        {
+            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+        }
+
+        /// <summary>
+        /// Exec task will use UTF8 when UTF8 Always is specified (with non-ANSI characters in the Command)
+        /// </summary>
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
+        public void ExecTaskUtf8AlwaysWithNonAnsi()
+        {
+            RunExec(true, new UTF8Encoding(false).EncodingName, "Always");
+        }
+
+        /// <summary>
+        /// Exec task will use UTF8 when UTF8 Always is specified (without non-ANSI characters in the Command)
+        /// </summary>
+        [Fact]
+        public void ExecTaskUtf8AlwaysWithAnsi()
+        {
+            RunExec(false, new UTF8Encoding(false).EncodingName, "Always");
+        }
+
+        /// <summary>
+        /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command
+        /// <remarks>Exec task will fail as the cmd processor will not be able to run the command.</remarks>
+        /// </summary>
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
+        public void ExecTaskUtf8NeverWithNonAnsi()
+        {
+            RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never", false);
+        }
+
+        /// <summary>
+        /// Exec task will NOT use UTF8 when UTF8 Never is specified and only ANSI characters are in the Command
+        /// </summary>
+        [Fact]
+        public void ExecTaskUtf8NeverWithAnsi()
+        {
+            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never");
+        }
+
+
+        /// <summary>
+        /// Helper function to run the Exec task with or without ANSI characters in the Command and check for an expected encoding.
+        /// </summary>
+        /// <param name="includeNonAnsiInCommand">True to include non-ANSI characters in the Command</param>
+        /// <param name="expectedEncoding">Expected EncodingName</param>
+        /// <param name="useUtf8">Optional parameter to specify the UseUtf8Encoding on the Exec task</param>
+        /// <param name="expectSuccess">Optional parameter if the Exec task should succeed or not. Default true.</param>
+        /// <returns></returns>
+        private void RunExec(bool includeNonAnsiInCommand, string expectedEncoding, string useUtf8 = null, bool expectSuccess = true)
+        {
+            string ansiCharacters = "test";
             string nonAnsiCharacters = "\u521B\u5EFA";
-            string folder = Path.Combine(Path.GetTempPath(), nonAnsiCharacters);
+            string folder = Path.Combine(Path.GetTempPath(), includeNonAnsiInCommand ? nonAnsiCharacters : ansiCharacters);
             string command = Path.Combine(folder, "test.cmd");
+
+            Exec exec;
 
             try
             {
                 Directory.CreateDirectory(folder);
                 File.WriteAllText(command, "echo [hello]");
+
                 if (!NativeMethodsShared.IsWindows)
                 {
                     command = ". " + command;
                 }
 
-                Exec exec = PrepareExec(command);
+                exec = PrepareExec(command);
 
-                Assert.True(exec.Execute()); // "Task should have succeeded"
-                ((MockEngine)exec.BuildEngine).AssertLogContains("[hello]");
+                if (!string.IsNullOrEmpty(useUtf8))
+                {
+                    exec.UseUtf8Encoding = useUtf8;
+                }
+
+                Assert.Equal(expectSuccess, exec.Execute());
+
+                if (expectSuccess)
+                {
+                    ((MockEngine) exec.BuildEngine).AssertLogContains("[hello]");
+                }
+
+                Assert.Equal(expectedEncoding, exec.StdOutEncoding);
+                Assert.Equal(expectedEncoding, exec.StdErrEncoding);
             }
             finally
             {
                 if (Directory.Exists(folder))
                     FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
             }
+
+            return;
         }
 
         [Fact]
@@ -649,6 +727,22 @@ namespace Microsoft.Build.UnitTests
 
             //Both two lines should had gone to stdout
             Assert.Equal(2, exec.ConsoleOutput.Length);
+        }
+
+        /// <summary>
+        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
+        /// in the current system encoding.
+        /// </summary>
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
+        public void CanEncodeTest()
+        {
+            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+
+            string nonAnsiCharacters = "\u521B\u5EFA";
+            string pathWithAnsiCharacters = @"c:\windows\system32\cmd.exe";
+
+            Assert.False(Exec.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
+            Assert.True(Exec.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
         }
     }
 

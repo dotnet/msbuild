@@ -64,14 +64,14 @@ namespace Microsoft.Build.Evaluation
             return Enumerable.Empty<ToolsetPropertyDefinition>();
         }
 
+        protected override Dictionary<string, List<string>> GetProjectImportSearchPathsTable(string toolsVersion, string os)
+        {
+            return new Dictionary<string, List<string>>();
+        }
+
         protected override IEnumerable<string> GetSubToolsetVersions(string toolsVersion)
         {
             return Enumerable.Empty<string>();
-        }
-
-        protected override Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> GetMSBuildExtensionPathsSearchPathsTable(string toolsVersion, string os)
-        {
-            return new Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>();
         }
     }
 }

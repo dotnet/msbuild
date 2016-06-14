@@ -217,6 +217,28 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void ItemFuncParseTest()
+        {
+            Console.WriteLine("ItemFuncParseTest()");
+
+            Parser p = new Parser();
+            GenericExpressionNode tree;
+
+            tree = p.Parse("@(item->foo('ab'))", 
+                ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
+            Assert.IsType<StringExpressionNode>(tree);
+            Assert.Equal("@(item->foo('ab'))", tree.GetUnexpandedValue(null));
+
+            tree = p.Parse("!@(item->foo())", 
+                ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
+            Assert.IsType<NotExpressionNode>(tree);
+
+            tree = p.Parse("(@(item->foo('ab')) and @(item->foo('bc')))", 
+                ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
+            Assert.IsType<AndExpressionNode>(tree);
+        }
+
+        [Fact]
         public void MetadataParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");

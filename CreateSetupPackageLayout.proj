@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="dir.props" />
+  <Import Project="$(MicroBuildDir)MicroBuild.Core.props" />
+
+  <PropertyGroup>
+      <X86OutputPath>$(BaseOutputPath)X86\$(OS)\$(Configuration)\</X86OutputPath>
+      <X64OutputPath>$(BaseOutputPath)X64\$(OS)\$(Configuration)\</X64OutputPath>
+      <SetupPackageRoot>$(BinDir)Setup\</SetupPackageRoot>
+      <SetupPackageLayoutDir>$(SetupPackageRoot)layout\</SetupPackageLayoutDir>
+      <SetupPackageOutputFile>$(SetupPackageRoot)MSBuild.fopx</SetupPackageOutputFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.dll" />
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.Framework.dll" />
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.Tasks.Core.dll" />
+    <BinX86Output Include="$(X86OutputPath)Microsoft.Build.Utilities.Core.dll" />
+    <BinX86Output Include="$(X86OutputPath)MSBuild.exe" />
+    <BinX86Output Include="$(X86OutputPath)MSBuild.exe.config" />
+    <BinX86Output Include="$(X86OutputPath)System.Threading.Tasks.Dataflow.dll" />
+    
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.dll" />
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Framework.dll" />
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Tasks.Core.dll" />
+    <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Utilities.Core.dll" />
+    <BinX64Output Include="$(X64OutputPath)MSBuild.exe" />
+    <BinX64Output Include="$(X64OutputPath)MSBuild.exe.config" />
+    <BinX64Output Include="$(X64OutputPath)System.Threading.Tasks.Dataflow.dll" />
+    
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.overridetasks" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.Common.tasks" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.CSharp.Core.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.CSharp.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.CSharp.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.CurrentVersion.props" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.props" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.NetFramework.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.VisualBasic.CurrentVersion.targets" />
+    <CommonOutput Include="$(X86OutputPath)Microsoft.VisualBasic.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PkgDef Include="$(SourceDir)Framework\Microsoft.Build.Framework.pkgdef" />
+    <PkgDef Include="$(SourceDir)XMakeBuildEngine\Microsoft.Build.pkgdef" />
+    <PkgDef Include="$(SourceDir)XmakeTasks\Microsoft.Build.Tasks.Core.pkgdef" />
+    <PkgDef Include="$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef" />
+  </ItemGroup>
+
+  <!-- Needed for the MicroBuild signing plugin -->
+  <ItemGroup>
+    <SigningTarget Include="$(SetupPackageOutputFile)"/>
+    <FilesToSign Include="@(SigningTarget)">
+      <Authenticode>Vsix</Authenticode>
+    </FilesToSign>
+  </ItemGroup>
+  <PropertyGroup>
+    <OutDir>$(SetupPackageRoot)</OutDir>
+  </PropertyGroup>
+
+  <Target Name="Build">
+    <Error Text="FopCreator.exe not found (MS internal only tool)."
+           Condition="!Exists('$(PackagesDir)\VS.Tools.Setup.FopCreator.1.0.16022601\FopCreator.exe')" />
+    <Error Text="X86 output folder not found."
+           Condition="!Exists('$(X86OutputPath)')" />
+    <Error Text="X64 output folder not found."
+           Condition="!Exists('$(X64OutputPath)')" />
+    
+    <!-- Delete the output if exists -->
+    <RemoveDir  Directories="$(SetupPackageRoot)" />
+
+    <!-- Copy our binaries to Bin and Bin\amd64 -->
+    <Copy SourceFiles="@(BinX86Output)"
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin" />
+    <Copy SourceFiles="@(CommonOutput)"
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin" />
+
+    <Copy SourceFiles="@(BinX64Output)"
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin\amd64" />
+    <Copy SourceFiles="@(CommonOutput)"
+          DestinationFolder="$(SetupPackageLayoutDir)MSBuild\$(TargetMSBuildToolsVersion)\Bin\amd64" />
+
+    <Copy SourceFiles="@(PkgDef)"
+          DestinationFolder="$(SetupPackageLayoutDir)Common7\IDE\CommonExtensions\MSBuild" />
+
+    <Exec Command="$(PackagesDir)\VS.Tools.Setup.FopCreator.1.0.16022601\FopCreator.exe /layoutdir $(SetupPackageLayoutDir) /outputfopx $(SetupPackageOutputFile)" />
+
+    <CallTarget Targets="AfterBuild" />
+  </Target>
+
+  <!-- MicroBuild signing plugin needs an AfterBuild target to run -->
+  <Target Name="AfterBuild" />
+
+  <Import Project="$(MicroBuildDir)MicroBuild.Core.targets" />
+</Project>
