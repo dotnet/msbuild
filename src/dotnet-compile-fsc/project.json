@@ -12,7 +12,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-160318",
+    "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-160509",
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
