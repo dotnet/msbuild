@@ -26,6 +26,13 @@ namespace Microsoft.DotNet.Tools.New
 
         public int CreateEmptyProject(string languageName, string templateDir)
         {
+            // Check if project.json exists in the folder
+            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "project.json")))
+            {
+                Reporter.Error.WriteLine($"Creating new {languageName} project failed, project already exists.");
+                return 1;
+            }
+
             var thisAssembly = typeof(NewCommand).GetTypeInfo().Assembly;
             var resources = from resourceName in thisAssembly.GetManifestResourceNames()
                             where resourceName.Contains(templateDir)
@@ -43,6 +50,17 @@ namespace Microsoft.DotNet.Tools.New
 
                     try
                     {
+                        // Check if other files from the template exists already, before extraction
+                        IEnumerable<string> fileNames = archive.Entries.Select(e => e.FullName);
+                        foreach (var entry in fileNames)
+                        {
+                            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
+                            {
+                                Reporter.Error.WriteLine($"Creating new {languageName} project failed, directory already contains {entry}");
+                                return 1;
+                            }
+                        }
+
                         archive.ExtractToDirectory(Directory.GetCurrentDirectory());
 
                         File.Move(
@@ -82,11 +100,12 @@ namespace Microsoft.DotNet.Tools.New
             var type = app.Option("-t|--type <TYPE>", "Type of project", CommandOptionType.SingleValue);
 
             var dotnetNew = new NewCommand();
-            app.OnExecute(() => {
+            app.OnExecute(() =>
+            {
 
                 var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", Templates = new[] { "Console", "Web", "Lib", "xunittest" } };
                 var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", Templates = new[] { "Console" } };
-                
+
                 string languageValue = lang.Value() ?? csharp.Name;
 
                 var language = new[] { csharp, fsharp }
