@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 Monikers.GetSdkDebianPackageName(c),
                 Monikers.GetDebianSharedFrameworkPackageName(CliDependencyVersions.SharedFrameworkVersion),
-                Monikers.GetDebianHostFxrPackageName(c),
+                Monikers.GetDebianHostFxrPackageName(CliDependencyVersions.HostFxrVersion),
                 Monikers.GetDebianSharedHostPackageName(c)
             };
             
