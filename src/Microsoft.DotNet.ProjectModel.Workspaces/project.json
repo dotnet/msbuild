@@ -10,7 +10,7 @@
     "Microsoft.DotNet.Compiler.Common": {
       "target": "project"
     },
-    "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0-beta1-20160610-04"
+    "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0"
   },
   "frameworks": {
     "net451": {

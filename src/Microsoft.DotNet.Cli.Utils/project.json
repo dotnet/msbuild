@@ -8,10 +8,10 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "NuGet.Versioning": "3.5.0-beta2-1480",
-    "NuGet.Packaging": "3.5.0-beta2-1480",
-    "NuGet.Frameworks": "3.5.0-beta2-1480",
-    "NuGet.ProjectModel": "3.5.0-beta2-1480"
+    "NuGet.Versioning": "3.5.0-beta2-1484",
+    "NuGet.Packaging": "3.5.0-beta2-1484",
+    "NuGet.Frameworks": "3.5.0-beta2-1484",
+    "NuGet.ProjectModel": "3.5.0-beta2-1484"
   },
   "frameworks": {
     "net451": {
@@ -26,7 +26,7 @@
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ],
       "dependencies": {
-        "System.Diagnostics.Process": "4.1.0-rc3-24210-10"
+        "System.Diagnostics.Process": "4.1.0"
       }
     }
   }

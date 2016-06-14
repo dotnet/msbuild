@@ -14,7 +14,7 @@
   },
   "tools": {
     "dotnet-compile-fsc": {
-      "version": "1.0.0-*",
+      "version": "1.0.0-preview2-*",
       "imports": [
         "dnxcore50",
         "portable-net45+win81",
@@ -27,7 +27,7 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc3-004459-00"
+          "version": "1.0.0"
         }
       },
       "imports": [

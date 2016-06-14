@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tests
             var command = new DotnetCommand()
                 .WithWorkingDirectory(testDirectory.Path);
             command.Environment["NUGET_PACKAGES"] = testNugetCache;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
 
             _firstDotnetUseCommandResult = command.ExecuteWithCapturedOutput("new");
 
