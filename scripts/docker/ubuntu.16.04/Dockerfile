@@ -28,7 +28,8 @@ RUN apt-get install -y  libunwind8 \
             liblttng-ust0 \
             libssl1.0.0 \
             zlib1g \
-            libuuid1 && \
+            libuuid1 \
+            liblldb-3.6 && \
     apt-get clean
 
 # Setup User to match Host User, and give superuser permissions

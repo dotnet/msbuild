@@ -209,11 +209,6 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
         public static BuildTargetResult DownloadHostAndSharedFxInstallers(BuildTargetContext c)
         {
-            if (CurrentPlatform.IsUbuntu && !CurrentPlatform.IsVersion("14.04"))
-            {
-                return c.Success();
-            }
-
             var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
             var hostVersion = CliDependencyVersions.SharedHostVersion;
             var hostFxrVersion = CliDependencyVersions.HostFxrVersion;
