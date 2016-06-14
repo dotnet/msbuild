@@ -15,7 +15,8 @@ namespace Microsoft.DotNet.Tests
 {
 	public class GivenThatTheUserIsRunningDotNetForTheFirstTime : TestBase
     {
-        private static CommandResult _firstDotnetUseCommandResult;
+        private static CommandResult _firstDotnetInfoUseCommandResult;
+        private static CommandResult _firstDotnetNewUseCommandResult;
         private static DirectoryInfo _nugetCacheFolder;
 
         static GivenThatTheUserIsRunningDotNetForTheFirstTime()
@@ -28,7 +29,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["NUGET_PACKAGES"] = testNugetCache;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
 
-            _firstDotnetUseCommandResult = command.ExecuteWithCapturedOutput("new");
+            _firstDotnetInfoUseCommandResult = command.ExecuteWithCapturedOutput("--info");
+            _firstDotnetNewUseCommandResult = command.ExecuteWithCapturedOutput("new");
 
             _nugetCacheFolder = new DirectoryInfo(testNugetCache);
         }        
@@ -36,7 +38,15 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void Using_dotnet_for_the_first_time_succeeds()
         {
-            _firstDotnetUseCommandResult.Should().Pass();
+            _firstDotnetNewUseCommandResult.Should().Pass();
+        }
+
+        [Fact]
+        public void Using_dotnet_for_the_first_time_with_non_verbs_doesnt_print_eula()
+        {
+            const string firstTimeUseWelcomeMessage = @".NET Command Line Tools";
+
+            _firstDotnetInfoUseCommandResult.StdOut.Should().StartWith(firstTimeUseWelcomeMessage);
         }
 
         [Fact]
@@ -54,12 +64,12 @@ Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.";
 
-            _firstDotnetUseCommandResult.StdOut.Should().StartWith(firstTimeUseWelcomeMessage);
+            _firstDotnetNewUseCommandResult.StdOut.Should().StartWith(firstTimeUseWelcomeMessage);
         }
 
     	[Fact]
     	public void It_restores_the_nuget_packages_to_the_nuget_cache_folder()
-    	{                        
+    	{
             _nugetCacheFolder.Should().HaveFile($"{GetDotnetVersion()}.dotnetSentinel");            
     	}
 

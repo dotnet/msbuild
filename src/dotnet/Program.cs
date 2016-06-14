@@ -55,11 +55,9 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                ConfigureDotNetForFirstTimeUse();
-
                 using (PerfTrace.Current.CaptureTiming())
                 {
-                    return ProcessArgs(args, new Telemetry());
+                    return ProcessArgs(args);
                 }
             }
             catch (GracefulException e)
@@ -78,7 +76,7 @@ namespace Microsoft.DotNet.Cli
             }
         }
 
-        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient)
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
@@ -86,6 +84,7 @@ namespace Microsoft.DotNet.Cli
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
+
             for (; lastArg < args.Length; lastArg++)
             {
                 if (IsArg(args[lastArg], "v", "verbose"))
@@ -114,6 +113,8 @@ namespace Microsoft.DotNet.Cli
                 }
                 else
                 {
+                    ConfigureDotNetForFirstTimeUse();
+
                     // It's the command, and we're done!
                     command = args[lastArg];
                     break;
@@ -124,6 +125,9 @@ namespace Microsoft.DotNet.Cli
                 HelpCommand.PrintHelp();
                 return 1;
             }
+
+            if (telemetryClient == null)
+                telemetryClient = new Telemetry();
 
             var appArgs = (lastArg + 1) >= args.Length ? Enumerable.Empty<string>() : args.Skip(lastArg + 1).ToArray();
 
@@ -178,6 +182,9 @@ namespace Microsoft.DotNet.Cli
                             environmentProvider);
 
                         dotnetConfigurer.Configure();
+
+                        if (!File.Exists(Telemetry.TelemetrySentinel))
+                            File.Create(Telemetry.TelemetrySentinel);
                     }
                 }
             }
