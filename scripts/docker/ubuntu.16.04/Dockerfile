@@ -21,6 +21,13 @@ RUN rm -rf rm -rf /var/lib/apt/lists/* && \
             sudo && \
     apt-get clean
 
+# Install Build Prereqs
+RUN apt-get -qqy install \
+        debhelper \
+        build-essential \
+        devscripts && \
+    apt-get clean
+
 # Dependencies for CoreCLR and CoreFX
 RUN apt-get install -y  libunwind8 \
             libkrb5-3 \
