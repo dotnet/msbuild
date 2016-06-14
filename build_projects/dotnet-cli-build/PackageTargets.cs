@@ -13,7 +13,8 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static readonly string[] ProjectsToPack  = new string[]
         {
-            "dotnet-compile-fsc",
+            // TODO: https://github.com/dotnet/cli/issues/3558
+            // "dotnet-compile-fsc",
             "Microsoft.DotNet.Cli.Utils",
             "Microsoft.DotNet.Compiler.Common",
             "Microsoft.DotNet.Files",
