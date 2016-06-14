@@ -11,7 +11,7 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "Microsoft.DiaSymReader": "1.0.8-rc2-60610-01",
+    "Microsoft.DiaSymReader": "1.0.8",
     "Microsoft.DiaSymReader.Native": "1.4.0-rc2"
   },
   "frameworks": {
