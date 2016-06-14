@@ -3,7 +3,7 @@
   "dependencies": {
     "L12": "1.0.0-*",
     "L21": "1.0.0-*",
-    "NETStandard.Library": "1.6.0-rc3-24210-10"
+    "NETStandard.Library": "1.6.0"
   },
   "frameworks": {
     "netstandard1.5": {

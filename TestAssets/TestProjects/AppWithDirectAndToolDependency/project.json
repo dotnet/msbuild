@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0-rc3-004459-00",
+    "Microsoft.NETCore.App": "1.0.0",
     "dotnet-hello": {
       "version": "1.0.0",
       "target": "package"

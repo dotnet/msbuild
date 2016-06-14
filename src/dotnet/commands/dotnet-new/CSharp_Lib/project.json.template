@@ -3,12 +3,11 @@
   "buildOptions": {
     "debugType": "portable"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "frameworks": {
     "netstandard1.6": {
       "dependencies": {
-        "NETStandard.Library": "1.6.0-rc3-24210-06"
+        "NETStandard.Library": "1.6.0"
       }
     }
   }
