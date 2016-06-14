@@ -221,6 +221,7 @@ namespace Microsoft.DotNet.Scripts
             ReplaceFileContents(@"build_projects\dotnet-cli-build\CliDependencyVersions.cs", fileContents =>
             {
                 fileContents = ReplaceDependencyVersion(c, fileContents, "SharedFrameworkVersion", "Microsoft.NETCore.App");
+                fileContents = ReplaceDependencyVersion(c, fileContents, "HostFxrVersion", "Microsoft.NETCore.DotNetHostResolver");
                 fileContents = ReplaceDependencyVersion(c, fileContents, "SharedHostVersion", "Microsoft.NETCore.DotNetHost");
 
                 return fileContents;
