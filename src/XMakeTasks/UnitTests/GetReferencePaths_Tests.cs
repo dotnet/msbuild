@@ -16,6 +16,7 @@ using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using Xunit;
 
+#if !RUNTIME_TYPE_NETCORE
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
@@ -311,6 +312,4 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-
+#endif
