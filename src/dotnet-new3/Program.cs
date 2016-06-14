@@ -41,12 +41,19 @@ namespace dotnet_new3
             CommandOption resetConfig = app.Option("--reset", "Resets the component cache and installed template sources.", CommandOptionType.NoValue);
             CommandOption rescan = app.Option("--rescan", "Rebuilds the component cache.", CommandOptionType.NoValue);
             CommandOption global = app.Option("--global", "Performs the --install or --install-component operation for all users.", CommandOptionType.NoValue);
+            CommandOption reinit = app.Option("--reinitialize", "Sets dotnet new3 back to its pre-first run state.", CommandOptionType.NoValue);
             CommandOption quiet = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
             CommandOption skipUpdateCheck = app.Option("--skip-update-check", "Don't check for updates.", CommandOptionType.NoValue);
             CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
+                if (reinit.HasValue())
+                {
+                    Paths.FirstRunCookie.Delete();
+                    return Task.FromResult(0);
+                }
+
                 if (!Paths.UserDir.Exists() || !Paths.FirstRunCookie.Exists())
                 {
                     if (!quiet.HasValue())
