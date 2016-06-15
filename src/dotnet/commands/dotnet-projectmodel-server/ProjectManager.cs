@@ -200,9 +200,13 @@ namespace Microsoft.DotNet.ProjectModel.Server
                     _configure.Value = message.Payload.GetValue("Configuration");
                     break;
                 case MessageTypes.RefreshDependencies:
+                    // In the case of RefreshDependencies request, the cache will not be reset in any case. The value 
+                    // is set so as to trigger refresh action in later loop.
                     _refreshDependencies.Value = false;
                     break;
                 case MessageTypes.RestoreComplete:
+                    // In the case of RestoreComplete request, the value of the 'Reset' property in payload will determine
+                    // if the cache should be reset. If the property doesn't exist, cache will be reset.
                     _refreshDependencies.Value = message.Payload.HasValues ? message.Payload.Value<bool>("Reset") : true;
                     break;
                 case MessageTypes.FilesChanged:
