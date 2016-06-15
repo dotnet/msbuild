@@ -12,6 +12,12 @@ brew install openssl
 brew link --force openssl
 ```
 
+Homebrew may also show the following warning:
+
+> Apple has deprecated use of OpenSSL in favor of its own TLS and crypto libraries
+
+This warning is meant for the software that uses OpenSSL (in this case, .NET Core) and not for the end-user that is installing said software. Homebrew installation doesn't touch either the existing Apple crypto libraries or existing OpenSSL 0.9.8 version, so there is no impact on any software that uses either one of those crypto solutions and is already installed.
+
 MacPorts doesn't have the concept of linking, so it is reccomended that you uninstall 0.9.8 version of OpenSSL using the following command:
 
 ```console
@@ -20,6 +26,16 @@ sudo port -f uninstall openssl @0.9.8
 ```
 
 You can verify whether you have the right version using the  `openssl version` command from the Terminal. 
+
+## Running .NET Core CLI on Nano Server
+
+If you’re using Nano Server Technical Preview 5 with .NET Core CLI, you will need to copy all DLL files from c:\windows\system32\forwarders to c:\windows\system32, due to a bug that has since been fixed in later releases.
+ 
+If you use “dotnet publish”, make sure to copy all DLL files from c:\windows\system32\forwarders to your publish directory as well.
+ 
+If your Nano Server Technical Preview 5 build is updated or serviced, please make sure to repeat this process, in case any of the DLLs have been updated as well.
+ 
+Apologies for any inconvenience. Again, this has been fixed in later releases.
 
 ## Users of zsh (z shell) don't get `dotnet` on the path after install
 There is a known issue in oh-my-zsh installer that interferes with how `path_helper` works on OS X systems. In short, 
@@ -55,7 +71,7 @@ When using non-release versions of the CLI, `dotnet restore` will fail to restor
 ```
 
 ## `dotnet restore` times out on Win7 x64
-If you have Virtual Box and you try to use the CLI on a Win7 x64 machine, `dotnet restore` will be really slow and will eventually time out without doing much restoring. 
+If you have any virtualization software (so far we've confirmed VMWare and Virtual Box) and you try to use the CLI on a Win7 SP1 x64 machine, `dotnet restore` will be really slow and will eventually time out without doing much restoring. The issue is in the virtual networking adapters that usually get installed with said software. 
 
 **Issues tracking this:** 
 
@@ -63,7 +79,7 @@ If you have Virtual Box and you try to use the CLI on a Win7 x64 machine, `dotne
 
 **Affects:** `dotnet restore`
 
-**Workaround:** disable the VirtualBox network interface and do the restore.   
+**Workaround:** disable the virtual network interface and do the restore.   
 
 ## Resolving the Standard library packages
 The StdLib package is on a MyGet feed. In order to restore it, a MyGet feed needs to be added 
