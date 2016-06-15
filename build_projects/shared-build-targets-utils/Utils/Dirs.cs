@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Cli.Build
             RuntimeEnvironment.GetRuntimeIdentifier());
 
         public static readonly string Intermediate = Path.Combine(Output, "intermediate");
-        public static readonly string PackagesIntermediate = Path.Combine(Output, "packages/intermediate");
         public static readonly string PackagesNoRID = Path.Combine(RepoRoot, "artifacts", "packages");
         public static readonly string Packages = Path.Combine(Output, "packages");
         public static readonly string Stage1 = Path.Combine(Output, "stage1");
@@ -45,11 +44,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string GetNuGetPackagesDir()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), ".nuget", "packages");
-            }
-            return Path.Combine(Environment.GetEnvironmentVariable("HOME"), ".nuget", "packages");
+            return Path.Combine(Dirs.RepoRoot, ".nuget", "packages");
         }
     }
 }

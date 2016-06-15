@@ -6,5 +6,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
     internal interface IDirectory
     {
         bool Exists(string path);
+
+        ITemporaryDirectory CreateTemporaryDirectory();
     }
 }

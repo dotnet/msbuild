@@ -7,14 +7,19 @@ namespace TestProjectWithCultureSpecificResource
 {
     public class Program
     {
-        public static void Main(string[] args)
+        // This method is consumed by load context tests
+        public static string GetMessage()
         {
             var rm = new ResourceManager(
                 "TestProjectWithCultureSpecificResource.Strings",
                 typeof(Program).GetTypeInfo().Assembly);
 
-            Console.WriteLine(rm.GetString("hello"));
-            Console.WriteLine(rm.GetString("hello", new CultureInfo("fr")));
+            return rm.GetString("hello") + Environment.NewLine + rm.GetString("hello", new CultureInfo("fr"));
+        }
+
+        public static void Main(string[] args)
+        {
+            Console.WriteLine(GetMessage());
         }
     }
 }

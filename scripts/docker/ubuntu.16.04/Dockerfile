@@ -21,6 +21,13 @@ RUN rm -rf rm -rf /var/lib/apt/lists/* && \
             sudo && \
     apt-get clean
 
+# Install Build Prereqs
+RUN apt-get -qqy install \
+        debhelper \
+        build-essential \
+        devscripts && \
+    apt-get clean
+
 # Dependencies for CoreCLR and CoreFX
 RUN apt-get install -y  libunwind8 \
             libkrb5-3 \
@@ -28,7 +35,8 @@ RUN apt-get install -y  libunwind8 \
             liblttng-ust0 \
             libssl1.0.0 \
             zlib1g \
-            libuuid1 && \
+            libuuid1 \
+            liblldb-3.6 && \
     apt-get clean
 
 # Setup User to match Host User, and give superuser permissions

@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class PrepareTargets
     {
-        [Target(nameof(Init), nameof(DownloadHostAndSharedFxArtifacts), nameof(RestorePackages))]
+        [Target(nameof(Init), nameof(DownloadHostAndSharedFxArtifacts), nameof(RestorePackages), nameof(ZipTemplates))]
         public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
 
         [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
@@ -35,9 +35,9 @@ namespace Microsoft.DotNet.Cli.Build
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
         [Target(
-            nameof(GenerateVersions), 
-            nameof(CheckPrereqs), 
-            nameof(LocateStage0), 
+            nameof(GenerateVersions),
+            nameof(CheckPrereqs),
+            nameof(LocateStage0),
             nameof(ExpectedBuildArtifacts),
             nameof(SetTelemetryProfile))]
         public static BuildTargetResult Init(BuildTargetContext c)
@@ -75,13 +75,33 @@ namespace Microsoft.DotNet.Cli.Build
                 ReleaseSuffix = branchInfo["RELEASE_SUFFIX"],
                 CommitCount = commitCount
             };
-            
-
             c.BuildContext["BuildVersion"] = buildVersion;
+
+            c.BuildContext["BranchName"] = branchInfo["BRANCH_NAME"];
             c.BuildContext["CommitHash"] = commitHash;
 
             c.Info($"Building Version: {buildVersion.SimpleVersion} (NuGet Packages: {buildVersion.NuGetVersion})");
             c.Info($"From Commit: {commitHash}");
+
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult ZipTemplates(BuildTargetContext c)
+        {
+            var templateDirectories = Directory.GetDirectories(
+                Path.Combine(Dirs.RepoRoot, "src", "dotnet", "commands", "dotnet-new"));
+
+            foreach (var directory in templateDirectories)
+            {
+                var zipFile = Path.Combine(Path.GetDirectoryName(directory), Path.GetFileName(directory) + ".zip");
+                if (File.Exists(zipFile))
+                {
+                    File.Delete(zipFile);
+                }
+
+                ZipFile.CreateFromDirectory(directory, zipFile);
+            }
 
             return c.Success();
         }
@@ -121,6 +141,7 @@ namespace Microsoft.DotNet.Cli.Build
             var cliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
             var hostVersion = CliDependencyVersions.SharedHostVersion;
+            var hostFxrVersion = CliDependencyVersions.HostFxrVersion;
 
             // Generated Installers + Archives
             AddInstallerArtifactToContext(c, "dotnet-sdk", "Sdk", cliVersion);
@@ -130,6 +151,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             //Downloaded Installers + Archives
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
+            AddInstallerArtifactToContext(c, "dotnet-hostfxr", "HostFxr", hostFxrVersion);
             AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
             AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);
 
@@ -137,8 +159,8 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target(
-            nameof(ExpectedBuildArtifacts), 
-            nameof(DownloadHostAndSharedFxArchives), 
+            nameof(ExpectedBuildArtifacts),
+            nameof(DownloadHostAndSharedFxArchives),
             nameof(DownloadHostAndSharedFxInstallers))]
         public static BuildTargetResult DownloadHostAndSharedFxArtifacts(BuildTargetContext c) => c.Success();
 
@@ -187,22 +209,21 @@ namespace Microsoft.DotNet.Cli.Build
         [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
         public static BuildTargetResult DownloadHostAndSharedFxInstallers(BuildTargetContext c)
         {
-            if (CurrentPlatform.IsUbuntu && !CurrentPlatform.IsVersion("14.04"))
-            {
-                return c.Success();
-            }
-
             var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
             var hostVersion = CliDependencyVersions.SharedHostVersion;
+            var hostFxrVersion = CliDependencyVersions.HostFxrVersion;
 
             var sharedFrameworkChannel = CliDependencyVersions.SharedFrameworkChannel;
             var sharedHostChannel = CliDependencyVersions.SharedHostChannel;
+            var hostFxrChannel = CliDependencyVersions.HostFxrChannel;
 
             var sharedFrameworkInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedFrameworkInstaller");
             var sharedHostInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedHostInstaller");
+            var hostFxrInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "hostFxrInstaller");
 
             Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDownloadFile));
             Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));
+            Mkdirp(Path.GetDirectoryName(hostFxrInstallerDownloadFile));
 
             if ( ! File.Exists(sharedFrameworkInstallerDownloadFile))
             {
@@ -234,6 +255,21 @@ namespace Microsoft.DotNet.Cli.Build
                 File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
             }
 
+            if ( ! File.Exists(hostFxrInstallerDownloadFile))
+            {
+                var hostFxrInstallerDestinationFile = c.BuildContext.Get<string>("HostFxrInstallerFile");
+                Mkdirp(Path.GetDirectoryName(hostFxrInstallerDestinationFile));
+
+                AzurePublisher.DownloadFile(
+                   AzurePublisher.CalculateInstallerBlob(
+                       hostFxrInstallerDestinationFile,
+                       hostFxrChannel,
+                       hostFxrVersion),
+                   hostFxrInstallerDownloadFile).Wait();
+
+                File.Copy(hostFxrInstallerDownloadFile, hostFxrInstallerDestinationFile, true);
+            }
+
             return c.Success();
         }
 
@@ -241,21 +277,9 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CheckPackageCache(BuildTargetContext c)
         {
             var ciBuild = string.Equals(Environment.GetEnvironmentVariable("CI_BUILD"), "1", StringComparison.Ordinal);
-
-            if (ciBuild)
-            {
-                // On CI, HOME is redirected under the repo, which gets deleted after every build.
-                // So make NUGET_PACKAGES outside of the repo.
-                var nugetPackages = Path.GetFullPath(Path.Combine(c.BuildContext.BuildDirectory, "..", ".nuget", "packages"));
-                Environment.SetEnvironmentVariable("NUGET_PACKAGES", nugetPackages);
-                Dirs.NuGetPackages = nugetPackages;
-            }
-
-            // Set the package cache location in NUGET_PACKAGES just to be safe
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NUGET_PACKAGES")))
-            {
-                Environment.SetEnvironmentVariable("NUGET_PACKAGES", Dirs.NuGetPackages);
-            }
+            
+            // Always set the package cache location local to the build
+            Environment.SetEnvironmentVariable("NUGET_PACKAGES", Dirs.NuGetPackages);
 
             CleanNuGetTempCache();
 
@@ -487,8 +511,8 @@ cmake is required to build the native host 'corehost'";
         }
 
         private static void AddInstallerArtifactToContext(
-            BuildTargetContext c, 
-            string artifactPrefix, 
+            BuildTargetContext c,
+            string artifactPrefix,
             string contextPrefix,
             string version)
         {

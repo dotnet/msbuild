@@ -26,12 +26,6 @@ namespace NuGet
 
         private static int GetMaxVersionFromMetadata(ManifestMetadata metadata)
         {
-            // Important: always add newer version checks at the top
-            if (metadata.Serviceable)
-            {
-                return ServiceableVersion;
-            }
-
             bool referencesHasTargetFramework =
               metadata.PackageAssemblyReferences != null &&
               metadata.PackageAssemblyReferences.Any(r => r.TargetFramework != null);

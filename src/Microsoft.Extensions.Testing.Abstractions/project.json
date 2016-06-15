@@ -7,12 +7,12 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Newtonsoft.Json": "7.0.1",
+    "Newtonsoft.Json": "9.0.1",
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "Microsoft.DiaSymReader": "1.0.6",
-    "Microsoft.DiaSymReader.Native": "1.4.0-rc"
+    "Microsoft.DiaSymReader": "1.0.8",
+    "Microsoft.DiaSymReader.Native": "1.4.0-rc2"
   },
   "frameworks": {
     "net451": {},
@@ -22,8 +22,8 @@
         "portable-net45+win8"
       ],
       "dependencies": {
-        "System.Resources.ResourceManager": "4.0.1-rc3-24201-00",
-        "System.Reflection.TypeExtensions": "4.1.0-rc3-24201-00"
+        "System.Resources.ResourceManager": "4.0.1",
+        "System.Reflection.TypeExtensions": "4.1.0"
       }
     }
   },

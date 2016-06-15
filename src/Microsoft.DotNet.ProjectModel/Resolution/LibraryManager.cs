@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
                         if (item.Library != library && !versionRange.Satisfies(library.Identity.Version))
                         {
-                            var message = $"Dependency conflict. {item.Library.Identity} expected {FormatLibraryRange(item.Dependency)} but got {library.Identity.Version}";
+                            var message = $"Dependency conflict. {item.Library.Identity} expected {FormatLibraryRange(item.Dependency)} but received {library.Identity.Version}";
 
                             messages.Add(
                             new DiagnosticMessage(

@@ -1,0 +1,23 @@
+{
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "compile": {
+      "include": [
+        "**/*.cs",
+        "../dotnet/CommandLine/*.cs"
+      ]
+    }
+  },
+  "dependencies": {
+    "Microsoft.DotNet.Archive": {
+      "target": "project"
+    },
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    }
+  },
+  "frameworks": {
+    "netcoreapp1.0": {}
+  }
+}

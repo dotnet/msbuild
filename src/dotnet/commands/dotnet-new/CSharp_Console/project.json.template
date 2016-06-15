@@ -1,6 +1,7 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
+    "debugType": "portable",
     "emitEntryPoint": true
   },
   "dependencies": {},
@@ -9,7 +10,7 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc3-004391"
+          "version": "1.0.0"
         }
       },
       "imports": "dnxcore50"

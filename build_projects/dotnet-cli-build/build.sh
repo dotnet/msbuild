@@ -56,6 +56,9 @@ while [[ $# > 0 ]]; do
     shift
 done
 
+# Set nuget package cache under the repo
+export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
+
 # Set up the environment to be used for building with clang.
 if which "clang-3.5" > /dev/null 2>&1; then
     export CC="$(which clang-3.5)"
@@ -97,6 +100,14 @@ then
     echo "Increasing file description limit to 1024"
     ulimit -n 1024
 fi
+
+# Clean old NuGet packages
+rm -rf "$HOME/.local/share/NuGet/Cache"
+rm -rf "$HOME/.local/share/NuGet/v3-cache"
+rm -rf "$NUGET_PACKAGES"
+
+# Disable first run since we want to control all package sources
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Restore the build scripts
 echo "Restoring Build Script projects..."

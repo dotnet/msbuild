@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Scripts
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
             dependencyInfos.Add(CreateDependencyInfo("CoreFx", Config.Instance.CoreFxVersionUrl).Result);
+            dependencyInfos.Add(CreateDependencyInfo("CoreClr", Config.Instance.CoreClrVersionUrl).Result);
             dependencyInfos.Add(CreateDependencyInfo("Roslyn", Config.Instance.RoslynVersionUrl).Result);
             dependencyInfos.Add(CreateDependencyInfo("CoreSetup", Config.Instance.CoreSetupVersionUrl).Result);
 
@@ -92,7 +93,8 @@ namespace Microsoft.DotNet.Scripts
             IEnumerable<string> projectJsonFiles = Enumerable.Union(
                 Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
                 Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.template", SearchOption.AllDirectories))
-                .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), noUpdateFileName)));
+                .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), noUpdateFileName)) &&
+                    !Path.GetDirectoryName(p).EndsWith("CSharp_Web", StringComparison.Ordinal));
 
             JObject projectRoot;
             foreach (string projectJsonFile in projectJsonFiles)
@@ -210,19 +212,17 @@ namespace Microsoft.DotNet.Scripts
         {
             ReplaceFileContents(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", fileContents =>
             {
-                DependencyInfo coreFXInfo = c.GetCoreFXDependency();
-
-                fileContents = ReplaceDependencyVersion(fileContents, coreFXInfo, "CoreCLRVersion", "Microsoft.NETCore.Runtime.CoreCLR");
+                fileContents = ReplaceDependencyVersion(c, fileContents, "CoreCLRVersion", "Microsoft.NETCore.Runtime.CoreCLR");
+                fileContents = ReplaceDependencyVersion(c, fileContents, "JitVersion", "Microsoft.NETCore.Jit");
 
                 return fileContents;
             });
 
             ReplaceFileContents(@"build_projects\dotnet-cli-build\CliDependencyVersions.cs", fileContents =>
             {
-                DependencyInfo coreSetupInfo = c.GetCoreSetupDependency();
-
-                fileContents = ReplaceDependencyVersion(fileContents, coreSetupInfo, "SharedFrameworkVersion", "Microsoft.NETCore.App");
-                fileContents = ReplaceDependencyVersion(fileContents, coreSetupInfo, "SharedHostVersion", "Microsoft.NETCore.DotNetHost");
+                fileContents = ReplaceDependencyVersion(c, fileContents, "SharedFrameworkVersion", "Microsoft.NETCore.App");
+                fileContents = ReplaceDependencyVersion(c, fileContents, "HostFxrVersion", "Microsoft.NETCore.DotNetHostResolver");
+                fileContents = ReplaceDependencyVersion(c, fileContents, "SharedHostVersion", "Microsoft.NETCore.DotNetHost");
 
                 return fileContents;
             });
@@ -230,32 +230,29 @@ namespace Microsoft.DotNet.Scripts
             return c.Success();
         }
 
-        private static DependencyInfo GetCoreFXDependency(this BuildTargetContext c)
-        {
-            return c.GetDependencyInfos().Single(d => d.Name == "CoreFx");
-        }
-
-        private static DependencyInfo GetCoreSetupDependency(this BuildTargetContext c)
-        {
-            return c.GetDependencyInfos().Single(d => d.Name == "CoreSetup");
-        }
-
-        private static string ReplaceDependencyVersion(string fileContents, DependencyInfo dependencyInfo, string dependencyPropertyName, string packageId)
+        private static string ReplaceDependencyVersion(BuildTargetContext c, string fileContents, string dependencyPropertyName, string packageId)
         {
             Regex regex = new Regex($@"{dependencyPropertyName} = ""(?<version>.*)"";");
+            string newVersion = c.GetNewVersion(packageId);
 
-            string newVersion = dependencyInfo
-                .NewVersions
+            return regex.ReplaceGroupValue(fileContents, "version", newVersion);
+        }
+
+        private static string GetNewVersion(this BuildTargetContext c, string packageId)
+        {
+            string newVersion = c.GetDependencyInfos()
+                .SelectMany(d => d.NewVersions)
                 .FirstOrDefault(p => p.Id == packageId)
                 ?.Version
                 .ToNormalizedString();
 
             if (string.IsNullOrEmpty(newVersion))
             {
-                throw new InvalidOperationException($"Could not find package version information for '{packageId}'");
+                c.Error($"Could not find package version information for '{packageId}'");
+                return $"DEPENDENCY '{packageId}' NOT FOUND";
             }
 
-            return regex.ReplaceGroupValue(fileContents, "version", newVersion);
+            return newVersion;
         }
 
         private static void ReplaceFileContents(string repoRelativePath, Func<string, string> replacement)

@@ -15,8 +15,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string Channel { get; set; }
 
-        private static string CliVersion { get; set; }
-
         private static string CliNuGetVersion { get; set; }
 
         private static string SharedFrameworkNugetVersion { get; set; }
@@ -27,7 +25,6 @@ namespace Microsoft.DotNet.Cli.Build
             AzurePublisherTool = new AzurePublisher();
             DebRepoPublisherTool = new DebRepoPublisher(Dirs.Packages);
 
-            CliVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             CliNuGetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             SharedFrameworkNugetVersion = CliDependencyVersions.SharedFrameworkVersion;
             Channel = c.BuildContext.Get<string>("Channel");
@@ -107,6 +104,8 @@ namespace Microsoft.DotNet.Cli.Build
                     {
                         AzurePublisherTool.PublishStringToBlob($"{Channel}/dnvm/latest.{version}", cliVersion);
                     }
+
+                    UpdateVersionsRepo(c);
                 }
                 finally
                 {
@@ -180,7 +179,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target(
             nameof(PublishTargets.PublishInstallerFilesToAzure),
             nameof(PublishTargets.PublishArchivesToAzure),
-            /*nameof(PublishTargets.PublishDebFilesToDebianRepo),*/ //https://github.com/dotnet/cli/issues/2973
+            nameof(PublishTargets.PublishDebFilesToDebianRepo),
             nameof(PublishTargets.PublishCliVersionBadge))]
         public static BuildTargetResult PublishArtifacts(BuildTargetContext c) => c.Success();
 
@@ -197,7 +196,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(
             nameof(PublishSdkDebToDebianRepo))]
-        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishDebFilesToDebianRepo(BuildTargetContext c)
         {
             return c.Success();
@@ -213,7 +212,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSdkInstallerFileToAzure(BuildTargetContext c)
         {
             var version = CliNuGetVersion;
@@ -271,7 +270,7 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
+        [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSdkDebToDebianRepo(BuildTargetContext c)
         {
             var version = CliNuGetVersion;
@@ -288,17 +287,15 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(PrepareTargets.Init))]
-        public static BuildTargetResult UpdateVersionsRepo(BuildTargetContext c)
+        private static void UpdateVersionsRepo(BuildTargetContext c)
         {
             string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
-            string nupkgFilePath = EnvVars.EnsureVariable("NUPKG_FILE_PATH");
-            string versionsRepoPath = EnvVars.EnsureVariable("VERSIONS_REPO_PATH");
+            string nupkgFilePath = Dirs.Packages;
+            string branchName = c.BuildContext.Get<string>("BranchName");
+            string versionsRepoPath = $"build-info/dotnet/cli/{branchName}/Latest";
 
             VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
             repoUpdater.UpdatePublishedVersions(nupkgFilePath, versionsRepoPath).Wait();
-
-            return c.Success();
         }
     }
 }

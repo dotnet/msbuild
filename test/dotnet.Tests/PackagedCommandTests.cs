@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tests
                 var projectOutputPath = $"LibraryWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
-                    new object[] { ".NETStandard,Version=v1.5", "CoreFX", "lib\\netstandard1.5\\dotnet-desktop-and-portable.dll", true },
+                    new object[] { ".NETStandard,Version=v1.6", "CoreFX", "lib\\netstandard1.6\\dotnet-desktop-and-portable.dll", true },
                     new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath, true }
                 };
             }

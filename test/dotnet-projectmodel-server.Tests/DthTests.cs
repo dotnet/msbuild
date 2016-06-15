@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                                                                    string expectedUnresolvedDependency,
                                                                    string expectedUnresolvedType)
         {
-            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Linux)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 Console.WriteLine("Test is skipped on Linux");
                 return;

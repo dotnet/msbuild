@@ -3,12 +3,12 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004391"
+      "version": "1.0.0"
     },
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
-    "Newtonsoft.Json": "7.0.1",
+    "Newtonsoft.Json": "9.0.1",
     "dotnet": {
       "target": "project"
     },

@@ -29,6 +29,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SdkBundle { get; set; }
 
+        private static string HostFxrMsi { get; set; }
+
         private static string SharedHostMsi { get; set; }
 
         private static string SharedFrameworkMsi { get; set; }
@@ -82,6 +84,7 @@ namespace Microsoft.DotNet.Cli.Build
             SdkEngine = GetEngineName(SdkBundle);
 
             SharedFrameworkMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), "msi");
+            HostFxrMsi = Path.ChangeExtension(c.BuildContext.Get<string>("HostFxrInstallerFile"), "msi");
             SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
 
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
@@ -134,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),
-                SdkMsi, SharedFrameworkMsi, SharedHostMsi, SdkBundle, WixRoot, cliSdkBrandName, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
+                SdkMsi, SharedFrameworkMsi, HostFxrMsi, SharedHostMsi, SdkBundle, WixRoot, cliSdkBrandName, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
                     .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
                     .Execute()
                     .EnsureSuccessful();

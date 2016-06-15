@@ -351,6 +351,18 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             buildResult.StdErr.Should().Contain("The project has not been restored or restore failed - run `dotnet restore`");
         }
 
+        [Fact]
+        private void App_WithSelfReferencingDependency_FailsBuild()
+        {
+            var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
+            var testInstance = testAssetsManager.CreateTestInstance("TestProjectWithSelfReferencingDependency")
+                                                .WithLockFiles();
+
+            var restoreResult = new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }.ExecuteWithCapturedOutput();
+            restoreResult.Should().Fail();
+            restoreResult.StdOut.Should().Contain("error: Cycle detected");
+        }
+
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {
             // copy all the files to temp dir

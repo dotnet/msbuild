@@ -165,12 +165,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public ICommand CaptureStdErr()
         {
-            throw new NotImplementedException();
+            _stdErr.Capture();
+            return this;
         }
 
         public ICommand CaptureStdOut()
         {
-            throw new NotImplementedException();
+            _stdOut.Capture();
+            return this;
         }
 
         public ICommand EnvironmentVariable(string name, string value)

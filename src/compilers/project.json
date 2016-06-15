@@ -6,11 +6,11 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc3-004391"
+      "version": "1.0.0"
     },
-    "Microsoft.CodeAnalysis.CSharp": "1.3.0-beta1-20160602-01",
-    "Microsoft.Net.Compilers.netcore": "1.3.0-beta1-20160602-01",
-    "Microsoft.DiaSymReader.Native": "1.4.0-rc"
+    "Microsoft.CodeAnalysis.CSharp": "1.3.0",
+    "Microsoft.Net.Compilers.netcore": "1.3.0",
+    "Microsoft.DiaSymReader.Native": "1.4.0-rc2"
   },
   "frameworks": {
     "netcoreapp1.0": {

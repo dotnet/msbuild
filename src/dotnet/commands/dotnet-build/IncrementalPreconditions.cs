@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Build
             log.Append(
                 "Incremental compilation will be automatically enabled if the above mentioned project properties are not used. " +
                 "For more information on the properties and how to address them, please consult:\n" +
-                @"https://github.com/dotnet/cli/blob/master/Documentation/addressing-incremental-compilation-warnings.md");
+                @"https://aka.ms/dotnet-build");
 
             log.AppendLine();
             log.AppendLine();

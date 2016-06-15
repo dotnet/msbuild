@@ -13,7 +13,8 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static readonly string[] ProjectsToPack  = new string[]
         {
-            "dotnet-compile-fsc",
+            // TODO: https://github.com/dotnet/cli/issues/3558
+            // "dotnet-compile-fsc",
             "Microsoft.DotNet.Cli.Utils",
             "Microsoft.DotNet.Compiler.Common",
             "Microsoft.DotNet.Files",
@@ -27,6 +28,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Target(nameof(PackageTargets.CopyCLISDKLayout),
         nameof(PackageTargets.CopySharedHostLayout),
+        nameof(PackageTargets.CopyHostFxrLayout),
         nameof(PackageTargets.CopySharedFxLayout),
         nameof(PackageTargets.CopyCombinedFrameworkSDKHostLayout),
         nameof(PackageTargets.CopyCombinedFrameworkSDKLayout))]
@@ -103,6 +105,23 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Target]
+        public static BuildTargetResult CopyHostFxrLayout(BuildTargetContext c)
+        {
+            var hostFxrRoot = Path.Combine(Dirs.Output, "obj", "hostFxr");
+            if (Directory.Exists(hostFxrRoot))
+            {
+                Utils.DeleteDirectory(hostFxrRoot);
+            }
+            Directory.CreateDirectory(hostFxrRoot);
+
+            Utils.CopyDirectoryRecursively(Path.Combine(Dirs.Stage2, "host"), hostFxrRoot, true);
+            FixPermissions(hostFxrRoot);
+
+            c.BuildContext["HostFxrPublishRoot"] = hostFxrRoot;
+            return c.Success();
+        }
+
+        [Target]
         public static BuildTargetResult CopySharedFxLayout(BuildTargetContext c)
         {
             var sharedFxRoot = Path.Combine(Dirs.Output, "obj", "sharedFx");
@@ -136,6 +155,9 @@ namespace Microsoft.DotNet.Cli.Build
 
             string sharedHostPublishRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
             Utils.CopyDirectoryRecursively(sharedHostPublishRoot, combinedRoot);
+
+            string hostFxrPublishRoot = c.BuildContext.Get<string>("HostFxrPublishRoot");
+            Utils.CopyDirectoryRecursively(hostFxrPublishRoot, combinedRoot);
 
             c.BuildContext["CombinedFrameworkSDKHostRoot"] = combinedRoot;
             return c.Success();
@@ -199,7 +221,6 @@ namespace Microsoft.DotNet.Cli.Build
 
             var packagingBuildBasePath = Path.Combine(Dirs.Stage2Compilation, "forPackaging");
 
-            FS.Mkdirp(Dirs.PackagesIntermediate);
             FS.Mkdirp(Dirs.Packages);
 
             foreach (var projectName in ProjectsToPack)
@@ -210,22 +231,11 @@ namespace Microsoft.DotNet.Cli.Build
                     projectFile,
                     "--no-build",
                     "--build-base-path", packagingBuildBasePath,
-                    "--output", Dirs.PackagesIntermediate,
+                    "--output", Dirs.Packages,
                     "--configuration", configuration,
                     "--version-suffix", versionSuffix)
                     .Execute()
                     .EnsureSuccessful();
-            }
-
-            var packageFiles = Directory.EnumerateFiles(Dirs.PackagesIntermediate, "*.nupkg");
-
-            foreach (var packageFile in packageFiles)
-            {
-                if (!packageFile.EndsWith(".symbols.nupkg"))
-                {
-                    var destinationPath = Path.Combine(Dirs.Packages, Path.GetFileName(packageFile));
-                    File.Copy(packageFile, destinationPath, overwrite: true);
-                }
             }
 
             return c.Success();

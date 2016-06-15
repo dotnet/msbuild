@@ -1,93 +1,87 @@
 % DOTNET(1)
 % Microsoft Corporation dotnetclifeedback@microsoft.com
-% January 2016
+% June 2016
 
-# NAME
+## NAME
 
-dotnet -- general driver for running the command-line commands
+dotnet -- General driver for running the command-line commands
 
-# SYNOPSIS
+## SYNOPSIS
 
-dotnet [--version] [--info] [--help] [--verbose] < command > [< args >]
+`dotnet [--version] [--help] [--verbose] [--info] <command> [<args>]`
 
-# DESCRIPTION
-dotnet is a generic driver for the CLI toolchain. Invoked on its own, it will give out brief usage instructions. 
+## DESCRIPTION
+`dotnet` is a generic driver for the Command Line Interface (CLI) toolchain. Invoked on its own, it will give out brief usage instructions. 
 
-Each specific feature is implemented as a command. In order to use the feature, it is specified after dotnet, i.e. `dotnet compile`. All of the arguments following the command are command's own arguments.  
+Each specific feature is implemented as a command. In order to use the feature, the command is specified after `dotnet`, such as [`dotnet build`](dotnet-build.md). All of the arguments following the command are its own arguments. 
+
+The only time `dotnet` is used as a command on its own is to run portable apps. Just specify a portable application DLL after the `dotnet` verb to execute the application.    
 
 
-# OPTIONS
+## OPTIONS
 `-v, --verbose`
 
-    Enable verbose output.
+Enables verbose output.
 
 `--version`
 
-    Print out the version of the CLI tooling
+Prints out the version of the CLI tooling.
 
 `--info`
 
-    Print out information about the CLI tooling
+Prints out more detailed information about the CLI tooling, such as the current operating system, commit SHA for the version, etc. 
 
 `-h, --help`
 
-    Print out a short help and a list of current commands. 
+Prints out a short help and a list of current commands. 
 
-# DOTNET COMMANDS
+## DOTNET COMMANDS
 
-The following commands exist for dotnet.
+The following commands exist for dotnet:
 
-`dotnet-compile(1)`
+* [dotnet-new](dotnet-new.md)
+   * Initializes a C# or F# console application project.
+* [dotnet-restore](dotnet-restore.md)
+  * Restores the dependencies for a given application. 
+* [dotnet-build](dotnet-build.md)
+  * Builds a .NET Core application.
+* [dotnet-publish](dotnet-publish.md)
+   * Publishes a .NET portable or self-contained application.
+* [dotnet-run](dotnet-run.md)
+   * Runs the application from source.
+* [dotnet-test](dotnet-test.md)
+   * Runs tests using a test runner specified in the project.json.
+* [dotnet-pack](dotnet-pack.md)
+   * Creates a NuGet package of your code.
 
-    Compile the application to either an intermediate language (IL) or to a native binary. 
-
-`dotnet-restore(1)`
-
-    Restores the dependencies for a given application. 
-
-`dotnet-run(1)`
-
-    Runs the application from source.
-
-`dotnet-publish(1)`
-
-    Publishes a flat directory that contains the application and its dependencies, including the runtime binaries. 
-
-`dotnet-test(1)`
-
-    Runs tests using a test runner specified in project.json.
-
-`dotnet-new(1)`
-
-    Initializes a sample .NET Core console application. 
-
-# EXAMPLES
+## EXAMPLES
 
 `dotnet new`
 
-    Initializes a sample .NET Core console application that can be compiled and ran.
+Initializes a sample .NET Core console application that can be compiled and run.
 
 `dotnet restore`
 
-    Restores dependencies for a given application. 
+Restores dependencies for a given application. 
 
 `dotnet compile`
 
-    Compiles the application in a given directory. 
+Compiles the application in a given directory. 
 
-# ENVIRONMENT 
+`dotnet myapp.dll`
+
+Runs a portable app named `myapp.dll`. 
+
+## ENVIRONMENT 
 
 `DOTNET_PACKAGES`
 
-    The primary package cache. If not set, defaults to $HOME/.nuget/packages on Unix or %LOCALAPPDATA%\NuGet\Packages (TBD) on Windows.
-
-`DOTNET_PACKAGES_CACHE`
-
-    The secondary cache. This is used by shared hosters (such as Azure) to provide a cache of pre-downloaded common packages on a faster disk. If not set it is not used.
+The primary package cache. If not set, it defaults to $HOME/.nuget/packages on Unix or %HOME%\NuGet\Packages on Windows.
 
 `DOTNET_SERVICING`
 
-    Specifies the location of the servicing index to use by the shared host when loading the runtime. 
+Specifies the location of the servicing index to use by the shared host when loading the runtime.
 
-# SEE ALSO
-dotnet-compile(1), dotnet-run(1), dotnet-publish(1), dotnet-restore(1)
+`DOTNET_CLI_TELEMETRY_OPTOUT`
+
+Specifies whether data about the .NET Core tools usage is collected and sent to Microsoft. **true** to opt-out of the telemetry feature (values true, 1 or yes accepted); otherwise, **false** (values false, 0 or no accepted). If not set, it defaults to **false**, that is, the telemetry feature is on.

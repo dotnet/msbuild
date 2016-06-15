@@ -64,5 +64,10 @@ namespace Microsoft.DotNet.ProjectModel
                 }
             }
         }
+
+        public static IEnumerable<LibraryExport> FilterExports(this IEnumerable<LibraryExport> exports, HashSet<string> exclusionList)
+        {
+            return exports.Where(e => !exclusionList.Contains(e.Library.Identity.Name));
+        }
     }
 }

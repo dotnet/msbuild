@@ -52,6 +52,27 @@ namespace Microsoft.DotNet.Tests
             buildResult.Should().Pass();
             buildResult.Should().NotHaveStdErr();
         }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_mupliple_times_it_should_fail()
+        {
+            var rootPath = Temp.CreateDirectory().Path;
+
+            new TestCommand("dotnet") { WorkingDirectory = rootPath }
+                .Execute("new");
+
+            DateTime expectedState = Directory.GetLastWriteTime(rootPath);
+
+            var result = new TestCommand("dotnet") { WorkingDirectory = rootPath }
+                .ExecuteWithCapturedOutput("new");
+
+            DateTime actualState = Directory.GetLastWriteTime(rootPath);
+
+            Assert.Equal(expectedState, actualState);
+
+            result.Should().Fail();
+            result.Should().HaveStdErr();
+        }
         
         private static void AddProjectJsonDependency(string projectJsonPath, string dependencyId, string dependencyVersion)
         {
