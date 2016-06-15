@@ -671,7 +671,7 @@
     <Content Include="Microsoft.CSharp.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.Data.Entity.Shim.targets">
+    <Content Include="Microsoft.Data.Entity.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.NETFramework.CurrentVersion.targets">
@@ -680,7 +680,7 @@
     <Content Include="Microsoft.NETFramework.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.ServiceModel.Shim.targets">
+    <Content Include="Microsoft.ServiceModel.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.VisualBasic.CurrentVersion.targets">
@@ -689,19 +689,19 @@
     <Content Include="Microsoft.VisualBasic.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.WinFx.Shim.targets">
+    <Content Include="Microsoft.WinFx.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.WorkflowBuildExtensions.Shim.targets">
+    <Content Include="Microsoft.WorkflowBuildExtensions.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.Xaml.Shim.targets">
+    <Content Include="Microsoft.Xaml.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Workflow.Shim.Targets">
+    <Content Include="Workflow.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Workflow.VisualBasic.Shim.Targets">
+    <Content Include="Workflow.VisualBasic.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.Common.overridetasks">
@@ -823,13 +823,13 @@
     <CopyFile Include="Microsoft.VisualStudioVersion.v$(VsMajorVersion).Common.props">
       <DestFolder>$(AssetCompatPropsDir)</DestFolder>
     </CopyFile>
-    <DataFile Include="Microsoft.Data.Entity.Shim.targets" />
-    <DataFile Include="Microsoft.ServiceModel.Shim.targets" />
-    <DataFile Include="Microsoft.WinFx.Shim.targets" />
-    <DataFile Include="Microsoft.WorkflowBuildExtensions.Shim.targets" />
-    <DataFile Include="Microsoft.Xaml.Shim.targets" />
-    <DataFile Include="Workflow.Shim.Targets" />
-    <DataFile Include="Workflow.VisualBasic.Shim.Targets" />
+    <DataFile Include="Microsoft.Data.Entity.targets" />
+    <DataFile Include="Microsoft.ServiceModel.targets" />
+    <DataFile Include="Microsoft.WinFx.targets" />
+    <DataFile Include="Microsoft.WorkflowBuildExtensions.targets" />
+    <DataFile Include="Microsoft.Xaml.targets" />
+    <DataFile Include="Workflow.targets" />
+    <DataFile Include="Workflow.VisualBasic.targets" />
     <!-- CPS Xaml Rules-->
     <CopyFile Include="XamlRules\Content.xaml">
       <DestFolder>$(XamlRulesOutputDir)</DestFolder>
