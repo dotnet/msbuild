@@ -230,6 +230,7 @@ namespace Microsoft.DotNet.Cli.Build
                 dotnet.Pack(
                     projectFile,
                     "--no-build",
+                    "--serviceable",
                     "--build-base-path", packagingBuildBasePath,
                     "--output", Dirs.Packages,
                     "--configuration", configuration,
