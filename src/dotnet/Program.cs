@@ -84,50 +84,54 @@ namespace Microsoft.DotNet.Cli
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
-
-            for (; lastArg < args.Length; lastArg++)
+            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel())
             {
-                if (IsArg(args[lastArg], "v", "verbose"))
+                for (; lastArg < args.Length; lastArg++)
                 {
-                    verbose = true;
+                    if (IsArg(args[lastArg], "v", "verbose"))
+                    {
+                        verbose = true;
+                    }
+                    else if (IsArg(args[lastArg], "version"))
+                    {
+                        PrintVersion();
+                        return 0;
+                    }
+                    else if (IsArg(args[lastArg], "info"))
+                    {
+                        PrintInfo();
+                        return 0;
+                    }
+                    else if (IsArg(args[lastArg], "h", "help"))
+                    {
+                        HelpCommand.PrintHelp();
+                        return 0;
+                    }
+                    else if (args[lastArg].StartsWith("-"))
+                    {
+                        Reporter.Error.WriteLine($"Unknown option: {args[lastArg]}");
+                        success = false;
+                    }
+                    else
+                    {
+                        ConfigureDotNetForFirstTimeUse(nugetCacheSentinel);
+
+                        // It's the command, and we're done!
+                        command = args[lastArg];
+                        break;
+                    }
                 }
-                else if (IsArg(args[lastArg], "version"))
-                {
-                    PrintVersion();
-                    return 0;
-                }
-                else if (IsArg(args[lastArg], "info"))
-                {
-                    PrintInfo();
-                    return 0;
-                }
-                else if (IsArg(args[lastArg], "h", "help"))
+                if (!success)
                 {
                     HelpCommand.PrintHelp();
-                    return 0;
+                    return 1;
                 }
-                else if (args[lastArg].StartsWith("-"))
-                {
-                    Reporter.Error.WriteLine($"Unknown option: {args[lastArg]}");
-                    success = false;
-                }
-                else
-                {
-                    ConfigureDotNetForFirstTimeUse();
 
-                    // It's the command, and we're done!
-                    command = args[lastArg];
-                    break;
+                if (telemetryClient == null)
+                {
+                    telemetryClient = new Telemetry(nugetCacheSentinel);
                 }
             }
-            if (!success)
-            {
-                HelpCommand.PrintHelp();
-                return 1;
-            }
-
-            if (telemetryClient == null)
-                telemetryClient = new Telemetry();
 
             var appArgs = (lastArg + 1) >= args.Length ? Enumerable.Empty<string>() : args.Skip(lastArg + 1).ToArray();
 
@@ -164,28 +168,22 @@ namespace Microsoft.DotNet.Cli
 
         }
 
-        private static void ConfigureDotNetForFirstTimeUse()
+        private static void ConfigureDotNetForFirstTimeUse(INuGetCacheSentinel nugetCacheSentinel)
         {
             using (PerfTrace.Current.CaptureTiming())
             {
                 using (var nugetPackagesArchiver = new NuGetPackagesArchiver())
                 {
-                    using (var nugetCacheSentinel = new NuGetCacheSentinel())
-                    {
-                        var environmentProvider = new EnvironmentProvider();
-                        var commandFactory = new DotNetCommandFactory();
-                        var nugetCachePrimer = 
-                            new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
-                        var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
-                            nugetCachePrimer,
-                            nugetCacheSentinel,
-                            environmentProvider);
+                    var environmentProvider = new EnvironmentProvider();
+                    var commandFactory = new DotNetCommandFactory();
+                    var nugetCachePrimer = 
+                        new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
+                    var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
+                        nugetCachePrimer,
+                        nugetCacheSentinel,
+                        environmentProvider);
 
-                        dotnetConfigurer.Configure();
-
-                        if (!File.Exists(Telemetry.TelemetrySentinel))
-                            File.Create(Telemetry.TelemetrySentinel);
-                    }
+                    dotnetConfigurer.Configure();
                 }
             }
         }

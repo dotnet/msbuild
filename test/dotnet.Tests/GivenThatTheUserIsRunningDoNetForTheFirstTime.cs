@@ -15,8 +15,8 @@ namespace Microsoft.DotNet.Tests
 {
 	public class GivenThatTheUserIsRunningDotNetForTheFirstTime : TestBase
     {
-        private static CommandResult _firstDotnetInfoUseCommandResult;
-        private static CommandResult _firstDotnetNewUseCommandResult;
+        private static CommandResult _firstDotnetNonVerbUseCommandResult;
+        private static CommandResult _firstDotnetVerbUseCommandResult;
         private static DirectoryInfo _nugetCacheFolder;
 
         static GivenThatTheUserIsRunningDotNetForTheFirstTime()
@@ -29,8 +29,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["NUGET_PACKAGES"] = testNugetCache;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
 
-            _firstDotnetInfoUseCommandResult = command.ExecuteWithCapturedOutput("--info");
-            _firstDotnetNewUseCommandResult = command.ExecuteWithCapturedOutput("new");
+            _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
+            _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new");
 
             _nugetCacheFolder = new DirectoryInfo(testNugetCache);
         }        
@@ -38,15 +38,15 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void Using_dotnet_for_the_first_time_succeeds()
         {
-            _firstDotnetNewUseCommandResult.Should().Pass();
+            _firstDotnetVerbUseCommandResult.Should().Pass();
         }
 
         [Fact]
         public void Using_dotnet_for_the_first_time_with_non_verbs_doesnt_print_eula()
         {
-            const string firstTimeUseWelcomeMessage = @".NET Command Line Tools";
+            const string firstTimeNonVerbUseMessage = @".NET Command Line Tools";
 
-            _firstDotnetInfoUseCommandResult.StdOut.Should().StartWith(firstTimeUseWelcomeMessage);
+            _firstDotnetNonVerbUseCommandResult.StdOut.Should().StartWith(firstTimeNonVerbUseMessage);
         }
 
         [Fact]
@@ -64,7 +64,7 @@ Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.";
 
-            _firstDotnetNewUseCommandResult.StdOut.Should().StartWith(firstTimeUseWelcomeMessage);
+            _firstDotnetVerbUseCommandResult.StdOut.Should().StartWith(firstTimeUseWelcomeMessage);
         }
 
     	[Fact]
