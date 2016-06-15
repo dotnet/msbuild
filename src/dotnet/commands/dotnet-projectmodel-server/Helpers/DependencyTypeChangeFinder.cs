@@ -9,13 +9,13 @@ namespace Microsoft.DotNet.ProjectModel.Server.Helpers
     {
         public static IEnumerable<DiagnosticMessage> Diagnose(
             ProjectContext context,
-            IEnumerable<string> currentSearchPaths)
+            IEnumerable<string> previousSearchPaths)
         {
             var result = new List<DiagnosticMessage>();
             var project = context.ProjectFile;
             var libraries = context.LibraryManager.GetLibraries();
 
-            var updatedSearchPath = GetUpdatedSearchPaths(currentSearchPaths, project.ResolveSearchPaths());
+            var updatedSearchPath = GetUpdatedSearchPaths(previousSearchPaths, project.ResolveSearchPaths());
             var projectCandiates = GetProjectCandidates(updatedSearchPath);
             var rootDependencies = libraries.FirstOrDefault(library => string.Equals(library.Identity.Name, project.Name))
                                            ?.Dependencies

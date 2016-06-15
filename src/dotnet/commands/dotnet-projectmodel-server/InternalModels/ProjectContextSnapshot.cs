@@ -24,13 +24,13 @@ namespace Microsoft.DotNet.ProjectModel.Server
         public IReadOnlyList<DiagnosticMessage> DependencyDiagnostics { get; set; }
         public IDictionary<string, DependencyDescription> Dependencies { get; set; }
 
-        public static ProjectContextSnapshot Create(ProjectContext context, string configuration, IEnumerable<string> currentSearchPaths)
+        public static ProjectContextSnapshot Create(ProjectContext context, string configuration, IEnumerable<string> previousSearchPaths)
         {
             var snapshot = new ProjectContextSnapshot();
 
             var allDependencyDiagnostics = new List<DiagnosticMessage>();
             allDependencyDiagnostics.AddRange(context.LibraryManager.GetAllDiagnostics());
-            allDependencyDiagnostics.AddRange(DependencyTypeChangeFinder.Diagnose(context, currentSearchPaths));
+            allDependencyDiagnostics.AddRange(DependencyTypeChangeFinder.Diagnose(context, previousSearchPaths));
 
             var diagnosticsLookup = allDependencyDiagnostics.ToLookup(d => d.Source);
 
