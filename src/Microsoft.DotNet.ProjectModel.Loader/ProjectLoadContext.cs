@@ -50,8 +50,8 @@ namespace Microsoft.DotNet.ProjectModel.Loader
         }
 
         public ProjectLoadContext(IDictionary<AssemblyName, string> assemblyPaths,
-                                   IDictionary<string, string> nativeLibraries,
-                                   IEnumerable<string> searchPaths)
+                                  IDictionary<string, string> nativeLibraries,
+                                  IEnumerable<string> searchPaths)
         {
             _assemblyPaths = assemblyPaths;
             _nativeLibraries = nativeLibraries;

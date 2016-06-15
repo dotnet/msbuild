@@ -24,7 +24,8 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-build.Tests",
             "dotnet-compile.Tests",
             "dotnet-compile.UnitTests",
-            "dotnet-compile-fsc.Tests",
+            // TODO: https://github.com/dotnet/cli/issues/3558
+            // "dotnet-compile-fsc.Tests",
             "dotnet-new.Tests",
             "dotnet-pack.Tests",
             "dotnet-projectmodel-server.Tests",
@@ -39,7 +40,9 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
             "Microsoft.DotNet.ProjectModel.Tests",
+            "Microsoft.DotNet.ProjectModel.Loader.Tests",
             "Microsoft.Extensions.DependencyModel.Tests",
+            "Microsoft.DotNet.Configurer.UnitTests",
             "Performance"
         };
 

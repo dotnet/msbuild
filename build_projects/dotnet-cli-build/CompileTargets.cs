@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
 
-        public static Crossgen CrossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion);
+        public static Crossgen CrossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion, DependencyVersions.JitVersion);
 
         // Updates the stage 2 with recent changes.
         [Target(nameof(PrepareTargets.Init), nameof(CompileStage2))]
@@ -109,7 +109,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             var result = CompileCliSdk(c,
                 dotnet: DotNetCli.Stage1,
-                rootOutputDirectory: Dirs.Stage2);
+                rootOutputDirectory: Dirs.Stage2,
+                generateNugetPackagesArchive: true);
 
             if (!result.Success)
             {
@@ -157,7 +158,11 @@ namespace Microsoft.DotNet.Cli.Build
             FS.RmFilesInDirRecursive(directory, "*.pdb");
         }
 
-        private static BuildTargetResult CompileCliSdk(BuildTargetContext c, DotNetCli dotnet, string rootOutputDirectory)
+        private static BuildTargetResult CompileCliSdk(
+            BuildTargetContext c,
+            DotNetCli dotnet,
+            string rootOutputDirectory,
+            bool generateNugetPackagesArchive = false)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
@@ -236,7 +241,7 @@ namespace Microsoft.DotNet.Cli.Build
             var sharedFrameworkNameVersionPath = SharedFrameworkPublisher.GetSharedFrameworkPublishPath(
                 rootOutputDirectory,
                 sharedFrameworkNugetVersion);
-            
+
             // Copy Host to SDK Directory
             File.Copy(
                 Path.Combine(sharedFrameworkNameVersionPath, HostArtifactNames.DotnetHostBaseName), 
@@ -250,7 +255,7 @@ namespace Microsoft.DotNet.Cli.Build
                 Path.Combine(sharedFrameworkNameVersionPath, HostArtifactNames.HostPolicyBaseName), 
                 Path.Combine(sdkOutputDirectory, HostArtifactNames.HostPolicyBaseName), 
                 overwrite: true);
-            
+
             CrossgenUtil.CrossgenDirectory(
                 sharedFrameworkNameVersionPath,
                 sdkOutputDirectory);
@@ -260,7 +265,75 @@ namespace Microsoft.DotNet.Cli.Build
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);
 
+            if(generateNugetPackagesArchive)
+            {
+                GenerateNuGetPackagesArchive(c, dotnet, sdkOutputDirectory);
+            }
+
             return c.Success();
+        }
+
+        private static void GenerateNuGetPackagesArchive(
+            BuildTargetContext c,
+            DotNetCli dotnet,
+            string sdkOutputDirectory)
+        {
+            var nuGetPackagesArchiveProject = Path.Combine(Dirs.Intermediate, "NuGetPackagesArchiveProject");
+            var nuGetPackagesArchiveFolder = Path.Combine(Dirs.Intermediate, "nuGetPackagesArchiveFolder");
+
+            RestoreNuGetPackagesArchive(dotnet, nuGetPackagesArchiveProject, nuGetPackagesArchiveFolder);
+
+            CompressNuGetPackagesArchive(c, dotnet, nuGetPackagesArchiveFolder, sdkOutputDirectory);
+        }
+
+        private static void RestoreNuGetPackagesArchive(
+            DotNetCli dotnet,
+            string nuGetPackagesArchiveProject,
+            string nuGetPackagesArchiveFolder)
+        {
+            Rmdir(nuGetPackagesArchiveProject);
+            Mkdirp(nuGetPackagesArchiveProject);
+
+            Rmdir(nuGetPackagesArchiveFolder);
+            Mkdirp(nuGetPackagesArchiveFolder);
+
+            dotnet.New()
+                .WorkingDirectory(nuGetPackagesArchiveProject)
+                .Execute()
+                .EnsureSuccessful();
+
+            dotnet.Restore("--packages", nuGetPackagesArchiveFolder)
+                .WorkingDirectory(nuGetPackagesArchiveProject)
+                .Execute()
+                .EnsureSuccessful();
+        }
+
+        private static void CompressNuGetPackagesArchive(
+            BuildTargetContext c,
+            DotNetCli dotnet,
+            string nuGetPackagesArchiveFolder,
+            string sdkOutputDirectory)
+        {
+            var configuration = c.BuildContext.Get<string>("Configuration");
+            var archiverExe = Path.Combine(Dirs.Output, "tools", $"Archiver{Constants.ExeSuffix}");
+            var intermediateArchive = Path.Combine(Dirs.Intermediate, "nuGetPackagesArchive.lzma");
+            var finalArchive = Path.Combine(sdkOutputDirectory, "nuGetPackagesArchive.lzma");
+
+            Rm(intermediateArchive);
+            Rm($"{intermediateArchive}.zip");
+
+            c.Info("Publishing Archiver");
+            dotnet.Publish("--output", Path.Combine(Dirs.Output, "tools"), "--configuration", configuration)
+                .WorkingDirectory(Path.Combine(Dirs.RepoRoot, "tools", "Archiver"))
+                .Execute()
+                .EnsureSuccessful();
+
+            Cmd(archiverExe,
+                "-a", intermediateArchive,
+                nuGetPackagesArchiveFolder)
+                .Execute();
+
+            File.Copy(intermediateArchive, finalArchive);
         }
 
         private static void RemoveAssetFromDepsPackages(string depsFile, string sectionName, string assetPath)

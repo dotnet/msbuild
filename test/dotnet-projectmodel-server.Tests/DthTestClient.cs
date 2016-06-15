@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         private readonly NetworkStream _networkStream;
         private readonly BlockingCollection<DthMessage> _messageQueue;
         private readonly CancellationTokenSource _readCancellationToken;
+        private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(20);
 
         // Keeps track of initialized project contexts
         // REVIEW: This needs to be exposed if we ever create 2 clients in order to simulate how build
@@ -129,7 +130,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             var result = new List<DthMessage>();
             while (count > 0)
             {
-                result.Add(GetResponse(timeout: TimeSpan.FromSeconds(10)));
+                result.Add(GetResponse(timeout: _defaultTimeout));
                 count--;
             }
 
@@ -138,7 +139,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
 
         public List<DthMessage> DrainAllMessages()
         {
-            return DrainAllMessages(TimeSpan.FromSeconds(10));
+            return DrainAllMessages(_defaultTimeout);
         }
 
         /// <summary>
@@ -173,7 +174,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         /// <returns>The first match message</returns>
         public DthMessage DrainTillFirst(string type)
         {
-            return DrainTillFirst(type, TimeSpan.FromSeconds(10));
+            return DrainTillFirst(type, _defaultTimeout);
         }
 
         /// <summary>
