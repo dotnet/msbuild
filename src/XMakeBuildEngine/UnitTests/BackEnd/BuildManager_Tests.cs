@@ -1365,7 +1365,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A cancelled build which waits for the task to get started before cancelling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [Fact]
+        [Fact(Skip= "https://github.com/Microsoft/msbuild/issues/696")]
         public void CancelledBuildWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
