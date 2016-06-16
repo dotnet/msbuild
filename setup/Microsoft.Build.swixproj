@@ -10,7 +10,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputArchitecture>neutral</OutputArchitecture>
     <OutputLocalized>false</OutputLocalized>
-    <OutputName>MSBuild</OutputName>
+    <OutputName>Microsoft.Build</OutputName>
     <OutputType>vsix</OutputType>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
