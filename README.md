@@ -51,13 +51,14 @@ You can download .NET Core as either an installer (MSI, PKG) or a zip (zip, gzip
 Ubuntu Installers
 ----------
 
-*Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have three separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install them in the order presented below.*
+*Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install them in the order presented below.*
 
 **For Ubuntu 14.04
 
 |         |Version |Installers|
 |---------|:------:|:------:|:------:|
 |**Shared Host**|[![](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/preview/dnvm/latest.ubuntu.x64.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-host-ubuntu-x64.latest.deb)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-dev-ubuntu-x64.latest.tar.gz)|
+|**Host Framework Resolver**|[![](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/preview/dnvm/latest.ubuntu.x64.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-hostfxr-ubuntu-x64.latest.deb)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-dev-ubuntu-x64.latest.tar.gz)|
 |**Shared Framework**|[![](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/preview/dnvm/latest.ubuntu.x64.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-sharedframework-ubuntu-x64.latest.deb)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-ubuntu-x64.latest.tar.gz)|
 |**Sdk**|[![](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/preview/dnvm/latest.ubuntu.x64.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-sdk-ubuntu-x64.latest.deb)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-dev-ubuntu-x64.latest.tar.gz)|
 
@@ -65,7 +66,6 @@ Interested in .NET Core + ASP.NET Core 1.0 RC1 bits?
 ----------------------------------------------------
 
 This toolchain is independent from the DNX-based .NET Core + ASP.NET Core 1.0 RC1 bits. If you are looking for .NET Core + ASP.NET Core 1.0 RC1 bits, you can find instructions on the http://get.asp.net/.  
->>>>>>> Undoing documentation changes to include ubuntu16.04. Will add it back once we have VSO builds running happily and producing binaries for it.
 
 Docker
 ------
