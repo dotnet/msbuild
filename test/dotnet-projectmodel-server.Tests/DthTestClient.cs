@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         {
             // Avoid Socket exception 10006 on Linux
             Thread.Sleep(100);
-            
+
             _socket = new Socket(AddressFamily.InterNetwork,
                                  SocketType.Stream,
                                  ProtocolType.Tcp);
@@ -61,13 +61,18 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
 
         public void SendPayload(string projectPath, string messageType)
         {
+            SendPayload(projectPath, messageType, new { });
+        }
+
+        public void SendPayload(string projectPath, string messageType, object payload)
+        {
             int contextId;
             if (!_projectContexts.TryGetValue(projectPath, out contextId))
             {
                 Assert.True(false, $"Unable to resolve context for {projectPath}");
             }
 
-            SendPayload(contextId, messageType);
+            SendPayload(contextId, messageType, payload);
         }
 
         public void SendPayload(int contextId, string messageType)
