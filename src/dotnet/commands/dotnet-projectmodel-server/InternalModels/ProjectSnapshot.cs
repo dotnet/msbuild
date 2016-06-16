@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
         public static ProjectSnapshot Create(string projectDirectory,
                                              string configuration,
                                              DesignTimeWorkspace workspaceContext,
-                                             IReadOnlyList<string> projectSearchPaths,
+                                             IReadOnlyList<string> previousSearchPaths,
                                              bool clearWorkspaceContextCache)
         {
             var projectContextsCollection = workspaceContext.GetProjectContextCollection(projectDirectory, clearWorkspaceContextCache);
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             foreach (var projectContext in projectContextsCollection.FrameworkOnlyContexts)
             {
                 snapshot.ProjectContexts[projectContext.TargetFramework] =
-                    ProjectContextSnapshot.Create(projectContext, configuration, currentSearchPaths);
+                    ProjectContextSnapshot.Create(projectContext, configuration, previousSearchPaths);
             }
 
             return snapshot;
