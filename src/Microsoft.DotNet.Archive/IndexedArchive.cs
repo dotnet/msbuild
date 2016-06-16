@@ -26,23 +26,48 @@ namespace Microsoft.DotNet.Archive
             public string Hash { get; }
         }
 
-        private class ArchiveFileInfo
+        private class ArchiveSource
         {
-            public ArchiveFileInfo(Stream stream, string archivePath, string hash)
+            public ArchiveSource(string sourceArchive, string sourceFile, string archivePath, string hash, long size)
             {
-                Stream = stream;
+                SourceArchive = sourceArchive;
+                SourceFile = sourceFile;
                 ArchivePath = archivePath;
                 Hash = hash;
+                Size = size;
             }
 
-            public Stream Stream { get; set; }
+            public string SourceArchive { get; set; }
+            public string SourceFile { get; set; }
             public string ArchivePath { get; }
             public string Hash { get; }
             public string FileName { get { return Path.GetFileNameWithoutExtension(ArchivePath); } }
             public string Extension { get { return Path.GetExtension(ArchivePath); } }
+            public long Size { get; }
 
-            public long Size { get { return Stream.Length; } }
+            public void CopyTo(Stream destination)
+            {
+                if (!String.IsNullOrEmpty(SourceArchive))
+                {
+                    using (var zip = new ZipArchive(File.OpenRead(SourceArchive), ZipArchiveMode.Read))
+                    using (var sourceStream = zip.GetEntry(SourceFile)?.Open())
+                    {
+                        if (sourceStream == null)
+                        {
+                            throw new Exception($"Couldn't find entry {SourceFile} in archive {SourceArchive}");
+                        }
 
+                        sourceStream.CopyTo(destination);
+                    }
+                }
+                else
+                {
+                    using (var sourceStream = File.OpenRead(SourceFile))
+                    {
+                        sourceStream.CopyTo(destination);
+                    }
+                }
+            }
         }
 
         static string[] ZipExtensions = new[] { ".zip", ".nupkg" };
@@ -50,7 +75,7 @@ namespace Microsoft.DotNet.Archive
 
         // maps file hash to archve path
         // $ prefix indicates that the file is not in the archive and path is a hash
-        private Dictionary<string, ArchiveFileInfo> _archiveFiles = new Dictionary<string, ArchiveFileInfo>();
+        private Dictionary<string, ArchiveSource> _archiveFiles = new Dictionary<string, ArchiveSource>();
         // maps file hash to external path
         private Dictionary<string, string> _externalFiles = new Dictionary<string, string>();
         // lists all extracted files & hashes
@@ -107,7 +132,7 @@ namespace Microsoft.DotNet.Archive
                 {
                     var archiveFile = _archiveFiles[entry.Hash];
                     string archivePath = _archiveFiles[entry.Hash].ArchivePath;
-                    if (archiveFile.Stream == null)
+                    if (archiveFile.SourceFile == null)
                     {
                         archivePath = "$" + archivePath;
                     }
@@ -151,9 +176,7 @@ namespace Microsoft.DotNet.Archive
                 var entry = archive.CreateEntry(fileToArchive.ArchivePath, CompressionLevel.NoCompression);
                 using (var entryStream = entry.Open())
                 {
-                    fileToArchive.Stream.CopyTo(entryStream);
-                    fileToArchive.Stream.Dispose();
-                    fileToArchive.Stream = null;
+                    fileToArchive.CopyTo(entryStream);
                 }
 
                 progress.Report("Archiving files", ++filesAdded, filesToArchive.Count);
@@ -379,7 +402,7 @@ namespace Microsoft.DotNet.Archive
             {
                 string hash = GetHash(fs); 
                 // $ prefix indicates that the file is not in the archive and path is relative to an external directory
-                _archiveFiles[hash] = new ArchiveFileInfo(null, "$" + hash , hash);
+                _archiveFiles[hash] = new ArchiveSource(null, null, "$" + hash , hash, fs.Length);
                 _externalFiles[hash] = externalFile;
             }
         }
@@ -414,76 +437,63 @@ namespace Microsoft.DotNet.Archive
 
         public void AddZip(string sourceZipFile, string destinationZipFile)
         {
+            CheckDisposed();
+
             using (var sourceArchive = new ZipArchive(File.OpenRead(sourceZipFile), ZipArchiveMode.Read))
             {
                 foreach(var entry in sourceArchive.Entries)
                 {
-                    // we can dispose this stream, if AddStream uses it, it will make a copy.
+                    string hash = null;
+                    long size = entry.Length;
+                    string destinationPath = $"{destinationZipFile}::{entry.FullName}";
                     using (var stream = entry.Open())
                     {
-                        string destinationPath = $"{destinationZipFile}::{entry.FullName}";
-                        AddStream(stream, destinationPath);
+                        hash = GetHash(stream);
                     }
+
+                    AddArchiveSource(sourceZipFile, entry.FullName, destinationPath, hash, size);
                 }
             }
         }
 
         public void AddFile(string sourceFilePath, string destinationPath)
         {
-            // lifetime of this stream is managed by AddStream
-            var stream = File.Open(sourceFilePath, FileMode.Open);
-            AddStream(stream, destinationPath);
-        }
-
-        public void AddStream(Stream stream, string destinationPath)
-        {
             CheckDisposed();
 
-            string hash = null;
-
-            if (stream.CanSeek)
+            string hash;
+            long size;
+            // lifetime of this stream is managed by AddStream
+            using (var stream = File.Open(sourceFilePath, FileMode.Open))
             {
                 hash = GetHash(stream);
-            }
-            else
-            {
-                var copy = CreateTemporaryStream();
-                stream.CopyTo(copy);
-                copy.Seek(0, SeekOrigin.Begin);
-                hash = GetHash(copy);
-                stream.Dispose();
-                stream = copy;
+                size = stream.Length;
             }
 
+            AddArchiveSource(null, sourceFilePath, destinationPath, hash, size);
+        }
+
+        private void AddArchiveSource(string sourceArchive, string sourceFile, string destinationPath, string hash, long size)
+        {
             lock (_archiveFiles)
             {
                 _destFiles.Add(new DestinationFileInfo(destinationPath, hash));
 
                 // see if we already have this file in the archive/external
-                ArchiveFileInfo existing = null;
+                ArchiveSource existing = null;
                 if (_archiveFiles.TryGetValue(hash, out existing))
                 {
-                    // reduce memory pressure
-                    if (!(stream is MemoryStream) && (existing.Stream is MemoryStream))
+                    // if we have raw source file, prefer that over a zipped source file
+                    if (sourceArchive == null && existing.SourceArchive != null)
                     {
-                        // dispose memory stream
-                        existing.Stream.Dispose();
-                        stream.Seek(0, SeekOrigin.Begin);
-                        existing.Stream = stream;
-                    }
-                    else
-                    {
-                        // we already have a good stream, free this one.
-                        stream.Dispose();
+                        existing.SourceArchive = null;
+                        existing.SourceFile = sourceFile;
                     }
                 }
                 else
                 {
-                    // add a new entry;
-                    stream.Seek(0, SeekOrigin.Begin);
                     var archivePath = Path.Combine(hash, Path.GetFileName(destinationPath));
 
-                    _archiveFiles.Add(hash, new ArchiveFileInfo(stream, archivePath, hash));
+                    _archiveFiles.Add(hash, new ArchiveSource(sourceArchive, sourceFile, archivePath, hash, size));
                 }
             }
         }
@@ -509,18 +519,6 @@ namespace Microsoft.DotNet.Archive
         {
             if (!_disposed)
             {
-                if (_archiveFiles != null)
-                {
-                    foreach(var archiveFile in _archiveFiles.Values)
-                    {
-                        if (archiveFile.Stream != null)
-                        {
-                            archiveFile.Stream.Dispose();
-                            archiveFile.Stream = null;
-                        }
-                    }
-                }
-
                 if (_sha != null)
                 {
                     _sha.Dispose();
