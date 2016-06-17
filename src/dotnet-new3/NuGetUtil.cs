@@ -169,7 +169,7 @@ namespace dotnet_new3
             {
                 dependenciesObject["Microsoft.NETCore.App"] = new JObject
                 {
-                    {"version", "1.0.0-rc2-3002702" },
+                    {"version", "1.0.0" },
                     {"type", "platform" }
                 };
 
