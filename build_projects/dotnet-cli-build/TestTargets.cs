@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
             "EndToEnd",
             "dotnet.Tests",
             "dotnet-build.Tests",
+            "dotnet-build3.Tests",
             "dotnet-compile.Tests",
             "dotnet-compile.UnitTests",
             // TODO: https://github.com/dotnet/cli/issues/3558
