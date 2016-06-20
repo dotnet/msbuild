@@ -736,6 +736,10 @@
       <SubType>Designer</SubType>
       <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="ManifestUtil\Strings.resx">
+      <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <!-- ==========================================================================================-->
     <!-- Assemblies Files we depend on -->
     <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
