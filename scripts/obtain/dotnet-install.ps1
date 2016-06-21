@@ -50,7 +50,7 @@
 #>
 [cmdletbinding()]
 param(
-   [string]$Channel="preview",
+   [string]$Channel="rel-1.0.0",
    [string]$Version="Latest",
    [string]$InstallDir="<auto>",
    [string]$Architecture="<auto>",
@@ -123,7 +123,7 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [str
         $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.sharedfx.win.$CLIArchitecture.version"
     }
     else {
-        $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.win.$CLIArchitecture.version"
+        $VersionFileUrl = "$AzureFeed/Sdk/$AzureChannel/latest.version"
     }
     
     $Response = Invoke-WebRequest -UseBasicParsing $VersionFileUrl
@@ -147,10 +147,8 @@ function Get-Azure-Channel-From-Channel([string]$Channel) {
     # For compatibility with build scripts accept also directly Azure channels names
     switch ($Channel.ToLower()) {
         { ($_ -eq "future") -or ($_ -eq "dev") } { return "dev" }
-        { ($_ -eq "beta") } { return "beta" }
-        { ($_ -eq "preview") } { return "preview" }
         { $_ -eq "production" } { throw "Production channel does not exist yet" }
-        default { throw "``$Channel`` is an invalid channel name. Use one of the following: ``future``, ``preview``, ``production``" }
+        default { return $_ }
     }
 }
 
@@ -171,19 +169,16 @@ function Get-Download-Links([string]$AzureFeed, [string]$AzureChannel, [string]$
     Say-Invocation $MyInvocation
     
     $ret = @()
-    $files = @()
+    
     if ($SharedRuntime) {
-        $files += "dotnet";
+        $PayloadURL = "$AzureFeed/$AzureChannel/Binaries/$SpecificVersion/dotnet-win-$CLIArchitecture.$SpecificVersion.zip"
     }
     else {
-        $files += "dotnet-dev";
+        $PayloadURL = "$AzureFeed/Sdk/$SpecificVersion/dotnet-dev-win-$CLIArchitecture.$SpecificVersion.zip"
     }
-    
-    foreach ($file in $files) {
-        $PayloadURL = "$AzureFeed/$AzureChannel/Binaries/$SpecificVersion/$file-win-$CLIArchitecture.$SpecificVersion.zip"
-        Say-Verbose "Constructed payload URL: $PayloadURL"
-        $ret += $PayloadURL
-    }
+
+    Say-Verbose "Constructed payload URL: $PayloadURL"
+    $ret += $PayloadURL
 
     return $ret
 }
