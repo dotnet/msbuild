@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using Microsoft.DotNet.Cli.Build.Framework;
+using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Build
 {
     public class AzurePublisher
     {
-        private static readonly string s_dotnetBlobRootUrl = "https://dotnetcli.blob.core.windows.net/dotnet/";
-        private static readonly string s_dotnetBlobContainerName = "dotnet";
+        public enum Product
+        {
+            SharedFramework,
+            Host,
+            HostFxr,
+            Sdk,
+        }
+
+        private const string s_dotnetBlobRootUrl = "https://dotnetcli.blob.core.windows.net/" + s_dotnetBlobContainerName;
+        private const string s_dotnetBlobContainerName = "dotnet";
 
         private string _connectionString { get; set; }
         private CloudBlobContainer _blobContainer { get; set; }
@@ -35,33 +39,21 @@ namespace Microsoft.DotNet.Cli.Build
             return blobClient.GetContainerReference(s_dotnetBlobContainerName);
         }
 
-        public void PublishInstallerFile(string installerFile, string channel, string version)
+        public string UploadFile(string file, Product product, string version)
         {
-            var installerFileBlob = CalculateInstallerBlob(installerFile, channel, version);
-            PublishFile(installerFileBlob, installerFile);
-        }
-
-        public void PublishArchive(string archiveFile, string channel, string version)
-        {
-            var archiveFileBlob = CalculateArchiveBlob(archiveFile, channel, version);
-            PublishFile(archiveFileBlob, archiveFile);
-        }
-
-        public void PublishFile(string blob, string file)
-        {
-            CloudBlockBlob blockBlob = _blobContainer.GetBlockBlobReference(blob);
-            blockBlob.UploadFromFileAsync(file, FileMode.Open).Wait();
-
-            SetBlobPropertiesBasedOnFileType(blockBlob);
+            string url = CalculateUploadUrlForFile(file, product, version);
+            CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(url);
+            blob.UploadFromFileAsync(file, FileMode.Open).Wait();
+            SetBlobPropertiesBasedOnFileType(blob);
+            return url;
         }
 
         public void PublishStringToBlob(string blob, string content)
         {
             CloudBlockBlob blockBlob = _blobContainer.GetBlockBlobReference(blob);
             blockBlob.UploadTextAsync(content).Wait();
-            
-            blockBlob.Properties.ContentType = "text/plain";
-            blockBlob.SetPropertiesAsync().Wait();
+
+            SetBlobPropertiesBasedOnFileType(blockBlob);
         }
 
         public void CopyBlob(string sourceBlob, string targetBlob)
@@ -90,8 +82,15 @@ namespace Microsoft.DotNet.Cli.Build
             else if (Path.GetExtension(blockBlob.Uri.AbsolutePath.ToLower()) == ".version")
             {
                 blockBlob.Properties.ContentType = "text/plain";
+                blockBlob.Properties.CacheControl = "no-cache";
                 blockBlob.SetPropertiesAsync().Wait();
             }
+        }
+
+        public IEnumerable<string> ListBlobs(Product product, string version)
+        {
+            string virtualDirectory = $"{product}/{version}";
+            return ListBlobs(virtualDirectory);
         }
 
         public IEnumerable<string> ListBlobs(string virtualDirectory)
@@ -100,14 +99,14 @@ namespace Microsoft.DotNet.Cli.Build
             BlobContinuationToken continuationToken = new BlobContinuationToken();
 
             var blobFiles = blobDir.ListBlobsSegmentedAsync(continuationToken).Result;
-            return blobFiles.Results.Select(bf => bf.Uri.PathAndQuery);
+            return blobFiles.Results.Select(bf => bf.Uri.PathAndQuery.Replace($"/{s_dotnetBlobContainerName}/", string.Empty));
         }
 
         public string AcquireLeaseOnBlob(string blob)
         {
             CloudBlockBlob cloudBlob = _blobContainer.GetBlockBlobReference(blob);
-            System.Threading.Tasks.Task<string> task = cloudBlob.AcquireLeaseAsync(TimeSpan.FromMinutes(1), null);
-            task.Wait(); 
+            Task<string> task = cloudBlob.AcquireLeaseAsync(TimeSpan.FromMinutes(1), null);
+            task.Wait();
             return task.Result;
         }
 
@@ -120,7 +119,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public bool IsLatestSpecifiedVersion(string version)
         {
-            System.Threading.Tasks.Task<bool> task = _blobContainer.GetBlockBlobReference(version).ExistsAsync();
+            Task<bool> task = _blobContainer.GetBlockBlobReference(version).ExistsAsync();
             task.Wait();
             return task.Result;
         }
@@ -136,7 +135,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public void CreateBlobIfNotExists(string path)
         {
-            System.Threading.Tasks.Task<bool> task = _blobContainer.GetBlockBlobReference(path).ExistsAsync();
+            Task<bool> task = _blobContainer.GetBlockBlobReference(path).ExistsAsync();
             task.Wait();
             if (!task.Result)
             {
@@ -153,40 +152,30 @@ namespace Microsoft.DotNet.Cli.Build
             try
             {
                 DeleteBlob(path);
-                
+
                 return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Deleting blob {path} failed with \r\n{e.Message}");
-                
+
                 return false;
             }
         }
 
-        public void DeleteBlob(string path)
+        private void DeleteBlob(string path)
         {
             _blobContainer.GetBlockBlobReference(path).DeleteAsync().Wait();
         }
 
-        public string CalculateInstallerUploadUrl(string installerFile, string channel, string version)
+        public static string CalculateUploadUrlForFile(string file, Product product, string version)
         {
-            return $"{s_dotnetBlobRootUrl}{CalculateInstallerBlob(installerFile, channel, version)}";
-        }
-
-        public static string CalculateInstallerBlob(string installerFile, string channel, string version)
-        {
-            return $"{channel}/Installers/{version}/{Path.GetFileName(installerFile)}";
-        }
-
-        public static string CalculateArchiveBlob(string archiveFile, string channel, string version)
-        {
-            return $"{channel}/Binaries/{version}/{Path.GetFileName(archiveFile)}";
+            return $"{s_dotnetBlobRootUrl}/{product}/{version}/{Path.GetFileName(file)}";
         }
 
         public static async Task DownloadFile(string blobFilePath, string localDownloadPath)
         {
-            var blobUrl = $"{s_dotnetBlobRootUrl}{blobFilePath}";
+            var blobUrl = $"{s_dotnetBlobRootUrl}/{blobFilePath}";
 
             using (var client = new HttpClient())
             {
@@ -195,30 +184,12 @@ namespace Microsoft.DotNet.Cli.Build
                 var response = sendTask.Result.EnsureSuccessStatusCode();
 
                 var httpStream = await response.Content.ReadAsStreamAsync();
-                
+
                 using (var fileStream = File.Create(localDownloadPath))
                 using (var reader = new StreamReader(httpStream))
                 {
                     httpStream.CopyTo(fileStream);
                     fileStream.Flush();
-                }
-            }
-        }
-
-        public void DownloadFilesWithExtension(string blobVirtualDirectory, string fileExtension, string localDownloadPath)
-        {
-            CloudBlobDirectory blobDir = _blobContainer.GetDirectoryReference(blobVirtualDirectory);
-            BlobContinuationToken continuationToken = new BlobContinuationToken();
-
-            var blobFiles = blobDir.ListBlobsSegmentedAsync(continuationToken).Result;
-
-            foreach (var blobFile in blobFiles.Results.OfType<CloudBlockBlob>())
-            {
-                if (Path.GetExtension(blobFile.Uri.AbsoluteUri) == fileExtension)
-                {
-                    string localBlobFile = Path.Combine(localDownloadPath, Path.GetFileName(blobFile.Uri.AbsoluteUri));
-                    Console.WriteLine($"Downloading {blobFile.Uri.AbsoluteUri} to {localBlobFile}...");
-                    blobFile.DownloadToFileAsync(localBlobFile, FileMode.Create).Wait();
                 }
             }
         }
