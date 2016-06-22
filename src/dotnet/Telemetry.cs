@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli
@@ -30,9 +32,11 @@ namespace Microsoft.DotNet.Cli
 
         public bool Enabled { get; }
 
-        public Telemetry()
+        public Telemetry () : this(null) { }
+
+        public Telemetry(INuGetCacheSentinel sentinel)
         {
-            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout);
+            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
             if (!Enabled)
             {
@@ -41,6 +45,16 @@ namespace Microsoft.DotNet.Cli
 
             //initialize in task to offload to parallel thread
             _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
+        }
+
+        private bool PermissionExists(INuGetCacheSentinel sentinel)
+        {
+            if (sentinel == null)
+            {
+                return false;
+            }
+
+            return sentinel.Exists();
         }
 
         public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)

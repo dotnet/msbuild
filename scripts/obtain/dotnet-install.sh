@@ -668,4 +668,4 @@ else
     say "Binaries of dotnet can be found in $bin_path"
 fi
 
-say "Installation finished successfuly."
+say "Installation finished successfully."
