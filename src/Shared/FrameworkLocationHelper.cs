@@ -871,7 +871,7 @@ namespace Microsoft.Build.Shared
         internal static string GeneratePathToBuildToolsForToolsVersion(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {
             // Much like when reading toolsets, first check the .exe.config
-            string toolsPath = GetPathToBuildToolsFromConfig(toolsVersion);
+            string toolsPath = GetPathToBuildToolsFromConfig(toolsVersion, architecture);
 
 #if FEATURE_WIN32_REGISTRY
             if (String.IsNullOrEmpty(toolsPath) && NativeMethodsShared.IsWindows)
@@ -981,45 +981,37 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Look up the path to the build tools directory for the requested ToolsVersion in the .exe.config file of this executable 
         /// </summary>
-        private static string GetPathToBuildToolsFromConfig(string toolsVersion)
+        private static string GetPathToBuildToolsFromConfig(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {
             string toolPath = null;
 
 #if FEATURE_SYSTEM_CONFIGURATION
             if (ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
             {
+                string toolsPathPropertyName = architecture == DotNetFrameworkArchitecture.Bitness64
+                    ? MSBuildConstants.ToolsPath64
+                    : MSBuildConstants.ToolsPath;
+
                 try
                 {
-                    Configuration configuration = FileUtilities.RunningTests
-                                                      ? ConfigurationManager.OpenExeConfiguration(
-                                                          FileUtilities.CurrentExecutablePath)
-                                                      : ConfigurationManager.OpenExeConfiguration(
-                                                          ConfigurationUserLevel.None);
-
+                    Configuration configuration = ReadApplicationConfiguration();
                     ToolsetConfigurationSection configurationSection = ToolsetConfigurationReaderHelpers.ReadToolsetConfigurationSection(configuration);
 
-                    if (configurationSection != null)
+                    ToolsetElement toolset = configurationSection?.Toolsets.GetElement(toolsVersion);
+                    PropertyElement toolsPathFromConfiguration = toolset?.PropertyElements.GetElement(toolsPathPropertyName);
+
+                    if (toolsPathFromConfiguration != null)
                     {
-                        ToolsetElement toolset = configurationSection.Toolsets.GetElement(toolsVersion);
+                        toolPath = toolsPathFromConfiguration.Value;
 
-                        if (toolset != null)
+                        if (toolPath != null)
                         {
-                            PropertyElement toolsPathFromConfiguration = toolset.PropertyElements.GetElement(MSBuildConstants.ToolsPath);
-
-                            if (toolsPathFromConfiguration != null)
+                            if (!FileUtilities.IsRootedNoThrow(toolPath))
                             {
-                                toolPath = toolsPathFromConfiguration.Value;
-
-                                if (toolPath != null)
-                                {
-                                    if (!FileUtilities.IsRootedNoThrow(toolPath))
-                                    {
-                                        toolPath = FileUtilities.NormalizePath(Path.Combine(FileUtilities.CurrentExecutableDirectory, toolPath));
-                                    }
-
-                                    toolPath = FileUtilities.EnsureTrailingSlash(toolPath);
-                                }
+                                toolPath = FileUtilities.NormalizePath(Path.Combine(FileUtilities.CurrentExecutableDirectory, toolPath));
                             }
+
+                            toolPath = FileUtilities.EnsureTrailingSlash(toolPath);
                         }
                     }
                 }
@@ -1187,6 +1179,26 @@ namespace Microsoft.Build.Shared
                 return;
             }
         }
+
+#if FEATURE_SYSTEM_CONFIGURATION
+        /// <summary>
+        /// Reads the application configuration file.
+        /// </summary>
+        private static Configuration ReadApplicationConfiguration()
+        {
+            var msbuildExeConfig = FileUtilities.CurrentExecutableConfigurationFilePath;
+
+            // When running from the command-line or from VS, use the msbuild.exe.config file
+            if (!FileUtilities.RunningTests && File.Exists(msbuildExeConfig))
+            {
+                var configFile = new ExeConfigurationFileMap { ExeConfigFilename = msbuildExeConfig };
+                return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
+            }
+
+            // When running tests or the expected config file doesn't exist, fall-back to default
+            return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+        }
+#endif
 
         #endregion
 
