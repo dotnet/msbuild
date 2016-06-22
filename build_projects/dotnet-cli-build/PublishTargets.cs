@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var packageName = CliMonikers.GetSdkDebianPackageName(c);
             var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
-            var uploadUrl = AzurePublisher.CalculateUploadUrlForFile(installerFile, AzurePublisher.Product.Sdk, version);
+            var uploadUrl = AzurePublisher.CalculateFullUrlForFile(installerFile, AzurePublisher.Product.Sdk, version);
 
             DebRepoPublisherTool.PublishDebFileToDebianRepo(
                 packageName,
