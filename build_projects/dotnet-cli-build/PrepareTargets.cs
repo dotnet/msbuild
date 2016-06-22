@@ -175,14 +175,14 @@ namespace Microsoft.DotNet.Cli.Build
 
             Mkdirp(Path.GetDirectoryName(combinedSharedHostAndFrameworkArchiveDownloadFile));
 
-            if ( ! File.Exists(combinedSharedHostAndFrameworkArchiveDownloadFile))
+            if (!File.Exists(combinedSharedHostAndFrameworkArchiveDownloadFile))
             {
                 // Needed for computing the blob path
-                var combinedSharedHostAndFrameworkArchiveBuildContextFile = 
+                var combinedSharedHostAndFrameworkArchiveBuildContextFile =
                     c.BuildContext.Get<string>("CombinedFrameworkHostCompressedFile");
 
                 AzurePublisher.DownloadFile(
-                    AzurePublisher.CalculateArchiveBlob(
+                    CalculateArchiveBlob(
                         combinedSharedHostAndFrameworkArchiveBuildContextFile,
                         sharedFrameworkChannel,
                         sharedFrameworkVersion),
@@ -225,13 +225,13 @@ namespace Microsoft.DotNet.Cli.Build
             Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));
             Mkdirp(Path.GetDirectoryName(hostFxrInstallerDownloadFile));
 
-            if ( ! File.Exists(sharedFrameworkInstallerDownloadFile))
+            if (!File.Exists(sharedFrameworkInstallerDownloadFile))
             {
                 var sharedFrameworkInstallerDestinationFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
                 Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDestinationFile));
-                
+
                 AzurePublisher.DownloadFile(
-                    AzurePublisher.CalculateInstallerBlob(
+                    CalculateInstallerBlob(
                         sharedFrameworkInstallerDestinationFile,
                         sharedFrameworkChannel,
                         sharedFrameworkVersion),
@@ -239,14 +239,14 @@ namespace Microsoft.DotNet.Cli.Build
 
                 File.Copy(sharedFrameworkInstallerDownloadFile, sharedFrameworkInstallerDestinationFile, true);
             }
-            
-            if ( ! File.Exists(sharedHostInstallerDownloadFile))
+
+            if (!File.Exists(sharedHostInstallerDownloadFile))
             {
                 var sharedHostInstallerDestinationFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
                 Mkdirp(Path.GetDirectoryName(sharedHostInstallerDestinationFile));
 
                 AzurePublisher.DownloadFile(
-                   AzurePublisher.CalculateInstallerBlob(
+                   CalculateInstallerBlob(
                        sharedHostInstallerDestinationFile,
                        sharedHostChannel,
                        hostVersion),
@@ -255,13 +255,13 @@ namespace Microsoft.DotNet.Cli.Build
                 File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
             }
 
-            if ( ! File.Exists(hostFxrInstallerDownloadFile))
+            if (!File.Exists(hostFxrInstallerDownloadFile))
             {
                 var hostFxrInstallerDestinationFile = c.BuildContext.Get<string>("HostFxrInstallerFile");
                 Mkdirp(Path.GetDirectoryName(hostFxrInstallerDestinationFile));
 
                 AzurePublisher.DownloadFile(
-                   AzurePublisher.CalculateInstallerBlob(
+                   CalculateInstallerBlob(
                        hostFxrInstallerDestinationFile,
                        hostFxrChannel,
                        hostFxrVersion),
@@ -277,7 +277,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult CheckPackageCache(BuildTargetContext c)
         {
             var ciBuild = string.Equals(Environment.GetEnvironmentVariable("CI_BUILD"), "1", StringComparison.Ordinal);
-            
+
             // Always set the package cache location local to the build
             Environment.SetEnvironmentVariable("NUGET_PACKAGES", Dirs.NuGetPackages);
 
@@ -548,7 +548,18 @@ cmake is required to build the native host 'corehost'";
             {
                 c.BuildContext[contextPrefix + "InstallerFile"] = Path.Combine(Dirs.Packages, installer);
             }
+        }
 
+        // The following CalculateBlob methods are temporary until the core-setup repo up-takes the new Azure Publish layout and
+        // CLI consumes newer Shared FX versions.
+        private static string CalculateArchiveBlob(string archiveFile, string channel, string version)
+        {
+            return $"{channel}/Binaries/{version}/{Path.GetFileName(archiveFile)}";
+        }
+
+        private static string CalculateInstallerBlob(string installerFile, string channel, string version)
+        {
+            return $"{channel}/Installers/{version}/{Path.GetFileName(installerFile)}";
         }
     }
 }
