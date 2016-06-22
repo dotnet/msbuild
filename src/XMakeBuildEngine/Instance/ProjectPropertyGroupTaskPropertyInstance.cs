@@ -20,7 +20,7 @@ namespace Microsoft.Build.Execution
     /// Wraps an unevaluated property under an propertygroup in a target.
     /// Immutable.
     /// </summary>
-    [DebuggerDisplay("{name}={Value} Condition={condition}")]
+    [DebuggerDisplay("{_name}={Value} Condition={_condition}")]
     public class ProjectPropertyGroupTaskPropertyInstance
     {
         /// <summary>

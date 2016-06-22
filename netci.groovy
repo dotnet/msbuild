@@ -9,6 +9,7 @@ def project = GithubProject
     ['Windows_NT', 'OSX', 'Ubuntu'].each {osName ->
         def isPR = false
         def newJobName = ''
+        def skipTestsWhenResultsNotFound = true
 
         if (branch == 'pr') {
             isPR = true
@@ -30,38 +31,41 @@ def project = GithubProject
                     steps{
                         batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && RebuildWithLocalMSBuild.cmd")
                     }
-                }
 
-                // Add xunit result archiving
-                Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml')
+                    skipTestsWhenResultsNotFound = false
+                }
 
                 break;
             case 'OSX':
                 newJob.with{
                     steps{
-                        shell("./cibuild.sh --scope Compile")
+                        shell("./cibuild.sh --scope Test")
                     }
                 }
 
-                //no test archiving yet
-
                 break;
             case 'Ubuntu':
+
+                // Do not run tests on Ubuntu. We don't yet have a green test baseline.
                 newJob.with{
                     steps{
                         shell("./cibuild.sh --scope Compile")
                     }
                 }
 
-                //no test archiving yet
-
                 break;
         }
-        
-        Utilities.setMachineAffinity(newJob, osName)
+
+        // Add xunit result archiving. Skip if no results found.
+        Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
+        Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
         Utilities.standardJobSetup(newJob, project, isPR, branch)
-        // Add archiving of logs
-        Utilities.addArchival(newJob, 'msbuild*.log')
+        // Add archiving of logs (even if the build failed)
+        Utilities.addArchival(newJob,
+                              'msbuild*.log', /* filesToArchive */
+                              '', /* filesToExclude */
+                              false, /* doNotFailIfNothingArchived */
+                              false, /* archiveOnlyIfSuccessful */)
         // Add trigger
         if (isPR) {
             Utilities.addGithubPRTrigger(newJob, "${osName} Build")

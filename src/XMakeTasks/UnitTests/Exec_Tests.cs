@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
+        [Fact]
         public void Timeout()
         {
             Exec exec = PrepareExec(":foo \n goto foo");
@@ -85,7 +85,9 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(-1, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
             Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
-            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Errors);
+
+            // ToolTask does not log an error on timeout.
+            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
         }
 
         [Fact]

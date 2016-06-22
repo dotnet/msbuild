@@ -77,8 +77,7 @@ namespace Microsoft.Build.UnitTests
         /// This is really testing msbuild.exe but it's here because it needs to
         /// call the internal reset method on the engine
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Flaky test
+        [Fact]
         public void CommentsInPreprocessing()
         {
             Microsoft.Build.Construction.XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();

@@ -1014,12 +1014,8 @@ namespace Microsoft.Build.BackEnd
                 string oldestOutputFullPath = Path.Combine(projectDirectory, oldestOutput);
                 oldestOutputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(oldestOutputFullPath);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
                 // Output does not exist
                 oldestOutputFileTime = DateTime.MinValue;
             }
@@ -1043,12 +1039,8 @@ namespace Microsoft.Build.BackEnd
                     string candidateOutputFullPath = Path.Combine(projectDirectory, candidateOutput);
                     candidateOutputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(candidateOutputFullPath);
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
                     // Output does not exist
                     candidateOutputFileTime = DateTime.MinValue;
                 }
@@ -1081,12 +1073,8 @@ namespace Microsoft.Build.BackEnd
                     string unescapedInputFullPath = Path.Combine(projectDirectory, unescapedInput);
                     inputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(unescapedInputFullPath);
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
                     // Output does not exist
                     inputFileTime = DateTime.MinValue;
                 }

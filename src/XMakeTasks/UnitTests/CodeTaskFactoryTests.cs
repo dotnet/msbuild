@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that 
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
+        [Fact]
         public void BuildTaskSimpleCodeFactory_RedirectFrom12()
         {
             string projectFileContents = @"
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
         {
             string projectFileContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=14.1.0.0` >
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=15.1.0.0` >
                          <ParameterGroup>     
                              <Text/>
                           </ParameterGroup>
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("Hello, World!");
-            mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=14.1.0.0");
+            mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=15.1.0.0");
         }
 
         /// <summary>

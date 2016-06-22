@@ -56,14 +56,10 @@ namespace Microsoft.Build.Tasks
                 {
                     thisPath = Path.GetFullPath(_buildAssemblyPath);
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (!ExceptionHandling.NotExpectedException(e))
-                    {
-                        // If it is an Expected Exception log the error
-                        Log.LogErrorWithCodeFromResources("SGen.InvalidPath", "BuildAssemblyPath", e.Message);
-                    }
-
+                    // If it is an Expected Exception log the error
+                    Log.LogErrorWithCodeFromResources("SGen.InvalidPath", "BuildAssemblyPath", e.Message);
                     throw;
                 }
 
@@ -359,14 +355,9 @@ namespace Microsoft.Build.Tasks
 
                 serializationAssemblyPathExists = File.Exists(SerializationAssemblyPath);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                // If it is not an expected exception rethrow the exception.
                 // Ignore the expected exceptions because they have already been logged
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
             }
 
             // Delete the assembly if it already exists.

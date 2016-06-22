@@ -1279,13 +1279,8 @@ namespace Microsoft.Build.Shared
                     (matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null),
                     needsRecursion, projectDirectoryUnescaped, stripProjectDirectory, getFileSystemEntries);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (!ExceptionHandling.IsIoRelatedException(ex))
-                {
-                    throw;
-                }
-
                 // Assume it's not meant to be a path
                 return new[] { filespecUnescaped };
             }

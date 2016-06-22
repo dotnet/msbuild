@@ -108,13 +108,8 @@ namespace Microsoft.Build.Tasks
                 {
                     EnsurePopulated();
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (!ExceptionHandling.IsIoRelatedException(ex))
-                    {
-                        throw;
-                    }
-
                     return false;
                 }
 
@@ -135,13 +130,8 @@ namespace Microsoft.Build.Tasks
                 {
                     EnsurePopulated();
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (!ExceptionHandling.IsIoRelatedException(ex))
-                    {
-                        throw;
-                    }
-
                     return false;
                 }
 

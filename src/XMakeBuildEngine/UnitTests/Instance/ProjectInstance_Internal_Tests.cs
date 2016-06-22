@@ -16,6 +16,7 @@ using System.IO;
 using System.Xml;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -24,6 +25,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// </summary>
     public class ProjectInstance_Internal_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public ProjectInstance_Internal_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         /// Read task registrations
         /// </summary>
@@ -285,8 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ProjectInstance's surfacing of the sub-toolset version
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void GetSubToolsetVersion()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -506,7 +513,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests building a simple project and verifying the log looks as expected.
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void Build()
         {
             string projectFileContent = @"
@@ -523,7 +530,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectInstance projectInstance = GetProjectInstance(projectFileContent);
             List<ILogger> loggers = new List<ILogger>();
-            MockLogger mockLogger = new MockLogger();
+            MockLogger mockLogger = new MockLogger(_output);
             loggers.Add(mockLogger);
             bool success = projectInstance.Build("Build", loggers);
 

@@ -201,7 +201,11 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public MemoryStatus()
             {
-                _length = (uint)Marshal.SizeOf<NativeMethodsShared.MemoryStatus>();
+#if (CLR2COMPATIBILITY)
+            _length = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.MemoryStatus));
+#else
+            _length = (uint)Marshal.SizeOf<NativeMethodsShared.MemoryStatus>();
+#endif
             }
 
             /// <summary>
@@ -296,7 +300,11 @@ namespace Microsoft.Build.Shared
         {
             public SecurityAttributes()
             {
-                _nLength = (uint)Marshal.SizeOf<NativeMethodsShared.SecurityAttributes>();
+#if (CLR2COMPATIBILITY)
+            _nLength = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.SecurityAttributes));
+#else
+            _nLength = (uint)Marshal.SizeOf<NativeMethodsShared.SecurityAttributes>();
+#endif
             }
 
             private uint _nLength;
@@ -318,6 +326,19 @@ namespace Microsoft.Build.Shared
         /// unit tests to change it.
         /// </remarks>
         internal static int MAX_PATH = 260;
+
+        /// <summary>
+        /// OS name that can be used for the projectImportSearchPaths element
+        /// for a toolset
+        /// </summary>
+        internal static string GetOSNameForExtensionsPath()
+        {
+#if XPLAT
+            return IsOSX ? "osx" : (IsUnix ? "unix" : "windows");
+#else
+            return "windows";
+#endif
+        }
 
         #endregion
 

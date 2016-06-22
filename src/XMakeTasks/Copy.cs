@@ -581,12 +581,8 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Name, destinationFileState.Name, e.Message);
                 success = false;
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
                 Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Name, destinationFileState.Name, e.Message);
                 success = false;
             }
@@ -612,13 +608,8 @@ namespace Microsoft.Build.Tasks
                         return result.Value;
                     }
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
                     if (e is ArgumentException ||  // Invalid chars
                         e is NotSupportedException || // Colon in the middle of the path
                         e is PathTooLongException)

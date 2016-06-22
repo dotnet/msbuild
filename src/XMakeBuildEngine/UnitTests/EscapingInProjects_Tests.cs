@@ -1359,8 +1359,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// have all sorts of crazy characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.
+        [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
         public void SolutionWithLotsaCrazyCharacters()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1551,8 +1550,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// have all sorts of crazy characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.
+        [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
         public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");

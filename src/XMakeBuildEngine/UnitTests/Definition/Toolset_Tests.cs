@@ -94,7 +94,11 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, SubToolset> subToolsets = new Dictionary<string, SubToolset>(StringComparer.OrdinalIgnoreCase);
             subToolsets.Add("dogfood", new SubToolset("dogfood", subToolsetProperties));
 
-            Toolset t = new Toolset("4.0", "c:\\bar", buildProperties, environmentProperties, globalProperties, subToolsets, "c:\\foo", "4.0");
+            Toolset t = new Toolset("4.0", "c:\\bar", buildProperties, environmentProperties, globalProperties,
+                subToolsets, "c:\\foo", "4.0", new Dictionary<string, List<string>>
+                {
+                    ["MSBuildExtensionsPath"] = new List<string> {@"c:\foo"}
+                });
 
             ((INodePacketTranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             Toolset t2 = Toolset.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -130,11 +134,15 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
                 else
                 {
-                    Assert.True(false, string.Format("Sub-toolset {0} was lost in translation.", key));
+                    Assert.True(false, $"Sub-toolset {key} was lost in translation.");
                 }
             }
 
             Assert.Equal(t.DefaultOverrideToolsVersion, t2.DefaultOverrideToolsVersion);
+
+            Assert.NotNull(t2.ImportPropertySearchPathsTable);
+            Assert.Equal(1, t2.ImportPropertySearchPathsTable.Count);
+            Assert.Equal(@"c:\foo", t2.ImportPropertySearchPathsTable["MSBuildExtensionsPath"][0]);
         }
 
         [Fact]
@@ -146,8 +154,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("v13.0", t.DefaultSubToolsetVersion);
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: This scenario is broken in Roslyn
+        [Fact]
         public void TestDefaultSubToolsetFor40()
         {
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset("4.0");

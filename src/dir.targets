@@ -3,7 +3,10 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
   <!-- OSS sign assemblies after compile runs. -->
-  <Import Project="$(ToolsDir)\sign.targets" />
+  <Import Project="$(ToolsDir)\sign.targets" Condition="Exists('$(ToolsDir)\sign.targets')" />
+
+  <Import Project="$(MicroBuildDir)\MicroBuild.Core.targets" Condition="Exists('$(MicroBuildDir)\MicroBuild.Core.targets')" />
+  <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
 
   <!-- Restore packages -->
   <PropertyGroup>

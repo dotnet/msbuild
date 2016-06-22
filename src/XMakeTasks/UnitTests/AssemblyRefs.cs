@@ -5,19 +5,6 @@ internal static class FXAssembly
     internal const string Version = "4.0.0.0";
 }
 
-internal static class ThisAssembly
-{
-    internal const string Title = "Microsoft.Build.Tasks.Unittest.dll";
-    internal const string Description = "Microsoft.Build.Tasks.Unittest.dll";
-    internal const string DefaultAlias = "Microsoft.Build.Tasks.Unittest.dll";
-    internal const string Copyright = "\u00A9 Microsoft Corporation.  All rights reserved.";
-    internal const string Version = "4.0.0.0";
-    internal const string InformationalVersion = "4.0.30319.0";
-    internal const string DailyBuildNumberStr = "30319";
-    internal const string BuildRevisionStr = "0";
-    internal const int DailyBuildNumber = 30319;
-}
-
 #pragma warning disable 436
 internal static class AssemblyRef
 {

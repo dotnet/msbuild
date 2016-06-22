@@ -1342,7 +1342,9 @@
     </comment>
   </data>
   <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
-    <value>Considered "{0}", but its name "{1}" didn't match.</value>
+    <value>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</value>
   </data>
   <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
     <value>Considered "{0}", but it didn't exist.</value>

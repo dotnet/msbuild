@@ -369,7 +369,7 @@ namespace Microsoft.Build.Evaluation
         /// Gets the file version of the file in which the Engine assembly lies.
         /// </summary>
         /// <remarks>
-        /// This is the Windows file version (specifically the value of the ProductVersion
+        /// This is the Windows file version (specifically the value of the FileVersion
         /// resource), not necessarily the assembly version.
         /// If you want the assembly version, use Constants.AssemblyVersion.
         /// This is not the <see cref="ToolsetsVersion">ToolsetCollectionVersion</see>.
@@ -384,7 +384,7 @@ namespace Microsoft.Build.Evaluation
                     // Use .CodeBase instead of .Location, because .Location doesn't
                     // work when Microsoft.Build.dll has been shadow-copied, for example
                     // in scenarios where NUnit is loading Microsoft.Build.
-                    s_engineVersion = new Version(FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath).ProductVersion);
+                    s_engineVersion = new Version(FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath).FileVersion);
                 }
 
                 return s_engineVersion;
@@ -1645,14 +1645,36 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Reset the toolsets using the provided toolset reader, used by unit tests
+        /// </summary>
+        internal void ResetToolsetsForTests(ToolsetConfigurationReader configurationReaderForTestsOnly)
+        {
+            InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
+        }
+
+        /// <summary>
+        /// Reset the toolsets using the provided toolset reader, used by unit tests
+        /// <summary>
+        internal void ResetToolsetsForTests(ToolsetRegistryReader registryReaderForTestsOnly)
+        {
+            InitializeToolsetCollection(registryReader:registryReaderForTestsOnly);
+        }
+
+        /// <summary>
         /// Populate Toolsets with a dictionary of (toolset version, Toolset) 
         /// using information from the registry and config file, if any.  
         /// </summary>
-        private void InitializeToolsetCollection()
+        private void InitializeToolsetCollection(
+                ToolsetRegistryReader registryReader = null,
+                ToolsetConfigurationReader configReader = null)
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            _defaultToolsVersion = ToolsetReader.ReadAllToolsets(_toolsets, EnvironmentProperties, _globalProperties, _toolsetDefinitionLocations);
+            // We only want our local toolset (as defined in MSBuild.exe.config) when we're operating locally...
+            _defaultToolsVersion = ToolsetReader.ReadAllToolsets(_toolsets,
+                    registryReader,
+                    configReader,
+                    EnvironmentProperties, _globalProperties, _toolsetDefinitionLocations);
 
             _toolsetsVersion++;
         }

@@ -757,7 +757,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify the correct reference files are found and that by default we do log the reference files 
         /// added.
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void VerifyReferencesLoggedAmd64()
         {
             MockEngine engine = new MockEngine();

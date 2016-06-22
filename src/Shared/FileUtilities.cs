@@ -29,15 +29,32 @@ namespace Microsoft.Build.Shared
     {
         // A list of possible test runners. If the program running has one of these substrings in the name, we assume
         // this is a test harness.
-        private static readonly string[] s_testRunners = { "XUNIT",
-                                                  "NUNIT", "DEVENV", "MSTEST", "VSTEST", "TASKRUNNER", "VSTESTHOST",
-                                                  "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
-                                              };
+        private static readonly string[] s_testRunners =
+        {
+            "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER",
+            "VSTESTHOST", "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
+        };
+
+        /// <summary>
+        /// Name of the Visual Studio process(es)
+        /// </summary>
+        private static readonly string[] s_visualStudioProcess = {"DEVENV"};
+
+        /// <summary>
+        /// Name of the MSBuild process(es)
+        /// </summary>
+        private static readonly string[] s_msBuildProcess = {"MSBUILD"};
+
 
         // This flag, when set, indicates that we are running tests. Initially assume it's true. It also implies that
         // the currentExecutableOverride is set to a path (that is non-null). Assume this is not initialized when we
         // have the impossible combination of runningTests = false and currentExecutableOverride = null.
         private static bool s_runningTests = true;
+
+        /// <summary>
+        /// Set to true/false when we know whether or not we're running inside Visual Studio
+        /// </summary>
+        private static bool? s_runningInVisualStudio;
 
         // This is the fake current executable we use in case we are running tests.
         private static string s_currentExecutableOverride = null;
@@ -52,29 +69,29 @@ namespace Microsoft.Build.Shared
         internal static string cacheDirectory = null;
 
         /// <summary>
-        /// Check if we are running unit tests (under some kind of test runner). If so, set the flag and come up with a
-        /// (potentially) fake executable path. Generally, the path will be used to find the config file, but also to
-        /// start msbuild.exe for remote nodes.
+        /// Check if we are running unit tests (under some kind of test runner) or in Visual Studio. If so, set the 
+        /// flag and come up with a (potentially) fake executable path. Generally, the path will be used to find 
+        /// the config file, but also to start msbuild.exe for remote nodes.
         /// </summary>
-        private static void GetTestExecutionInfo()
+        private static void GetExecutionInfo()
         {
             // Get the executable we are running
-            var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
+            var processNameCommandLine = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
+            var processNameCurrentProcess = Process.GetCurrentProcess().ProcessName;
 
-            // Check if it matches the pattern
-            s_runningTests = program != null &&
-                           s_testRunners.Any(s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
+            // Check if our current process name is in the list of own test runners
+            s_runningTests = IsProcessInList(processNameCommandLine, s_testRunners) ||
+                             IsProcessInList(processNameCurrentProcess, s_testRunners);
 
-            // Does not look like it's a test, but check the process name
-            if (!s_runningTests)
-            {
-                program = Process.GetCurrentProcess().ProcessName;
-                s_runningTests =
-                    s_testRunners.Any(s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
-            }
+            // Check to see if we're running inside of Visual Studio
+            s_runningInVisualStudio = IsProcessInList(processNameCommandLine, s_visualStudioProcess) ||
+                                      IsProcessInList(processNameCurrentProcess, s_visualStudioProcess);
 
-            // Definitely not a test, leave
-            if (!s_runningTests)
+            bool runningInMsBuildExe = IsProcessInList(processNameCommandLine, s_msBuildProcess) ||
+                                       IsProcessInList(processNameCurrentProcess, s_msBuildProcess);
+
+            // No need to customize execution info if we're running in msbuild.exe
+            if (runningInMsBuildExe)
             {
                 s_currentExecutableOverride = null;
                 return;
@@ -107,6 +124,17 @@ namespace Microsoft.Build.Shared
                 // no need to check it here.
                 s_currentExecutableOverride = Path.Combine(dir, "MSBuild.exe");
             }
+        }
+
+        /// <summary>
+        /// Returns true if processName appears in the processList
+        /// </summary>
+        /// <param name="processName">Name of the process</param>
+        /// <param name="processList">List of processes to check</param>
+        /// <returns></returns>
+        private static bool IsProcessInList(string processName, string[] processList)
+        {
+            return processList.Any(s => processName?.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0);
         }
 
         /// <summary>
@@ -582,14 +610,8 @@ namespace Microsoft.Build.Shared
             {
                 path = NormalizePath(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
 
             return path;
@@ -604,14 +626,8 @@ namespace Microsoft.Build.Shared
             {
                 File.Delete(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
         }
 
@@ -648,14 +664,8 @@ namespace Microsoft.Build.Shared
                         break;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
-                    }
-
-                    // Otherwise eat it.
                 }
 
                 if (i + 1 < retryCount) // should not wait for the final iteration since we not gonna check anyway
@@ -676,14 +686,8 @@ namespace Microsoft.Build.Shared
             {
                 result = Path.IsPathRooted(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
                 result = false;
             }
 
@@ -698,7 +702,7 @@ namespace Microsoft.Build.Shared
         /// for directories) was called - but with the advantage that a FileInfo object is returned
         /// that can be queried (e.g., for LastWriteTime) without hitting the disk again.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <returns>FileInfo around path if it is an existing /file/, else null</returns>
         internal static FileInfo GetFileInfoNoThrow(string filePath)
         {
@@ -710,11 +714,8 @@ namespace Microsoft.Build.Shared
             {
                 fileInfo = new FileInfo(filePath);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 // Invalid or inaccessible path: treat as if nonexistent file, just as File.Exists does
                 return null;
             }
@@ -908,7 +909,7 @@ namespace Microsoft.Build.Shared
                 // Check if initialized and do so if not yet
                 if (s_runningTests && s_currentExecutableOverride == null)
                 {
-                    GetTestExecutionInfo();
+                    GetExecutionInfo();
                 }
                 return s_runningTests;
             }
@@ -925,9 +926,25 @@ namespace Microsoft.Build.Shared
                 // Check if initialized and do so if not yet
                 if (s_runningTests && s_currentExecutableOverride == null)
                 {
-                    GetTestExecutionInfo();
+                    GetExecutionInfo();
                 }
                 return s_currentExecutableOverride;
+            }
+        }
+
+        /// <summary>
+        /// Returns true when the entry point application is Visual Studio.
+        /// </summary>
+        internal static bool RunningInVisualStudio
+        {
+            get
+            {
+                // Check if initialized and do so if not yet
+                if (!s_runningInVisualStudio.HasValue)
+                {
+                    GetExecutionInfo();
+                }
+                return s_runningInVisualStudio.Value;
             }
         }
     }

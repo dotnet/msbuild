@@ -22,7 +22,7 @@ namespace Microsoft.Build.Execution
     /// Wraps an evaluated property for build purposes.
     /// Added and removed via methods on the ProjectInstance object.
     /// </summary>
-    [DebuggerDisplay("{name}={escapedValue}")]
+    [DebuggerDisplay("{_name}={_escapedValue}")]
     public class ProjectPropertyInstance : IKeyed, IValued, IProperty, IEquatable<ProjectPropertyInstance>, INodePacketTranslatable, IDeepCloneable<ProjectPropertyInstance>
     {
         /// <summary>
