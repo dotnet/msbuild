@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string Channel { get; set; }
 
+        private static string CommitHash { get; set; }
+
         private static string CliNuGetVersion { get; set; }
 
         private static string SharedFrameworkNugetVersion { get; set; }
@@ -28,6 +30,7 @@ namespace Microsoft.DotNet.Cli.Build
             CliNuGetVersion = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             SharedFrameworkNugetVersion = CliDependencyVersions.SharedFrameworkVersion;
             Channel = c.BuildContext.Get<string>("Channel");
+            CommitHash = c.BuildContext.Get<string>("CommitHash");
 
             return c.Success();
         }
@@ -49,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Build
             if (CheckIfAllBuildsHavePublished())
             {
                 string targetContainer = $"{AzurePublisher.Product.Sdk}/{Channel}/";
-                string targetVersionFile = $"{targetContainer}{CliNuGetVersion}";
+                string targetVersionFile = $"{targetContainer}{CommitHash}";
                 string semaphoreBlob = $"{targetContainer}/publishSemaphore";
                 AzurePublisherTool.CreateBlobIfNotExists(semaphoreBlob);
                 string leaseId = AzurePublisherTool.AcquireLeaseOnBlob(semaphoreBlob);
@@ -64,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Build
                 }
                 else
                 {
-                    Regex versionFileRegex = new Regex(@"(?<version>\d\.\d\.\d)-(?<release>.*)?");
+                    Regex versionFileRegex = new Regex(@"(?<CommitHash>[\w\d]{40})");
 
                     // Delete old version files
                     AzurePublisherTool.ListBlobs(targetContainer)
