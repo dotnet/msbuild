@@ -19,6 +19,7 @@ using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using PackageBuilder = NuGet.PackageBuilder;
+using NuGetConstants = NuGet.Constants;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -58,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var packageOutputPath = Path.Combine(
                 ArtifactPathsCalculator.PackageOutputPath,
-                GetPackageName() + NuGet.Constants.PackageExtension);
+                GetPackageName() + NuGetConstants.PackageExtension);
 
             if (GeneratePackage(packageOutputPath, packDiagnostics))
             {
