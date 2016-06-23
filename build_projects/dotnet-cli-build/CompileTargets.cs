@@ -201,7 +201,6 @@ namespace Microsoft.DotNet.Cli.Build
             var compilersDeps = Path.Combine(sdkOutputDirectory, "compilers.deps.json");
             var compilersRuntimeConfig = Path.Combine(sdkOutputDirectory, "compilers.runtimeconfig.json");
 
-
             var binaryToCorehostifyRelDir = Path.Combine("runtimes", "any", "native");
             var binaryToCorehostifyOutDir = Path.Combine(sdkOutputDirectory, binaryToCorehostifyRelDir);
             // Corehostify binaries
@@ -211,7 +210,7 @@ namespace Microsoft.DotNet.Cli.Build
                 {
                     // Yes, it is .exe even on Linux. This is the managed exe we're working with
                     File.Copy(Path.Combine(binaryToCorehostifyOutDir, $"{binaryToCorehostify}.exe"), Path.Combine(sdkOutputDirectory, $"{binaryToCorehostify}.dll"));
-                    File.Delete(Path.Combine(binaryToCorehostifyOutDir, $"{binaryToCorehostify}.exe"));
+                    File.Move(Path.Combine(binaryToCorehostifyOutDir, $"{binaryToCorehostify}.exe"), Path.Combine(sdkOutputDirectory, $"{binaryToCorehostify}.exe"));
                     var binaryToCoreHostifyDeps = Path.Combine(sdkOutputDirectory, binaryToCorehostify + ".deps.json");
 
                     File.Copy(compilersDeps, Path.Combine(sdkOutputDirectory, binaryToCorehostify + ".deps.json"));
@@ -221,6 +220,8 @@ namespace Microsoft.DotNet.Cli.Build
                     {
                         var assetPath = Path.Combine(binaryToCorehostifyRelDir, $"{binaryToRemove}.exe").Replace(Path.DirectorySeparatorChar, '/');
                         RemoveAssetFromDepsPackages(binaryToCoreHostifyDeps, "runtimeTargets", assetPath);
+                        RemoveAssetFromDepsPackages(
+                            Path.Combine(sdkOutputDirectory, "dotnet.deps.json"), "runtimeTargets", assetPath);
                     }
                 }
                 catch (Exception ex)
@@ -270,7 +271,29 @@ namespace Microsoft.DotNet.Cli.Build
                 GenerateNuGetPackagesArchive(c, dotnet, sdkOutputDirectory);
             }
 
+            CopyMSBuildTargetsToSDKRoot(sdkOutputDirectory);
+
             return c.Success();
+        }
+
+        private static void CopyMSBuildTargetsToSDKRoot(string sdkOutputDirectory)
+        {
+            var msbuildTargetsDirectory = Path.Combine(sdkOutputDirectory, "runtimes", "any", "native");
+            
+            var filesToCopy = new List<string>();
+            filesToCopy.AddRange(Directory.EnumerateFiles(msbuildTargetsDirectory, "*.targets", SearchOption.AllDirectories));
+            filesToCopy.AddRange(Directory.EnumerateFiles(msbuildTargetsDirectory, "*.Targets", SearchOption.AllDirectories));
+            filesToCopy.AddRange(Directory.EnumerateFiles(msbuildTargetsDirectory, "*.props", SearchOption.AllDirectories));
+            filesToCopy.AddRange(Directory.EnumerateFiles(msbuildTargetsDirectory, "*.overridetasks", SearchOption.AllDirectories));
+            filesToCopy.AddRange(Directory.EnumerateFiles(msbuildTargetsDirectory, "*.tasks", SearchOption.AllDirectories));
+
+            foreach (var fileFullPath in filesToCopy)
+            {
+                var fileRelativePath = fileFullPath.Substring(msbuildTargetsDirectory.Length + 1);
+                var destinationFilePath = Path.Combine(sdkOutputDirectory, fileRelativePath);
+
+                File.Copy(fileFullPath, destinationFilePath, true);
+            }
         }
 
         private static void GenerateNuGetPackagesArchive(

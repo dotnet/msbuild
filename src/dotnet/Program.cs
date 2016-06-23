@@ -37,7 +37,8 @@ namespace Microsoft.DotNet.Cli
             ["publish"] = PublishCommand.Run,
             ["restore"] = RestoreCommand.Run,
             ["run"] = RunCommand.Run,
-            ["test"] = TestCommand.Run
+            ["test"] = TestCommand.Run,
+            ["build3"] = Build3Command.Run
         };
 
         public static int Main(string[] args)
