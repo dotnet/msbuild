@@ -51,8 +51,8 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (CheckIfAllBuildsHavePublished())
             {
-                string targetContainer = $"{AzurePublisher.Product.Sdk}/{Channel}/";
-                string targetVersionFile = $"{targetContainer}{CommitHash}";
+                string targetContainer = $"{AzurePublisher.Product.Sdk}/{Channel}";
+                string targetVersionFile = $"{targetContainer}/{CommitHash}";
                 string semaphoreBlob = $"{targetContainer}/publishSemaphore";
                 AzurePublisherTool.CreateBlobIfNotExists(semaphoreBlob);
                 string leaseId = AzurePublisherTool.AcquireLeaseOnBlob(semaphoreBlob);
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Cli.Build
                 string targetName = Path.GetFileName(blob)
                                         .Replace(CliNuGetVersion, "latest");
 
-                string target = $"{destinationFolder}{targetName}";
+                string target = $"{destinationFolder}/{targetName}";
                 AzurePublisherTool.CopyBlob(blob, target);
             }
         }
