@@ -593,7 +593,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", ToolLocationHelper.CurrentToolsVersion));
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/722")]
         public void TestGetPathToBuildToolsFile_32Bit()
         {
             string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness32);
@@ -623,7 +623,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/722")]
         public void TestGetPathToBuildToolsFile_64Bit()
         {
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProgramFiles(x86)")))
