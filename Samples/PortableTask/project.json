@@ -7,7 +7,7 @@
         "System.Net.NetworkInformation": "4.1.0",
         "Microsoft.NETCore": "5.0.1",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
-        "Microsoft.NETCore.Runtime": "1.0.2"
+        "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2"
       }
     }
   }

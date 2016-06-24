@@ -34,7 +34,7 @@
         "System.Xml.XmlDocument": "4.0.1",
         "System.Xml.XPath.XmlDocument": "4.0.1",
         "Microsoft.Win32.Primitives": "4.0.1",
-        "Microsoft.NETCore.Runtime": "1.0.2",
+        "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
         "Microsoft.NETCore.TestHost": "1.0.0"
       },
       "imports": [ "portable-net451+win81", "dnxcore50" ]

@@ -16,7 +16,7 @@
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
         "System.Threading.Thread": "4.0.0",
         "System.IO.FileSystem": "4.0.1",
-        "Microsoft.NETCore.Runtime": "1.0.2",
+        "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
         "Microsoft.NETCore.TestHost": "1.0.0",
         "System.Xml.XmlDocument": "4.0.1",
         "Microsoft.Win32.Primitives": "4.0.1",

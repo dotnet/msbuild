@@ -46,7 +46,7 @@
         "System.Xml.XPath": "4.0.1",
         "System.Xml.XPath.XmlDocument": "4.0.1",
         "System.Xml.ReaderWriter": "4.0.11",
-        "Microsoft.NETCore.Runtime": "1.0.2",
+        "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
         "Microsoft.NETCore.Console": "1.0.0",
         "Microsoft.NETCore.TestHost": "1.0.0",
         "Microsoft.Net.Compilers.NetCore": "1.2.0-beta1-20160122-02",
