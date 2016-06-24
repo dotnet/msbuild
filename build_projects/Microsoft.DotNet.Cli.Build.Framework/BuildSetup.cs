@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             {
                 foreach (var targetOverride in _overrides)
                 {
-                    Reporter.Verbose.WriteLine($"Target {targetOverride.Name} from {targetOverride.OriginalSource} was overridden in {targetOverride.OverrideSource}".Black());
+                    Reporter.Verbose.WriteLine($"Target {targetOverride.Name} from {targetOverride.OriginalSource} was overridden in {targetOverride.OverrideSource}");
                 }
             }
 
