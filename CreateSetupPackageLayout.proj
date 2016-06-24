@@ -18,16 +18,20 @@
     <BinX86Output Include="$(X86OutputPath)Microsoft.Build.Utilities.Core.dll" />
     <BinX86Output Include="$(X86OutputPath)MSBuild.exe" />
     <BinX86Output Include="$(X86OutputPath)MSBuild.exe.config" />
+    <BinX86Output Include="$(X86OutputPath)MSBuildTaskHost.exe" />
+    <BinX86Output Include="$(X86OutputPath)MSBuildTaskHost.exe.config" />
     <BinX86Output Include="$(X86OutputPath)System.Threading.Tasks.Dataflow.dll" />
-    
+
     <BinX64Output Include="$(X64OutputPath)Microsoft.Build.dll" />
     <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Framework.dll" />
     <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Tasks.Core.dll" />
     <BinX64Output Include="$(X64OutputPath)Microsoft.Build.Utilities.Core.dll" />
     <BinX64Output Include="$(X64OutputPath)MSBuild.exe" />
     <BinX64Output Include="$(X64OutputPath)MSBuild.exe.config" />
+    <BinX64Output Include="$(X64OutputPath)MSBuildTaskHost.exe" />
+    <BinX64Output Include="$(X64OutputPath)MSBuildTaskHost.exe.config" />
     <BinX64Output Include="$(X64OutputPath)System.Threading.Tasks.Dataflow.dll" />
-    
+
     <CommonOutput Include="$(X86OutputPath)Microsoft.Common.CurrentVersion.targets" />
     <CommonOutput Include="$(X86OutputPath)Microsoft.Common.overridetasks" />
     <CommonOutput Include="$(X86OutputPath)Microsoft.Common.targets" />

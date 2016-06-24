@@ -224,7 +224,11 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public MemoryStatus()
             {
-                _length = (uint)Marshal.SizeOf<NativeMethodsShared.MemoryStatus>();
+#if (CLR2COMPATIBILITY)
+            _length = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.MemoryStatus));
+#else
+            _length = (uint)Marshal.SizeOf<NativeMethodsShared.MemoryStatus>();
+#endif
             }
 
             /// <summary>
@@ -319,7 +323,11 @@ namespace Microsoft.Build.Shared
         {
             public SecurityAttributes()
             {
-                _nLength = (uint)Marshal.SizeOf<NativeMethodsShared.SecurityAttributes>();
+#if (CLR2COMPATIBILITY)
+            _nLength = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.SecurityAttributes));
+#else
+            _nLength = (uint)Marshal.SizeOf<NativeMethodsShared.SecurityAttributes>();
+#endif
             }
 
             private uint _nLength;

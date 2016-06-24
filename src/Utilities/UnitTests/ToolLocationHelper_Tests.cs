@@ -593,9 +593,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", ToolLocationHelper.CurrentToolsVersion));
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Test requires installed toolset.
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/722")]
         public void TestGetPathToBuildToolsFile_32Bit()
         {
             string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness32);
@@ -617,15 +615,15 @@ namespace Microsoft.Build.UnitTests
                     ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "4.0", UtilitiesDotNetFrameworkArchitecture.Bitness32)
                 );
 
-            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).Properties["MSBuildToolsPath32"].EvaluatedValue, "msbuild.exe");
+
+            var toolsPath32 = ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).Properties["MSBuildToolsPath32"];
+            string tv12path = Path.Combine(Path.GetFullPath(toolsPath32.EvaluatedValue), "msbuild.exe");
 
             Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ObjectModelHelpers.MSBuildDefaultToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
             Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Test requires installed toolset.
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/722")]
         public void TestGetPathToBuildToolsFile_64Bit()
         {
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProgramFiles(x86)")))
@@ -653,10 +651,35 @@ namespace Microsoft.Build.UnitTests
                     ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "4.0", UtilitiesDotNetFrameworkArchitecture.Bitness64)
                 );
 
-            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).Properties["MSBuildToolsPath32"].EvaluatedValue, "amd64", "msbuild.exe");
+            var toolsPath32 = ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).Properties["MSBuildToolsPath32"];
+            var toolsPath64 = Path.Combine(Path.GetFullPath(toolsPath32.EvaluatedValue), "amd64");
+            var tv12path = Path.Combine(toolsPath64, "msbuild.exe");
+            bool created = false;
 
-            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ObjectModelHelpers.MSBuildDefaultToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness64));
-            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness64));
+            try
+            {
+                // When building normally, the AMD64 folder will not exist. The method we're testing will return null if the path
+                // doesn't exist or msbuild.exe is not located in that path.
+                if (!Directory.Exists(toolsPath64))
+                {
+                    Directory.CreateDirectory(toolsPath64);
+                    created = true;
+                    if (!File.Exists(tv12path))
+                    {
+                        File.WriteAllText(tv12path, string.Empty);
+                    }
+                }
+
+                Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ObjectModelHelpers.MSBuildDefaultToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness64));
+                Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness64));
+            }
+            finally
+            {
+                if (created)
+                {
+                    FileUtilities.DeleteDirectoryNoThrow(toolsPath64, true);
+                }
+            }
         }
 
         [Fact]
@@ -951,8 +974,8 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+#if FEATURE_CODETASKFACTORY
+        [Fact]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1006,7 +1029,6 @@ namespace Microsoft.Build.UnitTests
             Assert.True(success); // "Build Failed.  See Std Out for details."
         }
 
-#if FEATURE_CODETASKFACTORY
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
