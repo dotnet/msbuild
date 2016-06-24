@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "System.Threading.Tasks.Dataflow": "4.5.26",
+    "System.Threading.Tasks.Dataflow": "4.6.0",
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-00410-02",
     "xunit.core": "2.1.0",

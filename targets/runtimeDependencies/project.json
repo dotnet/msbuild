@@ -14,7 +14,7 @@
       "dependencies": {
         "xunit.runner.visualstudio": "2.1.0",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
-        "System.Threading.Tasks.Dataflow": "4.5.26"
+        "System.Threading.Tasks.Dataflow": "4.6.0"
       }
     },
     "netcoreapp1.0": {
