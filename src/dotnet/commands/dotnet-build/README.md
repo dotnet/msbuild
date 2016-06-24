@@ -19,7 +19,7 @@ The `dotnet build` command builds multiple source file from a source project and
 The binary will be in Intermediate Language (IL) by default and will have a DLL extension. 
 `dotnet build` will also drop a `\*.deps` file which outlines what the host needs to run the application.  
 
-Building requires the existence of a lock file, which means that you have to run [`dotnet restore`](dotnet-restore.md) prior to building your code.
+Building requires the existence of a lock file, which means that you have to run [`dotnet restore`](../dotnet-restore/README.md) prior to building your code.
 
 Before any compilation begins, the build verb analyzes the project and its dependencies for incremental safety checks.
 If all checks pass, then build proceeds with incremental compilation of the project and its dependencies; 

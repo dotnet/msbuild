@@ -13,7 +13,7 @@ dotnet -- General driver for running the command-line commands
 ## DESCRIPTION
 `dotnet` is a generic driver for the Command Line Interface (CLI) toolchain. Invoked on its own, it will give out brief usage instructions. 
 
-Each specific feature is implemented as a command. In order to use the feature, the command is specified after `dotnet`, such as [`dotnet build`](dotnet-build.md). All of the arguments following the command are its own arguments. 
+Each specific feature is implemented as a command. In order to use the feature, the command is specified after `dotnet`, such as [`dotnet build`](commands/dotnet-build/README.md). All of the arguments following the command are its own arguments. 
 
 The only time `dotnet` is used as a command on its own is to run portable apps. Just specify a portable application DLL after the `dotnet` verb to execute the application.    
 
@@ -39,19 +39,19 @@ Prints out a short help and a list of current commands.
 
 The following commands exist for dotnet:
 
-* [dotnet-new](dotnet-new.md)
+* [dotnet-new](commands/dotnet-new/README.md)
    * Initializes a C# or F# console application project.
-* [dotnet-restore](dotnet-restore.md)
+* [dotnet-restore](commands/dotnet-restore/README.md)
   * Restores the dependencies for a given application. 
-* [dotnet-build](dotnet-build.md)
+* [dotnet-build](commands/dotnet-build/README.md)
   * Builds a .NET Core application.
-* [dotnet-publish](dotnet-publish.md)
+* [dotnet-publish](commands/dotnet-publish/README.md)
    * Publishes a .NET portable or self-contained application.
-* [dotnet-run](dotnet-run.md)
+* [dotnet-run](commands/dotnet-run/README.md)
    * Runs the application from source.
-* [dotnet-test](dotnet-test.md)
+* [dotnet-test](commands/dotnet-test/README.md)
    * Runs tests using a test runner specified in the project.json.
-* [dotnet-pack](dotnet-pack.md)
+* [dotnet-pack](commands/dotnet-pack/README.md)
    * Creates a NuGet package of your code.
 
 ## EXAMPLES

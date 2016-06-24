@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public string UploadFile(string file, Product product, string version)
         {
-            string url = CalculateUploadUrlForFile(file, product, version);
+            string url = CalculateRelativePathForFile(file, product, version);
             CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(url);
             blob.UploadFromFileAsync(file, FileMode.Open).Wait();
             SetBlobPropertiesBasedOnFileType(blob);
@@ -194,9 +194,14 @@ namespace Microsoft.DotNet.Cli.Build
             _blobContainer.GetBlockBlobReference(path).DeleteAsync().Wait();
         }
 
-        public static string CalculateUploadUrlForFile(string file, Product product, string version)
+        public static string CalculateFullUrlForFile(string file, Product product, string version)
         {
-            return $"{s_dotnetBlobRootUrl}/{product}/{version}/{Path.GetFileName(file)}";
+            return $"{s_dotnetBlobRootUrl}/{CalculateRelativePathForFile(file, product, version)}";
+        }
+
+        private static string CalculateRelativePathForFile(string file, Product product, string version)
+        {
+            return $"{product}/{version}/{Path.GetFileName(file)}";
         }
 
         public static async Task DownloadFile(string blobFilePath, string localDownloadPath)

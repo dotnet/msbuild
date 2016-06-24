@@ -288,7 +288,7 @@ get_latest_version_info() {
     if [ "$shared_runtime" = true ]; then
         version_file_url="$azure_feed/$azure_channel/dnvm/latest.sharedfx.$osname.$normalized_architecture.version"
     else
-        version_file_url="$azure_feed/$azure_channel/dnvm/latest.$osname.$normalized_architecture.version"
+        version_file_url="$azure_feed/Sdk/$azure_channel/latest.version"
     fi
     say_verbose "get_latest_version_info: latest url: $version_file_url"
     
@@ -307,21 +307,13 @@ get_azure_channel_from_channel() {
             echo "dev"
             return 0
             ;;
-        beta)
-            echo "beta"
-            return 0
-            ;;
-        preview)
-            echo "preview"
-            return 0
-            ;;
         production)
             say_err "Production channel does not exist yet"
             return 1
     esac
     
-    say_err "``$1`` is an invalid channel name. Use one of the following: ``future``, ``preview``, ``production``"
-    return 1
+	echo $channel
+    return 0
 }
 
 # args:
@@ -374,7 +366,7 @@ construct_download_link() {
     if [ "$shared_runtime" = true ]; then
         download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-$osname-$normalized_architecture.$specific_version.tar.gz"
     else
-        download_link="$azure_feed/$azure_channel/Binaries/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
+        download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
     fi
     
     echo "$download_link"
@@ -557,7 +549,7 @@ local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
 temporary_file_template="${TMPDIR:-/tmp}/dotnet.XXXXXXXXX"
 
-channel="preview"
+channel="rel-1.0.0"
 version="Latest"
 install_dir="<auto>"
 architecture="<auto>"
@@ -668,4 +660,4 @@ else
     say "Binaries of dotnet can be found in $bin_path"
 fi
 
-say "Installation finished successfuly."
+say "Installation finished successfully."

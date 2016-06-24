@@ -16,7 +16,7 @@ The `dotnet run` command provides a convenient option to run your application fr
 It compiles source code, generates an output program and then runs that program. 
 This command is useful for fast iterative development and can also be used to run a source-distributed program (for example, a website).
 
-This command relies on [`dotnet build`](dotnet-build.md) to build source inputs to a .NET assembly, before launching the program. 
+This command relies on [`dotnet build`](../dotnet-build/README.md) to build source inputs to a .NET assembly, before launching the program. 
 The requirements for this command and the handling of source inputs are all inherited from the build command. 
 The documentation for the build command provides more information on those requirements.
 
@@ -26,11 +26,11 @@ Temporary files are written to the child `obj` folder.
 
 In case of a project with multiple specified frameworks, `dotnet run` will first select the .NET Core frameworks. If those do not exist, it will error out. To specify other frameworks, use the `--framework` argument.
 
-The `dotnet run` command must be used in the context of projects, not built assemblies. If you're trying to execute a DLL instead, you should use [`dotnet`](dotnet.md) without any command like in the following example:
+The `dotnet run` command must be used in the context of projects, not built assemblies. If you're trying to execute a DLL instead, you should use [`dotnet`](../../README.md) without any command like in the following example:
  
 `dotnet myapp.dll`
 
-For more information about the `dotnet` driver, see the [.NET Core Command Line Tools (CLI)](overview.md) topic.
+For more information about the `dotnet` driver, see the [.NET Core Command Line Tools (CLI)](https://dotnet.github.io/docs/core-concepts/core-sdk/cli/overview.html) topic.
 
 
 ## OPTIONS

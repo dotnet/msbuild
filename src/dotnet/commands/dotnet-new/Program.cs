@@ -99,16 +99,24 @@ namespace Microsoft.DotNet.Tools.New
             app.Description = "Initializes empty project for .NET Platform";
             app.HelpOption("-h|--help");
 
-            var lang = app.Option("-l|--lang <LANGUAGE>", "Language of project [C#|F#]", CommandOptionType.SingleValue);
-            var type = app.Option("-t|--type <TYPE>", "Type of project", CommandOptionType.SingleValue);
+            var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", Templates = new[] { "Console", "Web", "Lib", "xunittest" } };
+            var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", Templates = new[] { "Console" } };
+
+            var languages = new[] { csharp, fsharp };
+
+            string langValuesString = string.Join(", ", languages.Select(l => l.Name));
+            var typeValues = 
+                from l in languages
+                let values = string.Join(", ", l.Templates)
+                select $"Valid values for {l.Name}: {values}.";
+            string typeValuesString = string.Join(" ", typeValues);
+
+            var lang = app.Option("-l|--lang <LANGUAGE>", $"Language of project    Valid values: {langValuesString}.", CommandOptionType.SingleValue);
+            var type = app.Option("-t|--type <TYPE>", $"Type of project        {typeValuesString}", CommandOptionType.SingleValue);
 
             var dotnetNew = new NewCommand();
             app.OnExecute(() =>
             {
-
-                var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", Templates = new[] { "Console", "Web", "Lib", "xunittest" } };
-                var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", Templates = new[] { "Console" } };
-
                 string languageValue = lang.Value() ?? csharp.Name;
 
                 var language = new[] { csharp, fsharp }
