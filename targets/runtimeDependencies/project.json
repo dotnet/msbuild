@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "xunit": "2.1.0",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00410-02"
+    "xunit.netcore.extensions": "1.0.0-prerelease-00520-01"
   },
   "frameworks": {
     "net46": {
@@ -55,7 +55,7 @@
         "Microsoft.Portable.Targets": "0.1.1-dev",
         "Microsoft.Win32.Primitives": "4.0.1",
         "Newtonsoft.Json": "8.0.3",
-        "xunit.console.netcore": "1.0.2-prerelease-00410-02"
+        "xunit.console.netcore": "1.0.3-prerelease-00524-01"
       },
       "imports": [
         "portable-net451+win81",
