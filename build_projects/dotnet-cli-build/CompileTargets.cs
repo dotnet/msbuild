@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.InternalAbstractions;
 using Newtonsoft.Json;
@@ -13,7 +11,7 @@ using static Microsoft.DotNet.Cli.Build.FS;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class CompileTargets
+    public class CompileTargets : Task
     {
         public static readonly bool IsWinx86 = CurrentPlatform.IsWindows && CurrentArchitecture.Isx86;
 
@@ -58,20 +56,24 @@ namespace Microsoft.DotNet.Cli.Build
 
         public static Crossgen CrossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion, DependencyVersions.JitVersion);
 
-        // Updates the stage 2 with recent changes.
-        [Target(nameof(PrepareTargets.Init), nameof(CompileStage2))]
-        public static BuildTargetResult UpdateBuild(BuildTargetContext c)
+        public override bool Execute()
         {
-            return c.Success();
+            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<CompileTargets>().CreateBuildContext();
+            BuildTargetContext c = new BuildTargetContext(context, null, null);
+
+            return Compile(c).Success;
         }
 
-        [Target(nameof(PrepareTargets.Init), nameof(CompileStage1), nameof(CompileStage2))]
+        [Target]
         public static BuildTargetResult Compile(BuildTargetContext c)
         {
+            PrepareTargets.Init(c);
+            CompileStage1(c);
+            CompileStage2(c);
+
             return c.Success();
         }
 
-        [Target(nameof(PrepareTargets.Init))]
         public static BuildTargetResult CompileStage1(BuildTargetContext c)
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
@@ -94,7 +96,6 @@ namespace Microsoft.DotNet.Cli.Build
             return result;
         }
 
-        [Target(nameof(PrepareTargets.Init))]
         public static BuildTargetResult CompileStage2(BuildTargetContext c)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");

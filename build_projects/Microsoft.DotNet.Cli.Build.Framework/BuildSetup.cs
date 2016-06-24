@@ -50,6 +50,11 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             return UseTargets(CollectTargets(typeof(T)));
         }
 
+        public BuildContext CreateBuildContext()
+        {
+            return new BuildContext(_targets, Directory.GetCurrentDirectory());
+        }
+
         public int Run(string[] args)
         {
             var targets = new[] { BuildContext.DefaultTarget };
@@ -68,7 +73,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                 }
             }
 
-            var context = new BuildContext(_targets, Directory.GetCurrentDirectory());
+            var context = CreateBuildContext();
             BuildTargetResult result = null;
             try
             {

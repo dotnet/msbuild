@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.InternalAbstractions;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public static class PackageTargets
+    public class PackageTargets : Task
     {
         public static readonly string[] ProjectsToPack  = new string[]
         {
@@ -26,32 +27,44 @@ namespace Microsoft.DotNet.Cli.Build
             "Microsoft.Extensions.Testing.Abstractions"
         };
 
-        [Target(nameof(PackageTargets.CopyCLISDKLayout),
-        nameof(PackageTargets.CopySharedHostLayout),
-        nameof(PackageTargets.CopyHostFxrLayout),
-        nameof(PackageTargets.CopySharedFxLayout),
-        nameof(PackageTargets.CopyCombinedFrameworkSDKHostLayout),
-        nameof(PackageTargets.CopyCombinedFrameworkSDKLayout))]
+        public override bool Execute()
+        {
+            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<PackageTargets>().CreateBuildContext();
+            BuildTargetContext c = new BuildTargetContext(context, null, null);
+
+            return Package(c).Success;
+        }
+
         public static BuildTargetResult InitPackage(BuildTargetContext c)
         {
+            CopyCLISDKLayout(c);
+            CopySharedHostLayout(c);
+            CopyHostFxrLayout(c);
+            CopySharedFxLayout(c);
+            CopyCombinedFrameworkSDKHostLayout(c);
+            CopyCombinedFrameworkSDKLayout(c);
+
             Directory.CreateDirectory(Dirs.Packages);
             return c.Success();
         }
 
-        [Target(nameof(PrepareTargets.Init),
-        nameof(PackageTargets.InitPackage),
-        nameof(PackageTargets.GenerateVersionBadge),
-        nameof(PackageTargets.GenerateCompressedFile),
-        nameof(InstallerTargets.GenerateInstaller),
-        nameof(PackageTargets.GenerateNugetPackages),
-        nameof(InstallerTargets.TestInstaller))]
-        [Environment("DOTNET_BUILD_SKIP_PACKAGING", null, "0", "false")]
+        [Target]
         public static BuildTargetResult Package(BuildTargetContext c)
         {
+            if (!EnvVars.GetBool("DOTNET_BUILD_SKIP_PACKAGING"))
+            {
+                PrepareTargets.Init(c);
+                InitPackage(c);
+                GenerateVersionBadge(c);
+                GenerateCompressedFile(c);
+                InstallerTargets.GenerateInstaller(c);
+                GenerateNugetPackages(c);
+                InstallerTargets.TestInstaller(c);
+            }
+
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult GenerateVersionBadge(BuildTargetContext c)
         {
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
@@ -65,7 +78,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CopyCLISDKLayout(BuildTargetContext c)
         {
             var cliSdkRoot = Path.Combine(Dirs.Output, "obj", "clisdk");
@@ -82,7 +94,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CopySharedHostLayout(BuildTargetContext c)
         {
             var sharedHostRoot = Path.Combine(Dirs.Output, "obj", "sharedHost");
@@ -104,7 +115,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CopyHostFxrLayout(BuildTargetContext c)
         {
             var hostFxrRoot = Path.Combine(Dirs.Output, "obj", "hostFxr");
@@ -121,7 +131,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CopySharedFxLayout(BuildTargetContext c)
         {
             var sharedFxRoot = Path.Combine(Dirs.Output, "obj", "sharedFx");
@@ -138,7 +147,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CopyCombinedFrameworkSDKHostLayout(BuildTargetContext c)
         {
             var combinedRoot = Path.Combine(Dirs.Output, "obj", "combined-framework-sdk-host");
@@ -163,7 +171,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CopyCombinedFrameworkSDKLayout(BuildTargetContext c)
         {
             var combinedRoot = Path.Combine(Dirs.Output, "obj", "combined-framework-sdk");
@@ -182,35 +189,38 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(PackageTargets.GenerateZip), nameof(PackageTargets.GenerateTarBall))]
         public static BuildTargetResult GenerateCompressedFile(BuildTargetContext c)
         {
+            GenerateZip(c);
+            GenerateTarBall(c);
+
             return c.Success();
         }
 
-        [Target(nameof(PackageTargets.InitPackage))]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateZip(BuildTargetContext c)
         {
-            CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
-            CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKCompressedFile"));
-            CreateZipFromDirectory(Path.Combine(Dirs.Stage2Symbols, "sdk"), c.BuildContext.Get<string>("SdkSymbolsCompressedFile"));
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
+                CreateZipFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKCompressedFile"));
+                CreateZipFromDirectory(Path.Combine(Dirs.Stage2Symbols, "sdk"), c.BuildContext.Get<string>("SdkSymbolsCompressedFile"));
+            }
 
             return c.Success();
         }
 
-        [Target(nameof(PackageTargets.InitPackage))]
-        [BuildPlatforms(BuildPlatform.Unix)]
         public static BuildTargetResult GenerateTarBall(BuildTargetContext c)
         {
-            CreateTarBallFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Unix))
+            {
+                CreateTarBallFromDirectory(c.BuildContext.Get<string>("CombinedFrameworkSDKHostRoot"), c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile"));
 
-            CreateTarBallFromDirectory(Path.Combine(Dirs.Stage2Symbols, "sdk"), c.BuildContext.Get<string>("SdkSymbolsCompressedFile"));
+                CreateTarBallFromDirectory(Path.Combine(Dirs.Stage2Symbols, "sdk"), c.BuildContext.Get<string>("SdkSymbolsCompressedFile"));
+            }
 
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult GenerateNugetPackages(BuildTargetContext c)
         {
             var versionSuffix = c.BuildContext.Get<BuildVersion>("BuildVersion").CommitCountString;

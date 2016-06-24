@@ -13,35 +13,71 @@ using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Utils;
 using System.IO.Compression;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class PrepareTargets
+    public class PrepareTargets : Task
     {
-        [Target(nameof(Init), nameof(DownloadHostAndSharedFxArtifacts), nameof(RestorePackages), nameof(ZipTemplates))]
-        public static BuildTargetResult Prepare(BuildTargetContext c) => c.Success();
+        public override bool Execute()
+        {
+            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<PrepareTargets>().CreateBuildContext();
+            BuildTargetContext c = new BuildTargetContext(context, null, null);
 
-        [Target(nameof(CheckPrereqCmakePresent), nameof(CheckPlatformDependencies))]
-        public static BuildTargetResult CheckPrereqs(BuildTargetContext c) => c.Success();
+            return Prepare(c).Success;
+        }
 
-        [Target(nameof(CheckCoreclrPlatformDependencies), nameof(CheckInstallerBuildPlatformDependencies))]
-        public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c) => c.Success();
+        [Target]
+        public static BuildTargetResult Prepare(BuildTargetContext c)
+        {
+            Init(c);
+            DownloadHostAndSharedFxArtifacts(c);
+            RestorePackages(c);
+            ZipTemplates(c);
 
-        [Target(nameof(CheckUbuntuCoreclrAndCoreFxDependencies), nameof(CheckCentOSCoreclrAndCoreFxDependencies))]
-        public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c) => c.Success();
+            return c.Success();
+        }
 
-        [Target(nameof(CheckUbuntuDebianPackageBuildDependencies))]
-        public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c) => c.Success();
+        public static BuildTargetResult CheckPrereqs(BuildTargetContext c)
+        {
+            CheckPrereqCmakePresent(c);
+            CheckPlatformDependencies(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c)
+        {
+            CheckCoreclrPlatformDependencies(c);
+            CheckInstallerBuildPlatformDependencies(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c)
+        {
+            CheckUbuntuCoreclrAndCoreFxDependencies(c);
+            CheckCentOSCoreclrAndCoreFxDependencies(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c)
+        {
+            CheckUbuntuDebianPackageBuildDependencies(c);
+
+            return c.Success();
+        }
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
-        [Target(
-            nameof(GenerateVersions),
-            nameof(CheckPrereqs),
-            nameof(LocateStage0),
-            nameof(ExpectedBuildArtifacts),
-            nameof(SetTelemetryProfile))]
         public static BuildTargetResult Init(BuildTargetContext c)
         {
+            GenerateVersions(c);
+            CheckPrereqs(c);
+            LocateStage0(c);
+            ExpectedBuildArtifacts(c);
+            SetTelemetryProfile(c);
+
             var configEnv = Environment.GetEnvironmentVariable("CONFIGURATION");
 
             if (string.IsNullOrEmpty(configEnv))
@@ -60,7 +96,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult GenerateVersions(BuildTargetContext c)
         {
             var commitCount = GitUtils.GetCommitCount();
@@ -86,7 +121,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult ZipTemplates(BuildTargetContext c)
         {
             var templateDirectories = Directory.GetDirectories(
@@ -106,7 +140,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult LocateStage0(BuildTargetContext c)
         {
             // We should have been run in the repo root, so locate the stage 0 relative to current directory
@@ -131,7 +164,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult ExpectedBuildArtifacts(BuildTargetContext c)
         {
             var config = Environment.GetEnvironmentVariable("CONFIGURATION");
@@ -158,13 +190,15 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(
-            nameof(ExpectedBuildArtifacts),
-            nameof(DownloadHostAndSharedFxArchives),
-            nameof(DownloadHostAndSharedFxInstallers))]
-        public static BuildTargetResult DownloadHostAndSharedFxArtifacts(BuildTargetContext c) => c.Success();
+        public static BuildTargetResult DownloadHostAndSharedFxArtifacts(BuildTargetContext c)
+        {
+            ExpectedBuildArtifacts(c);
+            DownloadHostAndSharedFxArchives(c);
+            DownloadHostAndSharedFxInstallers(c);
 
-        [Target]
+            return c.Success();
+        }
+
         public static BuildTargetResult DownloadHostAndSharedFxArchives(BuildTargetContext c)
         {
             var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
@@ -205,75 +239,75 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu)]
         public static BuildTargetResult DownloadHostAndSharedFxInstallers(BuildTargetContext c)
         {
-            var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
-            var hostVersion = CliDependencyVersions.SharedHostVersion;
-            var hostFxrVersion = CliDependencyVersions.HostFxrVersion;
-
-            var sharedFrameworkChannel = CliDependencyVersions.SharedFrameworkChannel;
-            var sharedHostChannel = CliDependencyVersions.SharedHostChannel;
-            var hostFxrChannel = CliDependencyVersions.HostFxrChannel;
-
-            var sharedFrameworkInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedFrameworkInstaller");
-            var sharedHostInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedHostInstaller");
-            var hostFxrInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "hostFxrInstaller");
-
-            Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDownloadFile));
-            Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));
-            Mkdirp(Path.GetDirectoryName(hostFxrInstallerDownloadFile));
-
-            if (!File.Exists(sharedFrameworkInstallerDownloadFile))
+            if (CurrentPlatform.IsAnyPlatform(BuildPlatform.Windows, BuildPlatform.OSX, BuildPlatform.Ubuntu))
             {
-                var sharedFrameworkInstallerDestinationFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
-                Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDestinationFile));
+                var sharedFrameworkVersion = CliDependencyVersions.SharedFrameworkVersion;
+                var hostVersion = CliDependencyVersions.SharedHostVersion;
+                var hostFxrVersion = CliDependencyVersions.HostFxrVersion;
 
-                AzurePublisher.DownloadFile(
-                    CalculateInstallerBlob(
-                        sharedFrameworkInstallerDestinationFile,
-                        sharedFrameworkChannel,
-                        sharedFrameworkVersion),
-                    sharedFrameworkInstallerDownloadFile).Wait();
+                var sharedFrameworkChannel = CliDependencyVersions.SharedFrameworkChannel;
+                var sharedHostChannel = CliDependencyVersions.SharedHostChannel;
+                var hostFxrChannel = CliDependencyVersions.HostFxrChannel;
 
-                File.Copy(sharedFrameworkInstallerDownloadFile, sharedFrameworkInstallerDestinationFile, true);
-            }
+                var sharedFrameworkInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedFrameworkInstaller");
+                var sharedHostInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "sharedHostInstaller");
+                var hostFxrInstallerDownloadFile = Path.Combine(CliDirs.CoreSetupDownload, "hostFxrInstaller");
 
-            if (!File.Exists(sharedHostInstallerDownloadFile))
-            {
-                var sharedHostInstallerDestinationFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
-                Mkdirp(Path.GetDirectoryName(sharedHostInstallerDestinationFile));
+                Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDownloadFile));
+                Mkdirp(Path.GetDirectoryName(sharedHostInstallerDownloadFile));
+                Mkdirp(Path.GetDirectoryName(hostFxrInstallerDownloadFile));
 
-                AzurePublisher.DownloadFile(
-                   CalculateInstallerBlob(
-                       sharedHostInstallerDestinationFile,
-                       sharedHostChannel,
-                       hostVersion),
-                   sharedHostInstallerDownloadFile).Wait();
+                if (!File.Exists(sharedFrameworkInstallerDownloadFile))
+                {
+                    var sharedFrameworkInstallerDestinationFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
+                    Mkdirp(Path.GetDirectoryName(sharedFrameworkInstallerDestinationFile));
 
-                File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
-            }
+                    AzurePublisher.DownloadFile(
+                        CalculateInstallerBlob(
+                            sharedFrameworkInstallerDestinationFile,
+                            sharedFrameworkChannel,
+                            sharedFrameworkVersion),
+                        sharedFrameworkInstallerDownloadFile).Wait();
 
-            if (!File.Exists(hostFxrInstallerDownloadFile))
-            {
-                var hostFxrInstallerDestinationFile = c.BuildContext.Get<string>("HostFxrInstallerFile");
-                Mkdirp(Path.GetDirectoryName(hostFxrInstallerDestinationFile));
+                    File.Copy(sharedFrameworkInstallerDownloadFile, sharedFrameworkInstallerDestinationFile, true);
+                }
 
-                AzurePublisher.DownloadFile(
-                   CalculateInstallerBlob(
-                       hostFxrInstallerDestinationFile,
-                       hostFxrChannel,
-                       hostFxrVersion),
-                   hostFxrInstallerDownloadFile).Wait();
+                if (!File.Exists(sharedHostInstallerDownloadFile))
+                {
+                    var sharedHostInstallerDestinationFile = c.BuildContext.Get<string>("SharedHostInstallerFile");
+                    Mkdirp(Path.GetDirectoryName(sharedHostInstallerDestinationFile));
 
-                File.Copy(hostFxrInstallerDownloadFile, hostFxrInstallerDestinationFile, true);
+                    AzurePublisher.DownloadFile(
+                       CalculateInstallerBlob(
+                           sharedHostInstallerDestinationFile,
+                           sharedHostChannel,
+                           hostVersion),
+                       sharedHostInstallerDownloadFile).Wait();
+
+                    File.Copy(sharedHostInstallerDownloadFile, sharedHostInstallerDestinationFile, true);
+                }
+
+                if (!File.Exists(hostFxrInstallerDownloadFile))
+                {
+                    var hostFxrInstallerDestinationFile = c.BuildContext.Get<string>("HostFxrInstallerFile");
+                    Mkdirp(Path.GetDirectoryName(hostFxrInstallerDestinationFile));
+
+                    AzurePublisher.DownloadFile(
+                       CalculateInstallerBlob(
+                           hostFxrInstallerDestinationFile,
+                           hostFxrChannel,
+                           hostFxrVersion),
+                       hostFxrInstallerDownloadFile).Wait();
+
+                    File.Copy(hostFxrInstallerDownloadFile, hostFxrInstallerDestinationFile, true);
+                }
             }
 
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CheckPackageCache(BuildTargetContext c)
         {
             var ciBuild = string.Equals(Environment.GetEnvironmentVariable("CI_BUILD"), "1", StringComparison.Ordinal);
@@ -327,9 +361,10 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(CheckPackageCache))]
         public static BuildTargetResult RestorePackages(BuildTargetContext c)
         {
+            CheckPackageCache(c);
+
             var dotnet = DotNetCli.Stage0;
 
             dotnet.Restore("--verbosity", "verbose", "--disable-parallel")
@@ -344,92 +379,99 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult CheckUbuntuDebianPackageBuildDependencies(BuildTargetContext c)
         {
-
-            var messageBuilder = new StringBuilder();
-            var aptDependencyUtility = new AptDependencyUtility();
-
-
-            foreach (var package in PackageDependencies.DebianPackageBuildDependencies)
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu, "14.04"))
             {
-                if (!AptDependencyUtility.PackageIsInstalled(package))
+                var messageBuilder = new StringBuilder();
+                var aptDependencyUtility = new AptDependencyUtility();
+
+
+                foreach (var package in PackageDependencies.DebianPackageBuildDependencies)
                 {
-                    messageBuilder.Append($"Error: Debian package build dependency {package} missing.");
-                    messageBuilder.Append(Environment.NewLine);
-                    messageBuilder.Append($"-> install with apt-get install {package}");
-                    messageBuilder.Append(Environment.NewLine);
+                    if (!AptDependencyUtility.PackageIsInstalled(package))
+                    {
+                        messageBuilder.Append($"Error: Debian package build dependency {package} missing.");
+                        messageBuilder.Append(Environment.NewLine);
+                        messageBuilder.Append($"-> install with apt-get install {package}");
+                        messageBuilder.Append(Environment.NewLine);
+                    }
+                }
+
+                if (messageBuilder.Length == 0)
+                {
+                    return c.Success();
+                }
+                else
+                {
+                    return c.Failed(messageBuilder.ToString());
                 }
             }
 
-            if (messageBuilder.Length == 0)
-            {
-                return c.Success();
-            }
-            else
-            {
-                return c.Failed(messageBuilder.ToString());
-            }
+            return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
         public static BuildTargetResult CheckUbuntuCoreclrAndCoreFxDependencies(BuildTargetContext c)
         {
-            var errorMessageBuilder = new StringBuilder();
-            var stage0 = DotNetCli.Stage0.BinPath;
-
-            foreach (var package in PackageDependencies.UbuntuCoreclrAndCoreFxDependencies)
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu, "14.04"))
             {
-                if (!AptDependencyUtility.PackageIsInstalled(package))
+                var errorMessageBuilder = new StringBuilder();
+                var stage0 = DotNetCli.Stage0.BinPath;
+
+                foreach (var package in PackageDependencies.UbuntuCoreclrAndCoreFxDependencies)
                 {
-                    errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
-                    errorMessageBuilder.Append(Environment.NewLine);
-                    errorMessageBuilder.Append($"-> install with apt-get install {package}");
-                    errorMessageBuilder.Append(Environment.NewLine);
+                    if (!AptDependencyUtility.PackageIsInstalled(package))
+                    {
+                        errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
+                        errorMessageBuilder.Append(Environment.NewLine);
+                        errorMessageBuilder.Append($"-> install with apt-get install {package}");
+                        errorMessageBuilder.Append(Environment.NewLine);
+                    }
+                }
+
+                if (errorMessageBuilder.Length == 0)
+                {
+                    return c.Success();
+                }
+                else
+                {
+                    return c.Failed(errorMessageBuilder.ToString());
                 }
             }
 
-            if (errorMessageBuilder.Length == 0)
-            {
-                return c.Success();
-            }
-            else
-            {
-                return c.Failed(errorMessageBuilder.ToString());
-            }
+            return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.CentOS)]
         public static BuildTargetResult CheckCentOSCoreclrAndCoreFxDependencies(BuildTargetContext c)
         {
-            var errorMessageBuilder = new StringBuilder();
-
-            foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
+            if (CurrentPlatform.IsPlatform(BuildPlatform.CentOS))
             {
-                if (!YumDependencyUtility.PackageIsInstalled(package))
+                var errorMessageBuilder = new StringBuilder();
+
+                foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
                 {
-                    errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
-                    errorMessageBuilder.Append(Environment.NewLine);
-                    errorMessageBuilder.Append($"-> install with yum install {package}");
-                    errorMessageBuilder.Append(Environment.NewLine);
+                    if (!YumDependencyUtility.PackageIsInstalled(package))
+                    {
+                        errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
+                        errorMessageBuilder.Append(Environment.NewLine);
+                        errorMessageBuilder.Append($"-> install with yum install {package}");
+                        errorMessageBuilder.Append(Environment.NewLine);
+                    }
+                }
+
+                if (errorMessageBuilder.Length == 0)
+                {
+                    return c.Success();
+                }
+                else
+                {
+                    return c.Failed(errorMessageBuilder.ToString());
                 }
             }
 
-            if (errorMessageBuilder.Length == 0)
-            {
-                return c.Success();
-            }
-            else
-            {
-                return c.Failed(errorMessageBuilder.ToString());
-            }
+            return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CheckPrereqCmakePresent(BuildTargetContext c)
         {
             try
@@ -461,7 +503,6 @@ cmake is required to build the native host 'corehost'";
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult SetTelemetryProfile(BuildTargetContext c)
         {
             var gitResult = Cmd("git", "rev-parse", "HEAD")
@@ -474,23 +515,6 @@ cmake is required to build the native host 'corehost'";
             Environment.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_PROFILE", $"https://github.com/dotnet/cli;{commitHash}");
 
             return c.Success();
-        }
-
-        private static string GetVersionFromProjectJson(string pathToProjectJson)
-        {
-            Regex r = new Regex($"\"{Regex.Escape(Monikers.SharedFrameworkName)}\"\\s*:\\s*\"(?'version'[^\"]*)\"");
-
-            foreach (var line in File.ReadAllLines(pathToProjectJson))
-            {
-                var m = r.Match(line);
-
-                if (m.Success)
-                {
-                    return m.Groups["version"].Value;
-                }
-            }
-
-            throw new InvalidOperationException("Unable to match the version name from " + pathToProjectJson);
         }
 
         private static IDictionary<string, string> ReadBranchInfo(BuildTargetContext c, string path)

@@ -8,10 +8,11 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 using static Microsoft.DotNet.Cli.Build.Utils;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class TestTargets
+    public class TestTargets : Task
     {
         private static string s_testPackageBuildVersionSuffix = "<buildversion>";
 
@@ -57,28 +58,53 @@ namespace Microsoft.DotNet.Cli.Build
             new { Path = "AppWithDirectDependencyDesktopAndPortable", Skip = new Func<bool>(() => !CurrentPlatform.IsWindows) }
         };
 
-        [Target(
-            nameof(PrepareTargets.Init),
-            nameof(SetupTests),
-            nameof(RestoreTests),
-            nameof(BuildTests),
-            nameof(RunTests),
-            nameof(ValidateDependencies))]
-        public static BuildTargetResult Test(BuildTargetContext c) => c.Success();
+        public override bool Execute()
+        {
+            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<TestTargets>().CreateBuildContext();
+            BuildTargetContext c = new BuildTargetContext(context, null, null);
 
-        [Target(nameof(SetupTestPackages), nameof(SetupTestProjects))]
-        public static BuildTargetResult SetupTests(BuildTargetContext c) => c.Success();
-
-        [Target(nameof(RestoreTestAssetPackages), nameof(BuildTestAssetPackages))]
-        public static BuildTargetResult SetupTestPackages(BuildTargetContext c) => c.Success();
-
-        [Target(nameof(RestoreTestAssetProjects),
-            nameof(RestoreDesktopTestAssetProjects),
-            nameof(BuildTestAssetProjects),
-            nameof(BuildDesktopTestAssetProjects))]
-        public static BuildTargetResult SetupTestProjects(BuildTargetContext c) => c.Success();
+            return Test(c).Success;
+        }
 
         [Target]
+        public static BuildTargetResult Test(BuildTargetContext c)
+        {
+            PrepareTargets.Init(c);
+            SetupTests(c);
+            RestoreTests(c);
+            BuildTests(c);
+            RunTests(c);
+            ValidateDependencies(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult SetupTests(BuildTargetContext c)
+        {
+            SetupTestPackages(c);
+            SetupTestProjects(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult SetupTestPackages(BuildTargetContext c)
+        {
+            RestoreTestAssetPackages(c);
+            BuildTestAssetPackages(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult SetupTestProjects(BuildTargetContext c)
+        {
+            RestoreTestAssetProjects(c);
+            RestoreDesktopTestAssetProjects(c);
+            BuildTestAssetProjects(c);
+            BuildDesktopTestAssetProjects(c);
+
+            return c.Success();
+        }
+
         public static BuildTargetResult RestoreTestAssetPackages(BuildTargetContext c)
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
@@ -95,7 +121,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult RestoreTestAssetProjects(BuildTargetContext c)
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
@@ -127,24 +152,27 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult RestoreDesktopTestAssetProjects(BuildTargetContext c)
         {
-            var dotnet = DotNetCli.Stage2;
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                var dotnet = DotNetCli.Stage2;
 
-            dotnet.Restore("--verbosity", "verbose",
-                "--infer-runtimes",
-                "--fallbacksource", Dirs.TestPackages)
-                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
-                .Execute().EnsureSuccessful();
+                dotnet.Restore("--verbosity", "verbose",
+                    "--infer-runtimes",
+                    "--fallbacksource", Dirs.TestPackages)
+                    .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects"))
+                    .Execute().EnsureSuccessful();
+            }
 
             return c.Success();
         }
 
-        [Target(nameof(CleanTestPackages), nameof(CleanProductPackages))]
         public static BuildTargetResult BuildTestAssetPackages(BuildTargetContext c)
         {
+            CleanTestPackages(c);
+            CleanProductPackages(c);
+
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages"));
 
             var dotnet = DotNetCli.Stage2;
@@ -209,7 +237,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CleanProductPackages(BuildTargetContext c)
         {
             foreach (var packageName in PackageTargets.ProjectsToPack)
@@ -220,7 +247,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult CleanTestPackages(BuildTargetContext c)
         {
             foreach (var packageProject in TestPackageProjects.Projects.Where(p => p.IsApplicable && p.Clean))
@@ -234,7 +260,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult BuildTestAssetProjects(BuildTargetContext c)
         {
             var testAssetsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects");
@@ -244,18 +269,20 @@ namespace Microsoft.DotNet.Cli.Build
             return BuildTestAssets(c, testAssetsRoot, dotnet, framework);
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult BuildDesktopTestAssetProjects(BuildTargetContext c)
         {
-            var testAssetsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects");
-            var dotnet = DotNetCli.Stage2;
-            var framework = "net451";
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                var testAssetsRoot = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "DesktopTestProjects");
+                var dotnet = DotNetCli.Stage2;
+                var framework = "net451";
 
-            return BuildTestAssets(c, testAssetsRoot, dotnet, framework);
+                return BuildTestAssets(c, testAssetsRoot, dotnet, framework);
+            }
+
+            return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult RestoreTests(BuildTargetContext c)
         {
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
@@ -270,7 +297,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult BuildTests(BuildTargetContext c)
         {
             var dotnet = DotNetCli.Stage2;
@@ -288,10 +314,13 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(nameof(RunXUnitTests))]
-        public static BuildTargetResult RunTests(BuildTargetContext c) => c.Success();
+        public static BuildTargetResult RunTests(BuildTargetContext c)
+        {
+            RunXUnitTests(c);
 
-        [Target]
+            return c.Success();
+        }
+
         public static BuildTargetResult RunXUnitTests(BuildTargetContext c)
         {
             // Need to load up the VS Vars
@@ -335,7 +364,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult ValidateDependencies(BuildTargetContext c)
         {
             var configuration = c.BuildContext.Get<string>("Configuration");

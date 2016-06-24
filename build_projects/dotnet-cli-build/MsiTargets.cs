@@ -75,75 +75,78 @@ namespace Microsoft.DotNet.Cli.Build
             }
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult InitMsi(BuildTargetContext c)
         {
-            SdkBundle = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
-            SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
-            SdkEngine = GetEngineName(SdkBundle);
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                SdkBundle = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
+                SdkMsi = Path.ChangeExtension(SdkBundle, "msi");
+                SdkEngine = GetEngineName(SdkBundle);
 
-            SharedFrameworkMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), "msi");
-            HostFxrMsi = Path.ChangeExtension(c.BuildContext.Get<string>("HostFxrInstallerFile"), "msi");
-            SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
+                SharedFrameworkMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), "msi");
+                HostFxrMsi = Path.ChangeExtension(c.BuildContext.Get<string>("HostFxrInstallerFile"), "msi");
+                SharedHostMsi = Path.ChangeExtension(c.BuildContext.Get<string>("SharedHostInstallerFile"), "msi");
 
-            var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            MsiVersion = buildVersion.GenerateMsiVersion();
-            CliDisplayVersion = buildVersion.SimpleVersion;
-            CliNugetVersion = buildVersion.NuGetVersion;
+                var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
+                MsiVersion = buildVersion.GenerateMsiVersion();
+                CliDisplayVersion = buildVersion.SimpleVersion;
+                CliNugetVersion = buildVersion.NuGetVersion;
 
-            AcquireWix(c);
+                AcquireWix(c);
+            }
+
             return c.Success();
         }
-
-        [Target(nameof(MsiTargets.InitMsi),
-        nameof(GenerateCliSdkMsi))]
-        [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateMsis(BuildTargetContext c)
+        public static BuildTargetResult GenerateMsisAndBundles(BuildTargetContext c)
         {
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                InitMsi(c);
+                GenerateCliSdkMsi(c);
+                GenerateCliSdkBundle(c);
+            }
+
             return c.Success();
         }
 
-        [Target(nameof(MsiTargets.InitMsi),
-        nameof(GenerateCliSdkBundle))]
-        [BuildPlatforms(BuildPlatform.Windows)]
-        public static BuildTargetResult GenerateBundles(BuildTargetContext c)
-        {
-            return c.Success();
-        }
-
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateCliSdkMsi(BuildTargetContext c)
         {
-            var cliSdkRoot = c.BuildContext.Get<string>("CLISDKRoot");
-            var upgradeCode = Utils.GenerateGuidFromName(SdkMsi).ToString().ToUpper();
-            var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                var cliSdkRoot = c.BuildContext.Get<string>("CLISDKRoot");
+                var upgradeCode = Utils.GenerateGuidFromName(SdkMsi).ToString().ToUpper();
+                var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
 
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatemsi.ps1"),
-                cliSdkRoot, SdkMsi, WixRoot, cliSdkBrandName, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
-                    .Execute()
-                    .EnsureSuccessful();
+                Cmd("powershell", "-NoProfile", "-NoLogo",
+                    Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatemsi.ps1"),
+                    cliSdkRoot, SdkMsi, WixRoot, cliSdkBrandName, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
+                        .Execute()
+                        .EnsureSuccessful();
+            }
+
             return c.Success();
         }
 
-        [Target(nameof(MsiTargets.InitMsi))]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateCliSdkBundle(BuildTargetContext c)
         {
-            var upgradeCode = Utils.GenerateGuidFromName(SdkBundle).ToString().ToUpper();
-            var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                var upgradeCode = Utils.GenerateGuidFromName(SdkBundle).ToString().ToUpper();
+                var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
 
-            Cmd("powershell", "-NoProfile", "-NoLogo",
-                Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),
-                SdkMsi, SharedFrameworkMsi, HostFxrMsi, SharedHostMsi, SdkBundle, WixRoot, cliSdkBrandName, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
-                    .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
-                    .Execute()
-                    .EnsureSuccessful();
+                Cmd("powershell", "-NoProfile", "-NoLogo",
+                    Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),
+                    SdkMsi, SharedFrameworkMsi, HostFxrMsi, SharedHostMsi, SdkBundle, WixRoot, cliSdkBrandName, MsiVersion, CliDisplayVersion, CliNugetVersion, upgradeCode, Arch)
+                        .EnvironmentVariable("Stage2Dir", Dirs.Stage2)
+                        .Execute()
+                        .EnsureSuccessful();
+            }
+
             return c.Success();
         }
 
+        // TODO: The following "Engine" tasks need to be separate MSBuild targets so the Windows
+        // VSO build can invoke them directly for signing.
         [Target(nameof(MsiTargets.InitMsi))]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult ExtractEngineFromBundle(BuildTargetContext c)

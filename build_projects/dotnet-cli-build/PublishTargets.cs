@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public static class PublishTargets
+    public class PublishTargets : Task
     {
         private static AzurePublisher AzurePublisherTool { get; set; }
 
@@ -21,7 +22,14 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string SharedFrameworkNugetVersion { get; set; }
 
-        [Target]
+        public override bool Execute()
+        {
+            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<PublishTargets>().CreateBuildContext();
+            BuildTargetContext c = new BuildTargetContext(context, null, null);
+
+            return Publish(c).Success;
+        }
+
         public static BuildTargetResult InitPublish(BuildTargetContext c)
         {
             AzurePublisherTool = new AzurePublisher();
@@ -35,18 +43,21 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target(
-            nameof(PrepareTargets.Init),
-            nameof(PublishTargets.InitPublish),
-            nameof(PublishTargets.PublishArtifacts),
-            nameof(PublishTargets.FinalizeBuild))]
-        [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
+        [Target]
         public static BuildTargetResult Publish(BuildTargetContext c)
         {
+            if (EnvVars.GetBool("PUBLISH_TO_AZURE_BLOB")) // This is set by CI systems
+            {
+                PrepareTargets.Init(c);
+
+                InitPublish(c);
+                PublishArtifacts(c);
+                FinalizeBuild(c);
+            }
+
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult FinalizeBuild(BuildTargetContext c)
         {
             if (CheckIfAllBuildsHavePublished())
@@ -148,33 +159,43 @@ namespace Microsoft.DotNet.Cli.Build
             return badges.Values.All(v => v);
         }
 
-        [Target(
-            nameof(PublishTargets.PublishInstallerFilesToAzure),
-            nameof(PublishTargets.PublishArchivesToAzure),
-            nameof(PublishTargets.PublishDebFilesToDebianRepo),
-            nameof(PublishTargets.PublishCliVersionBadge))]
-        public static BuildTargetResult PublishArtifacts(BuildTargetContext c) => c.Success();
-
-        [Target(
-            nameof(PublishTargets.PublishSdkInstallerFileToAzure),
-            nameof(PublishTargets.PublishCombinedFrameworkSDKHostInstallerFileToAzure))]
-        public static BuildTargetResult PublishInstallerFilesToAzure(BuildTargetContext c) => c.Success();
-
-        [Target(
-            nameof(PublishTargets.PublishCombinedHostFrameworkSdkArchiveToAzure),
-            nameof(PublishTargets.PublishCombinedFrameworkSDKArchiveToAzure),
-            nameof(PublishTargets.PublishSDKSymbolsArchiveToAzure))]
-        public static BuildTargetResult PublishArchivesToAzure(BuildTargetContext c) => c.Success();
-
-        [Target(
-            nameof(PublishSdkDebToDebianRepo))]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
-        public static BuildTargetResult PublishDebFilesToDebianRepo(BuildTargetContext c)
+        public static BuildTargetResult PublishArtifacts(BuildTargetContext c)
         {
+            PublishInstallerFilesToAzure(c);
+            PublishArchivesToAzure(c);
+            PublishDebFilesToDebianRepo(c);
+            PublishCliVersionBadge(c);
+
             return c.Success();
         }
 
-        [Target]
+        public static BuildTargetResult PublishInstallerFilesToAzure(BuildTargetContext c)
+        {
+            PublishSdkInstallerFileToAzure(c);
+            PublishCombinedFrameworkSDKHostInstallerFileToAzure(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult PublishArchivesToAzure(BuildTargetContext c)
+        {
+            PublishCombinedHostFrameworkSdkArchiveToAzure(c);
+            PublishCombinedFrameworkSDKArchiveToAzure(c);
+            PublishSDKSymbolsArchiveToAzure(c);
+
+            return c.Success();
+        }
+
+        public static BuildTargetResult PublishDebFilesToDebianRepo(BuildTargetContext c)
+        {
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu))
+            {
+                PublishSdkDebToDebianRepo(c);
+            }
+
+            return c.Success();
+        }
+
         public static BuildTargetResult PublishCliVersionBadge(BuildTargetContext c)
         {
             var versionBadge = c.BuildContext.Get<string>("VersionBadge");
@@ -183,37 +204,39 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSdkInstallerFileToAzure(BuildTargetContext c)
         {
-            var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
-            UploadFile(installerFile);
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu))
+            {
+                var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
+                UploadFile(installerFile);
+            }
 
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows, BuildPlatform.OSX)]
         public static BuildTargetResult PublishCombinedFrameworkSDKHostInstallerFileToAzure(BuildTargetContext c)
         {
-            var installerFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
-            UploadFile(installerFile);
+            if (CurrentPlatform.IsAnyPlatform(BuildPlatform.Windows, BuildPlatform.OSX))
+            {
+                var installerFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostInstallerFile");
+                UploadFile(installerFile);
+            }
 
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult PublishCombinedFrameworkSDKArchiveToAzure(BuildTargetContext c)
         {
-            var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKCompressedFile");
-            UploadFile(archiveFile);
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            {
+                var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKCompressedFile");
+                UploadFile(archiveFile);
+            }
 
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult PublishCombinedHostFrameworkSdkArchiveToAzure(BuildTargetContext c)
         {
             var archiveFile = c.BuildContext.Get<string>("CombinedFrameworkSDKHostCompressedFile");
@@ -222,7 +245,6 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
         public static BuildTargetResult PublishSDKSymbolsArchiveToAzure(BuildTargetContext c)
         {
             var archiveFile = c.BuildContext.Get<string>("SdkSymbolsCompressedFile");
@@ -231,20 +253,21 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        [Target]
-        [BuildPlatforms(BuildPlatform.Ubuntu)]
         public static BuildTargetResult PublishSdkDebToDebianRepo(BuildTargetContext c)
         {
-            var version = CliNuGetVersion;
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu))
+            {
+                var version = CliNuGetVersion;
 
-            var packageName = CliMonikers.GetSdkDebianPackageName(c);
-            var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
-            var uploadUrl = AzurePublisher.CalculateFullUrlForFile(installerFile, AzurePublisher.Product.Sdk, version);
+                var packageName = CliMonikers.GetSdkDebianPackageName(c);
+                var installerFile = c.BuildContext.Get<string>("SdkInstallerFile");
+                var uploadUrl = AzurePublisher.CalculateFullUrlForFile(installerFile, AzurePublisher.Product.Sdk, version);
 
-            DebRepoPublisherTool.PublishDebFileToDebianRepo(
-                packageName,
-                version,
-                uploadUrl);
+                DebRepoPublisherTool.PublishDebFileToDebianRepo(
+                    packageName,
+                    version,
+                    uploadUrl);
+            }
 
             return c.Success();
         }

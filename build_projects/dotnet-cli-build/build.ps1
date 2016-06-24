@@ -8,22 +8,8 @@ param(
     [string[]]$Targets=@("Default"),
     [string]$Architecture="x64",
     [switch]$NoPackage,
+    [switch]$NoRun,
     [switch]$Help)
-
-function RemoveDirectory([string] $path)
-{
-    if (Test-Path $path) 
-    {
-        Remove-Item $path -Recurse -Force
-    }
-}
-
-function CleanNuGet()
-{
-    RemoveDirectory($env:LocalAppData + "\NuGet\Cache")
-    RemoveDirectory($env:LocalAppData + "\NuGet\v3-cache")
-    RemoveDirectory($env:NUGET_PACKAGES)
-}
 
 if($Help)
 {
@@ -34,6 +20,7 @@ if($Help)
     Write-Host "  -Targets <TARGETS...>              Comma separated build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
     Write-Host "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
     Write-Host "  -NoPackage                         Skip packaging targets"
+    Write-Host "  -NoRun                             Skip running the build"
     Write-Host "  -Help                              Display this help message"
     exit 0
 }
@@ -79,9 +66,6 @@ if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
-# Ensure clean package folder and caches
-CleanNuGet
-
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
@@ -97,8 +81,11 @@ Write-Host "Compiling Build Scripts..."
 dotnet publish "$PSScriptRoot" -o "$PSScriptRoot\bin" --framework netcoreapp1.0
 if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
 
-# Run the builder
-Write-Host "Invoking Build Scripts..."
-Write-Host " Configuration: $env:CONFIGURATION"
-& "$PSScriptRoot\bin\dotnet-cli-build.exe" @Targets
-if($LASTEXITCODE -ne 0) { throw "Build failed" }
+if(!$NoRun)
+{
+    # Run the builder
+    Write-Host "Invoking Build Scripts..."
+    Write-Host " Configuration: $env:CONFIGURATION"
+    & "$PSScriptRoot\bin\dotnet-cli-build.exe" @Targets
+    if($LASTEXITCODE -ne 0) { throw "Build failed" }
+}

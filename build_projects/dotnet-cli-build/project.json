@@ -2,7 +2,15 @@
   "version": "1.0.0-*",
   "description": "Build scripts for dotnet-cli",
   "buildOptions": {
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "allowUnsafe": true,
+    "compile": [
+      "../Microsoft.DotNet.Cli.Build.Framework/**/*.cs",
+      "../shared-build-targets-utils/**/*.cs",
+      "../../src/Microsoft.DotNet.InternalAbstractions/RuntimeEnvironment.cs",
+      "../../src/Microsoft.DotNet.InternalAbstractions/Platform.cs",
+      "../../src/Microsoft.DotNet.InternalAbstractions/Native/*.cs"
+    ]
   },
   "dependencies": {
     "NETStandard.Library": "1.6.0",
@@ -14,12 +22,8 @@
     "System.Xml.XmlSerializer": "4.0.11",
     "WindowsAzure.Storage": "6.2.2-preview",
     "NuGet.CommandLine.XPlat": "3.5.0-beta2-1484",
-    "Microsoft.DotNet.Cli.Build.Framework": {
-      "target": "project"
-    },
-    "shared-build-targets-utils": {
-      "target": "project"
-    }
+    "Microsoft.Build.Framework": "0.1.0-preview-00024-160610",
+    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00024-160610"
   },
   "frameworks": {
     "netcoreapp1.0": {

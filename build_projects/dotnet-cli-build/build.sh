@@ -32,6 +32,9 @@ while [[ $# > 0 ]]; do
         --nopackage)
             export DOTNET_BUILD_SKIP_PACKAGING=1
             ;;
+        --norun)
+            export DOTNET_BUILD_SKIP_RUN=1
+            ;;
         --skip-prereqs)
             # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
             export DOTNET_INSTALL_SKIP_PREREQS=1
@@ -44,6 +47,7 @@ while [[ $# > 0 ]]; do
             echo "  --targets <TARGETS...>              Comma separated build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
             echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --nopackage                         Skip packaging targets"
+            echo "  --norun                             Skip running the build"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --help                              Display this help message"
             exit 0
@@ -100,11 +104,6 @@ then
     ulimit -n 1024
 fi
 
-# Clean old NuGet packages
-rm -rf "$HOME/.local/share/NuGet/Cache"
-rm -rf "$HOME/.local/share/NuGet/v3-cache"
-rm -rf "$NUGET_PACKAGES"
-
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
@@ -119,10 +118,13 @@ echo "Restoring Build Script projects..."
 echo "Compiling Build Scripts..."
 dotnet publish "$DIR" -o "$DIR/bin" --framework netcoreapp1.0
 
-export PATH="$OLDPATH"
-# Run the builder
-echo "Invoking Build Scripts..."
-echo "Configuration: $CONFIGURATION"
+if [-z "$DOTNET_BUILD_SKIP_RUN" ]
+then
+	export PATH="$OLDPATH"
+	# Run the builder
+	echo "Invoking Build Scripts..."
+	echo "Configuration: $CONFIGURATION"
+fi
 
 $DIR/bin/dotnet-cli-build ${targets[@]}
 exit $?

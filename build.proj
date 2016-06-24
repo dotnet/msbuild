@@ -11,39 +11,44 @@
     <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
     <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
 
-    <PlatformExeExtension Condition=" '$(OS)' == 'Windows_NT' ">.exe</PlatformExeExtension>
-    <PlatformExeExtension Condition=" '$(OS)' != 'Windows_NT' "></PlatformExeExtension>
+    <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
+    <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
 
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
+    <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
+    <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
   </PropertyGroup>
 
   <Target Name="BuildDotnetCliBuildFramework" Inputs="" Outputs="">
-    <Exec Command="$(PlatformScriptHost) $(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/build$(PlatformScriptExtension)" WorkingDirectory="$(MSBuildThisFileDirectory)"/>
-    <PropertyGroup>
-      <CliBuildFrameworkExe>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build$(PlatformExeExtension)</CliBuildFrameworkExe>
-    </PropertyGroup>
+    <Exec Command="$(PlatformScriptHost) $(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/build$(PlatformScriptExtension) $(NoRunArg)" WorkingDirectory="$(MSBuildThisFileDirectory)"/>
   </Target>
 
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework;$(CLITargets)" Name="BuildTheWholeCli"></Target>
+  <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
+
+  <UsingTask TaskName="PrepareTargets" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="CompileTargets" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="TestTargets" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="PackageTargets" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
-    <Exec Command="$(CliBuildFrameworkExe) Prepare" WorkingDirectory="$(MSBuildThisFileDirectory)"/>
+    <PrepareTargets />
   </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Compile">
-    <Exec Command="$(CliBuildFrameworkExe) Compile" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <CompileTargets />
   </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Test">
-    <Exec Command="$(CliBuildFrameworkExe) Test" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <TestTargets />
   </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Package">
-    <Exec Command="$(CliBuildFrameworkExe) Package" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <PackageTargets />
   </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Publish">
-    <Exec Command="$(CliBuildFrameworkExe) Publish" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <PublishTargets />
   </Target>
 
 </Project>

@@ -4,19 +4,19 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class InstallerTargets
     {
-        [Target(nameof(MsiTargets.GenerateMsis),
-        nameof(MsiTargets.GenerateBundles),
-        nameof(PkgTargets.GeneratePkgs),
-        nameof(DebTargets.GenerateDebs))]
         public static BuildTargetResult GenerateInstaller(BuildTargetContext c)
         {
+            MsiTargets.GenerateMsisAndBundles(c);
+            PkgTargets.GeneratePkgs(c);
+            DebTargets.GenerateDebs(c);
+
             return c.Success();
         }
 
-        [Target(nameof(DebTargets.TestDebInstaller))]
         public static BuildTargetResult TestInstaller(BuildTargetContext c)
-
         {
+            DebTargets.TestDebInstaller(c);
+
             return c.Success();
         }
     }
