@@ -50,8 +50,9 @@
     <StartAction>Program</StartAction>
   </PropertyGroup>
 
+  <!-- TODO: re-enable Versioning https://github.com/Microsoft/msbuild/issues/694
   <Import Project="$(ToolPackagesDir)\Nerdbank.GitVersioning\1.4.19\build\dotnet\Nerdbank.GitVersioning.targets"
-          Condition="'$(MSBuildRuntimeType)' != 'Core'" />
+          Condition="'$(MSBuildRuntimeType)' != 'Core'" /> -->
 
   <!-- Restore packages -->
   <PropertyGroup>
