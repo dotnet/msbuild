@@ -36,7 +36,6 @@
         "System.Diagnostics.FileVersionInfo": "4.0.0",
         "System.Diagnostics.Process": "4.1.0",
         "System.Diagnostics.TraceSource": "4.0.0",
-        "System.Linq.Expressions": "4.1.0",
         "System.Resources.Reader": "4.0.0",
         "System.Resources.Writer": "4.0.0",
         "System.Reflection": "4.1.0",
@@ -55,7 +54,12 @@
         "Microsoft.Portable.Targets": "0.1.1-dev",
         "Microsoft.Win32.Primitives": "4.0.1",
         "Newtonsoft.Json": "8.0.3",
-        "xunit.console.netcore": "1.0.3-prerelease-00524-01"
+        "xunit.console.netcore": "1.0.3-prerelease-00524-01",
+
+        "System.Net.Http": "4.1.0-rc3-24109-00",
+        "System.Text.RegularExpressions": "4.1.0-rc3-24109-00",
+        "System.Linq": "4.1.0-rc3-24109-00",
+        "System.Linq.Expressions": "4.1.0-rc3-24109-00"
       },
       "imports": [
         "portable-net451+win81",
