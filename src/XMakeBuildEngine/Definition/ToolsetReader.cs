@@ -201,32 +201,34 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // Other toolsets are installed in the xbuild directory
-                        var xbuildToolsetsDir = Path.Combine(libraryPath, "xbuild");
-                        var r = new Regex(xbuildToolsetsDir + Path.DirectorySeparatorChar + @"\d+\.\d+");
-                        foreach (var d in Directory.GetDirectories(xbuildToolsetsDir).Where(d => r.IsMatch(d)))
+                        var xbuildToolsetsDir = Path.Combine(libraryPath, $"xbuild{Path.DirectorySeparatorChar}");
+                        if (Directory.Exists(xbuildToolsetsDir))
                         {
-                            var version = Path.GetFileName(d);
-                            var binPath = Path.Combine(d, "bin");
-                            if (version != null && !toolsets.ContainsKey(version))
+                            var r = new Regex(Regex.Escape(xbuildToolsetsDir) + @"\d+\.\d+");
+                            foreach (var d in Directory.GetDirectories(xbuildToolsetsDir).Where(d => r.IsMatch(d)))
                             {
-                                // Create standard properties. On Mono they are well known
-                                PropertyDictionary<ProjectPropertyInstance> buildProperties =
-                                    CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
+                                var version = Path.GetFileName(d);
+                                var binPath = Path.Combine(d, "bin");
+                                if (version != null && !toolsets.ContainsKey(version))
+                                {
+                                    // Create standard properties. On Mono they are well known
+                                    PropertyDictionary<ProjectPropertyInstance> buildProperties =
+                                        CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
 
-                                toolsets.Add(
-                                    version,
-                                    new Toolset(
+                                    toolsets.Add(
                                         version,
-                                        binPath,
-                                        buildProperties,
-                                        environmentProperties,
-                                        globalProperties,
-                                        null,
-                                        currentDir,
-                                        string.Empty));
+                                        new Toolset(
+                                            version,
+                                            binPath,
+                                            buildProperties,
+                                            environmentProperties,
+                                            globalProperties,
+                                            null,
+                                            currentDir,
+                                            string.Empty));
+                                }
                             }
                         }
-
                         if (!toolsets.ContainsKey(MSBuildConstants.CurrentToolsVersion))
                         {
                             toolsets.Add(
