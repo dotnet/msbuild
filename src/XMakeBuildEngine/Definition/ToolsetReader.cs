@@ -209,7 +209,7 @@ namespace Microsoft.Build.Evaluation
                             {
                                 var version = Path.GetFileName(d);
                                 var binPath = Path.Combine(d, "bin");
-                                if (version != null && !toolsets.ContainsKey(version))
+                                if (!toolsets.ContainsKey(version))
                                 {
                                     // Create standard properties. On Mono they are well known
                                     PropertyDictionary<ProjectPropertyInstance> buildProperties =
