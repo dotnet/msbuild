@@ -157,16 +157,17 @@ namespace Microsoft.Build.Evaluation
             {
 #if FEATURE_WIN32_REGISTRY
                 if (NativeMethodsShared.IsWindows || registryReader != null)
-                // If we haven't been provided a registry reader (i.e. unit tests), create one
-                registryReader = registryReader ?? new ToolsetRegistryReader(environmentProperties, globalProperties);
+                {
+                    // If we haven't been provided a registry reader (i.e. unit tests), create one
+                    registryReader = registryReader ?? new ToolsetRegistryReader(environmentProperties, globalProperties);
 
-                // We do not accumulate properties when reading them from the registry, because the order
-                // in which values are returned to us is essentially random: so we disallow one property
-                // in the registry to refer to another also in the registry
-                defaultToolsVersionFromRegistry = registryReader.ReadToolsets(toolsets, globalProperties,
-                    initialProperties, false /* do not accumulate properties */, out overrideTasksPathFromRegistry,
-                    out defaultOverrideToolsVersionFromRegistry);
-            }
+                    // We do not accumulate properties when reading them from the registry, because the order
+                    // in which values are returned to us is essentially random: so we disallow one property
+                    // in the registry to refer to another also in the registry
+                    defaultToolsVersionFromRegistry = registryReader.ReadToolsets(toolsets, globalProperties,
+                        initialProperties, false /* do not accumulate properties */, out overrideTasksPathFromRegistry,
+                        out defaultOverrideToolsVersionFromRegistry);
+                }
                 else
 #endif
                 {
