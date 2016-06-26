@@ -229,18 +229,18 @@ namespace Microsoft.Build.Evaluation
                                 }
                             }
                         }
-                        if (!toolsets.ContainsKey(MSBuildConstants.CurrentToolsVersion))
-                        {
-                            toolsets.Add(
+                    }
+                    if (!toolsets.ContainsKey(MSBuildConstants.CurrentToolsVersion))
+                    {
+                        toolsets.Add(
+                            MSBuildConstants.CurrentToolsVersion,
+                            new Toolset(
                                 MSBuildConstants.CurrentToolsVersion,
-                                new Toolset(
-                                    MSBuildConstants.CurrentToolsVersion,
-                                    currentDir,
-                                    props,
-                                    new PropertyDictionary<ProjectPropertyInstance>(),
-                                    currentDir,
-                                    string.Empty));
-                        }
+                                currentDir,
+                                props,
+                                new PropertyDictionary<ProjectPropertyInstance>(),
+                                currentDir,
+                                string.Empty));
                     }
                 }
             }
