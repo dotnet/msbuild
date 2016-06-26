@@ -117,7 +117,7 @@ namespace Microsoft.Build.Evaluation
             ToolsetDefinitionLocations locations
             )
         {
-            PropertyDictionary<ProjectPropertyInstance> initialProperties =
+            var initialProperties =
                 new PropertyDictionary<ProjectPropertyInstance>(environmentProperties);
 
             initialProperties.ImportProperties(globalProperties);
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Evaluation
                         if (v4Dir != null && !toolsets.ContainsKey("4.0"))
                         {
                             // Create standard properties. On Mono they are well known
-                            PropertyDictionary<ProjectPropertyInstance> buildProperties =
+                            var buildProperties =
                                 CreateStandardProperties(globalProperties, "4.0", libraryPath, v4Dir);
 
                             toolsets.Add(
@@ -209,24 +209,25 @@ namespace Microsoft.Build.Evaluation
                             {
                                 var version = Path.GetFileName(d);
                                 var binPath = Path.Combine(d, "bin");
-                                if (!toolsets.ContainsKey(version))
+                                if (toolsets.ContainsKey(version))
                                 {
-                                    // Create standard properties. On Mono they are well known
-                                    PropertyDictionary<ProjectPropertyInstance> buildProperties =
-                                        CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
-
-                                    toolsets.Add(
-                                        version,
-                                        new Toolset(
-                                            version,
-                                            binPath,
-                                            buildProperties,
-                                            environmentProperties,
-                                            globalProperties,
-                                            null,
-                                            currentDir,
-                                            string.Empty));
+                                    continue;
                                 }
+                                // Create standard properties. On Mono they are well known
+                                var buildProperties =
+                                    CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
+
+                                toolsets.Add(
+                                    version,
+                                    new Toolset(
+                                        version,
+                                        binPath,
+                                        buildProperties,
+                                        environmentProperties,
+                                        globalProperties,
+                                        null,
+                                        currentDir,
+                                        string.Empty));
                             }
                         }
                     }
@@ -254,7 +255,7 @@ namespace Microsoft.Build.Evaluation
             if (((locations & ToolsetDefinitionLocations.Registry) != 0) && !toolsets.ContainsKey("2.0")
                 && FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
-                Toolset synthetic20Toolset = new Toolset(
+                var synthetic20Toolset = new Toolset(
                     "2.0",
                     FrameworkLocationHelper.PathToDotNetFrameworkV20,
                     environmentProperties,
@@ -284,61 +285,64 @@ namespace Microsoft.Build.Evaluation
             // We'll use the path from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a override in which case we'll just return null.
-            string overrideTasksPath = overrideTasksPathFromConfiguration ?? overrideTasksPathFromRegistry ?? overrideTasksPathFromLocal;
+            var overrideTasksPath = overrideTasksPathFromConfiguration ?? overrideTasksPathFromRegistry ?? overrideTasksPathFromLocal;
 
             // We'll use the path from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a override in which case we'll just return null.
-            string defaultOverrideToolsVersion = defaultOverrideToolsVersionFromConfiguration
+            var defaultOverrideToolsVersion = defaultOverrideToolsVersionFromConfiguration
                                                  ?? defaultOverrideToolsVersionFromRegistry
                                                  ?? defaultOverrideToolsVersionFromLocal;
 
             // We'll use the default from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a default, in which case we'll just return null.
-            string defaultToolsVersion = defaultToolsVersionFromConfiguration ?? defaultToolsVersionFromRegistry ?? defaultToolsVersionFromLocal;
+            var defaultToolsVersion = defaultToolsVersionFromConfiguration ?? defaultToolsVersionFromRegistry ?? defaultToolsVersionFromLocal;
 
             // If we got a default version from the registry or config file, and it
             // actually exists, fine.
             // Otherwise we have to come up with one.
-            if (defaultToolsVersion == null || !toolsets.ContainsKey(defaultToolsVersion))
+            if (defaultToolsVersion != null && toolsets.ContainsKey(defaultToolsVersion))
             {
-                // We're going to choose a hard coded default tools version of 2.0.
-                defaultToolsVersion = Constants.defaultToolsVersion;
-
-                // But don't overwrite any existing tools path for this default we're choosing.
-                if (!toolsets.ContainsKey(Constants.defaultToolsVersion))
-                {
-                    // There's no tools path already for 2.0, so use the path to the v2.0 .NET Framework.
-                    // If an old-fashioned caller sets BinPath property, or passed a BinPath to the constructor,
-                    // that will overwrite what we're setting here.
-                    ErrorUtilities.VerifyThrow(
-                        Constants.defaultToolsVersion == "2.0",
-                        "Getting 2.0 FX path so default should be 2.0");
-                    string pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV20;
-
-                    // We could not find the default toolsversion because it was not installed on the machine. Fallback to the 
-                    // one we expect to always be there when running msbuild 4.0.
-                    if (pathToFramework == null)
-                    {
-                        pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV40;
-                        defaultToolsVersion = Constants.defaultFallbackToolsVersion;
-                    }
-
-                    // Again don't overwrite any existing tools path for this default we're choosing.
-                    if (!toolsets.ContainsKey(defaultToolsVersion))
-                    {
-                        Toolset defaultToolset = new Toolset(
-                            defaultToolsVersion,
-                            pathToFramework,
-                            environmentProperties,
-                            globalProperties,
-                            overrideTasksPath,
-                            defaultOverrideToolsVersion);
-                        toolsets.Add(defaultToolsVersion, defaultToolset);
-                    }
-                }
+                return defaultToolsVersion;
             }
+            // We're going to choose a hard coded default tools version of 2.0.
+            defaultToolsVersion = Constants.defaultToolsVersion;
+
+            // But don't overwrite any existing tools path for this default we're choosing.
+            if (toolsets.ContainsKey(Constants.defaultToolsVersion))
+            {
+                return defaultToolsVersion;
+            }
+            // There's no tools path already for 2.0, so use the path to the v2.0 .NET Framework.
+            // If an old-fashioned caller sets BinPath property, or passed a BinPath to the constructor,
+            // that will overwrite what we're setting here.
+            ErrorUtilities.VerifyThrow(
+                Constants.defaultToolsVersion == "2.0",
+                "Getting 2.0 FX path so default should be 2.0");
+            var pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV20;
+
+            // We could not find the default toolsversion because it was not installed on the machine. Fallback to the
+            // one we expect to always be there when running msbuild 4.0.
+            if (pathToFramework == null)
+            {
+                pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV40;
+                defaultToolsVersion = Constants.defaultFallbackToolsVersion;
+            }
+
+            // Again don't overwrite any existing tools path for this default we're choosing.
+            if (toolsets.ContainsKey(defaultToolsVersion))
+            {
+                return defaultToolsVersion;
+            }
+            var defaultToolset = new Toolset(
+                defaultToolsVersion,
+                pathToFramework,
+                environmentProperties,
+                globalProperties,
+                overrideTasksPath,
+                defaultOverrideToolsVersion);
+            toolsets.Add(defaultToolsVersion, defaultToolset);
 
             return defaultToolsVersion;
         }
