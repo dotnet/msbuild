@@ -16,8 +16,7 @@
         "System.Console": "4.0.0",
         "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
         "Microsoft.NETCore.TestHost": "1.0.0",
-        "Microsoft.Win32.Primitives": "4.0.1",
-        "xunit.console.netcore": "1.0.2-prerelease-00410-02"
+        "Microsoft.Win32.Primitives": "4.0.1"
       },
       "imports": [ "portable-net451+win81", "dnxcore50" ]
     }
