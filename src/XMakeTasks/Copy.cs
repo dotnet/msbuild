@@ -309,7 +309,7 @@ namespace Microsoft.Build.Tasks
 
             bool linkCreated = false;
 
-            //first check if create hard or symbolic link option is choosen. If booth then return an error
+            //First check if create hard or symbolic link option is selected. If both then return an error
             if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
             {
                 Log.LogError("It can only be one value selected");
