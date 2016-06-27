@@ -185,13 +185,8 @@ namespace Microsoft.Build.Tasks
                         success = false;
                     }
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
                     Log.LogErrorWithCodeFromResources("Move.Error", sourceFile, destinationFile, e.Message);
                     success = false;
 

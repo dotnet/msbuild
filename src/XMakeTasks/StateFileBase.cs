@@ -141,13 +141,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                // If there was a problem deleting the file (like it's read-only or locked on disk, for
-                // example), then eat the exception and log a warning.  Otherwise, rethrow.
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 log.LogWarningWithCodeFromResources("General.CouldNotDeleteStateFile", stateFile, e.Message);
             }
         }

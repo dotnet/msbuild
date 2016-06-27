@@ -133,10 +133,8 @@ namespace Microsoft.Build.Tasks
                 }
                 unauthorizedAccess = true;
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
                 Log.LogErrorWithCodeFromResources("RemoveDir.Error", directory.ItemSpec, e.Message);
                 success = false;
             }
@@ -173,10 +171,8 @@ namespace Microsoft.Build.Tasks
                     success = RemoveReadOnlyAttributeRecursively(folder);
                 }
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
                 Log.LogErrorWithCodeFromResources("RemoveDir.Error", directory, e.Message);
                 success = false;
             }

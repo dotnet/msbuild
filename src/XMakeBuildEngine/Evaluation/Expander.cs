@@ -2054,13 +2054,8 @@ namespace Microsoft.Build.Evaluation
 
                                 directoryName = Path.GetDirectoryName(rootedPath);
                             }
-                            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
-                                if (ExceptionHandling.NotExpectedException(e))
-                                {
-                                    throw;
-                                }
-
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Item1, e.Message);
                             }
 

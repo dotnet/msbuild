@@ -873,19 +873,12 @@ namespace Microsoft.Build.BackEnd
                             TraceEngine("Memory usage now at {0}", memoryInUse);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                        {
-                            throw;
-                        }
-                        else
-                        {
-                            _nodeLoggingContext.LogFatalBuildError(
-                                new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation),
-                                e);
-                            throw new BuildAbortedException(e.Message, e);
-                        }
+                        _nodeLoggingContext.LogFatalBuildError(
+                            new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation),
+                            e);
+                        throw new BuildAbortedException(e.Message, e);
                     }
                 }
             }

@@ -45,11 +45,8 @@ namespace Microsoft.Build.Tasks
 
                 throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 int lineNumber = 0;
                 int linePosition = 0;
 
@@ -63,7 +60,7 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                if (reader != null) reader.Dispose();
+                reader?.Dispose();
             }
         }
 

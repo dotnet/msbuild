@@ -190,10 +190,8 @@ namespace Microsoft.Build.Tasks
                 {
                 }
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
                 Log.LogErrorWithCodeFromResources("Touch.CannotCreateFile", file, e.Message);
                 return false;
             }
@@ -261,10 +259,8 @@ namespace Microsoft.Build.Tasks
                         fileSetAttributes(file, faNew);
                         needToRestoreAttributes = true;
                     }
-                    catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                            throw;
                         Log.LogErrorWithCodeFromResources("Touch.CannotMakeFileWritable", file, e.Message);
                         return false;
                     }
@@ -278,10 +274,8 @@ namespace Microsoft.Build.Tasks
                 fileSetLastAccessTime(file, dt);
                 fileSetLastWriteTime(file, dt);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
                 Log.LogErrorWithCodeFromResources("Touch.CannotTouch", file, e.Message);
                 return false;
             }
@@ -295,10 +289,8 @@ namespace Microsoft.Build.Tasks
                     {
                         fileSetAttributes(file, faOriginal);
                     }
-                    catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                            throw;
                         Log.LogErrorWithCodeFromResources("Touch.CannotRestoreAttributes", file, e.Message);
                         retVal = false;
                     }

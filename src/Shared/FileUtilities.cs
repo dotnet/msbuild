@@ -711,14 +711,8 @@ namespace Microsoft.Build.Shared
             {
                 path = NormalizePath(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
 
             return path;
@@ -733,14 +727,8 @@ namespace Microsoft.Build.Shared
             {
                 File.Delete(FixFilePath(path));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
         }
 
@@ -779,14 +767,8 @@ namespace Microsoft.Build.Shared
                         break;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
-                    }
-
-                    // Otherwise eat it.
                 }
 
                 if (i + 1 < retryCount) // should not wait for the final iteration since we not gonna check anyway
@@ -819,14 +801,8 @@ namespace Microsoft.Build.Shared
             {
                 result = Path.IsPathRooted(FixFilePath(path));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
                 result = false;
             }
 
@@ -853,11 +829,8 @@ namespace Microsoft.Build.Shared
             {
                 fileInfo = new FileInfo(filePath);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 // Invalid or inaccessible path: treat as if nonexistent file, just as File.Exists does
                 return null;
             }

@@ -923,13 +923,8 @@ namespace Microsoft.Build.Shared
                 path = Path.GetFullPath(path);
                 return path;
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.ThrowInvalidOperation("FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory", targetFrameworkRootPath, frameworkName.ToString(), e.Message);
                 // The compiler does not see the massage above an as exception;
                 return null;

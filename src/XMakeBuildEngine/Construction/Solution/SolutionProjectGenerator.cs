@@ -1353,47 +1353,44 @@ namespace Microsoft.Build.Construction
                     {
                         newTask.SetParameter
                             (
-                             "ToolPath",
-                             FrameworkLocationHelper.GetPathToDotNetFramework(_version40)
+                                "ToolPath",
+                                FrameworkLocationHelper.GetPathToDotNetFramework(_version40)
                             );
 
                         if (targetFramework.Version > _version40)
                         {
-                            _loggingService.LogComment(_projectBuildEventContext, MessageImportance.Low, "AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", project.ProjectName, targetFramework.Version.ToString());
+                            _loggingService.LogComment(_projectBuildEventContext, MessageImportance.Low,
+                                "AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", project.ProjectName,
+                                targetFramework.Version.ToString());
                         }
                     }
                     else
                     {
                         string pathTo20 = FrameworkLocationHelper.GetPathToDotNetFramework(_version20);
 
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(pathTo20 != null, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(_solutionFile.FullPath), "AspNetCompiler.20NotInstalled");
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(pathTo20 != null,
+                            "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(_solutionFile.FullPath),
+                            "AspNetCompiler.20NotInstalled");
 
                         newTask.SetParameter
                             (
-                             "ToolPath",
-                             pathTo20
+                                "ToolPath",
+                                pathTo20
                             );
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-                else
-                {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                      (
-                      new BuildEventFileInfo(_solutionFile.FullPath),
-                      e,
-                      "AspNetCompiler.InvalidTargetFrameworkMonikerFromException",
-                       project.ProjectName,
-                       project.TargetFrameworkMoniker,
-                       e.Message
-                      );
-                }
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile
+                    (
+                        new BuildEventFileInfo(_solutionFile.FullPath),
+                        e,
+                        "AspNetCompiler.InvalidTargetFrameworkMonikerFromException",
+                        project.ProjectName,
+                        project.TargetFrameworkMoniker,
+                        e.Message
+                    );
             }
 
             if (!isDotNetFramework)
@@ -1539,13 +1536,8 @@ namespace Microsoft.Build.Construction
                 {
                     lastFolderInPhysicalPath = Path.GetFileName(aspNetPhysicalPath);
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
                     ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                         (
                         false,

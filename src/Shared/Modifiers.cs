@@ -588,10 +588,8 @@ namespace Microsoft.Build.Shared
                         ErrorUtilities.ThrowInternalError("\"{0}\" is not a valid item-spec modifier.", modifier);
                     }
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                        throw;
                     ErrorUtilities.VerifyThrowInvalidOperation(false, "Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
                 }
 
