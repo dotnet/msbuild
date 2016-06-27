@@ -1698,7 +1698,6 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-   
     <xs:element name="Copy" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -1709,7 +1708,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="Retries" />
                     <xs:attribute name="RetryDelayMilliseconds" />
                     <xs:attribute name="SkipUnchangedFiles" type="msb:boolean" />
-                    <xs:attribute name="UseHardOrSymlinksIfPossible" type="msb:LinkType" />
+                    <xs:attribute name="UseHardlinksIfPossible" type="msb:boolean" />
                     <xs:attribute name="SourceFiles" use="required" />
                 </xs:extension>
             </xs:complexContent>
@@ -5020,15 +5019,14 @@ elementFormDefault="qualified">
     </xs:element>
 
     <xs:element name="ValidateStoreManifest" substitutionGroup="msb:Task">
-      <xs:complexType>
-        <xs:complexContent>
-          <xs:extension base="msb:TaskType">
-            <xs:attribute name="Input" use="required" />
-            <xs:attribute name="StoreManifestSchema" use="required" />
-          </xs:extension>
-        </xs:complexContent>
-      </xs:complexType>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:TaskType">
+                    <xs:attribute name="Input" use="required" />
+                    <xs:attribute name="StoreManifestSchema" use="required" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
     </xs:element>
-  
-  </xs:schema>
-  
+    
+</xs:schema>

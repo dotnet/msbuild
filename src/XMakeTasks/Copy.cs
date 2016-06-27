@@ -14,18 +14,9 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Xml.Serialization;
 
 namespace Microsoft.Build.Tasks
 {
-    public enum LinkType
-    {
-        [XmlEnum]
-        None,
-        HardLink,
-        SymLink
-    }
-
     /// <summary>
     /// A task that copies files.
     /// </summary>
@@ -120,9 +111,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Create Hard or Sym Links for the copied files rather than copy the files if possible to do so
+        /// Create Hard Links for the copied files rather than copy the files if possible to do so
         /// </summary>
-        public LinkType UseHardOrSymlinksIfPossible
+        public bool UseHardlinksIfPossible
         {
             get;
             set;
@@ -307,20 +298,20 @@ namespace Microsoft.Build.Tasks
                 destinationFileExists = destinationFileState.FileExists;
             }
 
-            bool linkCreated = false;
+            bool hardLinkCreated = false;
 
             // If we want to create hard links, then try that first
-            if (UseHardOrSymlinksIfPossible != LinkType.None)
+            if (UseHardlinksIfPossible)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                Log.LogMessageFromResources(MessageImportance.Normal, UseHardOrSymlinksIfPossible == LinkType.HardLink ? "Copy.HardLinkComment" : "Copy.HardLinkComment", sourceFileState.Name, destinationFileState.Name);
+                Log.LogMessageFromResources(MessageImportance.Normal, "Copy.HardLinkComment", sourceFileState.Name, destinationFileState.Name);
 
                 if (!_overwriteReadOnlyFiles)
                 {
                     destinationFileExists = destinationFileState.FileExists;
                 }
 
-                // CreateHardLink and CreateSymlink cannot overwrite an existing file or link
+                // CreateHardLink cannot overwrite an existing file or hard link
                 // so we need to delete the existing entry before we create the hard link.
                 // We need to do a best-effort check to see if the files are the same
                 // if they are the same then we won't delete, just in case they refer to the same
@@ -332,9 +323,9 @@ namespace Microsoft.Build.Tasks
                     FileUtilities.DeleteNoThrow(destinationFileState.Name);
                 }
 
-                linkCreated = UseHardOrSymlinksIfPossible == LinkType.HardLink ? NativeMethods.CreateHardLink(destinationFileState.Name, sourceFileState.Name, IntPtr.Zero /* reserved, must be NULL */) : NativeMethods.CreateSymbolicLink(destinationFileState.Name, sourceFileState.Name, SymbolicLink.File);
+                hardLinkCreated = NativeMethods.CreateHardLink(destinationFileState.Name, sourceFileState.Name, IntPtr.Zero /* reserved, must be NULL */);
 
-                if (!linkCreated)
+                if (!hardLinkCreated)
                 {
                     int errorCode = Marshal.GetHRForLastWin32Error();
                     Exception hardLinkException = Marshal.GetExceptionForHR(errorCode);
@@ -343,9 +334,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // If the link was not created (either because the user didn't want one, or because it couldn't be created)
+            // If the hard link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
-            if (!linkCreated)
+            if (!hardLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFileState.Name, destinationFileState.Name);

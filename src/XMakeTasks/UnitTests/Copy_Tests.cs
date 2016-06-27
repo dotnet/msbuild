@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
 {
     public abstract class Copy_Tests : IDisposable
     {
-        public LinkType useHardOrSymLinks = LinkType.None;
+        public bool useHardLinks = false;
 
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSOVERWRITEREADONLYFILES, so that we can run 
@@ -85,9 +85,9 @@ namespace Microsoft.Build.UnitTests
                 t.RetryDelayMilliseconds = 1; // speed up tests!
 
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
 
                 t.BuildEngine = new MockEngine();
@@ -136,9 +136,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -196,9 +196,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -256,9 +256,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -316,9 +316,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -378,9 +378,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -440,9 +440,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -494,9 +494,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -532,9 +532,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -577,9 +577,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -622,9 +622,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -663,9 +663,9 @@ namespace Microsoft.Build.UnitTests
                     Copy t = new Copy();
                     t.RetryDelayMilliseconds = 1; // speed up tests!
                     // Allow the task's default (false) to have a chance
-                    if (useHardOrSymLinks == LinkType.None)
+                    if (useHardLinks)
                     {
-                        t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                        t.UseHardlinksIfPossible = useHardLinks;
                     }
                     MockEngine engine = new MockEngine();
                     t.BuildEngine = engine;
@@ -728,9 +728,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -780,9 +780,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -825,9 +825,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -896,9 +896,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -978,9 +978,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -997,9 +997,9 @@ namespace Microsoft.Build.UnitTests
 
                 t = new Copy();
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -1049,9 +1049,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -1100,9 +1100,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -1148,9 +1148,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine me = new MockEngine();
 
@@ -1168,7 +1168,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                if (useHardOrSymLinks == LinkType.None)
+                if (!useHardLinks)
                 {
                     Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
                     me.AssertLogDoesntContainMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
@@ -1220,9 +1220,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -1285,9 +1285,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             t.BuildEngine = new MockEngine();
             t.SourceFiles = sourceFiles;
@@ -1348,9 +1348,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             t.BuildEngine = new MockEngine();
             t.SourceFiles = sourceFiles;
@@ -1408,9 +1408,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
@@ -1456,9 +1456,9 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy();
                 t.RetryDelayMilliseconds = 1; // speed up tests!
                 // Allow the task's default (false) to have a chance
-                if (useHardOrSymLinks == LinkType.None)
+                if (useHardLinks)
                 {
-                    t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                    t.UseHardlinksIfPossible = useHardLinks;
                 }
                 t.BuildEngine = new MockEngine();
                 t.SourceFiles = sourceFiles;
@@ -1494,9 +1494,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             t.BuildEngine = new MockEngine();
             t.SourceFiles = sourceFiles;
@@ -1520,9 +1520,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             t.BuildEngine = new MockEngine();
             t.SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") }; ;
@@ -1544,9 +1544,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             MockEngine engine = new MockEngine(true /* log to console */);
             t.BuildEngine = engine;
@@ -1569,9 +1569,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             MockEngine engine = new MockEngine(true /* log to console */);
             t.BuildEngine = engine;
@@ -1596,9 +1596,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             MockEngine engine = new MockEngine(true /* log to console */);
             t.BuildEngine = engine;
@@ -1646,7 +1646,7 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
 
-            Assert.Equal(LinkType.None, t.UseHardOrSymlinksIfPossible);
+            Assert.Equal(false, t.UseHardlinksIfPossible);
         }
 
         /// <summary>
@@ -1659,9 +1659,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             MockEngine engine = new MockEngine(true /* log to console */);
             t.BuildEngine = engine;
@@ -1687,9 +1687,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             MockEngine engine = new MockEngine(true /* log to console */);
             t.BuildEngine = engine;
@@ -1718,9 +1718,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             MockEngine engine = new MockEngine(true /* log to console */);
             t.BuildEngine = engine;
@@ -1746,9 +1746,9 @@ namespace Microsoft.Build.UnitTests
             Copy t = new Copy();
             t.RetryDelayMilliseconds = 1; // speed up tests!
             // Allow the task's default (false) to have a chance
-            if (useHardOrSymLinks == LinkType.None)
+            if (useHardLinks)
             {
-                t.UseHardOrSymlinksIfPossible = useHardOrSymLinks;
+                t.UseHardlinksIfPossible = useHardLinks;
             }
             MockEngine engine = new MockEngine(true /* log to console */);
             t.BuildEngine = engine;
@@ -1841,7 +1841,7 @@ namespace Microsoft.Build.UnitTests
     {
         public CopyNotHardLink_Tests()
         {
-            this.useHardOrSymLinks = LinkType.None;
+            this.useHardLinks = false;
         }
     }
 
@@ -1849,7 +1849,7 @@ namespace Microsoft.Build.UnitTests
     {
         public CopyHardLink_Tests()
         {
-            this.useHardOrSymLinks = LinkType.HardLink;
+            this.useHardLinks = true;
         }
 
         /// <summary>
@@ -1875,7 +1875,7 @@ namespace Microsoft.Build.UnitTests
                 t.RetryDelayMilliseconds = 1; // speed up tests!
 
                 // Allow the task's default (false) to have a chance
-                t.UseHardOrSymlinksIfPossible = LinkType.HardLink;
+                t.UseHardlinksIfPossible = true;
 
                 MockEngine me = new MockEngine(true);
                 t.BuildEngine = me;
@@ -1969,7 +1969,7 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy
                 {
                     RetryDelayMilliseconds = 1, // speed up tests!
-                    UseHardOrSymlinksIfPossible = LinkType.HardLink,
+                    UseHardlinksIfPossible = true,
                     BuildEngine = me,
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),
@@ -2066,283 +2066,7 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy
                 {
                     RetryDelayMilliseconds = 1, // speed up tests!
-                    UseHardOrSymlinksIfPossible = LinkType.HardLink,
-                    BuildEngine = me,
-                    SourceFiles = sourceFiles,
-                    DestinationFolder = new TaskItem(destFolder),
-                    SkipUnchangedFiles = true
-                };
-
-                bool success = t.Execute();
-
-                Assert.True(success); // "success"
-                Assert.True(File.Exists(destFile)); // "destination exists"
-                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
-
-                // Can't do this below, because the real message doesn't end with String.Empty, it ends with a CLR exception string, and so matching breaks in PLOC.
-                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this
-                // Tried to create more than a few links to a file that is supported by the file system. (! yhMcE! Exception from HRESULT: Table c?! 0x80070476)
-                // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
-                me.AssertLogContains("0x80070476");
-
-                string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
-
-                Assert.Equal(1, t.DestinationFiles.Length);
-                Assert.Equal(1, t.CopiedFiles.Length);
-                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                // Now we will write new content to the source file
-                // we'll then check that the destination file automatically
-                // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is another source temp file.");
-
-                // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination copied file to contain the contents of original source file only."
-
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
-            }
-            finally
-            {
-                File.Delete(sourceFile);
-                File.Delete(destFile);
-                Directory.Delete(destFolder, true);
-            }
-        }
-    }
-
-    public class CopySymLink_Tests : Copy_Tests
-    {
-        public CopySymLink_Tests()
-        {
-            this.useHardOrSymLinks = LinkType.SymLink;
-        }
-
-        /// <summary>
-        /// DestinationFolder should work.
-        /// </summary>
-        [Fact]
-        public void CopyToDestinationFolderWithSymLinkCheck()
-        {
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = Path.GetTempPath();
-            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
-
-                // Don't create the dest folder, let task do that
-
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-
-                // Allow the task's default (false) to have a chance
-                t.UseHardOrSymlinksIfPossible = LinkType.SymLink;
-
-                MockEngine me = new MockEngine(true);
-                t.BuildEngine = me;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destFolder);
-                t.SkipUnchangedFiles = true;
-
-                bool success = t.Execute();
-
-                Assert.True(success); // "success"
-                Assert.True(File.Exists(destFile)); // "destination exists"
-                Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
-
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
-
-                string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file."
-
-                Assert.Equal(1, t.DestinationFiles.Length);
-                Assert.Equal(1, t.CopiedFiles.Length);
-                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                // Now we will write new content to the source file
-                // we'll then check that the destination file automatically
-                // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is another source temp file.");
-
-                // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal(destinationFileContents, "This is another source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
-
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
-            }
-            finally
-            {
-                Helpers.DeleteFiles(sourceFile, destFile);
-            }
-        }
-
-        /// <summary>
-        /// DestinationFolder should work.
-        /// </summary>
-        [Fact]
-        public void CopyToDestinationFolderWithSymLinkFallbackNetwork()
-        {
-            // Workaround: For some reason when this test runs with all other tests we are getting
-            // the incorrect result from CreateHardLink error message (a message associated with
-            // another test). Calling GetHRForLastWin32Error / GetExceptionForHR seems to clear
-            // out the previous message and allow us to get the right message in the Copy task.
-            int errorCode = Marshal.GetHRForLastWin32Error();
-            Marshal.GetExceptionForHR(errorCode);
-
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = @"\\localhost\c$\temp";
-            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-
-            try
-            {
-                if (!Directory.Exists(destFolder))
-                {
-                    Directory.CreateDirectory(destFolder);
-                }
-
-                string nothingFile = Path.Combine(destFolder, "nothing.txt");
-                File.WriteAllText(nothingFile, "nothing");
-                File.Delete(nothingFile);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("CopyToDestinationFolderWithHardLinkFallbackNetwork test could not access the network.");
-                // Something caused us to not be able to access our "network" share, don't fail.
-                return;
-            }
-
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
-
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-
-                MockEngine me = new MockEngine(true);
-                Copy t = new Copy
-                {
-                    RetryDelayMilliseconds = 1, // speed up tests!
-                    UseHardOrSymlinksIfPossible = LinkType.SymLink,
-                    BuildEngine = me,
-                    SourceFiles = sourceFiles,
-                    DestinationFolder = new TaskItem(destFolder),
-                    SkipUnchangedFiles = true
-                };
-
-                bool success = t.Execute();
-
-                Assert.True(success); // "success"
-                Assert.True(File.Exists(destFile)); // "destination exists"
-                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
-
-                // Can't do this below, because the real message doesn't end with String.Empty, it ends with a CLR exception string, and so matching breaks in PLOC.
-                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this
-                // The system cannot move the file to a different disk drive. (Exception from HRESULT: 0x80070011)
-                // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
-                me.AssertLogContains("0x80070011");
-
-                string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
-
-                Assert.Equal(1, t.DestinationFiles.Length);
-                Assert.Equal(1, t.CopiedFiles.Length);
-                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                // Now we will write new content to the source file
-                // we'll then check that the destination file automatically
-                // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is another source temp file.");
-
-                // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination copied file to contain the contents of original source file only."
-
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
-            }
-            finally
-            {
-                File.Delete(sourceFile);
-                File.Delete(destFile);
-                Directory.Delete(destFolder, true);
-            }
-        }
-
-        /// <summary>
-        /// DestinationFolder should work.
-        /// </summary>
-        [Fact]
-        public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
-        {
-            // Workaround: For some reason when this test runs with all other tests we are getting
-            // the incorrect result from CreateHardLink error message (a message associated with
-            // another test). Calling GetHRForLastWin32Error / GetExceptionForHR seems to clear
-            // out the previous message and allow us to get the right message in the Copy task.
-            int errorCode = Marshal.GetHRForLastWin32Error();
-            Marshal.GetExceptionForHR(errorCode);
-
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = Path.GetTempPath();
-            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
-
-                if (!Directory.Exists(destFolder))
-                {
-                    Directory.CreateDirectory(destFolder);
-                }
-
-                // Exhaust the number (1024) of directory entries that can be created for a file
-                // This is 1 + (1 x hard links)
-                // We need to test the fallback code path when we're out of directory entries for a file..
-                for (int n = 0; n < 1025 /* make sure */; n++)
-                {
-                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
-                    NativeMethods.CreateHardLink(destLink, sourceFile, IntPtr.Zero);
-                }
-
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-
-                MockEngine me = new MockEngine(true);
-                Copy t = new Copy
-                {
-                    RetryDelayMilliseconds = 1, // speed up tests!
-                    UseHardOrSymlinksIfPossible = LinkType.HardLink,
+                    UseHardlinksIfPossible = true,
                     BuildEngine = me,
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),

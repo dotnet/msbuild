@@ -556,13 +556,6 @@
             </xs:simpleType>
         </xs:union>
     </xs:simpleType>
-  <xs:simpleType name="LinkType" final="restriction">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="None"></xs:enumeration>
-      <xs:enumeration value="SymLink"></xs:enumeration>
-      <xs:enumeration value="HardLink"></xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
     <!-- Similar trick for Importance -->
     <xs:simpleType name="importance">
         <xs:union memberTypes="msb:non_empty_string">
