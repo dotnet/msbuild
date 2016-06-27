@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests
             File.Delete(nonexistentFile);
 
             DateTime nonexistentFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(nonexistentFile);
-            Assert.Equal(nonexistentFileTime, DateTime.MinValue);
+            Assert.Equal(DateTime.MinValue, nonexistentFileTime);
         }
 
         /// <summary>
