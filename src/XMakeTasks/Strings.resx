@@ -261,6 +261,10 @@
     <value>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</value>
     <comment>{StrBegin="MSB3025: "}</comment>
   </data>
+  <data name="Copy.SymbolicLinkComment">
+    <value>Creating symbolic link to copy "{0}" to "{1}".</value>
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>      
+  </data>
   <data name="Copy.Retrying">
     <value>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4}</value>
     <comment>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message.</comment>
