@@ -21,6 +21,7 @@ namespace Microsoft.Build.UnitTests
     {
         public bool useHardLinks = false;
 
+        public bool useSymbolicLinks = false;
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSOVERWRITEREADONLYFILES, so that we can run 
         /// the tests isolated from the current state of the environment, but put it back how it belongs
@@ -1845,6 +1846,37 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
+    public class CopyHardAndSymbolicLink_Tests : Copy_Tests
+    {
+        [Fact]
+        public void CopyWihHardAndSymbolicLinks()
+        {
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string temp = @"\\localhost\c$\temp";
+            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+
+            ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+
+            MockEngine me = new MockEngine(true);
+            Copy t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                UseHardlinksIfPossible = true,
+                UseSymboliclinksIfPossible = true,
+                BuildEngine = me,
+                SourceFiles = sourceFiles,
+                DestinationFolder = new TaskItem(destFolder),
+                SkipUnchangedFiles = true
+            };
+
+            bool success = t.Execute();
+
+            Assert.False(success);
+            me.AssertLogContains("It can only be one value selected");
+        }
+    }
+
     public class CopyHardLink_Tests : Copy_Tests
     {
         public CopyHardLink_Tests()
@@ -2119,5 +2151,84 @@ namespace Microsoft.Build.UnitTests
                 Directory.Delete(destFolder, true);
             }
         }
+    }
+
+    public class CopySymbolicLink_Tests : Copy_Tests
+    {
+        public CopySymbolicLink_Tests()
+        {
+            this.useSymbolicLinks = true;
+        }
+
+        /// <summary>
+        /// DestinationFolder should work.
+        /// </summary>
+        [Fact]
+        public void CopyToDestinationFolderWithSymbolicLinkCheck()
+        {
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string temp = Path.GetTempPath();
+            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                    sw.Write("This is a source temp file.");
+
+                // Don't create the dest folder, let task do that
+
+                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+
+                Copy t = new Copy();
+                t.RetryDelayMilliseconds = 1; // speed up tests!
+
+                // Allow the task's default (false) to have a chance
+                t.UseSymboliclinksIfPossible = true;
+
+                MockEngine me = new MockEngine(true);
+                t.BuildEngine = me;
+                t.SourceFiles = sourceFiles;
+                t.DestinationFolder = new TaskItem(destFolder);
+                t.SkipUnchangedFiles = true;
+
+                bool success = t.Execute();
+
+                Assert.True(success); // "success"
+                Assert.True(File.Exists(destFile)); // "destination exists"
+                Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+
+                string destinationFileContents;
+                using (StreamReader sr = new StreamReader(destFile))
+                    destinationFileContents = sr.ReadToEnd();
+
+                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination symbolic linked file to contain the contents of source file."
+
+                Assert.Equal(1, t.DestinationFiles.Length);
+                Assert.Equal(1, t.CopiedFiles.Length);
+                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
+
+                // Now we will write new content to the source file
+                // we'll then check that the destination file automatically
+                // has the same content (i.e. it's been hard linked)
+                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                    sw.Write("This is another source temp file.");
+
+                // Read the destination file (it should have the same modified content as the source)
+                using (StreamReader sr = new StreamReader(destFile))
+                    destinationFileContents = sr.ReadToEnd();
+
+                Assert.Equal(destinationFileContents, "This is another source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+            }
+            finally
+            {
+                Helpers.DeleteFiles(sourceFile, destFile);
+            }
+        }
+        
     }
 }

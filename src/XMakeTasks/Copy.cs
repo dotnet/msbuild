@@ -378,7 +378,7 @@ namespace Microsoft.Build.Tasks
                     int errorCode = Marshal.GetHRForLastWin32Error();
                     Exception symbolicLinkException = Marshal.GetExceptionForHR(errorCode);
                     // This is only a message since we don't want warnings when copying to network shares etc.
-                    Log.LogMessageFromResources(MessageImportance.Low, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, symbolicLinkException.Message);
+                    Log.LogMessageFromResources(MessageImportance.High, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, symbolicLinkException.Message);
                 }
             }
 
