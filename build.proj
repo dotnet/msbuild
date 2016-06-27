@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
 
   <PropertyGroup>
     <!--
@@ -17,9 +18,19 @@
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
     <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
+
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
   </PropertyGroup>
 
-  <Target Name="BuildDotnetCliBuildFramework" Inputs="" Outputs="">
+  <ItemGroup>
+    <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.cs" />
+    <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.json" />
+  </ItemGroup>
+
+  <Target Name="BuildDotnetCliBuildFramework" 
+          Inputs="@(DotnetCliBuildFrameworkInputs)" 
+          Outputs="$(CLIBuildDll)">
     <Exec Command="$(PlatformScriptHost) $(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/build$(PlatformScriptExtension) $(NoRunArg)" WorkingDirectory="$(MSBuildThisFileDirectory)"/>
   </Target>
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <UsingTask TaskName="Rid" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="Architecture" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
+
+  <Target Name="Init" >
+    <!-- Current Runtime Information -->
+    <Rid>
+      <Output TaskParameter="OutputRid" PropertyName="Rid" />
+    </Rid>
+    <Architecture>
+      <Output TaskParameter="OutputArchitecture" PropertyName="Architecture" />
+    </Architecture>
+
+    <!-- Common Properties -->
+    <PropertyGroup>
+      <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
+      <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
+      <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
+      <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
+    </PropertyGroup>
+
+    <!-- Generates BuildVersion Item
+        BuildVersion Metadata:
+          - Major
+          - Minor
+          - Patch
+          - ReleaseSuffix
+          - CommitHash
+          - CommitCount
+          - VersionSuffix
+          - SimpleVersion
+          - NugetVersion
+          - MsiVersion            -->
+    <GenerateBuildVersionInfo RepoRoot="$(RepoRoot)">
+        <Output TaskParameter="OutputBuildVersionInfo"
+                ItemName="BuildVersion" />
+    </GenerateBuildVersionInfo>
+
+    <PropertyGroup>
+      <SdkVersion>@(BuildVersion ->'%(NugetVersion)')</SdkVersion>
+      <SdkBrandName>Microsoft .NET Core 1.0.0 - SDK Preview 2</SdkBrandName>
+    </PropertyGroup>
+  </Target>
+</Project>
