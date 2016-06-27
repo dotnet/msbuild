@@ -38,31 +38,17 @@
   <Target Name="_RestoreBuildToolsPackagesConfig"
           Inputs="$(RestoreBuildToolsPackagesConfigInputs)"
           Outputs="$(BuildToolsSemaphore);$(NugetExeSemaphore);$(NuGetToolPath)"
-          Condition="Exists('$(NuGetPackagesFile)')">
+          Condition="Exists('$(NuGetProjectJsonFile)')">
     <Message Importance="High" Text="Restoring build tools..." />
 
-    <MakeDir Directories="$(NuGetDir)"
-             Condition="!Exists('$(NuGetDir)')" />
-
-    <!-- Download NuGet.exe -->
-    <Exec Command="$(DownloadCommand)" Condition="!Exists('$(NugetExeSemaphore)')" />
-
-    <Touch Files="$(NuGetToolPath)" />
-
-    <Touch Files="$(NugetExeSemaphore)"
-           ContinueOnError="WarnAndContinue"
-           AlwaysCreate="true"
-           ForceTouch="true" />
-
     <!-- Restore tools from packages/project.json -->
-    
     <Exec Condition="Exists('$(NuGetProjectJsonFile)')" 
           Command="$(DnuCoreRestoreCommand) --packages $(ToolPackagesDir) &quot;$(NuGetProjectJsonFile)&quot;"/>
 
-<!--     <Exec Condition="Exists('$(NuGetProjectJsonFile)')" 
+    <!-- <Exec Condition="Exists('$(NuGetProjectJsonFile)')" 
           Command="$(DotnetToolCommand) publish -f dnxcore50 -r $(NuGetRuntimeIdentifier) -o $(ToolPackagesDir) &quot;$(NuGetProjectJsonFile)&quot;"
           WorkingDirectory="$(NuGetConfigDir)" /> -->
-    
+
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
 
