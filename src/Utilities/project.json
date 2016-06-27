@@ -1,6 +1,5 @@
 ﻿{
   "frameworks": {
-    "net451": { },
     "net46": { },
     "netstandard1.3": {
       "dependencies": {

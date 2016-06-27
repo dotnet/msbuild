@@ -7,11 +7,6 @@
     "xunit.abstractions": "2.0.0"
   },
   "frameworks": {
-    "net451": {
-      "dependencies": {
-        "xunit.runner.visualstudio": "2.1.0"
-      }
-    },
     "net46": {
       "dependencies": {
         "xunit.runner.visualstudio": "2.1.0"
