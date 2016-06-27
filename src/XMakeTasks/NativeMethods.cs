@@ -780,7 +780,7 @@ namespace Microsoft.Build.Tasks
         // CreateSymbolicLink
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern bool CreateSymbolicLink(string newFileName, string exitingFileName, SymbolicLink dwFlags);
+        internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
         //------------------------------------------------------------------------------
         // MoveFileEx
