@@ -8,22 +8,13 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using SDKReference = Microsoft.Build.Tasks.ResolveSDKReference.SDKReference;
-using ProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 using Microsoft.Build.Evaluation;
-using System.Linq;
 using Microsoft.Build.Execution;
 using Xunit;
 
@@ -1169,7 +1160,6 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
-            t.TargetedSDKConfiguration = "Debug";
             t.TargetedSDKConfiguration = "x86";
             t.BuildEngine = engine;
             bool succeeded = t.Execute();

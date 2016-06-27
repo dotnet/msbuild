@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Security.AccessControl;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;

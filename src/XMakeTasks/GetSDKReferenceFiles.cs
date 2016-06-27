@@ -448,8 +448,7 @@ namespace Microsoft.Build.Tasks
                 else if (targetedConfiguration.Length > 0 && targetedArchitecture.Length > 0)
                 {
                     // Couldn't find any valid ApiContracts, look up references the traditional way
-                    IList<string> referencePaths = new List<string>();
-                    referencePaths = ToolLocationHelper.GetSDKReferenceFolders(resolvedSDKReference.ItemSpec, targetedConfiguration, targetedArchitecture);
+                    IList<string> referencePaths = ToolLocationHelper.GetSDKReferenceFolders(resolvedSDKReference.ItemSpec, targetedConfiguration, targetedArchitecture);
 
                     if (LogReferencesList)
                     {

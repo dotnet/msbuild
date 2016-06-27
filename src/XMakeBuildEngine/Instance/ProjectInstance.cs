@@ -2182,7 +2182,6 @@ namespace Microsoft.Build.Execution
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
 
-            string toolsVersionToUse = explicitToolsVersion;
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
             ElementLocation toolsVersionLocation = xml.Location;
 
@@ -2192,7 +2191,7 @@ namespace Microsoft.Build.Execution
                 toolsVersionLocation = xml.ToolsVersionLocation;
             }
 
-            toolsVersionToUse = Utilities.GenerateToolsVersionToUse
+            string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
                 (
                     explicitToolsVersion,
                     xml.ToolsVersion,

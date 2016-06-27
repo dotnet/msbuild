@@ -2768,7 +2768,6 @@ namespace Microsoft.Build.Evaluation
                 // used to figure out if any of them have changed.
                 RecordImport(null, _project._xml, _project._xml.Version);
 
-                string toolsVersionToUse = ExplicitToolsVersion;
                 ElementLocation toolsVersionLocation = _project._xml.ProjectFileLocation;
                 bool explicitToolsVersionSpecified = (ExplicitToolsVersion != null);
 
@@ -2778,7 +2777,7 @@ namespace Microsoft.Build.Evaluation
                     toolsVersionLocation = _project._xml.ToolsVersionLocation;
                 }
 
-                toolsVersionToUse = Utilities.GenerateToolsVersionToUse
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
                     (
                         ExplicitToolsVersion,
                         _project._xml.ToolsVersion,

@@ -14,8 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Xml;
-using System.Security;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -317,7 +315,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(3, item.Length);
                 int processId;
                 Assert.True(int.TryParse(item[2].ItemSpec, out processId), string.Format("Process ID passed from the 'test' target is not a valid integer (actual is '{0}')", item[2].ItemSpec));
-                Assert.NotEqual(System.Diagnostics.Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
+                Assert.NotEqual(Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
             }
             finally
             {
@@ -1383,7 +1381,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
 
-                System.Threading.Thread.Sleep(500);
+                Thread.Sleep(500);
                 _buildManager.CancelAllSubmissions();
                 asyncResult.WaitHandle.WaitOne();
                 BuildResult result = asyncResult.BuildResult;
@@ -1417,7 +1415,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
 
-                System.Threading.Thread.Sleep(500);
+                Thread.Sleep(500);
                 _buildManager.CancelAllSubmissions();
                 asyncResult.WaitHandle.WaitOne();
                 BuildResult result = asyncResult.BuildResult;
@@ -1451,7 +1449,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
 
-            System.Threading.Thread.Sleep(500);
+            Thread.Sleep(500);
             _buildManager.CancelAllSubmissions();
             asyncResult.WaitHandle.WaitOne();
             BuildResult result = asyncResult.BuildResult;
@@ -1482,7 +1480,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
 
-            System.Threading.Thread.Sleep(500);
+            Thread.Sleep(500);
             _buildManager.CancelAllSubmissions();
             asyncResult.WaitHandle.WaitOne();
             BuildResult result = asyncResult.BuildResult;
@@ -1655,7 +1653,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             ProjectInstance instance2 = _buildManager.GetProjectInstanceForBuild(project);
 
-            Assert.True(Object.ReferenceEquals(instance, instance2)); // "Instances don't match"
+            Assert.True(ReferenceEquals(instance, instance2)); // "Instances don't match"
         }
 
         /// <summary>
@@ -1752,7 +1750,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(true, _logger.FullLog.Contains(skippedMessage));
 
             ProjectInstance instance2 = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.True(Object.ReferenceEquals(instance, instance2)); // "Instances are not the same"
+            Assert.True(ReferenceEquals(instance, instance2)); // "Instances are not the same"
         }
 
         /// <summary>
@@ -1877,13 +1875,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _buildManager.ResetCaches();
 
                 // The semantic of TryOpen is to only retrieve the PRE if it is already in the weak cache.
-                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The built project shouldn't be in the cache anymore."
-                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The built project's import shouldn't be in the cache anymore."
+                Assert.Null(ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The built project shouldn't be in the cache anymore."
+                Assert.Null(ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The built project's import shouldn't be in the cache anymore."
 
                 Project project = projectCollection.LoadProject(rootProjectPath);
-                Microsoft.Build.Construction.ProjectRootElement preRoot, preImported;
-                Assert.NotNull(preRoot = Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The root project file should be in the weak cache."
-                Assert.NotNull(preImported = Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The imported project file should be in the weak cache."
+                ProjectRootElement preRoot, preImported;
+                Assert.NotNull(preRoot = ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The root project file should be in the weak cache."
+                Assert.NotNull(preImported = ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The imported project file should be in the weak cache."
                 Assert.True(preRoot.IsExplicitlyLoaded);
                 Assert.True(preImported.IsExplicitlyLoaded);
 
@@ -1897,15 +1895,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _buildManager.ResetCaches();
 
                 // Now make sure they are still in the weak cache.  Since they were loaded explictly before the build, the build shouldn't have unloaded them from the cache.
-                Assert.Same(preRoot, Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The root project file should be in the weak cache after a build."
-                Assert.Same(preImported, Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The imported project file should be in the weak cache after a build."
+                Assert.Same(preRoot, ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The root project file should be in the weak cache after a build."
+                Assert.Same(preImported, ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The imported project file should be in the weak cache after a build."
                 Assert.True(preRoot.IsExplicitlyLoaded);
                 Assert.True(preImported.IsExplicitlyLoaded);
 
                 projectCollection.UnloadProject(project);
                 projectCollection.UnloadAllProjects();
-                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The unloaded project shouldn't be in the cache anymore."
-                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The unloaded project's import shouldn't be in the cache anymore."
+                Assert.Null(ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The unloaded project shouldn't be in the cache anymore."
+                Assert.Null(ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The unloaded project's import shouldn't be in the cache anymore."
             }
         }
 
