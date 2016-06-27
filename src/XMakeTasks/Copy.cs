@@ -119,6 +119,15 @@ namespace Microsoft.Build.Tasks
             set;
         }
 
+        /// <summary>
+        /// Create Symbolic Links for the copied files rather than copy the files if possible to do so
+        /// </summary>
+        public bool UseSymboliclinksIfPossible
+        {
+            get;
+            set;
+        }
+
         public bool SkipUnchangedFiles
         {
             get
