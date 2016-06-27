@@ -1709,6 +1709,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="RetryDelayMilliseconds" />
                     <xs:attribute name="SkipUnchangedFiles" type="msb:boolean" />
                     <xs:attribute name="UseHardlinksIfPossible" type="msb:boolean" />
+                    <xs:attribute name="UseSymboliclinksIfPossible" type="msb:boolean" />
                     <xs:attribute name="SourceFiles" use="required" />
                 </xs:extension>
             </xs:complexContent>
