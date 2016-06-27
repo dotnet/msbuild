@@ -1,6 +1,6 @@
 :: This script will:
-::   1) Rebuild MSBuild source tree.
-::   2) Create a copy of the build output in bin\MSBuild
+::   1) Rebuild MSBuild source tree (x86 only).
+::   2) Create a "bootstrapped" copy of the build output in bin\MSBuild.
 ::   3) Build the source tree again with the MSBuild.exe in step 2.
 
 @echo off

@@ -1,12 +1,11 @@
 :: Usage:
-:: BuildAndCopy
+:: Rebuild the repo and copy to bin\bootstrap. Includes required MSBuild
+:: companion files copied from your local machine.
 :: 
-:: Example: BuildAndCopy.cmd
+:: Example: CreateBootstrappedMSBuild.cmd <AdditionalBuildCommand>
 
 @echo off
 setlocal
-
-set DebugBuildOutputPath=%~dp0bin\Windows_NT\Debug
 
 :: Check prerequisites
 if not defined VS140COMNTOOLS (
@@ -16,15 +15,14 @@ if not defined VS140COMNTOOLS (
 )
 
 if not "%1"=="" (
-    set OutputPath=%1
+    set AdditionalBuildCommand=%1
 )
 
 echo ** Building with the installed MSBuild
-echo ** Output Path: %DebugBuildOutputPath%
-echo ** Additional Build Parameters:%AdditionalBuildCommand%
+echo ** Additional Build Parameters: %AdditionalBuildCommand%
 echo.
 :: Build MSBuild
-call "%~dp0build.cmd" /t:Rebuild %AdditionalBuildCommand%
+call "%~dp0build.cmd" /t:Rebuild /p:Platform=x86 %AdditionalBuildCommand%
 set BUILDERRORLEVEL=%ERRORLEVEL%
 
 :: Kill Roslyn, which may have handles open to files we want
@@ -38,7 +36,7 @@ if %BUILDERRORLEVEL% NEQ 0 (
 
 :: Make a copy of our build
 echo ** Copying bootstrapped MSBuild to the bootstrap folder
-msbuild /verbosity:minimal CreatePrivateMSBuildEnvironment.proj
+msbuild /verbosity:minimal CreatePrivateMSBuildEnvironment.proj /p:Platform=x86
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo Failed building CreatePrivateMSBuildEnvironment.proj with error %ERRORLEVEL%
