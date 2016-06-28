@@ -309,13 +309,6 @@ namespace Microsoft.Build.Tasks
 
             bool linkCreated = false;
 
-            //First check if create hard or symbolic link option is selected. If both then return an error
-            if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
-            {
-                Log.LogError("It can only be one value selected");
-                return false;
-            }
-
             // If we want to create hard links, then try that first
             if (UseHardlinksIfPossible)
             {
@@ -542,6 +535,13 @@ namespace Microsoft.Build.Tasks
             if (_destinationFiles != null && _destinationFiles.Length != _sourceFiles.Length)
             {
                 Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _destinationFiles.Length, _sourceFiles.Length, "DestinationFiles", "SourceFiles");
+                return false;
+            }
+
+            //First check if create hard or symbolic link option is selected. If both then return an error
+            if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
+            {
+                Log.LogErrorWithCodeFromResources("Copy.OnlyOneLinkType", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
                 return false;
             }
 

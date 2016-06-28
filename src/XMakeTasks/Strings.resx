@@ -285,6 +285,9 @@
     <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
     <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
   </data>
+  <data name="Copy.OnlyOneLinkType">
+    <value>MSB3031: "{0}" and "{1}" cannot selected both. Choose one.</value>    
+  </data>
 
   <!--
         The CreateItem message bucket is: MSB3031 - MSB3040
