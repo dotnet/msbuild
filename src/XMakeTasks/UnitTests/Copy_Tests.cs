@@ -2004,7 +2004,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
-                ITaskItem[] sourceFiles = {new TaskItem(sourceFile)};
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
                 MockEngine me = new MockEngine(true);
                 Copy t = new Copy
@@ -2101,7 +2101,7 @@ namespace Microsoft.Build.UnitTests
                     NativeMethods.CreateHardLink(destLink, sourceFile, IntPtr.Zero);
                 }
 
-                ITaskItem[] sourceFiles = {new TaskItem(sourceFile)};
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
                 MockEngine me = new MockEngine(true);
                 Copy t = new Copy
@@ -2238,6 +2238,6 @@ namespace Microsoft.Build.UnitTests
                 Helpers.DeleteFiles(sourceFile, destFile);
             }
         }
-        
+
     }
 }
