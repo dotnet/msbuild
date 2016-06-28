@@ -5,12 +5,13 @@
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="CheckPrereqs" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
     <PrepareTargets />
   </Target>
 
-  <Target Name="Init" >
+  <Target Name="Init">
     <!-- Current Runtime Information -->
     <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="Rid" />
@@ -20,6 +21,10 @@
 
     <!-- Common Properties -->
     <PropertyGroup>
+      <Stage0Path Condition=" '$(OSName)' == 'win' ">$(RepoRoot)/.dotnet_stage0/Windows/$(Architecture)</Stage0Path>
+      <Stage0Path Condition=" '$(OSName)' != 'win' ">$(RepoRoot)/.dotnet_stage0/$(OSName)</Stage0Path>
+      <DotNetPath>$(Stage0Path)</DotNetPath>
+
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
       <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
@@ -95,4 +100,18 @@
     <!-- SetTelemetryProfile -->
     <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="https://github.com/dotnet/cli;$(CommitHash)" />
   </Target>
+
+  <Target DependsOnTargets="Init" Name="RestorePackages">
+
+    <!-- Clean NuGet Temp Cache on Linux (seeing some issues on Linux) -->
+    <!-- TODO: do we still need this?  Seems unnecessary -->
+    <RemoveDir
+      Condition=" '$(OSName)' != 'win' AND '$(OSName)' != 'osx' "
+      Directories="/tmp/NuGet" />
+
+    <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
+    <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
+
+  </Target>
+
 </Project>
