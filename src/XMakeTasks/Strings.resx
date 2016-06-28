@@ -285,8 +285,8 @@
     <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
     <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
   </data>
-  <data name="Copy.OnlyOneLinkType">
-    <value>MSB3031: "{0}" and "{1}" cannot selected both. Choose one.</value>    
+  <data name="Copy.ExactlyOneTypeOfLink">
+    <value>MSB3031: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
   </data>
 
   <!--
