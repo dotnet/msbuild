@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
         public string CommitHash { get; set; }
 
         [Output]
-        public int CommitCount { get; set; }
+        public string CommitCount { get; set; }
 
         [Output]
         public string ReleaseSuffix { get; set; }
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Build
             VersionMinor = buildVersion.Minor;
             VersionPatch = buildVersion.Patch;
             CommitHash = commitHash;
-            CommitCount = commitCount;
+            CommitCount = buildVersion.CommitCountString;
             ReleaseSuffix = buildVersion.ReleaseSuffix;
             VersionSuffix = buildVersion.VersionSuffix;
             SimpleVersion = buildVersion.SimpleVersion;

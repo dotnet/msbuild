@@ -103,15 +103,9 @@
 
   <Target DependsOnTargets="Init" Name="RestorePackages">
 
-    <!-- Clean NuGet Temp Cache on Linux (seeing some issues on Linux) -->
-    <!-- TODO: do we still need this?  Seems unnecessary -->
-    <RemoveDir
-      Condition=" '$(OSName)' != 'win' AND '$(OSName)' != 'osx' "
-      Directories="/tmp/NuGet" />
-
     <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
     <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
-
+    
   </Target>
 
 </Project>
