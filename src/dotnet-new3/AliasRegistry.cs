@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
 
@@ -20,7 +19,7 @@ namespace dotnet_new3
             {
                 return;
             }
-            
+
             if (!Paths.AliasesFile.Exists())
             {
                 _source = new JObject();
@@ -62,11 +61,10 @@ namespace dotnet_new3
             }
 
             Load();
-            ITemplate match;
             string templateName;
             if(AliasesToTemplates.TryGetValue(alias, out templateName))
             {
-                match = templates.FirstOrDefault(x => string.Equals(x.Name, templateName, StringComparison.Ordinal));
+                ITemplate match = templates.FirstOrDefault(x => string.Equals(x.Name, templateName, StringComparison.Ordinal));
 
                 if (match != null)
                 {

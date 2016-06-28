@@ -37,7 +37,7 @@ namespace dotnet_new3
         {
             using (IDisposable<ITemplateSourceFolder> rootFolder = configuredSource.Root)
             {
-                foreach (ITemplateSourceEntry entry in rootFolder.Value.EnumerateFiles("*", SearchOption.AllDirectories))
+                foreach (ITemplateSourceFile entry in rootFolder.Value.EnumerateFiles("*", SearchOption.AllDirectories))
                 {
                     if (entry.Kind == TemplateSourceEntryKind.File)
                     {

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Microsoft.TemplateEngine;
+using Microsoft.TemplateEngine.Core;
 
 namespace dotnet_new3
 {
@@ -29,18 +29,7 @@ namespace dotnet_new3
         private static string _defaultInstallPackageList;
         private static string _firstRunCookie;
 
-        public static string PackageCache
-        {
-            get
-            {
-                if (_packageCache == null)
-                {
-                    _packageCache = Path.Combine(UserProfileDir, ".nuget", "packages");
-                }
-
-                return _packageCache;
-            }
-        }
+        public static string PackageCache => _packageCache ?? (_packageCache = Path.Combine(UserProfileDir, ".nuget", "packages"));
 
         public static string UserProfileDir
         {
@@ -48,15 +37,10 @@ namespace dotnet_new3
             {
                 if(_userProfileDir == null)
                 {
-                    string profileDir;
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    {
-                        profileDir = Environment.GetEnvironmentVariable("USERPROFILE");
-                    }
-                    else
-                    {
-                        profileDir = Environment.GetEnvironmentVariable("HOME");
-                    }
+                    string profileDir =
+                        Environment.GetEnvironmentVariable(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                            ? "USERPROFILE"
+                            : "HOME");
 
                     _userProfileDir = profileDir;
                 }
@@ -86,7 +70,7 @@ namespace dotnet_new3
         public static string UserNuGetConfig => _userNuGetConfig ?? (_userNuGetConfig = Path.Combine(UserDir, "NuGet.config"));
 
         public static string BuiltInsFeed => _builtInsFeed ?? (_builtInsFeed = Path.Combine(AppDir, "BuiltIns"));
-        
+
         public static string DefaultInstallTemplateList => _defaultInstallTemplateList ?? (_defaultInstallTemplateList = Path.Combine(AppDir, "defaultinstall.template.list"));
 
         public static string DefaultInstallPackageList => _defaultInstallPackageList ?? (_defaultInstallPackageList = Path.Combine(AppDir, "defaultinstall.package.list"));
@@ -159,7 +143,7 @@ namespace dotnet_new3
                         string parentDir = localPath.Substring(0, parentDirEndIndex);
                         parentDir.CreateDirectory(targetPath);
                     }
-                     
+
                     File.Copy(p, wholeTargetPath, true);
                 }
             }
@@ -174,7 +158,7 @@ namespace dotnet_new3
             {
                 current = Path.Combine(current, parts[i]);
                 Directory.CreateDirectory(current);
-            }            
+            }
         }
 
         public static IEnumerable<string> EnumerateDirectories(this string path, string pattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -42,7 +41,7 @@ namespace dotnet_new3
         private IEnumerable<Type> ProcessAssembly(Assembly assembly)
         {
             List<Type> discoveredTypes = new List<Type>();
-            
+
             foreach (Type loaded in assembly.GetTypes().Where(x => typeof(IComponent).IsAssignableFrom(x)))
             {
                 ProcessType(loaded);

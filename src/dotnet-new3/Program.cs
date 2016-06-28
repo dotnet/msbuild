@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.TemplateEngine;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
@@ -242,7 +241,7 @@ namespace dotnet_new3
                     Reporter.Output.WriteLine($"Checking for updates for {src.Alias}...");
                 }
 
-                bool updatesReady = false;
+                bool updatesReady;
 
                 if (src.ParentSource != null)
                 {
@@ -260,15 +259,9 @@ namespace dotnet_new3
                         Reporter.Output.WriteLine($"An update for {src.Alias} is available...");
                     }
 
-                    string packageId;
-                    if (src.ParentSource != null)
-                    {
-                        packageId = src.Source.GetInstallPackageId(src.ParentSource, src.Location);
-                    }
-                    else
-                    {
-                        packageId = src.Source.GetInstallPackageId(src.Location);
-                    }
+                    string packageId = src.ParentSource != null
+                        ? src.Source.GetInstallPackageId(src.ParentSource, src.Location)
+                        : src.Source.GetInstallPackageId(src.Location);
 
                     toInstall.Add(packageId);
                 }
@@ -278,7 +271,7 @@ namespace dotnet_new3
             {
                 if (!quiet)
                 {
-                    Reporter.Output.WriteLine($"No updates were found.");
+                    Reporter.Output.WriteLine("No updates were found.");
                 }
 
                 return 0;
@@ -286,7 +279,7 @@ namespace dotnet_new3
 
             if (!quiet)
             {
-                Reporter.Output.WriteLine($"Installing updates...");
+                Reporter.Output.WriteLine("Installing updates...");
             }
 
             List<string> installCommands = new List<string>();
@@ -310,7 +303,7 @@ namespace dotnet_new3
 
             if (!quiet)
             {
-                Reporter.Output.WriteLine($"Done.");
+                Reporter.Output.WriteLine("Done.");
             }
 
             return 0;
@@ -319,7 +312,7 @@ namespace dotnet_new3
         private static void ConfigureEnvironment()
         {
             string userNuGetConfig = $@"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>  
+<configuration>
   <packageSources>
     <add key=""dotnet new3 builtins"" value = ""{Paths.BuiltInsFeed}""/>
     <add key=""CLI Dependencies"" value=""https://dotnet.myget.org/F/cli-deps/api/v3/index.json"" />

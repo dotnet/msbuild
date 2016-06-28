@@ -9,7 +9,6 @@ using Newtonsoft.Json.Linq;
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Frameworks;
-using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Protocol.Core.v3;
 using NuGet.Versioning;
@@ -20,7 +19,7 @@ namespace dotnet_new3
     {
         private static CachingSourceProvider _cachingSourceProvider;
         private static bool _inited;
-        private static readonly object _sync = new object();
+        private static readonly object Sync = new object();
         private static readonly List<SourceRepository> Repos = new List<SourceRepository>();
 
         public static void Init()
@@ -30,7 +29,7 @@ namespace dotnet_new3
                 return;
             }
 
-            lock (_sync)
+            lock (Sync)
             {
                 if (_inited)
                 {

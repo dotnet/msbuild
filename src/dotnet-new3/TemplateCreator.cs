@@ -117,7 +117,7 @@ namespace dotnet_new3
                     {
                         TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
                         {
-                            {"#", x => $"0." },
+                            {"#", x => "0." },
                             {"Templates", x => x.Name},
                             {"Short Names", x => $"[{x.ShortName}]"}
                         });
@@ -126,7 +126,7 @@ namespace dotnet_new3
                     return false;
                 }
 
-                int index = 0;
+                int index;
 
                 if (results.Count != 1 || string.IsNullOrWhiteSpace(templateName))
                 {
@@ -139,7 +139,7 @@ namespace dotnet_new3
                     });
 
                     Reporter.Output.WriteLine();
-                    Reporter.Output.WriteLine($"Select a template [1]:");
+                    Reporter.Output.WriteLine("Select a template [1]:");
 
                     string key = Console.ReadLine();
 
@@ -197,7 +197,7 @@ namespace dotnet_new3
                     Reporter.Output.WriteLine("Checking for updates...");
                 }
 
-                bool updatesReady = false;
+                bool updatesReady;
 
                 if (tmplt.Source.ParentSource != null)
                 {
@@ -215,15 +215,9 @@ namespace dotnet_new3
 
                     if (string.IsNullOrEmpty(answer) || answer.Trim().StartsWith("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        string packageId;
-                        if (tmplt.Source.ParentSource != null)
-                        {
-                            packageId = tmplt.Source.Source.GetInstallPackageId(tmplt.Source.ParentSource, tmplt.Source.Location);
-                        }
-                        else
-                        {
-                            packageId = tmplt.Source.Source.GetInstallPackageId(tmplt.Source.Location);
-                        }
+                        string packageId = tmplt.Source.ParentSource != null
+                            ? tmplt.Source.Source.GetInstallPackageId(tmplt.Source.ParentSource, tmplt.Source.Location)
+                            : tmplt.Source.Source.GetInstallPackageId(tmplt.Source.Location);
 
                         Command.CreateDotNet("new3", new[] { "-u", packageId, "--quiet" }).ForwardStdOut().ForwardStdErr().Execute();
                         Command.CreateDotNet("new3", new[] { "-i", packageId, "--quiet" }).ForwardStdOut().ForwardStdErr().Execute();

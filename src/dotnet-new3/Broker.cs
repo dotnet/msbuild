@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using Microsoft.TemplateEngine;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Core;
 using Newtonsoft.Json.Linq;
 
 namespace dotnet_new3

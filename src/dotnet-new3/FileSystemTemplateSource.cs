@@ -118,7 +118,7 @@ namespace dotnet_new3
         private class File : TemplateSourceFile
         {
             private readonly FileInfo _file;
-            private int _rootLength;
+            private readonly int _rootLength;
 
             public File(int rootLength, ITemplateSourceFolder parent, FileInfo file)
                 : base(parent)

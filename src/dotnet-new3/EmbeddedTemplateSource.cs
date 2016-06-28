@@ -7,9 +7,9 @@ namespace dotnet_new3
 {
     internal class EmbeddedTemplateSource : IConfiguredTemplateSource
     {
-        private ITemplateSourceEntry _entry;
-        private IConfiguredTemplateSource _parent;
-        private ITemplateSource _source;
+        private readonly ITemplateSourceEntry _entry;
+        private readonly IConfiguredTemplateSource _parent;
+        private readonly ITemplateSource _source;
 
         public EmbeddedTemplateSource(IConfiguredTemplateSource parent, ITemplateSourceEntry entry, ITemplateSource source)
         {
@@ -18,13 +18,7 @@ namespace dotnet_new3
             _source = source;
         }
 
-        public string Alias
-        {
-            get
-            {
-                return $"{_parent.Alias}::{_entry.FullPath}({_source.GetType().FullName})";
-            }
-        }
+        public string Alias => $"{_parent.Alias}::{_entry.FullPath}({_source.GetType().FullName})";
 
         public string Location => _entry.FullPath;
 

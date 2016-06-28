@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.TemplateEngine.Abstractions;
+﻿using Microsoft.TemplateEngine.Abstractions;
 
 namespace dotnet_new3
 {

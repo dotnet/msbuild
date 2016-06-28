@@ -56,7 +56,7 @@ namespace dotnet_new3
                 }
 
                 using (Stream fileData = source.Root.Value.OpenFile(location))
-                using (ZipArchive archive = new ZipArchive(fileData, ZipArchiveMode.Read, true))
+                using (new ZipArchive(fileData, ZipArchiveMode.Read, true))
                 {
                 }
 
@@ -95,7 +95,7 @@ namespace dotnet_new3
                 using (IDisposable<ITemplateSourceFolder> root = RootFor(location))
                 {
                     ITemplateSourceFile nuspec = root.Value.EnumerateFiles("*.nuspec", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                    
+
                     if(nuspec != null)
                     {
                         string id, version;
@@ -207,10 +207,7 @@ namespace dotnet_new3
                 _lastSlashIndex = string.IsNullOrEmpty(fullPath) ? 0 : (fullPath.Length - 1);
             }
 
-            public override IEnumerable<ITemplateSourceEntry> Children
-            {
-                get { return _cachedChildren ?? (_cachedChildren = CalculateChildren().ToList()); }
-            }
+            public override IEnumerable<ITemplateSourceEntry> Children => _cachedChildren ?? (_cachedChildren = CalculateChildren().ToList());
 
             private IEnumerable<ITemplateSourceEntry> CalculateChildren()
             {
