@@ -22,7 +22,7 @@ After this, the project is ready to be compiled and/or edited further.
 
 `-l`, `--lang [C#|F#]`
 
-Language of the project. Defaults to `C#`. `csharp` (`fsharp`) or `cs` (`fs`) are also valid options.
+Language of the project. Defaults to `C#`. `csharp` ( or `cs` ) and `fsharp` ( or `fs` ) are also valid options.
 
 `-t`, `--type`
 
@@ -41,15 +41,15 @@ Valid values for F# are:
 
 `dotnet new`
     
-    Drops a sample C## project in the current directory.
+    Drops a sample C# project in the current directory.
 
-`dotnet new --lang f##`
+`dotnet new --lang f#`
     
-    Drops a sample F## project in the current directory.
+    Drops a sample F# project in the current directory.
 
-`dotnet new --lang c##`
+`dotnet new --lang c#`
     
-    Drops a sample C## project in the current directory.
+    Drops a sample C# project in the current directory.
 
 # SEE ALSO
 dotnet-run(1)
