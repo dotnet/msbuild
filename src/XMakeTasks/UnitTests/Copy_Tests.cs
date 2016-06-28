@@ -1849,31 +1849,40 @@ namespace Microsoft.Build.UnitTests
     public class CopyHardAndSymbolicLink_Tests : Copy_Tests
     {
         [Fact]
-        public void CopyWihHardAndSymbolicLinks()
+        public void CopyWithHardAndSymbolicLinks()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = @"\\localhost\c$\temp";
+            string temp = Path.GetTempPath();
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
 
-            ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-
-            MockEngine me = new MockEngine(true);
-            Copy t = new Copy
+            try
             {
-                RetryDelayMilliseconds = 1, // speed up tests!
-                UseHardlinksIfPossible = true,
-                UseSymboliclinksIfPossible = true,
-                BuildEngine = me,
-                SourceFiles = sourceFiles,
-                DestinationFolder = new TaskItem(destFolder),
-                SkipUnchangedFiles = true
-            };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
-            bool success = t.Execute();
+                MockEngine me = new MockEngine(true);
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    UseHardlinksIfPossible = true,
+                    UseSymboliclinksIfPossible = true,
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true
+                };
 
-            Assert.False(success);
-            me.AssertLogContains("It can only be one value selected");
+                bool success = t.Execute();
+
+                Assert.False(success);
+
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+            }
+            finally
+            {
+                Helpers.DeleteFiles(sourceFile, destFile);
+            }
         }
     }
 
