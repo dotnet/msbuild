@@ -2,18 +2,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.IO.Compression;
+using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.InternalAbstractions;
-using Newtonsoft.Json.Linq;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Utils;
-using System.IO.Compression;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -38,43 +33,11 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        public static BuildTargetResult CheckPrereqs(BuildTargetContext c)
-        {
-            CheckPrereqCmakePresent(c);
-            CheckPlatformDependencies(c);
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CheckPlatformDependencies(BuildTargetContext c)
-        {
-            CheckCoreclrPlatformDependencies(c);
-            CheckInstallerBuildPlatformDependencies(c);
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CheckCoreclrPlatformDependencies(BuildTargetContext c)
-        {
-            CheckUbuntuCoreclrAndCoreFxDependencies(c);
-            CheckCentOSCoreclrAndCoreFxDependencies(c);
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CheckInstallerBuildPlatformDependencies(BuildTargetContext c)
-        {
-            CheckUbuntuDebianPackageBuildDependencies(c);
-
-            return c.Success();
-        }
-
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
         public static BuildTargetResult Init(BuildTargetContext c)
         {
             GenerateVersions(c);
-            CheckPrereqs(c);
-            LocateStage0(c);
+            CheckPrereqs.Run(s => c.Info(s));
             ExpectedBuildArtifacts(c);
             SetTelemetryProfile(c);
 
@@ -140,29 +103,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        public static BuildTargetResult LocateStage0(BuildTargetContext c)
-        {
-            // We should have been run in the repo root, so locate the stage 0 relative to current directory
-            var stage0 = DotNetCli.Stage0.BinPath;
-
-            if (!Directory.Exists(stage0))
-            {
-                return c.Failed($"Stage 0 directory does not exist: {stage0}");
-            }
-
-            // Identify the version
-            string versionFile = Directory.GetFiles(stage0, ".version", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (string.IsNullOrEmpty(versionFile))
-            {
-                throw new Exception($"'.version' file not found in '{stage0}' folder");
-            }
-
-            var version = File.ReadAllLines(versionFile);
-            c.Info($"Using Stage 0 Version: {version[1]}");
-
-            return c.Success();
-        }
+        
 
         public static BuildTargetResult ExpectedBuildArtifacts(BuildTargetContext c)
         {
@@ -375,130 +316,6 @@ namespace Microsoft.DotNet.Cli.Build
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools"))
                 .Execute()
                 .EnsureSuccessful();
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CheckUbuntuDebianPackageBuildDependencies(BuildTargetContext c)
-        {
-            if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu, "14.04"))
-            {
-                var messageBuilder = new StringBuilder();
-                var aptDependencyUtility = new AptDependencyUtility();
-
-
-                foreach (var package in PackageDependencies.DebianPackageBuildDependencies)
-                {
-                    if (!AptDependencyUtility.PackageIsInstalled(package))
-                    {
-                        messageBuilder.Append($"Error: Debian package build dependency {package} missing.");
-                        messageBuilder.Append(Environment.NewLine);
-                        messageBuilder.Append($"-> install with apt-get install {package}");
-                        messageBuilder.Append(Environment.NewLine);
-                    }
-                }
-
-                if (messageBuilder.Length == 0)
-                {
-                    return c.Success();
-                }
-                else
-                {
-                    return c.Failed(messageBuilder.ToString());
-                }
-            }
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CheckUbuntuCoreclrAndCoreFxDependencies(BuildTargetContext c)
-        {
-            if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu, "14.04"))
-            {
-                var errorMessageBuilder = new StringBuilder();
-                var stage0 = DotNetCli.Stage0.BinPath;
-
-                foreach (var package in PackageDependencies.UbuntuCoreclrAndCoreFxDependencies)
-                {
-                    if (!AptDependencyUtility.PackageIsInstalled(package))
-                    {
-                        errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
-                        errorMessageBuilder.Append(Environment.NewLine);
-                        errorMessageBuilder.Append($"-> install with apt-get install {package}");
-                        errorMessageBuilder.Append(Environment.NewLine);
-                    }
-                }
-
-                if (errorMessageBuilder.Length == 0)
-                {
-                    return c.Success();
-                }
-                else
-                {
-                    return c.Failed(errorMessageBuilder.ToString());
-                }
-            }
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CheckCentOSCoreclrAndCoreFxDependencies(BuildTargetContext c)
-        {
-            if (CurrentPlatform.IsPlatform(BuildPlatform.CentOS))
-            {
-                var errorMessageBuilder = new StringBuilder();
-
-                foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
-                {
-                    if (!YumDependencyUtility.PackageIsInstalled(package))
-                    {
-                        errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
-                        errorMessageBuilder.Append(Environment.NewLine);
-                        errorMessageBuilder.Append($"-> install with yum install {package}");
-                        errorMessageBuilder.Append(Environment.NewLine);
-                    }
-                }
-
-                if (errorMessageBuilder.Length == 0)
-                {
-                    return c.Success();
-                }
-                else
-                {
-                    return c.Failed(errorMessageBuilder.ToString());
-                }
-            }
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult CheckPrereqCmakePresent(BuildTargetContext c)
-        {
-            try
-            {
-                Command.Create("cmake", "--version")
-                    .CaptureStdOut()
-                    .CaptureStdErr()
-                    .Execute();
-            }
-            catch (Exception ex)
-            {
-                string message = $@"Error running cmake: {ex.Message}
-cmake is required to build the native host 'corehost'";
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    message += Environment.NewLine + "Download it from https://www.cmake.org";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    message += Environment.NewLine + "Ubuntu: 'sudo apt-get install cmake'";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    message += Environment.NewLine + "OS X w/Homebrew: 'brew install cmake'";
-                }
-                return c.Failed(message);
-            }
 
             return c.Success();
         }

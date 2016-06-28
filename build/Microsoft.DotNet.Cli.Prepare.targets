@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
-  <UsingTask TaskName="Rid" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="Architecture" AssemblyFile="$(CLIBuildDll)" />
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="PrepareTargets" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="CheckPrereqs" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
+
+  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
+    <PrepareTargets />
+  </Target>
 
   <Target Name="Init" >
     <!-- Current Runtime Information -->
-    <Rid>
-      <Output TaskParameter="OutputRid" PropertyName="Rid" />
-    </Rid>
-    <Architecture>
-      <Output TaskParameter="OutputArchitecture" PropertyName="Architecture" />
-    </Architecture>
+    <GetCurrentRuntimeInformation>
+      <Output TaskParameter="Rid" PropertyName="Rid" />
+      <Output TaskParameter="Architecture" PropertyName="Architecture" />
+      <Output TaskParameter="OSName" PropertyName="OSName" />
+    </GetCurrentRuntimeInformation>
 
     <!-- Common Properties -->
     <PropertyGroup>
@@ -20,28 +24,75 @@
       <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
+      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
     </PropertyGroup>
 
-    <!-- Generates BuildVersion Item
-        BuildVersion Metadata:
-          - Major
-          - Minor
-          - Patch
-          - ReleaseSuffix
-          - CommitHash
-          - CommitCount
-          - VersionSuffix
-          - SimpleVersion
-          - NugetVersion
-          - MsiVersion            -->
     <GenerateBuildVersionInfo RepoRoot="$(RepoRoot)">
-        <Output TaskParameter="OutputBuildVersionInfo"
-                ItemName="BuildVersion" />
+      <Output TaskParameter="VersionMajor" PropertyName="VersionMajor" />
+      <Output TaskParameter="VersionMinor" PropertyName="VersionMinor" />
+      <Output TaskParameter="VersionPatch" PropertyName="VersionPatch" />
+      <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
+      <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
+      <Output TaskParameter="ReleaseSuffix" PropertyName="ReleaseSuffix" />
+      <Output TaskParameter="VersionSuffix" PropertyName="VersionSuffix" />
+      <Output TaskParameter="SimpleVersion" PropertyName="SimpleVersion" />
+      <Output TaskParameter="NugetVersion" PropertyName="NugetVersion" />
+      <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
+      <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
+      <Output TaskParameter="Channel" PropertyName="Channel" />
+      <Output TaskParameter="BranchName" PropertyName="BranchName" />
     </GenerateBuildVersionInfo>
 
     <PropertyGroup>
-      <SdkVersion>@(BuildVersion ->'%(NugetVersion)')</SdkVersion>
+      <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
+      <SdkVersion>$(NugetVersion)</SdkVersion>
+
+      <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
+      <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>
+
+      <InstallerExtension Condition=" '$(OSName)' == 'win' ">.msi</InstallerExtension>
+      <InstallerExtension Condition=" '$(OSName)' == 'osx' ">.pkg</InstallerExtension>
+      <InstallerExtension Condition=" '$(OSName)' == 'ubuntu' ">.deb</InstallerExtension>
+
+      <BundleExtension Condition=" '$(OSName)' == 'win' ">.exe</BundleExtension>
+      <BundleExtension Condition=" '$(OSName)' == 'osx' ">$(InstallerExtension)</BundleExtension>
+      <BundleExtension Condition=" '$(OSName)' == 'ubuntu' ">$(InstallerExtension)</BundleExtension>
+
+      <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' Or '$(Rid)' == 'fedora.23-x64' Or '$(Rid)' == 'opensuse.13.2-x64' ">$(Rid)</ProductMonikerRid>
+      <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
+
+      <!-- Generated Installers + Archives -->
+      <SdkCompressedFile>$(PackagesDirectory)/dotnet-sdk-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</SdkCompressedFile>
+      <SdkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-sdk-$(ProductMonikerRid).$(SdkVersion)$(InstallerExtension)</SdkInstallerFile>
+
+      <CombinedFrameworkSDKHostCompressedFile>$(PackagesDirectory)/dotnet-dev-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</CombinedFrameworkSDKHostCompressedFile>
+      <CombinedFrameworkSDKHostInstallerFile Condition=" '$(BundleExtension)' != '' ">$(PackagesDirectory)/dotnet-dev-$(ProductMonikerRid).$(SdkVersion)$(BundleExtension)</CombinedFrameworkSDKHostInstallerFile>
+
+      <CombinedFrameworkSDKCompressedFile>$(PackagesDirectory)/dotnet-sharedframework-sdk-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</CombinedFrameworkSDKCompressedFile>
+      <CombinedFrameworkSDKInstallerFile Condition=" '$(BundleExtension)' != '' ">$(PackagesDirectory)/dotnet-sharedframework-sdk-$(ProductMonikerRid).$(SdkVersion)$(BundleExtension)</CombinedFrameworkSDKInstallerFile>
+
+      <SdkSymbolsCompressedFile>$(PackagesDirectory)/dotnet-sdk-debug-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</SdkSymbolsCompressedFile>
+      <SdkSymbolsInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-sdk-debug-$(ProductMonikerRid).$(SdkVersion)$(InstallerExtension)</SdkSymbolsInstallerFile>
+
+      <!-- Downloaded Installers + Archives -->
+      <SharedHostCompressedFile>$(PackagesDirectory)/dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(ArchiveExtension)</SharedHostCompressedFile>
+      <SharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</SharedHostInstallerFile>
+
+      <HostFxrCompressedFile>$(PackagesDirectory)/dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(ArchiveExtension)</HostFxrCompressedFile>
+      <HostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</HostFxrInstallerFile>
+
+      <SharedFrameworkCompressedFile>$(PackagesDirectory)/dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</SharedFrameworkCompressedFile>
+      <SharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</SharedFrameworkInstallerFile>
+
+      <CombinedFrameworkHostCompressedFile>$(PackagesDirectory)/dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFile>
+      <CombinedFrameworkHostInstallerFile Condition=" '$(BundleExtension)' != '' ">$(PackagesDirectory)/dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(BundleExtension)</CombinedFrameworkHostInstallerFile>
+
       <SdkBrandName>Microsoft .NET Core 1.0.0 - SDK Preview 2</SdkBrandName>
     </PropertyGroup>
+
+    <CheckPrereqs />
+
+    <!-- SetTelemetryProfile -->
+    <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="https://github.com/dotnet/cli;$(CommitHash)" />
   </Target>
 </Project>
