@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Cli.Build
             if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
             {
                 var cliSdkRoot = c.BuildContext.Get<string>("CLISDKRoot");
-                var upgradeCode = Utils.GenerateGuidFromName(SdkMsi).ToString().ToUpper();
+                var upgradeCode = GenerateGuidFromName.GenerateGuid(SdkMsi).ToString().ToUpper();
                 var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
 
                 Cmd("powershell", "-NoProfile", "-NoLogo",
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
             {
-                var upgradeCode = Utils.GenerateGuidFromName(SdkBundle).ToString().ToUpper();
+                var upgradeCode = GenerateGuidFromName.GenerateGuid(SdkBundle).ToString().ToUpper();
                 var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
 
                 Cmd("powershell", "-NoProfile", "-NoLogo",

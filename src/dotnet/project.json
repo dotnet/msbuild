@@ -60,12 +60,12 @@
       "exclude": "compile"
     },
 
-    "MSBuild": "0.1.0-preview-00024-160610",
-    "Microsoft.Build.Framework": "0.1.0-preview-00024-160610",
-    "Microsoft.Build.Tasks.Core": "0.1.0-preview-00024-160610",
-    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00024-160610",
-    "Microsoft.Build.Targets": "0.1.0-preview-00024-160610",
-    "Microsoft.Build": "0.1.0-preview-00024-160610",
+    "MSBuild": "0.1.0-preview-00028-160627",
+    "Microsoft.Build.Framework": "0.1.0-preview-00028-160627",
+    "Microsoft.Build.Tasks.Core": "0.1.0-preview-00028-160627",
+    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00028-160627",
+    "Microsoft.Build.Targets": "0.1.0-preview-00028-160627",
+    "Microsoft.Build": "0.1.0-preview-00028-160627",
     "Microsoft.Net.Compilers.NetCore": "1.3.0",
     "Microsoft.Net.Compilers.Targets.NetCore": "0.1.5-dev",
     "Microsoft.Cci": "4.0.0-rc3-24128-00",

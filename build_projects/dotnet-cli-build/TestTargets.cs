@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Build
             // "dotnet-compile-fsc.Tests",
             "dotnet-new.Tests",
             "dotnet-pack.Tests",
-            "dotnet-projectmodel-server.Tests",
+            //"dotnet-projectmodel-server.Tests",
             "dotnet-publish.Tests",
             "dotnet-resgen.Tests",
             "dotnet-run.Tests",

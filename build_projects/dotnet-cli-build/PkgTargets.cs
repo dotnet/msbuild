@@ -7,10 +7,11 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.InternalAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class PkgTargets
+    public class PkgTargets : Task
     {
         public static string PkgsIntermediateDir { get; set; }
         public static string SharedHostComponentId { get; set; }
@@ -45,10 +46,19 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
+        public override bool Execute()
+        {
+            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<DebTargets>().CreateBuildContext();
+            BuildTargetContext c = new BuildTargetContext(context, null, null);
+
+            return GeneratePkgs(c).Success;
+        }
+
         public static BuildTargetResult GeneratePkgs(BuildTargetContext c)
         {
             if (CurrentPlatform.IsPlatform(BuildPlatform.OSX))
             {
+                PrepareTargets.Init(c);
                 InitPkg(c);
                 GenerateCLISdkProductArchive(c);
             }

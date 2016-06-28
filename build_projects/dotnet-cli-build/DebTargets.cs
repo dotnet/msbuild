@@ -7,15 +7,25 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.InternalAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DebTargets
+    public class DebTargets : Task
     {
+        public override bool Execute()
+        {
+            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<DebTargets>().CreateBuildContext();
+            BuildTargetContext c = new BuildTargetContext(context, null, null);
+
+            return GenerateDebs(c).Success;
+        }
+
         public static BuildTargetResult GenerateDebs(BuildTargetContext c)
         {
             if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu))
             {
+                PrepareTargets.Init(c);
                 GenerateSdkDeb(c);
             }
 

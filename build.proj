@@ -26,13 +26,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.cs" />
-    <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.json" />
+    <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.cs" Exclude="build_projects/**/obj/**/*.cs" />
+    <DotnetCliBuildFrameworkInputs Include="build_projects/**/project.json;build_projects/**/project.lock.json" />
   </ItemGroup>
+  
+  <!-- Workaround to "Native image cannot be loaded multiple times" issue 
+       A target in the top level file needs to run and invoke a task 
+       https://github.com/Microsoft/msbuild/issues/750 -->
+  <Target Name="MSBuildWorkaroundTarget">
+    <Message Text="Dont remove this target" />
+  </Target>
 
   <Target Name="BuildDotnetCliBuildFramework" 
           Inputs="@(DotnetCliBuildFrameworkInputs)" 
-          Outputs="$(CLIBuildDll)">
+          Outputs="$(CLIBuildDll)"
+          DependsOnTargets="MSBuildWorkaroundTarget">
     <Exec Command="$(PlatformScriptHost) $(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/build$(PlatformScriptExtension) $(NoRunArg)" WorkingDirectory="$(MSBuildThisFileDirectory)"/>
   </Target>
 
@@ -40,7 +48,6 @@
 
   <UsingTask TaskName="CompileTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="TestTargets" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="PackageTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Compile">
@@ -51,13 +58,10 @@
     <TestTargets />
   </Target>
 
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Package">
-    <PackageTargets />
-  </Target>
-
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Publish">
     <PublishTargets />
   </Target>
 
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
 </Project>
