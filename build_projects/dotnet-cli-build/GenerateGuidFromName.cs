@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public override bool Execute()
         {
-            OutputGuid = GenerateGuid(Name).ToString();
+            OutputGuid = GenerateGuid(Name).ToString().ToUpper();
 
             return true;
         }
