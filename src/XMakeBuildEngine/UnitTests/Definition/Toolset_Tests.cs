@@ -174,9 +174,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("v13.0", t.DefaultSubToolsetVersion);
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: This scenario is broken in Roslyn
+        [Fact]
         public void TestDefaultSubToolsetFor40()
         {
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset("4.0");

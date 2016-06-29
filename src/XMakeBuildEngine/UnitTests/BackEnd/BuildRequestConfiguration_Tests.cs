@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.False(configuration.IsActivelyBuilding);
         }
 
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void TestCache()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"

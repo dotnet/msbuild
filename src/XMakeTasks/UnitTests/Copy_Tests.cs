@@ -1962,11 +1962,16 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        [Trait("Category", "nonosxtests")]
-        // Ignore: Flaky test
+        [Fact]
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {
+            // Workaround: For some reason when this test runs with all other tests we are getting
+            // the incorrect result from CreateHardLink error message (a message associated with
+            // another test). Calling GetHRForLastWin32Error / GetExceptionForHR seems to clear
+            // out the previous message and allow us to get the right message in the Copy task.
+            int errorCode = Marshal.GetHRForLastWin32Error();
+            Marshal.GetExceptionForHR(errorCode);
+
             string sourceFile = FileUtilities.GetTemporaryFile();
             string temp = @"\\localhost\c$\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
@@ -1995,22 +2000,24 @@ namespace Microsoft.Build.UnitTests
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles = {new TaskItem(sourceFile)};
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                t.UseHardlinksIfPossible = true;
                 MockEngine me = new MockEngine(true);
-                t.BuildEngine = me;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destFolder);
-                t.SkipUnchangedFiles = true;
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    UseHardlinksIfPossible = true,
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true
+                };
 
                 bool success = t.Execute();
 
                 Assert.True(success); // "success"
                 Assert.True(File.Exists(destFile)); // "destination exists"
-                Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
 
@@ -2056,11 +2063,16 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Flaky test
+        [Fact]
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
         {
+            // Workaround: For some reason when this test runs with all other tests we are getting
+            // the incorrect result from CreateHardLink error message (a message associated with
+            // another test). Calling GetHRForLastWin32Error / GetExceptionForHR seems to clear
+            // out the previous message and allow us to get the right message in the Copy task.
+            int errorCode = Marshal.GetHRForLastWin32Error();
+            Marshal.GetExceptionForHR(errorCode);
+
             string sourceFile = FileUtilities.GetTemporaryFile();
             string temp = Path.GetTempPath();
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
@@ -2081,26 +2093,28 @@ namespace Microsoft.Build.UnitTests
                 // We need to test the fallback code path when we're out of directory entries for a file..
                 for (int n = 0; n < 1025 /* make sure */; n++)
                 {
-                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n.ToString());
+                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
                     NativeMethods.CreateHardLink(destLink, sourceFile, IntPtr.Zero);
                 }
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles = {new TaskItem(sourceFile)};
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                t.UseHardlinksIfPossible = true;
                 MockEngine me = new MockEngine(true);
-                t.BuildEngine = me;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destFolder);
-                t.SkipUnchangedFiles = true;
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    UseHardlinksIfPossible = true,
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true
+                };
 
                 bool success = t.Execute();
 
                 Assert.True(success); // "success"
                 Assert.True(File.Exists(destFile)); // "destination exists"
-                Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
 

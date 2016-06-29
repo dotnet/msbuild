@@ -181,8 +181,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure that if the solution file version doesn't map to a sub-toolset version, we won't try 
         /// to force it to be used.  
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Needs investigation
+        [Fact(Skip = "Needs investigation")]
         public void DefaultSubToolsetIfSolutionVersionSubToolsetDoesntExist()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
@@ -291,9 +290,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Needs investigation
+        [Fact(Skip = "Needs investigation")]
         public void SolutionPassesSubToolsetToChildProjects2()
         {
             string classLibraryContentsToolsV4 = ObjectModelHelpers.CleanupFileContents(
@@ -439,9 +436,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure that, when we're not TV 4.0 -- which even for Dev11 solutions we are not by default -- that we
         /// do not pass VisualStudioVersion down to the child projects.  
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Needs investigation
+        [Fact(Skip = "Needs investigation")]
         public void SolutionDoesntPassSubToolsetToChildProjects()
         {
             try

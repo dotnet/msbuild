@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact(Skip = "Timing issue found on RI candidate from ToolPlat to Main, disabling for RI only.")]
+        [Fact]
         public void Timeout()
         {
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
@@ -89,7 +89,9 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(-1, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
             Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
-            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Errors);
+
+            // ToolTask does not log an error on timeout.
+            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
         }
 
         [Fact]

@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.Build.Shared;
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -329,7 +330,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("recursivedir"));
         }
 
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void GetExecutablePath()
         {
             string path;
@@ -589,7 +590,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath));
@@ -644,7 +644,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.DirectoryExistsNoThrow(inputPath));
@@ -689,7 +688,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.FileExistsNoThrow(inputPath));
@@ -734,7 +732,6 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                currentDirectory = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.Equal(true, FileUtilities.GetFileInfoNoThrow(inputPath) != null);
