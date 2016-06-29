@@ -9,6 +9,12 @@
 
     <Target Name="RestoreNuGetPackagesArchive"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs">
+        <ItemGroup>
+            <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
+            <FilesToClean Include="$(NuGetPackagesArchiveFolder)/**/*" />
+        </ItemGroup>
+
+        <Delete Files="@(FilesToClean)" />
         <RemoveDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)" />
         <MakeDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)"/>
 

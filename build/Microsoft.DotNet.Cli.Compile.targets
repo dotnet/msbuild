@@ -14,7 +14,8 @@
     </Target>
 
     <Target Name="CompileStage1"
-            DependsOnTargets="Init;
+            DependsOnTargets="BuildDotnetCliBuildFramework;
+                              Init;
                               SetupStage1;
                               CompileStage;
                               AfterCompileStage">   
@@ -29,7 +30,8 @@
     </Target>    
 
     <Target Name="CompileStage2"
-            DependsOnTargets="Init;
+            DependsOnTargets="BuildDotnetCliBuildFramework;
+                              Init;
                               SetupStage2;
                               CompileStage;
                               AfterCompileStage;
@@ -103,7 +105,7 @@
               DepsFile="$(SdkOutputDirectory)/csc.deps.json"
               NewName="csc.deps.json" />
 
-        <RemoveAssetFromDepsPackages DepsFile="$(BinaryToCorehostifyRelDir)/csc.deps.json"
+        <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/csc.deps.json"
                                      SectionName="runtimeTargets"
                                      AssetPath="$(BinaryToCorehostifyRelDir)/%(BinariesToRemove.Identity).exe" />
         <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/dotnet.deps.json"
@@ -160,6 +162,7 @@
         <ItemGroup>
           <BinObj Include="$(SrcDirectory)/**/bin/**/*" />
           <BinObj Include="$(SrcDirectory)/**/obj/**/*" />
+          <FilesToRemoveFromStageDirectory Include="$(StageDirectory)/**/*" />
         </ItemGroup>        
 
         <SharedFrameworkNameVersionPath RootOutputDirectory="$(StageDirectory)">
@@ -168,22 +171,29 @@
 
         <Delete Files="@(BinObj)" />
 
+        <Delete Files="@(FilesToRemoveFromStageDirectory)" />
         <RemoveDir Directories="$(StageDirectory)" />
         <MakeDir Directories="$(StageDirectory)"/>      
     </Target>
 
-    <Target Name="AfterCompileStage">
+    <Target Name="AfterCompileStage"
+            DependsOnTargets="RemoveUnnecessaryFiles">
         <ItemGroup>
-            <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
             <FilesToCopy Include="$(StageDirectory)/**/*.*" />
             <PdbsToClean Include="$(StageDirectory)/sdk/**/*.pdb" />
         </ItemGroup>
-
-        <Delete Files="@(FilesToClean)" />
 
         <Copy SourceFiles="@(FilesToCopy)"
             DestinationFiles="@(FilesToCopy->'$(StageSymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
         <Delete Files="@(PdbsToClean)" />
+    </Target>
+
+    <Target Name="RemoveUnnecessaryFiles">
+        <ItemGroup>
+            <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
+        </ItemGroup>
+
+        <Delete Files="@(FilesToClean)" />
     </Target>
 </Project>
