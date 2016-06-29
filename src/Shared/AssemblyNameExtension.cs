@@ -10,8 +10,10 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.IO;
+#if !FEATURE_ASSEMBLY_LOADFROM
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
+#endif
 
 namespace Microsoft.Build.Shared
 {
