@@ -68,7 +68,8 @@
   </Target>
 
   <Target Name="BuildProjectsForNuGetPackages"
-            DependsOnTargets="Init"            
+            DependsOnTargets="Init;
+                              SetupGenerateNugetPackagesInputsOutputs"            
             Condition=" '$(OS)' == 'Windows_NT' ">
         <MakeDir Directories="$(PackagingBuildBasePath)" />
 
