@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
-  <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
-
   <PropertyGroup>
     <!--
       $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
@@ -11,15 +8,10 @@
     <PlatformScriptHost Condition=" '$(OS)' != 'Windows_NT' "></PlatformScriptHost>
 
     <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
-    <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>    
+    <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
 
     <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
     <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
-    
-    <CR>%0D</CR>
-    <LF>%0A</LF>
-    <NewLine Condition=" '$(OSName)' == 'win' ">$(LF)</NewLine>
-    <NewLine Condition=" '$(OSName)' != 'win' ">$(CR)$(LF)</NewLine>
 
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
@@ -54,12 +46,12 @@
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
-  <UsingTask TaskName="PrepareTargets" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="CompileTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="TestTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
 
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
-    <PrepareTargets />
+  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Compile">
+    <CompileTargets />
   </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Test">

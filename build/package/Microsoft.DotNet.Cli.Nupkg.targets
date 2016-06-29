@@ -13,7 +13,6 @@
     <ItemGroup>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils" >
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
-<<<<<<< 2ed5363187bc82b73720ea0288bcb27b5d793e76
         <Version>$(SdkProjectJsonVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common">
@@ -66,16 +65,5 @@
                   --output $(NupkgOutputDirectory)
                   --configuration $(Configuration)
                   --version-suffix $(NupkgVersionSuffix)" />
-  </Target>
-
-  <Target Name="BuildProjectsForNuGetPackages"
-            DependsOnTargets="Init"            
-            Condition=" '$(OS)' == 'Windows_NT' ">
-        <MakeDir Directories="$(PackagingBuildBasePath)" />
-
-        <Exec Command="$(DotnetStage2) build
-                      --build-base-path $(PackagingBuildBasePath)
-                      --configuration $(Configuration)
-                      %(ProjectsToPack.Identity)" />
   </Target>
 </Project>
