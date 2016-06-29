@@ -10,10 +10,15 @@
     <PlatformScriptHost Condition=" '$(OS)' != 'Windows_NT' "></PlatformScriptHost>
 
     <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
-    <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
+    <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>    
 
     <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
     <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
+    
+    <CR>%0D</CR>
+    <LF>%0A</LF>
+    <NewLine Condition=" '$(OSName)' == 'win' ">$(LF)</NewLine>
+    <NewLine Condition=" '$(OSName)' != 'win' ">$(CR)$(LF)</NewLine>
 
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
@@ -49,12 +54,12 @@
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
-  <UsingTask TaskName="CompileTargets" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="PrepareTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="TestTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
 
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Compile">
-    <CompileTargets />
+  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
+    <PrepareTargets />
   </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Test">
@@ -66,5 +71,6 @@
   </Target>
 
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
 </Project>

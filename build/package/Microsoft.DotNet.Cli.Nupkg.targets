@@ -66,4 +66,15 @@
                   --configuration $(Configuration)
                   --version-suffix $(NupkgVersionSuffix)" />
   </Target>
+
+  <Target Name="BuildProjectsForNuGetPackages"
+            DependsOnTargets="Init"            
+            Condition=" '$(OS)' == 'Windows_NT' ">
+        <MakeDir Directories="$(PackagingBuildBasePath)" />
+
+        <Exec Command="$(DotnetStage2) build
+                      --build-base-path $(PackagingBuildBasePath)
+                      --configuration $(Configuration)
+                      %(ProjectsToPack.Identity)" />
+  </Target>
 </Project>
