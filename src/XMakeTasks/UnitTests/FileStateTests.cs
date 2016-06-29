@@ -3,14 +3,8 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using System.Globalization;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

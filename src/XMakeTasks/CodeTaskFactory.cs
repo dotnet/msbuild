@@ -725,8 +725,6 @@ namespace Microsoft.Build.Tasks
                     _sourceCode = File.ReadAllText(_sourcePath);
                 }
 
-                string fullCode = _sourceCode;
-
                 // A fragment is essentially the contents of the execute method (except the final return true/false)
                 // A method is the whole execute method specified
                 // Anything else assumes that the whole class is being supplied
@@ -764,7 +762,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Our code generation is complete, grab the source from the builder ready for compilation
-                fullCode = codeBuilder.ToString();
+                string fullCode = codeBuilder.ToString();
 
                 FullTaskSpecification fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 Assembly existingAssembly;

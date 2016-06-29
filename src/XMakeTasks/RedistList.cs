@@ -823,10 +823,10 @@ namespace Microsoft.Build.Tasks
                             // We do not need to add the redistName and the framework directory because this will be the same for all entries in the current redist list being read.
                             string hashIndex = String.Format(CultureInfo.InvariantCulture, "{0},{1}", newEntry.FullName, newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString());
 
-                            AssemblyEntry dictionaryEntry = null;
+                            AssemblyEntry dictionaryEntry;
                             assemblyEntries.TryGetValue(hashIndex, out dictionaryEntry);
                             // If the entry is not in the hashtable or the entry is in the hashtable but the new entry has the ingac flag true, make sure the hashtable contains the entry with the ingac true.
-                            if (dictionaryEntry == null || (dictionaryEntry != null && newEntry.InGAC))
+                            if (dictionaryEntry == null || newEntry.InGAC)
                             {
                                 assemblyEntries[hashIndex] = newEntry;
                             }

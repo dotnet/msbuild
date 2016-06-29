@@ -991,8 +991,8 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            AssemblyNameExtension[] dependentAssemblies = null;
-            FrameworkName frameworkName = null;
+            AssemblyNameExtension[] dependentAssemblies;
+            FrameworkName frameworkName;
             _getAssemblyMetadata
             (
                 reference.FullPath,
@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.Tasks
                     // We will remove the dependency to mscorlib from the list of dependencies so it is not used for resolution or unification.
                     bool isMscorlib = IsPseudoAssembly(dependentAssemblies[i].Name);
 
-                    if (!isMscorlib || (isMscorlib && dependentAssemblies[i].Version.Major != 255))
+                    if (!isMscorlib || dependentAssemblies[i].Version.Major != 255)
                     {
                         dependencies.Add(dependentAssemblies[i]);
                     }

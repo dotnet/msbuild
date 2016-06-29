@@ -59,7 +59,7 @@ namespace Microsoft.Build.Execution
 
             set
             {
-                ErrorUtilities.VerifyThrow(_instanceForMainThread == null || (_instanceForMainThread != null && value == null) || (_instanceForMainThread == value), "Should not assign to instanceForMainThread twice without cleaning it");
+                ErrorUtilities.VerifyThrow(_instanceForMainThread == null || value == null || _instanceForMainThread == value, "Should not assign to instanceForMainThread twice without cleaning it");
                 _instanceForMainThread = value;
             }
         }

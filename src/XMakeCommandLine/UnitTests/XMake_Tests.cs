@@ -535,7 +535,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.SetConsoleUI();
 
             // Make sure this doesn't throw an exception.
-            string bar = String.Format(CultureInfo.CurrentUICulture, "{0}", (int)1);
+            string bar = String.Format(CultureInfo.CurrentUICulture, "{0}", 1);
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
@@ -665,7 +665,6 @@ namespace Microsoft.Build.UnitTests
             psi.UseShellExecute = false;
             psi.Arguments = parameters;
             string output = String.Empty;
-            int exitCode = 1;
             Process p = new Process();
             p.EnableRaisingEvents = true;
             p.StartInfo = psi;
@@ -693,15 +692,14 @@ namespace Microsoft.Build.UnitTests
             p.BeginErrorReadLine();
             p.StandardInput.Close();
             p.WaitForExit();
-
-            exitCode = p.ExitCode;
+            int exitCode = p.ExitCode;
             p.Close();
 
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
             Console.WriteLine("==============");
 
-            Assert.Equal(expectSuccess, (exitCode == 0));
+            Assert.Equal(expectSuccess, exitCode == 0);
 
             return output;
         }

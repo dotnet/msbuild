@@ -322,7 +322,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 lock (_lockObject)
                 {
-                    _nextProjectId = _nextProjectId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
+                    _nextProjectId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
                     return _nextProjectId;
                 }
             }

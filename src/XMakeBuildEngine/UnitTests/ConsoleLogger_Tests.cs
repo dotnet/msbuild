@@ -2137,12 +2137,6 @@ namespace Microsoft.Build.UnitTests
             //Create a simulated console
             SimulatedConsole sc = new SimulatedConsole();
 
-            // error and warning string for 1 error and 1 warning
-            // errorString = 1 Error(s)
-            // warningString = 1 Warning(s)
-            string errorString = ResourceUtilities.FormatResourceString("ErrorCount", 1);
-            string warningString = ResourceUtilities.FormatResourceString("WarningCount", 1);
-
             // Create a ConsoleLogger with Normal verbosity
             ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal,
                                                 sc.Write, sc.SetColor, sc.ResetColor);
@@ -2206,9 +2200,9 @@ namespace Microsoft.Build.UnitTests
             Assert.False(actualLog.Contains("<yellow>"));
 
             // errorString = 0 Error(s)
-            errorString = ResourceUtilities.FormatResourceString("ErrorCount", 0);
+            string errorString = ResourceUtilities.FormatResourceString("ErrorCount", 0);
             // warningString = 0 Warning(s)
-            warningString = ResourceUtilities.FormatResourceString("WarningCount", 0);
+            string warningString = ResourceUtilities.FormatResourceString("WarningCount", 0);
 
             // Verify that the log has correct error and warning string
             Assert.True(actualLog.Contains(errorString));

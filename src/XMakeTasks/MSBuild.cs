@@ -545,7 +545,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool BuildProjectsInParallel(Hashtable propertiesTable, string[] undefinePropertiesArray, ArrayList targetLists, bool success, bool[] skipProjects)
         {
-            ITaskItem[] projectToBuildInParallel = Projects;
             // There were some projects that were skipped so we need to recreate the
             // project array with those projects removed
             List<ITaskItem> projectsToBuildArrayList = new List<ITaskItem>();
@@ -556,7 +555,7 @@ namespace Microsoft.Build.Tasks
                     projectsToBuildArrayList.Add(Projects[i]);
                 }
             }
-            projectToBuildInParallel = projectsToBuildArrayList.ToArray();
+            ITaskItem[] projectToBuildInParallel = projectsToBuildArrayList.ToArray();
 
             // Make the call to build the projects
             if (projectToBuildInParallel.Length > 0)
