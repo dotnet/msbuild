@@ -57,9 +57,9 @@
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
       <SdkVersion>$(NugetVersion)</SdkVersion>
       
-      <SdkProjectJsonVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-preview3-$(CommitCount)</SdkProjectJsonVersion>
-      <ProjectModelProjectJsonVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelProjectJsonVersion>
-      <DependencyModelAndInternalAbstractionsProjectJsonVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsProjectJsonVersion>
+      <SdkNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-preview3-$(CommitCount)</SdkNugetVersion>
+      <ProjectModelNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelNugetVersion>
+      <DependencyModelAndInternalAbstractionsNugetVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsNugetVersion>
 
       <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
       <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>
@@ -86,18 +86,16 @@
       <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedFrameworkSdk>
 
       <!-- Downloaded Installers + Archives -->
-      <SharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</SharedHostInstallerFileName>
-      <SharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(SharedHostInstallerFileName)</SharedHostInstallerFile>
+      <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
+      <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
 
-      <HostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</HostFxrInstallerFileName>
-      <HostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(HostFxrInstallerFileName)</HostFxrInstallerFile>
+      <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
+      <DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedHostFxrInstallerFileName)</DownloadedHostFxrInstallerFile>
 
-      <SharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</SharedFrameworkInstallerFileName>
-      <SharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(SharedFrameworkInstallerFileName)</SharedFrameworkInstallerFile>
+      <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
+      <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
 
       <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
-
-      <SdkBrandName>Microsoft .NET Core 1.0.0 - SDK Preview 2</SdkBrandName>
     </PropertyGroup>
 
     <CheckPrereqs />
@@ -124,24 +122,24 @@
         <ExtractDestintation>$(SharedFrameworkPublishDirectory)</ExtractDestintation>
       </_DownloadAndExtractItem>
 
-      <_DownloadAndExtractItem Include="SharedFrameworkInstallerFile"
-                               Condition="!Exists('$(SharedFrameworkInstallerFile)')">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(SharedFrameworkInstallerFileName)</Url>
-        <DownloadFileName>$(SharedFrameworkInstallerFile)</DownloadFileName>
+      <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
+                               Condition="!Exists('$(DownloadedSharedFrameworkInstallerFile)')">
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)</Url>
+        <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
-      <_DownloadAndExtractItem Include="SharedHostInstallerFile"
-                               Condition="!Exists('$(SharedHostInstallerFile)')">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(SharedHostInstallerFileName)</Url>
-        <DownloadFileName>$(SharedHostInstallerFile)</DownloadFileName>
+      <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
+                               Condition="!Exists('$(DownloadedSharedHostInstallerFile)')">
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)</Url>
+        <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
-      <_DownloadAndExtractItem Include="HostFxrInstallerFile"
-                               Condition="!Exists('$(HostFxrInstallerFile)')">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(HostFxrInstallerFileName)</Url>
-        <DownloadFileName>$(HostFxrInstallerFile)</DownloadFileName>
+      <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
+                               Condition="!Exists('$(DownloadedHostFxrInstallerFile)')">
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)</Url>
+        <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
     </ItemGroup>

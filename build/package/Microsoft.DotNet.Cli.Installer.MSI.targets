@@ -26,11 +26,6 @@
 
         <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
         <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
-
-        <!-- Rename is intentional to reduce confusion over generated vs downloaded msi's -->
-        <DownloadedSharedFrameworkInstallerFile>$(SharedFrameworkInstallerFile)</DownloadedSharedFrameworkInstallerFile> 
-        <DownloadedHostFxrInstallerFile>$(HostFxrInstallerFile)</DownloadedHostFxrInstallerFile>
-        <DownloadedSharedHostInstallerFile>$(SharedHostInstallerFile)</DownloadedSharedHostInstallerFile>
       </PropertyGroup>
 
       <!-- Consumed By Publish -->
@@ -60,22 +55,22 @@
             Inputs="$(WixDownloadSentinel)"
             Outputs="$(WixDestinationPath)">
 
-        <!-- Setup sentinel to take advantage of incrementality -->
-        <MakeDir Directories="$(WixRoot)" />
-        <WriteLinesToFile
-            File="$(WixDownloadSentinel)"
-            Lines="$(WixVersion)"
-            Overwrite="true"
-            Encoding="Unicode"/>
+      <!-- Setup sentinel to take advantage of incrementality -->
+      <MakeDir Directories="$(WixRoot)" />
+      <WriteLinesToFile
+          File="$(WixDownloadSentinel)"
+          Lines="$(WixVersion)"
+          Overwrite="true"
+          Encoding="Unicode"/>
         
-        <DownloadFile
-            Uri="$(WixDownloadUrl)"
-            DestinationPath="$(WixDestinationPath)"
-            Overwrite="false" />
+      <DownloadFile
+          Uri="$(WixDownloadUrl)"
+          DestinationPath="$(WixDestinationPath)"
+          Overwrite="false" />
 
-        <ExtractArchive
-            InputFile="$(WixDestinationPath)"
-            DestinationDirectory="$(WixRoot)" />
+      <ExtractArchive
+          InputFile="$(WixDestinationPath)"
+          DestinationDirectory="$(WixRoot)" />
 
     </Target>
 
@@ -86,16 +81,16 @@
                     $(SdkGenerateMsiPowershellScript)"
             Outputs="$(SdkInstallerFile)">
 
-        <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateMsiPowershellScript)
-                       '$(SdkLayoutOutputDirectory)'
-                       '$(SdkInstallerFile)'
-                       '$(WixRoot)'
-                       '$(SdkBrandName)'
-                       '$(MsiVersion)'
-                       '$(SimpleVersion)'
-                       '$(NugetVersion)'
-                       '$(SdkInstallerUpgradeCode)'
-                       '$(Architecture)'" />
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateMsiPowershellScript)
+                      '$(SdkLayoutOutputDirectory)'
+                      '$(SdkInstallerFile)'
+                      '$(WixRoot)'
+                      '$(SdkBrandName)'
+                      '$(MsiVersion)'
+                      '$(SimpleVersion)'
+                      '$(NugetVersion)'
+                      '$(SdkInstallerUpgradeCode)'
+                      '$(Architecture)'" />
     </Target>
 
     <Target Name="GenerateSdkBundle"
@@ -108,19 +103,19 @@
                     $(SdkGenerateBundlePowershellScript)"
             Outputs="$(CombinedFrameworkSdkHostInstallerFile)">
 
-        <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateBundlePowershellScript)
-                       '$(SdkInstallerFile)'
-                       '$(DownloadedSharedFrameworkInstallerFile)'
-                       '$(DownloadedHostFxrInstallerFile)'
-                       '$(DownloadedSharedHostInstallerFile)'
-                       '$(CombinedFrameworkSdkHostInstallerFile)'
-                       '$(WixRoot)'
-                       '$(SdkBrandName)'
-                       '$(MsiVersion)'
-                       '$(SimpleVersion)'
-                       '$(NugetVersion)'
-                       '$(CombinedFrameworkSDKHostInstallerUpgradeCode)'
-                       '$(Architecture)'" />
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateBundlePowershellScript)
+                      '$(SdkInstallerFile)'
+                      '$(DownloadedSharedFrameworkInstallerFile)'
+                      '$(DownloadedHostFxrInstallerFile)'
+                      '$(DownloadedSharedHostInstallerFile)'
+                      '$(CombinedFrameworkSdkHostInstallerFile)'
+                      '$(WixRoot)'
+                      '$(SdkBrandName)'
+                      '$(MsiVersion)'
+                      '$(SimpleVersion)'
+                      '$(NugetVersion)'
+                      '$(CombinedFrameworkSDKHostInstallerUpgradeCode)'
+                      '$(Architecture)'" />
     </Target>
 
     <Target Name="TestSdkMsi" 
@@ -129,15 +124,15 @@
             DependsOnTargets="Init;MsiTargetsSetupInputOutputs;GenerateSdkMsi"
             Condition=" '$(OS)' == 'Windows_NT'" >
 
-        <Exec Command ="powershell -NoProfile -NoLogo $(SdkTestMsiPowershellScript)
-                        -InputMsi '$(SdkInstallerFile)'
-                        -DotnetDir '$(OutputDirectory)'" />
+      <Exec Command ="powershell -NoProfile -NoLogo $(SdkTestMsiPowershellScript)
+                      -InputMsi '$(SdkInstallerFile)'
+                      -DotnetDir '$(OutputDirectory)'" />
 
-        <WriteLinesToFile
-            File="$(SdkMsiTestedSentinel)"
-            Lines="$(SdkVersion)"
-            Overwrite="true"
-            Encoding="Unicode"/>
+      <WriteLinesToFile
+          File="$(SdkMsiTestedSentinel)"
+          Lines="$(SdkVersion)"
+          Overwrite="true"
+          Encoding="Unicode"/>
     </Target>
 
     <Target Name="GenerateMsis" 
@@ -152,14 +147,14 @@
 
     <!-- These targets are used in signing, don't remove them! -->
     <Target Name="ExtractEngineFromSdkBundle">
-        <Exec Command="$(WixRoot)/insignia.exe 
-                       -ib $(CombinedFrameworkSdkHostInstallerFile) 
-                       -o $(CombinedFrameworkSdkHostBundleEngineName)" />
+      <Exec Command="$(WixRoot)/insignia.exe 
+                      -ib $(CombinedFrameworkSdkHostInstallerFile) 
+                      -o $(CombinedFrameworkSdkHostBundleEngineName)" />
     </Target>
 
     <Target Name="ReattachEngineToSdkBundle">
-        <Exec Command="$(WixRoot)/insignia.exe 
-                       -ab $(CombinedFrameworkSdkHostInstallerFile) 
-                       -o $(CombinedFrameworkSdkHostBundleEngineName)" />
+      <Exec Command="$(WixRoot)/insignia.exe 
+                      -ab $(CombinedFrameworkSdkHostInstallerFile) 
+                      -o $(CombinedFrameworkSdkHostBundleEngineName)" />
     </Target>
 </Project>
