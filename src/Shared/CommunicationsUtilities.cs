@@ -18,7 +18,9 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using System.Reflection;
+#if !FEATURE_APM
 using System.Threading.Tasks;
+#endif
 
 namespace Microsoft.Build.Internal
 {
@@ -448,6 +450,7 @@ namespace Microsoft.Build.Internal
             return result;
         }
 
+#if !FEATURE_APM
         internal static async Task<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
         {
             int totalBytesRead = 0;
@@ -462,6 +465,7 @@ namespace Microsoft.Build.Internal
             }
             return totalBytesRead;
         }
+#endif
 
         /// <summary>
         /// Given the appropriate information, return the equivalent TaskHostContext.  

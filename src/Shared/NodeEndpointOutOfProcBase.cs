@@ -21,7 +21,9 @@ using System.Security;
 using System.Security.AccessControl;
 #endif
 using System.Security.Principal;
+#if !FEATURE_APM
 using System.Threading.Tasks;
+#endif
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
