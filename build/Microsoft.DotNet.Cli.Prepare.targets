@@ -5,12 +5,13 @@
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="CheckPrereqs" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
     <PrepareTargets />
   </Target>
 
-  <Target Name="Init" >
+  <Target Name="Init">
     <!-- Current Runtime Information -->
     <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="Rid" />
@@ -20,6 +21,11 @@
 
     <!-- Common Properties -->
     <PropertyGroup>
+      <Stage0Path Condition=" '$(OSName)' == 'win' ">$(RepoRoot)/.dotnet_stage0/Windows/$(Architecture)</Stage0Path>
+      <Stage0Path Condition=" '$(OSName)' == 'osx' ">$(RepoRoot)/.dotnet_stage0/Darwin</Stage0Path>
+      <Stage0Path Condition=" '$(Stage0Path)' == '' ">$(RepoRoot)/.dotnet_stage0/Linux</Stage0Path>
+      <DotNetPath>$(Stage0Path)</DotNetPath>
+
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
       <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
@@ -95,4 +101,12 @@
     <!-- SetTelemetryProfile -->
     <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="https://github.com/dotnet/cli;$(CommitHash)" />
   </Target>
+
+  <Target DependsOnTargets="Init" Name="RestorePackages">
+
+    <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
+    <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
+    
+  </Target>
+
 </Project>
