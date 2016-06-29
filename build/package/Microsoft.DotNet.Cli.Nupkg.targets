@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Target Name="SetupGenerateNugetPackagesInputsOutputs"
+          DependsOnTargets="Init">
+    <PropertyGroup>
+      <NupkgVersionSuffix>$(CommitCount)</NupkgVersionSuffix>
+      <ProjectsSrcDirectory>$(RepoRoot)/src</ProjectsSrcDirectory>
+      <PackagingBuildBasePath>$(Stage2CompilationDirectory)/forPackaging</PackagingBuildBasePath>
+      <NupkgOutputDirectory>$(PackagesDirectory)</NupkgOutputDirectory>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils" >
+        <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
+        <Version>$(SdkProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common">
+        <ProjectName>Microsoft.DotNet.Compiler.Common</ProjectName>
+        <Version>$(SdkProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Files">
+        <ProjectName>Microsoft.DotNet.Files</ProjectName>
+        <Version>$(SdkProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions">
+        <ProjectName>Microsoft.DotNet.InternalAbstractions</ProjectName>
+        <Version>$(DependencyModelAndInternalAbstractionsProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel">
+        <ProjectName>Microsoft.DotNet.ProjectModel</ProjectName>
+        <Version>$(ProjectModelProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader">
+        <ProjectName>Microsoft.DotNet.ProjectModel.Loader</ProjectName>
+        <Version>$(SdkProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces">
+        <ProjectName>Microsoft.DotNet.ProjectModel.Workspaces</ProjectName>
+        <Version>$(SdkProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.DependencyModel">
+        <ProjectName>Microsoft.Extensions.DependencyModel</ProjectName>
+        <Version>$(DependencyModelAndInternalAbstractionsProjectJsonVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions">
+        <ProjectName>Microsoft.Extensions.Testing.Abstractions</ProjectName>
+        <Version>$(SdkProjectJsonVersion)</Version>
+      </ProjectsToPack>
+
+      <ProjectPackTargetInputs Include="$(PackagingBuildBasePath)/src/%(ProjectsToPack.ProjectName)/**/netstandard*/%(ProjectName).dll" />
+      <ProjectPackTargetOutputs Include="$(NupkgOutputDirectory)/%(ProjectsToPack.ProjectName).%(ProjectsToPack.Version).nupkg" />
+    
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GenerateNugetPackages"
+          DependsOnTargets="SetupGenerateNugetPackagesInputsOutputs"
+          Inputs="@(ProjectPackTargetInputs -> '%(Identity)')"
+          Outputs="@(ProjectPackTargetOutputs -> '%(Identity)')">
+    
+    <Exec Command="dotnet pack %(ProjectsToPack.Identity) 
+                  --no-build 
+                  --build-base-path $(PackagingBuildBasePath) 
+                  --output $(NupkgOutputDirectory)
+                  --configuration $(Configuration)
+                  --version-suffix $(NupkgVersionSuffix)" />
+  </Target>
+</Project>

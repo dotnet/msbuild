@@ -113,6 +113,4 @@ if(!(Test-Path $DotnetBundleOutput))
 
 Write-Host -ForegroundColor Green "Successfully created dotnet bundle - $DotnetBundleOutput"
 
-_ $RepoRoot\test\Installer\testmsi.ps1 @("$CLISDKMSIFile")
-
 exit $LastExitCode

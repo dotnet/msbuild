@@ -2,7 +2,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [Parameter(Mandatory=$true)][string]$inputMsi
+    [string]$InputMsi,
+    [string]$DotnetDir
 )
 
 . "$PSScriptRoot\..\..\scripts\common\_common.ps1"
@@ -38,7 +39,7 @@ $testName = "Microsoft.DotNet.Cli.Msi.Tests"
 $testDir="$PSScriptRoot\$testName"
 $testBin="$RepoRoot\artifacts\tests\$testName"
 
-pushd "$Stage2Dir"
+pushd "$DotnetDir"
 
 try {
     .\dotnet restore `

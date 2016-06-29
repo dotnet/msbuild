@@ -31,6 +31,7 @@
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
+      <SymbolsOutputDirectory>$(BaseOutputDirectory)/stage2symbols</SymbolsOutputDirectory>
     </PropertyGroup>
 
     <GenerateBuildVersionInfo RepoRoot="$(RepoRoot)">
@@ -52,6 +53,10 @@
     <PropertyGroup>
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
       <SdkVersion>$(NugetVersion)</SdkVersion>
+      
+      <SdkProjectJsonVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-preview3-$(CommitCount)</SdkProjectJsonVersion>
+      <ProjectModelProjectJsonVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelProjectJsonVersion>
+      <DependencyModelAndInternalAbstractionsProjectJsonVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsProjectJsonVersion>
 
       <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
       <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>
@@ -67,18 +72,15 @@
       <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' Or '$(Rid)' == 'fedora.23-x64' Or '$(Rid)' == 'opensuse.13.2-x64' ">$(Rid)</ProductMonikerRid>
       <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
 
-      <!-- Generated Installers + Archives -->
-      <SdkCompressedFile>$(PackagesDirectory)/dotnet-sdk-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</SdkCompressedFile>
-      <SdkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-sdk-$(ProductMonikerRid).$(SdkVersion)$(InstallerExtension)</SdkInstallerFile>
+      <ArtifactNameSdk>dotnet-sdk</ArtifactNameSdk>
+      <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
+      <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-dev</ArtifactNameCombinedHostHostFxrFrameworkSdk>
+      <ArtifactNameCombinedFrameworkSdk>dotnet-sharedframework-sdk</ArtifactNameCombinedFrameworkSdk>
 
-      <CombinedFrameworkSDKHostCompressedFile>$(PackagesDirectory)/dotnet-dev-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</CombinedFrameworkSDKHostCompressedFile>
-      <CombinedFrameworkSDKHostInstallerFile Condition=" '$(BundleExtension)' != '' ">$(PackagesDirectory)/dotnet-dev-$(ProductMonikerRid).$(SdkVersion)$(BundleExtension)</CombinedFrameworkSDKHostInstallerFile>
-
-      <CombinedFrameworkSDKCompressedFile>$(PackagesDirectory)/dotnet-sharedframework-sdk-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</CombinedFrameworkSDKCompressedFile>
-      <CombinedFrameworkSDKInstallerFile Condition=" '$(BundleExtension)' != '' ">$(PackagesDirectory)/dotnet-sharedframework-sdk-$(ProductMonikerRid).$(SdkVersion)$(BundleExtension)</CombinedFrameworkSDKInstallerFile>
-
-      <SdkSymbolsCompressedFile>$(PackagesDirectory)/dotnet-sdk-debug-$(ProductMonikerRid).$(SdkVersion)$(ArchiveExtension)</SdkSymbolsCompressedFile>
-      <SdkSymbolsInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-sdk-debug-$(ProductMonikerRid).$(SdkVersion)$(InstallerExtension)</SdkSymbolsInstallerFile>
+      <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdk>
+      <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdkDebug>
+      <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
+      <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedFrameworkSdk>
 
       <!-- Downloaded Installers + Archives -->
       <SharedHostCompressedFile>$(PackagesDirectory)/dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(ArchiveExtension)</SharedHostCompressedFile>
