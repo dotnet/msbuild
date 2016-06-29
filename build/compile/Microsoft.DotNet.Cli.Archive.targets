@@ -1,0 +1,43 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Target Name="GenerateNuGetPackagesArchive"
+            DependsOnTargets="RestoreNuGetPackagesArchive;
+                              CompressNuGetPackagesArchive"
+            Inputs="$(Stage2Directory)/sdk/**/dotnet.dll"
+            Outputs="$(FinalArchive)">
+        <Message Text="Generating NuGet Packages Archive" />
+    </Target>
+
+    <Target Name="RestoreNuGetPackagesArchive"
+            DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs">
+        <RemoveDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)" />
+        <MakeDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)"/>
+
+        <Exec Command="$(DotnetStage2) new" WorkingDirectory="$(NuGetPackagesArchiveProject)" />
+        <Exec Command="$(DotnetStage2) restore --packages $(NuGetPackagesArchiveFolder)"
+            WorkingDirectory="$(NuGetPackagesArchiveProject)" />
+    </Target>
+
+    <Target Name="CompressNuGetPackagesArchive"
+            DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs">
+        <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />
+
+        <Message Text="Publishing Archiver" />
+        <Exec Command="$(DotnetStage2) publish --output $(ToolsOutputDirectory) --configuration $(Configuration)" 
+            WorkingDirectory="$(RepoRoot)/tools/Archiver" />
+
+        <Exec Command="$(ArchiverExe) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
+
+        <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(FinalArchive)" />
+    </Target>
+
+    <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
+            DependsOnTargets="Init">
+        <PropertyGroup>
+            <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
+            <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
+            <ArchiverExe>$(ToolsOutputDirectory)/Archiver</ArchiverExe>
+            <IntermediateArchive>$(IntermediateDirectory)/nuGetPackagesArchive.lzma</IntermediateArchive>
+            <FinalArchive>$(Stage2Directory)/nuGetPackagesArchive.lzma</FinalArchive>
+        </PropertyGroup>
+    </Target>
+</Project>
