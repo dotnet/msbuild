@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     
     <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
-    <UsingTask TaskName="DecompressZip" AssemblyFile="$(CLIBuildDll)" />
+    <UsingTask TaskName="ExtractArchive" AssemblyFile="$(CLIBuildDll)" />
     <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(CLIBuildDll)" />
 
     <Target Name="MsiTargetsSetupInputOutputs" DependsOnTargets="Init">
@@ -73,8 +73,8 @@
             DestinationPath="$(WixDestinationPath)"
             Overwrite="false" />
 
-        <DecompressZip
-            InputZip="$(WixDestinationPath)"
+        <ExtractArchive
+            InputFile="$(WixDestinationPath)"
             DestinationDirectory="$(WixRoot)" />
 
     </Target>

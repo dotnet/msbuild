@@ -5,8 +5,6 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public abstract class DotNetTool : ToolTask
     {
-        private const string ExeName = "dotnet.exe";
-
         public DotNetTool()
         {
         }
@@ -19,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string ToolName
         {
-            get { return ExeName; }
+            get { return HostArtifactNames.DotnetHostBaseName; }
         }
 
         protected override MessageImportance StandardOutputLoggingImportance
@@ -34,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Build
             // if ToolPath was not provided by the MSBuild script 
             if (string.IsNullOrEmpty(path))
             {
-                Log.LogError($"Could not find the Path to {ExeName}");
+                Log.LogError($"Could not find the Path to {ToolName}");
 
                 return string.Empty;
             }

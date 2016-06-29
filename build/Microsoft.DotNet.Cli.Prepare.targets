@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="PrepareTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="CheckPrereqs" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="ExtractArchive" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="ArchiveDirectory" AssemblyFile="$(CLIBuildDll)" />
 
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
-    <PrepareTargets />
-  </Target>
+  <Target Name="Prepare"
+          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestorePackages;ZipTemplates" />
 
-  <Target Name="Init">
+  <Target Name="Init"
+          DependsOnTargets="BuildDotnetCliBuildFramework">
     <!-- Current Runtime Information -->
     <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="Rid" />
@@ -32,6 +34,7 @@
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SymbolsOutputDirectory>$(BaseOutputDirectory)/stage2symbols</SymbolsOutputDirectory>
+      <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
     </PropertyGroup>
 
     <GenerateBuildVersionInfo RepoRoot="$(RepoRoot)">
@@ -83,17 +86,16 @@
       <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedFrameworkSdk>
 
       <!-- Downloaded Installers + Archives -->
-      <SharedHostCompressedFile>$(PackagesDirectory)/dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(ArchiveExtension)</SharedHostCompressedFile>
-      <SharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</SharedHostInstallerFile>
+      <SharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</SharedHostInstallerFileName>
+      <SharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(SharedHostInstallerFileName)</SharedHostInstallerFile>
 
-      <HostFxrCompressedFile>$(PackagesDirectory)/dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(ArchiveExtension)</HostFxrCompressedFile>
-      <HostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</HostFxrInstallerFile>
+      <HostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</HostFxrInstallerFileName>
+      <HostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(HostFxrInstallerFileName)</HostFxrInstallerFile>
 
-      <SharedFrameworkCompressedFile>$(PackagesDirectory)/dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</SharedFrameworkCompressedFile>
-      <SharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</SharedFrameworkInstallerFile>
+      <SharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</SharedFrameworkInstallerFileName>
+      <SharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(SharedFrameworkInstallerFileName)</SharedFrameworkInstallerFile>
 
-      <CombinedFrameworkHostCompressedFile>$(PackagesDirectory)/dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFile>
-      <CombinedFrameworkHostInstallerFile Condition=" '$(BundleExtension)' != '' ">$(PackagesDirectory)/dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(BundleExtension)</CombinedFrameworkHostInstallerFile>
+      <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
 
       <SdkBrandName>Microsoft .NET Core 1.0.0 - SDK Preview 2</SdkBrandName>
     </PropertyGroup>
@@ -104,11 +106,80 @@
     <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="https://github.com/dotnet/cli;$(CommitHash)" />
   </Target>
 
-  <Target DependsOnTargets="Init" Name="RestorePackages">
+  <Target Name="SetupDownloadHostAndSharedFxInputsOutputs" DependsOnTargets="Init">
+    <PropertyGroup>
+      <CoreSetupBlobRootUrl>https://dotnetcli.blob.core.windows.net/dotnet/$(CoreSetupChannel)</CoreSetupBlobRootUrl>
+      <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrl)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
+      <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)/Installers</CoreSetupInstallerBlobRootUrl>
+
+      <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
+      <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</CombinedSharedHostAndFrameworkArchive>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
+                               Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
+        <Url>$(SharedFrameworkArchiveBlobRootUrl)/$(CombinedFrameworkHostCompressedFileName)</Url>
+        <DownloadFileName>$(CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
+        <ExtractDestintation>$(SharedFrameworkPublishDirectory)</ExtractDestintation>
+      </_DownloadAndExtractItem>
+
+      <_DownloadAndExtractItem Include="SharedFrameworkInstallerFile"
+                               Condition="!Exists('$(SharedFrameworkInstallerFile)')">
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(SharedFrameworkInstallerFileName)</Url>
+        <DownloadFileName>$(SharedFrameworkInstallerFile)</DownloadFileName>
+        <ExtractDestintation></ExtractDestintation>
+      </_DownloadAndExtractItem>
+
+      <_DownloadAndExtractItem Include="SharedHostInstallerFile"
+                               Condition="!Exists('$(SharedHostInstallerFile)')">
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(SharedHostInstallerFileName)</Url>
+        <DownloadFileName>$(SharedHostInstallerFile)</DownloadFileName>
+        <ExtractDestintation></ExtractDestintation>
+      </_DownloadAndExtractItem>
+
+      <_DownloadAndExtractItem Include="HostFxrInstallerFile"
+                               Condition="!Exists('$(HostFxrInstallerFile)')">
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(HostFxrInstallerFileName)</Url>
+        <DownloadFileName>$(HostFxrInstallerFile)</DownloadFileName>
+        <ExtractDestintation></ExtractDestintation>
+      </_DownloadAndExtractItem>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="DownloadHostAndSharedFxArtifacts"
+          DependsOnTargets="SetupDownloadHostAndSharedFxInputsOutputs">
+
+    <DownloadFile Condition=" '@(_DownloadAndExtractItem)' != '' "
+                  Uri="%(_DownloadAndExtractItem.Url)"
+                  DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />
+
+    <ExtractArchive Condition=" '%(_DownloadAndExtractItem.ExtractDestintation)' != '' "
+                    InputFile="%(_DownloadAndExtractItem.DownloadFileName)"
+                    DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestintation)" />
+  </Target>
+
+  <Target Name="RestorePackages"
+          DependsOnTargets="Init">
 
     <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
     <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
-    
+
+  </Target>
+
+  <Target Name="ZipTemplates">
+    <PropertyGroup>
+      <_DotNetNewFolder>$(RepoRoot)/src/dotnet/commands/dotnet-new</_DotNetNewFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <DotNetNewArchive Include="$([System.IO.Directory]::GetDirectories($(_DotNetNewFolder)))" />
+    </ItemGroup>
+
+    <ArchiveDirectory InputDirectory="%(DotNetNewArchive.FullPath)"
+                      FileName="$([System.IO.Path]::GetFileName(%(DotNetNewArchive.FullPath)))"
+                      OutputDirectory="%(DotNetNewArchive.RelativeDir)"
+                      ForceZipArchive="true" />
   </Target>
 
 </Project>

@@ -110,7 +110,7 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 # Restore the build scripts
 echo "Restoring Build Script projects..."
 (
-    cd "$DIR/.."
+    cd "$DIR"
     dotnet restore
 )
 
@@ -118,13 +118,12 @@ echo "Restoring Build Script projects..."
 echo "Compiling Build Scripts..."
 dotnet publish "$DIR" -o "$DIR/bin" --framework netcoreapp1.0
 
-if [-z "$DOTNET_BUILD_SKIP_RUN" ]
-then
+if [ -z "$DOTNET_BUILD_SKIP_RUN" ]; then
 	export PATH="$OLDPATH"
 	# Run the builder
 	echo "Invoking Build Scripts..."
 	echo "Configuration: $CONFIGURATION"
+    
+    $DIR/bin/dotnet-cli-build ${targets[@]}
 fi
-
-$DIR/bin/dotnet-cli-build ${targets[@]}
 exit $?
