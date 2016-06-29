@@ -159,23 +159,40 @@
                     DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestintation)" />
   </Target>
 
+  <Target Name="SetupRestorePackagesInputsOutputs">
+    <ItemGroup>
+      <RestorePackagesInput Include="$(RepoRoot)/src/**/project.json" />
+      <RestorePackagesInput Include="$(RepoRoot)/tools/**/project.json" />
+    </ItemGroup>
+  </Target>
+  
   <Target Name="RestorePackages"
-          DependsOnTargets="Init">
+          DependsOnTargets="SetupRestorePackagesInputsOutputs;Init"
+          Inputs="@(RestorePackagesInput)"
+          Outputs="@(RestorePackagesInput->'%(RelativeDir)/project.lock.json')">
 
     <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
     <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
 
   </Target>
 
-  <Target Name="ZipTemplates">
+  <Target Name="SetupZipTemplatesInputsOutputs">
     <PropertyGroup>
       <_DotNetNewFolder>$(RepoRoot)/src/dotnet/commands/dotnet-new</_DotNetNewFolder>
     </PropertyGroup>
-
     <ItemGroup>
       <DotNetNewArchive Include="$([System.IO.Directory]::GetDirectories($(_DotNetNewFolder)))" />
+      
+      <ZipTemplatesInput Include="$(_DotNetNewFolder)/**" Exclude="$(_DotNetNewFolder)/*.zip" />
+      <ZipTemplatesOutput Include="@(DotNetNewArchive->'%(RelativeDir)/$([System.IO.Path]::GetFileName('%(DotNetNewArchive.FullPath)')).zip')" />
     </ItemGroup>
+  </Target>
 
+  <Target Name="ZipTemplates"
+          DependsOnTargets="SetupZipTemplatesInputsOutputs"
+          Inputs="@(ZipTemplatesInput)"
+          Outputs="@(ZipTemplatesOutput)">
+    
     <ArchiveDirectory InputDirectory="%(DotNetNewArchive.FullPath)"
                       FileName="$([System.IO.Path]::GetFileName(%(DotNetNewArchive.FullPath)))"
                       OutputDirectory="%(DotNetNewArchive.RelativeDir)"
