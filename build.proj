@@ -9,7 +9,7 @@
     <PlatformScriptHost Condition=" '$(OS)' != 'Windows_NT' "></PlatformScriptHost>
 
     <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
-    <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>    
+    <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
 
     <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
     <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
@@ -56,10 +56,6 @@
   <UsingTask TaskName="PrepareTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="TestTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
-
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Prepare">
-    <PrepareTargets />
-  </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Test">
     <TestTargets />
