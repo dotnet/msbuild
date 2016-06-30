@@ -10,7 +10,6 @@ using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
@@ -33,7 +32,6 @@ namespace Microsoft.DotNet.Cli
             ["help"] = HelpCommand.Run,
             ["new"] = NewCommand.Run,
             ["pack"] = PackCommand.Run,
-            ["projectmodel-server"] = ProjectModelServerCommand.Run,
             ["publish"] = PublishCommand.Run,
             ["restore"] = RestoreCommand.Run,
             ["run"] = RunCommand.Run,
