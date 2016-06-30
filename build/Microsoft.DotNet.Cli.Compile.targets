@@ -65,9 +65,7 @@
 
         <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
         <SharedFrameworkNuGetVersion>1.0.0</SharedFrameworkNuGetVersion>
-        <SharedFrameworkNameVersionPath>
-          $(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkNuGetVersion)
-        </SharedFrameworkNameVersionPath>
+        <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkNuGetVersion)</SharedFrameworkNameVersionPath>
       </PropertyGroup>
 
       <ItemGroup>
