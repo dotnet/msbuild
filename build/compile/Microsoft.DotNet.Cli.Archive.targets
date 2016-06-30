@@ -4,46 +4,46 @@
                               CompressNuGetPackagesArchive"
             Inputs="$(Stage2Directory)/sdk/**/dotnet.dll"
             Outputs="$(FinalArchive)">
-        <Message Text="Generating NuGet Packages Archive" />
+      <Message Text="Generating NuGet Packages Archive" />
     </Target>
 
     <Target Name="RestoreNuGetPackagesArchive"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs">
-        <ItemGroup>
-            <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
-            <FilesToClean Include="$(NuGetPackagesArchiveFolder)/**/*" />
-        </ItemGroup>
+      <ItemGroup>
+        <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
+        <FilesToClean Include="$(NuGetPackagesArchiveFolder)/**/*" />
+      </ItemGroup>
 
-        <Delete Files="@(FilesToClean)" />
-        <RemoveDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)" />
-        <MakeDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)"/>
+      <Delete Files="@(FilesToClean)" />
+      <RemoveDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)" />
+      <MakeDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)"/>
 
-        <Exec Command="$(DotnetStage2) new" WorkingDirectory="$(NuGetPackagesArchiveProject)" />
-        <Exec Command="$(DotnetStage2) restore --packages $(NuGetPackagesArchiveFolder)"
-            WorkingDirectory="$(NuGetPackagesArchiveProject)" />
+      <Exec Command="$(DotnetStage2) new" WorkingDirectory="$(NuGetPackagesArchiveProject)" />
+      <Exec Command="$(DotnetStage2) restore --packages $(NuGetPackagesArchiveFolder)"
+          WorkingDirectory="$(NuGetPackagesArchiveProject)" />
     </Target>
 
     <Target Name="CompressNuGetPackagesArchive"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs">
-        <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />
+      <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />
 
-        <Message Text="Publishing Archiver" />
-        <Exec Command="$(DotnetStage2) publish --output $(ToolsOutputDirectory) --configuration $(Configuration)" 
-            WorkingDirectory="$(RepoRoot)/tools/Archiver" />
+      <Message Text="Publishing Archiver" />
+      <Exec Command="$(DotnetStage2) publish --output $(ToolsOutputDirectory) --configuration $(Configuration)" 
+          WorkingDirectory="$(RepoRoot)/tools/Archiver" />
 
-        <Exec Command="$(ArchiverExe) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
+      <Exec Command="$(ArchiverExe) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
 
-        <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(FinalArchive)" />
+      <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(FinalArchive)" />
     </Target>
 
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
             DependsOnTargets="Init">
-        <PropertyGroup>
-            <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
-            <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
-            <ArchiverExe>$(ToolsOutputDirectory)/Archiver</ArchiverExe>
-            <IntermediateArchive>$(IntermediateDirectory)/nuGetPackagesArchive.lzma</IntermediateArchive>
-            <FinalArchive>$(Stage2Directory)/nuGetPackagesArchive.lzma</FinalArchive>
-        </PropertyGroup>
+      <PropertyGroup>
+        <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
+        <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
+        <ArchiverExe>$(ToolsOutputDirectory)/Archiver</ArchiverExe>
+        <IntermediateArchive>$(IntermediateDirectory)/nuGetPackagesArchive.lzma</IntermediateArchive>
+        <FinalArchive>$(Stage2Directory)/nuGetPackagesArchive.lzma</FinalArchive>
+      </PropertyGroup>
     </Target>
 </Project>
