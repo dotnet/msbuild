@@ -20,6 +20,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     
+    <CoreSetupChannel>preview</CoreSetupChannel>
     <SharedFrameworkVersion>1.0.0</SharedFrameworkVersion>
     <SharedHostVersion>1.0.1</SharedHostVersion>
     <HostFxrVersion>1.0.1</HostFxrVersion>

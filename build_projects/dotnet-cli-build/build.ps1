@@ -71,7 +71,7 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Restore the build scripts
 Write-Host "Restoring Build Script projects..."
-pushd "$PSScriptRoot\.."
+pushd "$PSScriptRoot"
 dotnet restore
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 popd

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25402.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ED2FE3E2-F7E7-4389-8231-B65123F2076F}"
 EndProject
@@ -126,7 +126,18 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "dotnet-build3.Tests", "test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4-BC0F-443B-8ADF-691321F10108}"
 	ProjectSection(SolutionItems) = preProject
+		build\Microsoft.DotNet.Cli.Package.targets = build\Microsoft.DotNet.Cli.Package.targets
 		build\Microsoft.DotNet.Cli.Prepare.targets = build\Microsoft.DotNet.Cli.Prepare.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package", "package", "{31A6D092-F50C-4D70-BA4D-97098189A953}"
+	ProjectSection(SolutionItems) = preProject
+		build\package\Microsoft.DotNet.Cli.Archive.targets = build\package\Microsoft.DotNet.Cli.Archive.targets
+		build\package\Microsoft.DotNet.Cli.Installer.DEB.targets = build\package\Microsoft.DotNet.Cli.Installer.DEB.targets
+		build\package\Microsoft.DotNet.Cli.Installer.MSI.targets = build\package\Microsoft.DotNet.Cli.Installer.MSI.targets
+		build\package\Microsoft.DotNet.Cli.Installer.PKG.targets = build\package\Microsoft.DotNet.Cli.Installer.PKG.targets
+		build\package\Microsoft.DotNet.Cli.Layout.targets = build\package\Microsoft.DotNet.Cli.Layout.targets
+		build\package\Microsoft.DotNet.Cli.Nupkg.targets = build\package\Microsoft.DotNet.Cli.Nupkg.targets
 	EndProjectSection
 EndProject
 Global
@@ -967,5 +978,6 @@ Global
 		{4C3B06D5-B6D5-4E5B-A44F-3EBE52A1C759} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{35B19F22-B8C0-4849-9C35-3F809B7588B8} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{49D7318E-D198-4E2B-BBEA-3A24D805F88D} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{31A6D092-F50C-4D70-BA4D-97098189A953} = {89905EC4-BC0F-443B-8ADF-691321F10108}
 	EndGlobalSection
 EndGlobal

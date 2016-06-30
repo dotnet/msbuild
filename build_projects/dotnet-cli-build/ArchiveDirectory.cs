@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
-using Microsoft.Build.Utilities;
-using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-
+using Microsoft.DotNet.Cli.Build.Framework;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
 namespace Microsoft.DotNet.Cli.Build
@@ -24,6 +18,8 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string InputDirectory { get; set; }
 
+        public bool ForceZipArchive { get; set; }
+
         [Output]
         public string OutputArchive { get; set; }
 
@@ -34,14 +30,16 @@ namespace Microsoft.DotNet.Cli.Build
                 return true;
             }
 
-            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows))
+            if (CurrentPlatform.IsPlatform(BuildPlatform.Windows) || ForceZipArchive)
             {
                 OutputArchive = GenerateZip();
             }
-            else 
+            else
             {
                 OutputArchive = GenerateTarGz();
             }
+
+            Log.LogMessage($"Created Archive '{OutputArchive}'");
 
             return true;
         }
