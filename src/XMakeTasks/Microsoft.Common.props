@@ -29,7 +29,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <GlobalBuildPropsPath Condition="'$(_GlobalBuildPropsBasePath)' != '' and '$(_GlobalBuildPropsFile)' != ''">$([System.IO.Path]::Combine('$(_GlobalBuildPropsBasePath)', '$(_GlobalBuildPropsFile)'))</GlobalBuildPropsPath>
     </PropertyGroup>
 
-    <Import Project="$(GlobalBuildPropsPath)" Condition="'$(ImportGlobalBuildProps)' == 'true' and '$(GlobalBuildPropsPath)' != '' and Exists('$(GlobalBuildPropsPath)')"/>
+    <Import Project="$(GlobalBuildPropsPath)" Condition="'$(ImportGlobalBuildProps)' == 'true' and exists('$(GlobalBuildPropsPath)')"/>
 
     <!-- 
         Import wildcard "ImportBefore" props files if we're actually in a 12.0+ project (rather than a project being
