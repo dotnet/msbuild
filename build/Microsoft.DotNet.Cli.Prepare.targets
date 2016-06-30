@@ -39,8 +39,7 @@
       <OutputDirectory>$(Stage2Directory)</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
-      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
-      <SymbolsOutputDirectory>$(BaseOutputDirectory)/stage2symbols</SymbolsOutputDirectory>
+      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>      
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
     </PropertyGroup>
 
@@ -67,6 +66,9 @@
       <SdkNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-preview3-$(CommitCount)</SdkNugetVersion>
       <ProjectModelNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelNugetVersion>
       <DependencyModelAndInternalAbstractionsNugetVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsNugetVersion>
+
+      <CoreCLRVersion>1.0.2</CoreCLRVersion>
+      <JitVersion>1.0.2</JitVersion>
 
       <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
       <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>

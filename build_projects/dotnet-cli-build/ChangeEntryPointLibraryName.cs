@@ -16,8 +16,10 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class ChangeEntryPointLibraryName : Task
     {
+        [Required]
         public string DepsFile { get; set; }
 
+        [Required]
         public string NewName { get; set; }
 
         public override bool Execute()

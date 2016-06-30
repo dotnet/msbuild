@@ -16,6 +16,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class FixModeFlags : Task
     {
+        [Required]
         public string Dir { get; set; }
 
         public override bool Execute()

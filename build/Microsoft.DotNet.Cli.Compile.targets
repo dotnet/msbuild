@@ -1,15 +1,13 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="compile/Microsoft.DotNet.Cli.Archive.targets" />
+  <Import Project="compile/Microsoft.DotNet.Cli.LzmaArchive.targets" />
 
   <UsingTask TaskName="FixModeFlags" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="RemoveAssetFromDepsPackages" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="CleanPublishOutput" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="SharedFrameworkNameVersionPath" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="CrossgenDirectory" AssemblyFile="$(CLIBuildDll)" />    
 
-  <Target Name="Compile" DependsOnTargets="BuildDotnetCliBuildFramework;
-                                           Init;
+  <Target Name="Compile" DependsOnTargets="Init;
                                            SetupStage;
                                            CompileStage;
                                            BuildProjectsForNuGetPackages;
@@ -17,9 +15,13 @@
   </Target>
 
   <Target Name="SetupStage">
+    <PropertyGroup>
+      <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
+    </PropertyGroup>
+
     <ItemGroup>
-      <CompileStageInputs Include="$(RepoRoot)/src/**/*.cs" Exclude="$(RepoRoot)/src/**/obj/**/*.cs" />
-      <CompileStageInputs Include="$(RepoRoot)/src/**/project.json;$(RepoRoot)/src/**/project.lock.json" />
+      <CompileStageInputs Include="$(SrcDirectory)/**/*.cs" Exclude="$(SrcDirectory)/**/obj/**/*.cs" />
+      <CompileStageInputs Include="$(SrcDirectory)/**/project.json;$(SrcDirectory)/**/project.lock.json" />
 
       <Stage Include="Stage1">
         <Inputs>@(CompileStageInputs)</Inputs>
@@ -33,15 +35,13 @@
         <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
         <DotnetExe>$(DotnetStage1)</DotnetExe>
       </Stage>          
-    </ItemGroup>        
+    </ItemGroup>    
   </Target>    
 
   <Target Name="CompileStage"
-          Inputs="%(Stage.Identity);%(Stage.Inputs)"
-          Outputs="%(StageDirectory)/sdk/$(NugetVersion)/dotnet.dll">
-      <PropertyGroup>
-        <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
-
+          Inputs="%(Stage.Inputs)"
+          Outputs="%(StageDirectory)/sdk/$(SdkVersion)/dotnet.dll">
+      <PropertyGroup>      
         <ExeSuffix Condition=" '$(OSName)' == 'win' ">.exe</ExeSuffix>
         <ExeSuffix Condition=" '$(OSName)' != 'win' "></ExeSuffix>
 
@@ -58,10 +58,16 @@
 
         <StageDirectory>%(Stage.StageDirectory)</StageDirectory>
         <StageSymbolsDirectory>%(Stage.StageSymbolsDirectory)</StageSymbolsDirectory>
-        <SdkOutputDirectory>$(StageDirectory)/sdk/$(NugetVersion)</SdkOutputDirectory>            
+        <SdkOutputDirectory>$(StageDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>            
         <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
         <BinaryToCorehostifyOutDir>$(SdkOutputDirectory)/$(BinaryToCorehostifyRelDir)</BinaryToCorehostifyOutDir>
         <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
+
+        <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
+        <SharedFrameworkNuGetVersion>1.0.0</SharedFrameworkNuGetVersion>
+        <SharedFrameworkNameVersionPath>
+          $(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkNuGetVersion)
+        </SharedFrameworkNameVersionPath>
       </PropertyGroup>
 
       <ItemGroup>
@@ -69,7 +75,7 @@
         <BinObj Include="$(SrcDirectory)/**/obj/**/*" />
         <FilesToRemoveFromStageDirectory Include="$(StageDirectory)/**/*" />
 
-        <SharedFramework Include="$(IntermediateDirectory)/sharedFrameworkPublish/**/*.*" />
+        <SharedFramework Include="$(IntermediateDirectory)/sharedFrameworkPublish/**/*" />
 
         <BinariesToRemove Include="csc" />
         <BinariesToRemove Include="vbc" />
@@ -80,10 +86,6 @@
         <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.overridetasks" />
         <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.tasks" />
       </ItemGroup>
-
-      <SharedFrameworkNameVersionPath RootOutputDirectory="$(StageDirectory)">
-        <Output TaskParameter="OutputSharedFrameworkNameVersionPath" PropertyName="SharedFrameworkNameVersionPath" />
-      </SharedFrameworkNameVersionPath>
 
       <Delete Files="@(BinObj)" />
 
@@ -150,12 +152,14 @@
       <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(HostPolicyBaseName)"
             DestinationFiles="$(SdkOutputDirectory)/$(HostPolicyBaseName)" />
 
-      <CrossgenDirectory SharedFrameworkNameVersionPath="$(SharedFrameworkNameVersionPath)"
+      <CrossgenDirectory CoreCLRVersion="$(CoreCLRVersion)"
+                         JitVersion="$(JitVersion)"
+                         SharedFrameworkNameVersionPath="$(SharedFrameworkNameVersionPath)"
                          SdkOutputDirectory="$(SdkOutputDirectory)" />
 
       <!-- Generate .version file -->
       <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
-                        Lines="$(CommitHash)$(NewLine)$(NugetVersion)$(NewLine)"
+                        Lines="$(CommitHash);$(SdkVersion)"
                         Overwrite="true" />
 
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
@@ -168,7 +172,7 @@
       <Delete Files="@(FilesToClean)" />
 
       <ItemGroup>
-        <FilesToCopy Include="$(StageDirectory)/**/*.*" />
+        <FilesToCopy Include="$(StageDirectory)/**/*" />
         <PdbsToClean Include="$(StageDirectory)/sdk/**/*.pdb" />
       </ItemGroup>
 

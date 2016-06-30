@@ -16,15 +16,23 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class CrossgenDirectory : Task
     {
-        private static Crossgen CrossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion, DependencyVersions.JitVersion);
+        [Required]
+        public string CoreCLRVersion { get; set; }
 
+        [Required]
+        public string JitVersion { get; set; }
+
+        [Required]
         public string SharedFrameworkNameVersionPath { get; set; }
 
+        [Required]
         public string SdkOutputDirectory { get; set; }        
 
         public override bool Execute()
         {
-            CrossgenUtil.CrossgenDirectory(SharedFrameworkNameVersionPath, SdkOutputDirectory);
+            var crossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion, DependencyVersions.JitVersion);
+
+            crossgenUtil.CrossgenDirectory(SharedFrameworkNameVersionPath, SdkOutputDirectory);
 
             return true;
         }

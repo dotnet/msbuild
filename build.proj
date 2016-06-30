@@ -14,11 +14,6 @@
     <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
     <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
     
-    <CR>%0D</CR>
-    <LF>%0A</LF>
-    <NewLine Condition=" '$(OSName)' == 'win' ">$(LF)</NewLine>
-    <NewLine Condition=" '$(OSName)' != 'win' ">$(CR)$(LF)</NewLine>
-
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
     <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>

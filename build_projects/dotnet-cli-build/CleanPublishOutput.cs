@@ -16,12 +16,16 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class CleanPublishOutput : Task
     {
+        [Required]
         public string Path { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
+        [Required]
         public bool DeleteRuntimeConfigJson { get; set; }
 
+        [Required]
         public bool DeleteDepsJson { get; set; }
 
         public override bool Execute()

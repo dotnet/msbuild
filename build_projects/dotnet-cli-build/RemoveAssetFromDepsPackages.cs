@@ -18,10 +18,13 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class RemoveAssetFromDepsPackages : Task
     {
+        [Required]
         public string DepsFile { get; set; }
 
+        [Required]
         public string SectionName { get; set; }
 
+        [Required]
         public string AssetPath { get; set; }
 
         public override bool Execute()
@@ -31,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Build
             return true;
         }
 
-        private static void DoRemoveAssetFromDepsPackages(string depsFile, string sectionName, string assetPath)
+        public static void DoRemoveAssetFromDepsPackages(string depsFile, string sectionName, string assetPath)
         {
             JToken deps;
             using (var file = File.OpenText(depsFile))
