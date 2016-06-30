@@ -659,7 +659,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             }
 
-
+#if !FEATURE_APM
             public async Task RunPacketReadLoopAsync()
             {
                 while (true)
@@ -723,6 +723,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+#endif
 
             /// <summary>
             /// Sends the specified packet to this node.
