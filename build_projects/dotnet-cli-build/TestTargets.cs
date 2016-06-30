@@ -30,8 +30,6 @@ namespace Microsoft.DotNet.Cli.Build
             // "dotnet-compile-fsc.Tests",
             "dotnet-new.Tests",
             "dotnet-pack.Tests",
-            // TODO: https://github.com/dotnet/cli/issues/3734
-            //"dotnet-projectmodel-server.Tests",
             "dotnet-publish.Tests",
             "dotnet-resgen.Tests",
             "dotnet-run.Tests",
@@ -136,19 +134,6 @@ namespace Microsoft.DotNet.Cli.Build
                 .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestProjects"))
                 .Execute()
                 .EnsureSuccessful();
-
-            // The 'ProjectModelServer' directory contains intentionally-unresolved dependencies, so don't check for success. Also, suppress the output
-            dotnet.Restore(
-                "--verbosity", "verbose",
-                "--infer-runtimes")
-                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthTestProjects"))
-                .Execute();
-
-            dotnet.Restore(
-                "--verbosity", "verbose",
-                "--infer-runtimes")
-                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "ProjectModelServer", "DthUpdateSearchPathSample"))
-                .Execute();
 
             return c.Success();
         }

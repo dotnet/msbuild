@@ -1,8 +1,0 @@
-{
-  "version": "9.0.1",
-  "dependencies": {
-  },
-  "frameworks": {
-    "netstandard1.5": { }
-  }
-}
