@@ -9,55 +9,47 @@
     <UsingTask TaskName="CrossgenDirectory" AssemblyFile="$(CLIBuildDll)" />    
 
     <Target Name="Compile" DependsOnTargets="BuildDotnetCliBuildFramework;
-                                             Init;
-                                             SetupStage;
-                                             CompileStage;
-                                             BuildProjectsForNuGetPackages;
-                                             GenerateNuGetPackagesArchive">
+                                             CompileStage1;
+                                             CompileStage2">
     </Target>
-  
-    <Target Name="SetupStage">
-        <ItemGroup>
-          <CompileStageInputs Include="$(RepoRoot)/src/**/*.cs" Exclude="$(RepoRoot)/src/**/obj/**/*.cs" />
-          <CompileStageInputs Include="$(RepoRoot)/src/**/project.json;$(RepoRoot)/src/**/project.lock.json" />
 
-          <Stage Include="Stage1">
-              <Inputs>@(CompileStageInputs)</Inputs>
-              <StageDirectory>$(Stage1Directory)</StageDirectory>
-              <StageSymbolsDirectory>$(Stage1SymbolsDirectory)</StageSymbolsDirectory>
-              <DotnetExe>$(Stage0Path)/dotnet.exe</DotnetExe>
-          </Stage>
-          <Stage Include="Stage2">
-              <Inputs>@(CompileStageInputs)</Inputs>
-              <StageDirectory>$(Stage2Directory)</StageDirectory>
-              <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
-              <DotnetExe>$(DotnetStage1)</DotnetExe>
-          </Stage>          
-        </ItemGroup>        
+    <Target Name="CompileStage1"
+            DependsOnTargets="BuildDotnetCliBuildFramework;
+                              Init;
+                              SetupStage1;
+                              CompileStage;
+                              AfterCompileStage">   
+    </Target>
+
+    <Target Name="SetupStage1">
+        <PropertyGroup>
+            <StageDirectory>$(Stage1Directory)</StageDirectory>
+            <StageSymbolsDirectory>$(Stage1SymbolsDirectory)</StageSymbolsDirectory>
+            <DotnetExe>$(Stage0Path)/dotnet.exe</DotnetExe>
+        </PropertyGroup>
     </Target>    
 
-    <Target Name="CompileStage"
-            Inputs="%(Stage.Identity);%(Stage.Inputs)"
-            Outputs="%(StageDirectory)/sdk/$(NugetVersion)/dotnet.dll">
+    <Target Name="CompileStage2"
+            DependsOnTargets="BuildDotnetCliBuildFramework;
+                              Init;
+                              SetupStage2;
+                              CompileStage;
+                              AfterCompileStage;
+                              BuildProjectsForNuGetPackages;
+                              GenerateNuGetPackagesArchive">
+    </Target>
+
+    <Target Name="SetupStage2">
         <PropertyGroup>
-            <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
+            <StageDirectory>$(Stage2Directory)</StageDirectory>
+            <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
+            <DotnetExe>$(DotnetStage1)</DotnetExe>        
+        </PropertyGroup>
+    </Target>
 
-            <ExeSuffix Condition=" '$(OSName)' == 'win' ">.exe</ExeSuffix>
-            <ExeSuffix Condition=" '$(OSName)' != 'win' "></ExeSuffix>
-
-            <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>
-            <DynamicLibPrefix Condition=" '$(OSName)' != 'win' ">lib</DynamicLibPrefix>
-
-            <DynamicLibSuffix Condition=" '$(OSName)' == 'win' ">.dll</DynamicLibSuffix>
-            <DynamicLibSuffix Condition=" '$(OSName)' == 'osx' ">.dylib</DynamicLibSuffix>
-            <DynamicLibSuffix Condition=" '$(DynamicLibSuffix)' == '' ">.so</DynamicLibSuffix>
-
-            <DotnetHostBaseName>dotnet$(ExeSuffix)</DotnetHostBaseName>
-            <DotnetHostFxrBaseName>$(DynamicLibPrefix)hostfxr$(DynamicLibSuffix)</DotnetHostFxrBaseName>
-            <HostPolicyBaseName>$(DynamicLibPrefix)hostpolicy$(DynamicLibSuffix)</HostPolicyBaseName>
-
-            <StageDirectory>%(Stage.StageDirectory)</StageDirectory>
-            <StageSymbolsDirectory>%(Stage.StageSymbolsDirectory)</StageSymbolsDirectory>
+    <Target Name="CompileStage"
+            DependsOnTargets="BeforeCompileStage">
+        <PropertyGroup>
             <SdkOutputDirectory>$(StageDirectory)/sdk/$(NugetVersion)</SdkOutputDirectory>            
             <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
             <BinaryToCorehostifyOutDir>$(SdkOutputDirectory)/$(BinaryToCorehostifyRelDir)</BinaryToCorehostifyOutDir>
@@ -65,10 +57,6 @@
         </PropertyGroup>
 
         <ItemGroup>
-            <BinObj Include="$(SrcDirectory)/**/bin/**/*" />
-            <BinObj Include="$(SrcDirectory)/**/obj/**/*" />
-            <FilesToRemoveFromStageDirectory Include="$(StageDirectory)/**/*" />
-
             <SharedFramework Include="$(IntermediateDirectory)/sharedFrameworkPublish/**/*.*" />
 
             <BinariesToRemove Include="csc" />
@@ -81,22 +69,12 @@
             <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.tasks" />
         </ItemGroup>
 
-        <SharedFrameworkNameVersionPath RootOutputDirectory="$(StageDirectory)">
-            <Output TaskParameter="OutputSharedFrameworkNameVersionPath" PropertyName="SharedFrameworkNameVersionPath" />
-        </SharedFrameworkNameVersionPath>
-
-        <Delete Files="@(BinObj)" />
-
-        <Delete Files="@(FilesToRemoveFromStageDirectory)" />
-        <RemoveDir Directories="$(StageDirectory)" />
-        <MakeDir Directories="$(StageDirectory)"/>
-
         <!-- CopySharedFramework -->
         <Copy SourceFiles="@(SharedFramework)"
               DestinationFiles="@(SharedFramework->'$(StageDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
       
         <!-- Publish DotNet -->
-        <Exec Command="%(Stage.DotnetExe) publish
+        <Exec Command="$(DotnetExe) publish
                        --native-subdirectory
                        --output $(SdkOutputDirectory)
                        --configuration $(Configuration)
@@ -106,7 +84,7 @@
         <!-- Corehostify Binaries -->
         <FixModeFlags Dir="$(SdkOutputDirectory)" />
 
-        <Exec Command="%(Stage.DotnetExe) publish
+        <Exec Command="$(DotnetExe) publish
                        --output $(SdkOutputDirectory)
                        --framework netcoreapp1.0
                        $(SrcDirectory)/compilers" />
@@ -160,13 +138,46 @@
 
         <Copy SourceFiles="@(MSBuildTargetsToCopy)"
               DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>
+
+    <Target Name="BeforeCompileStage">
+        <PropertyGroup>
+            <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
+
+            <ExeSuffix Condition=" '$(OSName)' == 'win' ">.exe</ExeSuffix>
+            <ExeSuffix Condition=" '$(OSName)' != 'win' "></ExeSuffix>
+
+            <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>
+            <DynamicLibPrefix Condition=" '$(OSName)' != 'win' ">lib</DynamicLibPrefix>
+
+            <DynamicLibSuffix Condition=" '$(OSName)' == 'win' ">.dll</DynamicLibSuffix>
+            <DynamicLibSuffix Condition=" '$(OSName)' == 'osx' ">.dylib</DynamicLibSuffix>
+            <DynamicLibSuffix Condition=" '$(DynamicLibSuffix)' == '' ">.so</DynamicLibSuffix>
+
+            <DotnetHostBaseName>dotnet$(ExeSuffix)</DotnetHostBaseName>
+            <DotnetHostFxrBaseName>$(DynamicLibPrefix)hostfxr$(DynamicLibSuffix)</DotnetHostFxrBaseName>
+            <HostPolicyBaseName>$(DynamicLibPrefix)hostpolicy$(DynamicLibSuffix)</HostPolicyBaseName>
+        </PropertyGroup>
 
         <ItemGroup>
-            <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
-        </ItemGroup>
+          <BinObj Include="$(SrcDirectory)/**/bin/**/*" />
+          <BinObj Include="$(SrcDirectory)/**/obj/**/*" />
+          <FilesToRemoveFromStageDirectory Include="$(StageDirectory)/**/*" />
+        </ItemGroup>        
 
-        <Delete Files="@(FilesToClean)" />
+        <SharedFrameworkNameVersionPath RootOutputDirectory="$(StageDirectory)">
+            <Output TaskParameter="OutputSharedFrameworkNameVersionPath" PropertyName="SharedFrameworkNameVersionPath" />
+        </SharedFrameworkNameVersionPath>
 
+        <Delete Files="@(BinObj)" />
+
+        <Delete Files="@(FilesToRemoveFromStageDirectory)" />
+        <RemoveDir Directories="$(StageDirectory)" />
+        <MakeDir Directories="$(StageDirectory)"/>      
+    </Target>
+
+    <Target Name="AfterCompileStage"
+            DependsOnTargets="RemoveUnnecessaryFiles">
         <ItemGroup>
             <FilesToCopy Include="$(StageDirectory)/**/*.*" />
             <PdbsToClean Include="$(StageDirectory)/sdk/**/*.pdb" />
@@ -176,5 +187,13 @@
             DestinationFiles="@(FilesToCopy->'$(StageSymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
         <Delete Files="@(PdbsToClean)" />
+    </Target>
+
+    <Target Name="RemoveUnnecessaryFiles">
+        <ItemGroup>
+            <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
+        </ItemGroup>
+
+        <Delete Files="@(FilesToClean)" />
     </Target>
 </Project>
