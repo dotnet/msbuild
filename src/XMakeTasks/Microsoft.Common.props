@@ -16,7 +16,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <ImportByWildcardAfterMicrosoftCommonProps Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == ''">true</ImportByWildcardAfterMicrosoftCommonProps>
         <ImportUserLocationsByWildcardBeforeMicrosoftCommonProps Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == ''">true</ImportUserLocationsByWildcardBeforeMicrosoftCommonProps>
         <ImportUserLocationsByWildcardAfterMicrosoftCommonProps Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftCommonProps>
+        <ImportGlobalBuildProps Condition="'$(ImportGlobalBuildProps)' == ''">true</ImportGlobalBuildProps>
     </PropertyGroup>
+
+    <!-- 
+        Determine the path to the global build props file if the user did not disable $(ImportGlobalBuildProps) and
+        they did not already specify an absolute path to use via $(GlobalBuildPropsPath)
+    -->
+    <PropertyGroup Condition="'$(ImportGlobalBuildProps)' == 'true' and '$(GlobalBuildPropsPath)' == ''">
+      <_GlobalBuildPropsFile Condition="'$(_GlobalBuildPropsFile)' == ''">global.build.props</_GlobalBuildPropsFile>
+      <_GlobalBuildPropsBasePath Condition="'$(_GlobalBuildPropsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_GlobalBuildPropsFile)'))</_GlobalBuildPropsBasePath>
+      <GlobalBuildPropsPath Condition="'$(_GlobalBuildPropsBasePath)' != '' and '$(_GlobalBuildPropsFile)' != ''">$([System.IO.Path]::Combine('$(_GlobalBuildPropsBasePath)', '$(_GlobalBuildPropsFile)'))</GlobalBuildPropsPath>
+    </PropertyGroup>
+
+    <Import Project="$(GlobalBuildPropsPath)" Condition="'$(ImportGlobalBuildProps)' == 'true' and '$(GlobalBuildPropsPath)' != '' and Exists('$(GlobalBuildPropsPath)')"/>
 
     <!-- 
         Import wildcard "ImportBefore" props files if we're actually in a 12.0+ project (rather than a project being

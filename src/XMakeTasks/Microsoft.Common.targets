@@ -121,7 +121,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
     <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter')"/>
     <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfter40MicrosoftCommonTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter')"/>
-  </ImportGroup> 
+  </ImportGroup>
+
+  <PropertyGroup>
+    <ImportGlobalBuildTargets Condition="'$(ImportGlobalBuildTargets)' == ''">true</ImportGlobalBuildTargets>
+  </PropertyGroup>
+
+  <!-- 
+        Determine the path to the global build targets file if the user did not disable $(ImportGlobalBuildTargets) and
+        they did not already specify an absolute path to use via $(GlobalBuildTargetsPath)
+    -->
+  <PropertyGroup Condition="'$(ImportGlobalBuildTargets)' == 'true' and '$(GlobalBuildTargetsPath)' == ''">
+    <_GlobalBuildTargetsFile Condition="'$(_GlobalBuildTargetsFile)' == ''">global.build.targets</_GlobalBuildTargetsFile>
+    <_GlobalBuildTargetsBasePath Condition="'$(_GlobalBuildTargetsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_GlobalBuildTargetsFile)'))</_GlobalBuildTargetsBasePath>
+    <GlobalBuildTargetsPath Condition="'$(_GlobalBuildTargetsBasePath)' != '' and '$(_GlobalBuildTargetsFile)' != ''">$([System.IO.Path]::Combine('$(_GlobalBuildTargetsBasePath)', '$(_GlobalBuildTargetsFile)'))</GlobalBuildTargetsPath>
+  </PropertyGroup>
+
+  <Import Project="$(GlobalBuildTargetsPath)" Condition="'$(ImportGlobalBuildTargets)' == 'true' and '$(GlobalBuildTargetsPath)' != '' and Exists('$(GlobalBuildTargetsPath)')"/>
 
    <!-- Fix up FrameworkPathOverride, which is primarily used to determine the location of mscorlib.dll in the 
         (relatively uncommon) situation where the reference assemblies, in which it's usually found, are not 
