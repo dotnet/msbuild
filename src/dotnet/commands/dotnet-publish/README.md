@@ -24,7 +24,7 @@ Depending on the type of portable app, the resulting directory will contain the 
     dependency. 
 2. **Self-contained application** - same as above plus the entire runtime for the targeted platform.
 
-The above types are covered in more details in the [types of portable applications](https://dotnet.github.io/docs/core-concepts/app-types.html) topic. 
+The above types are covered in more details in the [types of portable applications](https://docs.microsoft.com/en-us/dotnet/articles/core/app-types) topic. 
 
 ## OPTIONS
 
