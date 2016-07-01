@@ -311,21 +311,18 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
         /// </summary>
-        override protected bool SkipTaskExecution()
+        protected override bool SkipTaskExecution()
         {
             if (!String.IsNullOrEmpty(OutputWindowsMetadataFile))
             {
-                if (File.Exists(OutputWindowsMetadataFile) && File.Exists(WinMDModule))
-                {
-                    FileInfo outputFileInfo = FileUtilities.GetFileInfoNoThrow(OutputWindowsMetadataFile);
-                    FileInfo winMDModuleFileInfo = FileUtilities.GetFileInfoNoThrow(WinMDModule);
+                var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(OutputWindowsMetadataFile);
+                var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(WinMDModule);
 
-                    // If the last write time of the input file is less than the last write time of the output file 
-                    // then the output is newer then the input so we do not need to re-run the tool.
-                    if (outputFileInfo.LastWriteTimeUtc > winMDModuleFileInfo.LastWriteTimeUtc)
-                    {
-                        return true;
-                    }
+                // If the last write time of the input file is less than the last write time of the output file 
+                // then the output is newer then the input so we do not need to re-run the tool.
+                if (outputWriteTime > winMDModuleWriteTime)
+                {
+                    return true;
                 }
             }
 
