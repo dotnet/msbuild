@@ -67,9 +67,6 @@
       <ProjectModelNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelNugetVersion>
       <DependencyModelAndInternalAbstractionsNugetVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsNugetVersion>
 
-      <CoreCLRVersion>1.0.2</CoreCLRVersion>
-      <JitVersion>1.0.2</JitVersion>
-
       <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
       <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>
 

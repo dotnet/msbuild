@@ -56,11 +56,7 @@
 
       <LayoutDefinition Include="Debug">
         <InputFiles>@(SdkDebugLayoutInput)</InputFiles>
-<<<<<<< 52e9475be8e9dd9d6715a1f0787da3faa1137f8a
-        <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>        
-=======
-        <OutputFiles>@(SdkDebugLayoutInput -> '$(SdkDebugLayoutOutputDirectory)/$([MSBuild]::MakeRelative($(Stage2SymbolsDirectory), '%(Identity)'))')</OutputFiles>        
->>>>>>> Addressing code review comments and making incremental build work.
+        <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdkDebug)</NameWithVersion>
         <Name>$(ArtifactNameSdkDebug)</Name>
       </LayoutDefinition>
