@@ -111,6 +111,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore')"/>
   </ImportGroup>
 
+  <Import Project="$(CommonTargetsPath)" />
+
   <PropertyGroup>
     <ImportGlobalBuildTargets Condition="'$(ImportGlobalBuildTargets)' == ''">true</ImportGlobalBuildTargets>
   </PropertyGroup>
@@ -126,8 +128,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(GlobalBuildTargetsPath)" Condition="'$(ImportGlobalBuildTargets)' == 'true' and exists('$(GlobalBuildTargetsPath)')"/>
-
-  <Import Project="$(CommonTargetsPath)" />
 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
     <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter')"/>
