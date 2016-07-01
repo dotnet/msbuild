@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask TaskName="MakeRelative" AssemblyFile="$(CLIBuildDll)" />
   
   <Target DependsOnTargets="Init" Name="SetupLayoutInputsOutputs" >
     <PropertyGroup>
@@ -9,11 +11,32 @@
     <!-- Set up Items with Layout Input Files -->
     <ItemGroup>
       <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
-      <SdkDebugLayoutInput Include="$(SymbolsOutputDirectory)/sdk/**/*.pdb" />
-      <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**" />
+      <SdkDebugLayoutInput Include="$(SymbolsOutputDirectory)/sdk/**/*" />
+      <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/shared/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/sdk/**/*" />
     </ItemGroup>
+
+    <MakeRelative
+      Path1="$(OutputDirectory)"
+      Path2="%(SdkLayoutInput.Identity)" >
+      <Output TaskParameter="RelativePath" ItemName="SdkRelativeOutputFiles" />
+    </MakeRelative>
+    <MakeRelative
+      Path1="$(OutputDirectory)"
+      Path2="%(SdkDebugLayoutInput.Identity)" >
+      <Output TaskParameter="RelativePath" ItemName="SdkDebugRelativeOutputFiles" />
+    </MakeRelative>
+    <MakeRelative
+      Path1="$(OutputDirectory)"
+      Path2="%(CombinedHostHostFxrFrameworkSdkInput.Identity)" >
+      <Output TaskParameter="RelativePath" ItemName="CombinedHostHostFxrFrameworkSdkRelativeOutputFiles" />
+    </MakeRelative>
+    <MakeRelative
+      Path1="$(OutputDirectory)"
+      Path2="%(CombinedFrameworkSdkInput.Identity)" >
+      <Output TaskParameter="RelativePath" ItemName="CombinedFrameworkSdkOutputFiles" />
+    </MakeRelative>
 
     <PropertyGroup>
       <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
@@ -24,30 +47,30 @@
 
     <!-- Set up Items Defining Layouts for easy change -->
     <ItemGroup>
-      <LayoutDefinition Include="SdkName">
+      <LayoutDefinition Include="Sdk">
         <InputFiles>@(SdkLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkLayoutInput -> '$(SdkLayoutOutputDirectory)/$([MSBuild]::MakeRelative($(OutputDirectory), '%(Identity)'))')</OutputFiles>
+        <OutputFiles>@(SdkRelativeOutputFiles -> '$(SdkLayoutOutputDirectory)/%(Identity)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdk)</NameWithVersion>
         <Name>$(ArtifactNameSdk)</Name>
       </LayoutDefinition>
 
-      <LayoutDefinition Include="SdkDebug">
+      <LayoutDefinition Include="Debug">
         <InputFiles>@(SdkDebugLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkDebugLayoutInput -> '$(SdkDebugLayoutOutputDirectory)/$([MSBuild]::MakeRelative($(SymbolsOutputDirectory), '%(Identity)'))')</OutputFiles>        
+        <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>        
         <NameWithVersion>$(ArtifactNameWithVersionSdkDebug)</NameWithVersion>
         <Name>$(ArtifactNameSdkDebug)</Name>
       </LayoutDefinition>
 
       <LayoutDefinition Include="CombinedHostHostFxrFrameworkSdk">
         <InputFiles>@(CombinedHostHostFxrFrameworkSdkInput)</InputFiles>
-        <OutputFiles>@(CombinedHostHostFxrFrameworkSdkInput -> '$(CombinedHostHostFxrFrameworkSdkOutputDirectory)/$([MSBuild]::MakeRelative($(OutputDirectory), '%(Identity)'))')</OutputFiles>        
+        <OutputFiles>@(CombinedHostHostFxrFrameworkSdkRelativeOutputFiles -> '$(CombinedHostHostFxrFrameworkSdkOutputDirectory)/%(Identity)')</OutputFiles>        
         <NameWithVersion>$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)</NameWithVersion>
         <Name>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)</Name>
       </LayoutDefinition>
 
       <LayoutDefinition Include="CombinedFrameworkSdk">
         <InputFiles>@(CombinedFrameworkSdkInput)</InputFiles>
-        <OutputFiles>@(CombinedFrameworkSdkInput -> '$(CombinedFrameworkSdkOutputDirectory)/$([MSBuild]::MakeRelative($(OutputDirectory), '%(Identity)'))')</OutputFiles>
+        <OutputFiles>@(CombinedFrameworkSdkOutputFiles -> '$(CombinedFrameworkSdkOutputDirectory)/%(Identity)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionCombinedFrameworkSdk)</NameWithVersion>
         <Name>$(ArtifactNameCombinedFrameworkSdk)</Name>
       </LayoutDefinition>

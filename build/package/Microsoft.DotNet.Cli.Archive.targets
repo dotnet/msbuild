@@ -10,18 +10,25 @@
 
     <ItemGroup>
       <GeneratedArchives Include="$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(ArchiveExtension)" />
+
+      <GenerateArchivesInputsOutputs Include="%(LayoutDefinition.Name)">
+        <Inputs>%(LayoutDefinition.OutputFiles)</Inputs>
+        <Outputs>$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(ArchiveExtension)</Outputs>
+        <InputDirectory>$(LayoutDirectory)/%(LayoutDefinition.Name)</InputDirectory>
+        <OutFileName>%(LayoutDefinition.NameWithVersion)</OutFileName>
+      </GenerateArchivesInputsOutputs>
     </ItemGroup>
   </Target>
 
   <Target Name="GenerateArchives" 
           DependsOnTargets="Init;Layout;SetupGenerateArchivesInputsOutputs" 
-          Inputs="@(LayoutDefinition -> '$(LayoutDirectory)/%(Name)')" 
-          Outputs="@(GeneratedArchives -> '%(Identity)')">
+          Inputs="%(GenerateArchivesInputsOutputs.Inputs)" 
+          Outputs="%(GenerateArchivesInputsOutputs.Outputs)">
 
     <ArchiveDirectory
-        FileName="%(LayoutDefinition.NameWithVersion)"
+        FileName="%(GenerateArchivesInputsOutputs.OutFileName)"
         OutputDirectory="$(ArchiveOutputDirectory)"
-        InputDirectory="$(LayoutDirectory)/%(LayoutDefinition.Name)" >
+        InputDirectory="$(LayoutDirectory)/%(GenerateArchivesInputsOutputs.InputDirectory)" >
 
         <Output TaskParameter="OutputArchive"
                 ItemName="Archives" />
