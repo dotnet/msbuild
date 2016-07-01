@@ -163,7 +163,6 @@ namespace Microsoft.DotNet.Cli
                 exitCode = result.ExitCode;
             }
 
-
             return exitCode;
 
         }
