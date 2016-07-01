@@ -1936,7 +1936,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
                 Assert.Equal(1, t.CopiedFiles.Length);
@@ -1953,7 +1953,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is another source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+                Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
@@ -2035,7 +2035,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
                 Assert.Equal(1, t.CopiedFiles.Length);
@@ -2052,7 +2052,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination copied file to contain the contents of original source file only."
+                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
@@ -2132,7 +2132,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
                 Assert.Equal(1, t.CopiedFiles.Length);
@@ -2149,7 +2149,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination copied file to contain the contents of original source file only."
+                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
@@ -2212,7 +2212,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination symbolic linked file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
                 Assert.Equal(1, t.CopiedFiles.Length);
@@ -2229,9 +2229,9 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(destinationFileContents, "This is another source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+                Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
             }
             finally
             {
