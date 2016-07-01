@@ -29,7 +29,7 @@
       <DotNetPath>$(Stage0Path)</DotNetPath>
 
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
-      <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
+      <OutputDirectory>$(BaseOutputDirectory)/stage2/</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>

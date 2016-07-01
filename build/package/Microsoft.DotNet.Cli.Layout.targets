@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask TaskName="MakeRelative" AssemblyFile="$(CLIBuildDll)" />
   
   <Target DependsOnTargets="Init" Name="SetupLayoutInputsOutputs" >
     <PropertyGroup>
@@ -9,8 +11,8 @@
     <!-- Set up Items with Layout Input Files -->
     <ItemGroup>
       <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
-      <SdkDebugLayoutInput Include="$(SymbolsOutputDirectory)/sdk/**/*.pdb" />
-      <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**" />
+      <SdkDebugLayoutInput Include="$(SymbolsOutputDirectory)/sdk/**/*" />
+      <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/shared/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/sdk/**/*" />
     </ItemGroup>
@@ -45,14 +47,14 @@
 
     <!-- Set up Items Defining Layouts for easy change -->
     <ItemGroup>
-      <LayoutDefinition Include="SdkName">
+      <LayoutDefinition Include="Sdk">
         <InputFiles>@(SdkLayoutInput)</InputFiles>
         <OutputFiles>@(SdkRelativeOutputFiles -> '$(SdkLayoutOutputDirectory)/%(Identity)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdk)</NameWithVersion>
         <Name>$(ArtifactNameSdk)</Name>
       </LayoutDefinition>
 
-      <LayoutDefinition Include="SdkDebug">
+      <LayoutDefinition Include="Debug">
         <InputFiles>@(SdkDebugLayoutInput)</InputFiles>
         <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>        
         <NameWithVersion>$(ArtifactNameWithVersionSdkDebug)</NameWithVersion>
@@ -77,7 +79,7 @@
   </Target>
 
   <Target Name="Layout" 
-          DependsOnTargets="Init;dotn"
+          DependsOnTargets="Init;SetupLayoutInputsOutputs"
           Inputs="@(LayoutDefinition -> '%(InputFiles)')" 
           Outputs="@(LayoutDefinition -> '%(OutputFiles)')" >
 

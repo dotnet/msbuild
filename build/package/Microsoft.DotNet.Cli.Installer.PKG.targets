@@ -66,13 +66,25 @@
       <ItemGroup>
         <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
       </ItemGroup>
+
+      <ItemGroup>
+        <GenerateSdkPkgInputs Include="$(SdkLayoutOutputDirectory)/**/*" />
+        <GenerateSdkPkgInputs Include="$(SdkPkgScriptsDirectory)/**/*" />
+
+        <GenerateSdkProductArchiveInputs Include="$(SdkInstallerFile)" />
+        <GenerateSdkProductArchiveInputs Include="$(DownloadedSharedFrameworkInstallerFile)" />
+        <GenerateSdkProductArchiveInputs Include="$(DownloadedHostFxrInstallerFile)" />
+        <GenerateSdkProductArchiveInputs Include="$(DownloadedSharedHostInstallerFile)" />
+        <GenerateSdkProductArchiveInputs Include="$(SdkProductArchiveDistributionTemplateFile)" />
+        <GenerateSdkProductArchiveInputs Include="$(SdkProductArchiveResourcesDirectory)/**/*" />
+      </ItemGroup>
     </Target>
 
     <Target Name="GenerateSdkPkg" 
-            Inputs="$(SdkLayoutOutputDirectory);"
+            Inputs="@(GenerateSdkPkgInputs)"
             Outputs="$(SdkInstallerFile)"
             DependsOnTargets="Init;Layout;SetupPkgInputsOutputs"
-            Condition=" '%(OSName)' == 'osx' ">
+            Condition=" '$(OSName)' == 'osx' ">
       
       <Exec Command="pkgbuild
                      --root '$(SdkLayoutOutputDirectory)'
@@ -84,16 +96,10 @@
     </Target>
 
     <Target Name="GenerateSdkProductArchive"
-            Inputs="$(SdkInstallerFile);
-                    $(DownloadedSharedFrameworkInstallerFile);
-                    $(DownloadedHostFxrInstallerFile);
-                    $(DownloadedSharedHostInstallerFile);
-                    $(SdkProductArchiveDistributionTemplateFile);
-                    $(ResourcesPath)"
+            Inputs="@(GenerateSdkProductArchiveInputs)"
             Outputs="$(CombinedFrameworkSdkHostInstallerFile)"
             DependsOnTargets="GenerateSdkPkg"
-            Condition=" '%(OSName)' == 'osx' ">
-      
+            Condition=" '$(OSName)' == 'osx' ">
       <!-- Move ProductArchive pkg components into place with component ids in the filenames -->
       <Copy 
         SourceFiles="$(SdkInstallerFile);
@@ -103,8 +109,7 @@
         DestinationFiles="$(SdkPkgIntermediatePath);
                           $(SharedFrameworkPkgIntermediatePath);
                           $(HostFxrPkgIntermediatePath);
-                          $(SharedHostPkgIntermediatePath);"
-        Overwrite="true" />
+                          $(SharedHostPkgIntermediatePath);" />
       
       <!-- Fill out parameters in the Distribution Template -->
       <ReplaceFileContents
@@ -117,7 +122,7 @@
                      --version '$(SdkVersion)'
                      --identifier '$(SdkProductArchiveId)'
                      --package-path '$(PkgIntermediateDirectory)'
-                     --resources '$(ResourcesPath)'
+                     --resources '$(SdkProductArchiveResourcesDirectory)'
                      --distribution '$(SdkProductArchiveDistributionFile)'
                      '$(CombinedFrameworkSdkHostInstallerFile)'" />
     </Target>
@@ -128,6 +133,6 @@
                               SetupPkgInputsOutputs;
                               GenerateSdkPkg;
                               GenerateSdkProductArchive"
-            Condition=" '%(OSName)' == 'osx' " />
+            Condition=" '$(OSName)' == 'osx' " />
 
 </Project>
