@@ -1846,7 +1846,7 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    public class CopyHardAndSymbolicLink_Tests : Copy_Tests
+    public class CopyHardAndSymbolicLink_Tests
     {
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
