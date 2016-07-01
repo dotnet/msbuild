@@ -333,35 +333,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetExecutablePath()
         {
-            string path;
-
-            // If FileUtilities knows we are running tests, it will return the assembly path, not the
-            // module path
-            if (FileUtilities.RunningTests)
-            {
-                path =
-                    Path.Combine(
-                        Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath)
-                            .TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }),
-                        "MSBuild.exe");
-            }
-            else
-            {
-                StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
-#if FEATURE_HANDLEREF
-                NativeMethodsShared.GetModuleFileName(NativeMethodsShared.NullHandleRef, sb, sb.Capacity);
-#else
-                NativeMethodsShared.GetModuleFileName(IntPtr.Zero, sb, sb.Capacity);
-#endif
-                path = sb.ToString();
-            }
+            var path = Path.Combine(
+                Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath)
+                    .TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }),
+                "MSBuild.exe");
 
             string configPath = FileUtilities.CurrentExecutableConfigurationFilePath;
             string directoryName = FileUtilities.CurrentExecutableDirectory;
             string executablePath = FileUtilities.CurrentExecutablePath;
-            Assert.True(string.Compare(configPath, executablePath + ".config", StringComparison.OrdinalIgnoreCase) == 0);
-            Assert.True(string.Compare(path, executablePath, StringComparison.OrdinalIgnoreCase) == 0);
-            Assert.True(string.Compare(directoryName, Path.GetDirectoryName(path), StringComparison.OrdinalIgnoreCase) == 0);
+            Assert.Equal(path + ".config", configPath, StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(path, executablePath, StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(Path.GetDirectoryName(path), directoryName, StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
