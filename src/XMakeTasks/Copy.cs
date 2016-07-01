@@ -541,7 +541,7 @@ namespace Microsoft.Build.Tasks
             //First check if create hard or symbolic link option is selected. If both then return an error
             if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
             {
-                Log.LogErrorWithCodeFromResources("Copy.OnlyOneLinkType", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+                Log.LogErrorWithCodeFromResources("Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
                 return false;
             }
 

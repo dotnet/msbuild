@@ -285,8 +285,8 @@
     <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
     <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
   </data>
-  <data name="Copy.OnlyOneLinkType">
-    <value>MSB3031: "{0}" and "{1}" cannot selected both. Choose one.</value>    
+  <data name="Copy.ExactlyOneTypeOfLink">
+    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
   </data>
 
   <!--
@@ -2678,6 +2678,7 @@
             MSB3861 - MSB3870   Task: ErrorFromResources
             MSB3871 - MSB3880   Targets: Code sharing
             MSB3881 - MSB3890   Task: Compiler
+            MSB3891 - MSB3900   Task: Copy
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
