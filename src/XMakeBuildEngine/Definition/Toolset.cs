@@ -704,15 +704,8 @@ namespace Microsoft.Build.Evaluation
                         );
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                // handle problems when reading the default tasks files
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    // Catching Exception, but rethrowing unless it's an IO related exception.
-                    throw;
-                }
-
                 loggingServices.LogWarning
                     (
                     buildEventContext,
@@ -954,14 +947,8 @@ namespace Microsoft.Build.Evaluation
                     _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_propertyBag);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    // Catching Exception, but rethrowing unless it's an IO related exception.
-                    throw;
-                }
-
                 loggingServices.LogError(buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file it is just gathering properties */String.Empty), "TasksPropertyBagError", e.Message);
             }
         }
@@ -1002,14 +989,8 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                        {
-                            // Catching Exception, but rethrowing unless it's an IO related exception.
-                            throw;
-                        }
-
                         string rootedPathMessage = ResourceUtilities.FormatResourceString("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
                         loggingServices.LogWarning(buildEventContext, null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
                     }
@@ -1082,14 +1063,8 @@ namespace Microsoft.Build.Evaluation
                     // handle XML errors in the default tasks file
                     ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, new BuildEventFileInfo(e), taskFileError, e.Message);
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        // Catching Exception, but rethrowing unless it's an IO related exception.
-                        throw;
-                    }
-
                     loggingServices.LogError(buildEventContext, new BuildEventFileInfo(defaultTasksFile), taskFileError, e.Message);
                     break;
                 }

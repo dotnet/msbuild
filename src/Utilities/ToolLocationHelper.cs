@@ -70,11 +70,22 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version461 = 8,
 
+        /// <summary>
+        /// version 4.5.2. Enum is out of order because it was shipped out of band from a Visual Studio update
+        /// without a corresponding SDK release.
+        /// </summary>
+        Version452 = 9,
+
+        /// <summary>
+        /// version 4.6.1
+        /// </summary>
+        Version462 = 10,
+
         // keep this up to date, this should always point to the last entry
         /// <summary>
         /// the latest version available at the time of release
         /// </summary>
-        VersionLatest = Version461
+        VersionLatest = Version462
     }
 
     /// <summary>
@@ -819,13 +830,8 @@ namespace Microsoft.Build.Utilities
                     ErrorUtilities.DebugTraceMessage("GetPlatformSDKPropsFileLocation", "Could not find root SDK location for SDKI = '{0}', SDKV = '{1}'", sdkIdentifier, sdkVersion);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (!ExceptionHandling.IsIoRelatedException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.DebugTraceMessage("GetPlatformSDKPropsFileLocation", "Encountered exception trying to get the SDK props file Location : {0}", e.Message);
             }
 
@@ -1009,13 +1015,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (!ExceptionHandling.IsIoRelatedException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", "Encountered exception trying to gather the platform references: {0}", e.Message);
             }
 
@@ -1074,13 +1075,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (!ExceptionHandling.IsIoRelatedException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.DebugTraceMessage("GetTargetPlatformReferences", "Encountered exception trying to gather the platform references: {0}", e.Message);
             }
 
@@ -1781,11 +1777,17 @@ namespace Microsoft.Build.Utilities
                 case TargetDotNetFrameworkVersion.Version451:
                     return FrameworkLocationHelper.dotNetFrameworkVersion451;
 
+                case TargetDotNetFrameworkVersion.Version452:
+                    return FrameworkLocationHelper.dotNetFrameworkVersion452;
+
                 case TargetDotNetFrameworkVersion.Version46:
                     return FrameworkLocationHelper.dotNetFrameworkVersion46;
 
                 case TargetDotNetFrameworkVersion.Version461:
                     return FrameworkLocationHelper.dotNetFrameworkVersion461;
+
+                case TargetDotNetFrameworkVersion.Version462:
+                    return FrameworkLocationHelper.dotNetFrameworkVersion462;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
@@ -2851,13 +2853,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (!ExceptionHandling.IsIoRelatedException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", "Encountered exception trying to gather platform-specific data: {0}", e.Message);
             }
         }
@@ -2962,13 +2959,8 @@ namespace Microsoft.Build.Utilities
             {
                 ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFile, ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                // If there was a problem writing the file (like it's read-only or locked on disk, for
-                // example), then eat the exception and log a warning.  Otherwise, rethrow.
-                if (ExceptionHandling.NotExpectedException(ex))
-                    throw;
-
                 ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFile, ex.Message);
             }
 

@@ -1289,12 +1289,8 @@ namespace Microsoft.Build.Tasks
                             Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", file);
                         }
                     }
-                    catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                            throw;
-
-                        // Invalid file path. 
                         throw new InvalidParameterValueException("CandidateAssemblyFiles", file, e.Message);
                     }
                 }

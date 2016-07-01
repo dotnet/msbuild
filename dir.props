@@ -26,6 +26,7 @@
     <XunitVersion>2.1.0</XunitVersion>
     <CompilerToolsVersion>1.2.0-beta1-20160108-01</CompilerToolsVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
+    <GitVersioningVersion>1.4.30</GitVersioningVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
@@ -36,6 +37,7 @@
     <ToolsDir>$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
     <MicroBuildDir>$(ToolPackagesDir)\MicroBuild.Core\$(MicroBuildVersion)\build\</MicroBuildDir>
+    <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning.$(GitVersioningVersion)\build\</GitVersioningDir>
 
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
     <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
@@ -94,9 +96,18 @@
   </ItemGroup>
 
   <!-- Set default Configuration and Platform -->
+  <PropertyGroup Condition="'$(Configuration)' ==''">
+    <Configuration Condition="'$(OS)' == 'Windows_NT'">Debug</Configuration>
+    <Configuration Condition="'$(OS)' != 'Windows_NT'">Debug-MONO</Configuration>
+  </PropertyGroup>
+
   <PropertyGroup>
-    <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
-    <PlatformTarget Condition="'$(PlatformTarget)'==''">$(Platform)</PlatformTarget>
+    <Platform Condition="'$(Platform)'==''">x86</Platform>
+    <!-- Only build for specific platforms when PlatformSpecificBuild == true. Otherwise
+         build for AnyCPU. Only MSBuild.exe and MSBuildTaskHost.exe should need this -->
+    <PlatformTarget Condition="'$(PlatformSpecificBuild)'!='true'">AnyCPU</PlatformTarget>
+    <PlatformTarget Condition="'$(PlatformSpecificBuild)'=='true'">$(Platform)</PlatformTarget>
+
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
   </PropertyGroup>
 

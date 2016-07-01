@@ -60,8 +60,10 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion40 = new Version(4, 0);
         internal static readonly Version dotNetFrameworkVersion45 = new Version(4, 5);
         internal static readonly Version dotNetFrameworkVersion451 = new Version(4, 5, 1);
+        internal static readonly Version dotNetFrameworkVersion452 = new Version(4, 5, 2);
         internal static readonly Version dotNetFrameworkVersion46 = new Version(4, 6);
         internal static readonly Version dotNetFrameworkVersion461 = new Version(4, 6, 1);
+        internal static readonly Version dotNetFrameworkVersion462 = new Version(4, 6, 2);
 
         // visual studio versions.
         internal static readonly Version visualStudioVersion100 = new Version(10, 0);
@@ -92,8 +94,6 @@ namespace Microsoft.Build.Shared
         private const string dotNetFrameworkRegistryKeyV20 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionV20;
 
         internal static string dotNetFrameworkVersionFolderPrefixV30 = NativeMethodsShared.IsWindows ? "v3.0" : "3.0"; // v3.0 is for WinFx.
-        private const string dotNetFrameworkVersionV30 = "v3.0"; // full WinFx version to pass to NativeMethodsShared.GetRequestedRuntimeInfo().
-        private static string s_dotNetFrameworkAssemblyFoldersRegistryKeyV30 = dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30;
         private static string s_dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 + "\\Setup";
 
         private const string fallbackDotNetFrameworkSdkRegistryInstallPath = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows";
@@ -120,15 +120,6 @@ namespace Microsoft.Build.Shared
         private const string ToolsVersionsRegistryPath = @"SOFTWARE\Microsoft\MSBuild\ToolsVersions";
 
         #endregion // Constants
-
-        #region Delegates
-
-        // This way, the methods that take these as parameters can also be overridden to do different things
-        // in unit tests. 
-        private static readonly GetDirectories s_getDirectories = new GetDirectories(Directory.GetDirectories);
-        private static readonly DirectoryExists s_directoryExists = new DirectoryExists(Directory.Exists);
-
-        #endregion // Delegates
 
         #region Static member variables
 
@@ -203,11 +194,17 @@ namespace Microsoft.Build.Shared
             // v4.5.1
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion451, visualStudioVersion120),
 
+            // v4.5.2
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion452, visualStudioVersion120),
+
             // v4.6
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion46, visualStudioVersion140),
 
             // v4.6.1
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion461, visualStudioVersion140),
+
+            // v4.6.2
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion462, visualStudioVersion150),
         };
 
         /// <summary>
@@ -246,6 +243,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452
             }),
 
             // VS14
@@ -257,6 +255,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452,
                 dotNetFrameworkVersion46,
                 dotNetFrameworkVersion461
             }),
@@ -270,8 +269,10 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452,
                 dotNetFrameworkVersion46,
                 dotNetFrameworkVersion461,
+                dotNetFrameworkVersion462
             }),
         };
 
@@ -288,16 +289,20 @@ namespace Microsoft.Build.Shared
         {
             // VS12
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion120), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion120) },
+            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion120), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion120) },
 
             // VS14
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion140) },
+            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
             { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
             { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140) },
 
             // VS15
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150) },
        };
 
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
@@ -674,7 +679,7 @@ namespace Microsoft.Build.Shared
         /// <param name="prefix">Should be something like 'v1.2' that indicates the runtime version we want.</param>
         /// <param name="directoryExists">Function that checks if directory exists.</param>
         /// <param name="getDirectories">Delegate to method that can return filesystem entries.</param>
-        /// <param name="architecture">Required architecture.</param>
+        /// <param name="architecture">.NET framework architecture</param>
         /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
         internal static string FindDotNetFrameworkPath
         (
@@ -923,13 +928,8 @@ namespace Microsoft.Build.Shared
                 path = Path.GetFullPath(path);
                 return path;
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.ThrowInvalidOperation("FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory", targetFrameworkRootPath, frameworkName.ToString(), e.Message);
                 // The compiler does not see the massage above an as exception;
                 return null;
@@ -1085,49 +1085,14 @@ namespace Microsoft.Build.Shared
         private static string FindRegistryValueUnderKey
         (
             string registryBaseKeyName,
-            string registryKeyName
-        )
-        {
-            return FindRegistryValueUnderKey(registryBaseKeyName, registryKeyName, RegistryView.Default);
-        }
-
-        /// <summary>
-        /// Look for the given registry value under the given key.
-        /// </summary>
-        private static string FindRegistryValueUnderKey
-        (
-            string registryBaseKeyName,
             string registryKeyName,
-            RegistryView registryView
-        )
+            RegistryView registryView = RegistryView.Default)
         {
-            string keyValueAsString = String.Empty;
-
             using (RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+            using (RegistryKey subKey = baseKey.OpenSubKey(registryBaseKeyName))
             {
-                using (RegistryKey subKey = baseKey.OpenSubKey(registryBaseKeyName))
-                {
-                    if (null == subKey)
-                    {
-                        keyValueAsString = null;
-                    }
-                    else
-                    {
-                        object keyValue = subKey.GetValue(registryKeyName);
-
-                        if (null == keyValue)
-                        {
-                            keyValueAsString = null;
-                        }
-                        else
-                        {
-                            keyValueAsString = keyValue.ToString();
-                        }
-                    }
-                }
+                return subKey?.GetValue(registryKeyName)?.ToString();
             }
-
-            return keyValueAsString;
         }
 #endif
 
@@ -1148,6 +1113,7 @@ namespace Microsoft.Build.Shared
         /// because most of attributes are the same for v4.x versions.
         /// </summary>
         /// <param name="version">.net framework version.</param>
+        /// <param name="visualStudioVersion">Version of Visual Studio</param>
         /// <returns></returns>
         private static DotNetFrameworkSpec CreateDotNetFrameworkSpecForV4(Version version, Version visualStudioVersion)
         {
@@ -1205,30 +1171,10 @@ namespace Microsoft.Build.Shared
         private class VisualStudioSpec
         {
             /// <summary>
-            /// The version of this visual studio.
-            /// </summary>
-            private readonly Version _version;
-
-            /// <summary>
             /// The key in registry to indicate the corresponding .net framework in this visual studio.
             /// i.e. 'v8.0A' for VS11.
             /// </summary>
             private readonly string _dotNetFrameworkSdkRegistryKey;
-
-            /// <summary>
-            /// The key in registry to indicate the corresponding windows sdk, i.e. "v8.0" for VS11.
-            /// </summary>
-            private readonly string _windowsSdkRegistryKey;
-
-            /// <summary>
-            /// The name in registry to indicate the sdk installation folder path, i.e. "InstallationFolder" for windows v8.0.
-            /// </summary>
-            private readonly string _windowsSdkRegistryInstallationFolderName;
-
-            /// <summary>
-            /// The list of supported .net framework versions in this visual studio.
-            /// </summary>
-            private readonly Version[] _supportedDotNetFrameworkVersions;
 
             public VisualStudioSpec(
                 Version version,
@@ -1237,44 +1183,32 @@ namespace Microsoft.Build.Shared
                 string windowsSdkRegistryInstallationFolderName,
                 Version[] supportedDotNetFrameworkVersions)
             {
-                _version = version;
+                Version = version;
                 _dotNetFrameworkSdkRegistryKey = dotNetFrameworkSdkRegistryKey;
-                _windowsSdkRegistryKey = windowsSdkRegistryKey;
-                _windowsSdkRegistryInstallationFolderName = windowsSdkRegistryInstallationFolderName;
-                _supportedDotNetFrameworkVersions = supportedDotNetFrameworkVersions;
+                WindowsSdkRegistryKey = windowsSdkRegistryKey;
+                WindowsSdkRegistryInstallationFolderName = windowsSdkRegistryInstallationFolderName;
+                SupportedDotNetFrameworkVersions = supportedDotNetFrameworkVersions;
             }
 
             /// <summary>
             /// The version of this visual studio.
             /// </summary>
-            public Version Version
-            {
-                get { return _version; }
-            }
+            public Version Version { get; }
 
             /// <summary>
             /// The list of supported .net framework versions in this visual studio.
             /// </summary>
-            public Version[] SupportedDotNetFrameworkVersions
-            {
-                get { return _supportedDotNetFrameworkVersions; }
-            }
+            public Version[] SupportedDotNetFrameworkVersions { get; }
 
             /// <summary>
             /// The key in registry to indicate the corresponding windows sdk, i.e. "v8.0" for VS11.
             /// </summary>
-            public string WindowsSdkRegistryKey
-            {
-                get { return _windowsSdkRegistryKey; }
-            }
+            public string WindowsSdkRegistryKey { get; }
 
             /// <summary>
             /// The name in registry to indicate the sdk installation folder path, i.e. "InstallationFolder" for windows v8.0.
             /// </summary>
-            public string WindowsSdkRegistryInstallationFolderName
-            {
-                get { return _windowsSdkRegistryInstallationFolderName; }
-            }
+            public string WindowsSdkRegistryInstallationFolderName { get; }
 
             /// <summary>
             /// The key in the registry to indicate the corresponding .net framework in this visual studio.
@@ -1288,6 +1222,10 @@ namespace Microsoft.Build.Shared
                 if (dotNetSdkVersion == dotNetFrameworkVersion461)
                 {
                     sdkVersionFolder = "4.6.1";
+                }
+                else if (dotNetSdkVersion == dotNetFrameworkVersion462)
+                {
+                    sdkVersionFolder = "4.6.2";
                 }
 
                 // If the path is formatted to include a version number if we need to include that.
@@ -1304,66 +1242,51 @@ namespace Microsoft.Build.Shared
             private const string MicrosoftSDKsRegistryKey = @"SOFTWARE\Microsoft\Microsoft SDKs";
 
             /// <summary>
-            /// The version of this .net framework.
-            /// </summary>
-            protected readonly Version version;
-
-            /// <summary>
             /// The registry key of this .net framework, i.e. "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" for .net v4.5.
             /// </summary>
-            protected readonly string dotNetFrameworkRegistryKey;
+            private readonly string _dotNetFrameworkRegistryKey;
 
             /// <summary>
             /// The name in registry to indicate that this .net framework is installed, i.e. "Install" for .net v4.5.
             /// </summary>
-            protected readonly string dotNetFrameworkSetupRegistryInstalledName;
-
-            /// <summary>
-            /// Folder prefix, i.e. v4.0 for .net v4.5.
-            /// </summary>
-            protected readonly string dotNetFrameworkFolderPrefix;
+            private readonly string _dotNetFrameworkSetupRegistryInstalledName;
 
             /// <summary>
             /// The key in registry to indicate the sdk tools folder, i.e. "WinSDK-NetFx40Tools-x86" for .net v4.5.
             /// </summary>
-            protected readonly string dotNetFrameworkSdkRegistryToolsKey;
-
-            /// <summary>
-            /// The name in registry to indicate the sdk installation folder path, i.e. "InstallationFolder" for .net v4.5.
-            /// </summary>
-            protected readonly string dotNetFrameworkSdkRegistryInstallationFolderName;
+            private readonly string _dotNetFrameworkSdkRegistryToolsKey;
 
             /// <summary>
             /// The version of visual studio that shipped with this .net framework.
             /// </summary>
-            protected readonly Version visualStudioVersion;
+            private readonly Version _visualStudioVersion;
 
             /// <summary>
             /// Does this .net framework include MSBuild?
             /// </summary>
-            protected readonly bool hasMSBuild;
+            private readonly bool _hasMsBuild;
 
             /// <summary>
             /// Cached paths of .net framework on different architecture.
             /// </summary>
-            protected readonly ConcurrentDictionary<DotNetFrameworkArchitecture, string> pathsToDotNetFramework;
+            private readonly ConcurrentDictionary<DotNetFrameworkArchitecture, string> _pathsToDotNetFramework;
 
             /// <summary>
             /// Cached paths of .net framework sdk tools folder path on different visual studio version.
             /// </summary>
-            protected readonly ConcurrentDictionary<Version, string> pathsToDotNetFrameworkSdkTools;
+            private readonly ConcurrentDictionary<Version, string> _pathsToDotNetFrameworkSdkTools;
 
 #if FEATURE_WIN32_REGISTRY
             /// <summary>
             /// Cached path of the corresponding windows sdk.
             /// </summary>
-            protected string pathToWindowsSdk;
+            private string _pathToWindowsSdk;
 #endif
 
             /// <summary>
             /// Cached path of .net framework reference assemblies.
             /// </summary>
-            protected string pathToDotNetFrameworkReferenceAssemblies;
+            protected string _pathToDotNetFrameworkReferenceAssemblies;
 
             public DotNetFrameworkSpec(
                 Version version,
@@ -1375,46 +1298,37 @@ namespace Microsoft.Build.Shared
                 bool hasMSBuild = true,
                 Version visualStudioVersion = null)
             {
-                this.version = version;
-                this.visualStudioVersion = visualStudioVersion;
-                this.dotNetFrameworkRegistryKey = dotNetFrameworkRegistryKey;
-                this.dotNetFrameworkSetupRegistryInstalledName = dotNetFrameworkSetupRegistryInstalledName;
-                this.dotNetFrameworkFolderPrefix = dotNetFrameworkVersionFolderPrefix;
-                this.dotNetFrameworkSdkRegistryToolsKey = dotNetFrameworkSdkRegistryToolsKey;
-                this.dotNetFrameworkSdkRegistryInstallationFolderName = dotNetFrameworkSdkRegistryInstallationFolderName;
-                this.hasMSBuild = hasMSBuild;
-                this.pathsToDotNetFramework = new ConcurrentDictionary<DotNetFrameworkArchitecture, string>();
-                this.pathsToDotNetFrameworkSdkTools = new ConcurrentDictionary<Version, string>();
+                this.Version = version;
+                this._visualStudioVersion = visualStudioVersion;
+                this._dotNetFrameworkRegistryKey = dotNetFrameworkRegistryKey;
+                this._dotNetFrameworkSetupRegistryInstalledName = dotNetFrameworkSetupRegistryInstalledName;
+                this.DotNetFrameworkFolderPrefix = dotNetFrameworkVersionFolderPrefix;
+                this._dotNetFrameworkSdkRegistryToolsKey = dotNetFrameworkSdkRegistryToolsKey;
+                this.DotNetFrameworkSdkRegistryInstallationFolderName = dotNetFrameworkSdkRegistryInstallationFolderName;
+                this._hasMsBuild = hasMSBuild;
+                this._pathsToDotNetFramework = new ConcurrentDictionary<DotNetFrameworkArchitecture, string>();
+                this._pathsToDotNetFrameworkSdkTools = new ConcurrentDictionary<Version, string>();
             }
 
             /// <summary>
             /// The version of this .net framework.
             /// </summary>
-            public Version Version
-            {
-                get { return this.version; }
-            }
+            public Version Version { get; }
 
             /// <summary>
             /// The name in registry to indicate the sdk installation folder path, i.e. "InstallationFolder" for .net v4.5.
             /// </summary>
-            public string DotNetFrameworkSdkRegistryInstallationFolderName
-            {
-                get { return this.dotNetFrameworkSdkRegistryInstallationFolderName; }
-            }
+            public string DotNetFrameworkSdkRegistryInstallationFolderName { get; }
 
             /// <summary>
             /// Folder prefix, i.e. v4.0 for .net v4.5.
             /// </summary>
-            public string DotNetFrameworkFolderPrefix
-            {
-                get { return this.dotNetFrameworkFolderPrefix; }
-            }
+            public string DotNetFrameworkFolderPrefix { get; }
 
-            private FrameworkName FrameworkName
-            {
-                get { return new FrameworkName(dotNetFrameworkIdentifier, this.version); }
-            }
+            /// <summary>
+            /// Get the FrameworkName for this version of the .NET Framework.
+            /// </summary>
+            private FrameworkName FrameworkName => new FrameworkName(dotNetFrameworkIdentifier, this.Version);
 
             /// <summary>
             /// Gets the full registry key of this .net framework Sdk for the given visual studio version.
@@ -1422,7 +1336,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetDotNetFrameworkSdkRootRegistryKey(VisualStudioSpec visualStudioSpec)
             {
-                return string.Join(@"\", HKLM, MicrosoftSDKsRegistryKey, visualStudioSpec.GetDotNetFrameworkSdkRegistryKey(Version), dotNetFrameworkSdkRegistryToolsKey);
+                return string.Join(@"\", HKLM, MicrosoftSDKsRegistryKey, visualStudioSpec.GetDotNetFrameworkSdkRegistryKey(Version), _dotNetFrameworkSdkRegistryToolsKey);
             }
 
             /// <summary>
@@ -1434,7 +1348,7 @@ namespace Microsoft.Build.Shared
                 return null;
 #else
                 string cachedPath;
-                if (this.pathsToDotNetFramework.TryGetValue(architecture, out cachedPath))
+                if (this._pathsToDotNetFramework.TryGetValue(architecture, out cachedPath))
                 {
                     return cachedPath;
                 }
@@ -1454,15 +1368,14 @@ namespace Microsoft.Build.Shared
                 // We're installed and we haven't found this framework path yet -- so find it!
                 string generatedPathToDotNetFramework =
                                 FindDotNetFrameworkPath(
-                                    Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName),
-                                    this.dotNetFrameworkFolderPrefix,
-                                    s_directoryExists,
-                                    s_getDirectories,
-                                    architecture
-                                    );
+                                    Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
+                                    this.DotNetFrameworkFolderPrefix,
+                                    Directory.Exists,
+                                    Directory.GetDirectories,
+                                    architecture);
 
                 // .net was improperly uninstalled: msbuild.exe isn't there
-                if (this.hasMSBuild &&
+                if (this._hasMSBuild &&
                     generatedPathToDotNetFramework != null &&
                     !File.Exists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")))
                 {
@@ -1471,7 +1384,7 @@ namespace Microsoft.Build.Shared
 
                 if (!string.IsNullOrEmpty(generatedPathToDotNetFramework))
                 {
-                    pathsToDotNetFramework[architecture] = generatedPathToDotNetFramework;
+                    _pathsToDotNetFramework[architecture] = generatedPathToDotNetFramework;
                 }
 
                 return generatedPathToDotNetFramework;
@@ -1485,7 +1398,7 @@ namespace Microsoft.Build.Shared
             public virtual string GetPathToDotNetFrameworkSdkTools(VisualStudioSpec visualStudioSpec)
             {
                 string cachedPath;
-                if (this.pathsToDotNetFrameworkSdkTools.TryGetValue(visualStudioSpec.Version, out cachedPath))
+                if (this._pathsToDotNetFrameworkSdkTools.TryGetValue(visualStudioSpec.Version, out cachedPath))
                 {
                     return cachedPath;
                 }
@@ -1497,7 +1410,7 @@ namespace Microsoft.Build.Shared
                     string frameworkPath = NativeMethodsShared.FrameworkBasePath;
                     if (!string.IsNullOrEmpty(frameworkPath))
                     {
-                        frameworkPath = Path.Combine(frameworkPath, this.version.ToString());
+                        frameworkPath = Path.Combine(frameworkPath, this.Version.ToString());
                     }
 
                     if (!string.IsNullOrEmpty(frameworkPath) && Directory.Exists(frameworkPath))
@@ -1565,12 +1478,12 @@ namespace Microsoft.Build.Shared
                 if (string.IsNullOrEmpty(generatedPathToDotNetFrameworkSdkTools))
                 {
                     // Fallback to "default" ultimately.
-                    generatedPathToDotNetFrameworkSdkTools = FallbackToDefaultPathToDotNetFrameworkSdkTools(this.version);
+                    generatedPathToDotNetFrameworkSdkTools = FallbackToDefaultPathToDotNetFrameworkSdkTools(this.Version);
                 }
 
                 if (!string.IsNullOrEmpty(generatedPathToDotNetFrameworkSdkTools))
                 {
-                    this.pathsToDotNetFrameworkSdkTools[visualStudioSpec.Version] = generatedPathToDotNetFrameworkSdkTools;
+                    this._pathsToDotNetFrameworkSdkTools[visualStudioSpec.Version] = generatedPathToDotNetFrameworkSdkTools;
                 }
 
                 return generatedPathToDotNetFrameworkSdkTools;
@@ -1597,18 +1510,18 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetPathToDotNetFrameworkReferenceAssemblies()
             {
-                if (this.pathToDotNetFrameworkReferenceAssemblies == null)
+                if (this._pathToDotNetFrameworkReferenceAssemblies == null)
                 {
                     // when a user requests the 40 reference assembly path we don't need to read the redist list because we will not be chaining so we may as well just
                     // generate the path and save us some time.
                     string referencePath = GenerateReferenceAssemblyPath(FrameworkLocationHelper.programFilesReferenceAssemblyLocation, this.FrameworkName);
                     if (Directory.Exists(referencePath))
                     {
-                        this.pathToDotNetFrameworkReferenceAssemblies = FileUtilities.EnsureTrailingSlash(referencePath);
+                        this._pathToDotNetFrameworkReferenceAssemblies = FileUtilities.EnsureTrailingSlash(referencePath);
                     }
                 }
 
-                return this.pathToDotNetFrameworkReferenceAssemblies;
+                return this._pathToDotNetFrameworkReferenceAssemblies;
             }
 
             /// <summary>
@@ -1618,32 +1531,32 @@ namespace Microsoft.Build.Shared
             public virtual string GetPathToWindowsSdk()
             {
 #if FEATURE_WIN32_REGISTRY
-                if (this.pathToWindowsSdk == null)
+                if (this._pathToWindowsSdk == null)
                 {
-                    ErrorUtilities.VerifyThrowArgument(this.visualStudioVersion != null, "FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk", this.version);
+                    ErrorUtilities.VerifyThrowArgument(this._visualStudioVersion != null, "FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk", this.Version);
 
-                    var visualStudioSpec = GetVisualStudioSpec(this.visualStudioVersion);
+                    var visualStudioSpec = GetVisualStudioSpec(this._visualStudioVersion);
 
                     if (string.IsNullOrEmpty(visualStudioSpec.WindowsSdkRegistryKey) || string.IsNullOrEmpty(visualStudioSpec.WindowsSdkRegistryInstallationFolderName))
                     {
-                        ErrorUtilities.ThrowArgument("FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk", this.version);
+                        ErrorUtilities.ThrowArgument("FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk", this.Version);
                     }
 
                     string registryPath = string.Join(@"\", MicrosoftSDKsRegistryKey, "Windows", visualStudioSpec.WindowsSdkRegistryKey);
 
                     // As of Dev11, the SDK reg keys are installed in the 32-bit registry. 
-                    this.pathToWindowsSdk = FindRegistryValueUnderKey(
+                    this._pathToWindowsSdk = FindRegistryValueUnderKey(
                         registryPath,
                         visualStudioSpec.WindowsSdkRegistryInstallationFolderName,
                         RegistryView.Registry32);
                 }
-                return this.pathToWindowsSdk;
+                return this._pathToWindowsSdk;
 #else
                 return null;
 #endif
             }
 
-            protected static string FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(Version dotNetFrameworkVersion, Version visualStudioVersion)
+            private static string FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(Version dotNetFrameworkVersion, Version visualStudioVersion)
             {
                 VisualStudioSpec visualStudioSpec;
                 DotNetFrameworkSpec dotNetFrameworkSpec;
@@ -1657,7 +1570,7 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
-            protected static string FallbackToDefaultPathToDotNetFrameworkSdkTools(Version dotNetFrameworkVersion)
+            private static string FallbackToDefaultPathToDotNetFrameworkSdkTools(Version dotNetFrameworkVersion)
             {
                 if (dotNetFrameworkVersion.Major == 4)
                 {
@@ -1718,7 +1631,7 @@ namespace Microsoft.Build.Shared
                 {
                     _pathToDotNetFrameworkSdkTools = FindRegistryValueUnderKey(
                         dotNetFrameworkRegistryPath,
-                        this.dotNetFrameworkSdkRegistryInstallationFolderName);
+                        this.DotNetFrameworkSdkRegistryInstallationFolderName);
                 }
 
                 return _pathToDotNetFrameworkSdkTools;
@@ -1784,21 +1697,21 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public override string GetPathToDotNetFrameworkReferenceAssemblies()
             {
-                if (this.pathToDotNetFrameworkReferenceAssemblies == null)
+                if (this._pathToDotNetFrameworkReferenceAssemblies== null)
                 {
 #if FEATURE_WIN32_REGISTRY
-                    this.pathToDotNetFrameworkReferenceAssemblies = FindRegistryValueUnderKey(
+                    this._pathToDotNetFrameworkReferenceAssemblies = FindRegistryValueUnderKey(
                         dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + this.dotNetFrameworkFolderPrefix,
                         referenceAssembliesRegistryValueName);
 #endif
 
-                    if (this.pathToDotNetFrameworkReferenceAssemblies == null)
+                    if (this._pathToDotNetFrameworkReferenceAssemblies == null)
                     {
-                        this.pathToDotNetFrameworkReferenceAssemblies = GenerateReferenceAssemblyDirectory(this.dotNetFrameworkFolderPrefix);
+                        this._pathToDotNetFrameworkReferenceAssemblies = GenerateReferenceAssemblyDirectory(this.DotNetFrameworkFolderPrefix);
                     }
                 }
 
-                return this.pathToDotNetFrameworkReferenceAssemblies;
+                return this._pathToDotNetFrameworkReferenceAssemblies;
             }
         }
     }

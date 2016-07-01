@@ -2020,13 +2020,8 @@ namespace Microsoft.Build.CommandLine
                 {
                     writer = FileUtilities.OpenWrite(parameters[parameters.Length - 1], append: false);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
-                    }
-
                     CommandLineSwitchException.Throw("InvalidPreprocessPath", parameters[parameters.Length - 1], ex.Message);
                 }
             }
@@ -2714,13 +2709,8 @@ namespace Microsoft.Build.CommandLine
                         fileParameters = fileParameters.Replace(logFileParameter, "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), logFileName));
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
                     throw new LoggerException(e.Message, e);
                 }
 

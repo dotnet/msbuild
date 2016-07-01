@@ -460,14 +460,9 @@ namespace Microsoft.Build.Utilities
                         return trackerPath;
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
-                    // Otherwise, just ignore this path and move on -- it's just bad for some reason. 
+                    // ignore this path and move on -- it's just bad for some reason. 
                 }
             }
 

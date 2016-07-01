@@ -228,3 +228,6 @@ ref/
 Differences.txt
 Tools/
 Samples/MultiprocessBuild/PortableTask.dll
+
+# Visual Studio Code
+.vscode/

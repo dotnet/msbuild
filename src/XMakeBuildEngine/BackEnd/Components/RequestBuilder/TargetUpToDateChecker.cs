@@ -1013,12 +1013,8 @@ namespace Microsoft.Build.BackEnd
                 string oldestOutputFullPath = Path.Combine(projectDirectory, oldestOutput);
                 oldestOutputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(oldestOutputFullPath);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
                 // Output does not exist
                 oldestOutputFileTime = DateTime.MinValue;
             }
@@ -1042,12 +1038,8 @@ namespace Microsoft.Build.BackEnd
                     string candidateOutputFullPath = Path.Combine(projectDirectory, candidateOutput);
                     candidateOutputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(candidateOutputFullPath);
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
                     // Output does not exist
                     candidateOutputFileTime = DateTime.MinValue;
                 }
@@ -1081,12 +1073,8 @@ namespace Microsoft.Build.BackEnd
                     string unescapedInputFullPath = Path.Combine(projectDirectory, unescapedInput);
                     inputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(unescapedInputFullPath);
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
                     // Output does not exist
                     inputFileTime = DateTime.MinValue;
                 }
@@ -1244,12 +1232,8 @@ namespace Microsoft.Build.BackEnd
                 path1 = Path.Combine(_project.Directory, path1);
                 path1Info = FileUtilities.GetFileInfoNoThrow(path1);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
                 path1Info = null;
             }
 
@@ -1259,12 +1243,8 @@ namespace Microsoft.Build.BackEnd
                 path2 = Path.Combine(_project.Directory, path2);
                 path2Info = FileUtilities.GetFileInfoNoThrow(path2);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
                 path2Info = null;
             }
 
