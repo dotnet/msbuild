@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public override bool Execute()
         {
-            var crossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion, DependencyVersions.JitVersion);
+            var crossgenUtil = new Crossgen(CoreCLRVersion, JitVersion);
 
             crossgenUtil.CrossgenDirectory(SharedFrameworkNameVersionPath, SdkOutputDirectory);
 

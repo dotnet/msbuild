@@ -7,12 +7,11 @@
   <UsingTask TaskName="CleanPublishOutput" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="CrossgenDirectory" AssemblyFile="$(CLIBuildDll)" />    
 
-  <Target Name="Compile" DependsOnTargets="Init;
+  <Target Name="Compile" DependsOnTargets="Prepare;
                                            SetupStage;
                                            CompileStage;
                                            BuildProjectsForNuGetPackages;
-                                           GenerateNuGetPackagesArchive">
-  </Target>
+                                           GenerateNuGetPackagesArchive" />
 
   <Target Name="SetupStage">
     <PropertyGroup>
@@ -62,10 +61,8 @@
         <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
         <BinaryToCorehostifyOutDir>$(SdkOutputDirectory)/$(BinaryToCorehostifyRelDir)</BinaryToCorehostifyOutDir>
         <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
-
-        <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-        <SharedFrameworkNuGetVersion>1.0.0</SharedFrameworkNuGetVersion>
-        <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkNuGetVersion)</SharedFrameworkNameVersionPath>
+        
+        <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
       </PropertyGroup>
 
       <ItemGroup>

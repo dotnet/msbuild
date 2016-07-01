@@ -11,111 +11,46 @@
     </PropertyGroup>
     
     <ItemGroup>
-      <MicrosoftDotNetCliUtilsInputs Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils/**/*.cs;
-                                              $(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils/**/project.json;
-                                              $(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils/**/project.lock.json"
-                                     Exclude="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils/**/obj/**/*.cs" />
-      <MicrosoftDotNetCompilerCommonInputs Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common/**/*.cs;
-                                                    $(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common/**/project.json;
-                                                    $(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common/**/project.lock.json"
-                                           Exclude="$(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common/**/obj/**/*.cs" />
-      <MicrosoftDotNetFilesInputs Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Files/**/*.cs;
-                                           $(ProjectsSrcDirectory)/Microsoft.DotNet.Files/**/project.json;
-                                           $(ProjectsSrcDirectory)/Microsoft.DotNet.Files/**/project.lock.json"
-                            Exclude="$(ProjectsSrcDirectory)/Microsoft.DotNet.Files/**/obj/**/*.cs" />
-      <MicrosoftDotNetInternalAbstractionsInputs Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions/**/*.cs;
-                                                          $(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions/**/project.json;
-                                                          $(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions/**/project.lock.json"
-                                                 Exclude="$(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions/**/obj/**/*.cs" />
-      <MicrosoftDotNetProjectModelInputs Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel/**/*.cs;
-                                                  $(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel/**/project.json;
-                                                  $(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel/**/project.lock.json"
-                                         Exclude="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel/**/obj/**/*.cs" />
-      <MicrosoftDotNetProjectModelLoaderInputs Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader/**/*.cs;
-                                                        $(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader/**/project.json;
-                                                        $(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader/**/project.lock.json"
-                                               Exclude="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader/**/obj/**/*.cs" />
-      <MicrosoftDotNetProjectModelWorkspacesInputs Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces/**/*.cs;
-                                                            $(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces/**/project.json;
-                                                            $(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces/**/project.lock.json"
-                                                   Exclude="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces/**/obj/**/*.cs" />
-      <MicrosoftExtensionsDependencyModelInputs Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.DependencyModel/**/*.cs;
-                                                         $(ProjectsSrcDirectory)/Microsoft.Extensions.DependencyModel/**/project.json;
-                                                         $(ProjectsSrcDirectory)/Microsoft.Extensions.DependencyModel/**/project.lock.json"
-                                                Exclude="$(ProjectsSrcDirectory)/Microsoft.Extensions.DependencyModel/**/obj/**/*.cs" />
-      <MicrosoftExtensionsTestingAbstractionsInputs Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions/**/*.cs;
-                                                             $(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions/**/project.json;
-                                                             $(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions/**/project.lock.json"
-                                                    Exclude="$(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions/**/obj/**/*.cs" />
-
-      <MicrosoftDotNetCliUtilsOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.DotNet.Cli.Utils/**/netstandard*/Microsoft.DotNet.Cli.Utils.dll" />
-      <MicrosoftDotNetCompilerCommonOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.DotNet.Compiler.Common/**/netstandard*/Microsoft.DotNet.Compiler.Common.dll" />
-      <MicrosoftDotNetFilesOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.DotNet.Files/**/netstandard*/Microsoft.DotNet.Files.dll" />
-      <MicrosoftDotNetInternalAbstractionsOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.DotNet.InternalAbstractions/**/netstandard*/Microsoft.DotNet.InternalAbstractions.dll" />
-      <MicrosoftDotNetProjectModelOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.DotNet.ProjectModel/**/netstandard*/Microsoft.DotNet.ProjectModel.dll" />
-      <MicrosoftDotNetProjectModelLoaderOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.DotNet.ProjectModel.Loader/**/netstandard*/Microsoft.DotNet.ProjectModel.Loader.dll" />
-      <MicrosoftDotNetProjectModelWorkspacesOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.DotNet.ProjectModel.Workspaces/**/netstandard*/Microsoft.DotNet.ProjectModel.Workspaces.dll" />
-      <MicrosoftExtensionsDependencyModelOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.Extensions.DependencyModel/**/netstandard*/Microsoft.Extensions.DependencyModel.dll" />
-      <MicrosoftExtensionsTestingAbstractionsOutputs Include="$(PackagingBuildBasePath)/src/Microsoft.Extensions.Testing.Abstractions/**/netstandard*/Microsoft.Extensions.Testing.Abstractions.dll" />
-
-
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils">
-        <Inputs>@(MicrosoftDotNetCliUtilsInputs)</Inputs>
-        <Outputs>@(MicrosoftDotNetCliUtilsOutputs)</Outputs>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils" >
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common">
-        <Inputs>@(MicrosoftDotNetCompilerCommonInputs)</Inputs>
-        <Outputs>@(MicrosoftDotNetCompilerCommonOutputs)</Outputs>
         <ProjectName>Microsoft.DotNet.Compiler.Common</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Files">
-        <Inputs>@(MicrosoftDotNetFilesInputs)</Inputs>
-        <Outputs>@(MicrosoftDotNetFilesOutputs)</Outputs>
         <ProjectName>Microsoft.DotNet.Files</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions">
-        <Inputs>@(MicrosoftDotNetInternalAbstractionsInputs)</Inputs>
-        <Outputs>@(MicrosoftDotNetInternalAbstractionsOutputs)</Outputs>
         <ProjectName>Microsoft.DotNet.InternalAbstractions</ProjectName>
         <Version>$(DependencyModelAndInternalAbstractionsNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel">
-        <Inputs>@(MicrosoftDotNetProjectModelInputs)</Inputs>
-        <Outputs>@(MicrosoftDotNetProjectModelOutputs)</Outputs>
         <ProjectName>Microsoft.DotNet.ProjectModel</ProjectName>
         <Version>$(ProjectModelNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader">
-        <Inputs>@(MicrosoftDotNetProjectModelLoaderInputs)</Inputs>
-        <Outputs>@(MicrosoftDotNetProjectModelLoaderOutputs)</Outputs>
         <ProjectName>Microsoft.DotNet.ProjectModel.Loader</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces">
-        <Inputs>@(MicrosoftDotNetProjectModelWorkspacesInputs)</Inputs>
-        <Outputs>@(MicrosoftDotNetProjectModelWorkspacesOutputs)</Outputs>
         <ProjectName>Microsoft.DotNet.ProjectModel.Workspaces</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.DependencyModel">
-        <Inputs>@(MicrosoftExtensionsDependencyModelInputs)</Inputs>
-        <Outputs>@(MicrosoftExtensionsDependencyModelOutputs)</Outputs>
         <ProjectName>Microsoft.Extensions.DependencyModel</ProjectName>
         <Version>$(DependencyModelAndInternalAbstractionsNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions">
-        <Inputs>@(MicrosoftExtensionsTestingAbstractionsInputs)</Inputs>
-        <Outputs>@(MicrosoftExtensionsTestingAbstractionsOutputs)</Outputs>
         <ProjectName>Microsoft.Extensions.Testing.Abstractions</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
 
-      <ProjectPackTargetInputs Include="%(ProjectsToPack.Outputs)" />
+      <ProjectPackTargetInputs Include="$(PackagingBuildBasePath)/src/%(ProjectsToPack.ProjectName)/**/netstandard*/%(ProjectName).dll" />
       <ProjectPackTargetOutputs Include="$(NupkgOutputDirectory)/%(ProjectsToPack.ProjectName).%(ProjectsToPack.Version).nupkg" />
+    
     </ItemGroup>
   </Target>
 
@@ -135,9 +70,7 @@
   <Target Name="BuildProjectsForNuGetPackages"
             DependsOnTargets="Init;
                               SetupGenerateNugetPackagesInputsOutputs"            
-            Condition=" '$(OS)' == 'Windows_NT' "
-            Inputs="%(ProjectsToPack.Inputs)"
-            Outputs="%(ProjectsToPack.Outputs)">
+            Condition=" '$(OS)' == 'Windows_NT' ">
         <MakeDir Directories="$(PackagingBuildBasePath)" />
 
         <Exec Command="$(DotnetStage2) build

@@ -13,18 +13,22 @@
 
     <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
     <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
-    
+
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
     <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
 
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    
+
     <CoreSetupChannel>preview</CoreSetupChannel>
+    <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkVersion>1.0.0</SharedFrameworkVersion>
     <SharedHostVersion>1.0.1</SharedHostVersion>
     <HostFxrVersion>1.0.1</HostFxrVersion>
+
+    <CoreCLRVersion>1.0.2</CoreCLRVersion>
+    <JitVersion>1.0.2</JitVersion>
   </PropertyGroup>
 
   <ItemGroup>
