@@ -3280,7 +3280,10 @@ $(
                 "$(e.Substring($([System.IO.Path]::Combine(`a`, `b`))))",
                 "$([]::())",
                 "$((((",
+#if FEATURE_WIN32_REGISTRY
+                // If no registry, this gets expanded to the empty string
                 "$(Registry:X)",
+#endif
                 "$($())",
                 "$",
                 "()"
