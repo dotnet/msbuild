@@ -86,6 +86,7 @@
     <Compile Include="LC_Tests.cs" />
     <Compile Include="MakeDir_Tests.cs" />
     <Compile Include="ManifestWriter_Tests.cs" />
+    <Compile Include="MicrosoftCommonProps_Tests.cs" />
     <Compile Include="MockFaultInjectionHelper.cs" />
     <Compile Include="MockTypeInfo.cs" />
     <Compile Include="MockTypeLib.cs" />
