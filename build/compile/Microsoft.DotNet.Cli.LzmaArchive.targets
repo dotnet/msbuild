@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Target Name="GenerateNuGetPackagesArchive"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs"
-            Inputs="$(_DotNetNewFolder)/CSharp_Console/**/*"
+            Inputs="@(GenerateNuGetPackagesArchiveInputs)"
             Outputs="$(FinalArchive)">
       <ItemGroup>
         <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
@@ -37,5 +37,15 @@
         <IntermediateArchive>$(IntermediateDirectory)/nuGetPackagesArchive.lzma</IntermediateArchive>
         <FinalArchive>$(Stage2Directory)/sdk/$(SdkVersion)/nuGetPackagesArchive.lzma</FinalArchive>
       </PropertyGroup>
+
+      <ItemGroup>
+        <GenerateNuGetPackagesArchiveInputs Include="$(_DotNetNewFolder)/CSharp_Console/**/*" />
+        <GenerateNuGetPackagesArchiveInputs Include="$(SrcDirectory)/dotnet-archive/**/*"
+                                            Exclude="$(SrcDirectory)/dotnet-archive/**/bin/**/*;
+                                                     $(SrcDirectory)/dotnet-archive/**/obj/**/*" />
+        <GenerateNuGetPackagesArchiveInputs Include="$(SrcDirectory)/Microsoft.DotNet.Archive/**/*"
+                                            Exclude="$(SrcDirectory)/Microsoft.DotNet.Archive/**/bin/**/*;
+                                                     $(SrcDirectory)/Microsoft.DotNet.Archive/**/obj/**/*" />
+      </ItemGroup>
     </Target>
 </Project>
