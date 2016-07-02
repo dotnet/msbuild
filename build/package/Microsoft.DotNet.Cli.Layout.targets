@@ -11,7 +11,7 @@
     <!-- Set up Items with Layout Input Files -->
     <ItemGroup>
       <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
-      <SdkDebugLayoutInput Include="$(SymbolsOutputDirectory)/sdk/**/*" />
+      <SdkDebugLayoutInput Include="$(Stage2SymbolsDirectory)/sdk/**/*" />
       <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/shared/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/sdk/**/*" />
@@ -56,7 +56,7 @@
 
       <LayoutDefinition Include="Debug">
         <InputFiles>@(SdkDebugLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>        
+        <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdkDebug)</NameWithVersion>
         <Name>$(ArtifactNameSdkDebug)</Name>
       </LayoutDefinition>

@@ -220,9 +220,14 @@ namespace Microsoft.DotNet.Cli.Build
                     foreach (var binaryToRemove in new string[] { "csc", "vbc" })
                     {
                         var assetPath = Path.Combine(binaryToCorehostifyRelDir, $"{binaryToRemove}.exe").Replace(Path.DirectorySeparatorChar, '/');
-                        RemoveAssetFromDepsPackages(binaryToCoreHostifyDeps, "runtimeTargets", assetPath);
-                        RemoveAssetFromDepsPackages(
-                            Path.Combine(sdkOutputDirectory, "dotnet.deps.json"), "runtimeTargets", assetPath);
+                        RemoveAssetFromDepsPackages.DoRemoveAssetFromDepsPackages(
+                            binaryToCoreHostifyDeps,
+                            "runtimeTargets",
+                            assetPath);
+                        RemoveAssetFromDepsPackages.DoRemoveAssetFromDepsPackages(
+                            Path.Combine(sdkOutputDirectory, "dotnet.deps.json"),
+                            "runtimeTargets",
+                            assetPath);
                     }
                 }
                 catch (Exception ex)
@@ -358,40 +363,6 @@ namespace Microsoft.DotNet.Cli.Build
                 .Execute();
 
             File.Copy(intermediateArchive, finalArchive);
-        }
-
-        private static void RemoveAssetFromDepsPackages(string depsFile, string sectionName, string assetPath)
-        {
-            JToken deps;
-            using (var file = File.OpenText(depsFile))
-            using (JsonTextReader reader = new JsonTextReader(file))
-            {
-                deps = JObject.ReadFrom(reader);
-            }
-
-            foreach (JProperty target in deps["targets"])
-            {
-                foreach (JProperty pv in target.Value.Children<JProperty>())
-                {
-                    var section = pv.Value[sectionName];
-                    if (section != null)
-                    {
-                        foreach (JProperty relPath in section)
-                        {
-                            if (assetPath.Equals(relPath.Name))
-                            {
-                                relPath.Remove();
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            using (var file = File.CreateText(depsFile))
-            using (var writer = new JsonTextWriter(file) { Formatting = Formatting.Indented })
-            {
-                deps.WriteTo(writer);
-            }
         }
 
         private static void CopySharedFramework(string sharedFrameworkPublish, string rootOutputDirectory)

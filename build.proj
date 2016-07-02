@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="build/Microsoft.DotNet.Cli.Monikers.props" />
-
+  
   <PropertyGroup>
     <!--
       $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
@@ -21,20 +21,24 @@
 
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    
+
     <CoreSetupChannel>preview</CoreSetupChannel>
+    <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkVersion>1.0.0</SharedFrameworkVersion>
     <SharedHostVersion>1.0.1</SharedHostVersion>
     <HostFxrVersion>1.0.1</HostFxrVersion>
+
+    <CoreCLRVersion>1.0.2</CoreCLRVersion>
+    <JitVersion>1.0.2</JitVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.cs" Exclude="build_projects/**/obj/**/*.cs" />
     <DotnetCliBuildFrameworkInputs Include="build_projects/**/project.json;build_projects/**/project.lock.json" />
   </ItemGroup>
-  
-  <!-- Workaround to "Native image cannot be loaded multiple times" issue 
-       A target in the top level file needs to run and invoke a task 
+
+  <!-- Workaround to "Native image cannot be loaded multiple times" issue
+       A target in the top level file needs to run and invoke a task
        https://github.com/Microsoft/msbuild/issues/750 -->
   <Target Name="MSBuildWorkaroundTarget">
     <Message Text="Dont remove this target" />
@@ -49,13 +53,8 @@
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
-  <UsingTask TaskName="CompileTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="TestTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
-
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Compile">
-    <CompileTargets />
-  </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Test">
     <TestTargets />
@@ -66,5 +65,6 @@
   </Target>
 
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
 </Project>
