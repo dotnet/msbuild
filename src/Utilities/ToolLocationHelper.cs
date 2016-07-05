@@ -77,7 +77,7 @@ namespace Microsoft.Build.Utilities
         Version452 = 9,
 
         /// <summary>
-        /// version 4.6.1
+        /// version 4.6.2
         /// </summary>
         Version462 = 10,
 
