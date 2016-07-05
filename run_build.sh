@@ -15,7 +15,8 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 OLDPATH="$PATH"
 
-REPOROOT="$DIR/../.."
+ARCHITECTURE="x64"
+REPOROOT="$DIR"
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 
 while [[ $# > 0 ]]; do
@@ -79,7 +80,7 @@ while read line; do
 done < "$REPOROOT/branchinfo.txt"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
-[ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$(uname)
+[ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$ARCHITECTURE
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
 $REPOROOT/scripts/obtain/dotnet-install.sh --channel $CHANNEL --verbose
@@ -98,4 +99,4 @@ fi
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build3 build.proj /p:Architecture=x64
+dotnet build3 build.proj /p:Architecture=$ARCHITECTURE

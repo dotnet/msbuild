@@ -31,9 +31,7 @@
     <CoreCLRVersion>1.0.2</CoreCLRVersion>
     <JitVersion>1.0.2</JitVersion>
 
-    <Stage0Path Condition=" '$(OS)' == 'Windows_NT' ">$(RepoRoot)/.dotnet_stage0/Windows/$(Architecture)</Stage0Path>
-    <Stage0Path Condition=" '$(OSName)' == 'osx' ">$(RepoRoot)/.dotnet_stage0/Darwin</Stage0Path>
-    <Stage0Path Condition=" '$(Stage0Path)' == '' ">$(RepoRoot)/.dotnet_stage0/Linux</Stage0Path>
+    <Stage0Path>$(RepoRoot)/.dotnet_stage0/$(Architecture)</Stage0Path>
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
     <DotnetStage0>$(Stage0Path)/dotnet$(ExeExtension)</DotnetStage0>

@@ -55,17 +55,9 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string GetStage0Path()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0",
-                    RuntimeEnvironment.OperatingSystemPlatform.ToString(),
-                    RuntimeEnvironment.RuntimeArchitecture);
-            }
-            else
-            {
-                return Path.Combine(Directory.GetCurrentDirectory(), ".dotnet_stage0", RuntimeEnvironment.OperatingSystemPlatform.ToString());
-            }
-
+            return Path.Combine(Directory.GetCurrentDirectory(),
+                                ".dotnet_stage0",
+                                RuntimeEnvironment.RuntimeArchitecture);
         }
     }
 }
