@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Delete files from disk.
     /// </summary>
-    public sealed class Delete : TaskExtension, ICancelableTask
+    public class Delete : TaskExtension, ICancelableTask
     {
         #region Properties
 
