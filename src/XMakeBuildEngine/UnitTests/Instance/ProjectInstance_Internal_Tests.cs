@@ -16,6 +16,7 @@ using System.IO;
 using System.Xml;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -24,6 +25,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// </summary>
     public class ProjectInstance_Internal_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public ProjectInstance_Internal_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         /// Read task registrations
         /// </summary>
@@ -531,7 +539,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectInstance projectInstance = GetProjectInstance(projectFileContent);
             List<ILogger> loggers = new List<ILogger>();
-            MockLogger mockLogger = new MockLogger();
+            MockLogger mockLogger = new MockLogger(_output);
             loggers.Add(mockLogger);
             bool success = projectInstance.Build("Build", loggers);
 

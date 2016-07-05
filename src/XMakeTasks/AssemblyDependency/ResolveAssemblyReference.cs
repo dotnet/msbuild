@@ -1194,7 +1194,7 @@ namespace Microsoft.Build.Tasks
 
             // If there is a list of assemblyFiles that was considered but then rejected,
             // show information about them.
-            LogAssembliesConsideredAndRejected(reference, importance);
+            LogAssembliesConsideredAndRejected(reference, fusionName, importance);
 
             if (!reference.IsBadImage)
             {
@@ -1546,7 +1546,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="reference">The reference.</param>
         /// <param name="importance">The importance of the message.</param>
-        private void LogAssembliesConsideredAndRejected(Reference reference, MessageImportance importance)
+        private void LogAssembliesConsideredAndRejected(Reference reference, string fusionName, MessageImportance importance)
         {
             if (reference.AssembliesConsideredAndRejected != null)
             {
@@ -1599,7 +1599,7 @@ namespace Microsoft.Build.Tasks
                                 break;
                             }
                         case NoMatchReason.FusionNamesDidNotMatch:
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch", location.FileNameAttempted, location.AssemblyName.FullName));
+                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch", location.FileNameAttempted, location.AssemblyName.FullName, fusionName));
                             break;
 
                         case NoMatchReason.TargetHadNoFusionName:
