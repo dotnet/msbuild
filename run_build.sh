@@ -25,15 +25,8 @@ while [[ $# > 0 ]]; do
             export CONFIGURATION=$2
             shift
             ;;
-        --targets)
-            IFS=',' read -r -a targets <<< $2
-            shift
-            ;;
         --nopackage)
             export DOTNET_BUILD_SKIP_PACKAGING=1
-            ;;
-        --norun)
-            export DOTNET_BUILD_SKIP_RUN=1
             ;;
         --skip-prereqs)
             # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
@@ -44,10 +37,8 @@ while [[ $# > 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-            echo "  --targets <TARGETS...>              Comma separated build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
             echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --nopackage                         Skip packaging targets"
-            echo "  --norun                             Skip running the build"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --help                              Display this help message"
             exit 0
@@ -107,23 +98,4 @@ fi
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-# Restore the build scripts
-echo "Restoring Build Script projects..."
-(
-    cd "$DIR"
-    dotnet restore
-)
-
-# Build the builder
-echo "Compiling Build Scripts..."
-dotnet publish "$DIR" -o "$DIR/bin" --framework netcoreapp1.0
-
-if [ -z "$DOTNET_BUILD_SKIP_RUN" ]; then
-	export PATH="$OLDPATH"
-	# Run the builder
-	echo "Invoking Build Scripts..."
-	echo "Configuration: $CONFIGURATION"
-    
-    $DIR/bin/dotnet-cli-build ${targets[@]}
-fi
-exit $?
+dotnet build3 build.proj /p:Architecture=x64

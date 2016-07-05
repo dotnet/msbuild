@@ -27,7 +27,7 @@
         <Inputs>@(CompileStageInputs)</Inputs>
         <StageDirectory>$(Stage1Directory)</StageDirectory>
         <StageSymbolsDirectory>$(Stage1SymbolsDirectory)</StageSymbolsDirectory>
-        <DotnetExe>$(Stage0Path)/dotnet$(ExeExtension)</DotnetExe>
+        <DotnetExe>$(DotnetStage0)</DotnetExe>
       </Stage>
       <Stage Include="Stage2">
         <Inputs>@(CompileStageInputs)</Inputs>

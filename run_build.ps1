@@ -5,28 +5,24 @@
 
 param(
     [string]$Configuration="Debug",
-    [string[]]$Targets=@("Default"),
     [string]$Architecture="x64",
     [switch]$NoPackage,
-    [switch]$NoRun,
     [switch]$Help)
 
 if($Help)
 {
-    Write-Host "Usage: .\build.ps1 [-Configuration <CONFIGURATION>] [-Targets <TARGETS...>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-Help]"
+    Write-Host "Usage: .\build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-Help]"
     Write-Host ""
     Write-Host "Options:"
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-    Write-Host "  -Targets <TARGETS...>              Comma separated build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
     Write-Host "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
     Write-Host "  -NoPackage                         Skip packaging targets"
-    Write-Host "  -NoRun                             Skip running the build"
     Write-Host "  -Help                              Display this help message"
     exit 0
 }
 
 $env:CONFIGURATION = $Configuration;
-$RepoRoot = "$PSScriptRoot\..\.."
+$RepoRoot = "$PSScriptRoot"
 $env:NUGET_PACKAGES = "$RepoRoot\.nuget\packages"
 
 if($NoPackage)
@@ -69,23 +65,5 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-# Restore the build scripts
-Write-Host "Restoring Build Script projects..."
-pushd "$PSScriptRoot"
-dotnet restore
-if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
-popd
-
-# Publish the builder
-Write-Host "Compiling Build Scripts..."
-dotnet publish "$PSScriptRoot" -o "$PSScriptRoot\bin" --framework netcoreapp1.0
-if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
-
-if(!$NoRun)
-{
-    # Run the builder
-    Write-Host "Invoking Build Scripts..."
-    Write-Host " Configuration: $env:CONFIGURATION"
-    & "$PSScriptRoot\bin\dotnet-cli-build.exe" @Targets
-    if($LASTEXITCODE -ne 0) { throw "Build failed" }
-}
+dotnet build3 build.proj /p:Architecture=x64
+if($LASTEXITCODE -ne 0) { throw "Failed to restore" } 
