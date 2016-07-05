@@ -567,6 +567,7 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Invalid configuration file should not dump stack.
         /// </summary>
@@ -651,6 +652,7 @@ namespace Microsoft.Build.UnitTests
             // if there's not, we will catch when we try to read the toolsets. Either is fine; we just want to not crash.
             Assert.True(output.Contains("MSB1043") || output.Contains("MSB4136"));
         }
+#endif
 
         /// <summary>
         /// Try hard to delete a file or directory specified
