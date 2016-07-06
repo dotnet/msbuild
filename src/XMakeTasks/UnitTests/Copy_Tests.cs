@@ -1963,6 +1963,7 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFolder should work.
         /// </summary>
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // SMB share paths only work on Windows
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
