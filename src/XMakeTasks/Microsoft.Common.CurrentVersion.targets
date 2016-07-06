@@ -527,6 +527,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AssemblyFoldersSuffix Condition=" '$(AssemblyFoldersSuffix)' == '' ">AssemblyFoldersEx</AssemblyFoldersSuffix>
     <FrameworkRegistryBase Condition=" '$(FrameworkRegistryBase)' == '' ">Software\Microsoft\$(TargetFrameworkIdentifier)</FrameworkRegistryBase>
     <TargetPlatformRegistryBase Condition="'$(TargetPlatformRegistryBase)' == ''">Software\Microsoft\Microsoft SDKs\$(TargetPlatformIdentifier)</TargetPlatformRegistryBase>
+    <NonPortableAssemblySearchPaths Condition=" '$(NonPortableAssemblyResolution)' == 'false'">
+      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
+      {AssemblyFolders};
+      {GAC};
+      {RawFileName};
+      $(OutDir)
+    </NonPortableAssemblySearchPaths>
+
     <!--
         The SearchPaths property is set to find assemblies in the following order:
 
@@ -534,23 +542,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             (2) $(ReferencePath) - the reference path property, which comes from the .USER file.
             (3) The hintpath from the referenced item itself, indicated by {HintPathFromItem}.
             (4) The directory of MSBuild's "target" runtime from GetFrameworkPath.
-                The "target" runtime folder is the folder of the runtime that MSBuild is a part of.
-            (5) Registered assembly folders, indicated by {Registry:*,*,*}
+                The "target" runtime folder is the folder of the runtime that MSBuild is a part of
+		or a folder with certain reference assemblies.
+		
+		 - If NonPortableAssemblyResolution is not false (unset by default), go on -
+		
+	    (5) Registered assembly folders, indicated by {Registry:*,*,*}
             (6) Legacy registered assembly folders, indicated by {AssemblyFolders}
             (7) Resolve to the GAC.
             (8) Treat the reference's Include as if it were a real file name.
             (9) Look in the application's output folder (like bin\debug)
-        -->
-    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == ''">
+    -->
+    
+    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == '' ">
       {CandidateAssemblyFiles};
       $(ReferencePath);
       {HintPathFromItem};
       {TargetFrameworkDirectory};
-      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
-      {AssemblyFolders};
-      {GAC};
-      {RawFileName};
-      $(OutDir)
+      $(NonPortableAssemblySearchPaths)
     </AssemblySearchPaths>
 
     <!--
