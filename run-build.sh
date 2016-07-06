@@ -22,24 +22,19 @@ source "$REPOROOT/scripts/common/_prettyprint.sh"
 # Set nuget package cache under the repo
 export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
 
-args=( "$0" )
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
     case $lowerI in
         -c|--configuration)
             export CONFIGURATION=$2
-            args=( "${args[@]/$1}" )
-            args=( "${args[@]/$2}" )
             shift
             ;;
         --nopackage)
             export DOTNET_BUILD_SKIP_PACKAGING=1
-            args=( "${args[@]/$1}" )
             ;;
         --skip-prereqs)
             # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
             export DOTNET_INSTALL_SKIP_PREREQS=1
-            args=( "${args[@]/$1}" )
             ;;
         --help)
             echo "Usage: $0 [--configuration <CONFIGURATION>] [--targets <TARGETS...>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help]"
@@ -59,11 +54,6 @@ while [[ $# > 0 ]]; do
 
     shift
 done
-
-# $args array may have empty elements in it.
-# The easiest way to remove them is to cast to string and back to array.
-temp="${args[@]}"
-args=($temp)
 
 # Load Branch Info
 while read line; do
@@ -93,4 +83,4 @@ fi
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build3 build.proj /p:Architecture=$ARCHITECTURE "${args[@]}"
+dotnet build3 build.proj /p:Architecture=$ARCHITECTURE
