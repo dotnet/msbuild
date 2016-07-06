@@ -83,9 +83,12 @@
     <Compile Include="GetInstalledSDKLocations_Tests.cs" />
     <Compile Include="GetReferencePaths_Tests.cs" />
     <Compile Include="GetSDKReference_Tests.cs" />
+    <Compile Include="DirectoryBuildProjectImportTestBase.cs" />
+    <Compile Include="DirectoryBuildTargetsImportTests.cs" />
     <Compile Include="LC_Tests.cs" />
     <Compile Include="MakeDir_Tests.cs" />
     <Compile Include="ManifestWriter_Tests.cs" />
+    <Compile Include="DirectoryBuildPropsImportTests.cs" />
     <Compile Include="MockFaultInjectionHelper.cs" />
     <Compile Include="MockTypeInfo.cs" />
     <Compile Include="MockTypeLib.cs" />
