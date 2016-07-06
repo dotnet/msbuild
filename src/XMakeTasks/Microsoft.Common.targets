@@ -114,20 +114,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(CommonTargetsPath)" />
 
   <PropertyGroup>
-    <ImportGlobalBuildTargets Condition="'$(ImportGlobalBuildTargets)' == ''">true</ImportGlobalBuildTargets>
+    <ImportDirectoryBuildTargets Condition="'$(ImportDirectoryBuildTargets)' == ''">true</ImportDirectoryBuildTargets>
   </PropertyGroup>
 
   <!-- 
-        Determine the path to the global build targets file if the user did not disable $(ImportGlobalBuildTargets) and
-        they did not already specify an absolute path to use via $(GlobalBuildTargetsPath)
+        Determine the path to the directory build targets file if the user did not disable $(ImportDirectoryBuildTargets) and
+        they did not already specify an absolute path to use via $(DirectoryBuildTargetsPath)
     -->
-  <PropertyGroup Condition="'$(ImportGlobalBuildTargets)' == 'true' and '$(GlobalBuildTargetsPath)' == ''">
-    <_GlobalBuildTargetsFile Condition="'$(_GlobalBuildTargetsFile)' == ''">global.build.targets</_GlobalBuildTargetsFile>
-    <_GlobalBuildTargetsBasePath Condition="'$(_GlobalBuildTargetsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_GlobalBuildTargetsFile)'))</_GlobalBuildTargetsBasePath>
-    <GlobalBuildTargetsPath Condition="'$(_GlobalBuildTargetsBasePath)' != '' and '$(_GlobalBuildTargetsFile)' != ''">$([System.IO.Path]::Combine('$(_GlobalBuildTargetsBasePath)', '$(_GlobalBuildTargetsFile)'))</GlobalBuildTargetsPath>
+  <PropertyGroup Condition="'$(ImportDirectoryBuildTargets)' == 'true' and '$(DirectoryBuildTargetsPath)' == ''">
+    <_DirectoryBuildTargetsFile Condition="'$(_DirectoryBuildTargetsFile)' == ''">Directory.Build.targets</_DirectoryBuildTargetsFile>
+    <_DirectoryBuildTargetsBasePath Condition="'$(_DirectoryBuildTargetsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectoryBuildTargetsFile)'))</_DirectoryBuildTargetsBasePath>
+    <DirectoryBuildTargetsPath Condition="'$(_DirectoryBuildTargetsBasePath)' != '' and '$(_DirectoryBuildTargetsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectoryBuildTargetsBasePath)', '$(_DirectoryBuildTargetsFile)'))</DirectoryBuildTargetsPath>
   </PropertyGroup>
 
-  <Import Project="$(GlobalBuildTargetsPath)" Condition="'$(ImportGlobalBuildTargets)' == 'true' and exists('$(GlobalBuildTargetsPath)')"/>
+  <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
     <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter')"/>

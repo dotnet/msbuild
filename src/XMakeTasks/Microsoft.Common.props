@@ -16,20 +16,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <ImportByWildcardAfterMicrosoftCommonProps Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == ''">true</ImportByWildcardAfterMicrosoftCommonProps>
         <ImportUserLocationsByWildcardBeforeMicrosoftCommonProps Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == ''">true</ImportUserLocationsByWildcardBeforeMicrosoftCommonProps>
         <ImportUserLocationsByWildcardAfterMicrosoftCommonProps Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftCommonProps>
-        <ImportGlobalBuildProps Condition="'$(ImportGlobalBuildProps)' == ''">true</ImportGlobalBuildProps>
+        <ImportDirectoryBuildProps Condition="'$(ImportDirectoryBuildProps)' == ''">true</ImportDirectoryBuildProps>
     </PropertyGroup>
 
     <!-- 
-        Determine the path to the global build props file if the user did not disable $(ImportGlobalBuildProps) and
-        they did not already specify an absolute path to use via $(GlobalBuildPropsPath)
+        Determine the path to the directory build props file if the user did not disable $(ImportDirectoryBuildProps) and
+        they did not already specify an absolute path to use via $(DirectoryBuildPropsPath)
     -->
-    <PropertyGroup Condition="'$(ImportGlobalBuildProps)' == 'true' and '$(GlobalBuildPropsPath)' == ''">
-      <_GlobalBuildPropsFile Condition="'$(_GlobalBuildPropsFile)' == ''">global.build.props</_GlobalBuildPropsFile>
-      <_GlobalBuildPropsBasePath Condition="'$(_GlobalBuildPropsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_GlobalBuildPropsFile)'))</_GlobalBuildPropsBasePath>
-      <GlobalBuildPropsPath Condition="'$(_GlobalBuildPropsBasePath)' != '' and '$(_GlobalBuildPropsFile)' != ''">$([System.IO.Path]::Combine('$(_GlobalBuildPropsBasePath)', '$(_GlobalBuildPropsFile)'))</GlobalBuildPropsPath>
+    <PropertyGroup Condition="'$(ImportDirectoryBuildProps)' == 'true' and '$(DirectoryBuildPropsPath)' == ''">
+      <_DirectoryBuildPropsFile Condition="'$(_DirectoryBuildPropsFile)' == ''">Directory.Build.props</_DirectoryBuildPropsFile>
+      <_DirectoryBuildPropsBasePath Condition="'$(_DirectoryBuildPropsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectoryBuildPropsFile)'))</_DirectoryBuildPropsBasePath>
+      <DirectoryBuildPropsPath Condition="'$(_DirectoryBuildPropsBasePath)' != '' and '$(_DirectoryBuildPropsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectoryBuildPropsBasePath)', '$(_DirectoryBuildPropsFile)'))</DirectoryBuildPropsPath>
     </PropertyGroup>
 
-    <Import Project="$(GlobalBuildPropsPath)" Condition="'$(ImportGlobalBuildProps)' == 'true' and exists('$(GlobalBuildPropsPath)')"/>
+    <Import Project="$(DirectoryBuildPropsPath)" Condition="'$(ImportDirectoryBuildProps)' == 'true' and exists('$(DirectoryBuildPropsPath)')"/>
 
     <!-- 
         Import wildcard "ImportBefore" props files if we're actually in a 12.0+ project (rather than a project being
