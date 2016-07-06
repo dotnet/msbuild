@@ -72,12 +72,6 @@
 
         <BinariesToRemove Include="csc" />
         <BinariesToRemove Include="vbc" />
-
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.targets" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.Targets" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.props" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.overridetasks" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.tasks" />
       </ItemGroup>
 
       <Delete Files="@(BinObj)" />
@@ -155,8 +149,16 @@
                         Lines="$(CommitHash);$(SdkVersion)"
                         Overwrite="true" />
 
+      <ItemGroup>
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.targets" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.Targets" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.props" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.overridetasks" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.tasks" />
+      </ItemGroup>
+
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
-            DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(Filename)%(Extension)')" />
 
       <ItemGroup>
         <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />

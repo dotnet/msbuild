@@ -126,21 +126,21 @@
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
-                               Condition="!Exists('$(DownloadedSharedFrameworkInstallerFile)')">
+                               Condition="!Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
         <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)</Url>
         <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
-                               Condition="!Exists('$(DownloadedSharedHostInstallerFile)')">
+                               Condition="!Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
         <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)</Url>
         <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
-                               Condition="!Exists('$(DownloadedHostFxrInstallerFile)')">
+                               Condition="!Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
         <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)</Url>
         <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>

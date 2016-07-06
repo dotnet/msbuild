@@ -12,9 +12,6 @@
     <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
     <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
 
-    <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
-    <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
-
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
     <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>

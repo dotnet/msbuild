@@ -49,12 +49,12 @@ args=($temp)
 
 dockerbuild()
 {
-    BUILD_COMMAND=/opt/code/run_build.sh $DIR/scripts/dockerrun.sh --non-interactive "$@"
+    BUILD_COMMAND=/opt/code/run-build.sh $DIR/scripts/dockerrun.sh --non-interactive "$@"
 }
 
 # Check if we need to build in docker
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
     dockerbuild "${args[@]}"
 else
-    $DIR/run_build.sh "${args[@]}"
+    $DIR/run-build.sh "${args[@]}"
 fi
