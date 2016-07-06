@@ -36,6 +36,7 @@ Type of the project. Valid values for C# are:
 Valid values for F# are:
 
 * `console`
+* `lib`
 
 ## EXAMPLES
 

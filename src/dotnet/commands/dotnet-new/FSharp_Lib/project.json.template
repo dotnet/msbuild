@@ -1,12 +1,11 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
-    "debugType": "portable",
-    "emitEntryPoint": true,
+    "debugType": "portable"
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
-        "Program.fs"
+        "Library.fs"
       ]
     }
   },
@@ -14,12 +13,9 @@
     "dotnet-compile-fsc":"1.0.0-preview2-*"
   },
   "frameworks": {
-    "netcoreapp1.0": {
+    "netstandard1.6": {
       "dependencies": {
-        "Microsoft.NETCore.App": {
-          "type": "platform",
-          "version": "1.0.1"
-        },
+        "NETStandard.Library":"1.6.0",
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629"
       }
     }
