@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
+using PlatformID = Xunit.PlatformID;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -2065,6 +2066,7 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFolder should work.
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // Only Windows has a (small) link limit, and this tests for an HRESULT
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
