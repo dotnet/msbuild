@@ -3154,7 +3154,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {"$(Reg:AAA)", ""}
                                    };
 
-            string[] errorTests = {
+            var errorTests = new List<string>{
             "$(input[)",
             "$(input.ToString()])",
             "$(input.ToString()[)",
@@ -3221,7 +3221,6 @@ $(
                 "$(e`.Length)",
                 "$([System.IO.Path]Combine::Combine(`a`,`b`))",
                 "$([System.IO.Path]::Combine((`a`,`b`))",
-                "$([System.IO.Path]::Combine(`|`,`b`))",
                 "$([System.IO.Path]Combine(::Combine(`a`,`b`))",
                 "$([System.IO.Path]Combine(`::Combine(`a`,`b`)`, `b`)`)",
                 "$([System.IO.Path]::`Combine(`a`, `b`)`)",
@@ -3289,6 +3288,12 @@ $(
                 "()"
             };
 
+            if (NativeMethodsShared.IsWindows)
+            {
+                // '|' is only an invalid character in Windows filesystems
+                errorTests.Add("$([System.IO.Path]::Combine(`|`,`b`))");
+            }
+
             string result;
             for (int i = 0; i < validTests.GetLength(0); i++)
             {
@@ -3306,7 +3311,7 @@ $(
                 }
             }
 
-            for (int i = 0; i < errorTests.GetLength(0); i++)
+            for (int i = 0; i < errorTests.Count; i++)
             {
                 // If an expression is invalid,
                 //      - Expansion may throw InvalidProjectFileException, or
