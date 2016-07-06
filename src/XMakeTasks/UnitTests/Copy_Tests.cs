@@ -2095,7 +2095,8 @@ namespace Microsoft.Build.UnitTests
                 for (int n = 0; n < 1025 /* make sure */; n++)
                 {
                     string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
-                    NativeMethods.CreateHardLink(destLink, sourceFile, IntPtr.Zero);
+                    string linkError;
+                    NativeMethods.MakeHardLink(destLink, sourceFile, out linkError);
                 }
 
                 ITaskItem[] sourceFiles = {new TaskItem(sourceFile)};
