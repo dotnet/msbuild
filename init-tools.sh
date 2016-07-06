@@ -14,12 +14,4 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Load Branch Info
-while read line; do
-    if [[ $line != \#* ]]; then
-        IFS='=' read -ra splat <<< "$line"
-        export ${splat[0]}="${splat[1]}"
-    fi
-done < "$DIR/branchinfo.txt"
-
 $DIR/scripts/obtain/dotnet-install.sh --channel $CHANNEL --verbose
