@@ -6,9 +6,14 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static BuildTargetResult GenerateInstaller(BuildTargetContext c)
         {
+            var debTargets = new DebTargets
+            {
+                CLISDKRoot = c.BuildContext.Get<string>("CLISDKRoot")
+            };
+
             MsiTargets.GenerateMsisAndBundles(c);
             PkgTargets.GeneratePkgs(c);
-            DebTargets.GenerateDebs(c);
+            debTargets.GenerateDebs(c);
 
             return c.Success();
         }

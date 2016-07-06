@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.InternalAbstractions;
 
@@ -13,6 +14,9 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class DebTargets : Task
     {
+        [Required]
+        public string CLISDKRoot { get; set; }
+
         public override bool Execute()
         {
             BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<DebTargets>().CreateBuildContext();
@@ -21,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Build
             return GenerateDebs(c).Success;
         }
 
-        public static BuildTargetResult GenerateDebs(BuildTargetContext c)
+        public BuildTargetResult GenerateDebs(BuildTargetContext c)
         {
             if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu))
             {
@@ -32,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Build
             return c.Success();
         }
 
-        public static BuildTargetResult GenerateSdkDeb(BuildTargetContext c)
+        public BuildTargetResult GenerateSdkDeb(BuildTargetContext c)
         {
             if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu))
             {
@@ -53,7 +57,6 @@ namespace Microsoft.DotNet.Cli.Build
                 var debFile = c.BuildContext.Get<string>("SdkInstallerFile");
                 var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
                 var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
-                var sdkPublishRoot = c.BuildContext.Get<string>("CLISDKRoot");
                 var sharedFxDebianPackageName = Monikers.GetDebianSharedFrameworkPackageName(CliDependencyVersions.SharedFrameworkVersion);
 
                 var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sdk");
@@ -67,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Build
 
                 Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"),
                     "-v", version,
-                    "-i", sdkPublishRoot,
+                    "-i", CLISDKRoot,
                     "-o", debFile,
                     "-p", packageName,
                     "-b", Monikers.CLISdkBrandName,
