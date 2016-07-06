@@ -110,7 +110,6 @@ namespace Microsoft.Build.Tasks
                         if (!success)
                         {
                             int error = Marshal.GetLastWin32Error();
-                            Console.WriteLine("File not found ({0}): {1}", error, _filename);
 
                             // File not found is the most common case, for example we're copying
                             // somewhere without a file yet. Don't do something like FileInfo.Exists to
