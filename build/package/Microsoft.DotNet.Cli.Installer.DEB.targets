@@ -3,6 +3,10 @@
     
     <UsingTask TaskName="DebTargets" AssemblyFile="$(CLIBuildDll)" />
 
+    <PropertyGroup>
+    	<CLISDKRoot>$(LayoutDirectory)/$(ArtifactNameSdk)/sdk</CLISDKRoot>
+    </PropertyGroup>
+
     <Target Name="GenerateDebs" >
         <DebTargets />
     </Target>

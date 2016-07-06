@@ -34,7 +34,7 @@ else
     $env:DOTNET_BUILD_SKIP_PACKAGING=0
 }
 
-& "$RepoRoot\init-tools.ps1"
+& "$RepoRoot\init-tools.ps1" -Architecture $Architecture
 if($LASTEXITCODE -ne 0) { throw "Failed to install Init Tools" }
 
 dotnet build3 build.proj /p:Architecture=$Architecture
