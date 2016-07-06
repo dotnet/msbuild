@@ -158,7 +158,7 @@
       </ItemGroup>
 
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
-            DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(Filename)%(Extension)')" />
+            DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <ItemGroup>
         <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
