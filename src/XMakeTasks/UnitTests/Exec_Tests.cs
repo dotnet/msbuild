@@ -9,6 +9,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
+using PlatformID = Xunit.PlatformID;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -79,6 +80,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // TODO: https://github.com/Microsoft/msbuild/issues/434
         public void Timeout()
         {
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
