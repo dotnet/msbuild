@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 exporter.GetDependencies(LibraryType.Project)
                     .Concat(exporter.GetDependencies(LibraryType.MSBuildProject));
         }
-        
+
         public static void CopyTo(this IEnumerable<LibraryAsset> assets, string destinationPath)
         {
             if (!Directory.Exists(destinationPath))
@@ -31,18 +31,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 var file = Path.Combine(destinationPath, Path.GetFileName(asset.ResolvedPath));
                 File.Copy(asset.ResolvedPath, file, overwrite: true);
                 RemoveFileAttribute(file, FileAttributes.ReadOnly);
-            }
-        }
-
-        private static void RemoveFileAttribute(String file, FileAttributes attribute)
-        {
-            if (File.Exists(file))
-            {
-                var fileAttributes = File.GetAttributes(file);
-                if ((fileAttributes & attribute) == attribute)
-                {
-                    File.SetAttributes(file, fileAttributes & ~attribute);
-                }
             }
         }
 
@@ -60,6 +48,18 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
                 File.Copy(transformedFile, targetName, overwrite: true);
                 RemoveFileAttribute(targetName, FileAttributes.ReadOnly);
+            }
+        }
+        
+        private static void RemoveFileAttribute(String file, FileAttributes attribute)
+        {
+            if (File.Exists(file))
+            {
+                var fileAttributes = File.GetAttributes(file);
+                if ((fileAttributes & attribute) == attribute)
+                {
+                    File.SetAttributes(file, fileAttributes & ~attribute);
+                }
             }
         }
 
