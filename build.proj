@@ -12,9 +12,6 @@
     <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
     <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
 
-    <NoRunArg Condition=" '$(OS)' == 'Windows_NT' ">-NoRun</NoRunArg>
-    <NoRunArg Condition=" '$(OS)' != 'Windows_NT' ">--norun</NoRunArg>
-
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
     <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
@@ -30,6 +27,11 @@
 
     <CoreCLRVersion>1.0.2</CoreCLRVersion>
     <JitVersion>1.0.2</JitVersion>
+
+    <Stage0Path>$(RepoRoot)/.dotnet_stage0/$(Architecture)</Stage0Path>
+    <ExeExtension>.exe</ExeExtension>
+    <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
+    <DotnetStage0>$(Stage0Path)/dotnet$(ExeExtension)</DotnetStage0>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,7 +50,13 @@
           Inputs="@(DotnetCliBuildFrameworkInputs)" 
           Outputs="$(CLIBuildDll)"
           DependsOnTargets="MSBuildWorkaroundTarget">
-    <Exec Command="$(PlatformScriptHost) $(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/build$(PlatformScriptExtension) $(NoRunArg)" WorkingDirectory="$(MSBuildThisFileDirectory)"/>
+    <PropertyGroup>
+      <DotnetCliBuildDirectory>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
+    </PropertyGroup>
+
+    <Exec Command="$(DotnetStage0) restore" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
+
+    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>    
   </Target>
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>

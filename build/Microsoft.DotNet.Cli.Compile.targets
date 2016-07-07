@@ -27,7 +27,7 @@
         <Inputs>@(CompileStageInputs)</Inputs>
         <StageDirectory>$(Stage1Directory)</StageDirectory>
         <StageSymbolsDirectory>$(Stage1SymbolsDirectory)</StageSymbolsDirectory>
-        <DotnetExe>$(Stage0Path)/dotnet$(ExeExtension)</DotnetExe>
+        <DotnetExe>$(DotnetStage0)</DotnetExe>
       </Stage>
       <Stage Include="Stage2">
         <Inputs>@(CompileStageInputs)</Inputs>
@@ -72,12 +72,6 @@
 
         <BinariesToRemove Include="csc" />
         <BinariesToRemove Include="vbc" />
-
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.targets" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.Targets" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.props" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.overridetasks" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.tasks" />
       </ItemGroup>
 
       <Delete Files="@(BinObj)" />
@@ -154,6 +148,14 @@
       <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
                         Lines="$(CommitHash);$(SdkVersion)"
                         Overwrite="true" />
+
+      <ItemGroup>
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.targets" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.Targets" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.props" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.overridetasks" />
+        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.tasks" />
+      </ItemGroup>
 
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
             DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />

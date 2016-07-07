@@ -22,12 +22,7 @@
     </GetCurrentRuntimeInformation>
 
     <!-- Common Properties -->
-    <PropertyGroup>
-      <Stage0Path Condition=" '$(OSName)' == 'win' ">$(RepoRoot)/.dotnet_stage0/Windows/$(Architecture)</Stage0Path>
-      <Stage0Path Condition=" '$(OSName)' == 'osx' ">$(RepoRoot)/.dotnet_stage0/Darwin</Stage0Path>
-      <Stage0Path Condition=" '$(Stage0Path)' == '' ">$(RepoRoot)/.dotnet_stage0/Linux</Stage0Path>
-      <ExeExtension>.exe</ExeExtension>
-      <ExeExtension Condition="'$OSName)' != 'win' "></ExeExtension>
+    <PropertyGroup>      
       <DotNetPath>$(Stage0Path)</DotNetPath>
 
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
@@ -131,21 +126,21 @@
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
-                               Condition="!Exists('$(DownloadedSharedFrameworkInstallerFile)')">
+                               Condition="!Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
         <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)</Url>
         <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
-                               Condition="!Exists('$(DownloadedSharedHostInstallerFile)')">
+                               Condition="!Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
         <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)</Url>
         <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
-                               Condition="!Exists('$(DownloadedHostFxrInstallerFile)')">
+                               Condition="!Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
         <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)</Url>
         <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
