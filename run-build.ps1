@@ -34,8 +34,33 @@ else
     $env:DOTNET_BUILD_SKIP_PACKAGING=0
 }
 
+# Load Branch Info
+cat "$RepoRoot\branchinfo.txt" | ForEach-Object {
+    if(!$_.StartsWith("#") -and ![String]::IsNullOrWhiteSpace($_)) {
+        $splat = $_.Split([char[]]@("="), 2)
+        Set-Content "env:\$($splat[0])" -Value $splat[1]
+    }
+}
+
+# Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
+if (!$env:DOTNET_INSTALL_DIR)
+{
+    $env:DOTNET_INSTALL_DIR="$RepoRoot\.dotnet_stage0\$Architecture"
+}
+
+if (!(Test-Path $env:DOTNET_INSTALL_DIR))
+{
+    mkdir $env:DOTNET_INSTALL_DIR | Out-Null
+}
+
 & "$RepoRoot\init-tools.ps1" -Architecture $Architecture
 if($LASTEXITCODE -ne 0) { throw "Failed to install Init Tools" }
+
+# Put the stage0 on the path
+$env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
+
+# Disable first run since we want to control all package sources
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 dotnet build3 build.proj /p:Architecture=$Architecture
 if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
