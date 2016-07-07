@@ -571,24 +571,20 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultToolsVersion = reader.ReadToolsets(toolsets, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Dictionary<string, List<string>> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;
-#if XPLAT
             if (NativeMethodsShared.IsWindows)
-#endif
             {
                 CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"c:\\foo"});
                 CheckPathsTable(pathsTable, "MSBuildExtensionsPath64", new string[] {"c:\\foo64", "c:\\bar64"});
             }
-#if XPLAT
             else if (NativeMethodsShared.IsOSX)
             {
-                CheckPathsTable(pathsTable, ProjectImportPathMatch.Default, new string[] {"/tmp/foo"});
-                CheckPathsTable(pathsTable, ProjectImportPathMatch.Path32, new string[] {"/tmp/foo32", "/tmp/bar32"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/foo"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath32", new string[] {"/tmp/foo32", "/tmp/bar32"});
             }
             else
             {
-                CheckPathsTable(pathsTable, ProjectImportPathMatch.Default, new string[] {"/tmp/bar"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/bar"});
             }
-#endif
         }
 
         private void CheckPathsTable(Dictionary<string, List<string>> pathsTable, string kind, string[] expectedPaths)
