@@ -327,6 +327,8 @@ namespace Microsoft.Build.Execution
             this.TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
 
+            this.EvaluatedItemElements = new List<ProjectItemElement>();
+
             IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> thisAsIEvaluatorData = (IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this;
             thisAsIEvaluatorData.AfterTargets = new Dictionary<string, List<TargetSpecification>>();
             thisAsIEvaluatorData.BeforeTargets = new Dictionary<string, List<TargetSpecification>>();
@@ -420,6 +422,8 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
+            this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
+
             _usingDifferentToolsVersionFromProjectFile = data.UsingDifferentToolsVersionFromProjectFile;
             _originalProjectToolsVersion = data.OriginalProjectToolsVersion;
             _explicitToolsVersionSpecified = data.ExplicitToolsVersion != null;
@@ -496,6 +500,8 @@ namespace Microsoft.Build.Execution
             _targets = that._targets;
             _itemDefinitions = that._itemDefinitions;
             _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
+
+            this.EvaluatedItemElements = that.EvaluatedItemElements;
 
             this.ProjectRootElementCache = that.ProjectRootElementCache;
         }
@@ -579,6 +585,12 @@ namespace Microsoft.Build.Execution
                     (ICollection<ProjectItemInstance>)ReadOnlyEmptyCollection<ProjectItemInstance>.Instance :
                     new ReadOnlyCollection<ProjectItemInstance>(_items);
             }
+        }
+
+        public List<ProjectItemElement> EvaluatedItemElements
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -2181,6 +2193,8 @@ namespace Microsoft.Build.Execution
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
+
+            this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             string toolsVersionToUse = explicitToolsVersion;
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);

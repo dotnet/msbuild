@@ -2529,6 +2529,12 @@ namespace Microsoft.Build.Evaluation
                 get { return _items; }
             }
 
+            public List<ProjectItemElement> EvaluatedItemElements
+            {
+                get;
+                private set;
+            }
+
             /// <summary>
             /// List of items that link the XML items and evaluated items,
             /// evaluated as if their conditions were true.
@@ -2758,6 +2764,7 @@ namespace Microsoft.Build.Evaluation
                 this.AllEvaluatedProperties = new List<ProjectProperty>();
                 this.AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 this.AllEvaluatedItems = new List<ProjectItem>();
+                this.EvaluatedItemElements = new List<ProjectItemElement>();
 
                 if (_globalPropertiesToTreatAsLocal != null)
                 {

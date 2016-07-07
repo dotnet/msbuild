@@ -1780,6 +1780,8 @@ namespace Microsoft.Build.Evaluation
             // FINALLY: Add the items to the project
             if (itemConditionResult && itemGroupConditionResult)
             {
+                _data.EvaluatedItemElements.Add(itemElement);
+
                 foreach (I item in items)
                 {
                     _data.AddItem(item);
