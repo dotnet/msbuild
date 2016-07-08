@@ -36,6 +36,10 @@ while [[ $# > 0 ]]; do
             # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
             export DOTNET_INSTALL_SKIP_PREREQS=1
             ;;
+        --architecture)
+            ARCHITECTURE=$2
+            shift
+            ;;
         --help)
             echo "Usage: $0 [--configuration <CONFIGURATION>] [--targets <TARGETS...>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help]"
             echo ""
