@@ -35,6 +35,11 @@
             <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
         </PropertyGroup>
 
+        <!-- Consumed By Publish -->
+        <ItemGroup>
+          <GeneratedInstallers Include="$(SdkInstallerFile)" />
+        </ItemGroup>        
+
         <ItemGroup>
             <SdkDebInputFiles Include="$(SdkLayoutOutputDirectory)/**/*" />
         </ItemGroup>
