@@ -211,26 +211,27 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("v3", metadata[2].Value);
         }
 
-        /// <summary>
-        /// Read item with Remove outside of Target: not currently supported
-        /// </summary>
-        [Fact]
-        public void ReadInvalidRemoveOutsideTarget()
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <ItemGroup>
-                            <i Remove='i1'/>
-                        </ItemGroup>
-                    </Project>
-                ";
+        ///// <summary>
+        ///// Read item with Remove outside of Target: not currently supported
+        ///// </summary>
+        //[Fact]
+        //public void ReadInvalidRemoveOutsideTarget()
+        //{
+        //    Assert.Throws<InvalidProjectFileException>(() =>
+        //    {
+        //        string content = @"
+        //            <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+        //                <ItemGroup>
+        //                    <i Remove='i1'/>
+        //                </ItemGroup>
+        //            </Project>
+        //        ";
 
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
-        }
+        //        ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+        //    }
+        //   );
+        //}
+
         /// <summary>
         /// Read item with Remove inside of Target, but with metadata
         /// </summary>
