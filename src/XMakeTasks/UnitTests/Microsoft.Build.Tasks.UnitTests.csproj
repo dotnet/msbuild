@@ -36,6 +36,22 @@
     <Compile Include="Al_Tests.cs" />
     <Compile Include="AppConfig_Tests.cs" />
     <Compile Include="AspNetCompiler_Tests.cs" />
+    <Compile Include="AssemblyDependency\FilePrimary.cs" />
+    <Compile Include="AssemblyDependency\GlobalAssemblyCacheTests.cs" />
+    <Compile Include="AssemblyDependency\InstalledSDKResolverFixture.cs" />
+    <Compile Include="AssemblyDependency\Miscellaneous.cs" />
+    <Compile Include="AssemblyDependency\NonSpecificVersionStrictPrimary.cs" />
+    <Compile Include="AssemblyDependency\Perf.cs" />
+    <Compile Include="AssemblyDependency\ReferenceTests.cs" />
+    <Compile Include="AssemblyDependency\ResolveAssemblyReferenceTestFixture.cs" />
+    <Compile Include="AssemblyDependency\SpecificVersionPrimary.cs" />
+    <Compile Include="AssemblyDependency\StronglyNamedDependency.cs" />
+    <Compile Include="AssemblyDependency\StronglyNamedDependencyAppConfig.cs" />
+    <Compile Include="AssemblyDependency\StronglyNamedDependencyAutoUnify.cs" />
+    <Compile Include="AssemblyDependency\VerifyIgnoreVersionForFrameworkReference.cs" />
+    <Compile Include="AssemblyDependency\VerifyTargetFrameworkAttribute.cs" />
+    <Compile Include="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
+    <Compile Include="AssemblyDependency\WinMDTests.cs" />
     <Compile Include="AssemblyIdentity_Tests.cs" />
     <Compile Include="AssemblyRefs.cs" />
     <Compile Include="AssemblyRegistrationCache_Tests.cs" />
@@ -101,7 +117,6 @@
     <Compile Include="RemoveDuplicates_Tests.cs" />
     <Compile Include="ResGen_Tests.cs" />
     <Compile Include="ResGenDependencies_Tests.cs" />
-    <Compile Include="ResolveAssemblyReference_Tests.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet_Tests.cs" />
     <!--
     <Compile Include="ResolveAssemblyReference_Tests.cs" />
@@ -175,5 +190,6 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
