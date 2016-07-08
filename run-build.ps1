@@ -7,7 +7,7 @@ param(
     [string]$Configuration="Debug",
     [string]$Architecture="x64",
     # This is here just to eat away this parameter because CI still passes this in.
-    [string]$Targets="Default"
+    [string]$Targets="Default",
     [switch]$NoPackage,
     [switch]$Help,
     [Parameter(Position=0, ValueFromRemainingArguments=$true)]

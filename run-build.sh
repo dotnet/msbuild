@@ -29,22 +29,29 @@ while [[ $# > 0 ]]; do
     case $lowerI in
         -c|--configuration)
             export CONFIGURATION=$2
+            args=( "${args[@]/$1}" )
             args=( "${args[@]/$2}" )
             shift
             ;;
         --nopackage)
             export DOTNET_BUILD_SKIP_PACKAGING=1
+            args=( "${args[@]/$1}" )
             ;;
         --skip-prereqs)
             # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
             export DOTNET_INSTALL_SKIP_PREREQS=1
+            args=( "${args[@]/$1}" )
             ;;
         --architecture)
             ARCHITECTURE=$2
+            args=( "${args[@]/$1}" )
+            args=( "${args[@]/$2}" )
             shift
             ;;
-        --targets)
-            # This is here just to eat away this parameter because CI still passes this in.
+        # This is here just to eat away this parameter because CI still passes this in.
+        --targets)            
+            args=( "${args[@]/$1}" )
+            args=( "${args[@]/$2}" )
             shift
             ;;
         --help)
@@ -63,8 +70,6 @@ while [[ $# > 0 ]]; do
             ;;
     esac
 
-    # removes the just processed argument from args
-    args=( "${args[@]/$1}" )
     shift
 done
 
@@ -100,5 +105,7 @@ fi
 
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
+echo "${args[@]}"
 
 dotnet build3 build.proj /p:Architecture=$ARCHITECTURE "${args[@]}"
