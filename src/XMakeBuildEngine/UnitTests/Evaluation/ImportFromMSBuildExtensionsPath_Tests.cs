@@ -23,6 +23,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// </summary>
     public class ImportFromMSBuildExtensionsPathTests : IDisposable
     {
+        string toolsVersionToUse = null;
+
+        public ImportFromMSBuildExtensionsPathTests()
+        {
+            toolsVersionToUse = new ProjectCollection().DefaultToolsVersion;
+        }
+
         public void Dispose()
         {
             ToolsetConfigurationReaderTestHelper.CleanUp();
@@ -354,8 +361,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                    </configSections>
-                   <msbuildToolsets default=""14.1"">
-                     <toolset toolsVersion=""14.1"">
+                   <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                     <toolset toolsVersion=""" + toolsVersionToUse + @""">
                        <property name=""MSBuildToolsPath"" value="".""/>
                        <property name=""MSBuildBinPath"" value=""" + /*v4Folder*/"." + @"""/>
                        <projectImportSearchPaths>
@@ -432,8 +439,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                    </configSections>
-                   <msbuildToolsets default=""14.1"">
-                     <toolset toolsVersion=""14.1"">
+                   <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                     <toolset toolsVersion=""" + toolsVersionToUse + @""">
                        <property name=""MSBuildToolsPath"" value="".""/>
                        <property name=""MSBuildBinPath"" value="".""/>
                        <projectImportSearchPaths>
@@ -493,8 +500,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                    </configSections>
-                   <msbuildToolsets default=""14.1"">
-                     <toolset toolsVersion=""14.1"">
+                   <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                     <toolset toolsVersion=""" + toolsVersionToUse + @""">
                        <property name=""MSBuildToolsPath"" value="".""/>
                        <property name=""MSBuildBinPath"" value="".""/>
                        <projectImportSearchPaths>
@@ -563,8 +570,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <configSections>
                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                   </configSections>
-                  <msbuildToolsets default=""14.1"">
-                    <toolset toolsVersion=""14.1"">
+                  <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                    <toolset toolsVersion=""" + toolsVersionToUse + @""">
                       <property name=""MSBuildToolsPath"" value="".""/>
                       <property name=""MSBuildBinPath"" value="".""/>
                       <projectImportSearchPaths>
@@ -673,8 +680,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                    </configSections>
-                   <msbuildToolsets default=""14.1"">
-                     <toolset toolsVersion=""14.1"">
+                   <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                     <toolset toolsVersion=""" + toolsVersionToUse + @""">
                        <property name=""MSBuildToolsPath"" value=""."" />
                        <property name=""MSBuildBinPath"" value=""."" />
                        <projectImportSearchPaths>

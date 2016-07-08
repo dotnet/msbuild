@@ -1358,8 +1358,8 @@ namespace Microsoft.Build.Shared
                 if (NativeMethodsShared.IsWindows)
                 {
                     if (!CheckForFrameworkInstallation(
-                            this.dotNetFrameworkRegistryKey,
-                            this.dotNetFrameworkSetupRegistryInstalledName))
+                            this._dotNetFrameworkRegistryKey,
+                            this._dotNetFrameworkSetupRegistryInstalledName))
                     {
                         return null;
                     }
@@ -1375,7 +1375,7 @@ namespace Microsoft.Build.Shared
                                     architecture);
 
                 // .net was improperly uninstalled: msbuild.exe isn't there
-                if (this._hasMSBuild &&
+                if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
                     !File.Exists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")))
                 {
@@ -1425,7 +1425,7 @@ namespace Microsoft.Build.Shared
                                               @"\",
                                               MicrosoftSDKsRegistryKey,
                                               visualStudioSpec.GetDotNetFrameworkSdkRegistryKey(Version),
-                                              this.dotNetFrameworkSdkRegistryToolsKey);
+                                              this._dotNetFrameworkSdkRegistryToolsKey);
 
                     // For the Dev10 SDK, we check the registry that corresponds to the current process' bitness, rather than
                     // always the 32-bit one the way we do for Dev11 and onward, since that's what we did in Dev10 as well.
@@ -1434,7 +1434,7 @@ namespace Microsoft.Build.Shared
 
                     generatedPathToDotNetFrameworkSdkTools = FindRegistryValueUnderKey(
                         registryPath,
-                        this.dotNetFrameworkSdkRegistryInstallationFolderName,
+                        this.DotNetFrameworkSdkRegistryInstallationFolderName,
                         registryView);
 
                     if (string.IsNullOrEmpty(generatedPathToDotNetFrameworkSdkTools))
@@ -1447,7 +1447,7 @@ namespace Microsoft.Build.Shared
                         for (int i = 0; i < s_explicitFallbackRulesForPathToDotNetFrameworkSdkTools.GetLength(0); ++i)
                         {
                             var trigger = s_explicitFallbackRulesForPathToDotNetFrameworkSdkTools[i, 0];
-                            if (trigger.Item1 == this.version && trigger.Item2 == visualStudioSpec.Version)
+                            if (trigger.Item1 == this.Version && trigger.Item2 == visualStudioSpec.Version)
                             {
                                 foundExplicitRule = true;
                                 var fallback = s_explicitFallbackRulesForPathToDotNetFrameworkSdkTools[i, 1];
@@ -1468,7 +1468,7 @@ namespace Microsoft.Build.Shared
                                 // The items in the array "visualStudioSpecs" must be ordered by version. That would allow us to fallback to the previous visual studio version easily.
                                 VisualStudioSpec fallbackVisualStudioSpec = s_visualStudioSpecs[index - 1];
                                 generatedPathToDotNetFrameworkSdkTools = FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(
-                                    this.version,
+                                    this.Version,
                                     fallbackVisualStudioSpec.Version);
                             }
                         }
@@ -1701,7 +1701,7 @@ namespace Microsoft.Build.Shared
                 {
 #if FEATURE_WIN32_REGISTRY
                     this._pathToDotNetFrameworkReferenceAssemblies = FindRegistryValueUnderKey(
-                        dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + this.dotNetFrameworkFolderPrefix,
+                        dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + this.DotNetFrameworkFolderPrefix,
                         referenceAssembliesRegistryValueName);
 #endif
 
