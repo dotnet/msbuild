@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Core;
 using Newtonsoft.Json.Linq;
 
@@ -37,7 +38,7 @@ namespace dotnet_new3
             foreach (JProperty child in sources.Properties())
             {
                 JObject entry = child.Value as JObject;
-                ITemplateSource source;
+                IMountPoint source;
 
                 if (entry != null && ComponentRegistry.TryGetNamedComponent(entry["source"].Value<string>(), out source))
                 {
@@ -51,7 +52,7 @@ namespace dotnet_new3
             }
         }
 
-        public IEnumerable<IConfiguredTemplateSource> GetConfiguredSources()
+        public IEnumerable<IMountPoint> GetConfiguredSources()
         {
             Load();
             return _configuredSources.Values.Select(x => new ConfiguredTemplateSource(x.Source, x.Alias, x.Location));
