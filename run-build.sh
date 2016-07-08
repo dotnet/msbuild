@@ -22,11 +22,14 @@ source "$REPOROOT/scripts/common/_prettyprint.sh"
 # Set nuget package cache under the repo
 export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
 
+args=( "$@" )
+
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
     case $lowerI in
         -c|--configuration)
             export CONFIGURATION=$2
+            args=( "${args[@]/$2}" )
             shift
             ;;
         --nopackage)
@@ -56,8 +59,15 @@ while [[ $# > 0 ]]; do
             ;;
     esac
 
+    # removes the just processed argument from args
+    args=( "${args[@]/$1}" )
     shift
 done
+
+# $args array may have empty elements in it.
+# The easiest way to remove them is to cast to string and back to array.
+temp="${args[@]}"
+args=($temp)
 
 # Load Branch Info
 while read line; do
@@ -87,4 +97,4 @@ fi
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build3 build.proj /p:Architecture=$ARCHITECTURE
+dotnet build3 build.proj /p:Architecture=$ARCHITECTURE "${args[@]}"
