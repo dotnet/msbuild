@@ -43,6 +43,10 @@ while [[ $# > 0 ]]; do
             ARCHITECTURE=$2
             shift
             ;;
+        --targets)
+            # This is here just to eat away this parameter because CI still passes this in.
+            shift
+            ;;
         --help)
             echo "Usage: $0 [--configuration <CONFIGURATION>] [--targets <TARGETS...>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help]"
             echo ""
