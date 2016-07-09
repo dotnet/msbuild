@@ -67,7 +67,7 @@ namespace Microsoft.Build.Evaluation
             {
                 return ImmutableList<ItemData>.Empty;
             }
-            return itemList.GetItems(ImmutableHashSet<string>.Empty);
+            return itemList.GetItems(ImmutableHashSet<string>.Empty).Where(itemData => itemData.ConditionResult).ToList();
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
@@ -458,7 +458,10 @@ namespace Microsoft.Build.Evaluation
                 LazyItemList itemList;
                 if (_referencedItemLists.TryGetValue(itemType, out itemList))
                 {
-                    return itemList.GetItems(globsToIgnore).Select(itemData => itemData.Item).ToList();
+                    return itemList.GetItems(globsToIgnore)
+                        .Where(ItemData => ItemData.ConditionResult)
+                        .Select(itemData => itemData.Item)
+                        .ToList();
                 }
                 else
                 {
