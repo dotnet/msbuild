@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Tools.New
                 if (templateName == null)
                 {
                     Reporter.Error.WriteLine($"Unrecognized type: {typeValue}".Red());
-                    Reporter.Error.WriteLine($"Avaiable types for {language.Name} :".Red());
+                    Reporter.Error.WriteLine($"Available types for {language.Name} :".Red());
                     foreach (var t in language.Templates)
                     {
                         Reporter.Error.WriteLine($"- {t}".Red());
