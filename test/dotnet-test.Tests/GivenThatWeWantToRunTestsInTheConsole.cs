@@ -42,7 +42,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         public void It_returns_a_failure_when_it_fails_to_run_the_tests()
         {
             var testCommand = new DotnetTestCommand();
-            var result = testCommand.Execute(
+            var result = testCommand.ExecuteWithCapturedOutput(
                 $"{_projectFilePath} -o {Path.Combine(AppContext.BaseDirectory, "nonExistingFolder")} --no-build");
             result.Should().Fail();
         }

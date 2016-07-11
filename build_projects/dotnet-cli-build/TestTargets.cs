@@ -73,7 +73,6 @@ namespace Microsoft.DotNet.Cli.Build
             RestoreTests(c);
             BuildTests(c);
             RunTests(c);
-            ValidateDependencies(c);
 
             return c.Success();
         }
@@ -346,25 +345,6 @@ namespace Microsoft.DotNet.Cli.Build
                 }
                 return c.Failed("Tests failed!");
             }
-
-            return c.Success();
-        }
-
-        public static BuildTargetResult ValidateDependencies(BuildTargetContext c)
-        {
-            var configuration = c.BuildContext.Get<string>("Configuration");
-            var dotnet = DotNetCli.Stage2;
-
-            c.Info("Publishing MultiProjectValidator");
-            dotnet.Publish("--output", Path.Combine(Dirs.Output, "tools"), "--configuration", configuration)
-                .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "tools", "MultiProjectValidator"))
-                .Execute()
-                .EnsureSuccessful();
-
-            var validator = Path.Combine(Dirs.Output, "tools", $"pjvalidate{Constants.ExeSuffix}");
-
-            Cmd(validator, Path.Combine(c.BuildContext.BuildDirectory, "src"))
-                .Execute();
 
             return c.Success();
         }

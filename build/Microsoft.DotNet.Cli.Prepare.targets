@@ -22,7 +22,9 @@
     </GetCurrentRuntimeInformation>
 
     <!-- Common Properties -->
-    <PropertyGroup>      
+    <PropertyGroup>
+      <IsDesktopAvailable>False</IsDesktopAvailable>
+      <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
       <DotNetPath>$(Stage0Path)</DotNetPath>
 
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
@@ -104,7 +106,7 @@
     <CheckPrereqs />
 
     <!-- SetTelemetryProfile -->
-    <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="https://github.com/dotnet/cli;$(CommitHash)" />
+    <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="$(DOTNET_CLI_TELEMETRY_PROFILE);https://github.com/dotnet/cli;$(CommitHash)" />
   </Target>
 
   <Target Name="SetupDownloadHostAndSharedFxInputsOutputs" DependsOnTargets="Init">

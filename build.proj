@@ -61,12 +61,7 @@
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
-  <UsingTask TaskName="TestTargets" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
-
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Test">
-    <TestTargets />
-  </Target>
 
   <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Publish">
     <PublishTargets />
@@ -75,4 +70,5 @@
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Test.targets" /> 
 </Project>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="SetupTestPackageProjectData">
+    <ItemGroup>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/PackageWithFakeNativeDep/project.json">
+        <Name>PackageWithFakeNativeDep</Name>
+        <IsTool>False</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>net45</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/dotnet-dependency-context-test/project.json">
+        <Name>dotnet-dependency-context-test</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/dotnet-dependency-tool-invoker/project.json">
+        <Name>dotnet-dependency-tool-invoker</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/dotnet-desktop-and-portable/project.json">
+        <Name>dotnet-desktop-and-portable</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>net451;netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/dotnet-desktop-binding-redirects/project.json"
+                          Condition=" '$(IsDesktopAvailable)' == 'True' ">
+        <Name>dotnet-desktop-binding-redirects</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>$(DesktopAvailable)</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>net451</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello/project.json">
+        <Name>dotnet-hello</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello/project.json">
+        <Name>dotnet-hello</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/dotnet-portable/project.json">
+        <Name>dotnet-portable</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/TestAssets/TestPackages/ToolWithOutputName/project.json">
+        <Name>ToolWithOutputName</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.DotNet.Cli.Utils/project.json">
+        <Name>Microsoft.DotNet.Cli.Utils</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.DotNet.ProjectModel/project.json">
+        <Name>Microsoft.DotNet.ProjectModel</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.DotNet.ProjectModel.Loader/project.json">
+        <Name>Microsoft.DotNet.ProjectModel.Loader</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.DotNet.ProjectModel.Workspaces/project.json">
+        <Name>Microsoft.DotNet.ProjectModel.Workspaces</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.DotNet.InternalAbstractions/project.json">
+        <Name>Microsoft.DotNet.InternalAbstractions</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.3</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.Extensions.DependencyModel/project.json">
+        <Name>Microsoft.Extensions.DependencyModel</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.Extensions.Testing.Abstractions/project.json">
+        <Name>Microsoft.Extensions.Testing.Abstractions</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.DotNet.Compiler.Common/project.json">
+        <Name>Microsoft.DotNet.Compiler.Common</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/Microsoft.DotNet.Files/project.json">
+        <Name>Microsoft.DotNet.Files</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </TestPackageProject>
+      <TestPackageProject Include="$(RepoRoot)/src/dotnet-compile-fsc/project.json">
+        <Name>dotnet-compile-fsc</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </TestPackageProject>
+    </ItemGroup>
+
+    <ItemGroup>
+      <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />
+      <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net451" />
+      <TestPackageProjectFrameworks Include="%(TestPackageProject.Frameworks)" Exclude="@(TestPackageProjectFrameworksExcludes)" />
+    </ItemGroup>
+  </Target>
+</Project>

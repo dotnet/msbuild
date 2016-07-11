@@ -240,9 +240,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var testInstance = testAssetsManager.CreateTestInstance("TestProjectWithUnresolvedDependency")
                                                 .WithLockFiles();
 
-            var restoreResult = new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }.Execute();
-            restoreResult.Should().Fail();
-            new DirectoryInfo(testInstance.TestRoot).Should().HaveFile("project.lock.json");
+            var restoreResult = new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }
+                .ExecuteWithCapturedOutput()
+                .Should().Fail();
+
+            new DirectoryInfo(testInstance.TestRoot)
+                .Should().HaveFile("project.lock.json");
 
             var buildCmd = new BuildCommand(testInstance.TestRoot);
             var buildResult = buildCmd.ExecuteWithCapturedOutput();

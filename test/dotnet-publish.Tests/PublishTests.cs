@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
 
             string testProject = _getProjectJson(instance.TestRoot, "TestApp");
             var publishCommand = new PublishCommand(testProject);
-            publishCommand.Execute().Should().Fail();
+            publishCommand.ExecuteWithCapturedOutput().Should().Fail();
         }
 
         [Fact]
@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
 
             var testProject = _getProjectJson(instance.TestRoot, "TestLibrary");
             var publishCommand = new PublishCommand(testProject);
-            publishCommand.Execute().Should().Fail();
+            publishCommand.ExecuteWithCapturedOutput().Should().Fail();
         }
 
         [WindowsOnlyFact()]
@@ -268,7 +268,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var testProject = _getProjectJson(instance.TestRoot, "CompileFail");
             var publishCommand = new PublishCommand(testProject);
 
-            publishCommand.Execute().Should().Fail();
+            publishCommand.ExecuteWithCapturedOutput().Should().Fail();
         }
 
         [Fact]
@@ -280,7 +280,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var testProject = _getProjectJson(instance.TestRoot, "TestApp");
             var publishCommand = new PublishCommand(testProject, noBuild: true);
 
-            publishCommand.Execute().Should().Fail();
+            publishCommand.ExecuteWithCapturedOutput().Should().Fail();
         }
 
         [Fact]
@@ -341,7 +341,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             using (var dir = new DisposableDirectory(Temp))
             {
                 var command = new TestCommand("dotnet");
-                command.Execute($"publish {dir.Path}").Should().Fail();
+                command.ExecuteWithCapturedOutput($"publish {dir.Path}").Should().Fail();
             }
         }
 
@@ -352,7 +352,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             {
                 var command = new TestCommand("dotnet");
                 string temp = Path.Combine(dir.Path, "project.json");
-                command.Execute($"publish {temp}").Should().Fail();
+                command.ExecuteWithCapturedOutput($"publish {temp}").Should().Fail();
             }
         }
 
