@@ -59,7 +59,7 @@
           Inputs="@(ProjectPackTargetInputs -> '%(Identity)')"
           Outputs="@(ProjectPackTargetOutputs -> '%(Identity)')">
     
-    <Exec Command="dotnet pack %(ProjectsToPack.Identity) 
+    <Exec Command="$(DotnetStage2) pack %(ProjectsToPack.Identity) 
                   --no-build 
                   --build-base-path $(PackagingBuildBasePath) 
                   --output $(NupkgOutputDirectory)

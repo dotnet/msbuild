@@ -115,10 +115,6 @@ parseargs(){
         echo "Provide the NuGet name of the targetted Shared Framework. Missing option '--framework-nuget-name'" && help
     fi
 
-    if [ -z "$PREVIOUS_VERSION_URL" ]; then
-        echo "Provide a URL to the previous debian pacakge (Required for running upgrade tests). Missing option '--previous-version-url'" && help
-    fi
-
     if [ -z "$SHARED_FRAMEWORK_NUGET_VERSION" ]; then
         echo "Provide the NuGet version of the targetted Shared Framework. Missing option '--framework-nuget-version'" && help
     fi

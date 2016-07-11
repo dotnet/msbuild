@@ -80,7 +80,6 @@ namespace Microsoft.DotNet.Cli.Build
                 var sharedHostPkgIntermediatePath = Path.Combine(PkgsIntermediateDir, $"{SharedHostComponentId}.pkg");
                 var hostFxrPkgIntermediatePath = Path.Combine(PkgsIntermediateDir, $"{HostFxrComponentId}.pkg");
 
-
                 File.Copy(c.BuildContext.Get<string>("SharedFrameworkInstallerFile"), sharedFrameworkPkgIntermediatePath, true);
                 File.Copy(c.BuildContext.Get<string>("SharedHostInstallerFile"), sharedHostPkgIntermediatePath, true);
                 File.Copy(c.BuildContext.Get<string>("HostFxrInstallerFile"), hostFxrPkgIntermediatePath, true);
