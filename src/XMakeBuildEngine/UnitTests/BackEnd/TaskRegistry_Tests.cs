@@ -77,7 +77,7 @@ namespace TestTask
             // Setting the current directory to the MSBuild running location. It *should* be this
             // already, but if it's not some other test changed it and didn't change it back. If
             // the directory does not include the reference dlls the compilation will fail.
-            Directory.SetCurrentDirectory(FileUtilities.CurrentExecutableDirectory);
+            Directory.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
             try
             {

@@ -31,6 +31,9 @@
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

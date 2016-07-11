@@ -189,8 +189,8 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), pg, true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            string expected1 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, @"..\foo"));
-            string expected2 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, @"..\bar"));
+            string expected1 = Path.GetFullPath(Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, @"..\foo"));
+            string expected2 = Path.GetFullPath(Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, @"..\bar"));
             Console.WriteLine(values["2.0"].ToolsPath);
             Assert.Equal(expected1, values["2.0"].ToolsPath);
             Assert.Equal(expected2, values["3.0"].ToolsPath);

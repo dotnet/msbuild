@@ -11,7 +11,7 @@ using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
-
+using System.IO;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -206,19 +206,6 @@ namespace Microsoft.Build.BackEnd
                 // We can only create additional in-proc nodes if we have decided not to save the operating environment.  This is the global
                 // DTAR case in Visual Studio, but other clients might enable this as well under certain special circumstances.
                 ErrorUtilities.VerifyThrow(_inProcNodeOwningOperatingEnvironment == null, "Unexpected non-null in-proc node semaphore.");
-
-                // Blend.exe v4.x or earlier launches two nodes that co-own the same operating environment
-                // and they will not patch this
-                var p = Process.GetCurrentProcess();
-                {
-                    // This should be reasonably sufficient to assume MS Expression Blend 4 or earlier
-                    if ((FileUtilities.CurrentExecutableName.Equals("Blend", StringComparison.OrdinalIgnoreCase)) &&
-                        (p.MainModule.FileVersionInfo.OriginalFilename.Equals("Blend.exe", StringComparison.OrdinalIgnoreCase)) &&
-                        (p.MainModule.FileVersionInfo.ProductMajorPart < 5))
-                    {
-                        _exclusiveOperatingEnvironment = false;
-                    }
-                }
 
                 if (Environment.GetEnvironmentVariable("MSBUILDINPROCENVCHECK") == "1")
                 {

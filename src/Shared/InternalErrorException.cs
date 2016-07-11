@@ -116,7 +116,7 @@ namespace Microsoft.Build.Shared
             {
                 string processName = Process.GetCurrentProcess().ProcessName.ToUpperInvariant();
 
-                if (!FileUtilities.RunningTests)
+                if (!BuildEnvironmentHelper.Instance.RunningTests)
                 {
                     if (Environment.GetEnvironmentVariable("_NTROOT") == null)
                     {

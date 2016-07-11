@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                var configFile = FileUtilities.CurrentExecutableConfigurationFilePath;
+                var configFile = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
                 result = File.Exists(configFile) && File.ReadAllText(configFile).Contains("toolsVersion");
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
