@@ -34,8 +34,8 @@
 
     <Stage0Directory>$(RepoRoot)/.dotnet_stage0/$(Architecture)</Stage0Directory>
     <DotnetStage0>$(Stage0Directory)/dotnet$(ExeExtension)</DotnetStage0>
-
     <DotnetCliBuildDirectory>$(RepoRoot)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
+    <PackagesDir>$(RepoRoot)/.nuget</PackagesDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -85,4 +85,6 @@
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Test.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Publish.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Run.targets" />
+  <Import Project="$(BuildToolsDir)/clean.targets" />
 </Project>

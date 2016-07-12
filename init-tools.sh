@@ -17,12 +17,14 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 $DIR/scripts/obtain/dotnet-install.sh --channel $CHANNEL --verbose
 
 __init_tools_log=$DIR/init-tools.log
-__DOTNET_CMD=$DOTNET_INSTALL_DIR/dotnet
+__BUILD_TOOLS_CLI_VERSION=$(cat "$DIR/BuildToolsCliVersion.txt")
 __BUILD_TOOLS_DIR=$DIR/build_tools
+__BUILD_TOOLS_CLI_DIR=$__BUILD_TOOLS_DIR/dotnetcli/
 __BUILD_TOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
 __BUILD_TOOLS_PACKAGE_VERSION=$(cat $DIR/BuildToolsVersion.txt)
 __BUILD_TOOLS_PATH=$NUGET_PACKAGES/Microsoft.DotNet.BuildTools/$__BUILD_TOOLS_PACKAGE_VERSION/lib
 __BUILD_TOOLS_SEMAPHORE=$__BUILD_TOOLS_DIR/init-tools.completed
+__DOTNET_CMD=$DOTNET_INSTALL_DIR/dotnet
 __PROJECT_JSON_PATH=$__BUILD_TOOLS_DIR/$__BUILD_TOOLS_PACKAGE_VERSION
 __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
 __PROJECT_JSON_CONTENTS="{ \"dependencies\": { \"Microsoft.DotNet.BuildTools\": \"$__BUILD_TOOLS_PACKAGE_VERSION\" }, \"frameworks\": { \"netcoreapp1.0\": { } } }"
@@ -36,7 +38,11 @@ if [ ! -e "$__PROJECT_JSON_FILE" ]; then
     "$__DOTNET_CMD" restore "$__PROJECT_JSON_FILE" --packages "$NUGET_PACKAGES" --source "$__BUILD_TOOLS_SOURCE" >> "$__init_tools_log" 2>&1
 
     if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."; fi
+  fi
 
+  if [ ! -d "$__BUILD_TOOLS_CLI_DIR" ]; then
+    echo "Installing Build Tools CLI Version: $__BUILD_TOOLS_CLI_VERSION"
+    "$DIR/scripts/obtain/dotnet-install.sh" --channel rel-1.0.0 --version "$__BUILD_TOOLS_CLI_VERSION" --install-dir "$__BUILD_TOOLS_CLI_DIR"
   fi
 
   echo "Initializing build tools..."
@@ -46,3 +52,4 @@ if [ ! -e "$__PROJECT_JSON_FILE" ]; then
 else
   echo "Tools are already initialized"
 fi
+

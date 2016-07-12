@@ -9,6 +9,7 @@ param(
     # This is here just to eat away this parameter because CI still passes this in.
     [string]$Targets="Default",
     [switch]$NoPackage,
+    [switch]$NoBuild,
     [switch]$Help,
     [Parameter(Position=0, ValueFromRemainingArguments=$true)]
     $ExtraParameters)
@@ -21,6 +22,7 @@ if($Help)
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
     Write-Host "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
     Write-Host "  -NoPackage                         Skip packaging targets"
+    Write-Host "  -NoBuild                           Skip building the product"
     Write-Host "  -Help                              Display this help message"
     exit 0
 }
@@ -66,5 +68,13 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build3 build.proj /p:Architecture=$Architecture $ExtraParameters
-if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
+if ($NoBuild)
+{
+    Write-Host "Not building due to --nobuild"
+    Write-Host "Command that would be run: 'dotnet build3 build.proj /p:Architecture=$Architecture $ExtraParameters'"
+}
+else
+{
+    dotnet build3 build.proj /p:Architecture=$Architecture $ExtraParameters
+    if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
+}

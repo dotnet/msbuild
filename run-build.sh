@@ -19,6 +19,8 @@ OLDPATH="$PATH"
 ARCHITECTURE="x64"
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 
+BUILD=1
+
 # Set nuget package cache under the repo
 export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
 
@@ -42,6 +44,9 @@ while [[ $# > 0 ]]; do
             export DOTNET_INSTALL_SKIP_PREREQS=1
             args=( "${args[@]/$1}" )
             ;;
+        --nobuild)
+            BUILD=0
+            ;;
         --architecture)
             ARCHITECTURE=$2
             args=( "${args[@]/$1}" )
@@ -61,6 +66,7 @@ while [[ $# > 0 ]]; do
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
             echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --nopackage                         Skip packaging targets"
+            echo "  --nobuild                           Skip building, showing the command that would be used to build"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --help                              Display this help message"
             exit 0
@@ -110,4 +116,9 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 echo "${args[@]}"
 
-dotnet build3 build.proj /p:Architecture=$ARCHITECTURE "${args[@]}"
+if [ $BUILD -eq 1 ]; then
+    dotnet build3 build.proj /p:Architecture=$ARCHITECTURE "${args[@]}"
+else
+    echo "Not building due to --nobuild"
+    echo "Command that would be run is: 'dotnet build3 build.proj /p:Architecture=$ARCHITECTURE ${args[@]}'"
+fi
