@@ -75,6 +75,8 @@ done
 
 # $args array may have empty elements in it.
 # The easiest way to remove them is to cast to string and back to array.
+# This will actually break quoted arguments, arguments like 
+# -test "hello world" will be broken into three arguments instead of two, as it should.
 temp="${args[@]}"
 args=($temp)
 
