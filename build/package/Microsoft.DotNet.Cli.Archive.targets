@@ -28,7 +28,7 @@
     <ArchiveDirectory
         FileName="%(GenerateArchivesInputsOutputs.OutFileName)"
         OutputDirectory="$(ArchiveOutputDirectory)"
-        InputDirectory="$(LayoutDirectory)/%(GenerateArchivesInputsOutputs.InputDirectory)" >
+        InputDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)" >
 
         <Output TaskParameter="OutputArchive"
                 ItemName="Archives" />
