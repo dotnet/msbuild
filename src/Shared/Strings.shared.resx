@@ -247,10 +247,14 @@
     <value>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</value>
     <comment>{StrBegin="MSB5021: "}</comment>
   </data>
+  <data name="Shared.CanNotFindValidMSBuildLocation">
+    <value>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</value>
+    <comment>{StrBegin="MSB5021: "}</comment>
+  </data>
   <!--
         The shared message bucket is: MSB5001 - MSB5999
 
-        Next message code should be MSB5024
+        Next message code should be MSB5025
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
