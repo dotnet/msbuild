@@ -2202,36 +2202,45 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.True(success); // "success"
-                Assert.True(File.Exists(destFile)); // "destination exists"
-                Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+                var needHigherPrivileges = me.Log.Contains("0x80070522");
 
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+                if (needHigherPrivileges)
+                {
+                    Assert.True(needHigherPrivileges, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
+                }
+                else
+                {
+                    Assert.True(success); // "success"
+                    Assert.True(File.Exists(destFile)); // "destination exists"
+                    Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
 
-                string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
+                    me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
+                    string destinationFileContents;
+                    using (StreamReader sr = new StreamReader(destFile))
+                        destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal(1, t.DestinationFiles.Length);
-                Assert.Equal(1, t.CopiedFiles.Length);
-                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
+                    Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
 
-                // Now we will write new content to the source file
-                // we'll then check that the destination file automatically
-                // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is another source temp file.");
+                    Assert.Equal(1, t.DestinationFiles.Length);
+                    Assert.Equal(1, t.CopiedFiles.Length);
+                    Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
+                    Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
 
-                // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = new StreamReader(destFile))
-                    destinationFileContents = sr.ReadToEnd();
+                    // Now we will write new content to the source file
+                    // we'll then check that the destination file automatically
+                    // has the same content (i.e. it's been hard linked)
+                    using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                        sw.Write("This is another source temp file.");
 
-                Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+                    // Read the destination file (it should have the same modified content as the source)
+                    using (StreamReader sr = new StreamReader(destFile))
+                        destinationFileContents = sr.ReadToEnd();
 
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
+                    Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
+                }
             }
             finally
             {
