@@ -94,9 +94,6 @@
         <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
         <!-- Run E2E -->
-        <Exec Command="$(DebianInstalledDotnet) restore"
-              WorkingDirectory="$(RepoRoot)/test" />
-
         <Exec Command="$(DebianInstalledDotnet) test -xml $(DebianTestResultsXmlFile)"
               WorkingDirectory="$(EndToEndTestDirectory)" />
 
