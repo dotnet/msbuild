@@ -6,8 +6,12 @@
 param(
     [string]$Configuration="Debug",
     [string]$Architecture="x64",
+    # This is here just to eat away this parameter because CI still passes this in.
+    [string]$Targets="Default",
     [switch]$NoPackage,
-    [switch]$Help)
+    [switch]$Help,
+    [Parameter(Position=0, ValueFromRemainingArguments=$true)]
+    $ExtraParameters)
 
 if($Help)
 {
@@ -62,5 +66,5 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build3 build.proj /p:Architecture=$Architecture
+dotnet build3 build.proj /p:Architecture=$Architecture $ExtraParameters
 if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
