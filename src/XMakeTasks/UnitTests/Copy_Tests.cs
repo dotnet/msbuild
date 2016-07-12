@@ -2202,6 +2202,7 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
+                //See https://github.com/Microsoft/msbuild/issues/763 for elevated privileges. For now we check if error exists.
                 var needHigherPrivileges = me.Log.Contains("0x80070522");
 
                 if (needHigherPrivileges)
