@@ -16,7 +16,7 @@ if not defined VS140COMNTOOLS (
 :: Build and create bootstrapped MSBuild to bin\bootstrap
 :: Note: This will always build with Platform=x86
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap.log
-call "%~dp0CreateBootstrappedMSBuild.cmd"
+call "%~dp0CreateBootstrappedMSBuild.cmd" %*
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo CreateBootstrappedMSBuild.cmd failed with errorlevel %ERRORLEVEL% 1>&2
@@ -26,7 +26,7 @@ if %ERRORLEVEL% NEQ 0 (
 :: Rebuild with bootstrapped msbuild
 set MSBUILDLOGPATH=%~dp0msbuild_local.log
 set MSBUILDCUSTOMPATH="%~dp0\bin\Bootstrap\15.0\Bin\MSBuild.exe"
-"%~dp0build.cmd" /t:RebuildAndTest /p:BootstrappedMSBuild=true
+"%~dp0build.cmd" /t:RebuildAndTest /p:BootstrappedMSBuild=true %*
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo build.cmd with bootstrapped MSBuild failed with errorlevel %ERRORLEVEL% 1>&2

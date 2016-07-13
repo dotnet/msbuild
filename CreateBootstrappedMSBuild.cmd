@@ -2,7 +2,7 @@
 :: Rebuild the repo and copy to bin\bootstrap. Includes required MSBuild
 :: companion files copied from your local machine.
 :: 
-:: Example: CreateBootstrappedMSBuild.cmd <AdditionalBuildCommand>
+:: Example: CreateBootstrappedMSBuild.cmd <AdditionalBuildCommands>
 
 @echo off
 setlocal
@@ -15,14 +15,14 @@ if not defined VS140COMNTOOLS (
 )
 
 if not "%1"=="" (
-    set AdditionalBuildCommand=%1
+    set AdditionalBuildCommands=%*
 )
 
 echo ** Building with the installed MSBuild
-echo ** Additional Build Parameters: %AdditionalBuildCommand%
+echo ** Additional Build Parameters: %AdditionalBuildCommands%
 echo.
 :: Build MSBuild
-call "%~dp0build.cmd" /t:Rebuild /p:Platform=x86 %AdditionalBuildCommand%
+call "%~dp0build.cmd" /t:Rebuild /p:Platform=x86 %AdditionalBuildCommands%
 set BUILDERRORLEVEL=%ERRORLEVEL%
 
 :: Kill Roslyn, which may have handles open to files we want
