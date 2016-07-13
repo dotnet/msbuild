@@ -569,7 +569,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path, string targetFrameworkVersion)
         {
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
+            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
             if (String.IsNullOrEmpty(certThumbprint))
                 throw new ArgumentNullException("certThumbprint");
@@ -628,7 +628,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
+            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
             SignFileInternal(cert, timestampUrl, path, true, resources);
         }
 
