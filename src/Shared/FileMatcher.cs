@@ -576,12 +576,38 @@ namespace Microsoft.Build.Shared
             }
         }
 
-
         struct GetFilesRecursionResult
         {
             public string[] Files;
             public string[] Subdirs;
             public string RemainingWildcardDirectory;
+        }
+
+        class GetFilesSearchData
+        {
+            public GetFilesSearchData(
+                string filespec,                // can be null
+                int extensionLengthToEnforce,   // only relevant when filespec is not null
+                Regex regexFileMatch,           // can be null
+                bool needsRecursion
+                )
+            {
+                Filespec = filespec;
+                ExtensionLengthToEnforce = extensionLengthToEnforce;
+                RegexFileMatch = regexFileMatch;
+                NeedsRecursion = needsRecursion;
+            }
+
+            public string Filespec { get; }
+            public int ExtensionLengthToEnforce { get; }
+            public Regex RegexFileMatch { get; }
+            public bool NeedsRecursion { get; }
+        }
+
+        struct GetFilesRecursionState
+        {
+            public string RemainingWildcardDirectory;
+            public GetFilesSearchData SearchData;
         }
 
         /// <summary>
@@ -619,13 +645,31 @@ namespace Microsoft.Build.Shared
 
             ErrorUtilities.VerifyThrow(remainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
 
+            var searchData = new GetFilesSearchData(filespec, extensionLengthToEnforce, regexFileMatch, needsRecursion);
+            GetFilesRecursionState state = new GetFilesRecursionState();
+            state.SearchData = searchData;
+            state.RemainingWildcardDirectory = remainingWildcardDirectory;
+
+            GetFilesRecursive(listOfFiles, baseDirectory, state, projectDirectory, stripProjectDirectory, getFileSystemEntries);
+        }
+
+        private static void GetFilesRecursive
+        (
+            System.Collections.IList listOfFiles,
+            string baseDirectory,
+            GetFilesRecursionState recursionState,
+            string projectDirectory,
+            bool stripProjectDirectory,
+            GetFileSystemEntries getFileSystemEntries
+        )
+        {
             var nextStep = GetFilesRecursiveStep(
                 baseDirectory,
-                remainingWildcardDirectory,
-                filespec,
-                extensionLengthToEnforce,
-                regexFileMatch,
-                needsRecursion,
+                recursionState.RemainingWildcardDirectory,
+                recursionState.SearchData.Filespec,
+                recursionState.SearchData.ExtensionLengthToEnforce,
+                recursionState.SearchData.RegexFileMatch,
+                recursionState.SearchData.NeedsRecursion,
                 projectDirectory,
                 stripProjectDirectory,
                 getFileSystemEntries);
@@ -642,9 +686,14 @@ namespace Microsoft.Build.Shared
             {
                 foreach (string subdir in nextStep.Subdirs)
                 {
+                    //  RecursionState is a struct so this copies it
+                    var newRecursionState = recursionState;
+
+                    newRecursionState.RemainingWildcardDirectory = nextStep.RemainingWildcardDirectory;
+
                     // We never want to strip the project directory from the leaves, because the current 
                     // process directory maybe different
-                    GetFilesRecursive(listOfFiles, subdir, nextStep.RemainingWildcardDirectory, filespec, extensionLengthToEnforce, regexFileMatch, true, projectDirectory, stripProjectDirectory, getFileSystemEntries);
+                    GetFilesRecursive(listOfFiles, subdir, newRecursionState, projectDirectory, stripProjectDirectory, getFileSystemEntries);
                 }
             }
         }
