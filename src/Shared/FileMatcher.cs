@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Shared
 {
@@ -575,6 +576,14 @@ namespace Microsoft.Build.Shared
             }
         }
 
+
+        struct GetFilesRecursionResult
+        {
+            public string[] Files;
+            public string[] Subdirs;
+            public string RemainingWildcardDirectory;
+        }
+
         /// <summary>
         /// Get all files that match either the file-spec or the regular expression. 
         /// </summary>
@@ -610,6 +619,52 @@ namespace Microsoft.Build.Shared
 
             ErrorUtilities.VerifyThrow(remainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
 
+            var nextStep = GetFilesRecursiveStep(
+                baseDirectory,
+                remainingWildcardDirectory,
+                filespec,
+                extensionLengthToEnforce,
+                regexFileMatch,
+                needsRecursion,
+                projectDirectory,
+                stripProjectDirectory,
+                getFileSystemEntries);
+
+            if (nextStep.Files != null)
+            {
+                foreach (var file in nextStep.Files)
+                {
+                    listOfFiles.Add(file);
+                }
+            }
+
+            if (nextStep.Subdirs != null)
+            {
+                foreach (string subdir in nextStep.Subdirs)
+                {
+                    // We never want to strip the project directory from the leaves, because the current 
+                    // process directory maybe different
+                    GetFilesRecursive(listOfFiles, subdir, nextStep.RemainingWildcardDirectory, filespec, extensionLengthToEnforce, regexFileMatch, true, projectDirectory, stripProjectDirectory, getFileSystemEntries);
+                }
+            }
+        }
+
+        private static GetFilesRecursionResult GetFilesRecursiveStep
+        (
+            //System.Collections.IList listOfFiles,
+            string baseDirectory,
+            string remainingWildcardDirectory,
+            string filespec,                // can be null
+            int extensionLengthToEnforce,   // only relevant when filespec is not null
+            Regex regexFileMatch,           // can be null
+            bool needsRecursion,
+            string projectDirectory,
+            bool stripProjectDirectory,
+            GetFileSystemEntries getFileSystemEntries
+        )
+        {
+            GetFilesRecursionResult ret = new GetFilesRecursionResult();
+
             /*
              * Get the matching files.
              */
@@ -630,22 +685,33 @@ namespace Microsoft.Build.Shared
             if (considerFiles)
             {
                 string[] files = getFileSystemEntries(FileSystemEntity.Files, baseDirectory, filespec, projectDirectory, stripProjectDirectory);
-                foreach (string file in files)
+
+                bool needToProcessEachFile = filespec == null || extensionLengthToEnforce != 0;
+                if (needToProcessEachFile)
                 {
-                    if ((filespec != null) ||
-                        // if no file-spec provided, match the file to the regular expression
-                        // PERF NOTE: Regex.IsMatch() is an expensive operation, so we avoid it whenever possible
-                        regexFileMatch.IsMatch(file))
+                    List<string> listOfFiles = new List<string>();
+                    foreach (string file in files)
                     {
-                        if ((filespec == null) ||
-                            // if we used a file-spec with a "loosely" defined extension
-                            (extensionLengthToEnforce == 0) ||
-                            // discard all files that do not have extensions of the desired length
-                            (Path.GetExtension(file).Length == extensionLengthToEnforce))
+                        if ((filespec != null) ||
+                            // if no file-spec provided, match the file to the regular expression
+                            // PERF NOTE: Regex.IsMatch() is an expensive operation, so we avoid it whenever possible
+                            regexFileMatch.IsMatch(file))
                         {
-                            listOfFiles.Add((object)file);
+                            if ((filespec == null) ||
+                                // if we used a file-spec with a "loosely" defined extension
+                                (extensionLengthToEnforce == 0) ||
+                                // discard all files that do not have extensions of the desired length
+                                (Path.GetExtension(file).Length == extensionLengthToEnforce))
+                            {
+                                listOfFiles.Add(file);
+                            }
                         }
                     }
+                    ret.Files = listOfFiles.ToArray(); 
+                }
+                else
+                {
+                    ret.Files = files;
                 }
             }
 
@@ -685,14 +751,11 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
-                // We never want to strip the project directory from the leaves, because the current 
-                // process directory maybe different
-                string[] subdirs = getFileSystemEntries(FileSystemEntity.Directories, baseDirectory, pattern, null, false);
-                foreach (string subdir in subdirs)
-                {
-                    GetFilesRecursive(listOfFiles, subdir, remainingWildcardDirectory, filespec, extensionLengthToEnforce, regexFileMatch, true, projectDirectory, stripProjectDirectory, getFileSystemEntries);
-                }
+                ret.RemainingWildcardDirectory = remainingWildcardDirectory;
+                ret.Subdirs = getFileSystemEntries(FileSystemEntity.Directories, baseDirectory, pattern, null, false);
             }
+
+            return ret;
         }
 
         /// <summary>
