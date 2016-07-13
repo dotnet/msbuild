@@ -63,7 +63,7 @@
 
   <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
 
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework" Name="Publish">
+  <Target DependsOnTargets="BuildDotnetCliBuildFramework;GenerateVersionBadge" Name="Publish">
     <PublishTargets />
   </Target>
 
@@ -71,4 +71,7 @@
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Test.targets" /> 
+
+  <!-- This should be in the build/Microsoft.DotNet.Cli.Publish.targets -->
+  <Import Project="build/publish/Microsoft.DotNet.Cli.Badge.targets" />
 </Project>
