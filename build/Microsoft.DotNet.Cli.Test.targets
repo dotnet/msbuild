@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="test/ProjectsToTest.props" />
-  <Import Project="test/TestPackageProjects.props" />
-
-  <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetPack" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
+  <Import Project="test/TestPackageProjects.targets" />
+  <Import Project="test/TestAssetProjects.targets" />
 
   <Target Name="Test" 
           DependsOnTargets="PrepareTests;
@@ -36,8 +32,6 @@
   <Target Name="PrepareTests"
           DependsOnTargets="Init">
     <PropertyGroup>
-      <PathSeparator>/</PathSeparator>
-      <PathSeparator Condition=" '$(OSName)' == 'win' ">\</PathSeparator>
       <TestPackageBuildVersionSuffix>$(CommitCount)</TestPackageBuildVersionSuffix>
       <TestOutputDir>$(BaseOutputDirectory)/tests/</TestOutputDir>
       <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild/</TestPackagesBuildDir>
@@ -96,20 +90,15 @@
   </Target>
 
   <Target Name="BuildTestAssetProjects"
-          DependsOnTargets="RestoreTestAssetProjects">
-    <ItemGroup>
-      <NoAutoBuildTestAssets Include="$(RepoRoot)TestAssets$(PathSeparator)TestProjects$(PathSeparator)**$(PathSeparator).noautobuild" />
-      <NoAutoBuildTestAssetProjects Include="%(NoAutoBuildTestAssets.RelativeDir)project.json" />
-      <BuildableTestAssetProjects Include="$(RepoRoot)TestAssets$(PathSeparator)TestProjects$(PathSeparator)**$(PathSeparator)project.json" 
-                                  Exclude="@(NoAutoBuildTestAssetProjects)" />
-    </ItemGroup>
-
-    <Message Text="Skipping projects with .noautobuild files:" />
-    <Message Text="%(NoAutoBuildTestAssetProjects.Identity)" />
+          DependsOnTargets="RestoreTestAssetProjects;
+                            SetupTestAssetProjectData;"
+          Inputs="%(TestAssetProjects.BuildInputs)"
+          Outputs="%(TestAssetProjects.BuildOutput)">
 
     <DotNetBuild  Framework="netcoreapp1.0"
+                  ProjectPath="$(RepoRoot)%(TestAssetProjects.ProjectPath)"
                   ToolPath="$(DotnetUnderTest)"
-                  WorkingDirectory="%(BuildableTestAssetProjects.RelativeDir)" />
+                  WorkingDirectory="%(TestAssetProjects.RelativeDir)" />
   </Target>
 
   <Target Name="RestoreTestAssetProjects"

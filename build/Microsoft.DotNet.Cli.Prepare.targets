@@ -4,7 +4,10 @@
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="CheckPrereqs" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetPack" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ExtractArchive" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ArchiveDirectory" AssemblyFile="$(CLIBuildDll)" />
