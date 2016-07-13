@@ -663,13 +663,9 @@ namespace Microsoft.Build.Shared
             GetFileSystemEntries getFileSystemEntries
         )
         {
-            var nextStep = GetFilesRecursiveStep(
+            GetFilesRecursionResult nextStep = GetFilesRecursiveStep(
                 baseDirectory,
-                recursionState.RemainingWildcardDirectory,
-                recursionState.SearchData.Filespec,
-                recursionState.SearchData.ExtensionLengthToEnforce,
-                recursionState.SearchData.RegexFileMatch,
-                recursionState.SearchData.NeedsRecursion,
+                recursionState,
                 projectDirectory,
                 stripProjectDirectory,
                 getFileSystemEntries);
@@ -700,13 +696,8 @@ namespace Microsoft.Build.Shared
 
         private static GetFilesRecursionResult GetFilesRecursiveStep
         (
-            //System.Collections.IList listOfFiles,
             string baseDirectory,
-            string remainingWildcardDirectory,
-            string filespec,                // can be null
-            int extensionLengthToEnforce,   // only relevant when filespec is not null
-            Regex regexFileMatch,           // can be null
-            bool needsRecursion,
+            GetFilesRecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
             GetFileSystemEntries getFileSystemEntries
@@ -720,12 +711,12 @@ namespace Microsoft.Build.Shared
             bool considerFiles = false;
 
             // Only consider files if...
-            if (remainingWildcardDirectory.Length == 0)
+            if (recursionState.RemainingWildcardDirectory.Length == 0)
             {
                 // We've reached the end of the wildcard directory elements.
                 considerFiles = true;
             }
-            else if (remainingWildcardDirectory.IndexOf(recursiveDirectoryMatch, StringComparison.Ordinal) == 0)
+            else if (recursionState.RemainingWildcardDirectory.IndexOf(recursiveDirectoryMatch, StringComparison.Ordinal) == 0)
             {
                 // or, we've reached a "**" so everything else is matched recursively.
                 considerFiles = true;
@@ -733,24 +724,25 @@ namespace Microsoft.Build.Shared
 
             if (considerFiles)
             {
-                string[] files = getFileSystemEntries(FileSystemEntity.Files, baseDirectory, filespec, projectDirectory, stripProjectDirectory);
+                string[] files = getFileSystemEntries(FileSystemEntity.Files, baseDirectory,
+                    recursionState.SearchData.Filespec, projectDirectory, stripProjectDirectory);
 
-                bool needToProcessEachFile = filespec == null || extensionLengthToEnforce != 0;
+                bool needToProcessEachFile = recursionState.SearchData.Filespec == null || recursionState.SearchData.ExtensionLengthToEnforce != 0;
                 if (needToProcessEachFile)
                 {
                     List<string> listOfFiles = new List<string>();
                     foreach (string file in files)
                     {
-                        if ((filespec != null) ||
+                        if ((recursionState.SearchData.Filespec != null) ||
                             // if no file-spec provided, match the file to the regular expression
                             // PERF NOTE: Regex.IsMatch() is an expensive operation, so we avoid it whenever possible
-                            regexFileMatch.IsMatch(file))
+                            recursionState.SearchData.RegexFileMatch.IsMatch(file))
                         {
-                            if ((filespec == null) ||
+                            if ((recursionState.SearchData.Filespec == null) ||
                                 // if we used a file-spec with a "loosely" defined extension
-                                (extensionLengthToEnforce == 0) ||
+                                (recursionState.SearchData.ExtensionLengthToEnforce == 0) ||
                                 // discard all files that do not have extensions of the desired length
-                                (Path.GetExtension(file).Length == extensionLengthToEnforce))
+                                (Path.GetExtension(file).Length == recursionState.SearchData.ExtensionLengthToEnforce))
                             {
                                 listOfFiles.Add(file);
                             }
@@ -767,14 +759,14 @@ namespace Microsoft.Build.Shared
             /*
              * Recurse into subdirectories.
              */
-            if (needsRecursion && remainingWildcardDirectory.Length > 0)
+            if (recursionState.SearchData.NeedsRecursion && recursionState.RemainingWildcardDirectory.Length > 0)
             {
                 // Find the next directory piece.
                 string pattern = null;
 
-                if (remainingWildcardDirectory != recursiveDirectoryMatch)
+                if (recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch)
                 {
-                    int indexOfNextSlash = remainingWildcardDirectory.IndexOfAny(directorySeparatorCharacters);
+                    int indexOfNextSlash = recursionState.RemainingWildcardDirectory.IndexOfAny(directorySeparatorCharacters);
                     ErrorUtilities.VerifyThrow(indexOfNextSlash != -1, "Slash should be guaranteed.");
 
                     // Peel off the leftmost directory piece. So for example, if remainingWildcardDirectory
@@ -789,18 +781,18 @@ namespace Microsoft.Build.Shared
                     // back into remainingWildcardDirectory.
                     // This is a performance optimization. We don't want to enumerate everything if we 
                     // don't have to.
-                    pattern = remainingWildcardDirectory.Substring(0, indexOfNextSlash);
-                    remainingWildcardDirectory = remainingWildcardDirectory.Substring(indexOfNextSlash + 1);
+                    pattern = recursionState.RemainingWildcardDirectory.Substring(0, indexOfNextSlash);
+                    recursionState.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory.Substring(indexOfNextSlash + 1);
 
                     // If pattern turned into **, then there's no choice but to enumerate everything.
                     if (pattern == recursiveDirectoryMatch)
                     {
                         pattern = null;
-                        remainingWildcardDirectory = recursiveDirectoryMatch;
+                        recursionState.RemainingWildcardDirectory = recursiveDirectoryMatch;
                     }
                 }
 
-                ret.RemainingWildcardDirectory = remainingWildcardDirectory;
+                ret.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory;
                 ret.Subdirs = getFileSystemEntries(FileSystemEntity.Directories, baseDirectory, pattern, null, false);
             }
 
