@@ -36,6 +36,7 @@
     <Compile Include="Al_Tests.cs" />
     <Compile Include="AppConfig_Tests.cs" />
     <Compile Include="AspNetCompiler_Tests.cs" />
+    <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig_Tests.cs" />
     <Compile Include="AssemblyDependency\FilePrimary.cs" />
     <Compile Include="AssemblyDependency\GlobalAssemblyCacheTests.cs" />
     <Compile Include="AssemblyDependency\InstalledSDKResolverFixture.cs" />
