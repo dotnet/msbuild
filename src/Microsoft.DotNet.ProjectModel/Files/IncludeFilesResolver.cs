@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
                         file.IsCustomTarget = true;
 
                         // Prefer named targets over default ones
-                        includeEntries.RemoveWhere(f => string.Equals(f.SourcePath, file.SourcePath));
+                        includeEntries.RemoveWhere(f => string.Equals(f.SourcePath, file.SourcePath) && f.IsCustomTarget == false);
                         includeEntries.Add(file);
                     }
                 }

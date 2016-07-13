@@ -113,6 +113,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
             zip.Entries.Should().Contain(e => e.FullName == "packfiles/pack1.txt");
             zip.Entries.Should().Contain(e => e.FullName == "newpath/pack2.txt");
+            zip.Entries.Should().Contain(e => e.FullName == "anotherpath/pack2.txt");
         }
 
         [Fact]

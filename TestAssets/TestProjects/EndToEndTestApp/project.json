@@ -20,7 +20,8 @@
     "files": {
       "includeFiles": "packfiles/pack1.txt",
       "mappings": {
-        "newpath/": "packfiles/pack2.txt"
+        "newpath/": "packfiles/pack2.txt",
+        "anotherpath/": "packfiles/pack2.txt"
       }
     }
   },
