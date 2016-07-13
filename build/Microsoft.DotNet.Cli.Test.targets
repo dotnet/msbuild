@@ -3,6 +3,9 @@
   <Import Project="test/ProjectsToTest.props" />
   <Import Project="test/TestPackageProjects.props" />
 
+  <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetPack" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
 
   <Target Name="Test" 
@@ -22,9 +25,6 @@
       <TestTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsEnv)" />
     </ItemGroup>
 
-    <Message Text="PATH=$(ExecPath)" />
-    <Message Text="TEST_ARTIFACTS=$(TestArtifactsEnv)" />
-
     <DotNetTest WorkingDirectory="$(TestDirectory)/%(ProjectsToTest.Identity)/"
                 EnvironmentVariables="@(TestTaskEnvironmentVariables)"
                 ToolPath="$(Stage2Directory)"
@@ -39,19 +39,21 @@
       <PathSeparator>/</PathSeparator>
       <PathSeparator Condition=" '$(OSName)' == 'win' ">\</PathSeparator>
       <TestPackageBuildVersionSuffix>$(CommitCount)</TestPackageBuildVersionSuffix>
-      <TestOutputDir>$(BaseOutputDirectory)/tests</TestOutputDir>
-      <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild</TestPackagesBuildDir>
-      <TestPackagesDir>$(TestOutputDir)/packages</TestPackagesDir>
-      <TestArtifactsDir>$(TestOutputDir)/artifacts</TestArtifactsDir>
-      <TestResultXmlDir>$(TestOutputDir)/results</TestResultXmlDir>
-      <TestDirectory>$(RepoRoot)/test</TestDirectory>
-      <DotnetUnderTest>$(DotnetStage2)</DotnetUnderTest>
+      <TestOutputDir>$(BaseOutputDirectory)/tests/</TestOutputDir>
+      <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild/</TestPackagesBuildDir>
+      <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
+      <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
+      <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
+      <TestDirectory>$(RepoRoot)/test/</TestDirectory>
+      <DotnetUnderTest>$(Stage2Directory)</DotnetUnderTest>
     </PropertyGroup>
   </Target>
 
   <Target Name="BuildTests" 
           DependsOnTargets="RestoreTests;">
-    <Exec Command="$(DotnetUnderTest) build --configuration $(Configuration)" WorkingDirectory="$(TestDirectory)/%(ProjectsToTest.Identity)/" />
+    <DotNetBuild  Configuration="$(Configuration)"
+                  ToolPath="$(DotnetUnderTest)"
+                  WorkingDirectory="$(TestDirectory)/%(ProjectsToTest.Identity)/" />
   </Target>
 
   <Target Name="RestoreTests"
@@ -60,15 +62,25 @@
                             SetupRestoreTestsInputs;"
           Inputs="@(RestoreTestsInputs)"
           Outputs="@(RestoreTestsInputs->'%(RelativeDir)project.lock.json')">
-    <Exec Command="$(DotnetUnderTest) restore $(TestDirectory) --fallbacksource $(TestPackagesDir)" WorkingDirectory="$(TestDirectory)" />
+    <DotNetRestore  FallbackSource="$(TestPackagesDir)"
+                    ToolPath="$(DotnetUnderTest)" 
+                    WorkingDirectory="$(TestDirectory)" />
   </Target>
  
   <Target Name="CleanTestProjectsBinObj" 
           DependsOnTargets="SetupRestoreTestsInputs;" 
           Inputs="@(RestoreTestsInputs)"
           Outputs="@(RestoreTestsInputs->'%(RelativeDir)project.lock.json')">
-    <Delete Files="$(TestDirectory)/**/bin/**/*.*')" />
-    <Delete Files="$(TestDirectory)/**/obj/**/*.*')" />
+    <ItemGroup>
+      <FilesToDelete Include="$(TestDirectory)**/bin/**/*.*" />
+      <FilesToDelete Include="$(TestDirectory)**/obj/**/*.*" />
+    </ItemGroup>  
+
+    <Delete Files="@(FilesToDelete)" />
+
+    <ItemGroup>
+      <FilesToDelete Remove="*" />
+    </ItemGroup>
   </Target>
 
   <Target Name="SetupRestoreTestsInputs"
@@ -95,8 +107,9 @@
     <Message Text="Skipping projects with .noautobuild files:" />
     <Message Text="%(NoAutoBuildTestAssetProjects.Identity)" />
 
-    <Exec Command="$(DotnetUnderTest) build %(BuildableTestAssetProjects.FullPath) --framework netcoreapp1.0" 
-          WorkingDirectory="%(BuildableTestAssetProjects.RelativeDir)" />
+    <DotNetBuild  Framework="netcoreapp1.0"
+                  ToolPath="$(DotnetUnderTest)"
+                  WorkingDirectory="%(BuildableTestAssetProjects.RelativeDir)" />
   </Target>
 
   <Target Name="RestoreTestAssetProjects"
@@ -104,7 +117,10 @@
                             SetupRestoreTestAssetProjectsInputs;"
           Inputs="@(RestoreTestAssetProjectsInputs)"
           Outputs="@(RestoreTestAssetProjectsInputs->'%(RelativeDir)/project.lock.json')">
-    <Exec Command="$(DotnetUnderTest) restore $(RepoRoot)/TestAssets/TestProjects/ --fallbacksource $(TestPackagesDir)" />
+
+    <DotNetRestore  FallbackSource="$(TestPackagesDir)"
+                    ToolPath="$(DotnetUnderTest)" 
+                    WorkingDirectory="$(RepoRoot)TestAssets/TestProjects/" />
   </Target>
 
   <Target Name="SetupRestoreTestAssetProjectsInputs" >
@@ -133,7 +149,11 @@
     <Message Text="Skipping projects with .noautobuild files:" />
     <Message Text="%(NoAutoBuildDesktopTestAssetProjects.FullPath)" />
 
-    <Exec Command="$(DotnetUnderTest) build %(BuildableDesktopTestAssetProjects.FullPath) --framework net451" WorkingDirectory="%(BuildableDesktopTestAssetProjects.RelativeDir)" />
+    <DotNetBuild  Configuration="$(Configuration)"
+                  Framework="net451"
+                  ProjectPath="%(BuildableDesktopTestAssetProjects.FullPath)"
+                  ToolPath="$(DotnetUnderTest)"
+                  WorkingDirectory="%(BuildableDesktopTestAssetProjects.RelativeDir)" />
   </Target>
 
   <Target Name="RestoreDesktopTestAssetProjects"
@@ -142,7 +162,10 @@
                             SetupRestoreDesktopTestAssetProjectsInputs;"
           Inputs="@(RestoreDesktopTestAssetProjectsInputs)"
           Outputs="@(RestoreDesktopTestAssetProjectsInputs->'%(RelativeDir)/project.lock.json')">
-    <Exec Command="$(DotnetUnderTest) restore $(RepoRoot)TestAssets\DesktopTestProjects\ --fallbacksource $(TestPackagesDir)" />
+
+    <DotNetRestore  FallbackSource="$(TestPackagesDir)"
+                    ToolPath="$(DotnetUnderTest)" 
+                    WorkingDirectory="$(RepoRoot)TestAssets\DesktopTestProjects\" />
   </Target>
 
   <Target Name="SetupRestoreDesktopTestAssetProjectsInputs">
@@ -154,25 +177,28 @@
   <Target Name="CreateTestAssetPackageNuPkgs" 
           DependsOnTargets="BuildTestAssetPackageProjects;
                             SetupTestPackageProjectData;"
-          Outputs="%(TestPackageProject.Identity)">
-    <PropertyGroup>
-      <VersionSuffixOption></VersionSuffixOption>
-      <VersionSuffixOption Condition="'%(TestPackageProject.VersionSuffix)' != ''">--version-suffix %(TestPackageProject.VersionSuffix)</VersionSuffixOption>
-    </PropertyGroup>
+          Inputs="%(TestPackageProject.PackInputs)"
+          Outputs="%(TestPackageProject.PackOutputs)">
 
-    <Exec Command="$(DotnetUnderTest) pack %(TestPackageProject.FullPath) --no-build --build-base-path $(TestPackagesBuildDir) --output $(TestPackagesDir) $(VersionSuffixOption)" />
+    <DotNetPack BuildBasePath="$(TestPackagesBuildDir)"
+                NoBuild="True"
+                Output="$(TestPackagesDir)"
+                ProjectPath="%(TestPackageProject.FullPath)"
+                ToolPath="$(DotnetUnderTest)"
+                VersionSuffix="%(TestPackageProject.VersionSuffix)" />
   </Target>
 
   <Target Name="BuildTestAssetPackageProjects"
           DependsOnTargets="RestoreTestAssetPackageProjects;
                             SetupTestPackageProjectData;"
-          Outputs="%(TestPackageProjectFrameworks.Identity)">
-    <PropertyGroup>
-      <CurrentBuildFramework>%(TestPackageProjectFrameworks.Identity)</CurrentBuildFramework>
-    </PropertyGroup>
+          Inputs="%(TestPackageProject.BuildInputs)"
+          Outputs="%(TestPackageProject.BuildOutputs)">
 
-    <Exec Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(TestPackageProject.Frameworks)', '(^|;)$(CurrentBuildFramework)($|;)'))"
-          Command="$(DotnetUnderTest) build --framework $(CurrentBuildFramework) --build-base-path $(TestPackagesBuildDir) %(TestPackageProject.FullPath)" />
+    <DotNetBuild  BuildBasePath="$(TestPackagesBuildDir)"
+                  Framework="%(TestPackageProject.Framework)"
+                  ProjectPath="%(TestPackageProject.FullPath)"
+                  ToolPath="$(DotnetUnderTest)"
+                  WorkingDirectory="%(BuildableTestAssetProjects.RelativeDir)" />
   </Target>
  
   <Target Name="RestoreTestAssetPackageProjects" 
@@ -180,7 +206,9 @@
                             SetupRestoreTestAssetPackageProjectsInputs;" 
           Inputs="@(RestoreTestAssetPackageProjectsInputs)"
           Outputs="@(RestoreTestAssetPackageProjectsInputs->'%(RelativeDir)/project.lock.json')">
-    <Exec Command="$(DotnetUnderTest) restore $(RepoRoot)/TestAssets/TestPackages/" />
+
+    <DotNetRestore  ToolPath="$(DotnetUnderTest)" 
+                    WorkingDirectory="$(RepoRoot)/TestAssets/TestPackages/" />
   </Target>
 
   <Target Name="SetupRestoreTestAssetPackageProjectsInputs"
