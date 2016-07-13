@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     
     <Target Name="SetupGenerateDebInputsOutputs">
-        <Exec Command="/usr/bin/env debuild -h" >
+        <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
             <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
         </Exec>
 
