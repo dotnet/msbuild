@@ -107,6 +107,7 @@
   <!-- Change define constants as needed -->
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
+    <DefineConstants Condition="$(LocalizedBuild) == 'true'">$(DefineConstants);LOCALIZED_BUILD</DefineConstants>
   </PropertyGroup>
 
   <!-- Setup some common paths -->
