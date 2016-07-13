@@ -58,13 +58,14 @@
           DependsOnTargets="SetupGenerateNugetPackagesInputsOutputs"
           Inputs="@(ProjectPackTargetInputs -> '%(Identity)')"
           Outputs="@(ProjectPackTargetOutputs -> '%(Identity)')">
-    
-    <Exec Command="$(DotnetStage2) pack %(ProjectsToPack.Identity) 
-                  --no-build 
-                  --build-base-path $(PackagingBuildBasePath) 
-                  --output $(NupkgOutputDirectory)
-                  --configuration $(Configuration)
-                  --version-suffix $(NupkgVersionSuffix)" />
+
+    <DotNetPack BuildBasePath="$(PackagingBuildBasePath)"
+                NoBuild="True"
+                Output="$(NupkgOutputDirectory)"
+                ProjectPath="%(ProjectsToPack.Identity)"
+                ToolPath="$(DotnetStage2)"
+                VersionSuffix="$(NupkgVersionSuffix)"
+                Configuration="$(Configuration)" />
   </Target>
 
   <Target Name="BuildProjectsForNuGetPackages"
