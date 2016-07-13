@@ -3,6 +3,7 @@
   <Import Project="dir.props" />
 
   <ItemGroup>
+    <ProjectWithoutConfiguration Include="build\dirs.proj" />
     <ProjectWithoutConfiguration Include="src\dirs.proj" />
     <ProjectWithoutConfiguration Include="Samples\dirs.proj" Condition="'$(BuildSamples)'!='false'" />
   </ItemGroup>

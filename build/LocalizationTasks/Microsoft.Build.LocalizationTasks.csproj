@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.Build.LocalizationTasks</RootNamespace>
+    <AssemblyName>Microsoft.Build.LocalizationTasks</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Source Files -->
+    <Compile Include="*.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System"/>
+    <Reference Include="System.Text.RegularExpressions"/>
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.Core" />
+    <Reference Include="fmdev.XliffParser"/>
+  </ItemGroup>
+
+  <Import Project="..\dir.targets" />
+  
+</Project>

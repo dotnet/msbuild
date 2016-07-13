@@ -117,7 +117,7 @@
 
   <!-- Setup the default output and intermediate paths -->
   <PropertyGroup>
-    <BaseOutputPath>$(ProjectDir)bin\</BaseOutputPath>
+    <BaseOutputPath Condition="$(BaseOutputPath) == ''">$(BinDir)</BaseOutputPath>
     <BaseOutputPathWithConfig>$(BaseOutputPath)$(OS)\$(Configuration)\</BaseOutputPathWithConfig>
     <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$(BaseOutputPath)$(Platform)\$(OS)\$(Configuration)\</BaseOutputPathWithConfig>
     <OutputPath>$(BaseOutputPathWithConfig)\</OutputPath>
@@ -128,6 +128,10 @@
 
     <TestPath>$(TestWorkingDir)$(MSBuildProjectName)\$(OS)\$(Configuration)\</TestPath>
     <TestPath Condition="'$(Platform)' != 'AnyCPU'">$(TestWorkingDir)$(MSBuildProjectName)\$(Platform)\$(OS)\$(Configuration)\</TestPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BuildBinDir>$(ProjectDir)build\bin\$(Platform)\$(OS)\$(Configuration)</BuildBinDir>
   </PropertyGroup>
 
 </Project>

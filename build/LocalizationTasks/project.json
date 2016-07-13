@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "fmdev.XliffParser": "0.4.0"
+  },
+  "frameworks": {
+    "net46": { }
+  },
+  "runtimes": {
+    "win": {},
+    "win-x86": {},
+    "win-x64": {},
+  }
+}
