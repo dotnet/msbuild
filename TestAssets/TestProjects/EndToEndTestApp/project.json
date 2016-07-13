@@ -25,7 +25,7 @@
       }
     }
   },
-  "publishOptions": "testpublishfile.txt",
+  "publishOptions": [ "testpublishfile.txt", "publishfiles" ],
   "frameworks": {
     "netcoreapp1.0": {}
   },
