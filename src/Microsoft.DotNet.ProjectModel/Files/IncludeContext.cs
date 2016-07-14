@@ -40,7 +40,8 @@ namespace Microsoft.DotNet.ProjectModel.Files
             var token = rawObject.Value<JToken>(option);
             if (token.Type != JTokenType.Object)
             {
-                IncludePatterns = new List<string>(ExtractValues(token));
+                IncludePatterns = CreateCollection(
+                    sourceBasePath, option, ExtractValues(token), literalPath: false);
             }
             else
             {
