@@ -2,7 +2,6 @@
   "version": "1.0.0-*",
   "description": "Build scripts for dotnet-cli",
   "buildOptions": {
-    "emitEntryPoint": true,
     "allowUnsafe": true,
     "compile": [
       "../Microsoft.DotNet.Cli.Build.Framework/**/*.cs",

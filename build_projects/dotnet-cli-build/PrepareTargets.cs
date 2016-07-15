@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -12,26 +15,8 @@ using static Microsoft.DotNet.Cli.Build.Utils;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class PrepareTargets : Task
+    public class PrepareTargets
     {
-        public override bool Execute()
-        {
-            BuildContext context = new BuildSetup("MSBuild").UseAllTargetsFromAssembly<PrepareTargets>().CreateBuildContext();
-            BuildTargetContext c = new BuildTargetContext(context, null, null);
-
-            return Prepare(c).Success;
-        }
-
-        [Target]
-        public static BuildTargetResult Prepare(BuildTargetContext c)
-        {
-            Init(c);
-            DownloadHostAndSharedFxArtifacts(c);
-            RestorePackages(c);
-            ZipTemplates(c);
-
-            return c.Success();
-        }
 
         // All major targets will depend on this in order to ensure variables are set up right if they are run independently
         public static BuildTargetResult Init(BuildTargetContext c)

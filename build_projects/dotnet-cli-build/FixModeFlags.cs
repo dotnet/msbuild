@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Runtime.InteropServices;
-using System.Net.Http;
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.DotNet.InternalAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
 
