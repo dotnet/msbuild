@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Microsoft.DotNet.Cli.Build
@@ -33,9 +34,27 @@ namespace Microsoft.DotNet.Cli.Build
             _blobContainer = GetDotnetBlobContainer(_connectionString);
         }
 
+        public AzurePublisher(string accountName, string accountKey)
+        {
+            _blobContainer = GetDotnetBlobContainer(accountName, accountKey);
+        }
+
         private CloudBlobContainer GetDotnetBlobContainer(string connectionString)
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
+            
+            return GetDotnetBlobContainer(storageAccount);
+        }
+
+        private CloudBlobContainer GetDotnetBlobContainer(string accountName, string accountKey)
+        {
+            var storageCredentials = new StorageCredentials(accountName, accountKey);
+            var storageAccount = new CloudStorageAccount(storageCredentials, true);
+            return GetDotnetBlobContainer(storageAccount);
+        }
+
+        private CloudBlobContainer GetDotnetBlobContainer(CloudStorageAccount storageAccount)
+        {
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             
             return blobClient.GetContainerReference(s_dotnetBlobContainerName);
@@ -71,6 +90,12 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Copy actual blob data
             target.StartCopyAsync(source).Wait();
+        }
+
+        public void SetBlobPropertiesBasedOnFileType(string path)
+        {
+            CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(path);
+            SetBlobPropertiesBasedOnFileType(blob);
         }
 
         private void SetBlobPropertiesBasedOnFileType(CloudBlockBlob blockBlob)

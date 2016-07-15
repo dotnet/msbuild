@@ -18,6 +18,7 @@
 
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <BuildToolsDir>$(RepoRoot)/build_tools</BuildToolsDir>
 
     <CoreSetupChannel>preview</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
@@ -46,32 +47,36 @@
     <Message Text="Dont remove this target" />
   </Target>
 
-  <Target Name="BuildDotnetCliBuildFramework" 
-          Inputs="@(DotnetCliBuildFrameworkInputs)" 
+  <Target Name="BuildDotnetCliBuildFramework"
+          Inputs="@(DotnetCliBuildFrameworkInputs)"
           Outputs="$(CLIBuildDll)"
           DependsOnTargets="MSBuildWorkaroundTarget">
     <PropertyGroup>
       <DotnetCliBuildDirectory>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
     </PropertyGroup>
 
+    <ItemGroup>
+      <DotnetSdkDirectories Include="$([System.IO.Directory]::GetDirectories(&quot;$(Stage0Path)/sdk&quot;))" />
+      <AzureStorageToCopy Include="@(DotnetSdkDirectories)">
+        <Source>$(DotnetCliBuildDirectory)/bin/Microsoft.WindowsAzure.Storage.dll</Source>
+        <Destination>%(Identity)/Microsoft.WindowsAzure.Storage.dll</Destination>
+      </AzureStorageToCopy>
+    </ItemGroup>
+
     <Exec Command="$(DotnetStage0) restore" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
 
-    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>    
+    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
+
+    <!-- This is a work around to issue https://github.com/Microsoft/msbuild/issues/658 -->
+    <Copy SourceFiles="%(AzureStorageToCopy.Source)"
+          DestinationFiles="%(AzureStorageToCopy.Destination)" />
   </Target>
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
-
-  <UsingTask TaskName="PublishTargets" AssemblyFile="$(CLIBuildDll)" />
-
-  <Target DependsOnTargets="BuildDotnetCliBuildFramework;GenerateVersionBadge" Name="Publish">
-    <PublishTargets />
-  </Target>
 
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Test.targets" /> 
-
-  <!-- This should be in the build/Microsoft.DotNet.Cli.Publish.targets -->
-  <Import Project="build/publish/Microsoft.DotNet.Cli.Badge.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Publish.targets" />
 </Project>

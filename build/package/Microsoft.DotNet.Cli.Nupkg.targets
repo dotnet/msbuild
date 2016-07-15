@@ -63,7 +63,7 @@
                 NoBuild="True"
                 Output="$(NupkgOutputDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)"
-                ToolPath="$(DotnetStage2)"
+                ToolPath="$(Stage2Directory)"
                 VersionSuffix="$(NupkgVersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
