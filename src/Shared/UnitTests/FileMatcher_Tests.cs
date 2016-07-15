@@ -548,6 +548,12 @@ namespace Microsoft.Build.UnitTests
             ValidateSplitFileSpec("f:\\dir?\\foo.cs", "f:\\", "dir?\\", "foo.cs");
             ValidateSplitFileSpec("dir?\\foo.cs", "", "dir?\\", "foo.cs");
             ValidateSplitFileSpec(@"**\test\**", "", @"**\test\**\", "*.*");
+            ValidateSplitFileSpec("bin\\**\\*.cs", "bin\\", "**\\", "*.cs");
+            ValidateSplitFileSpec("bin\\**\\*.*", "bin\\", "**\\", "*.*");
+            ValidateSplitFileSpec("bin\\**", "bin\\", "**\\", "*.*");
+            ValidateSplitFileSpec("bin\\**\\", "bin\\", "**\\", "");
+            ValidateSplitFileSpec("bin\\**\\*", "bin\\", "**\\", "*");
+
         }
 
         [Fact]
