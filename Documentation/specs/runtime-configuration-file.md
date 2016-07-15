@@ -36,7 +36,7 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
         "framework": {
             "name": "Microsoft.DotNetCore",
             "version": "1.0.1"
-        }
+        },
         
         "applyPatches": false
     }
