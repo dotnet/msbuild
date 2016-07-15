@@ -92,6 +92,12 @@ namespace Microsoft.DotNet.Cli.Build
             target.StartCopyAsync(source).Wait();
         }
 
+        public void SetBlobPropertiesBasedOnFileType(string path)
+        {
+            CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(path);
+            SetBlobPropertiesBasedOnFileType(blob);
+        }
+
         private void SetBlobPropertiesBasedOnFileType(CloudBlockBlob blockBlob)
         {
             if (Path.GetExtension(blockBlob.Uri.AbsolutePath.ToLower()) == ".svg")

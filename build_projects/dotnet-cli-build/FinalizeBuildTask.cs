@@ -30,7 +30,8 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string BranchName { get; set; }
 
-        private AzurePublisher AzurePublisherTool {
+        private AzurePublisher AzurePublisherTool
+        {
             get
             {
                 if(_azurePublisher == null)

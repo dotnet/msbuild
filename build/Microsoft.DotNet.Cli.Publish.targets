@@ -5,6 +5,7 @@
 
   <UsingTask TaskName="UploadToAzure" AssemblyFile="$(BuildToolsTaskDir)/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
   <UsingTask TaskName="FinalizeBuildTask" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="SetBlobPropertiesBasedOnFileTypeTask" AssemblyFile="$(CLIBuildDll)" />
 
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
@@ -96,6 +97,11 @@
       AccountKey="$(CloudDropAccessToken)"
       AccountName="$(CloudDropAccountName)"
       ContainerName="$(ContainerName)"
+      Items="@(CliVersionBadgeToUpload)" />
+
+    <SetBlobPropertiesBasedOnFileTypeTask
+      AccountKey="$(CloudDropAccessToken)"
+      AccountName="$(CloudDropAccountName)"
       Items="@(CliVersionBadgeToUpload)" />
   </Target>
 </Project>
