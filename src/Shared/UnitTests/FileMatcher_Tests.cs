@@ -553,6 +553,7 @@ namespace Microsoft.Build.UnitTests
             ValidateSplitFileSpec("bin\\**", "bin\\", "**\\", "*.*");
             ValidateSplitFileSpec("bin\\**\\", "bin\\", "**\\", "");
             ValidateSplitFileSpec("bin\\**\\*", "bin\\", "**\\", "*");
+            ValidateSplitFileSpec("**", "", "**\\", "*.*");
 
         }
 
@@ -1077,6 +1078,7 @@ namespace Microsoft.Build.UnitTests
             (
                 String.Empty, /* we don't need project directory as we use mock filesystem */
                 filespec,
+                null,
                 new FileMatcher.GetFileSystemEntries(mockFileSystem.GetAccessibleFileSystemEntries),
                 new DirectoryExists(mockFileSystem.DirectoryExists)
             );
