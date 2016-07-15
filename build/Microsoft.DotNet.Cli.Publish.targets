@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(ToolsDir)/PublishContent.targets" />
+  <Import Project="$(BuildToolsDir)/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Microsoft.DotNet.Cli.Badge.targets" />
 
   <UsingTask TaskName="UploadToAzure" AssemblyFile="$(BuildToolsTaskDir)/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
-  <UsingTask TaskName="FinalizeBuildTask" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="SetBlobPropertiesBasedOnFileTypeTask" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="FinalizeBuild" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="SetBlobPropertiesBasedOnFileType" AssemblyFile="$(CLIBuildDll)" />
 
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
-          DependsOnTargets="Prepare;
+          DependsOnTargets="Init;
                             Package;
                             PublishArtifacts;
-                            FinalizeBuild" />
+                            FinishBuild" />
 
-  <Target Name="PublishArtifacts" DependsOnTargets="SetupAzureBlobInformation;
-                                                    GenerateVersionBadge;
-                                                    GatherItemsForPattern;
-                                                    UploadToAzure;
-                                                    PublishDebFilesToDebianRepo;
-                                                    PublishCliVersionBadge" />
+  <!-- UploadToAzure target comes from Build Tools -->
+  <Target Name="PublishArtifacts" 
+          DependsOnTargets="SetupAzureBlobInformation;
+                            GenerateVersionBadge;
+                            GatherItemsForPattern;                            
+                            UploadToAzure;
+                            PublishDebFilesToDebianRepo;
+                            PublishCliVersionBadge" />
 
-  <Target Name="FinalizeBuild">
-    <FinalizeBuildTask AccountName="$(CloudDropAccountName)"
-                       AccountKey="$(CloudDropAccessToken)"
-                       NugetVersion="$(NugetVersion)"
-                       Channel="$(Channel)"
-                       CommitHash="$(CommitHash)"
-                       BranchName="$(BranchName)" />
+  <Target Name="FinishBuild">
+    <FinalizeBuild AccountName="$(CloudDropAccountName)"
+                   AccountKey="$(CloudDropAccessToken)"
+                   NugetVersion="$(NugetVersion)"
+                   Channel="$(Channel)"
+                   CommitHash="$(CommitHash)"
+                   BranchName="$(BranchName)" />
   </Target>
 
   <Target Name="SetupAzureBlobInformation">
@@ -56,14 +58,16 @@
 
   <Target Name="PublishDebFilesToDebianRepo" Condition=" '$(OSName)' == 'ubuntu' ">
     <Error Condition="'$(REPO_ID)' == ''" Text="REPO_ID must be set as an environment variable for debian publishing." />
+    <Error Condition="'$(REPO_USER)' == ''" Text="REPO_USER must be set as an environment variable for debian publishing." />
+    <Error Condition="'$(REPO_PASS)' == ''" Text="REPO_PASS must be set as an environment variable for debian publishing." />
+    <Error Condition="'$(REPO_SERVER)' == ''" Text="REPO_SERVER must be set as an environment variable for debian publishing." />
 
     <ItemGroup>
       <SdkInstallerFileItemGroup Include="$(SdkInstallerFile)" />
     </ItemGroup>
     <PropertyGroup>
-      <SdkDebianPackageName>dotnet-dev-$(NugetVersion)</SdkDebianPackageName>
       <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(NugetVersion)/%(SdkInstallerFileItemGroup.Filename)%(SdkInstallerFileItemGroup.Extension)</SdkDebianUploadUrl>
-      <DebianUploadJsonFile>$(PackageDirectory)/package_upload.json</DebianUploadJsonFile>
+      <DebianUploadJsonFile>$(SdkDebianIntermediateDirectory)/package_upload.json</DebianUploadJsonFile>
       <DebianRevisionNumber>1</DebianRevisionNumber>
 
       <DebianUploadJsonContent>
@@ -99,7 +103,7 @@
       ContainerName="$(ContainerName)"
       Items="@(CliVersionBadgeToUpload)" />
 
-    <SetBlobPropertiesBasedOnFileTypeTask
+    <SetBlobPropertiesBasedOnFileType
       AccountKey="$(CloudDropAccessToken)"
       AccountName="$(CloudDropAccountName)"
       Items="@(CliVersionBadgeToUpload)" />

@@ -18,7 +18,7 @@
 
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <ToolsDir>$(RepoRoot)/build_tools</ToolsDir>
+    <BuildToolsDir>$(RepoRoot)/build_tools</BuildToolsDir>
 
     <CoreSetupChannel>preview</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>

@@ -8,7 +8,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class SetBlobPropertiesBasedOnFileTypeTask : Task
+    public class SetBlobPropertiesBasedOnFileType : Task
     {
         private AzurePublisher _azurePublisher;
 

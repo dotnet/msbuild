@@ -8,7 +8,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class FinalizeBuildTask : Task
+    public class FinalizeBuild : Task
     {
         private AzurePublisher _azurePublisher;
 
@@ -45,12 +45,12 @@ namespace Microsoft.DotNet.Cli.Build
 
         public override bool Execute()
         {
-            FinalizeBuild();
+            DoFinalizeBuild();
 
             return true;
         }
 
-        private void FinalizeBuild()
+        private void DoFinalizeBuild()
         {
             if (CheckIfAllBuildsHavePublished())
             {
