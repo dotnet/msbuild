@@ -556,7 +556,7 @@ architecture="<auto>"
 debug_symbols=false
 dry_run=false
 no_path=false
-azure_feed="https://dotnetcli.blob.core.windows.net/dotnet"
+azure_feed="https://dotnetcli.azureedge.net/dotnet"
 verbose=false
 shared_runtime=false
 

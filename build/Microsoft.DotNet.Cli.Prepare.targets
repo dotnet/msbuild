@@ -114,7 +114,7 @@
 
   <Target Name="SetupDownloadHostAndSharedFxInputsOutputs" DependsOnTargets="Init">
     <PropertyGroup>
-      <CoreSetupBlobRootUrl>https://dotnetcli.blob.core.windows.net/dotnet/$(CoreSetupChannel)</CoreSetupBlobRootUrl>
+      <CoreSetupBlobRootUrl>https://dotnetcli.azureedge.net/dotnet/$(CoreSetupChannel)</CoreSetupBlobRootUrl>
       <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrl)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
       <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)/Installers</CoreSetupInstallerBlobRootUrl>
 
