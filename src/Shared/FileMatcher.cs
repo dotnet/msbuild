@@ -747,7 +747,8 @@ namespace Microsoft.Build.Shared
 
                         for (int i = 0; i < excludeNextSteps.Length; i++)
                         {
-                            if (excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir.Equals(subdir, StringComparison.Ordinal)))
+                            if (excludeNextSteps[i].Subdirs != null &&
+                                excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir.Equals(subdir, StringComparison.Ordinal)))
                             {
                                 GetFilesRecursionState thisExcludeStep = searchesToExclude[i];
                                 thisExcludeStep.BaseDirectory = subdir;
@@ -847,7 +848,8 @@ namespace Microsoft.Build.Shared
                 // Find the next directory piece.
                 string pattern = null;
 
-                if (recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch)
+                if (recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch &&
+                    recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch + s_directorySeparator)
                 {
                     int indexOfNextSlash = recursionState.RemainingWildcardDirectory.IndexOfAny(directorySeparatorCharacters);
                     ErrorUtilities.VerifyThrow(indexOfNextSlash != -1, "Slash should be guaranteed.");
@@ -1643,6 +1645,11 @@ namespace Microsoft.Build.Shared
                         searchesToExclude.Add(excludeState);
                     }
                 }
+            }
+
+            if (searchesToExclude != null && searchesToExclude.Count == 0)
+            {
+                searchesToExclude = null;
             }
 
             /*
