@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Globalization;
@@ -598,15 +599,30 @@ namespace Microsoft.Build.Shared
                 NeedsRecursion = needsRecursion;
             }
 
+            /// <summary>
+            /// The filespec.
+            /// </summary>
             public string Filespec { get; }
             public int ExtensionLengthToEnforce { get; }
+            /// <summary>
+            /// Wild-card matching.
+            /// </summary>
             public Regex RegexFileMatch { get; }
+            /// <summary>
+            /// If true, then recursion is required.
+            /// </summary>
             public bool NeedsRecursion { get; }
         }
 
         struct GetFilesRecursionState
         {
+            /// <summary>
+            /// The remaining, wildcard part of the directory.
+            /// </summary>
             public string RemainingWildcardDirectory;
+            /// <summary>
+            /// Data about a search that does not change as the search recursively traverses directories
+            /// </summary>
             public GetFilesSearchData SearchData;
         }
 
@@ -615,44 +631,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="listOfFiles">List of files that gets populated.</param>
         /// <param name="baseDirectory">The path to enumerate</param>
-        /// <param name="remainingWildcardDirectory">The remaining, wildcard part of the directory.</param>
-        /// <param name="filespec">The filespec.</param>
-        /// <param name="extensionLengthToEnforce"></param>
-        /// <param name="regexFileMatch">Wild-card matching.</param>
-        /// <param name="needsRecursion">If true, then recursion is required.</param>
+        /// <param name="recursionState">Information about the search</param>
         /// <param name="projectDirectory"></param>
         /// <param name="stripProjectDirectory"></param>
         /// <param name="getFileSystemEntries">Delegate.</param>
-        private static void GetFilesRecursive
-        (
-            System.Collections.IList listOfFiles,
-            string baseDirectory,
-            string remainingWildcardDirectory,
-            string filespec,                // can be null
-            int extensionLengthToEnforce,   // only relevant when filespec is not null
-            Regex regexFileMatch,           // can be null
-            bool needsRecursion,
-            string projectDirectory,
-            bool stripProjectDirectory,
-            GetFileSystemEntries getFileSystemEntries
-        )
-        {
-            ErrorUtilities.VerifyThrow((filespec == null) || (regexFileMatch == null),
-                "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
-
-            ErrorUtilities.VerifyThrow((filespec != null) || (regexFileMatch != null),
-                "Need either a file-spec or a regular expression to match files.");
-
-            ErrorUtilities.VerifyThrow(remainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
-
-            var searchData = new GetFilesSearchData(filespec, extensionLengthToEnforce, regexFileMatch, needsRecursion);
-            GetFilesRecursionState state = new GetFilesRecursionState();
-            state.SearchData = searchData;
-            state.RemainingWildcardDirectory = remainingWildcardDirectory;
-
-            GetFilesRecursive(listOfFiles, baseDirectory, state, projectDirectory, stripProjectDirectory, getFileSystemEntries);
-        }
-
+        /// <param name="searchesToExclude">Patterns to exclude from the results</param>
         private static void GetFilesRecursive
         (
             System.Collections.IList listOfFiles,
@@ -660,9 +643,42 @@ namespace Microsoft.Build.Shared
             GetFilesRecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
-            GetFileSystemEntries getFileSystemEntries
+            GetFileSystemEntries getFileSystemEntries,
+            IList<GetFilesRecursionState> searchesToExclude
         )
         {
+            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec== null) || (recursionState.SearchData.RegexFileMatch == null),
+                "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
+
+            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec != null) || (recursionState.SearchData.RegexFileMatch != null),
+                "Need either a file-spec or a regular expression to match files.");
+
+            ErrorUtilities.VerifyThrow(recursionState.RemainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
+
+            //  Determine if any of searchesToExclude is necessarily a superset of the results that will be returned.
+            //  This means all results will be excluded and we should bail out now.
+            if (searchesToExclude != null)
+            {
+                foreach (var searchToExclude in searchesToExclude)
+                {
+                    //  We can exclude all results in this folder if:
+                    if (
+                        //  We are matching files based on a filespec and not a regular expression
+                        searchToExclude.SearchData.Filespec != null &&
+                        //  The wildcard path portion of the excluded search matches the include search
+                        searchToExclude.RemainingWildcardDirectory == recursionState.RemainingWildcardDirectory &&
+                        //  The exclude search will match ALL filenames OR
+                        (searchToExclude.SearchData.Filespec == "*" || searchToExclude.SearchData.Filespec == "*.*" ||
+                            //  The exclude search filename pattern matches the include search's pattern
+                            (searchToExclude.SearchData.Filespec == recursionState.SearchData.Filespec &&
+                            searchToExclude.SearchData.ExtensionLengthToEnforce == recursionState.SearchData.ExtensionLengthToEnforce)))
+                    {
+                        //  We won't get any results from this search that we would end up keeping
+                        return;
+                    }
+                }
+            }
+
             GetFilesRecursionResult nextStep = GetFilesRecursiveStep(
                 baseDirectory,
                 recursionState,
@@ -670,11 +686,42 @@ namespace Microsoft.Build.Shared
                 stripProjectDirectory,
                 getFileSystemEntries);
 
+            GetFilesRecursionResult[] excludeNextSteps = null;
+            if (searchesToExclude != null)
+            {
+                excludeNextSteps = new GetFilesRecursionResult[searchesToExclude.Count];
+                for (int i = 0; i < searchesToExclude.Count; i++)
+                {
+                    excludeNextSteps[i] = GetFilesRecursiveStep(
+                        baseDirectory,
+                        searchesToExclude[i],
+                        projectDirectory,
+                        stripProjectDirectory,
+                        getFileSystemEntries);
+                }
+            }
+
             if (nextStep.Files != null)
             {
+                HashSet<string> filesToExclude = null;
+                if (excludeNextSteps != null)
+                {
+                    filesToExclude = new HashSet<string>();
+                    foreach (var excludeStep in excludeNextSteps)
+                    {
+                        foreach (var file in excludeStep.Files)
+                        {
+                            filesToExclude.Add(file);
+                        }
+                    }
+                }
+
                 foreach (var file in nextStep.Files)
                 {
-                    listOfFiles.Add(file);
+                    if (filesToExclude == null || !filesToExclude.Contains(file))
+                    {
+                        listOfFiles.Add(file);
+                    }
                 }
             }
 
@@ -687,9 +734,26 @@ namespace Microsoft.Build.Shared
 
                     newRecursionState.RemainingWildcardDirectory = nextStep.RemainingWildcardDirectory;
 
+                    List<GetFilesRecursionState> newSearchesToExclude = null;
+
+                    if (excludeNextSteps != null)
+                    {
+                        newSearchesToExclude = new List<GetFilesRecursionState>();
+
+                        for (int i = 0; i < excludeNextSteps.Length; i++)
+                        {
+                            if (excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir.Equals(subdir)))
+                            {
+                                GetFilesRecursionState thisExcludeStep = searchesToExclude[i];
+                                thisExcludeStep.RemainingWildcardDirectory = excludeNextSteps[i].RemainingWildcardDirectory;
+                                newSearchesToExclude.Add(thisExcludeStep);
+                            }
+                        }
+                    }
+
                     // We never want to strip the project directory from the leaves, because the current 
                     // process directory maybe different
-                    GetFilesRecursive(listOfFiles, subdir, newRecursionState, projectDirectory, stripProjectDirectory, getFileSystemEntries);
+                    GetFilesRecursive(listOfFiles, subdir, newRecursionState, projectDirectory, stripProjectDirectory, getFileSystemEntries, newSearchesToExclude);
                 }
             }
         }
@@ -1376,12 +1440,18 @@ namespace Microsoft.Build.Shared
              */
             try
             {
-                GetFilesRecursive(listOfFiles, fixedDirectoryPart, wildcardDirectoryPart,
+                var searchData = new GetFilesSearchData(
                     // if using the regular expression, ignore the file pattern
                     (matchWithRegex ? null : filenamePart), (needToEnforceExtensionLength ? extensionPart.Length : 0),
                     // if using the file pattern, ignore the regular expression
                     (matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null),
-                    needsRecursion, projectDirectoryUnescaped, stripProjectDirectory, getFileSystemEntries);
+                    needsRecursion);
+                GetFilesRecursionState state = new GetFilesRecursionState();
+                state.SearchData = searchData;
+                state.RemainingWildcardDirectory = wildcardDirectoryPart;
+
+                GetFilesRecursive(listOfFiles, fixedDirectoryPart, state,
+                   projectDirectoryUnescaped, stripProjectDirectory, getFileSystemEntries, null);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
