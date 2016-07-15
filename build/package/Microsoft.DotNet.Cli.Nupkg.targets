@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
-  <Target Name="SetupGenerateNugetPackagesInputsOutputs"
+  <Target Name="SetupProjectsToPack"
           DependsOnTargets="Init">
     <PropertyGroup>
       <NupkgVersionSuffix>$(CommitCount)</NupkgVersionSuffix>
@@ -47,10 +47,14 @@
         <ProjectName>Microsoft.Extensions.Testing.Abstractions</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
+    </ItemGroup>
+  </Target>
 
-      <ProjectPackTargetInputs Include="$(PackagingBuildBasePath)/src/%(ProjectsToPack.ProjectName)/**/netstandard*/%(ProjectName).dll" />
+  <Target Name="SetupGenerateNugetPackagesInputsOutputs"
+          DependsOnTargets="SetupProjectsToPack">
+    <ItemGroup>
+      <ProjectPackTargetInputs Include="$(PackagingBuildBasePath)/src/%(ProjectsToPack.ProjectName)/**/netstandard*/%(ProjectsToPack.ProjectName).dll" />
       <ProjectPackTargetOutputs Include="$(NupkgOutputDirectory)/%(ProjectsToPack.ProjectName).%(ProjectsToPack.Version).nupkg" />
-    
     </ItemGroup>
   </Target>
 
@@ -70,7 +74,7 @@
 
   <Target Name="BuildProjectsForNuGetPackages"
             DependsOnTargets="Init;
-                              SetupGenerateNugetPackagesInputsOutputs"            
+                              SetupProjectsToPack"            
             Condition=" '$(OS)' == 'Windows_NT' ">
         <MakeDir Directories="$(PackagingBuildBasePath)" />
 
