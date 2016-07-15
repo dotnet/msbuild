@@ -144,7 +144,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "compile", "compile", "{8E33
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{FF498306-2DE2-47F6-8C35-3CF0589CF2B8}"
 	ProjectSection(SolutionItems) = preProject
-		build\test\ProjectsToTest.props = build\test\ProjectsToTest.props
 		build\test\TestPackageProjects.props = build\test\TestPackageProjects.props
 	EndProjectSection
 EndProject

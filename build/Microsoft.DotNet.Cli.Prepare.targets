@@ -164,22 +164,30 @@
                     InputFile="%(_DownloadAndExtractItem.DownloadFileName)"
                     DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestintation)" />
   </Target>
-
-  <Target Name="SetupRestorePackagesInputsOutputs">
-    <ItemGroup>
-      <RestorePackagesInput Include="$(RepoRoot)/src/**/project.json" />
-      <RestorePackagesInput Include="$(RepoRoot)/tools/**/project.json" />
-    </ItemGroup>
-  </Target>
   
   <Target Name="RestorePackages"
           DependsOnTargets="SetupRestorePackagesInputsOutputs;Init"
           Inputs="@(RestorePackagesInput)"
           Outputs="@(RestorePackagesInput->'%(RelativeDir)/project.lock.json')">
 
+    <CallTarget Targets="CleanSrcToolsLockFiles" />
     <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
     <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
 
+  </Target>
+
+  <Target Name="CleanSrcToolsLockFiles" >
+    <ItemGroup>
+      <SrcToolsLockFiles Include="$(RepoRoot)/src/**/project.lock.json;$(RepoRoot)/tools/**/project.lock.json" />
+    </ItemGroup>
+    <Delete Files="@(SrcToolsLockFiles)" /> 
+  </Target>
+
+  <Target Name="SetupRestorePackagesInputsOutputs">
+    <ItemGroup>
+      <RestorePackagesInput Include="$(RepoRoot)/src/**/project.json" />
+      <RestorePackagesInput Include="$(RepoRoot)/tools/**/project.json" />
+    </ItemGroup>
   </Target>
 
   <Target Name="SetupZipTemplatesInputsOutputs">

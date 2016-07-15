@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetConfiguration()} {GetXml()} {GetNoTrait()}"; }
+            get { return $"{GetConfiguration()} {GetNoBuild()} {GetXml()} {GetNoTrait()}"; }
         }
 
         public string Configuration { get; set; }
@@ -20,6 +20,8 @@ namespace Microsoft.DotNet.Cli.Build
         public string Xml { get; set; }
 
         public string NoTrait { get; set; }
+
+        public bool NoBuild { get; set; }
 
         private string GetConfiguration()
         {
@@ -46,6 +48,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (!string.IsNullOrEmpty(Xml))
             {
                 return $"-xml {Xml}";
+            }
+
+            return null;
+        }
+
+        private string GetNoBuild()
+        {
+            if (NoBuild)
+            {
+                return "--no-build";
             }
 
             return null;
