@@ -64,18 +64,23 @@ namespace Microsoft.DotNet.Scripts
 
         private static IDependencyUpdater CreateProjectJsonUpdater()
         {
-            const string noUpdateFileName = ".noautoupdate";
-
-            IEnumerable<string> projectJsonFiles = Enumerable.Union(
-                Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
-                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.template", SearchOption.AllDirectories))
-                .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), noUpdateFileName)) &&
-                    !Path.GetDirectoryName(p).EndsWith("CSharp_Web", StringComparison.Ordinal));
+            IEnumerable<string> projectJsonFiles = GetProjectJsonsToUpdate();
 
             return new ProjectJsonUpdater(projectJsonFiles)
             {
                 SkipStableVersions = false
             };
+        }
+
+        private static IEnumerable<string> GetProjectJsonsToUpdate()
+        {
+            const string noUpdateFileName = ".noautoupdate";
+
+            return Enumerable.Union(
+                Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
+                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.template", SearchOption.AllDirectories))
+                .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), noUpdateFileName)) &&
+                    !Path.GetDirectoryName(p).EndsWith("CSharp_Web", StringComparison.Ordinal));
         }
 
         private static IDependencyUpdater CreateRegexUpdater(string repoRelativePath, string dependencyPropertyName, string packageId)

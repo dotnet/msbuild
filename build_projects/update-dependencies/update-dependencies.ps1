@@ -34,9 +34,9 @@ if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
-# Restore the build_projects
-Write-Host "Restoring Build projects..."
-pushd "$RepoRoot\build_projects"
+# Restore the app
+Write-Host "Restoring update-dependencies..."
+pushd "$AppPath"
 dotnet restore
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 popd
