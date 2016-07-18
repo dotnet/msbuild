@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.DotNet.Cli.Build.Framework;
 
 namespace Microsoft.DotNet.Scripts
 {
@@ -18,10 +17,10 @@ namespace Microsoft.DotNet.Scripts
     ///
     /// The following Environment Variables can optionally be specified:
     /// 
-    /// COREFX_VERSION_URL - The Url to get the current CoreFx package versions. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.0.0/Latest_Packages.txt")
-    /// CORECLR_VERSION_URL - The Url to get the current CoreCLR version. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.0.0/Latest_Packages.txt")
-    /// ROSLYN_VERSION_URL - The Url to get the current Roslyn version. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/roslyn/netcore1.0/Latest_Packages.txt")
-    /// CORESETUP_VERSION_URL - The Url to get the current dotnet/core-setup package versions. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/release/1.0.0/Latest_Packages.txt")
+    /// COREFX_VERSION_URL - The Url to get the current CoreFx package versions. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.0.0")
+    /// CORECLR_VERSION_URL - The Url to get the current CoreCLR version. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.0.0")
+    /// ROSLYN_VERSION_URL - The Url to get the current Roslyn version. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/roslyn/netcore1.0")
+    /// CORESETUP_VERSION_URL - The Url to get the current dotnet/core-setup package versions. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/release/1.0.0")
     /// GITHUB_ORIGIN_OWNER - The owner of the GitHub fork to push the commit and create the PR from. (ex. "dotnet-bot")
     /// GITHUB_UPSTREAM_OWNER - The owner of the GitHub base repo to create the PR to. (ex. "dotnet")
     /// GITHUB_PROJECT - The repo name under the ORIGIN and UPSTREAM owners. (ex. "cli")
@@ -36,11 +35,10 @@ namespace Microsoft.DotNet.Scripts
         private Lazy<string> _email = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_EMAIL"));
         private Lazy<string> _password = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PASSWORD"));
         
-        private Lazy<string> _coreFxVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("COREFX_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.0.0/Latest_Packages.txt"));
-        private Lazy<string> _coreClrVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("CORECLR_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.0.0/Latest_Packages.txt"));
-        private Lazy<string> _roslynVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("ROSLYN_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/roslyn/netcore1.0/Latest_Packages.txt"));
-        private Lazy<string> _coreSetupVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/release/1.0.0/Latest_Packages.txt"));
-        private Lazy<string> _gitHubOriginOwner;
+        private Lazy<string> _coreFxVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("COREFX_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.0.0"));
+        private Lazy<string> _coreClrVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("CORECLR_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.0.0"));
+        private Lazy<string> _roslynVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("ROSLYN_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/roslyn/netcore1.0"));
+        private Lazy<string> _coreSetupVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/release/1.0.0"));
         private Lazy<string> _gitHubUpstreamOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"));
         private Lazy<string> _gitHubProject = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PROJECT", "cli"));
         private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", "rel/1.0.0"));
@@ -50,7 +48,6 @@ namespace Microsoft.DotNet.Scripts
 
         private Config()
         {
-            _gitHubOriginOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_ORIGIN_OWNER", UserName));
         }
 
         public string UserName => _userName.Value;
@@ -60,7 +57,6 @@ namespace Microsoft.DotNet.Scripts
         public string CoreClrVersionUrl => _coreClrVersionUrl.Value;
         public string RoslynVersionUrl => _roslynVersionUrl.Value;
         public string CoreSetupVersionUrl => _coreSetupVersionUrl.Value;
-        public string GitHubOriginOwner => _gitHubOriginOwner.Value;
         public string GitHubUpstreamOwner => _gitHubUpstreamOwner.Value;
         public string GitHubProject => _gitHubProject.Value;
         public string GitHubUpstreamBranch => _gitHubUpstreamBranch.Value;
@@ -76,7 +72,7 @@ namespace Microsoft.DotNet.Scripts
 
             if (value == null)
             {
-                throw new BuildFailureException($"Can't find environment variable '{name}'.");
+                throw new InvalidOperationException($"Can't find environment variable '{name}'.");
             }
 
             return value;

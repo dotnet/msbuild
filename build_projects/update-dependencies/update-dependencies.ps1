@@ -4,15 +4,13 @@
 #
 
 param(
-    [string[]]$Targets=@("Default"),
     [switch]$Help)
 
 if($Help)
 {
-    Write-Host "Usage: .\update-dependencies.ps1 [-Targets <TARGETS...>]"
+    Write-Host "Usage: .\update-dependencies.ps1"
     Write-Host ""
     Write-Host "Options:"
-    Write-Host "  -Targets <TARGETS...>              Comma separated build targets to run (UpdateFiles, PushPR; Default is everything)"
     Write-Host "  -Help                              Display this help message"
     exit 0
 }
@@ -36,9 +34,9 @@ if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
-# Restore the build_projects
-Write-Host "Restoring Build projects..."
-pushd "$RepoRoot\build_projects"
+# Restore the app
+Write-Host "Restoring update-dependencies..."
+pushd "$AppPath"
 dotnet restore
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 popd
@@ -51,5 +49,5 @@ if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
 # Run the app
 Write-Host "Invoking App $AppPath..."
 Write-Host " Configuration: $env:CONFIGURATION"
-& "$AppPath\bin\update-dependencies.exe" @Targets
+& "$AppPath\bin\update-dependencies.exe"
 if($LASTEXITCODE -ne 0) { throw "Build failed" }
