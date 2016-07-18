@@ -24,8 +24,6 @@ namespace Microsoft.DotNet.Tools.Test
                     GetCommandArgs(projectContext, dotnetTestParams),
                     projectContext.TargetFramework,
                     dotnetTestParams.Config)
-                .ForwardStdErr()
-                .ForwardStdOut()
                 .Execute()
                 .ExitCode;
         }

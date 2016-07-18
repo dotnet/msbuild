@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Tools.New
             app.HelpOption("-h|--help");
 
             var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", Templates = new[] { "Console", "Web", "Lib", "xunittest" } };
-            var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", Templates = new[] { "Console" } };
+            var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", Templates = new[] { "Console", "Lib" } };
 
             var languages = new[] { csharp, fsharp };
 
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Tools.New
                 if (templateName == null)
                 {
                     Reporter.Error.WriteLine($"Unrecognized type: {typeValue}".Red());
-                    Reporter.Error.WriteLine($"Avaiable types for {language.Name} :".Red());
+                    Reporter.Error.WriteLine($"Available types for {language.Name} :".Red());
                     foreach (var t in language.Templates)
                     {
                         Reporter.Error.WriteLine($"- {t}".Red());

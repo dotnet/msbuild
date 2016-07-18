@@ -156,12 +156,9 @@ namespace Microsoft.DotNet.Cli
             else
             {
                 CommandResult result = Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
-                    .ForwardStdErr()
-                    .ForwardStdOut()
                     .Execute();
                 exitCode = result.ExitCode;
             }
-
 
             return exitCode;
 

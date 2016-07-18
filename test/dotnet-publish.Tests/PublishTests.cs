@@ -128,6 +128,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
 
             publishCommand.Execute().Should().Pass();
             publishCommand.GetOutputDirectory().Should().HaveFile("testpublishfile.txt");
+            publishCommand.GetOutputDirectory().Should().HaveFile("publishfiles/anotherpublishfile.txt");
         }
 
         [Fact]
