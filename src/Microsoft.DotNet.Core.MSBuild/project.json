@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0-preview3-*",
+  "packOptions": {
+    "files": {
+      "include": [
+        "build/**/*",
+        "../../artifacts/bin/src/Microsoft.DotNet.Core.Build.Tasks/bin/Debug/netstandard1.6/*.dll",
+        "../../artifacts/bin/src/Microsoft.DotNet.Core.Build.Tasks/bin/Debug/net451/*.dll"
+      ],
+      "mappings": {
+        "lib/netstandard1.6/": "../../artifacts/bin/src/Microsoft.DotNet.Core.Build.Tasks/bin/Debug/netstandard1.6/*.dll",
+        "lib/net451/": "../../artifacts/bin/src/Microsoft.DotNet.Core.Build.Tasks/bin/Debug/net451/*.dll"
+      }
+    }
+  },
+  "frameworks": {
+    "netstandard1.0": {}
+  }
+}

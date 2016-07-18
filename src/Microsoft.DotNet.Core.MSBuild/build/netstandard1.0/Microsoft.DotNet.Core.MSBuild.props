@@ -1,0 +1,87 @@
+<!--<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <PlatformTarget Condition=" '$(PlatformTarget)' == '' ">x64</PlatformTarget>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <TargetFrameworkIdentifier>NETCoreApp</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <OutputPath>bin\$(Configuration)\netcoreapp1.0</OutputPath>
+    <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NoStdLib>true</NoStdLib>
+    <NoLogo>true</NoLogo> -->
+<!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
+<!--
+    <NuGetTargetMoniker>.NETCoreApp,Version=v1.0</NuGetTargetMoniker>
+    -->
+<!-- Temp Hack: Being passed through from cli, where should this come from? -->
+<!--
+    <BaseNuGetRuntimeIdentifier Condition=" '$(BaseNuGetRuntimeIdentifier)' == '' ">win7</BaseNuGetRuntimeIdentifier>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+
+
+  </PropertyGroup>
+
+</Project>-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <!-- User-facing configuration-agnostic defaults -->
+  <PropertyGroup>
+    <Configuration>Debug</Configuration>
+    <Platform>AnyCPU</Platform>
+
+    <FileAlignment>512</FileAlignment>
+    <GlobalExclude>bin\**;obj\**;</GlobalExclude>
+  </PropertyGroup>
+
+  <!-- User-facing configuration-specific defaults -->
+  <PropertyGroup>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>$(NoWarn);1701</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoStdLib>true</NoStdLib>
+    <!-- TODO: Need to figure out runtimes -->
+
+    <!-- TODO: Below are hacks eerhardt made on top of davkean's .props file -->
+    
+    <!-- Temp Hack: davkean had this, but that casues all references not to be copied to output dir: 
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
+         This will be set to false during "build", but set to true during "publish"
+    -->
+    <!--Setting PlatformTarget is needed when CopyNuGetImplementations is left on, or else you get 'Your project.json doesn't list 'win10' as a targeted runtime. You should add '"win10": { }' inside your "runtimes" section in your project.json, and then re-run NuGet restore' errors -->
+    <PlatformTarget>x64</PlatformTarget>
+
+    <!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
+    <NoLogo>true</NoLogo>
+
+    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
+    <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
+  </PropertyGroup>
+
+</Project>

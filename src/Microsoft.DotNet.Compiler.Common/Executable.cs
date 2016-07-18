@@ -97,13 +97,12 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         {   
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
-            var emitEntryPoint = _compilerOptions.EmitEntryPoint ?? false;
+            var isRunnable = _compilerOptions.EmitEntryPoint ?? _context.ProjectFile.OverrideIsRunnable;
 
-            if (emitEntryPoint && !_context.IsPortable)
+            if (isRunnable && !_context.IsPortable)
             {
-                // TODO: Pick a host based on the RID
                 VerifyCoreClrPresenceInPackageGraph();
-                CoreHost.CopyTo(_runtimeOutputPath, _compilerOptions.OutputName + Constants.ExeSuffix);
+                RenamePublishedHost(_context, _runtimeOutputPath, _compilerOptions);
             }
         }
 
@@ -332,6 +331,60 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
 
             exporter.GetAllExports().GenerateBindingRedirects(configFiles);
+        }
+
+        private static int RenamePublishedHost(ProjectContext context, string outputPath, CommonCompilerOptions compilationOptions)
+        {
+            if (context.TargetFramework.IsDesktop())
+            {
+                return 0;
+            }
+
+            var publishedHostFile = ResolvePublishedHostFile(outputPath);
+            if (publishedHostFile == null)
+            {
+                Reporter.Output.WriteLine($"publish: warning: host executable not available in dependencies, using host for current platform");
+                // TODO should this be an error?
+
+                CoreHost.CopyTo(outputPath, compilationOptions.OutputName + Constants.ExeSuffix);
+                return 0;
+            }
+
+            var publishedHostExtension = Path.GetExtension(publishedHostFile);
+            var renamedHostName = compilationOptions.OutputName + publishedHostExtension;
+            var renamedHostFile = Path.Combine(outputPath, renamedHostName);
+
+            try
+            {
+                Reporter.Verbose.WriteLine($"publish: renaming published host {publishedHostFile} to {renamedHostFile}");
+                File.Copy(publishedHostFile, renamedHostFile, true);
+                File.Delete(publishedHostFile);
+            }
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine($"publish: Failed to rename {publishedHostFile} to {renamedHostFile}: {e.Message}");
+                return 1;
+            }
+
+            return 0;
+        }
+
+        private static string ResolvePublishedHostFile(string outputPath)
+        {
+            var tryExtensions = new string[] { "", ".exe" };
+
+            foreach (var extension in tryExtensions)
+            {
+                var hostFile = Path.Combine(outputPath, Constants.PublishedHostExecutableName + extension);
+                if (File.Exists(hostFile))
+                {
+                    Reporter.Verbose.WriteLine($"resolved published host: {hostFile}");
+                    return hostFile;
+                }
+            }
+
+            Reporter.Verbose.WriteLine($"failed to resolve published host in: {outputPath}");
+            return null;
         }
     }
 }

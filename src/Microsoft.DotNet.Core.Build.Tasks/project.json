@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0-preview3-*",
+  "buildOptions": {
+    "keyFile": "../../tools/Key.snk",
+    "warningsAsErrors": true
+  },
+  "dependencies": {
+    "Microsoft.DotNet.Compiler.Common": {
+      "target": "project"
+    }
+  },
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "Microsoft.Build.Utilities.v4.0": {
+          "type": "build"
+        },
+        "Microsoft.Build.Framework": {
+          "type": "build"
+        }
+      }
+    },
+    "netstandard1.6": {
+      "imports": [
+        "portable-net45+wp80+win8+wpa81+dnxcore50"
+      ],
+      "dependencies": {
+        "Microsoft.Build.Framework": "0.1.0-preview-00024-160610",
+        "Microsoft.Build.Tasks.Core": "0.1.0-preview-00024-160610",
+        "Microsoft.Build.Utilities.Core": "0.1.0-preview-00024-160610"
+      }
+    }
+  }
+}
