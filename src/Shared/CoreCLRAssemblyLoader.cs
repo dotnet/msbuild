@@ -19,8 +19,9 @@ namespace Microsoft.Build.Shared
     {
         private readonly Dictionary<string, Assembly> _pathsToAssemblies = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Assembly> _namesToAssemblies = new Dictionary<string, Assembly>();
-        //private readonly List<string> _dependencyPaths = new List<string>();
+        private readonly List<string> _dependencyPaths = new List<string>();
         private readonly object _guard = new object();
+        private static readonly string[] _extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
 
         /// <summary>
         /// Creates a new instance of <see cref="CoreClrAssemblyLoader" />,
@@ -32,6 +33,19 @@ namespace Microsoft.Build.Shared
         {
             var assemblyLoader = new CoreClrAssemblyLoader();
             return assemblyLoader;
+        }
+
+        public void AddDependencyLocation(string fullPath)
+        {
+            if (fullPath == null)
+            {
+                throw new ArgumentNullException(nameof(fullPath));
+            }
+
+            lock (_guard)
+            {
+                _dependencyPaths.Add(fullPath);
+            }
         }
 
         public Assembly LoadFromPath(string fullPath)
@@ -97,6 +111,21 @@ namespace Microsoft.Build.Shared
                     return assembly;
                 }
 
+                foreach (var dependencyPath in _dependencyPaths)
+                {
+                    foreach (var extension in _extensions)
+                    {
+                        var candidatePath = Path.Combine(dependencyPath, $"{assemblyName.Name}.{extension}");
+                        if (IsAssemblyAlreadyLoaded(candidatePath) ||
+                            !File.Exists(candidatePath))
+                        {
+                            continue;
+                        }
+
+                        return LoadAndCache(candidatePath);
+                    }
+                }
+
                 return null;
             }
         }
@@ -113,6 +142,11 @@ namespace Microsoft.Build.Shared
             _namesToAssemblies[name] = assembly;
 
             return assembly;
+        }
+
+        private bool IsAssemblyAlreadyLoaded(string path)
+        {
+            return _pathsToAssemblies.ContainsKey(path);
         }
     }
 }
