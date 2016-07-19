@@ -13,7 +13,6 @@ namespace Microsoft.DotNet.Cli.Build
             var result = Command.Create("yum", "list", "installed", packageName)
                 .CaptureStdOut()
                 .CaptureStdErr()
-                .QuietBuildReporter()
                 .Execute();
 
             return result.ExitCode == 0;

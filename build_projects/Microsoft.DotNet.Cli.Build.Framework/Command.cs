@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
             var exitCode = _process.ExitCode;
 
-            ReportExecEnd(exitCode);
+            ReportExecEnd(exitCode); 
 
             return new CommandResult(
                 _process.StartInfo,
@@ -236,36 +236,6 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             ThrowIfRunning();
             _process.StartInfo.RedirectStandardError = true;
             _stdErrCapture = new StringWriter();
-            return this;
-        }
-
-        public Command ForwardStdOut(TextWriter to = null)
-        {
-            ThrowIfRunning();
-            _process.StartInfo.RedirectStandardOutput = true;
-            if (to == null)
-            {
-                _stdOutForward = Reporter.Output.WriteLine;
-            }
-            else
-            {
-                _stdOutForward = to.WriteLine;
-            }
-            return this;
-        }
-
-        public Command ForwardStdErr(TextWriter to = null)
-        {
-            ThrowIfRunning();
-            _process.StartInfo.RedirectStandardError = true;
-            if (to == null)
-            {
-                _stdErrForward = Reporter.Error.WriteLine;
-            }
-            else
-            {
-                _stdErrForward = to.WriteLine;
-            }
             return this;
         }
 
@@ -307,28 +277,25 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             return prefix + " " + info.Arguments;
         }
 
-        private void ReportExecBegin()
-        {
-            if (!_quietBuildReporter)
-            {
-                BuildReporter.BeginSection("EXEC", FormatProcessInfo(_process.StartInfo, includeWorkingDirectory: false));
-            }
-        }
-
-        private void ReportExecEnd(int exitCode)
-        {
-            if (!_quietBuildReporter)
-            {
-                bool success = exitCode == 0;
-
-                var message = $"{FormatProcessInfo(_process.StartInfo, includeWorkingDirectory: !success)} exited with {exitCode}";
-
-                BuildReporter.EndSection(
-                    "EXEC",
-                    success ? message.Green() : message.Red().Bold(),
-                    success);
-            }
-        }
+        private void ReportExecBegin() 
+        { 
+            if (!_quietBuildReporter) 
+            { 
+                Console.WriteLine($"[> EXEC] {FormatProcessInfo(_process.StartInfo, includeWorkingDirectory: false)}"); 
+            } 
+        } 
+ 
+        private void ReportExecEnd(int exitCode) 
+        { 
+            if (!_quietBuildReporter) 
+            { 
+                bool success = exitCode == 0; 
+ 
+                var message = $"{FormatProcessInfo(_process.StartInfo, includeWorkingDirectory: !success)} exited with {exitCode}"; 
+ 
+                Console.WriteLine("[< EXEC] {message}"); 
+            } 
+        } 
 
         private void ThrowIfRunning([CallerMemberName] string memberName = null)
         {

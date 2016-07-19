@@ -102,22 +102,5 @@ namespace Microsoft.DotNet.Cli.Build
                 }
             }
         }
-
-        public static void CleanBinObj(BuildTargetContext c, string dir)
-        {
-            dir = dir ?? c.BuildContext.BuildDirectory;
-            foreach(var candidate in Directory.EnumerateDirectories(dir))
-            {
-                if (string.Equals(Path.GetFileName(candidate), "bin") ||
-                    string.Equals(Path.GetFileName(candidate), "obj"))
-                {
-                    Utils.DeleteDirectory(candidate);
-                }
-                else
-                {
-                    CleanBinObj(c, candidate);
-                }
-            }
-        }
     }
 }

@@ -14,113 +14,96 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public override bool Execute()
         {
-            Run(s => Log.LogMessage(s));
-
-            return true;
+            return CheckCoreclrPlatformDependencies() &&
+                   CheckInstallerBuildPlatformDependencies() && 
+                   LocateStage0();
         }
 
-        public static void Run(Action<string> logInfo)
+        private bool CheckCoreclrPlatformDependencies()
         {
-            CheckCoreclrPlatformDependencies();
-            CheckInstallerBuildPlatformDependencies();
-
-            LocateStage0(logInfo);
+            return CheckUbuntuCoreclrAndCoreFxDependencies() &&
+                   CheckCentOSCoreclrAndCoreFxDependencies();
         }
 
-        private static void CheckCoreclrPlatformDependencies()
+        private bool CheckInstallerBuildPlatformDependencies()
         {
-            CheckUbuntuCoreclrAndCoreFxDependencies();
-            CheckCentOSCoreclrAndCoreFxDependencies();
+            return CheckUbuntuDebianPackageBuildDependencies();
         }
 
-        private static void CheckInstallerBuildPlatformDependencies()
+        private bool CheckUbuntuCoreclrAndCoreFxDependencies()
         {
-            CheckUbuntuDebianPackageBuildDependencies();
-        }
+            bool isSuccessful = true;
 
-        private static void CheckUbuntuCoreclrAndCoreFxDependencies()
-        {
             if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu, "14.04"))
             {
-                var errorMessageBuilder = new StringBuilder();
                 var stage0 = DotNetCli.Stage0.BinPath;
 
                 foreach (var package in PackageDependencies.UbuntuCoreclrAndCoreFxDependencies)
                 {
                     if (!AptDependencyUtility.PackageIsInstalled(package))
                     {
-                        errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
-                        errorMessageBuilder.Append(Environment.NewLine);
-                        errorMessageBuilder.Append($"-> install with apt-get install {package}");
-                        errorMessageBuilder.Append(Environment.NewLine);
+                        isSuccessful = false;
+
+                        Log.LogError($"Coreclr package dependency {package} missing. Install with `apt-get install {package}`");
                     }
                 }
-
-                if (errorMessageBuilder.Length > 0)
-                {
-                    throw new BuildFailureException(errorMessageBuilder.ToString());
-                }
             }
+
+            return isSuccessful;
         }
 
-        private static void CheckCentOSCoreclrAndCoreFxDependencies()
+        private bool CheckCentOSCoreclrAndCoreFxDependencies()
         {
+            var isSuccessful = true; 
+
             if (CurrentPlatform.IsPlatform(BuildPlatform.CentOS))
             {
-                var errorMessageBuilder = new StringBuilder();
-
                 foreach (var package in PackageDependencies.CentosCoreclrAndCoreFxDependencies)
                 {
                     if (!YumDependencyUtility.PackageIsInstalled(package))
                     {
-                        errorMessageBuilder.Append($"Error: Coreclr package dependency {package} missing.");
-                        errorMessageBuilder.Append(Environment.NewLine);
-                        errorMessageBuilder.Append($"-> install with yum install {package}");
-                        errorMessageBuilder.Append(Environment.NewLine);
+                        isSuccessful = false;
+
+                        Log.LogError($"Coreclr package dependency {package} missing. Install with yum install {package}");
                     }
                 }
-
-                if (errorMessageBuilder.Length > 0)
-                {
-                    throw new BuildFailureException(errorMessageBuilder.ToString());
-                }
             }
+
+            return isSuccessful;
         }
 
-        private static void CheckUbuntuDebianPackageBuildDependencies()
+        private bool CheckUbuntuDebianPackageBuildDependencies()
         {
+            var isSuccessful = true;
+
             if (CurrentPlatform.IsPlatform(BuildPlatform.Ubuntu, "14.04"))
             {
-                var messageBuilder = new StringBuilder();
                 var aptDependencyUtility = new AptDependencyUtility();
-
 
                 foreach (var package in PackageDependencies.DebianPackageBuildDependencies)
                 {
                     if (!AptDependencyUtility.PackageIsInstalled(package))
                     {
-                        messageBuilder.Append($"Error: Debian package build dependency {package} missing.");
-                        messageBuilder.Append(Environment.NewLine);
-                        messageBuilder.Append($"-> install with apt-get install {package}");
-                        messageBuilder.Append(Environment.NewLine);
+                        isSuccessful = false;
+
+                        Log.LogError($"Debian package build dependency {package} missing. Install with apt-get install {package}");
                     }
                 }
-
-                if (messageBuilder.Length > 0)
-                {
-                    throw new BuildFailureException(messageBuilder.ToString());
-                }
             }
+
+            return isSuccessful;
         }
 
-        private static void LocateStage0(Action<string> logInfo)
+        private bool LocateStage0()
         {
             // We should have been run in the repo root, so locate the stage 0 relative to current directory
             var stage0 = DotNetCli.Stage0.BinPath;
 
             if (!Directory.Exists(stage0))
             {
-                throw new BuildFailureException($"Stage 0 directory does not exist: {stage0}");
+                Log.LogError($"Stage 0 directory does not exist: {stage0}");
+
+                return false;
             }
 
             // Identify the version
@@ -128,11 +111,16 @@ namespace Microsoft.DotNet.Cli.Build
 
             if (string.IsNullOrEmpty(versionFile))
             {
-                throw new Exception($"'.version' file not found in '{stage0}' folder");
+                Log.LogError($"'.version' file not found in '{stage0}' folder");
+
+                return false;
             }
 
             var version = File.ReadAllLines(versionFile);
-            logInfo($"Using Stage 0 Version: {version[1]}");
+            
+            Log.LogMessage($"Using Stage 0 Version: {version[1]}");
+
+            return true;
         }
     }
 }

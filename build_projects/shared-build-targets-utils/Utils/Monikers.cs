@@ -15,22 +15,6 @@ namespace Microsoft.DotNet.Cli.Build
         public const string SharedHostBrandName = "Microsoft .NET Core 1.0.0 - Host";
         public const string HostFxrBrandName = "Microsoft .NET Core 1.0.0 - Host FX Resolver";
 
-        public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix, string version)
-        {
-            string rid = RuntimeEnvironment.GetRuntimeIdentifier();
-
-            if (rid == "ubuntu.16.04-x64" || rid == "fedora.23-x64" || rid == "opensuse.13.2-x64")
-            {
-                return $"{artifactPrefix}-{rid}.{version}";
-            }
-            else
-            {
-                string osname = GetOSShortName();
-                var arch = CurrentArchitecture.Current.ToString();
-                return $"{artifactPrefix}-{osname}-{arch}.{version}";
-            }
-        }
-
         public static string GetBadgeMoniker()
         {
             switch (RuntimeEnvironment.GetRuntimeIdentifier())
@@ -55,12 +39,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             return $"dotnet-sharedframework-{SharedFrameworkName}-{sharedFrameworkNugetVersion}".ToLower();
         }
-
-        public static string GetDebianSharedHostPackageName(BuildTargetContext c)
-        {
-            return $"dotnet-host".ToLower();
-        }
-
+        
         public static string GetOSShortName()
         {
             string osname = "";

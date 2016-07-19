@@ -13,11 +13,11 @@
     <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
 
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
-    <CLIBuildFileName>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
-    <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
 
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <CLIBuildFileName>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
+    <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
     <BuildToolsDir>$(RepoRoot)/build_tools</BuildToolsDir>
 
     <CoreSetupChannel>preview</CoreSetupChannel>
@@ -33,6 +33,8 @@
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
     <DotnetStage0>$(Stage0Path)/dotnet$(ExeExtension)</DotnetStage0>
+
+    <DotnetCliBuildDirectory>$(RepoRoot)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,10 +52,8 @@
   <Target Name="BuildDotnetCliBuildFramework"
           Inputs="@(DotnetCliBuildFrameworkInputs)"
           Outputs="$(CLIBuildDll)"
-          DependsOnTargets="MSBuildWorkaroundTarget">
-    <PropertyGroup>
-      <DotnetCliBuildDirectory>$(MSBuildThisFileDirectory)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
-    </PropertyGroup>
+          DependsOnTargets="MSBuildWorkaroundTarget;
+                            RestoreDotnetCliBuildFramework">
 
     <ItemGroup>
       <DotnetSdkDirectories Include="$([System.IO.Directory]::GetDirectories(&quot;$(Stage0Path)/sdk&quot;))" />
@@ -63,13 +63,18 @@
       </AzureStorageToCopy>
     </ItemGroup>
 
-    <Exec Command="$(DotnetStage0) restore" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
-
     <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
 
     <!-- This is a work around to issue https://github.com/Microsoft/msbuild/issues/658 -->
     <Copy SourceFiles="%(AzureStorageToCopy.Source)"
           DestinationFiles="%(AzureStorageToCopy.Destination)" />
+  </Target>
+
+  <Target Name="RestoreDotnetCliBuildFramework"
+          Inputs="$(DotnetCliBuildDirectory)/project.json"
+          Outputs="$(DotnetCliBuildDirectory)/project.lock.json">
+
+    <Exec Command="$(DotnetStage0) restore" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
