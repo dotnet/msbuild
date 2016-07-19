@@ -1415,7 +1415,9 @@ namespace System.Deployment.Internal.CodeSigning
 
             // Add an enveloped and an Exc-C14N transform.
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
-            reference.AddTransform(new XmlLicenseTransform());
+#if (false) // BUGBUG: LTA transform complaining about issuer node not found.
+            reference.AddTransform(new XmlLicenseTransform()); 
+#endif
             reference.AddTransform(new XmlDsigExcC14NTransform());
 
             // Add the reference.
