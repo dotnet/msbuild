@@ -269,6 +269,11 @@
         <target state="translated">このコレクションは読み取り専用です。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
+        <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
+        <target state="new">MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</target>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
