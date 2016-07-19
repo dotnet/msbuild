@@ -193,6 +193,10 @@
       <LogicalName>MSBuild.Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <!-- Content Files -->
+    <Content Include="MSBuild.rsp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <!-- File for Assemblies we depend on -->
