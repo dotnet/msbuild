@@ -3078,7 +3078,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// A whole bunch error check tests
         /// </summary>
-        [Fact(Skip = "Flaky test")]
+        [Fact]
         public void Medley()
         {
             // Make absolutely sure that the static method cache hasn't been polluted by the other tests.  
@@ -3154,7 +3154,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {"$(Reg:AAA)", ""}
                                    };
 
-            string[] errorTests = {
+            var errorTests = new List<string>{
             "$(input[)",
             "$(input.ToString()])",
             "$(input.ToString()[)",
@@ -3221,7 +3221,6 @@ $(
                 "$(e`.Length)",
                 "$([System.IO.Path]Combine::Combine(`a`,`b`))",
                 "$([System.IO.Path]::Combine((`a`,`b`))",
-                "$([System.IO.Path]::Combine(`|`,`b`))",
                 "$([System.IO.Path]Combine(::Combine(`a`,`b`))",
                 "$([System.IO.Path]Combine(`::Combine(`a`,`b`)`, `b`)`)",
                 "$([System.IO.Path]::`Combine(`a`, `b`)`)",
@@ -3280,11 +3279,20 @@ $(
                 "$(e.Substring($([System.IO.Path]::Combine(`a`, `b`))))",
                 "$([]::())",
                 "$((((",
+#if FEATURE_WIN32_REGISTRY
+                // If no registry, this gets expanded to the empty string
                 "$(Registry:X)",
+#endif
                 "$($())",
                 "$",
                 "()"
             };
+
+            if (NativeMethodsShared.IsWindows)
+            {
+                // '|' is only an invalid character in Windows filesystems
+                errorTests.Add("$([System.IO.Path]::Combine(`|`,`b`))");
+            }
 
             string result;
             for (int i = 0; i < validTests.GetLength(0); i++)
@@ -3303,7 +3311,7 @@ $(
                 }
             }
 
-            for (int i = 0; i < errorTests.GetLength(0); i++)
+            for (int i = 0; i < errorTests.Count; i++)
             {
                 // If an expression is invalid,
                 //      - Expansion may throw InvalidProjectFileException, or

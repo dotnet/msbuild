@@ -1244,7 +1244,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Test Project's surfacing of the sub-toolset version
         /// </summary>
-        [Fact(Skip = "Fails due to a null-to-empty-string comparison")]
+        [Fact]
         public void GetSubToolsetVersion()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");

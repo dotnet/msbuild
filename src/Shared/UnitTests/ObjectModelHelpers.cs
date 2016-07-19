@@ -497,34 +497,37 @@ namespace Microsoft.Build.UnitTests
             // Anonymous in-memory projects use the current directory for $(MSBuildProjectDirectory).
             // We need to set the directory to something reasonable.
             string originalDir = Directory.GetCurrentDirectory();
+            try
+            {
 #if FEATURE_SPECIAL_FOLDERS
-            Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+                Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
 #endif
 
-            XmlReaderSettings readerSettings = new XmlReaderSettings();
-            readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
 
-            Project project = new Project
-                (
-                XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
-                null,
-                toolsVersion,
-                projectCollection
-                );
+                Project project = new Project
+                    (
+                    XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
+                    null,
+                    toolsVersion,
+                    projectCollection
+                    );
 
-            Guid guid = Guid.NewGuid();
-            project.FullPath = Path.Combine(Path.GetTempPath(), "Temporary" + guid.ToString("N") + ".csproj");
-            project.ReevaluateIfNecessary();
+                Guid guid = Guid.NewGuid();
+                project.FullPath = Path.Combine(Path.GetTempPath(), "Temporary" + guid.ToString("N") + ".csproj");
+                project.ReevaluateIfNecessary();
 
-            if (logger != null)
-            {
-                project.ProjectCollection.RegisterLogger(logger);
+                if (logger != null)
+                {
+                    project.ProjectCollection.RegisterLogger(logger);
+                }
+
+                return project;
             }
-
-            // Return to the original directory.
-            Directory.SetCurrentDirectory(originalDir);
-
-            return project;
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDir);
+            }
         }
         /// <summary>
         /// Creates a project in memory and builds the default targets.  The build is

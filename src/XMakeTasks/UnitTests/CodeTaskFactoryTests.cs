@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that 
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
+        [Fact]
         public void BuildTaskSimpleCodeFactory_RedirectFrom12()
         {
             string projectFileContents = @"

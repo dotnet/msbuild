@@ -22,9 +22,19 @@
 
   <!-- Tool versions -->
   <PropertyGroup>
-    <NuSpecReferenceGeneratorVersion>1.4.2</NuSpecReferenceGeneratorVersion>
+    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <SourceDir>$(ProjectDir)src\</SourceDir>
+    <PackagesDir>$(ProjectDir)packages\</PackagesDir>
+
+    <!-- Output directories -->
+    <BinDir>$(ProjectDir)bin\</BinDir>
+    <TestWorkingDir>$(BinDir)tests\</TestWorkingDir>
+    <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
+
+    <!-- Package version / directories -->
+    <BuildToolsVersion>1.0.25-prerelease-00199</BuildToolsVersion>
+    <CompilerToolsVersion>1.3.2</CompilerToolsVersion>
     <XunitVersion>2.1.0</XunitVersion>
-    <CompilerToolsVersion>1.2.0-beta1-20160108-01</CompilerToolsVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.4.30</GitVersioningVersion>
   </PropertyGroup>
@@ -308,7 +318,7 @@
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
     <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
 
     <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.

@@ -8,10 +8,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Xml;
-using Microsoft.Build.BackEnd;
+using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -19,9 +18,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.BuildTasks;
 using Xunit;
 
@@ -59,8 +57,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static string GetTestTaskAssemblyLocation()
         {
-            string codeFile = null;
-            string outputFile = Path.Combine(Path.GetTempPath(), "TaskRegistryTests_TestTask.dll");
             string codeContent = @"
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -76,55 +72,63 @@ namespace TestTask
     }
 }";
 
-            File.Delete(outputFile);
-            bool succeeded = true;
+            var codeFile = FileUtilities.GetTemporaryFile();
+            var outputFile = FileUtilities.GetTemporaryFile(".dll");
+
+            // Setting the current directory to the MSBuild running location. It *should* be this
+            // already, but if it's not some other test changed it and didn't change it back. If
+            // the directory does not include the reference dlls the compilation will fail.
+            Directory.SetCurrentDirectory(FileUtilities.CurrentExecutableDirectory);
 
             try
             {
-                codeFile = FileUtilities.GetTemporaryFile();
                 File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine();
-                csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.References = new ITaskItem[] { new TaskItem("Microsoft.Build.Framework.dll"), new TaskItem("Microsoft.Build.Utilities.Core.dll") };
-                csc.Platform = "AnyCPU";
-                csc.TargetType = "Library";
-                csc.Prefer32Bit = false;
-                succeeded = csc.Execute();
+                var csc = new Csc
+                {
+                    BuildEngine = new MockEngine(),
+                    Sources = new ITaskItem[] {new TaskItem(codeFile)},
+                    OutputAssembly = new TaskItem(outputFile),
+                    References =
+                        new ITaskItem[]
+                        {
+                            new TaskItem("Microsoft.Build.Framework.dll"),
+                            new TaskItem("Microsoft.Build.Utilities.Core.dll")
+                        },
+                    Platform = "AnyCPU",
+                    TargetType = "Library",
+                    Prefer32Bit = false
+                };
+                var succeeded = csc.Execute();
+
+                if (succeeded)
+                {
+                    return outputFile;
+                }
+
+                throw new Exception($"CSC task failed creating custom task: {csc.ErrorLog}");
             }
             catch (Exception)
             {
-                if (File.Exists(outputFile))
-                {
-                    FileUtilities.DeleteNoThrow(outputFile);
-                }
-
-                // now rethrow
+                FileUtilities.DeleteNoThrow(outputFile);
                 throw;
             }
             finally
             {
-                File.Delete(codeFile);
-            }
-
-            if (succeeded)
-            {
-                return outputFile;
-            }
-            else
-            {
-                return null;
+                FileUtilities.DeleteNoThrow(codeFile);
             }
         }
     }
-
 
     /// <summary>
     /// Test the task registry
     /// </summary>
     public class TaskRegistry_Tests : IClassFixture<TaskAssemblyFixture>
     {
+        /// <summary>
+        /// Expander to expand the registry entires
+        /// </summary>
+        private static Expander<ProjectPropertyInstance, ProjectItemInstance> s_registryExpander;
+
         /// <summary>
         /// Name of the test task built into the test 
         /// assembly at testTaskLocation.
@@ -134,45 +138,39 @@ namespace TestTask
         /// <summary>
         /// Location of the generated test task DLL.
         /// </summary>
-        private static string s_testTaskLocation;
+        private readonly string _testTaskLocation;
 
         /// <summary>
         /// Logging service to use in for the task registry
         /// </summary>
-        private static ILoggingService s_loggingService;
-
-        /// <summary>
-        /// Mock logger which is attached to the logging service.
-        /// </summary>
-        private static MockLogger s_logger;
+        private readonly ILoggingService _loggingService;
 
         /// <summary>
         /// Target logging context to use when logging. 
         /// </summary>
-        private static TargetLoggingContext s_targetLoggingContext;
+        private readonly TargetLoggingContext _targetLoggingContext;
 
         /// <summary>
         /// Build event context to use when logging
         /// </summary>
-        private static BuildEventContext s_loggerContext = new BuildEventContext(2, 2, 2, 2);
+        private readonly BuildEventContext _loggerContext = new BuildEventContext(2, 2, 2, 2);
 
         /// <summary>
         /// Element location to use when logging 
         /// </summary>
-        private static ElementLocation s_elementLocation = ElementLocation.Create("c:\\project.proj", 0, 0);
+        private readonly ElementLocation _elementLocation = ElementLocation.Create("c:\\project.proj", 0, 0);
 
         /// <summary>
-        /// Setup some logging services so we can see what is goign on.
+        /// Setup some logging services so we can see what is going on.
         /// </summary>
         public TaskRegistry_Tests(TaskAssemblyFixture fixture)
         {
-            s_testTaskLocation = fixture.TestTaskLocation;
+            _testTaskLocation = fixture.TestTaskLocation;
 
-            s_loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1) as ILoggingService;
-            s_logger = new MockLogger();
-            s_targetLoggingContext = new TargetLoggingContext(s_loggingService, s_loggerContext);
+            _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            _targetLoggingContext = new TargetLoggingContext(_loggingService, _loggerContext);
 
-            s_loggingService.RegisterLogger(s_logger);
+            _loggingService.RegisterLogger(new MockLogger());
         }
 
         #region UsingTaskTests
@@ -190,9 +188,9 @@ namespace TestTask
             ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", null, "CustomTask, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected one registered tasks in TaskRegistry.AllTaskDeclarations!"
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
@@ -211,8 +209,8 @@ namespace TestTask
         /// <summary>
         /// Register many tasks with different names
         /// Expect:
-        ///     Three tasks to be regisered
-        ///     Expect only one task to be regisered under each task name
+        ///     Three tasks to be registered
+        ///     Expect only one task to be registered under each task name
         ///     Expect the correct assembly information to be registered
         /// </summary>
         [Fact]
@@ -230,9 +228,9 @@ namespace TestTask
             element = project.AddUsingTask("AnotherCustomTask", null, "AnotherCustomTask, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(3, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.AllTaskDeclarations!"
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
@@ -272,9 +270,9 @@ namespace TestTask
             element = project.AddUsingTask("CustomTask", null, "CustomTask, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(3, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.AllTaskDeclarations!"
 
             // First assert that there are two unique buckets
@@ -337,9 +335,9 @@ namespace TestTask
             element = project.AddUsingTask("AnotherCustomTask", null, "CustomTasks, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(3, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.AllTaskDeclarations!"
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
@@ -376,11 +374,11 @@ namespace TestTask
             element = project.AddUsingTask("CustomTask", "Some\\Relative\\Path\\CustomTasks.dll", null);
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // two unique buckets
             Assert.Equal(2, registry.TaskRegistrations.Count); // "Expected only two buckets since two of three tasks have the same name!"
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(3, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
         }
 
@@ -415,10 +413,10 @@ namespace TestTask
             element.Architecture = "x64";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             Assert.Equal(3, registry.TaskRegistrations.Count); // "Should have three buckets, since two of the tasks are the same."
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(4, registeredTaskCount);
         }
 
@@ -428,18 +426,18 @@ namespace TestTask
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheTaskDoesNotExist_ExactMatch()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask("UnrelatedTask", s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask("UnrelatedTask", _testTaskLocation, null);
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -468,18 +466,18 @@ namespace TestTask
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheTaskDoesNotExist_FuzzyMatch()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask("UnrelatedTask", s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask("UnrelatedTask", _testTaskLocation, null);
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -508,20 +506,20 @@ namespace TestTask
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheMatchingTaskDoesNotExist_FuzzyMatch()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -550,20 +548,20 @@ namespace TestTask
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheMatchingTaskDoesNotExistOnFirstCallButDoesOnSecond()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -592,20 +590,20 @@ namespace TestTask
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheMatchingExactParameters()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // no parameters - no match
             RetrieveAndValidateRegisteredTaskRecord
@@ -669,20 +667,20 @@ namespace TestTask
         /// ever work, since we don't currently have a way to create a using task with 
         /// parameters other than those two. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheMatchingExactParameters_AdditionalParameters()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Runtime and architecture match the using task exactly, but since there is an additional parameter, it still 
             // doesn't match when doing exact matching. 
@@ -716,20 +714,20 @@ namespace TestTask
         /// Test retrieving a matching task record using various parameter combinations when allowing 
         /// fuzzy matches.
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // no parameters
             RetrieveAndValidateRegisteredTaskRecord
@@ -799,20 +797,20 @@ namespace TestTask
         /// Test retrieving a matching task record using various parameter combinations when allowing 
         /// fuzzy matches.
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_RecoverFromFailure()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // no parameters - should retrieve the record
             RetrieveAndValidateRegisteredTaskRecord
@@ -857,25 +855,25 @@ namespace TestTask
         /// multiple using tasks registered for the same task, just with different parameter 
         /// sets. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "*";
             element.Architecture = "x64";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // no parameters -- gets the first one (CLR4|x86)
             RetrieveAndValidateRegisteredTaskRecord
@@ -987,25 +985,25 @@ namespace TestTask
         /// there are multiple matches, if we are doing fuzzy matching, we should prefer the 
         /// record that's in the cache, even if it wasn't the original first record. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks_PreferCache()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "*";
             element.Architecture = "x64";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // CLR4|x64 -- should be fulfilled by *|x64
             RetrieveAndValidateRegisteredTaskRecord
@@ -1039,20 +1037,20 @@ namespace TestTask
         /// Test retrieving a matching task record using various parameter combinations when allowing 
         /// fuzzy matches.
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_ExactMatches()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // CLR4|* should match
             RetrieveAndValidateRegisteredTaskRecord
@@ -1109,20 +1107,20 @@ namespace TestTask
         /// ever work, since we don't currently have a way to create a using task with 
         /// parameters other than those two. 
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_AdditionalParameters()
         {
-            Assert.NotNull(s_testTaskLocation); // "Need a test task to run this test"
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, s_testTaskLocation, null);
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
             element.Architecture = "x86";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Runtime and architecture match, so even though we have the extra parameter, it should still match 
             Dictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1199,19 +1197,19 @@ namespace TestTask
             element.Condition = "'@(ThirdItem)$(Property1)' == 'ThirdValue1Value1'";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(3, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
 
             IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
             {
-                string expandedtaskName = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(taskElement.TaskName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.TaskNameLocation);
-                string expandedAssemblyName = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyNameLocation);
-                string expandedAssemblyFile = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyFile, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyFileLocation);
-                string expandedTaskFactory = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(taskElement.TaskFactory, ExpanderOptions.ExpandPropertiesAndItems, taskElement.TaskFactoryLocation);
+                string expandedtaskName = RegistryExpander.ExpandIntoStringAndUnescape(taskElement.TaskName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.TaskNameLocation);
+                string expandedAssemblyName = RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyNameLocation);
+                string expandedAssemblyFile = RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyFile, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyFileLocation);
+                string expandedTaskFactory = RegistryExpander.ExpandIntoStringAndUnescape(taskElement.TaskFactory, ExpanderOptions.ExpandPropertiesAndItems, taskElement.TaskFactoryLocation);
 
                 expandedAssemblyName = String.IsNullOrEmpty(expandedAssemblyName) ? null : expandedAssemblyName;
                 expandedAssemblyFile = String.IsNullOrEmpty(expandedAssemblyFile) ? null : expandedAssemblyFile;
@@ -1255,9 +1253,9 @@ namespace TestTask
             element.Condition = "'@(ThirdItem)$(Property1)' == 'ThirdValue1'";
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(2, registeredTaskCount); // "Expected two registered tasks in TaskRegistry.TaskRegistrations!"
 
             IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
@@ -1265,9 +1263,9 @@ namespace TestTask
             for (int i = 0; i <= 2; i += 2)
             {
                 ProjectUsingTaskElement taskElement = elementList[i];
-                string expandedtaskName = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(taskElement.TaskName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.TaskNameLocation);
-                string expandedAssemblyName = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyNameLocation);
-                string expandedAssemblyFile = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyFile, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyFileLocation);
+                string expandedtaskName = RegistryExpander.ExpandIntoStringAndUnescape(taskElement.TaskName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.TaskNameLocation);
+                string expandedAssemblyName = RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyName, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyNameLocation);
+                string expandedAssemblyFile = RegistryExpander.ExpandIntoStringAndUnescape(taskElement.AssemblyFile, ExpanderOptions.ExpandPropertiesAndItems, taskElement.AssemblyFileLocation);
 
                 expandedAssemblyName = String.IsNullOrEmpty(expandedAssemblyName) ? null : expandedAssemblyName;
                 expandedAssemblyFile = String.IsNullOrEmpty(expandedAssemblyFile) ? null : expandedAssemblyFile;
@@ -1293,9 +1291,9 @@ namespace TestTask
             ProjectUsingTaskElement element = project.AddUsingTask("Hello", "File", null);
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
 
             IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
@@ -1326,9 +1324,9 @@ namespace TestTask
             element.AddParameterGroup();
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
             IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
@@ -1362,9 +1360,9 @@ namespace TestTask
 
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
             IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
@@ -1404,7 +1402,7 @@ namespace TestTask
             string type = "";
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(typeof(String)));
         }
 
@@ -1419,12 +1417,12 @@ namespace TestTask
             string type = null;
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(typeof(String)));
         }
 
         /// <summary>
-        /// Verify when registering a randon type which is not allowed that we get an InvalidProjectFileException
+        /// Verify when registering a random type which is not allowed that we get an InvalidProjectFileException
         /// </summary>
         [Fact]
         public void RandomTypeOnParameter()
@@ -1436,7 +1434,7 @@ namespace TestTask
                 string type = "ISomethingItem";
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
@@ -1480,7 +1478,7 @@ namespace TestTask
                 string type = typeof(ArrayList[]).FullName;
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
@@ -1527,7 +1525,7 @@ namespace TestTask
 #endif
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
@@ -1546,13 +1544,13 @@ namespace TestTask
                 string type = typeof(ArrayList).FullName;
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
         }
         /// <summary>
-        /// Verify the expected outparameters are supported
+        /// Verify the expected output parameters are supported
         ///     String
         ///     String[]
         ///     ValueType
@@ -1618,7 +1616,7 @@ namespace TestTask
                 string type = typeof(ArrayList).FullName;
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
@@ -1634,7 +1632,7 @@ namespace TestTask
             string type = typeof(String).FullName;
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Output);
         }
 
@@ -1649,7 +1647,7 @@ namespace TestTask
             string type = typeof(String).FullName;
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Output);
         }
 
@@ -1666,7 +1664,7 @@ namespace TestTask
                 string type = typeof(String).FullName;
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
@@ -1682,7 +1680,7 @@ namespace TestTask
             string type = typeof(String).FullName;
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Required);
         }
 
@@ -1697,12 +1695,12 @@ namespace TestTask
             string type = typeof(String).FullName;
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Required);
         }
 
         /// <summary>
-        /// Verify a value which cannot be parsed to a boolean results in a invalidprojectfileexception
+        /// Verify a value which cannot be parsed to a boolean results in a InvalidProjectFileException
         /// </summary>
         [Fact]
         public void RandomRequired()
@@ -1714,7 +1712,7 @@ namespace TestTask
                 string type = typeof(String).FullName;
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
@@ -1742,9 +1740,9 @@ namespace TestTask
 
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            int registeredTaskCount = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
+            int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
             IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
@@ -1758,9 +1756,9 @@ namespace TestTask
             Assert.Null(inlineTaskRecord.InlineTaskXmlBody);
             Assert.Equal(2, inlineTaskRecord.UsingTaskParameters.Count);
 
-            string expandedOutput = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.Output, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.OutputLocation);
-            string expandedRequired = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.Required, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.RequiredLocation);
-            string expandedType = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.ParameterType, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.ParameterTypeLocation);
+            string expandedOutput = RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.Output, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.OutputLocation);
+            string expandedRequired = RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.Required, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.RequiredLocation);
+            string expandedType = RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.ParameterType, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.ParameterTypeLocation);
 
             TaskPropertyInfo parameterInfo = inlineTaskRecord.UsingTaskParameters[filledOutAttributesParameter.Name] as TaskPropertyInfo;
             Assert.NotNull(parameterInfo);
@@ -1796,7 +1794,7 @@ namespace TestTask
             element.AddUsingTaskBody("$(FalseString)", String.Empty);
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
             Assert.Equal(1, registeredTaskRecords.Count); // "Expected only one task registered under this TaskName!"
@@ -1820,7 +1818,7 @@ namespace TestTask
             element.AddUsingTaskBody("@(ItemWithTrueItem)", String.Empty);
             elementList.Add(element);
 
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
             Assert.Equal(1, registeredTaskRecords.Count); // "Expected only one task registered under this TaskName!"
@@ -1838,7 +1836,7 @@ namespace TestTask
         {
             string body = "$(Property1)@(ThirdItem)$(Property2)";
             List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(bool.FalseString, body);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Make sure when evaluate is false the string passed in is not expanded
             Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated.Equals(body));
@@ -1855,8 +1853,8 @@ namespace TestTask
             ProjectUsingTaskElement taskElement = elementList[0];
             ProjectUsingTaskBodyElement bodyElement = taskElement.TaskBody;
 
-            string expandedBody = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.RegistryExpander.ExpandIntoStringAndUnescape(body, ExpanderOptions.ExpandPropertiesAndItems, bodyElement.Location);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            string expandedBody = RegistryExpander.ExpandIntoStringAndUnescape(body, ExpanderOptions.ExpandPropertiesAndItems, bodyElement.Location);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Make sure when evaluate is false the string passed in is not expanded
             Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated.Equals(expandedBody));
@@ -1872,7 +1870,7 @@ namespace TestTask
             {
                 string evaluate = "RandomStuff";
                 List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
-                TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                CreateTaskRegistryAndRegisterTasks(elementList);
                 Assert.True(false);
             }
            );
@@ -1885,7 +1883,7 @@ namespace TestTask
         {
             string evaluate = bool.FalseString;
             List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
 
@@ -1897,7 +1895,7 @@ namespace TestTask
         {
             string evaluate = "";
             List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
 
@@ -1909,7 +1907,7 @@ namespace TestTask
         {
             string evaluate = null;
             List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
         #endregion
@@ -1924,7 +1922,7 @@ namespace TestTask
         /// - that the record that was retrieved had the expected runtime and architecture 
         ///   values as its factory parameters. 
         /// </summary>
-        private static void RetrieveAndValidateRegisteredTaskRecord
+        private void RetrieveAndValidateRegisteredTaskRecord
                                                         (
                                                             TaskRegistry registry,
                                                             bool exactMatchRequired,
@@ -1936,7 +1934,7 @@ namespace TestTask
                                                         )
         {
             bool retrievedFromCache = false;
-            var record = registry.GetTaskRegistrationRecord(TestTaskName, null, taskParameters, exactMatchRequired, s_targetLoggingContext, s_elementLocation, out retrievedFromCache);
+            var record = registry.GetTaskRegistrationRecord(TestTaskName, null, taskParameters, exactMatchRequired, _targetLoggingContext, _elementLocation, out retrievedFromCache);
 
             if (shouldBeRetrieved)
             {
@@ -1968,7 +1966,7 @@ namespace TestTask
         /// - that the record that was retrieved had the expected runtime and architecture 
         ///   values as its factory parameters. 
         /// </summary>
-        private static void RetrieveAndValidateRegisteredTaskRecord
+        private void RetrieveAndValidateRegisteredTaskRecord
                                                         (
                                                             TaskRegistry registry,
                                                             bool exactMatchRequired,
@@ -1983,9 +1981,11 @@ namespace TestTask
             Dictionary<string, string> parameters = null;
             if (runtime != null || architecture != null)
             {
-                parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                parameters.Add(XMakeAttributes.runtime, runtime ?? XMakeAttributes.MSBuildRuntimeValues.any);
-                parameters.Add(XMakeAttributes.architecture, architecture ?? XMakeAttributes.MSBuildArchitectureValues.any);
+                parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    {XMakeAttributes.runtime, runtime ?? XMakeAttributes.MSBuildRuntimeValues.any},
+                    {XMakeAttributes.architecture, architecture ?? XMakeAttributes.MSBuildArchitectureValues.any}
+                };
             }
 
             RetrieveAndValidateRegisteredTaskRecord(registry, exactMatchRequired, parameters, shouldBeRetrieved, shouldBeRetrievedFromCache, expectedRuntime, expectedArchitecture);
@@ -1997,7 +1997,7 @@ namespace TestTask
         /// - that it was retrieved (or not) as expected 
         /// - that it was retrieved from the cache (or not) as expected
         /// </summary>
-        private static void RetrieveAndValidateRegisteredTaskRecord(TaskRegistry registry, bool exactMatchRequired, Dictionary<string, string> taskParameters, bool shouldBeRetrieved, bool shouldBeRetrievedFromCache)
+        private void RetrieveAndValidateRegisteredTaskRecord(TaskRegistry registry, bool exactMatchRequired, Dictionary<string, string> taskParameters, bool shouldBeRetrieved, bool shouldBeRetrievedFromCache)
         {
             // if we're requiring an exact match, we can cheat and figure out what the expected runtime / architecture should be.  
             // if not, then if the user didn't pass us an expected runtime, we can't really check it, so just pass 
@@ -2019,7 +2019,7 @@ namespace TestTask
         /// - that it was retrieved (or not) as expected 
         /// - that it was retrieved from the cache (or not) as expected
         /// </summary>
-        private static void RetrieveAndValidateRegisteredTaskRecord(TaskRegistry registry, bool exactMatchRequired, string runtime, string architecture, bool shouldBeRetrieved, bool shouldBeRetrievedFromCache)
+        private void RetrieveAndValidateRegisteredTaskRecord(TaskRegistry registry, bool exactMatchRequired, string runtime, string architecture, bool shouldBeRetrieved, bool shouldBeRetrievedFromCache)
         {
             // if we're requiring an exact match, we can cheat and figure out what the expected runtime / architecture should be.  
             // if not, then if the user didn't pass us an expected runtime, we can't really check it, so just pass 
@@ -2033,10 +2033,10 @@ namespace TestTask
         /// <summary>
         /// Make sure the type passed in is the same type which is parsed out.
         /// </summary>
-        private static void VerifyTypeParameter(string output, string required, string type)
+        private void VerifyTypeParameter(string output, string required, string type)
         {
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             Type paramType = Type.GetType(type);
 
@@ -2090,6 +2090,101 @@ namespace TestTask
         }
 
         /// <summary>
+        /// Accessor to the expander
+        /// </summary>
+        internal static Expander<ProjectPropertyInstance, ProjectItemInstance> RegistryExpander => s_registryExpander ?? (s_registryExpander = GetExpander());
+
+        /// <summary>
+        /// Count the number of registry records which exist in the task registry
+        /// </summary>
+        internal static int GetDeepCountOfRegisteredTasks(IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registryRecords)
+        {
+            return registryRecords?.Values.Sum(recordList => recordList.Count) ?? 0;
+        }
+
+        /// <summary>
+        /// Create and fill a task registry based on some using task elements.
+        /// </summary>
+        internal TaskRegistry CreateTaskRegistryAndRegisterTasks(List<ProjectUsingTaskElement> usingTaskElements)
+        {
+            TaskRegistry registry = new TaskRegistry(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+
+            foreach (ProjectUsingTaskElement projectUsingTaskElement in usingTaskElements)
+            {
+                TaskRegistry.RegisterTasksFromUsingTaskElement
+                    (
+                        _loggingService,
+                        _loggerContext,
+                        Directory.GetCurrentDirectory(),
+                        projectUsingTaskElement,
+                        registry,
+                        RegistryExpander,
+                        ExpanderOptions.ExpandPropertiesAndItems
+                    );
+            }
+
+            return registry;
+        }
+
+        /// <summary>
+        /// Create an expander with some property values which can be used for testing.
+        /// </summary>
+        internal static Expander<ProjectPropertyInstance, ProjectItemInstance> GetExpander()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+            for (int i = 1; i < 6; i++)
+            {
+                pg.Set(ProjectPropertyInstance.Create("Property" + i, "Value" + i));
+            }
+
+            pg.Set(ProjectPropertyInstance.Create("TrueString", "True"));
+            pg.Set(ProjectPropertyInstance.Create("FalseString", "False"));
+            pg.Set(ProjectPropertyInstance.Create("ItaskItem", "Microsoft.Build.Framework.ItaskItem[]"));
+
+            List<ProjectItemInstance> intermediateAssemblyItemGroup = new List<ProjectItemInstance>();
+            ProjectItemInstance iag = new ProjectItemInstance(project, "IntermediateAssembly", @"subdir1\engine.dll", project.FullPath);
+            intermediateAssemblyItemGroup.Add(iag);
+            iag.SetMetadata("aaa", "111");
+
+            iag = new ProjectItemInstance(project, "IntermediateAssembly", @"subdir2\tasks.dll", project.FullPath);
+            intermediateAssemblyItemGroup.Add(iag);
+            iag.SetMetadata("bbb", "222");
+
+            List<ProjectItemInstance> firstItemGroup = new List<ProjectItemInstance>();
+            for (int i = 0; i < 3; i++)
+            {
+                ProjectItemInstance fig = new ProjectItemInstance(project, "FirstItem" + i, "FirstValue" + i, project.FullPath);
+                firstItemGroup.Add(fig);
+            }
+
+            List<ProjectItemInstance> secondItemGroup = new List<ProjectItemInstance>();
+            for (int i = 0; i < 3; i++)
+            {
+                ProjectItemInstance sig = new ProjectItemInstance(project, "SecondItem" + i, "SecondValue" + i, project.FullPath);
+                secondItemGroup.Add(sig);
+            }
+
+            List<ProjectItemInstance> thirdItemGroup = new List<ProjectItemInstance>();
+            ProjectItemInstance tig = new ProjectItemInstance(project, "ThirdItem", "ThirdValue1", project.FullPath);
+            thirdItemGroup.Add(tig);
+
+            List<ProjectItemInstance> trueItemGroup = new List<ProjectItemInstance>();
+            ProjectItemInstance trig = new ProjectItemInstance(project, "ItemWithTrueItem", "true", project.FullPath);
+            trueItemGroup.Add(trig);
+
+            ItemDictionary<ProjectItemInstance> secondaryItemsByName = new ItemDictionary<ProjectItemInstance>();
+            secondaryItemsByName.ImportItems(intermediateAssemblyItemGroup);
+            secondaryItemsByName.ImportItems(firstItemGroup);
+            secondaryItemsByName.ImportItems(secondItemGroup);
+            secondaryItemsByName.ImportItems(thirdItemGroup);
+            secondaryItemsByName.ImportItems(trueItemGroup);
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName);
+            return expander;
+        }
+
+        /// <summary>
         /// Create a custom class derived from ITaskItem to test input and output parameters work using this item.
         /// </summary>
         internal class DerivedFromITaskItem : ITaskItem
@@ -2097,11 +2192,7 @@ namespace TestTask
             /// <summary>
             /// The ItemSpec of the item
             /// </summary>
-            public string ItemSpec
-            {
-                get;
-                set;
-            }
+            public string ItemSpec { get; set; }
 
             /// <summary>
             /// Collection of metadataNames on the item
@@ -2160,137 +2251,6 @@ namespace TestTask
             }
         }
 
-        /// <summary>
-        /// Helper class to assist in using the task registry
-        /// </summary>
-        /// <typeparam name="P">ProjectPropertyInstance</typeparam>
-        /// <typeparam name="I">ProjectItemInstance</typeparam>
-        internal class TaskRegistryHelperMethods<P, I>
-            where P : class, IProperty
-            where I : class, IItem
-        {
-            /// <summary>
-            /// Expander to expand the registry entires
-            /// </summary>
-            private static Expander<ProjectPropertyInstance, ProjectItemInstance> s_registryExpander;
-
-            /// <summary>
-            /// Accessor to the expander
-            /// </summary>
-            internal static Expander<ProjectPropertyInstance, ProjectItemInstance> RegistryExpander
-            {
-                get
-                {
-                    if (s_registryExpander == null)
-                    {
-                        s_registryExpander = GetExpander();
-                    }
-
-                    return s_registryExpander;
-                }
-            }
-
-            /// <summary>
-            /// Count the number of registry records which exist in the task registry
-            /// </summary>
-            internal static int GetDeepCountOfRegisteredTasks(IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registryRecords)
-            {
-                if (registryRecords == null)
-                {
-                    return 0;
-                }
-
-                int count = 0;
-                foreach (List<TaskRegistry.RegisteredTaskRecord> recordList in registryRecords.Values)
-                {
-                    count += recordList.Count;
-                }
-
-                return count;
-            }
-
-            /// <summary>
-            /// Create and fill a task registry based on some using task elements.
-            /// </summary>
-            internal static TaskRegistry CreateTaskRegistryAndRegisterTasks(List<ProjectUsingTaskElement> usingTaskElements)
-            {
-                TaskRegistry registry = new TaskRegistry(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
-
-                foreach (ProjectUsingTaskElement projectUsingTaskElement in usingTaskElements)
-                {
-                    TaskRegistry.RegisterTasksFromUsingTaskElement<ProjectPropertyInstance, ProjectItemInstance>
-                        (
-                         s_loggingService,
-                         s_loggerContext,
-                         Directory.GetCurrentDirectory(),
-                         projectUsingTaskElement,
-                         registry,
-                         RegistryExpander,
-                         ExpanderOptions.ExpandPropertiesAndItems
-                         );
-                }
-
-                return registry;
-            }
-
-            /// <summary>
-            /// Create an expander with some property values which can be used for testing.
-            /// </summary>
-            internal static Expander<ProjectPropertyInstance, ProjectItemInstance> GetExpander()
-            {
-                ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-                for (int i = 1; i < 6; i++)
-                {
-                    pg.Set(ProjectPropertyInstance.Create("Property" + i, "Value" + i));
-                }
-
-                pg.Set(ProjectPropertyInstance.Create("TrueString", "True"));
-                pg.Set(ProjectPropertyInstance.Create("FalseString", "False"));
-                pg.Set(ProjectPropertyInstance.Create("ItaskItem", "Microsoft.Build.Framework.ItaskItem[]"));
-
-                List<ProjectItemInstance> intermediateAssemblyItemGroup = new List<ProjectItemInstance>();
-                ProjectItemInstance iag = new ProjectItemInstance(project, "IntermediateAssembly", @"subdir1\engine.dll", project.FullPath);
-                intermediateAssemblyItemGroup.Add(iag);
-                iag.SetMetadata("aaa", "111");
-
-                iag = new ProjectItemInstance(project, "IntermediateAssembly", @"subdir2\tasks.dll", project.FullPath);
-                intermediateAssemblyItemGroup.Add(iag);
-                iag.SetMetadata("bbb", "222");
-
-                List<ProjectItemInstance> firstItemGroup = new List<ProjectItemInstance>();
-                for (int i = 0; i < 3; i++)
-                {
-                    ProjectItemInstance fig = new ProjectItemInstance(project, "FirstItem" + i, "FirstValue" + i, project.FullPath);
-                    firstItemGroup.Add(fig);
-                }
-
-                List<ProjectItemInstance> secondItemGroup = new List<ProjectItemInstance>();
-                for (int i = 0; i < 3; i++)
-                {
-                    ProjectItemInstance sig = new ProjectItemInstance(project, "SecondItem" + i, "SecondValue" + i, project.FullPath);
-                    secondItemGroup.Add(sig);
-                }
-
-                List<ProjectItemInstance> thirdItemGroup = new List<ProjectItemInstance>();
-                ProjectItemInstance tig = new ProjectItemInstance(project, "ThirdItem", "ThirdValue1", project.FullPath);
-                thirdItemGroup.Add(tig);
-
-                List<ProjectItemInstance> trueItemGroup = new List<ProjectItemInstance>();
-                ProjectItemInstance trig = new ProjectItemInstance(project, "ItemWithTrueItem", "true", project.FullPath);
-                trueItemGroup.Add(trig);
-
-                ItemDictionary<ProjectItemInstance> secondaryItemsByName = new ItemDictionary<ProjectItemInstance>();
-                secondaryItemsByName.ImportItems(intermediateAssemblyItemGroup);
-                secondaryItemsByName.ImportItems(firstItemGroup);
-                secondaryItemsByName.ImportItems(secondItemGroup);
-                secondaryItemsByName.ImportItems(thirdItemGroup);
-                secondaryItemsByName.ImportItems(trueItemGroup);
-
-                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName);
-                return expander;
-            }
-        }
         #endregion
     }
 }

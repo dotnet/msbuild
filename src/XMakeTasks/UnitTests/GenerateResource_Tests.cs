@@ -2771,14 +2771,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string originalCurrentDirectory = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
 
-            bool success = t.Execute();
-
-            // Restore the current working directory to what it was before the test.
-            Directory.SetCurrentDirectory(originalCurrentDirectory);
-
-            // Make sure the resource was built.
-            Assert.True(success); // "GenerateResource failed"
-            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory("MyStrings.resources");
+            try
+            {
+                bool success = t.Execute();
+                // Make sure the resource was built.
+                Assert.True(success); // "GenerateResource failed"
+                ObjectModelHelpers.AssertFileExistsInTempProjectDirectory("MyStrings.resources");
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalCurrentDirectory);
+            }
         }
     }
 

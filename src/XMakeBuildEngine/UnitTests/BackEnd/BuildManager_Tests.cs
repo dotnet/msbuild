@@ -563,7 +563,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value. Also, make sure that when a project is pulled from the results cache
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1386,8 +1386,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [Fact(Skip= "https://github.com/Microsoft/msbuild/issues/696")]
         public void CancelledBuildWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -3368,6 +3367,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildParameters.Loggers = new ILogger[] { cl };
                 buildParameters.LegacyThreadingSemantics = true;
                 buildParameters.MaxNodeCount = 2;
+                buildParameters.EnableNodeReuse = false;
                 BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 
                 AutoResetEvent project1DoneEvent = new AutoResetEvent(false);

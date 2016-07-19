@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests
             AssertParse("namespace i { [MyChar('a')] class a { } }", "i.a");
         }
 
-        [Fact(Skip = "For this to pass, we need to support every kind of Char token in the tokenizer")]
+        [Fact]
         public void ClassAttributeCharIsCloseScope()
         {
             AssertParse("namespace i { [MyChar('\x0000')] class a { } }", "i.a");

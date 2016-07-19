@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check the ability of the distributed logger to correctly tell its internal file logger where to log the file
         /// </summary>
-        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        [Fact]
         public void DistributedFileLoggerParameters()
         {
             DistributedFileLogger fileLogger = new DistributedFileLogger();
@@ -412,16 +412,16 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
                 fileLogger.NodeId = 1;
-                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura\\mylogfile.log");
+                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura", "mylogfile.log");
                 fileLogger.Initialize(new EventSourceSink());
-                Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura\\mylogfile1.log") + ";", StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura", "mylogfile1.log") + ";", StringComparison.OrdinalIgnoreCase));
                 fileLogger.Shutdown();
             }
             finally
             {
                 if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "tempura")))
                 {
-                    File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "tempura\\mylogfile1.log"));
+                    File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "tempura", "mylogfile1.log"));
                     FileUtilities.DeleteWithoutTrailingBackslash(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
                 }
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile0.log"));

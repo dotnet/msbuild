@@ -37,6 +37,9 @@ namespace Microsoft.Build.UnitTests.FileTracking
 
         private static string s_oldPath = null;
 
+        private static string s_cmd32Path;
+        private static string s_cmd64Path;
+
         public FileTrackerTests()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -47,6 +50,14 @@ namespace Microsoft.Build.UnitTests.FileTracking
             s_defaultFileTrackerPathUnquoted = FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
             s_defaultFileTrackerPath = "\"" + s_defaultFileTrackerPathUnquoted + "\"";
             s_defaultTrackerPath = FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
+
+            s_cmd32Path = (IntPtr.Size == sizeof(Int32))
+                ? Environment.ExpandEnvironmentVariables(@"%windir%\System32\cmd.exe")
+                : Environment.ExpandEnvironmentVariables(@"%windir%\syswow64\cmd.exe");
+
+            s_cmd64Path = (IntPtr.Size == sizeof(Int32))
+                ? Environment.ExpandEnvironmentVariables(@"%windir%\sysnative\cmd.exe")
+                : Environment.ExpandEnvironmentVariables(@"%windir%\System32\cmd.exe");
 
             // blank out the path so that we know we're not inadvertently depending on it.
             s_oldPath = Environment.GetEnvironmentVariable("PATH");
@@ -81,7 +92,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             FileTrackerTestHelper.CleanTlogs();
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerHelp()
         {
             Console.WriteLine("Test: FileTracker");
@@ -90,7 +101,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.Equal(1, exit);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerBadArg()
         {
             Console.WriteLine("Test: FileTrackerBadArg");
@@ -102,7 +113,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.True(log.Contains("TRK0000")); // bad arg
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerNoUIDll()
         {
             Console.WriteLine("Test: FileTrackerNoUIDll");
@@ -139,7 +150,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerNonexistentRspFile()
         {
             Console.WriteLine("Test: FileTrackerNonexistentRspFile");
@@ -160,7 +171,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.True(log.Contains("abc.rsp"));
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerWithDll()
         {
             Console.WriteLine("Test: FileTrackerWithDll");
@@ -170,7 +181,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.Equal(1, exit);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerReadOnlyTlog()
         {
             Console.WriteLine("Test: FileTrackerTlogWriteFailure");
@@ -202,7 +213,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrIn()
         {
             Console.WriteLine("Test: FileTrackerFindStrIn");
@@ -216,7 +227,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInOperations()
         {
             Console.WriteLine("Test: FileTrackerFindStrInOperations");
@@ -234,7 +245,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.True(foundW || foundA);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInOperationsExtended()
         {
             Console.WriteLine("Test: FileTrackerFindStrInOperationsExtended");
@@ -257,7 +268,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.True(foundCreateFileW || foundCreateFileA);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInOperationsExtended_AttributesOnly()
         {
             Console.WriteLine("Test: FileTrackerFindStrInOperationsExtended_AttributesOnly");
@@ -279,7 +290,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.True(foundCreateFileW || foundCreateFileA);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerExtendedDirectoryTracking()
         {
             Console.WriteLine("Test: FileTrackerExtendedDirectoryTracking");
@@ -401,7 +412,7 @@ namespace ConsoleApplication4
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInIncludeDuplicates()
         {
             Console.WriteLine("Test: FileTrackerFindStrInIncludeDuplicates");
@@ -442,7 +453,7 @@ namespace ConsoleApplication4
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "readtwice.read.1.tlog", 2);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerDoNotRecordWriteAsRead()
         {
             Console.WriteLine("Test: FileTrackerDoNotRecordWriteAsRead");
@@ -516,7 +527,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInCommandLine()
         {
             Console.WriteLine("Test: FileTrackerFindStrInCommandLine");
@@ -531,7 +542,7 @@ class X
             Assert.Equal("findstr /ip foo test.in", line);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInArgumentSpaces()
         {
             Console.WriteLine("Test: FileTrackerFindStrIn");
@@ -545,7 +556,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test file.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindUnicode()
         {
             Console.WriteLine("Test: FileTrackerFindUnicode");
@@ -560,7 +571,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("t\u1EBCst.in").ToUpperInvariant(), "find.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerStartProcessFindStrIn()
         {
             Console.WriteLine("Test: FileTrackerStartProcessFindStrIn");
@@ -576,7 +587,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerResponseFile()
         {
             Console.WriteLine("Test: FileTrackerResponseFile");
@@ -596,7 +607,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInRootFiles()
         {
             Console.WriteLine("Test: FileTrackerFindStrInRootFiles");
@@ -613,7 +624,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInRootFilesCommand()
         {
             Console.WriteLine("Test: FileTrackerFindStrInRootFilesCommand");
@@ -633,7 +644,7 @@ class X
                                    FileTrackerTestHelper.ReadLineFromFile("findstr.command.1.tlog", 2));
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInRootFilesSpaces()
         {
             Console.WriteLine("Test: FileTrackerFindStrInRootFilesSpaces");
@@ -650,7 +661,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerHelperCommandLine()
         {
             Console.WriteLine("Test: FileTrackerHelperCommandLine");
@@ -674,7 +685,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerSortOut()
         {
             Console.WriteLine("Test: FileTrackerSortOut");
@@ -700,7 +711,7 @@ class X
                                    FileTrackerTestHelper.ReadLineFromFile("test.out", 1).ToUpperInvariant());
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerSortOutIntermediate()
         {
             Console.WriteLine("Test: FileTrackerSortOutIntermediate");
@@ -728,7 +739,7 @@ class X
         }
 
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerIntermediateDirMissing()
         {
             Console.WriteLine("Test: FileTrackerIntermediateDirMissing");
@@ -758,7 +769,7 @@ class X
                                    FileTrackerTestHelper.ReadLineFromFile("test.out", 1).ToUpperInvariant());
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInChain()
         {
             Console.WriteLine("Test: FileTrackerFindStrInChain");
@@ -772,7 +783,7 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "cmd-findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFindStrInChainRepeatCommand()
         {
             Console.WriteLine("Test: FileTrackerFindStrInChainRepeatCommand");
@@ -791,7 +802,59 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
+        public void FileTrackerFindStrInX64X86ChainRepeatCommand()
+        {
+            Console.WriteLine("Test: FileTrackerFindStrInX64X86ChainRepeatCommand");
+
+            if (!Environment.Is64BitOperatingSystem)
+            {
+                Console.WriteLine("FileTrackerFindStrInX64X86ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
+                Assert.True(true);
+                return;
+            }
+
+            string[] tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
+            foreach (string tlogFile in tlogFiles)
+            {
+                File.Delete(tlogFile);
+            }
+            FileTrackerTestHelper.WriteAll("test.in", "foo");
+
+            int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd64Path + " /c " + s_cmd32Path + " /c findstr /ip foo test.in");
+            tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
+            Console.WriteLine("");
+            Assert.Equal(0, exit);
+            FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
+        }
+
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
+        public void FileTrackerFindStrInX86X64ChainRepeatCommand()
+        {
+            Console.WriteLine("Test: FileTrackerFindStrInX86X64ChainRepeatCommand");
+
+            if (!Environment.Is64BitOperatingSystem)
+            {
+                Console.WriteLine("FileTrackerFindStrInX86X64ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
+                Assert.True(true);
+                return;
+            }
+
+            string[] tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
+            foreach (string tlogFile in tlogFiles)
+            {
+                File.Delete(tlogFile);
+            }
+            FileTrackerTestHelper.WriteAll("test.in", "foo");
+
+            int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd32Path + " /c " + s_cmd64Path + " /c findstr /ip foo test.in");
+            tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
+            Console.WriteLine("");
+            Assert.Equal(0, exit);
+            FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
+        }
+
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFileIsUnderPath()
         {
             Console.WriteLine("Test: FileTrackerFileIsUnderPath");
@@ -837,7 +900,7 @@ class X
             Assert.Equal(false, FileTracker.FileIsUnderPath(@"c:\foo\rumble.cpp", @"c:\foo\rumble\"));
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void FileTrackerFileIsExcludedFromDependencies()
         {
             Console.WriteLine("Test: FileTrackerFileIsExcludedFromDependencies");
@@ -891,7 +954,7 @@ class X
             Assert.Equal(true, FileTracker.FileIsExcludedFromDependencies(testFile));
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTest1()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -914,7 +977,7 @@ class X
             File.Delete(tlogWriteFile);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTest2()
         {
             // Do test 1 twice in a row to make sure there is no leakage
@@ -922,7 +985,7 @@ class X
             InProcTrackingTest1();
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTestSuspendResume()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -959,7 +1022,7 @@ class X
             File.Delete(sourceFile + "_r");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTestStopBeforeWrite()
         {
             Assert.Throws<COMException>(() =>
@@ -982,7 +1045,7 @@ class X
             }
            );
         }
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTestNotStop()
         {
             InProcTrackingTesterNoStop(1);
@@ -1050,7 +1113,7 @@ class X
             File.Delete(sourceFile);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTestIteration()
         {
             for (int iter = 0; iter < 50; iter++)
@@ -1059,7 +1122,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingNonStopTestIteration()
         {
             for (int iter = 0; iter < 50; iter++)
@@ -1069,7 +1132,7 @@ class X
             FileTracker.StopTrackingAndCleanup();
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTwoContexts()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -1110,7 +1173,7 @@ class X
             File.Delete(tlogWriteFile2);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTwoContextsWithRoot()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -1161,7 +1224,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingSpawnsOutOfProcTool()
         {
             string intermediateDir = Path.GetTempPath() + @"InProcTrackingSpawnsOutOfProcTool\";
@@ -1209,7 +1272,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingSpawnsOutOfProcTool_OverrideEnvironment()
         {
             string intermediateDir = Path.GetTempPath() + @"InProcTrackingSpawnsOutOfProcTool_OverrideEnvironment\";
@@ -1259,7 +1322,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingSpawnsToolWithTrackerResponseFile()
         {
             Console.WriteLine("Test: InProcTrackingSpawnsToolWithTrackerResponseFile");
@@ -1267,7 +1330,7 @@ class X
             InProcTrackingSpawnsToolWithTracker(true);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingSpawnsToolWithTrackerNoResponseFile()
         {
             Console.WriteLine("Test: InProcTrackingSpawnsToolWithTrackerNoResponseFile");
@@ -1275,7 +1338,7 @@ class X
             InProcTrackingSpawnsToolWithTracker(false);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingTwoContextsTwoEnds()
         {
             Assert.Throws<COMException>(() =>
@@ -1349,7 +1412,7 @@ class X
             File.Delete("InProcTrackingStartProcessFindStrIn-findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingStartProcessFindStrNullCommandLine()
         {
             Console.WriteLine("Test: InProcTrackingStartProcessFindStrNullCommandLine");
@@ -1396,7 +1459,7 @@ class X
         }
 
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingStartProcessFindStrInDefaultTaskName()
         {
             Console.WriteLine("Test: InProcTrackingStartProcessFindStrInDefaultTaskName");
@@ -1425,7 +1488,7 @@ class X
             File.Delete("InProcTrackingStartProcessFindStrIn-findstr.read.1.tlog");
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingChildThreadTrackedAuto()
         {
             FileTracker.SetThreadCount(1);
@@ -1466,7 +1529,7 @@ class X
             File.Delete(sourceFile);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingChildThreadTrackedManual()
         {
             FileTracker.SetThreadCount(1);
@@ -1505,7 +1568,7 @@ class X
             File.Delete(sourceFile);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingChildThreadNotTracked()
         {
             FileTracker.SetThreadCount(1);
@@ -1541,7 +1604,7 @@ class X
             File.Delete(sourceFile);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingChildThreadNotTrackedLocallyTracked()
         {
             FileTracker.SetThreadCount(1);
@@ -1603,7 +1666,7 @@ class X
         }
 
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void InProcTrackingChildCustomEnvironment()
         {
             string sourceFile = "allenvironment.txt";
@@ -1669,7 +1732,7 @@ class X
             File.Delete(commandFile);
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void CreateFileDoesntRecordWriteIfNotWrittenTo()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "CreateFileDoesntRecordWriteIfNotWrittenTo");
@@ -1712,7 +1775,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void CopyAlwaysRecordsWrites()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "CopyAlwaysRecordsWrites");
@@ -1781,9 +1844,7 @@ class X
             }
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Needs investigation
+        [Fact(Skip = "Needs investigation")]
         public void MoveAlwaysRecordsWrites()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "MoveAlwaysRecordsWrites");
@@ -1856,7 +1917,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void LaunchMultipleOfSameTool_SameCommand()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_SameCommand");
@@ -1897,7 +1958,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void LaunchMultipleOfSameTool_DifferentCommands1()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands1");
@@ -1938,7 +1999,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void LaunchMultipleOfSameTool_DifferentCommands2()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands2");
@@ -1988,7 +2049,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void LaunchMultipleOfSameTool_DifferentCommands3()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands3");
@@ -2031,10 +2092,7 @@ class X
             }
             finally
             {
-                if (oldCurrentDirectory != null)
-                {
-                    Directory.SetCurrentDirectory(oldCurrentDirectory);
-                }
+                Directory.SetCurrentDirectory(oldCurrentDirectory);
 
                 if (FileUtilities.DirectoryExistsNoThrow(testDir))
                 {
@@ -2043,7 +2101,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void LaunchMultipleOfSameTool_DifferentCommands4()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands4");
@@ -2097,7 +2155,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void LaunchMultipleDifferentTools()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleDifferentTools");
@@ -2146,7 +2204,7 @@ class X
             }
         }
 
-        [Fact]
+        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
         public void LaunchMultipleOfSameTool_DifferentContexts()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentContexts");
@@ -2190,9 +2248,7 @@ class X
 
         }
 
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Needs investigation
+        [Fact(Skip = "Needs investigation")]
         public void LaunchMultipleOfSameTool_ToolLaunchesOthers()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_ToolLaunchesOthers");

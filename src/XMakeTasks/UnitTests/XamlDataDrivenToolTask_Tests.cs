@@ -167,26 +167,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
         }
 
-        /// <summary>
-        /// Tests the functionality of a nonreversible property
-        /// When set to true, should find that the file exists because of the default property
-        /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        public void TestComplexNonreversible()
-        {
-            // When flag is set to false
-            object fakeTaskInstance = CreateFakeTask();
-            XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexNonreversibleWArgument", false);
-            string expectedResult = "/always /Cr:CT";
-            CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
-
-            // When flag is set to true
-            fakeTaskInstance = CreateFakeTask();
-            XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexNonreversibleWArgument", true);
-            expectedResult = "/always /Cr:CT /CnrwaDefaultFile";
-            CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
-        }
-
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void TestComplexString()

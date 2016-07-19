@@ -254,8 +254,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify a good task can be created.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifyGoodTaskInstantiation()
         {
             ITask createdTask = null;
@@ -282,8 +281,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify a good task that does not use the task host can be created when passed "don't care" 
         /// for the task invocation task host parameters.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifyMatchingTaskParametersDontLaunchTaskHost1()
         {
             ITask createdTask = null;
@@ -314,8 +312,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify a good task that does not use the task host can be created when passed task host 
         /// parameters that explicitly match the current process. 
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifyMatchingTaskParametersDontLaunchTaskHost2()
         {
             ITask createdTask = null;
@@ -346,8 +343,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify a good task that does not use the task host can be created when passed "don't care" 
         /// for the task invocation task host parameters.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifyMatchingUsingTaskParametersDontLaunchTaskHost1()
         {
             ITask createdTask = null;
@@ -380,8 +376,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify a good task that does not use the task host can be created when passed task host 
         /// parameters that explicitly match the current process. 
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifyMatchingUsingTaskParametersDontLaunchTaskHost2()
         {
             ITask createdTask = null;
@@ -414,9 +409,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify a good task that uses the task host can be created when passed task host 
         /// parameters that explicitly do not match the current process. 
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifyMatchingParametersDontLaunchTaskHost()
         {
             ITask createdTask = null;
@@ -650,9 +643,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify a good task that uses the task host can be created when the task factory is 
         /// explicitly instructed to launch the task host. 
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void VerifySameFactoryCanGenerateDifferentTaskInstances()
         {
             ITask createdTask = null;

@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 
 using Microsoft.Build.CommandLine;
@@ -564,18 +567,14 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Invalid configuration file should not dump stack.
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void ConfigurationInvalid()
         {
             string startDirectory = null;
-            string newPathToMSBuildExe = null;
-            string newPathToMSBuildPdb = null;
-            string pathToConfigFile = null;
-            string pathToProjectFile = null;
             string output = null;
             string oldValueForMSBuildOldOM = null;
 
@@ -584,22 +583,10 @@ namespace Microsoft.Build.UnitTests
                 oldValueForMSBuildOldOM = Environment.GetEnvironmentVariable("MSBuildOldOM");
                 Environment.SetEnvironmentVariable("MSBuildOldOM", "");
 
-                Random rand = new Random();
-                startDirectory = Path.Combine(Path.GetTempPath(), Convert.ToString(rand.NextDouble()));
-                Directory.CreateDirectory(startDirectory);
+                startDirectory = CopyMSBuild();
+                var newPathToMSBuildExe = Path.Combine(startDirectory, "msbuild.exe");
+                var pathToConfigFile = Path.Combine(startDirectory, "msbuild.exe.config");
 
-                string pathToMSBuildExe = ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ToolLocationHelper.CurrentToolsVersion);
-                newPathToMSBuildExe = Path.Combine(startDirectory, "msbuild.exe");
-                File.Copy(pathToMSBuildExe, newPathToMSBuildExe);
-
-                string pathToMSBuildPdb = ToolLocationHelper.GetPathToBuildToolsFile("msbuild.pdb", ToolLocationHelper.CurrentToolsVersion);
-                newPathToMSBuildPdb = Path.Combine(startDirectory, "msbuild.pdb");
-                if (File.Exists(pathToMSBuildPdb))
-                {
-                    File.Copy(pathToMSBuildPdb, newPathToMSBuildPdb);
-                }
-
-                pathToConfigFile = Path.Combine(startDirectory, "msbuild.exe.config");
                 string configContent = @"<?xml version =""1.0""?>
                                             <configuration>
                                                 <configSections>
@@ -623,7 +610,7 @@ namespace Microsoft.Build.UnitTests
                                             </configuration>";
                 File.WriteAllText(pathToConfigFile, configContent);
 
-                pathToProjectFile = Path.Combine(startDirectory, "foo.proj");
+                var pathToProjectFile = Path.Combine(startDirectory, "foo.proj");
                 string projectString =
                    "<?xml version='1.0' encoding='utf-8'?>" +
                     "<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='X'>" +
@@ -653,10 +640,6 @@ namespace Microsoft.Build.UnitTests
                 {
                     // Process does not let go its lock on the exe file until about 1 millisecond after 
                     // p.WaitForExit() returns. Do I know why? No I don't.
-                    RobustDelete(pathToConfigFile);
-                    RobustDelete(newPathToMSBuildExe);
-                    RobustDelete(newPathToMSBuildPdb);
-                    RobustDelete(pathToProjectFile);
                     RobustDelete(startDirectory);
                 }
                 finally
@@ -669,6 +652,7 @@ namespace Microsoft.Build.UnitTests
             // if there's not, we will catch when we try to read the toolsets. Either is fine; we just want to not crash.
             Assert.True(output.Contains("MSB1043") || output.Contains("MSB4136"));
         }
+#endif
 
         /// <summary>
         /// Try hard to delete a file or directory specified
@@ -1002,23 +986,24 @@ namespace Microsoft.Build.UnitTests
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-windows-failing")]
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "MSBuild.rsp");
-
-            string exeDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string exePath = Path.Combine(exeDirectory, "MSBuild.exe");
-            string mainRspPath = Path.Combine(exeDirectory, "MSBuild.rsp");
+            string directory = null;
+            string exeDirectory = null;
 
             try
             {
+                directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(directory);
+                string projectPath = Path.Combine(directory, "my.proj");
+                string rspPath = Path.Combine(directory, "msbuild.rsp");
+
+                exeDirectory = CopyMSBuild();
+                string exePath = Path.Combine(exeDirectory, "msbuild.exe");
+                string mainRspPath = Path.Combine(exeDirectory, "msbuild.rsp");
+
                 Directory.CreateDirectory(exeDirectory);
 
-                CopyMSBuildExeToPath(exeDirectory);
                 File.WriteAllText(mainRspPath, "/p:A=0");
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
@@ -1036,11 +1021,8 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-
-                FileUtilities.DeleteDirectoryNoThrow(exeDirectory, recursive:false);
+                RobustDelete(directory);
+                RobustDelete(exeDirectory);
             }
         }
 
@@ -1049,19 +1031,16 @@ namespace Microsoft.Build.UnitTests
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-windows-failing")]
         public void ProjectDirectoryIsMSBuildExeDirectory()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "MSBuild.rsp");
-            string exePath = Path.Combine(directory, "MSBuild.exe");
+            string directory = null;
 
             try
             {
-                Directory.CreateDirectory(directory);
-
-                CopyMSBuildExeToPath(directory);
+                directory = CopyMSBuild();
+                string projectPath = Path.Combine(directory, "my.proj");
+                string rspPath = Path.Combine(directory, "msbuild.rsp");
+                string exePath = Path.Combine(directory, "msbuild.exe");
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);
@@ -1078,7 +1057,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                FileUtilities.DeleteDirectoryNoThrow(directory, recursive:false);
+                RobustDelete(directory);
             }
         }
 
@@ -1843,22 +1822,33 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        private void CopyMSBuildExeToPath(string destPath)
+        private string CopyMSBuild()
         {
-            File.Copy(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, Path.Combine(destPath, "MSBuild.exe"));
+            string dest = null;
+            try
+            {
+                string source = Path.GetDirectoryName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
+                dest = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
-            var msbuildExeDir = Path.GetDirectoryName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
-            var deps = new string[] {
-                    "Microsoft.Build.dll",
-                    "Microsoft.Build.Framework.dll",
-                    "Microsoft.Build.Tasks.Core.dll",
-                    "Microsoft.Build.Utilities.Core.dll",
-                    "System.Threading.Tasks.Dataflow.dll",
-                    "Microsoft.Common.tasks"
-            };
+                Directory.CreateDirectory(dest);
 
-            foreach (var dep in deps)
-                File.Copy(Path.Combine(msbuildExeDir, dep), Path.Combine(destPath, dep));
+                // Copy MSBuild.exe & dependent files (they will not be in the GAC so they must exist next to msbuild.exe)
+                var filesToCopy = Directory
+                    .EnumerateFiles(source)
+                    .Where(f=> f.EndsWith(".dll") || f.EndsWith(".tasks") || f.EndsWith(".exe") || f.EndsWith(".exe.config"));
+
+                foreach (var file in filesToCopy)
+                {
+                    File.Copy(file, Path.Combine(dest, Path.GetFileName(file)));
+                }
+
+                return dest;
+            }
+            catch (Exception)
+            {
+                RobustDelete(dest);
+                throw;
+            }
         }
     }
 }
