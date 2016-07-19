@@ -364,6 +364,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <_ExplicitReference Include="$(FrameworkPathOverride)\System.dll" />
     </ItemGroup>
 
+    <!-- Import design time targets for Roslyn Project System. These are only available if Visual Studio is installed. -->
+    <PropertyGroup>
+       <VisualBasicDesignTimeTargetsPath Condition="'$(VisualBasicDesignTimeTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed\Microsoft.VisualBasic.DesignTime.targets</VisualBasicDesignTimeTargetsPath>
+    </PropertyGroup>
+    <Import Project="$(VisualBasicDesignTimeTargetsPath)" Condition="'$(VisualBasicDesignTimeTargetsPath)' != '' and Exists('$(VisualBasicDesignTimeTargetsPath)')" />
+
     <Import Project="$(CustomAfterMicrosoftVisualBasicTargets)" Condition="'$(CustomAfterMicrosoftVisualBasicTargets)' != '' and Exists('$(CustomAfterMicrosoftVisualBasicTargets)')" />
 
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter')"/>
