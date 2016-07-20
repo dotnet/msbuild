@@ -7,175 +7,54 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Runner;
+using Microsoft.TemplateEngine.Edge.Settings;
+using Microsoft.TemplateEngine.Edge.Template;
 
 namespace dotnet_new3
 {
     public static class TemplateCreator
     {
-        public static IReadOnlyCollection<ITemplate> List(string searchString, CommandOption source)
+        public static IReadOnlyCollection<ITemplate> List(string searchString)
         {
-            HashSet<ITemplate> results = new HashSet<ITemplate>(TemplateEqualityComparer.Default);
-            IReadOnlyList<IConfiguredTemplateSource> searchSources;
+            HashSet<ITemplate> matchingTemplates = new HashSet<ITemplate>(TemplateEqualityComparer.Default);
+            IReadOnlyList<ITemplate> allTemplates = SettingsLoader.GetTemplates().ToList();
 
-            if (!source.HasValue())
+            foreach (ITemplate template in allTemplates)
             {
-                searchSources = Program.Broker.GetConfiguredSources().ToList();
-            }
-            else
-            {
-                IConfiguredTemplateSource realSource = Program.Broker.GetConfiguredSources().FirstOrDefault(x => x.Alias == source.Value());
-                if (realSource == null)
+                if (string.IsNullOrEmpty(searchString)
+                    || template.Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) > -1
+                    || template.ShortName.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) > -1)
                 {
-                    return results;
-                }
-
-                searchSources = new List<IConfiguredTemplateSource> { realSource };
-            }
-
-            searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
-
-            foreach (IGenerator gen in Program.Broker.ComponentRegistry.OfType<IGenerator>())
-            {
-                foreach (IConfiguredTemplateSource target in searchSources)
-                {
-                    results.UnionWith(gen.GetTemplatesFromSource(target));
+                    matchingTemplates.Add(template);
                 }
             }
 
-            IReadOnlyCollection<ITemplate> aliasResults = AliasRegistry.GetTemplatesForAlias(searchString, results);
-
-            if (!string.IsNullOrWhiteSpace(searchString))
-            {
-                results.RemoveWhere(x => x.Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) < 0 && (x.ShortName?.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) ?? -1) < 0);
-            }
-
-            results.UnionWith(aliasResults);
-            return results;
+            matchingTemplates.UnionWith(AliasRegistry.GetTemplatesForAlias(searchString, allTemplates));
+            return matchingTemplates;
         }
 
-        private static bool TryGetTemplate(string templateName, CommandOption source, bool quiet, out ITemplate tmplt, out IGenerator generator)
+        private static bool TryGetTemplate(string templateName, out ITemplate tmplt)
         {
-            IReadOnlyList<IConfiguredTemplateSource> searchSources;
+            try
+            {
+                IReadOnlyCollection<ITemplate> result = List(templateName);
 
-            if (!source.HasValue())
-            {
-                searchSources = Program.Broker.GetConfiguredSources().ToList();
-            }
-            else
-            {
-                IConfiguredTemplateSource realSource = Program.Broker.GetConfiguredSources().FirstOrDefault(x => x.Alias == source.Value());
-                if (realSource == null)
+                if (result.Count == 1)
                 {
-                    tmplt = null;
-                    generator = null;
-                    return false;
+                    tmplt = result.First();
+                    return true;
                 }
-
-                searchSources = new List<IConfiguredTemplateSource> { realSource };
+            }
+            catch
+            {
             }
 
-            searchSources = ConfiguredTemplateSourceHelper.Scan(searchSources, Program.Broker.ComponentRegistry.OfType<ITemplateSource>());
-
-            string aliasTemplateName = AliasRegistry.GetTemplateNameForAlias(templateName);
-            generator = null;
             tmplt = null;
-
-            foreach (IGenerator gen in Program.Broker.ComponentRegistry.OfType<IGenerator>())
-            {
-                foreach (IConfiguredTemplateSource target in searchSources)
-                {
-                    if (gen.TryGetTemplateFromSource(target, templateName, out tmplt))
-                    {
-                        generator = gen;
-                        break;
-                    }
-
-                    if (aliasTemplateName != null && gen.TryGetTemplateFromSource(target, aliasTemplateName, out tmplt))
-                    {
-                        generator = gen;
-                        break;
-                    }
-                }
-
-                if (generator != null)
-                {
-                    break;
-                }
-            }
-
-            if (generator == null || tmplt == null)
-            {
-                List<ITemplate> results = List(templateName, source).ToList();
-
-                if (results.Count == 0)
-                {
-                    if (!string.IsNullOrWhiteSpace(templateName) || source.HasValue())
-                    {
-                        Reporter.Error.WriteLine($"No template containing \"{templateName}\" was found in any of the configured sources.".Bold().Red());
-                    }
-                    else
-                    {
-                        TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
-                        {
-                            {"#", x => "0." },
-                            {"Templates", x => x.Name},
-                            {"Short Names", x => $"[{x.ShortName}]"}
-                        });
-                    }
-
-                    return false;
-                }
-
-                int index;
-
-                if (results.Count != 1 || string.IsNullOrWhiteSpace(templateName))
-                {
-                    int counter = 0;
-                    TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
-                    {
-                        {"#", x => $"{++counter}." },
-                        {"Templates", x => x.Name},
-                        {"Short Names", x => $"[{x.ShortName}]"}
-                    });
-
-                    Reporter.Output.WriteLine();
-                    Reporter.Output.WriteLine("Select a template [1]:");
-
-                    string key = Console.ReadLine();
-
-                    if (string.IsNullOrWhiteSpace(key))
-                    {
-                        key = "1";
-                    }
-
-                    while (!int.TryParse(key, out index))
-                    {
-                        if (string.Equals(key, "q", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return false;
-                        }
-
-                        key = Console.ReadLine();
-                    }
-                }
-                else
-                {
-                    if (!quiet)
-                    {
-                        Reporter.Output.WriteLine($"Using template: {results[0].Name} [{results[0].ShortName}] {AliasRegistry.GetAliasForTemplate(results[0])}");
-                    }
-
-                    index = 1;
-                }
-
-                tmplt = results[index - 1];
-                generator = results[index - 1].Generator;
-            }
-
-            return true;
+            return false;
         }
 
-        public static async Task<int> Instantiate(CommandLineApplication app, string templateName, CommandOption name, CommandOption dir, CommandOption source, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters, bool quiet, bool skipUpdateCheck)
+        public static async Task<int> Instantiate(CommandLineApplication app, string templateName, CommandOption name, CommandOption dir, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters, bool quiet, bool skipUpdateCheck)
         {
             if(string.IsNullOrWhiteSpace(templateName) && help.HasValue())
             {
@@ -184,11 +63,12 @@ namespace dotnet_new3
             }
 
             ITemplate tmplt;
-            IGenerator generator;
-            if (!TryGetTemplate(templateName, source, quiet, out tmplt, out generator))
+            if (!TryGetTemplate(templateName, out tmplt))
             {
                 return -1;
             }
+
+            IGenerator generator = tmplt.Generator;
 
             if (!skipUpdateCheck)
             {
@@ -197,39 +77,42 @@ namespace dotnet_new3
                     Reporter.Output.WriteLine("Checking for updates...");
                 }
 
-                bool updatesReady;
+                //TODO: Implement check for updates over mount points
+                //bool updatesReady;
 
-                if (tmplt.Source.ParentSource != null)
-                {
-                    updatesReady = await tmplt.Source.Source.CheckForUpdatesAsync(tmplt.Source.ParentSource, tmplt.Source.Location);
-                }
-                else
-                {
-                    updatesReady = await tmplt.Source.Source.CheckForUpdatesAsync(tmplt.Source.Location);
-                }
+                //if (tmplt.Source.ParentSource != null)
+                //{
+                //    updatesReady = await tmplt.Source.Source.CheckForUpdatesAsync(tmplt.Source.ParentSource, tmplt.Source.Location);
+                //}
+                //else
+                //{
+                //    updatesReady = await tmplt.Source.Source.CheckForUpdatesAsync(tmplt.Source.Location);
+                //}
 
-                if (updatesReady)
-                {
-                    Console.WriteLine("Updates for this template are available. Install them now? [Y]");
-                    string answer = Console.ReadLine();
+                //if (updatesReady)
+                //{
+                //    Console.WriteLine("Updates for this template are available. Install them now? [Y]");
+                //    string answer = Console.ReadLine();
 
-                    if (string.IsNullOrEmpty(answer) || answer.Trim().StartsWith("y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        string packageId = tmplt.Source.ParentSource != null
-                            ? tmplt.Source.Source.GetInstallPackageId(tmplt.Source.ParentSource, tmplt.Source.Location)
-                            : tmplt.Source.Source.GetInstallPackageId(tmplt.Source.Location);
+                //    if (string.IsNullOrEmpty(answer) || answer.Trim().StartsWith("y", StringComparison.OrdinalIgnoreCase))
+                //    {
+                //        string packageId = tmplt.Source.ParentSource != null
+                //            ? tmplt.Source.Source.GetInstallPackageId(tmplt.Source.ParentSource, tmplt.Source.Location)
+                //            : tmplt.Source.Source.GetInstallPackageId(tmplt.Source.Location);
 
-                        Command.CreateDotNet("new3", new[] { "-u", packageId, "--quiet" }).ForwardStdOut().ForwardStdErr().Execute();
-                        Command.CreateDotNet("new3", new[] { "-i", packageId, "--quiet" }).ForwardStdOut().ForwardStdErr().Execute();
+                //        Command.CreateDotNet("new3", new[] { "-u", packageId, "--quiet" }).ForwardStdOut().ForwardStdErr().Execute();
+                //        Command.CreateDotNet("new3", new[] { "-i", packageId, "--quiet" }).ForwardStdOut().ForwardStdErr().Execute();
 
-                        Program.Broker.ComponentRegistry.ForceReinitialize();
+                //        Program.Broker.ComponentRegistry.ForceReinitialize();
 
-                        if (!TryGetTemplate(templateName, source, quiet, out tmplt, out generator))
-                        {
-                            return -1;
-                        }
-                    }
-                }
+                //        if (!TryGetTemplate(templateName, source, quiet, out tmplt))
+                //        {
+                //            return -1;
+                //        }
+
+                //        generator = tmplt.Generator;
+                //    }
+                //}
             }
 
             string realName = name.Value() ?? tmplt.DefaultName ?? new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
@@ -323,7 +206,7 @@ namespace dotnet_new3
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                await generator.Create(tmplt, templateParams);
+                await generator.Create(new Orchestrator(), tmplt, templateParams);
                 sw.Stop();
 
                 if (!quiet)

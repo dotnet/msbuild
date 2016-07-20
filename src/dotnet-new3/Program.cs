@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Mount;
+using Microsoft.TemplateEngine.Core;
+using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Edge.Settings;
+using NuGet.Protocol.Core.v3;
 
 namespace dotnet_new3
 {
     public class Program
     {
-        internal static IBroker Broker { get; private set; }
-
         public static int Main(string[] args)
         {
-            //Console.ReadLine();
-            Broker = new Broker();
-
             CommandLineApplication app = new CommandLineApplication(false)
             {
                 Name = "dotnet new3",
@@ -32,8 +32,6 @@ namespace dotnet_new3
             CommandOption parametersFiles = app.Option("-x|--extra-args", "Adds a parameters file.", CommandOptionType.MultipleValue);
             CommandOption install = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
             CommandOption uninstall = app.Option("-u|--uninstall", "Uninstalls a source", CommandOptionType.MultipleValue);
-            CommandOption source = app.Option("-s|--source", "The specific template source to get the template from.", CommandOptionType.SingleValue);
-            CommandOption currentConfig = app.Option("-c|--current-config", "Lists the currently installed components and sources.", CommandOptionType.NoValue);
             CommandOption help = app.Option("-h|--help", "Indicates whether to display the help for the template's parameters instead of creating it.", CommandOptionType.NoValue);
 
             CommandOption installComponent = app.Option("--install-component", "Installs a component.", CommandOptionType.MultipleValue);
@@ -49,21 +47,21 @@ namespace dotnet_new3
             {
                 if (reinit.HasValue())
                 {
-                    Paths.FirstRunCookie.Delete();
+                    Paths.User.FirstRunCookie.Delete();
                     return Task.FromResult(0);
                 }
 
-                if (!Paths.UserDir.Exists() || !Paths.FirstRunCookie.Exists())
+                if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
                 {
                     if (!quiet.HasValue())
                     {
                         Reporter.Output.WriteLine("Getting things ready for first use...");
                     }
 
-                    if (!Paths.FirstRunCookie.Exists())
+                    if (!Paths.User.FirstRunCookie.Exists())
                     {
                         PerformReset(true, true);
-                        Paths.FirstRunCookie.WriteAllText("");
+                        Paths.User.FirstRunCookie.WriteAllText("");
                     }
 
                     ConfigureEnvironment();
@@ -72,7 +70,6 @@ namespace dotnet_new3
 
                 if (rescan.HasValue())
                 {
-                    Broker.ComponentRegistry.ForceReinitialize();
                     ShowConfig();
                     return Task.FromResult(0);
                 }
@@ -83,7 +80,7 @@ namespace dotnet_new3
                     return Task.FromResult(0);
                 }
 
-                if (currentConfig.HasValue())
+                if (app.RemainingArguments.Any(x => x == "--debug:showconfig"))
                 {
                     ShowConfig();
                     return Task.FromResult(0);
@@ -103,7 +100,7 @@ namespace dotnet_new3
 
                 if (update.HasValue())
                 {
-                    return PerformUpdateAsync(template.Value, quiet.HasValue(), source);
+                    //return PerformUpdateAsync(template.Value, quiet.HasValue(), source);
                 }
 
                 if (uninstall.HasValue())
@@ -112,52 +109,15 @@ namespace dotnet_new3
                     {
                         if (value == "*")
                         {
-                            Paths.TemplateSourcesFile.Delete();
-                            Paths.AliasesFile.Delete();
-
-                            if (global.HasValue())
-                            {
-                                Paths.GlobalTemplateCacheDir.Delete();
-                            }
-                            else
-                            {
-                                Paths.TemplateCacheDir.Delete();
-                            }
+                            Paths.User.AliasesFile.Delete();
+                            //TODO: Reset settings, delete template cache
 
                             return Task.FromResult(0);
                         }
 
                         if (!TryRemoveSource(value))
                         {
-                            string cacheDir = global.HasValue() ? Paths.GlobalTemplateCacheDir : Paths.TemplateCacheDir;
-                            bool anyRemoved = false;
-
-                            if (!value.Exists())
-                            {
-                                foreach(string file in cacheDir.EnumerateFiles($"{value}.*.nupkg"))
-                                {
-                                    int verStart = file.IndexOf(value, StringComparison.OrdinalIgnoreCase) + value.Length + 1;
-                                    string ver = file.Substring(verStart);
-                                    ver = ver.Substring(0, ver.Length - ".nupkg".Length);
-                                    Version version;
-
-                                    if (Version.TryParse(ver, out version))
-                                    {
-                                        if (!quiet.HasValue())
-                                        {
-                                            Reporter.Output.WriteLine($"Removing {value} version {version}...");
-                                        }
-
-                                        anyRemoved = true;
-                                        file.Delete();
-                                    }
-                                }
-                            }
-
-                            if (!anyRemoved && !quiet.HasValue())
-                            {
-                                Reporter.Error.WriteLine($"Couldn't remove {value} as a template source.".Red().Bold());
-                            }
+                            //TODO: Remove mount points
                         }
                     }
 
@@ -166,7 +126,7 @@ namespace dotnet_new3
 
                 if (listOnly.HasValue())
                 {
-                    ListTemplates(template, source);
+                    ListTemplates(template);
                     return Task.FromResult(0);
                 }
 
@@ -183,7 +143,7 @@ namespace dotnet_new3
                     return Task.FromResult(-1);
                 }
 
-                return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, source, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue());
+                return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue());
             });
 
             int result;
@@ -224,109 +184,108 @@ namespace dotnet_new3
             return result;
         }
 
-        private static async Task<int> PerformUpdateAsync(string name, bool quiet, CommandOption source)
-        {
-            HashSet<IConfiguredTemplateSource> allSources = new HashSet<IConfiguredTemplateSource>();
-            HashSet<string> toInstall = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        //private static async Task<int> PerformUpdateAsync(string name, bool quiet, CommandOption source)
+        //{
+        //    HashSet<IConfiguredTemplateSource> allSources = new HashSet<IConfiguredTemplateSource>();
+        //    HashSet<string> toInstall = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (ITemplate template in TemplateCreator.List(name, source))
-            {
-                allSources.Add(template.Source);
-            }
+        //    foreach (ITemplate template in TemplateCreator.List(name, source))
+        //    {
+        //        allSources.Add(template.Source);
+        //    }
 
-            foreach (IConfiguredTemplateSource src in allSources)
-            {
-                if (!quiet)
-                {
-                    Reporter.Output.WriteLine($"Checking for updates for {src.Alias}...");
-                }
+        //    foreach (IConfiguredTemplateSource src in allSources)
+        //    {
+        //        if (!quiet)
+        //        {
+        //            Reporter.Output.WriteLine($"Checking for updates for {src.Alias}...");
+        //        }
 
-                bool updatesReady;
+        //        bool updatesReady;
 
-                if (src.ParentSource != null)
-                {
-                    updatesReady = await src.Source.CheckForUpdatesAsync(src.ParentSource, src.Location);
-                }
-                else
-                {
-                    updatesReady = await src.Source.CheckForUpdatesAsync(src.Location);
-                }
+        //        if (src.ParentSource != null)
+        //        {
+        //            updatesReady = await src.Source.CheckForUpdatesAsync(src.ParentSource, src.Location);
+        //        }
+        //        else
+        //        {
+        //            updatesReady = await src.Source.CheckForUpdatesAsync(src.Location);
+        //        }
 
-                if (updatesReady)
-                {
-                    if (!quiet)
-                    {
-                        Reporter.Output.WriteLine($"An update for {src.Alias} is available...");
-                    }
+        //        if (updatesReady)
+        //        {
+        //            if (!quiet)
+        //            {
+        //                Reporter.Output.WriteLine($"An update for {src.Alias} is available...");
+        //            }
 
-                    string packageId = src.ParentSource != null
-                        ? src.Source.GetInstallPackageId(src.ParentSource, src.Location)
-                        : src.Source.GetInstallPackageId(src.Location);
+        //            string packageId = src.ParentSource != null
+        //                ? src.Source.GetInstallPackageId(src.ParentSource, src.Location)
+        //                : src.Source.GetInstallPackageId(src.Location);
 
-                    toInstall.Add(packageId);
-                }
-            }
+        //            toInstall.Add(packageId);
+        //        }
+        //    }
 
-            if(toInstall.Count == 0)
-            {
-                if (!quiet)
-                {
-                    Reporter.Output.WriteLine("No updates were found.");
-                }
+        //    if(toInstall.Count == 0)
+        //    {
+        //        if (!quiet)
+        //        {
+        //            Reporter.Output.WriteLine("No updates were found.");
+        //        }
 
-                return 0;
-            }
+        //        return 0;
+        //    }
 
-            if (!quiet)
-            {
-                Reporter.Output.WriteLine("Installing updates...");
-            }
+        //    if (!quiet)
+        //    {
+        //        Reporter.Output.WriteLine("Installing updates...");
+        //    }
 
-            List<string> installCommands = new List<string>();
-            List<string> uninstallCommands = new List<string>();
+        //    List<string> installCommands = new List<string>();
+        //    List<string> uninstallCommands = new List<string>();
 
-            foreach (string packageId in toInstall)
-            {
-                installCommands.Add("-i");
-                installCommands.Add(packageId);
+        //    foreach (string packageId in toInstall)
+        //    {
+        //        installCommands.Add("-i");
+        //        installCommands.Add(packageId);
 
-                uninstallCommands.Add("-i");
-                uninstallCommands.Add(packageId);
-            }
+        //        uninstallCommands.Add("-i");
+        //        uninstallCommands.Add(packageId);
+        //    }
 
-            installCommands.Add("--quiet");
-            uninstallCommands.Add("--quiet");
+        //    installCommands.Add("--quiet");
+        //    uninstallCommands.Add("--quiet");
 
-            Command.CreateDotNet("new3", uninstallCommands).ForwardStdOut().ForwardStdErr().Execute();
-            Command.CreateDotNet("new3", installCommands).ForwardStdOut().ForwardStdErr().Execute();
-            Broker.ComponentRegistry.ForceReinitialize();
+        //    Command.CreateDotNet("new3", uninstallCommands).ForwardStdOut().ForwardStdErr().Execute();
+        //    Command.CreateDotNet("new3", installCommands).ForwardStdOut().ForwardStdErr().Execute();
+        //    Broker.ComponentRegistry.ForceReinitialize();
 
-            if (!quiet)
-            {
-                Reporter.Output.WriteLine("Done.");
-            }
+        //    if (!quiet)
+        //    {
+        //        Reporter.Output.WriteLine("Done.");
+        //    }
 
-            return 0;
-        }
+        //    return 0;
+        //}
 
         private static void ConfigureEnvironment()
         {
             string userNuGetConfig = $@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <packageSources>
-    <add key=""dotnet new3 builtins"" value = ""{Paths.BuiltInsFeed}""/>
-    <add key=""CLI Dependencies"" value=""https://dotnet.myget.org/F/cli-deps/api/v3/index.json"" />
+    <add key=""dotnet new3 builtins"" value = ""{Paths.Global.BuiltInsFeed}""/>
   </packageSources>
 </configuration>";
 
-            Paths.UserNuGetConfig.WriteAllText(userNuGetConfig);
-            string[] packages = Paths.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            Paths.User.NuGetConfig.WriteAllText(userNuGetConfig);
+            string[] packages = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
                 InstallPackage(packages, false, true, true);
             }
 
-            packages = Paths.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            packages = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
                 InstallPackage(packages, true, true, true);
@@ -335,47 +294,47 @@ namespace dotnet_new3
 
         private static void InstallPackage(IReadOnlyList<string> packages, bool installingTemplates, bool global, bool quiet = false)
         {
-            NuGetUtil.InstallPackage(packages, installingTemplates, global, quiet, TryAddSource);
-            Broker.ComponentRegistry.ForceReinitialize();
+            NuGetUtil.InstallPackage(packages, global, quiet);
 
             if (!quiet)
             {
-                ListTemplates(new CommandArgument(), new CommandOption("--notReal", CommandOptionType.SingleValue));
+                ListTemplates(new CommandArgument());
             }
         }
 
         private static void PerformReset(bool global, bool quiet = false)
         {
-            if (global)
-            {
-                Paths.GlobalComponentsDir.Delete();
-                Paths.GlobalComponentCacheFile.Delete();
-                Paths.GlobalTemplateCacheDir.Delete();
-            }
+            //TODO: Reset things
+            //if (global)
+            //{
+            //    Paths.GlobalComponentsDir.Delete();
+            //    Paths.GlobalComponentCacheFile.Delete();
+            //    Paths.GlobalTemplateCacheDir.Delete();
+            //}
 
-            Paths.ComponentsDir.Delete();
-            Paths.TemplateCacheDir.Delete();
-            Paths.ScratchDir.Delete();
-            Paths.TemplateSourcesFile.Delete();
-            Paths.AliasesFile.Delete();
-            Paths.ComponentCacheFile.Delete();
+            //Paths.ComponentsDir.Delete();
+            //Paths.TemplateCacheDir.Delete();
+            //Paths.ScratchDir.Delete();
+            //Paths.TemplateSourcesFile.Delete();
+            //Paths.AliasesFile.Delete();
+            //Paths.ComponentCacheFile.Delete();
 
-            Paths.TemplateCacheDir.CreateDirectory();
-            Paths.ComponentsDir.CreateDirectory();
-            Broker.ComponentRegistry.ForceReinitialize();
-            TryAddSource(Paths.TemplateCacheDir);
-            TryAddSource(Paths.GlobalTemplateCacheDir);
+            //Paths.TemplateCacheDir.CreateDirectory();
+            //Paths.ComponentsDir.CreateDirectory();
+            //Broker.ComponentRegistry.ForceReinitialize();
+            //TryAddSource(Paths.TemplateCacheDir);
+            //TryAddSource(Paths.GlobalTemplateCacheDir);
 
-            if (!quiet)
-            {
-                ShowConfig();
-            }
+            //if (!quiet)
+            //{
+            //    ShowConfig();
+            //}
         }
 
-        private static void ListTemplates(CommandArgument template, CommandOption source)
+        private static void ListTemplates(CommandArgument template)
         {
-            IEnumerable<ITemplate> results = TemplateCreator.List(template.Value, source);
-            TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, string>>
+            IEnumerable<ITemplate> results = TemplateCreator.List(template.Value);
+            TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, object>>
             {
                 {"Templates", x => x.Name},
                 {"Short Names", x => $"[{x.ShortName}]"},
@@ -385,55 +344,61 @@ namespace dotnet_new3
 
         private static bool TryRemoveSource(string value)
         {
-            return Broker.RemoveConfiguredSource(value);
+            return false;
+            //return Broker.RemoveConfiguredSource(value);
         }
 
         private static void ShowConfig()
         {
             Reporter.Output.WriteLine("dotnet new3 current configuration:");
             Reporter.Output.WriteLine(" ");
-            TableFormatter.Print(Broker.GetConfiguredSources(), "(No Items)", "   ", '-', new Dictionary<string, Func<IConfiguredTemplateSource, string>>
+            TableFormatter.Print(SettingsLoader.MountPoints, "(No Items)", "   ", '-', new Dictionary<string, Func<MountPointInfo, object>>
             {
-                { "Template Sources", x => x.Location }
+                {"Mount Points", x => x.Place},
+                {"Id", x => x.MountPointId},
+                {"Parent", x => x.ParentMountPointId},
+                {"Factory", x => x.MountPointFactoryId}
             });
 
-            TableFormatter.Print(Broker.ComponentRegistry.OfType<ITemplateSource>(), "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplateSource, string>>
+            TableFormatter.Print(SettingsLoader.Components.OfType<IMountPointFactory>(), "(No Items)", "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
             {
-                { "Template Source Readers", x => x.Name },
-                { "Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName }
+                {"Mount Point Factories", x => x.Id},
+                {"Type", x => x.GetType().FullName},
+                {"Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
 
-            TableFormatter.Print(Broker.ComponentRegistry.OfType<IGenerator>(), "(No Items)", "   ", '-', new Dictionary<string, Func<IGenerator, string>>
+            TableFormatter.Print(SettingsLoader.Components.OfType<IGenerator>(), "(No Items)", "   ", '-', new Dictionary<string, Func<IGenerator, object>>
             {
-                { "Generators", x => x.Name },
-                { "Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName }
+                {"Generators", x => x.Id},
+                {"Type", x => x.GetType().FullName},
+                {"Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
         }
 
         private static bool TryAddSource(string value)
         {
-            ITemplateSource source = null;
-            foreach (ITemplateSource src in Broker.ComponentRegistry.OfType<ITemplateSource>())
-            {
-                if (src.CanHandle(value))
-                {
-                    source = src;
-                }
-            }
+            //ITemplateSource source = null;
+            //foreach (ITemplateSource src in Broker.ComponentRegistry.OfType<ITemplateSource>())
+            //{
+            //    if (src.CanHandle(value))
+            //    {
+            //        source = src;
+            //    }
+            //}
 
-            if (source == null)
-            {
-                return false;
-            }
+            //if (source == null)
+            //{
+            //    return false;
+            //}
 
-            Broker.AddConfiguredSource(value, source.Name, value);
+            //Broker.AddConfiguredSource(value, source.Name, value);
             return true;
         }
     }
 
     internal class TableFormatter
     {
-        public static void Print<T>(IEnumerable<T> items, string noItemsMessage, string columnPad, char header, Dictionary<string, Func<T, string>> dictionary)
+        public static void Print<T>(IEnumerable<T> items, string noItemsMessage, string columnPad, char header, Dictionary<string, Func<T, object>> dictionary)
         {
             List<string>[] columns = new List<string>[dictionary.Count];
 
@@ -449,10 +414,10 @@ namespace dotnet_new3
             foreach (T item in items)
             {
                 int index = 0;
-                foreach (KeyValuePair<string, Func<T, string>> act in dictionary)
+                foreach (KeyValuePair<string, Func<T, object>> act in dictionary)
                 {
                     headers[index] = act.Key;
-                    columns[index++].Add(act.Value(item));
+                    columns[index++].Add(act.Value(item)?.ToString() ?? "(null)");
                 }
                 ++valueCount;
             }
@@ -467,7 +432,7 @@ namespace dotnet_new3
             else
             {
                 int index = 0;
-                foreach (KeyValuePair<string, Func<T, string>> act in dictionary)
+                foreach (KeyValuePair<string, Func<T, object>> act in dictionary)
                 {
                     headers[index] = act.Key;
                     columnWidths[index++] = act.Key.Length;
