@@ -154,6 +154,18 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void BuildEnvironmentDetectsVisualStudioByBlendProcess()
+        {
+            using (var env = new EmptyBuildEnviroment())
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.BlendPath, ReturnNull, () => env.MSBuildExePath, ReturnNull);
+
+                Assert.True(BuildEnvironmentHelper.Instance.RunningInVisualStudio);
+                Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
+            }
+        }
+
+        [Fact]
         public void BuildEnvironmentFindsAmd64()
         {
             using (var env = new EmptyBuildEnviroment())
@@ -199,6 +211,8 @@ namespace Microsoft.Build.Engine.UnitTests
 
             public string DevEnvPath { get; }
 
+            public string BlendPath { get; }
+
             public string BuildDirectory { get; }
 
             public string BuildDirectory64 { get; }
@@ -223,6 +237,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     BuildDirectory = Path.Combine(TempFolderRoot, "MSBuild", "15.0", "Bin");
                     BuildDirectory64 = Path.Combine(BuildDirectory, "amd64");
                     DevEnvPath = Path.Combine(TempFolderRoot, "Common7", "IDE", "devenv.exe");
+                    BlendPath = Path.Combine(TempFolderRoot, "Common7", "IDE", "blend.exe");
 
                     Directory.CreateDirectory(BuildDirectory);
                     foreach (var file in files)
