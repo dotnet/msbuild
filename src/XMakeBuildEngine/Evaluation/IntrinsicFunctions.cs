@@ -364,6 +364,31 @@ namespace Microsoft.Build.Evaluation
             return false;
         }
 
+        public static string GetCurrentExecutableDirectory()
+        {
+            return FileUtilities.CurrentExecutableDirectory;
+        }
+
+        public static string GetVsInstallRoot()
+        {
+            var vsInstallDir = Environment.GetEnvironmentVariable("VSINSTALLDIR");
+            var vsVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
+
+            if (!string.IsNullOrEmpty(vsInstallDir) && !string.IsNullOrEmpty(vsVersion))
+            {
+                if (vsVersion == "15.0" && Directory.Exists(vsInstallDir))
+                {
+                    return vsInstallDir;
+                }
+            }
+
+            // This assumes MSBuild is in VS\MSBuild\15.0\Bin.
+            var msbuildDir = FileUtilities.CurrentExecutableDirectory;
+            vsInstallDir = Path.GetFullPath(Path.Combine(msbuildDir, @"..\..\.."));
+
+            return vsInstallDir;
+        }
+
         #region Debug only intrinsics
 
         /// <summary>

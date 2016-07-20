@@ -760,6 +760,10 @@
       <SubType>Designer</SubType>
       <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="ManifestUtil\Strings.resx">
+      <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">
       <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.manifest.xml</LogicalName>
