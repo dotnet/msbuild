@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata minClientVersion="2.8.1">
     <id>Microsoft.Build.Targets</id>
@@ -34,17 +34,10 @@
     <file src="Microsoft.Common.targets" target="runtimes\any\native" />
     <file src="Microsoft.CSharp.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.CSharp.targets" target="runtimes\any\native" />
-    <file src="Microsoft.Data.Entity.Shim.targets" target="runtimes\any\native" />
     <file src="Microsoft.NETFramework.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.NETFramework.targets" target="runtimes\any\native" />
-    <file src="Microsoft.ServiceModel.Shim.targets" target="runtimes\any\native" />
     <file src="Microsoft.VisualBasic.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.VisualBasic.targets" target="runtimes\any\native" />
-    <file src="Microsoft.WinFx.Shim.targets" target="runtimes\any\native" />
-    <file src="Microsoft.WorkflowBuildExtensions.Shim.targets" target="runtimes\any\native" />
-    <file src="Microsoft.Xaml.Shim.targets" target="runtimes\any\native" />
-    <file src="Workflow.Shim.Targets" target="runtimes\any\native" />
-    <file src="Workflow.VisualBasic.Shim.Targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.overridetasks" target="runtimes\any\native" />
     <file src="Extensions\14.1\Microsoft.Common.props" target="contentFiles\any\any\14.1" />
     <file src="Microsoft.Common.tasks" target="runtimes\any\native" />
@@ -53,6 +46,15 @@
     <file src="Microsoft.VisualStudioVersion.v11.Common.props" target="runtimes\any\native" />
     <file src="Microsoft.VisualStudioVersion.v12.Common.props" target="runtimes\any\native" />
     <file src="Microsoft.VisualStudioVersion.v14.Common.props" target="runtimes\any\native" />
-    <file src="Microsoft.Xaml.Shim.targets" target="runtimes\any\native" />
+
+    <!-- Shim targets should only be included for full-framework deployments. -->
+    <!-- Until there is a distinction in the package, leaving them commented out here.
+    <file src="Microsoft.Data.Entity.targets" target="runtimes\any\native" />
+    <file src="Microsoft.ServiceModel.targets" target="runtimes\any\native" />
+    <file src="Microsoft.WinFx.targets" target="runtimes\any\native" />
+    <file src="Microsoft.WorkflowBuildExtensions.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Xaml.targets" target="runtimes\any\native" />
+    <file src="Workflow.Targets" target="runtimes\any\native" />
+    <file src="Workflow.VisualBasic.Targets" target="runtimes\any\native" /> -->
   </files>
 </package>
