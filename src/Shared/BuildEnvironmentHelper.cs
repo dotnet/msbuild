@@ -18,9 +18,9 @@ namespace Microsoft.Build.Shared
         };
 
         /// <summary>
-        /// Name of the Visual Studio process(es)
+        /// Name of the Visual Studio (and Blend) process.
         /// </summary>
-        private static readonly string[] s_visualStudioProcess = {"DEVENV"};
+        private static readonly string[] s_visualStudioProcess = {"DEVENV", "BLEND"};
 
         /// <summary>
         /// Name of the MSBuild process(es)
@@ -143,10 +143,9 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Look for Visual Studio
         /// </summary>
-        /// <param name="processName"></param>
-        /// <param name="processName2"></param>
-        /// <param name="runningInVisualStudio"></param>
-        /// <returns></returns>
+        /// <param name="processNames">Name(s) of Visual Studio processes.</param>
+        /// <param name="runningInVisualStudio">True if running in Visual Studio</param>
+        /// <returns>Path to Visual Studio install root.</returns>
         private static string FindVisualStudio(string[] processNames, out bool runningInVisualStudio)
         {
             runningInVisualStudio = false;
@@ -158,7 +157,7 @@ namespace Microsoft.Build.Shared
                 {
                     runningInVisualStudio = true;
 
-                    // This assumes running from VS\Common7\IDE\devenv.exe.
+                    // This assumes running from VS\Common7\IDE\<process>.exe.
                     return FileUtilities.GetFolderAbove(process, 3);
                 }
             }
