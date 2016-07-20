@@ -19,15 +19,15 @@
   <UsingTask TaskName="MakeNetCoreRunnable" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)/Microsoft.DotNet.Core.Build.Tasks.dll" />
              
   <PropertyGroup>
-    <!-- TODO Condition="IsNetCore" -->
     <CoreBuildDependsOn>
-      NetCorePreCoreBuild;
       $(CoreBuildDependsOn);
-      NetCorePostCoreBuild
+      GenerateDependencyFile;
+      GenerateRuntimeConfigurationFiles
     </CoreBuildDependsOn>
   </PropertyGroup>
 
-  <Target Name="MakeCompilationOutputRunnable">
+  <Target Name="GenerateDependencyFile"
+          Condition=" '$(GenerateDependencyFile)' == 'true'">
     <!--
     TODO: Is this the best way? Should we just tell CSC to output $(AssemblyName).dll directly?
     -->
@@ -42,10 +42,12 @@
                          OutputType="$(OutputType)" />
   </Target>
 
-  <Target Name="NetCorePreCoreBuild" />
+  <Target Name="GenerateRuntimeConfigurationFiles"
+        Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
 
-  <Target Name="NetCorePostCoreBuild"
-          DependsOnTargets="MakeCompilationOutputRunnable" />
+    <!-- TODO: Split up MakeNetCoreRunnable and implement this target-->
+    <!-- Putting this here to show the structure that we should use in production -->
+  </Target>
 
   <!--
     ============================================================
@@ -57,23 +59,19 @@
 
   <PropertyGroup>
     <PublishDependsOn>
-      NetCorePublishPreBuild;
       Build;
-      NetCorePublishPostBuild
+      CopyPublishArtifacts
     </PublishDependsOn>
+
+    <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
   </PropertyGroup>
+
   <Target
       Name="Publish"
       DependsOnTargets="$(PublishDependsOn)" />
 
-  <Target Name="NetCorePublishPreBuild">
-    <PropertyGroup>
-      <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
-    </PropertyGroup>
-  </Target>
-
-  <Target Name="NetCorePublishPostBuild">
-    <Message Text="ERIC NetCorePublishPostBuild" />
-
+  <Target Name="CopyPublishArtifacts">
+    <Message Text="ERIC CopyPublishArtifacts" />
+    <!--<Copy ... ="/>" />-->
   </Target>
 </Project>

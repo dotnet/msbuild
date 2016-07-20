@@ -24,7 +24,12 @@
     }
   },
   "publishOptions": {
-    "include": "14.1/**"
+    "include": [
+      "14.1/**"
+    ],
+    "mappings": {
+      "NETCore/": "../Microsoft.DotNet.Core.MSBuild/build/netstandard1.0/*"
+    }
   },
   "dependencies": {
     "NuGet.Commands": {
