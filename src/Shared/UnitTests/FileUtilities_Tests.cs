@@ -864,17 +864,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetFolderAboveTest()
         {
-            string path = @"c:\1\2\3\4\5";
+            string root = NativeMethodsShared.IsWindows ? @"c:\" : "/";
+            string path = Path.Combine(root, "1", "2", "3", "4", "5");
 
-            Assert.Equal(@"c:\1\2\3\4\5", FileUtilities.GetFolderAbove(path, 0));
-            Assert.Equal(@"c:\1\2\3\4", FileUtilities.GetFolderAbove(path));
-            Assert.Equal(@"c:\1\2\3", FileUtilities.GetFolderAbove(path, 2));
-            Assert.Equal(@"c:\1\2", FileUtilities.GetFolderAbove(path, 3));
-            Assert.Equal(@"c:\1", FileUtilities.GetFolderAbove(path, 4));
-            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(path, 5));
-            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(path, 99));
+            Assert.Equal(Path.Combine(root, "1", "2", "3", "4", "5"), FileUtilities.GetFolderAbove(path, 0));
+            Assert.Equal(Path.Combine(root, "1", "2", "3", "4"), FileUtilities.GetFolderAbove(path));
+            Assert.Equal(Path.Combine(root, "1", "2", "3"), FileUtilities.GetFolderAbove(path, 2));
+            Assert.Equal(Path.Combine(root, "1", "2"), FileUtilities.GetFolderAbove(path, 3));
+            Assert.Equal(Path.Combine(root, "1"), FileUtilities.GetFolderAbove(path, 4));
+            Assert.Equal(root, FileUtilities.GetFolderAbove(path, 5));
+            Assert.Equal(root, FileUtilities.GetFolderAbove(path, 99));
 
-            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(@"c:\", 99));
+            Assert.Equal(root, FileUtilities.GetFolderAbove(root, 99));
         }
 
         [Fact]
