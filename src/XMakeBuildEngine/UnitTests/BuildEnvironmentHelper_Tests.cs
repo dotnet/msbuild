@@ -135,7 +135,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/669")]
         public void BuildEnvironmentDetectsRunningTests()
         {
             Assert.True(BuildEnvironmentHelper.Instance.RunningTests);
