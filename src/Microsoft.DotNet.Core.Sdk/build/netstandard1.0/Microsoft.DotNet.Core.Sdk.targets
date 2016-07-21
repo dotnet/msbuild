@@ -4,7 +4,9 @@
     <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netstandard1.6</MicrosoftDotNetCoreBuildTasksTFM>
     <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MicrosoftDotNetCoreBuildTasksTFM)' == ''">net451</MicrosoftDotNetCoreBuildTasksTFM>
     <MicrosoftDotNetCoreBuildTasksDirectory>$(MicrosoftDotNetCoreBuildTasksDirectoryRoot)$(MicrosoftDotNetCoreBuildTasksTFM)/</MicrosoftDotNetCoreBuildTasksDirectory>
-  
+
+	<!-- If the build task directory doesn't exist (since we aren't in a NuGet package), load the task assembly in the tools path -->
+    <MicrosoftDotNetCoreBuildTasksDirectory Condition=" !Exists('$(MicrosoftDotNetCoreBuildTasksDirectory)') ">$(MSBuildToolsPath)/</MicrosoftDotNetCoreBuildTasksDirectory>
 </PropertyGroup>
 
   <PropertyGroup>
@@ -16,7 +18,7 @@
     <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
   </PropertyGroup>
   
-  <UsingTask TaskName="MakeNetCoreRunnable" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)/Microsoft.DotNet.Core.Build.Tasks.dll" />
+  <UsingTask TaskName="MakeNetCoreRunnable" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll" />
              
   <PropertyGroup>
     <CoreBuildDependsOn>
@@ -47,6 +49,28 @@
 
     <!-- TODO: Split up MakeNetCoreRunnable and implement this target-->
     <!-- Putting this here to show the structure that we should use in production -->
+  </Target>
+
+  <!--
+    ============================================================
+                                        GetRunInformation
+
+    Returns the ProcessStart information that can be used to run this project.
+    ============================================================
+    -->
+
+  <Target Name="GetRunInformation"
+          DependsOnTargets="GenerateRunInformation"
+          Outputs="@(RunInformation)" />
+
+  <Target Name="GenerateRunInformation">
+    <ItemGroup>
+      <RunInformation Include="$(MSBuildProjectFullPath)">
+	    <!-- TODO: Need to get the Muxer path from MSBuild -->
+        <CommandName>dotnet</CommandName>
+        <Args>exec;$(TargetDir)/$(AssemblyName).dll</Args>
+      </RunInformation>
+    </ItemGroup>
   </Target>
 
   <!--

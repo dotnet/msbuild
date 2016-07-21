@@ -6,6 +6,7 @@
       "include": [
         "commands/dotnet-new/CSharp_Console.zip",
         "commands/dotnet-new/CSharp_Lib.zip",
+        "commands/dotnet-new/CSharp_MSBuild.zip",
         "commands/dotnet-new/CSharp_xunittest.zip",
         "commands/dotnet-new/CSharp_Web.zip",
         "commands/dotnet-new/FSharp_Console.zip",
@@ -18,6 +19,7 @@
         "commands/dotnet-new/FSharp_Console/**",
         "commands/dotnet-new/CSharp_Web/**",
         "commands/dotnet-new/CSharp_Lib/**",
+        "commands/dotnet-new/CSharp_MSBuild/**",
         "commands/dotnet-new/FSharp_Lib/**",
         "commands/dotnet-new/CSharp_xunittest/**"
       ]
@@ -28,7 +30,7 @@
       "14.1/**"
     ],
     "mappings": {
-      "NETCore/": "../Microsoft.DotNet.Core.MSBuild/build/netstandard1.0/*"
+      "NETCore/": "../Microsoft.DotNet.Core.Sdk/build/netstandard1.0/*"
     }
   },
   "dependencies": {
@@ -80,7 +82,11 @@
     "Microsoft.Net.Compilers.Targets.NetCore": "0.1.5-dev",
     "Microsoft.Cci": "4.0.0-rc3-24128-00",
     "Microsoft.Composition": "1.0.30",
-    "Microsoft.NuGet.Build.Tasks": "1.0.0-alpha-000001"
+    "Microsoft.NuGet.Build.Tasks": "1.0.0-alpha-000001",
+
+    "Microsoft.DotNet.Core.Build.Tasks": {
+      "target": "project"
+    }
   },
   "frameworks": {
     "netcoreapp1.0": {

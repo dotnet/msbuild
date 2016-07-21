@@ -3,8 +3,7 @@
     "Microsoft.NETCore.App": {
       "version": "1.0.0",
       "type": "platform"
-    },
-    "Microsoft.DotNet.Core.MSBuild": "1.0.0-preview3"
+    }
   },
   "frameworks": {
     "netcoreapp1.0": {
