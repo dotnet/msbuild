@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <NETCoreTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\NETCore\Microsoft.DotNet.Core.Sdk.targets</NETCoreTargets>
+    <NETCoreTargets Condition="'$(NETCoreTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.DotNet.Core.Sdk.targets</NETCoreTargets>
   </PropertyGroup>
   <Import Condition="Exists('$(NETCoreTargets)')" Project="$(NETCoreTargets)" />
 </Project>

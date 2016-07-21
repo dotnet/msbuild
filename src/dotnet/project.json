@@ -27,11 +27,10 @@
   },
   "publishOptions": {
     "include": [
-      "14.1/**"
-    ],
-    "mappings": {
-      "NETCore/": "../Microsoft.DotNet.Core.Sdk/build/netstandard1.0/*"
-    }
+      "14.1/**",
+      "*.props",
+      "*.targets"
+    ]
   },
   "dependencies": {
     "NuGet.Commands": {

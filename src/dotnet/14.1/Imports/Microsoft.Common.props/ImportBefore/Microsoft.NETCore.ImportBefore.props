@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <NETCoreProps Condition="'$(NETCoreProps)'==''">$(MSBuildExtensionsPath)\NETCore\Microsoft.DotNet.Core.Sdk.props</NETCoreProps>
+    <NETCoreProps Condition="'$(NETCoreProps)'==''">$(MSBuildExtensionsPath)\Microsoft.DotNet.Core.Sdk.props</NETCoreProps>
   </PropertyGroup>
   <Import Condition="Exists('$(NETCoreProps)')" Project="$(NETCoreProps)" />
 </Project>
