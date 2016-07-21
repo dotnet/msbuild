@@ -331,6 +331,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -342,7 +343,7 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_LEGACY_GETFULLPATH
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -360,8 +361,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void GetItemSpecModifierRootDirThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -392,14 +392,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadUNC1()
         {
-            // UNC is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(null, FileUtilities.NormalizePath(@"\\"));
@@ -408,14 +403,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadUNC2()
         {
-            // UNC is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(null, FileUtilities.NormalizePath(@"\\XXX\"));
@@ -424,14 +414,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadUNC3()
         {
-            // UNC is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
@@ -440,16 +425,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathGoodUNC()
         {
             Assert.Equal(@"\\localhost\share", FileUtilities.NormalizePath(@"\\localhost\share"));
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathTooLongWithDots()
         {
             string longPart = new string('x', 300);
@@ -458,14 +441,9 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_LEGACY_GETFULLPATH
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadGlobalroot()
         {
-            // device path is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 /*
@@ -483,8 +461,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathInvalid()
         {
             Assert.Throws<ArgumentException>(() =>
