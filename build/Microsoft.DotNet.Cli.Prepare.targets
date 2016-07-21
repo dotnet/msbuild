@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="CheckPrereqs" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetPack" AssemblyFile="$(CLIBuildDll)" />
@@ -12,11 +11,20 @@
   <UsingTask TaskName="ExtractArchive" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ArchiveDirectory" AssemblyFile="$(CLIBuildDll)" />
 
+  <Import Project="prepare/CheckPrereqs.targets" />
+
   <Target Name="Prepare"
           DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestorePackages;ZipTemplates" />
 
   <Target Name="Init"
-          DependsOnTargets="BuildDotnetCliBuildFramework">
+          DependsOnTargets="InitializeCommonProps;
+                            BuildDotnetCliBuildFramework;
+                            CheckPrereqs;">
+  </Target>
+
+  <Target Name="InitializeCommonProps"
+          DependsOnTargets="BuildDotnetCliBuildFramework" >
+
     <!-- Current Runtime Information -->
     <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="Rid" />
@@ -41,7 +49,7 @@
       <OutputDirectory>$(Stage2Directory)/</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
-      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>      
+      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
     </PropertyGroup>
 
@@ -64,7 +72,7 @@
     <PropertyGroup>
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
       <SdkVersion>$(NugetVersion)</SdkVersion>
-      
+
       <SdkNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-preview3-$(CommitCount)</SdkNugetVersion>
       <ProjectModelNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelNugetVersion>
       <DependencyModelAndInternalAbstractionsNugetVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsNugetVersion>
@@ -105,8 +113,6 @@
 
       <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
     </PropertyGroup>
-
-    <CheckPrereqs />
 
     <!-- SetTelemetryProfile -->
     <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="$(DOTNET_CLI_TELEMETRY_PROFILE);https://github.com/dotnet/cli;$(CommitHash)" />
@@ -164,7 +170,7 @@
                     InputFile="%(_DownloadAndExtractItem.DownloadFileName)"
                     DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestintation)" />
   </Target>
-  
+
   <Target Name="RestorePackages"
           DependsOnTargets="SetupRestorePackagesInputsOutputs;Init"
           Inputs="@(RestorePackagesInput)"
@@ -180,7 +186,7 @@
     <ItemGroup>
       <SrcToolsLockFiles Include="$(RepoRoot)/src/**/project.lock.json;$(RepoRoot)/tools/**/project.lock.json" />
     </ItemGroup>
-    <Delete Files="@(SrcToolsLockFiles)" /> 
+    <Delete Files="@(SrcToolsLockFiles)" />
   </Target>
 
   <Target Name="SetupRestorePackagesInputsOutputs">
@@ -196,7 +202,7 @@
     </PropertyGroup>
     <ItemGroup>
       <DotNetNewArchive Include="$([System.IO.Directory]::GetDirectories($(_DotNetNewFolder)))" />
-      
+
       <ZipTemplatesInput Include="$(_DotNetNewFolder)/**" Exclude="$(_DotNetNewFolder)/*.zip" />
       <ZipTemplatesOutput Include="@(DotNetNewArchive->'%(RelativeDir)/$([System.IO.Path]::GetFileName('%(DotNetNewArchive.FullPath)')).zip')" />
     </ItemGroup>
@@ -206,7 +212,7 @@
           DependsOnTargets="SetupZipTemplatesInputsOutputs"
           Inputs="@(ZipTemplatesInput)"
           Outputs="@(ZipTemplatesOutput)">
-    
+
     <ArchiveDirectory InputDirectory="%(DotNetNewArchive.FullPath)"
                       FileName="$([System.IO.Path]::GetFileName(%(DotNetNewArchive.FullPath)))"
                       OutputDirectory="%(DotNetNewArchive.RelativeDir)"
