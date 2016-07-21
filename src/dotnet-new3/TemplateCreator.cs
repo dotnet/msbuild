@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Core;
 using Microsoft.TemplateEngine.Edge.Runner;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
@@ -61,11 +62,15 @@ namespace dotnet_new3
                 app.ShowHelp();
                 return 0;
             }
-
             ITemplate tmplt;
-            if (!TryGetTemplate(templateName, out tmplt))
+
+            using (new Timing(x => Console.WriteLine(x.TotalMilliseconds)))
             {
-                return -1;
+
+                if (!TryGetTemplate(templateName, out tmplt))
+                {
+                    return -1;
+                }
             }
 
             IGenerator generator = tmplt.Generator;

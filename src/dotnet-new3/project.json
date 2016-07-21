@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-003121",
-    "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-preview2-003121",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.TemplateEngine.Core": "1.0.0-*",
     "Microsoft.TemplateEngine.Abstractions": "1.0.0-*",

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -10,7 +10,6 @@ using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Core;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
-using NuGet.Protocol.Core.v3;
 
 namespace dotnet_new3
 {
@@ -31,24 +30,27 @@ namespace dotnet_new3
             CommandOption alias = app.Option("-a|--alias", "Creates an alias for the specified template", CommandOptionType.SingleValue);
             CommandOption parametersFiles = app.Option("-x|--extra-args", "Adds a parameters file.", CommandOptionType.MultipleValue);
             CommandOption install = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
-            CommandOption uninstall = app.Option("-u|--uninstall", "Uninstalls a source", CommandOptionType.MultipleValue);
             CommandOption help = app.Option("-h|--help", "Indicates whether to display the help for the template's parameters instead of creating it.", CommandOptionType.NoValue);
 
-            CommandOption installComponent = app.Option("--install-component", "Installs a component.", CommandOptionType.MultipleValue);
-            CommandOption resetConfig = app.Option("--reset", "Resets the component cache and installed template sources.", CommandOptionType.NoValue);
-            CommandOption rescan = app.Option("--rescan", "Rebuilds the component cache.", CommandOptionType.NoValue);
-            CommandOption global = app.Option("--global", "Performs the --install or --install-component operation for all users.", CommandOptionType.NoValue);
-            CommandOption reinit = app.Option("--reinitialize", "Sets dotnet new3 back to its pre-first run state.", CommandOptionType.NoValue);
             CommandOption quiet = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
             CommandOption skipUpdateCheck = app.Option("--skip-update-check", "Don't check for updates.", CommandOptionType.NoValue);
             CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
-            app.OnExecute(() =>
+            app.OnExecute(async () =>
             {
-                if (reinit.HasValue())
+                bool reinitFlag = app.RemainingArguments.Any(x => x == "--debug:reinit");
+
+                if (reinitFlag)
                 {
                     Paths.User.FirstRunCookie.Delete();
-                    return Task.FromResult(0);
+                }
+
+                if (reinitFlag || app.RemainingArguments.Any(x => x == "--debug:reset-config"))
+                {
+                    Paths.User.AliasesFile.Delete();
+                    Paths.User.SettingsFile.Delete();
+                    Paths.User.TemplateCacheFile.Delete();
+                    return 0;
                 }
 
                 if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
@@ -58,44 +60,20 @@ namespace dotnet_new3
                         Reporter.Output.WriteLine("Getting things ready for first use...");
                     }
 
-                    if (!Paths.User.FirstRunCookie.Exists())
-                    {
-                        PerformReset(true, true);
-                        Paths.User.FirstRunCookie.WriteAllText("");
-                    }
-
                     ConfigureEnvironment();
-                    PerformReset(false, true);
-                }
-
-                if (rescan.HasValue())
-                {
-                    ShowConfig();
-                    return Task.FromResult(0);
-                }
-
-                if (resetConfig.HasValue())
-                {
-                    PerformReset(global.HasValue());
-                    return Task.FromResult(0);
+                    Paths.User.FirstRunCookie.WriteAllText("");
                 }
 
                 if (app.RemainingArguments.Any(x => x == "--debug:showconfig"))
                 {
                     ShowConfig();
-                    return Task.FromResult(0);
+                    return 0;
                 }
 
                 if (install.HasValue())
                 {
-                    InstallPackage(install.Values, true, global.HasValue(), quiet.HasValue());
-                    return Task.FromResult(0);
-                }
-
-                if (installComponent.HasValue())
-                {
-                    InstallPackage(installComponent.Values, false, global.HasValue(), quiet.HasValue());
-                    return Task.FromResult(0);
+                    InstallPackage(install.Values, quiet.HasValue());
+                    return 0;
                 }
 
                 if (update.HasValue())
@@ -103,53 +81,41 @@ namespace dotnet_new3
                     //return PerformUpdateAsync(template.Value, quiet.HasValue(), source);
                 }
 
-                if (uninstall.HasValue())
-                {
-                    foreach (string value in uninstall.Values)
-                    {
-                        if (value == "*")
-                        {
-                            Paths.User.AliasesFile.Delete();
-                            //TODO: Reset settings, delete template cache
-
-                            return Task.FromResult(0);
-                        }
-
-                        if (!TryRemoveSource(value))
-                        {
-                            //TODO: Remove mount points
-                        }
-                    }
-
-                    return Task.FromResult(0);
-                }
-
                 if (listOnly.HasValue())
                 {
                     ListTemplates(template);
-                    return Task.FromResult(0);
+                    return 0;
                 }
 
                 IReadOnlyDictionary<string, string> parameters;
 
-                try
+                    try
+                    {
+                        parameters = app.ParseExtraArgs(parametersFiles);
+                    }
+                    catch (Exception ex)
+                    {
+                        Reporter.Error.WriteLine(ex.Message.Red().Bold());
+                        app.ShowHelp();
+                        return -1;
+                    }
+
+                if (await TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue()) == -1)
                 {
-                    parameters = app.ParseExtraArgs(parametersFiles);
-                }
-                catch (Exception ex)
-                {
-                    Reporter.Error.WriteLine(ex.Message.Red().Bold());
-                    app.ShowHelp();
-                    return Task.FromResult(-1);
+                    ListTemplates(template);
+                    return -1;
                 }
 
-                return TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue());
+                return 0;
             });
 
             int result;
             try
             {
+                Stopwatch s = Stopwatch.StartNew();
                 result = app.Execute(args);
+                s.Stop();
+                Console.WriteLine(s.Elapsed.TotalMilliseconds);
             }
             catch (Exception ex)
             {
@@ -282,53 +248,24 @@ namespace dotnet_new3
             string[] packages = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, false, true, true);
+                InstallPackage(packages, true);
             }
 
             packages = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, true, true, true);
+                InstallPackage(packages, true);
             }
         }
 
-        private static void InstallPackage(IReadOnlyList<string> packages, bool installingTemplates, bool global, bool quiet = false)
+        private static void InstallPackage(IReadOnlyList<string> packages, bool quiet = false)
         {
-            NuGetUtil.InstallPackage(packages, global, quiet);
+            NuGetUtil.InstallPackage(packages, quiet);
 
             if (!quiet)
             {
                 ListTemplates(new CommandArgument());
             }
-        }
-
-        private static void PerformReset(bool global, bool quiet = false)
-        {
-            //TODO: Reset things
-            //if (global)
-            //{
-            //    Paths.GlobalComponentsDir.Delete();
-            //    Paths.GlobalComponentCacheFile.Delete();
-            //    Paths.GlobalTemplateCacheDir.Delete();
-            //}
-
-            //Paths.ComponentsDir.Delete();
-            //Paths.TemplateCacheDir.Delete();
-            //Paths.ScratchDir.Delete();
-            //Paths.TemplateSourcesFile.Delete();
-            //Paths.AliasesFile.Delete();
-            //Paths.ComponentCacheFile.Delete();
-
-            //Paths.TemplateCacheDir.CreateDirectory();
-            //Paths.ComponentsDir.CreateDirectory();
-            //Broker.ComponentRegistry.ForceReinitialize();
-            //TryAddSource(Paths.TemplateCacheDir);
-            //TryAddSource(Paths.GlobalTemplateCacheDir);
-
-            //if (!quiet)
-            //{
-            //    ShowConfig();
-            //}
         }
 
         private static void ListTemplates(CommandArgument template)
@@ -340,12 +277,6 @@ namespace dotnet_new3
                 {"Short Names", x => $"[{x.ShortName}]"},
                 {"Alias", x => AliasRegistry.GetAliasForTemplate(x) ?? ""}
             });
-        }
-
-        private static bool TryRemoveSource(string value)
-        {
-            return false;
-            //return Broker.RemoveConfiguredSource(value);
         }
 
         private static void ShowConfig()
@@ -373,26 +304,6 @@ namespace dotnet_new3
                 {"Type", x => x.GetType().FullName},
                 {"Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
-        }
-
-        private static bool TryAddSource(string value)
-        {
-            //ITemplateSource source = null;
-            //foreach (ITemplateSource src in Broker.ComponentRegistry.OfType<ITemplateSource>())
-            //{
-            //    if (src.CanHandle(value))
-            //    {
-            //        source = src;
-            //    }
-            //}
-
-            //if (source == null)
-            //{
-            //    return false;
-            //}
-
-            //Broker.AddConfiguredSource(value, source.Name, value);
-            return true;
         }
     }
 
