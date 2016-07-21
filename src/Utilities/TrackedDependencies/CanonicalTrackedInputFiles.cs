@@ -512,11 +512,11 @@ namespace Microsoft.Build.Utilities
                 // Missing outputs from the graph means that the source is out of date
                 if (_outputs.DependencyTable.TryGetValue(sourceFullPath, out outputFiles))
                 {
-                    DateTime sourceTime = NativeMethods.GetLastWriteTimeUtc(sourceFullPath);
+                    DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(sourceFullPath);
 
                     foreach (string outputFile in outputFiles.Keys)
                     {
-                        DateTime outputFileTime = NativeMethods.GetLastWriteTimeUtc(outputFile);
+                        DateTime outputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputFile);
                         // If the file exists
                         if (outputFileTime > DateTime.MinValue)
                         {
@@ -560,7 +560,7 @@ namespace Microsoft.Build.Utilities
                         DateTime dependeeTime = DateTime.MinValue;
                         if (!_lastWriteTimeCache.TryGetValue(file, out dependeeTime))
                         {
-                            dependeeTime = NativeMethods.GetLastWriteTimeUtc(file);
+                            dependeeTime = NativeMethodsShared.GetLastWriteFileUtcTime(file);
                             _lastWriteTimeCache[file] = dependeeTime;
                         }
 

@@ -220,7 +220,7 @@ namespace Microsoft.Build.Utilities
                                             // either are not under temp, or are recursively beneath the current project directory.
                                             if (FileTracker.FileIsUnderPath(tlogEntry, currentProjectDirectory) || !FileTracker.FileIsExcludedFromDependencies(tlogEntry))
                                             {
-                                                DateTime fileModifiedTime = NativeMethods.GetLastWriteTimeUtc(tlogEntry);
+                                                DateTime fileModifiedTime = NativeMethodsShared.GetLastWriteFileUtcTime(tlogEntry);
 
                                                 dependencies.Add(tlogEntry, fileModifiedTime);
                                             }
@@ -622,7 +622,7 @@ namespace Microsoft.Build.Utilities
                 DateTime fileModifiedTime;
                 if (FileUtilities.FileExistsNoThrow(fullComputedOutput))
                 {
-                    fileModifiedTime = NativeMethods.GetLastWriteTimeUtc(fullComputedOutput);
+                    fileModifiedTime = NativeMethodsShared.GetLastWriteFileUtcTime(fullComputedOutput);
                 }
                 else
                 {

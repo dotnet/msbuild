@@ -207,9 +207,6 @@
     <Compile Include="TrackedDependencies\FlatTrackingData.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="TrackedDependencies\NativeMethods.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="TrackedDependencies\FileTracker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
