@@ -69,33 +69,8 @@ namespace Microsoft.DotNet.Tools.New
 
                         archive.ExtractToDirectory(projectDirectory);
 
-                        string projectJsonFile = Path.Combine(projectDirectory, "project.json");
-
-                        File.Move(
-                            Path.Combine(projectDirectory, "project.json.template"),
-                            projectJsonFile);
-
-                        string originalProjectJsonText = File.ReadAllText(projectJsonFile);
-                        string replacedProjectJsonText = originalProjectJsonText
-                            .Replace("$currentruntime$", RuntimeEnvironment.GetRuntimeIdentifier());
-
-                        if (replacedProjectJsonText != originalProjectJsonText)
-                        {
-                            File.WriteAllText(projectJsonFile, replacedProjectJsonText);
-                        }
-
-                        string projectName = new DirectoryInfo(projectDirectory).Name;
-                        foreach (string file in Directory.GetFiles(projectDirectory, "*", SearchOption.AllDirectories))
-                        {
-                            if (Path.GetFileNameWithoutExtension(file) == "$projectName$")
-                            {
-                                string extension = Path.GetExtension(file);
-
-                                File.Move(
-                                    file,
-                                    Path.Combine(Path.GetDirectoryName(file), $"{projectName}{extension}"));
-                            }
-                        }
+                        ReplaceProjectJsonTemplateValues(projectDirectory);
+                        ReplaceFileTemplateNames(projectDirectory);
                     }
                     catch (IOException ex)
                     {
@@ -114,6 +89,40 @@ namespace Microsoft.DotNet.Tools.New
             Reporter.Output.WriteLine($"Created new {languageName} project in {Directory.GetCurrentDirectory()}.");
 
             return 0;
+        }
+
+        private static void ReplaceProjectJsonTemplateValues(string projectDirectory)
+        {
+            string projectJsonFile = Path.Combine(projectDirectory, "project.json");
+
+            File.Move(
+                Path.Combine(projectDirectory, "project.json.template"),
+                projectJsonFile);
+
+            string originalProjectJsonText = File.ReadAllText(projectJsonFile);
+            string replacedProjectJsonText = originalProjectJsonText
+                .Replace("$currentruntime$", RuntimeEnvironment.GetRuntimeIdentifier());
+
+            if (replacedProjectJsonText != originalProjectJsonText)
+            {
+                File.WriteAllText(projectJsonFile, replacedProjectJsonText);
+            }
+        }
+
+        private static void ReplaceFileTemplateNames(string projectDirectory)
+        {
+            string projectName = new DirectoryInfo(projectDirectory).Name;
+            foreach (string file in Directory.GetFiles(projectDirectory, "*", SearchOption.AllDirectories))
+            {
+                if (Path.GetFileNameWithoutExtension(file) == "$projectName$")
+                {
+                    string extension = Path.GetExtension(file);
+
+                    File.Move(
+                        file,
+                        Path.Combine(Path.GetDirectoryName(file), $"{projectName}{extension}"));
+                }
+            }
         }
 
         public static int Run(string[] args)
