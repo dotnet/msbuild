@@ -234,7 +234,7 @@ namespace Microsoft.Build.CommandLine
         {
             string[] newArgArray = new string[args.Length + 1];
 
-            newArgArray[0] = FileUtilities.CurrentExecutablePath;
+            newArgArray[0] = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             Array.Copy(args, 0, newArgArray, 1, args.Length);
 
             return newArgArray;
@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_ASSEMBLY_LOCATION
                     parameters.NodeExeLocation = Assembly.GetExecutingAssembly().Location;
 #else
-                    parameters.NodeExeLocation = FileUtilities.CurrentExecutablePath;
+                    parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
                     parameters.MaxNodeCount = cpuCount;
                     parameters.Loggers = projectCollection.Loggers;
@@ -1340,7 +1340,7 @@ namespace Microsoft.Build.CommandLine
 #else
             ArrayList commandLineArgs = new ArrayList(commandLine);
 
-            s_exeName = FileUtilities.CurrentExecutablePath;
+            s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
 
             if (!s_exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))

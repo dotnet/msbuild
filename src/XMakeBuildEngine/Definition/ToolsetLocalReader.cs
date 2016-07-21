@@ -42,7 +42,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                return FileUtilities.CurrentExecutableDirectory;
+                return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
             }
         }
 
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override IEnumerable<ToolsetPropertyDefinition> GetPropertyDefinitions(string toolsVersion)
         {
-            yield return new ToolsetPropertyDefinition(MSBuildConstants.ToolsPath, FileUtilities.CurrentExecutableDirectory, _sourceLocation);
+            yield return new ToolsetPropertyDefinition(MSBuildConstants.ToolsPath, BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, _sourceLocation);
         }
 
         protected override IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion)

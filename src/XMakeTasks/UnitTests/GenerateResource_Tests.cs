@@ -3342,7 +3342,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 #if FEATURE_INSTALLED_MSBUILD
                 ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45);
 #else
-                Path.Combine(FileUtilities.CurrentExecutableDirectory, "system.dll");
+                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "system.dll");
 #endif
 
             File.Copy(pathToSystemDLL, tempSystemDLL);

@@ -16,9 +16,9 @@ namespace Microsoft.Build.UnitTests
 {
     public class TypeLoader_Tests
     {
-        private static readonly string ProjectFilePath = Path.Combine(FileUtilities.CurrentExecutableDirectory, "portableTaskTest.proj");
+        private static readonly string ProjectFilePath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "portableTaskTest.proj");
         private static readonly string DLLFileName = "PortableTask.dll";
-        private static readonly string OriginalDllPath = Path.Combine(FileUtilities.CurrentExecutableDirectory, DLLFileName);
+        private static readonly string OriginalDllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, DLLFileName);
 
         [Fact]
         public void Basic()
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit);
             Assert.False(successfulExit);
 
-            string dllPath = Path.Combine(FileUtilities.CurrentExecutableDirectory, dllName);
+            string dllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, dllName);
             CheckIfCorrectAssemblyLoaded(output, dllPath, false);
         }
 

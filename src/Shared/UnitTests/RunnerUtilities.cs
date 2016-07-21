@@ -8,7 +8,7 @@ namespace Microsoft.Build.SharedUtilities
 
     internal static class RunnerUtilities
     {
-        public static string PathToCurrentlyRunningMsBuildExe => FileUtilities.CurrentExecutablePath;
+        public static string PathToCurrentlyRunningMsBuildExe => BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
         /// <summary>
         /// Invoke the currently running msbuild and return the stdout, stderr, and process exit status.
@@ -56,7 +56,7 @@ namespace Microsoft.Build.SharedUtilities
         /// </summary>
         private static string ResolveRuntimeExecutableName()
         {
-            return NativeMethodsShared.IsMono ? "mono" : Path.Combine(FileUtilities.CurrentExecutableDirectory, "CoreRun");
+            return NativeMethodsShared.IsMono ? "mono" : Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "CoreRun");
         }
 #endif
 

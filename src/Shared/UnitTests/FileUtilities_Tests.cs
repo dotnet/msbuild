@@ -331,24 +331,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetExecutablePath()
-        {
-            var path = Path.Combine(
-                Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath)
-                    .TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }),
-                "MSBuild.exe");
-
-            string configPath = FileUtilities.CurrentExecutableConfigurationFilePath;
-            string directoryName = FileUtilities.CurrentExecutableDirectory;
-            string executablePath = FileUtilities.CurrentExecutablePath;
-            Assert.Equal(path + ".config", configPath, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(path, executablePath, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(Path.GetDirectoryName(path), directoryName, StringComparer.OrdinalIgnoreCase);
-        }
-
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -878,5 +860,36 @@ namespace Microsoft.Build.UnitTests
 
         private static string SystemSpecificAbsolutePath => FileUtilities.ExecutingAssemblyPath;
 
+
+        [Fact]
+        public void GetFolderAboveTest()
+        {
+            string path = @"c:\1\2\3\4\5";
+
+            Assert.Equal(@"c:\1\2\3\4\5", FileUtilities.GetFolderAbove(path, 0));
+            Assert.Equal(@"c:\1\2\3\4", FileUtilities.GetFolderAbove(path));
+            Assert.Equal(@"c:\1\2\3", FileUtilities.GetFolderAbove(path, 2));
+            Assert.Equal(@"c:\1\2", FileUtilities.GetFolderAbove(path, 3));
+            Assert.Equal(@"c:\1", FileUtilities.GetFolderAbove(path, 4));
+            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(path, 5));
+            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(path, 99));
+
+            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(@"c:\", 99));
+        }
+
+        [Fact]
+        public void CombinePathsTest()
+        {
+            // These tests run in .NET 4+, so we can cheat
+            var root = @"c:\";
+
+            Assert.Equal(
+                Path.Combine(root, "path1"),
+                FileUtilities.CombinePaths(root, "path1"));
+
+            Assert.Equal(
+                Path.Combine(root, "path1", "path2", "file.txt"),
+                FileUtilities.CombinePaths(root, "path1", "path2", "file.txt"));
+        }
     }
 }

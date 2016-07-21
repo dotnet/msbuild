@@ -25,35 +25,13 @@ namespace Microsoft.Build.Shared
     {
         // A list of possible test runners. If the program running has one of these substrings in the name, we assume
         // this is a test harness.
-        private static readonly string[] s_testRunners =
-        {
-            "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER",
-            "VSTESTHOST", "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
-        };
-
-        /// <summary>
-        /// Name of the Visual Studio process(es)
-        /// </summary>
-        private static readonly string[] s_visualStudioProcess = {"DEVENV"};
-
-        /// <summary>
-        /// Name of the MSBuild process(es)
-        /// </summary>
-        private static readonly string[] s_msBuildProcess = {"MSBUILD"};
 
 
         // This flag, when set, indicates that we are running tests. Initially assume it's true. It also implies that
         // the currentExecutableOverride is set to a path (that is non-null). Assume this is not initialized when we
         // have the impossible combination of runningTests = false and currentExecutableOverride = null.
-        private static bool s_runningTests = true;
-
-        /// <summary>
-        /// Set to true/false when we know whether or not we're running inside Visual Studio
-        /// </summary>
-        private static bool? s_runningInVisualStudio;
 
         // This is the fake current executable we use in case we are running tests.
-        private static string s_currentExecutableOverride = null;
 
         // MaxPath accounts for the null-terminating character, for example, the maximum path on the D drive is "D:\<256 chars>\0". 
         // See: ndp\clr\src\BCL\System\IO\Path.cs
@@ -63,78 +41,6 @@ namespace Microsoft.Build.Shared
         /// The directory where MSBuild stores cache information used during the build.
         /// </summary>
         internal static string cacheDirectory = null;
-
-        /// <summary>
-        /// Check if we are running unit tests (under some kind of test runner) or in Visual Studio. If so, set the 
-        /// flag and come up with a (potentially) fake executable path. Generally, the path will be used to find 
-        /// the config file, but also to start msbuild.exe for remote nodes.
-        /// </summary>
-        private static void GetExecutionInfo()
-        {
-            string processNameCurrentProcess = Process.GetCurrentProcess().ProcessName;
-            string processNameCommandLine = null;
-#if FEATURE_GET_COMMANDLINE
-            //We may get better precision for the executable from the command line args, if the API is available
-            processNameCommandLine = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
-#endif
-
-            // Check if our current process name is in the list of own test runners
-            s_runningTests = IsProcessInList(processNameCommandLine, s_testRunners) ||
-                             IsProcessInList(processNameCurrentProcess, s_testRunners);
-
-            // Check to see if we're running inside of Visual Studio
-            s_runningInVisualStudio = IsProcessInList(processNameCommandLine, s_visualStudioProcess) ||
-                                      IsProcessInList(processNameCurrentProcess, s_visualStudioProcess);
-
-            bool runningInMsBuildExe = IsProcessInList(processNameCommandLine, s_msBuildProcess) ||
-                                       IsProcessInList(processNameCurrentProcess, s_msBuildProcess);
-
-            // No need to customize execution info if we're running in msbuild.exe
-            if (runningInMsBuildExe)
-            {
-                s_currentExecutableOverride = null;
-                return;
-            }
-
-            // We are running test harness. Pretend instead that we are running msbuild.exe.
-            // See if the path is provided.
-            s_currentExecutableOverride = Environment.GetEnvironmentVariable("MSBUILD_EXE_PATH");
-
-            if (s_currentExecutableOverride == null)
-            {
-                // Try to find msbuild.exe. Assume it's where the current assembly is
-                var dir = ExecutingAssemblyPath;
-                if (dir == null)
-                {
-                    // Can't get the assembly path, use current directory
-                    dir = Directory.GetCurrentDirectory();
-                }
-                else
-                {
-                    // Get directory name from the assembly and make sure it does not end with a slash
-                    var path = Path.GetDirectoryName(dir);
-
-                    // The result may be null if we were looking at a drive root. Strange, but keep it
-                    // if it was the drive root
-                    dir = (path ?? dir).TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
-                }
-
-                // The executable is msbuild.exe. This should come up with a valid path to msbuild.exe, but
-                // no need to check it here.
-                s_currentExecutableOverride = Path.Combine(dir, "MSBuild.exe");
-            }
-        }
-
-        /// <summary>
-        /// Returns true if processName appears in the processList
-        /// </summary>
-        /// <param name="processName">Name of the process</param>
-        /// <param name="processList">List of processes to check</param>
-        /// <returns></returns>
-        private static bool IsProcessInList(string processName, string[] processList)
-        {
-            return processList.Any(s => processName?.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0);
-        }
 
         /// <summary>
         /// FOR UNIT TESTS ONLY
@@ -579,94 +485,10 @@ namespace Microsoft.Build.Shared
         internal const string FileTimeFormat = "yyyy'-'MM'-'dd HH':'mm':'ss'.'fffffff";
 
         /// <summary>
-        /// Cached path to the current exe
-        /// </summary>
-        private static string s_executablePath;
-
-        /// <summary>
         /// Get the currently executing assembly path
         /// </summary>
         internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
 
-
-        /// <summary>
-        /// Name of the current .exe without extension, such as "MSBuild" "Devenv" or "Blend".
-        /// This is much cheaper than calling Process.GetCurrentProcess().ProcessName.
-        /// </summary>
-        internal static string CurrentExecutableName
-        {
-            get
-            {
-                return Path.GetFileNameWithoutExtension(CurrentExecutablePath);
-            }
-        }
-
-        /// <summary>
-        /// Full path to the current exe (for example, msbuild.exe) including the file name
-        /// </summary>
-        internal static string CurrentExecutablePath
-        {
-            get
-            {
-                if (s_executablePath == null)
-                {
-                    s_executablePath = CurrentExecutableOverride;
-                }
-
-                if (s_executablePath == null)
-                {
-                    if (NativeMethodsShared.IsWindows)
-                    {
-                        StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
-                        if (NativeMethodsShared.GetModuleFileName(
-#if FEATURE_HANDLEREF
-                            NativeMethodsShared.NullHandleRef,
-#else
-                            IntPtr.Zero,
-#endif
-                            sb, sb.Capacity) == 0)
-                        {
-                            throw new System.ComponentModel.Win32Exception();
-                        }
-                        s_executablePath = sb.ToString();
-                    }
-                    else
-                    {
-                        s_executablePath =
-#if FEATURE_GET_COMMANDLINE
-                            Environment.GetCommandLineArgs()[0] ??
-#endif
-                            Path.Combine(Path.GetDirectoryName(ExecutingAssemblyPath) ?? Directory.GetCurrentDirectory(), "MSBuild.exe");
-                    }
-                }
-
-                return s_executablePath;
-            }
-        }
-
-        /// <summary>
-        /// Full path to the directory that the current exe (for example, msbuild.exe) is located in
-        /// </summary>
-        internal static string CurrentExecutableDirectory
-        {
-            get
-            {
-                return
-                    (Path.GetDirectoryName(CurrentExecutablePath) ?? CurrentExecutablePath).TrimEnd(
-                        new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
-            }
-        }
-
-        /// <summary>
-        /// Full path to the current config file (for example, msbuild.exe.config)
-        /// </summary>
-        internal static string CurrentExecutableConfigurationFilePath
-        {
-            get
-            {
-                return String.Concat(CurrentExecutablePath, ".config");
-            }
-        }
 
         /// <summary>
         /// Determines the full path for the given file-spec.
@@ -1051,52 +873,42 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Gets the flag that indicates if we are running in a test harness
+        /// Get the folder N levels above the given. Will stop and return current path when rooted.
         /// </summary>
-        internal static bool RunningTests
+        /// <param name="path">Path to get the folder above.</param>
+        /// <param name="count">Number of levels up to walk.</param>
+        /// <returns>Full path to the folder N levels above the path.</returns>
+        internal static string GetFolderAbove(string path, int count = 1)
         {
-            get
+            if (count < 1)
+                return path;
+
+            var parent = Directory.GetParent(path);
+
+            while (count > 1 && parent?.Parent != null)
             {
-                // Check if initialized and do so if not yet
-                if (s_runningTests && s_currentExecutableOverride == null)
-                {
-                    GetExecutionInfo();
-                }
-                return s_runningTests;
+                parent = parent.Parent;
+                count--;
             }
+
+            return parent?.FullName ?? path;
         }
 
         /// <summary>
-        /// Gets a supposed (computed) path for the msbuild.exe if running
-        /// in a test harness. Otherwise returns null.
+        /// Combine multiple paths. Should only be used when compiling against .NET 2.0.
+        /// <remarks>
+        /// Only use in .NET 2.0. Otherwise, use System.IO.Path.Combine(...)
+        /// </remarks>
         /// </summary>
-        private static string CurrentExecutableOverride
+        /// <param name="root">Root path.</param>
+        /// <param name="paths">Paths to concatenate.</param>
+        /// <returns>Combined path.</returns>
+        internal static string CombinePaths(string root, params string[] paths)
         {
-            get
-            {
-                // Check if initialized and do so if not yet
-                if (s_runningTests && s_currentExecutableOverride == null)
-                {
-                    GetExecutionInfo();
-                }
-                return s_currentExecutableOverride;
-            }
-        }
+            ErrorUtilities.VerifyThrowArgumentNull(root, nameof(root));
+            ErrorUtilities.VerifyThrowArgumentNull(paths, nameof(paths));
 
-        /// <summary>
-        /// Returns true when the entry point application is Visual Studio.
-        /// </summary>
-        internal static bool RunningInVisualStudio
-        {
-            get
-            {
-                // Check if initialized and do so if not yet
-                if (!s_runningInVisualStudio.HasValue)
-                {
-                    GetExecutionInfo();
-                }
-                return s_runningInVisualStudio.Value;
-            }
+            return paths.Aggregate(root, Path.Combine);
         }
 
         internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
