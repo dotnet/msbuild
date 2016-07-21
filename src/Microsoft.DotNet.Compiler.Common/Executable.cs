@@ -333,7 +333,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             exporter.GetAllExports().GenerateBindingRedirects(configFiles);
         }
 
-        private static int RenamePublishedHost(ProjectContext context, string outputPath, CommonCompilerOptions compilationOptions)
+        public static int RenamePublishedHost(ProjectContext context, string outputPath, CommonCompilerOptions compilationOptions)
         {
             if (context.TargetFramework.IsDesktop())
             {

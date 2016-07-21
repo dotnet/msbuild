@@ -95,7 +95,6 @@
       DependsOnTargets="$(PublishDependsOn)" />
 
   <Target Name="CopyPublishArtifacts">
-    <Message Text="ERIC CopyPublishArtifacts" />
-    <!--<Copy ... ="/>" />-->
+    <Message Text="TODO: Implement CopyPublishArtifacts" />
   </Target>
 </Project>
