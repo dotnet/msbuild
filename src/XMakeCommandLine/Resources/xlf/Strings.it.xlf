@@ -69,7 +69,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      extension that ends in "proj" and uses that file.
 </source>
         <target state="translated">Descrizione:         compila le destinazioni specificate nel file di progetto. Se
-                     non viene specificato un file di progetto, verrà eseguita la
+                     non viene specificato un file di progetto, MSBuild esegue la
                      ricerca di un file con estensione che termina con "proj" nella
                      directory di lavoro corrente e verrà usato tale file.
 </target>
@@ -152,7 +152,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      più file di risposta, specificare ciascun file
                      separatamente.
                      
-                     Qualsiasi file di risposta denominato "msbuild.rsp" viene usato 
+                     Qualsiasi file di risposta denominato "msbuild.rsp" viene utilizzato 
                      automaticamente dai percorsi seguenti: 
                      (1) la directory di msbuild.exe
                      (2) la directory della prima compilazione di soluzione o progetto
@@ -189,7 +189,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Example:
                        /target:Resources;Compile
 </source>
-        <target state="translated">  /target:&lt;destinazioni&gt;  Compila le destinazioni specificate nel progetto. Usare il punto e virgola
+        <target state="translated">  /target:&lt;targets&gt;  Compila le destinazioni specificate nel progetto. Usare il punto e virgola
                      o la virgola per separare più destinazioni oppure
                      specificare ciascuna destinazione separatamente (forma breve: /t).
                      Esempio:
@@ -244,7 +244,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
         <target state="translated">  /logger:&lt;logger&gt;   Usare questo logger per registrare eventi da MSBuild. Per specificare
-                     più logger, specificare ciascun logger separatamente.
+                     più logger, specificare ogni logger separatamente.
                      La sintassi di &lt;logger&gt; è la seguente:
                        [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
@@ -352,7 +352,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                             anche quando è in esecuzione in modalità
                             non-multiprocessore. Si tratta dello stile di registrazione predefinito. 
                         ForceConsoleColor: usa i colori della console ANSI anche se
-                            non sono supportati dalla console
+                            non sono supportati dalla console.
                         Verbosity: esegue l'override dell'impostazione /verbosity per questo
                             logger.
                      Esempio:
@@ -418,8 +418,8 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      computer. (Short form: /m[:n])
       </source>
         <target state="translated">  /maxcpucount[:n]   Specifica il numero massimo di processi simultanei da 
-                     usare per la compilazione. Se l'opzione non viene
-                     usata, verrà usato il valore predefinito 1. Se viene usata senza un valore,
+                     usare per la compilazione. Se l'opzione non viene usata, verrà
+                     usato il valore predefinito 1. Se viene usata senza un valore,
                      MSBuild userà un numero non superiore al numero di 
                      processori del computer (forma breve: /m[:n]).
       </target>
@@ -476,14 +476,14 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
 </source>
         <target state="translated">  /distributedlogger:&lt;logger centrale&gt;*&lt;logger inoltro&gt;                     
                      Usare questo logger per registrare eventi da MSBuild,
-                     associando un'istanza di logger diversa a ogni nodo. Per
-                     specificare più logger, specificare ciascun logger 
-                     separatamente (forma breve /dl).
+                     associando un'istanza di logger diversa a ogni nodo. Per specificare
+                     più logger, specificare ogni logger separatamente 
+                     (forma breve /dl).
                      La sintassi di &lt;logger&gt; è la seguente:
                        [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;assembly logger&gt; è la seguente:
+                     La sintassi di &lt;logger assembly&gt; è la seguente:
                        {&lt;nome assembly&gt;[,&lt;nome sicuro&gt;] | &lt;file assembly&gt;}
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger nel formato in cui vengono specificati (forma breve: /l).
@@ -697,7 +697,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </source>
         <target state="translated">  /nodeReuse:&lt;parametri&gt;
                      Abilita o disabilita il riutilizzo dei nodi MSBuild.
-                     I parametri disponibili sono:
+                     I parametri sono:
                      True: i nodi vengono mantenuti dopo il completamento della
                             compilazione e riutilizzati per le compilazioni successive (impostazione predefinita).
                      False: i nodi non vengono mantenuti dopo il completamento

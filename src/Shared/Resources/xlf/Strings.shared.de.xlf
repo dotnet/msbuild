@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
         <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
-        <target state="translated">MSB5022: Der MSBuild-Aufgabenhost unterstützt das Ausführen von Aufgaben nicht, die IBuildEngine-Rückrufe tätigen. Führen Sie Ihre Aufgabe stattdessen im MSBuild-Kernprozess aus, wenn Sie diese Vorgänge durchführen möchten.  Wenn UsingTask mit einem "Runtime"- oder "Architecture"-Wert oder der Aufgabenaufruf mit einem "MSBuildRuntime"- oder "MSBuildArchitecture" attribuiert wurde, der nicht mit der aktuellen Laufzeit oder Architektur von MSBuild übereinstimmt, wird eine Aufgabe automatisch im Aufgabenhost ausgeführt.</target>
+        <target state="translated">MSB5022: Der MSBuild-Aufgabenhost unterstützt das Ausführen von Aufgaben nicht, die IBuildEngine-Rückrufe tätigen. Führen Sie Ihre Aufgabe stattdessen im MSBuild-Kernprozess aus, wenn Sie diese Vorgänge durchführen möchten.  Wenn UsingTask mit einem Runtime- oder Architecture-Wert oder der Aufgabenaufruf mit einem MSBuildRuntime- oder MSBuildArchitecture-Wert attribuiert wurde, der nicht mit der aktuellen Laufzeit oder Architektur von MSBuild übereinstimmt, wird eine Aufgabe automatisch im Aufgabenhost ausgeführt.</target>
         <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
       </trans-unit>
       <trans-unit id="BuildStarted">
@@ -271,7 +271,7 @@
       </trans-unit>
       <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
-        <target state="new">MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</target>
+        <target state="translated">MSB5024: Es wurde kein gültiger Speicherort für MSBuild ermittelt. Versuchen Sie, den Prozess über die Entwicklereingabeaufforderung für Visual Studio auszuführen.</target>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
     </body>

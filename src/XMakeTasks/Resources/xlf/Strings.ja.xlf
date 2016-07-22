@@ -1453,8 +1453,8 @@
 			but its name "{1}"
 			didn't match the expected name "{2}".</source>
         <target state="translated">"{0}" を考慮しましたが、
-			名前 "{1}" が
-			必要な名前 "{2}" に一致しませんでした。</target>
+			名前 "{1}"は
+			必要な名前 "{2}" と一致しませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">

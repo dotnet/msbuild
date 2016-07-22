@@ -69,9 +69,9 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      extension that ends in "proj" and uses that file.
 </source>
         <target state="translated">説明:         プロジェクト ファイル内の指定したターゲットをビルドします。
-                    プロジェクト ファイルを指定しなかった場合、MSBuild は現在の
-                    作業ディレクトリの中から "proj" で終わるファイル
-                    拡張子を検索し、そのファイルを使用します。
+                    プロジェクト ファイルを指定しなかった場合、MSBuild は現在の作業ディレクトリの中から
+                     "proj" で終わるファイル拡張子を検索し、そのファイルを使用します。
+                    
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -99,7 +99,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       <trans-unit id="HelpMessage_4_HelpSwitch">
         <source>  /help              Display this usage message. (Short form: /? or /h)
 </source>
-        <target state="translated">  /help             このヘルプ メッセージを表示します (短い形式: /? または /h)。
+        <target state="translated">  /help              このヘルプ メッセージを表示します(短い形式: /? または /h)。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -127,7 +127,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       <trans-unit id="HelpMessage_6_VersionSwitch">
         <source>  /version           Display version information only. (Short form: /ver)
 </source>
-        <target state="translated">  /version           バージョン情報だけを表示します (短い形式: /ver)。
+        <target state="translated">  /version           バージョン情報だけを表示します。(短い形式: /ver)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -148,11 +148,11 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;ファイル&gt;            コマンド ライン設定をテキスト ファイルから挿入します。
-                    複数の応答ファイルがある場合は、各応答ファイルを個別に
-                    指定します。
+        <target state="translated">  @&lt;ファイル&gt;            コマンド ライン設定をテキスト ファイルから挿入します。複数の
+                    応答ファイルがある場合は、各応答ファイルを個別に指定
+                    します。
                      
-                    "msbuild.rsp" という名前の応答ファイルは、
+                    「msbuild.rsp」 という名前の応答ファイルは、
                     次の場所から自動的に利用されます:
                     (1) msbuild.exe のディレクトリ
                     (2) プロジェクトまたはソリューションが最初にビルドされたディレクトリ
@@ -171,7 +171,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      /noautorsp)
 </source>
         <target state="translated">  /noautoresponse    MSBuild.rsp ファイルを自動的に含めません (短い形式:
-                    /noautorsp)。
+                     /noautorsp)。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -189,9 +189,9 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        /target:Resources;Compile
 </source>
-        <target state="translated">  /target:&lt;ターゲット&gt;  このプロジェクト内でビルドするターゲットです。
-                    複数のターゲットをセミコロンまたはコンマで区切って
-                    指定するか、各ターゲットを個別に指定します(短い形式: /t)。
+        <target state="translated">  /target:&lt;ターゲット&gt;  このプロジェクト内でビルドするターゲットです。複数のターゲットをセミコロンまたは
+                    コンマで区切って指定するか、
+                    各ターゲットを個別に指定します。(短い形式: /t)。
                     例:
                       /target:Resources;Compile
 </target>
@@ -212,10 +212,10 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        /property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  /property:&lt;n&gt;=&lt;v&gt;  設定またはオーバーライドするプロジェクトレベルのプロパティ
-                    です。&lt;n&gt; はプロパティ名、&lt;v&gt; はプロパティ値です。
-                    複数のプロパティをセミコロンまたはコンマで区切って
-                    指定するか、各プロパティを個別に指定します (短い形式: /p)。
+        <target state="translated">  /property:&lt;n&gt;=&lt;v&gt; これらのプロジェクト レベルのプロパティを設定またはオーバーライドします。&lt;n&gt; は
+                    プロパティ名、&lt;v&gt; はプロパティ値です。複数の
+                    プロパティを区切るには、セミコロンまたはコンマを使用するか、または
+                    各プロパティを個別に指定します。(短い形式: /p)
                     例:
                       /property:WarningLevel=2;OutDir=bin\Debug\
 </target>
@@ -244,7 +244,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
         <target state="translated">  /logger:&lt;ロガー&gt;  MSBuild のイベントを記録するロガーです。複数の
-                    ロガーがある場合は、各ロガーを個別に指定します。
+                    ロガーがある場合は、各ロガーを個別に指定します
                     &lt;ロガー&gt; の構文:
                       [&lt;ロガー クラス&gt;,]&lt;ロガー アセンブリ&gt;[;&lt;ロガー パラメーター&gt;]
                     &lt;ロガー クラス&gt; の構文:
@@ -252,7 +252,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                     &lt;ロガー アセンブリ&gt; の構文:
                       {&lt;アセンブリ名&gt;[,&lt;厳密な名前&gt;] | &lt;アセンブリ ファイル&gt;}
                     &lt;ロガー パラメーター&gt; は省略可能であり、
-                    入力したとおりにロガーに渡されます (短い形式: /l)。
+                    入力したとおりにロガーに渡されます(短い形式: /l)。
                     例:
                       /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                       /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -275,7 +275,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
 </source>
         <target state="translated">  /verbosity:&lt;レベル&gt; 表示するイベント ログの情報量です。
                     使用できる詳細レベル: q[uiet]、m[inimal]、
-                    n[ormal]、d[etailed]、diag[nostic] (短い形式: /v)。
+                    n[ormal]、d[etailed]、diag[nostic](短い形式: /v)。
                     例:
                       /verbosity:quiet
 </target>
@@ -337,20 +337,20 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        NoItemAndPropertyList--各プロジェクト ビルドの開始時に
                            項目とプロパティの一覧を表示しません。   
                        ShowCommandLine--TaskCommandLineEvent メッセージを表示します。 
-                       ShowTimestamp--タイムスタンプをメッセージの先頭に
-                           表示します。                                          
-                       ShowEventId--開始したイベント、終了したイベント、および
-                           メッセージの eventId を表示します。
-                       ForceNoAlign--テキストをコンソール バッファーのサイズに
-                           合わせません。
-                       DisableConsoleColor--すべてのログ メッセージに、
-                           コンソールの既定の色を使用します。
-                       DisableMPLogging-- マルチプロセッサ以外のモードで
-                           実行されている場合にマルチプロセッサ ログ出力方法を
-                           無効にします。
-                       EnableMPLogging--マルチプロセッサ以外のモードで
-                           実行されている場合でもマルチプロセッサ ログ出力
-                           方法を有効にします。このログ出力方法は既定で有効です。
+                       ShowTimestamp--タイムスタンプを
+                           メッセージの先頭に表示します。                                          
+                       ShowEventId--開始したイベント、終了したイベント、
+                           およびメッセージの eventId を表示します。
+                       ForceNoAlign--テキストを
+                           コンソール バッファーのサイズに合わせません。
+                       DisableConsoleColor--すべてのログ メッセージに、コンソールの既定の色を
+                           使用します。
+                       DisableMPLogging--マルチプロセッサ
+                           ログ出力方法を無効にします 
+                           (マルチプロセッサ以外のモードで実行されている場合)。
+                       EnableMPLogging--マルチプロセッサ
+                           ログ出力方法を有効にします
+                           (マルチプロセッサ以外のモードで実行されている場合でも)。このログ出力方法は既定で有効です。
                        ForceConsoleColor--コンソールが ANSI コンソールの色を
                            サポートしていない場合でもその色を使用します。
                        Verbosity--このロガーの /verbosity 設定をオーバーライド
@@ -373,7 +373,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      to the console. (Short form: /noconlog)
 </source>
         <target state="translated">  /noconsolelogger   既定のコンソール ロガーを無効にし、イベントのログを
-                    コンソールに記録しません (短い形式: /noconlog)。
+                    コンソールに記録しません(短い形式: /noconlog)。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -393,10 +393,10 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        /validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  /validate          プロジェクトを既定のスキーマと比較して検証します (短い
+        <target state="translated">  /validate          プロジェクトを既定のスキーマと比較して検証します(短い
                     形式: /val)。
 
- /validate:&lt;スキーマ&gt; プロジェクトを指定したスキーマと比較して検証します (短い
+ /validate:&lt;スキーマ&gt; プロジェクトを指定したスキーマと比較して検証します(短い
                     形式: /val)。
                     例:
                       /validate:MyExtendedBuildSchema.xsd
@@ -419,9 +419,9 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </source>
         <target state="translated">  /maxcpucount[:n]   ビルド時の同時実行プロセスの最大数を指定
                     します。スイッチが使用されない場合、
-                    既定値は 1 です。スイッチが値を指定することなく使用される
-                    場合、MSBuild は最大でコンピューターのプロセッサ数を使用
-                    します (短い形式: /m[:n])。
+                    既定値は 1 です。値を指定することなくスイッチが使用される場合、
+                    MSBuild は最大でコンピューターのプロセッサ数を使用
+                    します(短い形式: /m[:n])。
       </target>
         <note>
           LOCALIZATION: "maxcpucount" should not be localized.
@@ -477,7 +477,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
         <target state="translated">  /distributedlogger:&lt;中心ロガー&gt;*&lt;転送ロガー&gt;                    
                     MSBuild のイベントを記録して、各ノードに異なる
                     ロガー インスタンスをアタッチするロガーです。複数の
-                    ロガーがある場合は、各ロガーを個別に指定します 
+                    ロガーがある場合は、各ロガーを個別に指定します
                     (短い形式 /dl)。
                     &lt;ロガー&gt; の構文:
                       [&lt;ロガー クラス&gt;,]&lt;ロガー アセンブリ&gt;[;&lt;ロガー パラメーター&gt;]
@@ -486,7 +486,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                     &lt;ロガー アセンブリ&gt; の構文:
                       {&lt;アセンブリ名&gt;[,&lt;厳密な名前&gt;] | &lt;アセンブリ ファイル&gt;}
                     &lt;ロガー パラメーター&gt; は省略可能であり、
-                    入力したとおりにロガーに渡されます (短い形式: /l)。
+                    入力したとおりにロガーに渡されます(短い形式: /l)。
                     例:
                       /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -537,9 +537,9 @@ Copyright (C) Microsoft Corporation.All rights reserved.
    </source>
         <target state="translated">  /toolsversion:&lt;バージョン&gt;
                     ビルド中に使用する MSBuild Toolset (タスク、ターゲットなど)
-                    のバージョンです。このバージョンは、
+                     のバージョンです。このバージョンは、
                     個別のプロジェクトで指定されたバージョンをオーバーライドします。(短い形式:
-                    /tv)
+                     /tv)
                     例:
                       /toolsversion:3.5
    </target>
@@ -563,13 +563,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
         <target state="translated">  /fileLogger[n]     ビルド出力のログをファイルに記録します。既定では、
-                    このファイルは "msbuild[n].log" という形式の名前で現在の
+                    このファイルは「msbuild[n].log」という形式の名前で現在の
                     ディレクトリに置かれます。すべてのノードのイベントは
-                    1 つのログに統合されます。ファイルの場所と
-                    fileLogger の他のパラメーターは、"/fileLoggerParameters[n]"
-                    スイッチを追加して指定できます。
-                    "n" は (存在する場合は) 1 ～ 9 の数値で、最大
-                    10 のファイル ロガーをアタッチできます (短い形式:/fl[n])。
+                     1 つのログに統合されます。ファイルの場所と、
+                    fileLogger の他のパラメーターは、
+                    /fileLoggerParameters[n] スイッチを追加して指定できます。
+                    「n」は (存在する場合は) 1 から 9 の数値で、最大
+                    10 のファイル ロガーをアタッチできます(短い形式:/fl[n])。
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -598,12 +598,12 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                     ビルド出力のログを MSBuild ノードごとに 1 つずつ、全体で
                     複数のログ ファイルに記録します。これらのファイルが最初に
                     置かれる場所は、現在のディレクトリです。既定では、これらの
-                    ファイル名は "MSBuild&lt;nodeid&gt;.log" のようになります。
-                    ファイルの場所と fileLogger の他のパラメーターは、
-                    "/fileLoggerParameters" スイッチを追加して指定できます。
+                    ファイル名は「MSBuild&lt;nodeid&gt;.log」のようになります。ファイルの場所と
+                    fileLogger の他のパラメーターは、
+                    「/fileLoggerParameters」スイッチを追加して指定できます。
 
-                    fileLoggerParameters スイッチでログ ファイル名を設定した
-                    場合、分散ロガーは fileName をテンプレートとして使用し、
+                    fileLoggerParameters スイッチでログ ファイル名を設定した場合、
+                    分散ロガーは fileName をテンプレートとして使用し、
                     この fileName の末尾にノード ID を追加して、
                     各ノードのログ ファイルを作成します。
     </target>
@@ -651,8 +651,8 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                     このスイッチの存在は、対応する
                     /filelogger[n] スイッチの存在を暗示します。
                     "n" は (存在する場合は) 1 ～ 9 の数値です。
-                    /fileloggerparameters も分散ファイル ロガーによって
-                    使用されます。/distributedFileLogger の説明を参照してください 
+                    /fileloggerparameters も分散ファイル ロガーによって使用されます。
+                    /distributedFileLogger の説明を参照してください 
                     (短い形式: /flp[n])。
                     コンソール ロガーと同じパラメーターを使用
                     できます。使用できるその他の主要なパラメーター:
@@ -664,8 +664,8 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                            スイッチを設定しない場合は、既存の
                            ログ ファイルの内容が上書きされます。
                            既定ではログ ファイルに追加されません。
-                       Encoding--UTF-8、Unicode、ASCII など、ファイルの
-                           エンコーディングを指定します。
+                       Encoding--ファイルのエンコーディングを指定します
+                            (UTF-8、Unicode、ASCII など)。
                     既定の詳細設定は Detailed です。
                     例:
                       /fileLoggerParameters:LogFile=MyLog.log;Append;
@@ -723,8 +723,8 @@ Copyright (C) Microsoft Corporation.All rights reserved.
     </source>
         <target state="translated">  /preprocess[:file]
                     ビルド中にインポートされるすべてのファイルを
-                    インライン展開することで、単一の集約されたプロジェクト
-                    ファイルを作成します。ファイルの境界にはマークが挿入されます。これは、
+                    インライン展開することで、単一の
+                    集約されたプロジェクト ファイルを作成します。ファイルの境界にはマークが挿入されます。これは、
                     インポートされるファイルとそれが存在する場所および、
                     ビルドに対するファイルの関係を明らかにするのに
                     役立ちます。既定では、出力はコンソール
@@ -745,7 +745,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
     </source>
         <target state="translated">  /detailedsummary
                     ビルドの最後に、ビルド構成と、ノードに対して
-                    どのようにスケジュールされていたかについて、
+                    どのようにスケジュールされたかについて、
                     詳細情報が表示されます。
                     (短い形式: /ds)
     </target>
@@ -758,9 +758,9 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      MSBuild XML and any tasks and loggers it uses.
    </source>
         <target state="translated">  /debug
-                    デバッガー プロンプトを直ちに表示します。Visual Studio 
-                    がアタッチされ、MSBuild XML と、使用されるすべてのタスク
-                    およびロガーをデバッグできます。
+                    デバッガー プロンプトを直ちに表示します。
+                    Visual Studio がアタッチされ、MSBuild XML と、
+                    使用されるすべてのタスクおよびロガーをデバッグできます。
    </target>
         <note />
       </trans-unit>

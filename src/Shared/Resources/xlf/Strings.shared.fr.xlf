@@ -108,7 +108,7 @@
       </trans-unit>
       <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">La version "{0}" de .NET Framework n'est pas prise en charge lors du ciblage explicite du SDK Windows, qui est pris en charge uniquement par .NET 4.5 et ultérieur.  Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.TargetDotNetFrameworkVersion correspondant à la version 4.5 (Version45) ou ultérieur.</target>
+        <target state="translated">La version "{0}" de .NET Framework n'est pas prise en charge lors du ciblage explicite du SDK Windows, qui est pris en charge uniquement par .NET 4.5 et ultérieur.  Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.TargetDotNetFrameworkVersion correspondant à la version 4.5 (Version45) ou ultérieure.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkLocationHelper.UnsupportedVisualStudioVersion">
@@ -271,7 +271,7 @@
       </trans-unit>
       <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
-        <target state="new">MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</target>
+        <target state="translated">MSB5024: Impossible de déterminer un emplacement valide vers MSBuild. Essayez d’exécuter ce processus à partir de l’invite de commandes Developer pour Visual Studio.</target>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
     </body>

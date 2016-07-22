@@ -1305,7 +1305,7 @@
       </trans-unit>
       <trans-unit id="MSBuild.NotBuildingInParallel">
         <source>Overriding the BuildingInParallel property by setting it to false. This is due to the system being run in single process mode with StopOnFirstFailure set to true.</source>
-        <target state="translated">Переопределение свойства BuildingInParallel путем выбора значения false. Эта ситуация возникла из-за того, что система работает в режиме одного процесса и параметр StopOnFirstFailure имеет значение true.</target>
+        <target state="translated">Переопределение свойства BuildingInParallel путем задания значения false. Эта ситуация возникла из-за того, что система работает в режиме одного процесса и параметр StopOnFirstFailure имеет значение true.</target>
         <note>LOCALIZATION:  Do not localize the words "MSBuild", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
       <trans-unit id="MSBuild.NoStopOnFirstFailure">
@@ -2231,7 +2231,7 @@
       </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
-        <target state="translated">MSB3661: Свойству Transform передано недопустимое значение значение :"{0}".</target>
+        <target state="translated">MSB3661: Свойству Transform передано недопустимое значение "{0}".</target>
         <note>{StrBegin="MSB3661: "}</note>
       </trans-unit>
       <trans-unit id="TlbImp.NoInputFileSpecified">

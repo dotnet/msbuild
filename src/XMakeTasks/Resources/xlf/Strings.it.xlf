@@ -2731,7 +2731,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.ReplaceAppxLocation">
         <source>Updating the "{0}" architecture "APPX" location from "{1}" to "{2}". </source>
-        <target state="translated">Aggiornamento della posizione "APPX"  dell'architettura "{0}" da "{1}" a "{2}". </target>
+        <target state="translated">Aggiornamento della posizione "APPX" dell'architettura "{0}" da "{1}" a "{2}". </target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoSDKLocationsSpecified">

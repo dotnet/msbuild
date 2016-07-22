@@ -94,12 +94,12 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.InvalidKeyFileSpecified">
         <source>MSB3649: The KeyFile path '{0}' is invalid. KeyFile must point to an existing file.</source>
-        <target state="translated">MSB3649: O caminho de KeyFile '{0}' é inválido. KeyFile deve apontar para um arquivo existente.</target>
+        <target state="translated">MSB3649: O caminho de KeyFile "{0}" é inválido. KeyFile deve apontar para um arquivo existente.</target>
         <note>{StrBegin="MSB3649: "}</note>
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid">
         <source>MSB3650: Neither SDKToolsPath '{0}' nor ToolPath '{1}' is a valid directory.  One of these must be set.</source>
-        <target state="translated">MSB3650: SDKToolsPath '{0}' e ToolPath '{1}' não são diretórios válidos.  Um deles deve ser definido.</target>
+        <target state="translated">MSB3650: SDKToolsPath "{0}" e ToolPath "{1}" não são diretórios válidos.  Um deles deve ser definido.</target>
         <note>{StrBegin="MSB3650: "}</note>
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer">
@@ -587,7 +587,7 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.DependencyNotFound">
         <source>MSB3162: The '{0}' item selected requires '{1}'. Select the missing prerequisite in the Prerequisites Dialog Box or create a bootstrapper package for the missing prerequisite.</source>
-        <target state="translated">MSB3162: O item '{0}' selecionado requer '{1}'. Selecione o pré-requisito ausente na Caixa de Diálogo Pré-Requisitos ou crie um pacote de bootstrapper para o pré-requisito ausente.</target>
+        <target state="translated">MSB3162: O item "{0}" selecionado requer "{1}". Selecione o pré-requisito ausente na Caixa de Diálogo Pré-Requisitos ou crie um pacote de bootstrapper para o pré-requisito ausente.</target>
         <note>{StrBegin="MSB3162: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.DifferingPublicKeys">
@@ -667,7 +667,7 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageFileNotFound">
         <source>MSB3152: To enable 'Download prerequisites from the same location as my application' in the Prerequisites dialog box, you must download file '{0}' for item '{1}' to your local machine. For more information, see http://go.microsoft.com/fwlink/?LinkId=616018.</source>
-        <target state="translated">MSB3152: Para habilitar a opção "Baixar pré-requisitos da mesma localização de meu aplicativo" na caixa de diálogo Pré-requisitos, você deve baixar o arquivo '{0}' para o item '{1}' em seu computador local. Para obter mais informações, consulte http://go.microsoft.com/fwlink/?LinkId=616018.</target>
+        <target state="translated">MSB3152: Para habilitar a opção "Baixar pré-requisitos da mesma localização de meu aplicativo" na caixa de diálogo Pré-requisitos, você deve baixar o arquivo "{0}" para o item "{1}" em seu computador local. Para obter mais informações, consulte http://go.microsoft.com/fwlink/?LinkId=616018.</target>
         <note>{StrBegin="MSB3152: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageResourceFileNotFound">
@@ -702,12 +702,12 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.UsingProductCulture">
         <source>MSB3157: Could not match culture '{0}' for item '{1}'. Using culture '{2}' instead.</source>
-        <target state="translated">MSB3157: Não foi possível coincidir a cultura '{0}' para o item '{1}'. Usando a cultura '{2}'.</target>
+        <target state="translated">MSB3157: Não foi possível coincidir a cultura "{0}" para o item "{1}". Usando a cultura "{2}".</target>
         <note>{StrBegin="MSB3157: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.UsingResourcesCulture">
         <source>MSB3158: Could not find resources for culture '{0}'. Using culture '{1}' instead.</source>
-        <target state="translated">MSB3158: Não foi possível encontrar recursos para a cultura '{0}'. Usando a cultura '{1}'.</target>
+        <target state="translated">MSB3158: Não foi possível encontrar recursos para a cultura "{0}". Usando a cultura "{1}".</target>
         <note>{StrBegin="MSB3158: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.ValidationError">
@@ -1129,7 +1129,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.NeutralityOfCultureNotPreserved">
         <source>MSB3578: This assembly contains neutral resources corresponding to the culture "{0}". These resources will not be considered neutral in the output format as we are unable to preserve this information. The resources will continue to correspond to "{0}" in the output format.</source>
-        <target state="translated">MSB3578: Este assembly contém recursos neutros correspondentes à cultura "{0}". Esses recursos não serão considerados neutros no formato de saída, pois não conseguimos preservar essas informações. Os recursos continuarão correspondentes a "{0}" no formato de saída.</target>
+        <target state="translated">MSB3578: Este assembly contém recursos neutros correspondentes à cultura "{0}". Esses recursos não serão consideradas neutros no formato de saída, pois não conseguimos preservar essas informações. Os recursos continuarão correspondentes a "{0}" no formato de saída.</target>
         <note>{StrBegin="MSB3578: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.NoResourcesFileInAssembly">
@@ -1320,7 +1320,7 @@
       </trans-unit>
       <trans-unit id="RegisterAssembly.AssemblyNotRegisteredForComInterop">
         <source>MSB3211: The assembly '{0}' is not registered for COM Interop. Please register it with regasm.exe /tlb.</source>
-        <target state="translated">MSB3211: O assembly '{0}' não está registrado para interoperabilidade COM. Registre-o com o regasm.exe /tlb.</target>
+        <target state="translated">MSB3211: O assembly "{0}" não está registrado para interoperabilidade COM. Registre-o com o regasm.exe /tlb.</target>
         <note>{StrBegin="MSB3211: "}</note>
       </trans-unit>
       <trans-unit id="RegisterAssembly.CantExportTypeLib">
@@ -1390,7 +1390,7 @@
       </trans-unit>
       <trans-unit id="ResGen.SdkOrToolPathNotSpecifiedOrInvalid">
         <source>MSB3451: Neither SDKToolsPath '{0}' nor ToolPath '{1}' is a valid directory.  One of these must be set.</source>
-        <target state="translated">MSB3451: SDKToolsPath '{0}' e ToolPath '{1}' não são diretórios válidos.  Um deles deve ser definido.</target>
+        <target state="translated">MSB3451: SDKToolsPath "{0}" e ToolPath "{1}" não são diretórios válidos.  Um deles deve ser definido.</target>
         <note>{StrBegin="MSB3451: "}</note>
       </trans-unit>
       <trans-unit id="ResGen.STRClassNamespaceOrFilenameWithoutLanguage">
@@ -1579,7 +1579,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToResolveReferenceBecauseHigherTargetFramework">
         <source>MSB3251: Could not resolve assembly {0}. The target framework required by this assembly ({1}) is higher than the project target framework. If this reference is required by your code, you may get compilation errors.</source>
-        <target state="translated">MSB3251: Não foi possível resolver o assembly {0}. A estrutura de destino exigida pelo assembly ({1}) é superior à estrutura de destino do projeto. Se essa referência for exigida pelo seu código, poderão ocorrer erros de compilação.</target>
+        <target state="translated">MSB3251: Não foi possível resolver o assembly "{0}". A estrutura de destino exigida pelo assembly ({1}) é superior à estrutura de destino do projeto. Se essa referência for exigida pelo seu código, poderão ocorrer erros de compilação.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList">
@@ -1907,7 +1907,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
-        <target state="translated">A Referência COM '{0}' é o assembly de interoperabilidade para o controle ActiveX '{1}', mas foi marcada para ser vinculada pelo compilador com o sinalizador /link. Essa referência COM será tratada como uma referência e não será vinculada.</target>
+        <target state="translated">A Referência COM "{0}" é o assembly de interoperabilidade para o controle ActiveX "{1}", mas foi marcada para ser vinculada pelo compilador com o sinalizador /link. Essa referência COM será tratada como uma referência e não será vinculada.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.AddingMissingTlbReference">
@@ -2641,7 +2641,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
         <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors."</source>
-        <target state="translated">MSB3755: Não foi possível localizar a referência "{0}". Se essa referência for exigida pelo seu código, poderão ocorrer erros de compilação.</target>
+        <target state="translated">MSB3755: Não foi possível localizar a referência "{0}". Se essa referência for exigida pelo seu código, poderão ocorrer erros de compilação.”</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
@@ -2716,7 +2716,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoAppxLocationsFound">
         <source>No "APPX" attributes indicating app package locations were found in the SDK manifest. If an app package is required at runtime the project may not run.</source>
-        <target state="translated">Nenhum atributo de "APPX" indicando localizações de pacotes do aplicativo foi encontrado no manifesto do SDK. Se um pacote do aplicativo for necessário em tempo de execução, o projeto poderá não ser executado.</target>
+        <target state="translated">Nenhum atributo de "APPX" indicando localizações de pacotes dos aplicativos foi encontrado no manifesto do SDK. Se um pacote do aplicativo for necessário em tempo de execução, o projeto poderá não ser executado.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveSDKReference.FoundFrameworkIdentity">
@@ -2786,7 +2786,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.Prefer32BitNotSupportedWithNeutralProject">
         <source>MSB3782: The "{0}" SDK does not support targeting a neutral architecture with "Prefer 32-Bit" enabled for the project. Please go to the project properties (Build tab for C# and Compile tab for VB) and disable the "Prefer 32-bit" option, or change your project to target a non-neutral architecture.</source>
-        <target state="translated">MSB3782: O "{0}" SDK não dá suporte ao direcionamento de uma arquitetura neutra com a opção "Preferir 32 bits" habilitada para o projeto. Vá até as propriedades do projeto (guia Build para C# e guia Compile para VB) e desabilite a opção "Preferir 32 bits", ou mude o seu projeto para um destino de arquitetura diferente de neutra.</target>
+        <target state="translated">MSB3782: O "{0}" SDK não dá suporte ao direcionamento de uma arquitetura neutra com a opção "Prefer 32-Bit" habilitada para o projeto. Vá até as propriedades do projeto (guia Build para C# e guia Compile para VB) e desabilite a opção "Prefer 32-bit", ou mude o seu projeto para um destino de arquitetura diferente de neutra.</target>
         <note>{StrBegin="MSB3782: "} Also, please localize "Prefer 32-Bit" in the same way that it is localized in wizard\vbdesigner\designer\proppages\buildproppage.resx</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.MaxPlatformVersionLessThanTargetPlatformVersion">

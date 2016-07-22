@@ -2416,7 +2416,7 @@
       </trans-unit>
       <trans-unit id="Xaml.MissingSwitchValue">
         <source>MSB3694: Unable to create Xaml task.  The EnumValue "{1}" on EnumProperty "{0}" is missing the SwitchValue attribute.</source>
-        <target state="translated">MSB3694: 无法创建 Xaml 任务。EnumProperty“{0}”的 EnumValue“{1}”缺少 SwitchValue 特性。</target>
+        <target state="translated">MSB3694: 无法创建 Xaml 任务。EnumProperty“{0}”上的 EnumValue“{1}”缺少 SwitchValue 属性。</target>
         <note>{StrBegin="MSB3694: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.CommandFailed">
@@ -2426,7 +2426,7 @@
       </trans-unit>
       <trans-unit id="Xaml.CommandFailedAccessDenied">
         <source>MSB3722: The command "{0}" exited with code {1}. Please verify that you have sufficient rights to run this command.</source>
-        <target state="translated">MSB3722: 命令“{0}”已退出，返回代码为 {1}。请验证您是否拥有运行此命令的足够权限。</target>
+        <target state="translated">MSB3722: 命令“{0}”已退出，具有代码 {1}。请验证您是否拥有运行此命令的足够权限。</target>
         <note>{StrBegin="MSB3722: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.MissingRequiredArgument">
@@ -2766,7 +2766,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingAppxLocation">
         <source>MSB3778: "APPX" attributes were found in the SDK manifest file "{0}" however none of the attributes matched the targeted configuration and architecture "{1} | {2}" and no "APPX" attribute without configuration and architecture could be found. If an app package is required then the project will fail at runtime.</source>
-        <target state="translated">MSB3778: 在 SDK 清单文件“{0}”中找到了多个“APPX”特性，但是其中任何特性都不匹配目标配置和架构“{1} | {2}”，并且找不到任何不带配置和架构的“APPX”特性。如果需要应用程序包，则项目将在运行时失败。</target>
+        <target state="translated">MSB3778: 在 SDK 清单文件“{0}”中找到了多个“APPX”属性，但其中的所有属性均与目标配置和架构“{1} | {2}”不匹配，且找不到任何不带配置和架构的“APPX”属性。如果需要应用程序包，则项目将在运行时失败。</target>
         <note>{StrBegin="MSB3778: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.TargetArchitectureNotSupported">
@@ -2781,12 +2781,12 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKMissingDependency">
         <source>MSB3781: The SDK "{0}" depends on the following SDK(s) {1}, which have not been added to the project or were not found. Please ensure that you add these dependencies to your project or you may experience runtime issues. You can add dependencies to your project through the Reference Manager.</source>
-        <target state="translated">MSB3781: SDK“{0}”依赖于以下尚未添加到项目中或未找到的 SDK {1}。请确保将这些依赖项添加到项目中，否则您可能遇到运行时问题。您可以通过引用管理器向您的项目添加依赖项。</target>
+        <target state="translated">MSB3781: SDK“{0}”取决于下述 SDK {1}，后者尚未添加到项目或未找到。请确保向你的项目添加了这些必备组件，否则你可以会遇到运行时问题。可通过引用管理器向项目添加必备组件。</target>
         <note>{StrBegin="MSB3781: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.Prefer32BitNotSupportedWithNeutralProject">
         <source>MSB3782: The "{0}" SDK does not support targeting a neutral architecture with "Prefer 32-Bit" enabled for the project. Please go to the project properties (Build tab for C# and Compile tab for VB) and disable the "Prefer 32-bit" option, or change your project to target a non-neutral architecture.</source>
-        <target state="translated">MSB3782: “{0}”SDK 不支持面向为项目启用“首选 32 位”的中性体系结构。请访问项目属性(C# 中为“生成”选项卡，VB 中为“编译”选项卡)并禁用“首选 32 位”选项，或将项目更改为面向非中性体系结构。</target>
+        <target state="translated">MSB3782:“{0}”SDK 不支持面向为项目启用了“首选 32 位”的中性系统结构。请访问项目属性(C# 中为“生成”选项卡，VB 中为“编译”选项卡)并禁用“首选 32 位”选项，或将项目更改为面向非中性体系结构。</target>
         <note>{StrBegin="MSB3782: "} Also, please localize "Prefer 32-Bit" in the same way that it is localized in wizard\vbdesigner\designer\proppages\buildproppage.resx</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.MaxPlatformVersionLessThanTargetPlatformVersion">
