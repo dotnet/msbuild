@@ -31,9 +31,13 @@
             <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
         
             <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
-            <DebianInstalledDotnet>/usr/share/dotnet/dotnet</DebianInstalledDotnet>
+            <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
             <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
         </PropertyGroup>
+
+        <ItemGroup>
+          <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
+        </ItemGroup>
 
         <!-- Consumed By Publish -->
         <ItemGroup>
@@ -89,8 +93,10 @@
         <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
         <!-- Run E2E -->
-        <Exec Command="$(DebianInstalledDotnet) test -xml $(DebianTestResultsXmlFile)"
-              WorkingDirectory="$(EndToEndTestDirectory)" />
+        <DotNetTest WorkingDirectory="$(EndToEndTestDirectory)"
+                    EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
+                    ToolPath="$(DebianInstalledDirectory)"
+                    Xml="$(DebianTestResultsXmlFile)" />
 
         <!-- Remove Packages -->
         <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
