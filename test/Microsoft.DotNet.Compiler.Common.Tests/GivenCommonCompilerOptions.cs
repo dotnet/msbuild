@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common.Tests
 {
-    public class Tests : TestBase
+    public class GivenCommonCompilerOptions : TestBase
     {
         [Fact]
         public void SimpleSerialize()

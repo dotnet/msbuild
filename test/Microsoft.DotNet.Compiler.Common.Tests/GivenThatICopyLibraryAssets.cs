@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common.Tests
             assets.CopyTo(outputDirectory);
 
             var copiedFile = Directory.EnumerateFiles(outputDirectory, Path.GetFileName(libraryAsset.RelativePath)).First();
-            FileIsReadonly(copiedFile).Should().BeFalse();
+            IsFileReadonly(copiedFile).Should().BeFalse();
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common.Tests
             assets.StructuredCopyTo(outputDirectory, intermediateDirectory);
 
             var copiedFile = Directory.EnumerateFiles(outputDirectory, Path.GetFileName(libraryAsset.RelativePath)).First();
-            FileIsReadonly(copiedFile).Should().BeFalse();
+            IsFileReadonly(copiedFile).Should().BeFalse();
         }
 
         private void MakeFileReadonly(string file)
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common.Tests
             File.SetAttributes(file, File.GetAttributes(file) | FileAttributes.ReadOnly);
         }
 
-        private bool FileIsReadonly(string file)
+        private bool IsFileReadonly(string file)
         {
             return (File.GetAttributes(file) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly;
         }
