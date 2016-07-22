@@ -1051,6 +1051,7 @@ namespace Microsoft.Build.Shared
         internal static int GetParentProcessId(int processId)
         {
             int ParentID = 0;
+#if !CLR2COMPATIBILITY
             if (IsUnixLike)
             {
                 string line = null;
@@ -1080,6 +1081,7 @@ namespace Microsoft.Build.Shared
                 }
             }
             else
+#endif
             {
                 SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
 

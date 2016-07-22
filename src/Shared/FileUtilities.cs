@@ -376,7 +376,7 @@ namespace Microsoft.Build.Shared
         {
             // Don't bother with arrays or properties or network paths, or those that
             // have no slashes.
-            if (NativeMethodsShared.IsWindows || string.IsNullOrWhiteSpace(value) ||
+            if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(value) ||
                 value.StartsWith("$(") || value.StartsWith("@(") || value.StartsWith("\\\\") ||
                 value.IndexOfAny(new[] { '/', '\\' }) == -1)
             {
