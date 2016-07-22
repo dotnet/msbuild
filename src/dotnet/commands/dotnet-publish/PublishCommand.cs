@@ -12,7 +12,6 @@ using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Files;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
@@ -341,16 +340,6 @@ namespace Microsoft.DotNet.Tools.Publish
             Reporter.Verbose.WriteLine($"failed to resolve published host in: {outputPath}");
             return null;
         }
-
-        private static void PublishFiles(IEnumerable<string> files, string outputPath)
-        {
-            foreach (var file in files)
-            {
-                var targetPath = Path.Combine(outputPath, Path.GetFileName(file));
-                File.Copy(file, targetPath, overwrite: true);
-            }
-        }
-
         private void PublishAssetGroups(IEnumerable<LibraryAssetGroup> groups, string outputPath, bool nativeSubdirectories, bool includeRuntimeGroups)
         {
             foreach (var group in groups.Where(g => includeRuntimeGroups || string.IsNullOrEmpty(g.Runtime)))

@@ -21,10 +21,9 @@ namespace Microsoft.DotNet.Cli.Build3.Tests
 
             var testProjectDirectory = testInstance.TestRoot;
 
-            var build3Command = new TestCommand("dotnet");
-            build3Command.WorkingDirectory = testProjectDirectory;
-
-            build3Command.ExecuteWithCapturedOutput("build3")
+            new Build3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
                 .Should()
                 .Pass();
 

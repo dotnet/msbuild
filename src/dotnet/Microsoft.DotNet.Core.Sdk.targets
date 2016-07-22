@@ -1,0 +1,100 @@
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MicrosoftDotNetCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../lib/</MicrosoftDotNetCoreBuildTasksDirectoryRoot>
+    <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netstandard1.6</MicrosoftDotNetCoreBuildTasksTFM>
+    <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MicrosoftDotNetCoreBuildTasksTFM)' == ''">net451</MicrosoftDotNetCoreBuildTasksTFM>
+    <MicrosoftDotNetCoreBuildTasksDirectory>$(MicrosoftDotNetCoreBuildTasksDirectoryRoot)$(MicrosoftDotNetCoreBuildTasksTFM)/</MicrosoftDotNetCoreBuildTasksDirectory>
+
+	<!-- If the build task directory doesn't exist (since we aren't in a NuGet package), load the task assembly in the tools path -->
+    <MicrosoftDotNetCoreBuildTasksDirectory Condition=" !Exists('$(MicrosoftDotNetCoreBuildTasksDirectory)') ">$(MSBuildToolsPath)/</MicrosoftDotNetCoreBuildTasksDirectory>
+</PropertyGroup>
+
+  <PropertyGroup>
+    <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
+              properties to any folder that exists to skip the GetReferenceAssemblyPaths task (not target) and
+              to prevent it from outputting a warning (MSB3644).
+          -->
+    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
+    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
+  </PropertyGroup>
+  
+  <UsingTask TaskName="MakeNetCoreRunnable" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll" />
+             
+  <PropertyGroup>
+    <CoreBuildDependsOn>
+      $(CoreBuildDependsOn);
+      GenerateDependencyFile;
+      GenerateRuntimeConfigurationFiles
+    </CoreBuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GenerateDependencyFile"
+          Condition=" '$(GenerateDependencyFile)' == 'true'">
+    <!--
+    TODO: Is this the best way? Should we just tell CSC to output $(AssemblyName).dll directly?
+    -->
+    <Move SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)/$(AssemblyName).dll" />
+
+    <!--
+    TODO: need to remove ProjectPath (to load up the project.json) and instead pass @(PackageDependency) 
+    -->
+    <MakeNetCoreRunnable ProjectPath="$(MSBuildProjectDirectory)"   
+                         Configuration="$(Configuration)"
+                         OutputPath="$(OutDir)"
+                         OutputType="$(OutputType)" />
+  </Target>
+
+  <Target Name="GenerateRuntimeConfigurationFiles"
+        Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
+
+    <!-- TODO: Split up MakeNetCoreRunnable and implement this target-->
+    <!-- Putting this here to show the structure that we should use in production -->
+  </Target>
+
+  <!--
+    ============================================================
+                                        GetRunInformation
+
+    Returns the ProcessStart information that can be used to run this project.
+    ============================================================
+    -->
+
+  <Target Name="GetRunInformation"
+          DependsOnTargets="GenerateRunInformation"
+          Outputs="@(RunInformation)" />
+
+  <Target Name="GenerateRunInformation">
+    <ItemGroup>
+      <RunInformation Include="$(MSBuildProjectFullPath)">
+	    <!-- TODO: Need to get the Muxer path from MSBuild -->
+        <CommandName>dotnet</CommandName>
+        <Args>exec;$(TargetDir)/$(AssemblyName).dll</Args>
+      </RunInformation>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        Publish
+
+    Override the "in-box" publish, which is very ClickOnce centric.
+    ============================================================
+    -->
+
+  <PropertyGroup>
+    <PublishDependsOn>
+      Build;
+      CopyPublishArtifacts
+    </PublishDependsOn>
+
+    <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
+  </PropertyGroup>
+
+  <Target
+      Name="Publish"
+      DependsOnTargets="$(PublishDependsOn)" />
+
+  <Target Name="CopyPublishArtifacts">
+    <Message Text="TODO: Implement CopyPublishArtifacts" />
+  </Target>
+</Project>

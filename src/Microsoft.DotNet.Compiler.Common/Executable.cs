@@ -97,9 +97,9 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         {   
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
-            var emitEntryPoint = _compilerOptions.EmitEntryPoint ?? false;
+            var isRunnable = _compilerOptions.EmitEntryPoint ?? _context.ProjectFile.OverrideIsRunnable;
 
-            if (emitEntryPoint && !_context.IsPortable)
+            if (isRunnable && !_context.IsPortable)
             {
                 // TODO: Pick a host based on the RID
                 VerifyCoreClrPresenceInPackageGraph();
