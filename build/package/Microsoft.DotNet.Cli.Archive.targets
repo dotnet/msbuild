@@ -1,16 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
-  <UsingTask TaskName="ArchiveDirectory" AssemblyFile="$(CLIBuildDll)" />
 
-  <Target Name="SetupGenerateArchivesInputsOutputs" DependsOnTargets="Init">
+  <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(BuildToolsDir)/Microsoft.DotNet.Build.dll"/>
+  <UsingTask TaskName="TarGzFileCreateFromDirectory" AssemblyFile="$(CLIBuildDll)" />
+
+  <Target Name="GenerateArchives"
+          DependsOnTargets="Init;
+                            Layout;
+                            SetupGenerateArchivesInputsOutputs;
+                            MakePackagesDir;"
+          Inputs="%(GenerateArchivesInputsOutputs.Inputs)"
+          Outputs="%(GenerateArchivesInputsOutputs.Outputs)">
+
+    <PropertyGroup>
+      <GenerateArchivesDestinationArchive>$(ArchiveOutputDirectory)/%(GenerateArchivesInputsOutputs.OutFileName)$(ArchiveExtension)</GenerateArchivesDestinationArchive>
+    </PropertyGroup>
+
+    <ZipFileCreateFromDirectory
+        Condition=" '$(OSName)' == 'win' "
+        SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
+        DestinationArchive="$(GenerateArchivesDestinationArchive)" />
+
+    <TarGzFileCreateFromDirectory
+        Condition=" '$(OSName)' != 'win' "
+        SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
+        DestinationArchive="$(GenerateArchivesDestinationArchive)" />
+
+    <ItemGroup>
+      <Archives Include="$(GenerateArchivesDestinationArchive)" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="SetupGenerateArchivesInputsOutputs" 
+          DependsOnTargets="Init">
     <PropertyGroup>
       <ArchiveOutputDirectory>$(PackagesDirectory)</ArchiveOutputDirectory>
     </PropertyGroup>
 
     <ItemGroup>
-      <GeneratedArchives Include="$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(ArchiveExtension)" />
-
       <GenerateArchivesInputsOutputs Include="%(LayoutDefinition.Name)">
         <Inputs>%(LayoutDefinition.OutputFiles)</Inputs>
         <Outputs>$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(ArchiveExtension)</Outputs>
@@ -20,20 +48,8 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="GenerateArchives" 
-          DependsOnTargets="Init;Layout;SetupGenerateArchivesInputsOutputs" 
-          Inputs="%(GenerateArchivesInputsOutputs.Inputs)" 
-          Outputs="%(GenerateArchivesInputsOutputs.Outputs)">
-
-    <ArchiveDirectory
-        FileName="%(GenerateArchivesInputsOutputs.OutFileName)"
-        OutputDirectory="$(ArchiveOutputDirectory)"
-        InputDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)" >
-
-        <Output TaskParameter="OutputArchive"
-                ItemName="Archives" />
-    </ArchiveDirectory>
-
+  <Target Name="MakePackagesDir">
+    <MakeDir Directories="$(PackagesDirectory)" />
   </Target>
 
 </Project>

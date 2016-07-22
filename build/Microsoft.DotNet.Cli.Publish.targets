@@ -16,10 +16,10 @@
                             FinishBuild" />
 
   <!-- UploadToAzure target comes from Build Tools -->
-  <Target Name="PublishArtifacts" 
+  <Target Name="PublishArtifacts"
           DependsOnTargets="SetupAzureBlobInformation;
                             GenerateVersionBadge;
-                            GatherItemsForPattern;                            
+                            GatherItemsForPattern;
                             UploadToAzure;
                             PublishDebFilesToDebianRepo;
                             PublishCliVersionBadge" />
@@ -40,7 +40,7 @@
       <CloudDropAccessToken>$(STORAGE_KEY)</CloudDropAccessToken>
       <CloudDropAccountName>$(STORAGE_ACCOUNT)</CloudDropAccountName>
       <DotnetBlobRootUrl>https://$(CloudDropAccountName).blob.core.windows.net/$(ContainerName)</DotnetBlobRootUrl>
-    </PropertyGroup>    
+    </PropertyGroup>
   </Target>
 
   <Target Name="GatherItemsForPattern">
@@ -51,10 +51,10 @@
 
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$(Product)/$(NugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath> 
+        <RelativeBlobPath>$(Product)/$(NugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </ForPublishing>
     </ItemGroup>
-  </Target>  
+  </Target>
 
   <Target Name="PublishDebFilesToDebianRepo" Condition=" '$(OSName)' == 'ubuntu' ">
     <Error Condition="'$(REPO_ID)' == ''" Text="REPO_ID must be set as an environment variable for debian publishing." />

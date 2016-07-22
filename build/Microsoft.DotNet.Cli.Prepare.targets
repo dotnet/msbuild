@@ -9,7 +9,7 @@
   <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ExtractArchive" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="ArchiveDirectory" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(BuildToolsDir)/Microsoft.DotNet.Build.Tasks.dll"/>
 
   <Import Project="prepare/CheckPrereqs.targets" />
 
@@ -213,10 +213,10 @@
           Inputs="@(ZipTemplatesInput)"
           Outputs="@(ZipTemplatesOutput)">
 
-    <ArchiveDirectory InputDirectory="%(DotNetNewArchive.FullPath)"
-                      FileName="$([System.IO.Path]::GetFileName(%(DotNetNewArchive.FullPath)))"
-                      OutputDirectory="%(DotNetNewArchive.RelativeDir)"
-                      ForceZipArchive="true" />
+    <ZipFileCreateFromDirectory
+          SourceDirectory="%(DotNetNewArchive.FullPath)"
+          DestinationArchive="%(DotNetNewArchive.RelativeDir)/$([System.IO.Path]::GetFileName(%(DotNetNewArchive.FullPath))).zip"
+          OverwriteDestination="True" />
   </Target>
 
 </Project>
