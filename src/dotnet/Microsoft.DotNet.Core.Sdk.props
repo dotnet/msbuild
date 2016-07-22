@@ -6,7 +6,7 @@
 
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
-    <Configuration>Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform>AnyCPU</Platform>
 
     <FileAlignment>512</FileAlignment>
@@ -58,6 +58,9 @@
 
     <!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
     <NoLogo>true</NoLogo>
+
+    <!-- Need to revisit this and see if this is the correct default for both Debug and Release -->
+    <DebugType>portable</DebugType>
 
     <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
