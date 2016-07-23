@@ -255,72 +255,50 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Whether there are any child metadata elements
         /// </summary>
-        public bool HasMetadata
-        {
-            get { return FirstChild != null; }
-        }
+        public bool HasMetadata => FirstChild != null;
 
         /// <summary>
         /// Get any child metadata.
         /// </summary>
-        public ICollection<ProjectMetadataElement> Metadata
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectMetadataElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectMetadataElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectMetadataElement> Metadata => new ReadOnlyCollection<ProjectMetadataElement>
+            (
+            new FilteringEnumerable<ProjectElement, ProjectMetadataElement>(Children)
+            );
 
         /// <summary>
         /// Location of the include attribute
         /// </summary>
-        public ElementLocation IncludeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.include); }
-        }
+        public ElementLocation IncludeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.include);
 
         /// <summary>
         /// Location of the exclude attribute
         /// </summary>
-        public ElementLocation ExcludeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.exclude); }
-        }
+        public ElementLocation ExcludeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.exclude);
 
         /// <summary>
         /// Location of the remove attribute
         /// </summary>
-        public ElementLocation RemoveLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.remove); }
-        }
+        public ElementLocation RemoveLocation => XmlElement.GetAttributeLocation(XMakeAttributes.remove);
+
+        /// <summary>
+        /// Location of the update attribute
+        /// </summary>
+        public ElementLocation UpdateLocation => XmlElement.GetAttributeLocation(XMakeAttributes.update);
 
         /// <summary>
         /// Location of the keepMetadata attribute
         /// </summary>
-        public ElementLocation KeepMetadataLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.keepMetadata); }
-        }
+        public ElementLocation KeepMetadataLocation => XmlElement.GetAttributeLocation(XMakeAttributes.keepMetadata);
 
         /// <summary>
         /// Location of the removeMetadata attribute
         /// </summary>
-        public ElementLocation RemoveMetadataLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.removeMetadata); }
-        }
+        public ElementLocation RemoveMetadataLocation => XmlElement.GetAttributeLocation(XMakeAttributes.removeMetadata);
 
         /// <summary>
         /// Location of the keepDuplicates attribute
         /// </summary>
-        public ElementLocation KeepDuplicatesLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.keepDuplicates); }
-        }
+        public ElementLocation KeepDuplicatesLocation => XmlElement.GetAttributeLocation(XMakeAttributes.keepDuplicates);
 
         /// <summary>
         /// Whether the include value has wildcards, 
@@ -431,7 +409,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer parent, ProjectElement previousSibling, ProjectElement nextSibling)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectTargetElement || (Include.Length > 0 && Remove.Length == 0), "OM_ItemsOutsideTargetMustHaveIncludeNoRemove");
+            ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectTargetElement || ((Include.Length > 0 || Update.Length > 0) && Remove.Length == 0), "OM_ItemsOutsideTargetMustHaveIncludeOrUpdateButNoRemove");
             ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectRootElement || parent.Parent is ProjectTargetElement || parent.Parent is ProjectWhenElement || parent.Parent is ProjectOtherwiseElement, "OM_CannotAcceptParent");
         }
 

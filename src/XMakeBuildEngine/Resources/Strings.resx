@@ -437,8 +437,7 @@
     attributes e.g. &lt;Import Project=""&gt; -- the value of Project should not be an empty string.</comment>
   </data>
   <data name="InvalidAttributeExclusive" UESanitized="false" Visibility="Public">
-    <!-- TODO: Replace ???? with a real error code -->
-    <value>MSB????: At most one of the include, remove, and update attributes may be specified for an item element.</value>
+    <value>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</value>
   </data>
   <data name="InvalidAttributeValueWithException" UESanitized="false" Visibility="Public">
     <value>MSB4102: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid. {3}</value>
@@ -1382,9 +1381,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_CannotAcceptParent">
     <value>This parent is not a valid parent for the item.</value>
   </data>
-  <data name="OM_ItemsOutsideTargetMustHaveIncludeNoRemove">
-    <value>An item not parented under a Target must have a value for Include and no value for Remove.</value>
-    <comment>LOCALIZATION: Please do not localize "Target", "Include", and "Remove".</comment>
+  <data name="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateButNoRemove">
+    <value>An item not parented under a Target must have a value for Include or Update and no value for Remove.</value>
+    <comment>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</comment>
   </data>
   <data name="OM_NameInvalid">
     <value>The name "{0}" contains an invalid character "{1}".</value>
