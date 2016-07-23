@@ -11,6 +11,17 @@ check out our [Getting started page](http://go.microsoft.com/fwlink/?LinkID=7983
 
 Also, don't forget to check out [the documentation](https://aka.ms/dotnet-cli-docs). 
 
+Changes in issue triaging
+-------------------------
+We are making significant changes to the CLI tooling by supporting MSBuild as the build engine and `csproj` as the project format. You can read ["Changes to project.json" blog post](https://blogs.msdn.microsoft.com/dotnet/2016/05/23/changes-to-project-json/) for more context. We've realized that this also means that many of the shortcomings of the current tooling will be solved by this move so we've decided to introduce two new labels to indicate that in the issues: 
+
+* `msbuild-mitigated` - this label indicates the issue will be mitigated via move to MSBuild. 
+* `msbuild-notapplicable` - this label indicates the issue will not be applicable after moving to MSBuild.
+
+We will close issues that are labelled with one of these labels. Proactive triaging will help us reduce the number of issues and enable us to focus on issues that require fixing independent of the move to msbuild.
+
+Please feel free to re-open and comment on any issue that you believe was triaged incorrectly.
+
 Found an issue?
 ---------------
 You can consult the [known issues page](https://github.com/dotnet/core/blob/master/cli/known-issues.md) to find out the current issues and 
