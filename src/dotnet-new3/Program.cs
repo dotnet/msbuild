@@ -112,10 +112,10 @@ namespace dotnet_new3
             int result;
             try
             {
-                Stopwatch s = Stopwatch.StartNew();
-                result = app.Execute(args);
-                s.Stop();
-                Console.WriteLine(s.Elapsed.TotalMilliseconds);
+                using (Timing.Over("Execute"))
+                {
+                    result = app.Execute(args);
+                }
             }
             catch (Exception ex)
             {
@@ -270,8 +270,8 @@ namespace dotnet_new3
 
         private static void ListTemplates(CommandArgument template)
         {
-            IEnumerable<ITemplate> results = TemplateCreator.List(template.Value);
-            TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplate, object>>
+            IEnumerable<ITemplateInfo> results = TemplateCreator.List(template.Value);
+            TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplateInfo, object>>
             {
                 {"Templates", x => x.Name},
                 {"Short Names", x => $"[{x.ShortName}]"},

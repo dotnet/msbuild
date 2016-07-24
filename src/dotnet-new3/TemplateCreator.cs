@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Core;
 using Microsoft.TemplateEngine.Edge.Runner;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -16,12 +17,16 @@ namespace dotnet_new3
 {
     public static class TemplateCreator
     {
-        public static IReadOnlyCollection<ITemplate> List(string searchString)
+        public static IReadOnlyCollection<ITemplateInfo> List(string searchString)
         {
-            HashSet<ITemplate> matchingTemplates = new HashSet<ITemplate>(TemplateEqualityComparer.Default);
-            IReadOnlyList<ITemplate> allTemplates = SettingsLoader.GetTemplates().ToList();
+            HashSet<ITemplateInfo> matchingTemplates = new HashSet<ITemplateInfo>(TemplateEqualityComparer.Default);
+            HashSet<ITemplateInfo> allTemplates = new HashSet<ITemplateInfo>(TemplateEqualityComparer.Default);
 
-            foreach (ITemplate template in allTemplates)
+            using (Timing.Over("load"))
+            SettingsLoader.GetTemplates(allTemplates);
+
+            using(Timing.Over("Search in loaded"))
+            foreach (ITemplateInfo template in allTemplates)
             {
                 if (string.IsNullOrEmpty(searchString)
                     || template.Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) > -1
@@ -31,20 +36,24 @@ namespace dotnet_new3
                 }
             }
 
+            using(Timing.Over("Alias search"))
             matchingTemplates.UnionWith(AliasRegistry.GetTemplatesForAlias(searchString, allTemplates));
             return matchingTemplates;
         }
 
-        private static bool TryGetTemplate(string templateName, out ITemplate tmplt)
+        private static bool TryGetTemplate(string templateName, out ITemplateInfo tmplt)
         {
             try
             {
-                IReadOnlyCollection<ITemplate> result = List(templateName);
-
-                if (result.Count == 1)
+                using (Timing.Over("List"))
                 {
-                    tmplt = result.First();
-                    return true;
+                    IReadOnlyCollection<ITemplateInfo> result = List(templateName);
+
+                    if (result.Count == 1)
+                    {
+                        tmplt = result.First();
+                        return true;
+                    }
                 }
             }
             catch
@@ -62,18 +71,18 @@ namespace dotnet_new3
                 app.ShowHelp();
                 return 0;
             }
-            ITemplate tmplt;
 
-            using (new Timing(x => Console.WriteLine(x.TotalMilliseconds)))
+            ITemplateInfo tmpltInfo;
+
+            using (Timing.Over("Get single"))
             {
-
-                if (!TryGetTemplate(templateName, out tmplt))
+                if (!TryGetTemplate(templateName, out tmpltInfo))
                 {
                     return -1;
                 }
             }
 
-            IGenerator generator = tmplt.Generator;
+            ITemplate tmplt = SettingsLoader.LoadTemplate(tmpltInfo);
 
             if (!skipUpdateCheck)
             {
@@ -129,7 +138,7 @@ namespace dotnet_new3
                 Directory.SetCurrentDirectory(Directory.CreateDirectory(realName).FullName);
             }
 
-            IParameterSet templateParams = generator.GetParametersForTemplate(tmplt);
+            IParameterSet templateParams = tmplt.Generator.GetParametersForTemplate(tmplt);
 
             foreach (ITemplateParameter param in templateParams.Parameters)
             {
@@ -188,7 +197,7 @@ namespace dotnet_new3
                 }
 
                 Reporter.Output.WriteLine("Parameters:");
-                foreach (ITemplateParameter parameter in generator.GetParametersForTemplate(tmplt).Parameters.OrderBy(x => x.Priority).ThenBy(x => x.Name))
+                foreach (ITemplateParameter parameter in tmplt.Generator.GetParametersForTemplate(tmplt).Parameters.OrderBy(x => x.Priority).ThenBy(x => x.Name))
                 {
                     Reporter.Output.WriteLine(
                         $@"    {parameter.Name} ({parameter.Priority})
@@ -211,7 +220,7 @@ namespace dotnet_new3
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                await generator.Create(new Orchestrator(), tmplt, templateParams);
+                await tmplt.Generator.Create(new Orchestrator(), tmplt, templateParams);
                 sw.Stop();
 
                 if (!quiet)
