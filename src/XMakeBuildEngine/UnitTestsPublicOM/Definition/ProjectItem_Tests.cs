@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(@"bar", item.GetMetadataValue("Filename"));
             Assert.Equal(@".baz", item.GetMetadataValue("Extension"));
             Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\foo\" : "/foo/", item.GetMetadataValue("RelativeDir"));
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"foo\" : "/foo/", item.GetMetadataValue("Directory"));
+            Assert.Equal(NativeMethodsShared.IsWindows ? @"foo\" : "foo/", item.GetMetadataValue("Directory"));
             Assert.Equal(String.Empty, item.GetMetadataValue("RecursiveDir"));
             Assert.Equal(
                 NativeMethodsShared.IsWindows ? @"c:\foo\bar.baz" : "/foo/bar.baz",

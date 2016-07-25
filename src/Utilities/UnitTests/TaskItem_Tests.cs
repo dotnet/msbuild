@@ -245,7 +245,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem from = new TaskItem();
             from.ItemSpec = NativeMethodsShared.IsWindows ? @"c:\subdir\Monkey.txt" : "/subdir/Monkey.txt";
             Assert.Equal(
-                NativeMethodsShared.IsWindows ? @"subdir\" : "/subdir/",
+                NativeMethodsShared.IsWindows ? @"subdir\" : "subdir/",
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory));
         }
 
