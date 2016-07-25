@@ -18,11 +18,6 @@
         <target state="translated">命令列值的引號不合法 [{0}]。</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.StringsCannotContainOddNumberOfDoubleQuotes">
-        <source>The value [{0}] contains an odd number of double-quote characters. Only even numbers of literal double-quote characters are acceptable to command line tools.</source>
-        <target state="translated">值 [{0}] 含有奇數的雙引號字元。命令列工具只接受偶數的常值雙引號字元。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">命令以返回碼 {0} 結束。</target>

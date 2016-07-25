@@ -18,11 +18,6 @@
         <target state="translated">Guillemet non conforme dans la valeur de ligne de commande [{0}].</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.StringsCannotContainOddNumberOfDoubleQuotes">
-        <source>The value [{0}] contains an odd number of double-quote characters. Only even numbers of literal double-quote characters are acceptable to command line tools.</source>
-        <target state="translated">La valeur [{0}] contient un nombre impair de guillemets. Seuls les nombres pairs de guillemets littéraux sont acceptés par les outils en ligne de commande.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">La commande s'est arrêtée avec le code {0}.</target>

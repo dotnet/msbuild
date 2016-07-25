@@ -18,11 +18,6 @@
         <target state="translated">명령줄 값 [{0}]에 따옴표가 잘못 사용되었습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.StringsCannotContainOddNumberOfDoubleQuotes">
-        <source>The value [{0}] contains an odd number of double-quote characters. Only even numbers of literal double-quote characters are acceptable to command line tools.</source>
-        <target state="translated">[{0}] 값에 홀수의 큰따옴표 문자가 있습니다. 명령줄 도구에는 짝수의 리터럴 큰따옴표 문자만 사용할 수 있습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">명령이 종료되었습니다(코드: {0}).</target>

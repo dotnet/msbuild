@@ -18,11 +18,6 @@
         <target state="translated">Comillas no válidas en el valor de la línea de comandos [{0}].</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.StringsCannotContainOddNumberOfDoubleQuotes">
-        <source>The value [{0}] contains an odd number of double-quote characters. Only even numbers of literal double-quote characters are acceptable to command line tools.</source>
-        <target state="translated">El valor [{0}] contiene un número impar de caracteres de comillas dobles. Solo se aceptan números pares de caracteres literales de comillas dobles en las herramientas de la línea de comandos.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">El comando salió con el código {0}.</target>

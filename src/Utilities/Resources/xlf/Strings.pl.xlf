@@ -18,11 +18,6 @@
         <target state="translated">Niedozwolony cudzysłów w wartości wiersza polecenia [{0}].</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.StringsCannotContainOddNumberOfDoubleQuotes">
-        <source>The value [{0}] contains an odd number of double-quote characters. Only even numbers of literal double-quote characters are acceptable to command line tools.</source>
-        <target state="translated">Wartość [{0}] zawiera nieparzystą liczbę znaków podwójnego cudzysłowu. W narzędziach wiersza polecenia akceptowana jest tylko parzysta liczba znaków podwójnego cudzysłowu dla literałów.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">Polecenie zostało zakończone z kodem {0}.</target>

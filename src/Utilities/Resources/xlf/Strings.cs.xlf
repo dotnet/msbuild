@@ -18,11 +18,6 @@
         <target state="translated">Řetězec v uvozovkách v hodnotě příkazového řádku [{0}] je neplatný.</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.StringsCannotContainOddNumberOfDoubleQuotes">
-        <source>The value [{0}] contains an odd number of double-quote characters. Only even numbers of literal double-quote characters are acceptable to command line tools.</source>
-        <target state="translated">Hodnota [{0}] obsahuje lichý počet znaků uvozovek. Nástroje příkazového řádku připouštějí pouze sudý počet znaků uvozovek použitých jako literálů.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">Příkaz byl ukončen s kódem {0}.</target>
