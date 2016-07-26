@@ -769,6 +769,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void VerifyReferencesLoggedAmd64()
         {
             MockEngine engine = new MockEngine();
