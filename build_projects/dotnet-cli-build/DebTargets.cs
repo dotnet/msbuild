@@ -37,33 +37,36 @@ namespace Microsoft.DotNet.Cli.Build
             var version = c.BuildContext.Get<BuildVersion>("BuildVersion").NuGetVersion;
             var debFile = c.BuildContext.Get<string>("SdkInstallerFile");
             var manPagesDir = Path.Combine(Dirs.RepoRoot, "Documentation", "manpages");
-            var previousVersionURL = $"https://dotnetcli.blob.core.windows.net/dotnet/{channel}/Installers/Latest/dotnet-ubuntu-x64.latest.deb";
             var sdkPublishRoot = c.BuildContext.Get<string>("CLISDKRoot");
             var sharedFxDebianPackageName = Monikers.GetDebianSharedFrameworkPackageName(CliDependencyVersions.SharedFrameworkVersion);
+            var debianConfigFile = Path.Combine(Dirs.DebPackagingConfig, "dotnet-debian_config.json");
+            var postinstallFile = Path.Combine(Dirs.DebPackagingConfig, "postinst");
 
-            var objRoot = Path.Combine(Dirs.Output, "obj", "debian", "sdk");
-
-            if (Directory.Exists(objRoot))
+            var debianConfigVariables = new Dictionary<string, string>()
             {
-                Directory.Delete(objRoot, true);
-            }
+                { "SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME", sharedFxDebianPackageName },
+                { "SHARED_FRAMEWORK_NUGET_NAME", Monikers.SharedFrameworkName },
+                { "SHARED_FRAMEWORK_NUGET_VERSION",  CliDependencyVersions.SharedFrameworkVersion },
+                { "SHARED_FRAMEWORK_BRAND_NAME", Monikers.SharedFxBrandName },
+                { "SDK_NUGET_VERSION", version },
+                { "CLI_SDK_BRAND_NAME", Monikers.CLISdkBrandName }
+            };
 
-            Directory.CreateDirectory(objRoot);
+            var debCreator = new DebPackageCreator(
+                DotNetCli.Stage2,
+                Dirs.Intermediate);
 
-            Cmd(Path.Combine(Dirs.RepoRoot, "scripts", "package", "package-debian.sh"),
-                "-v", version, 
-                "-i", sdkPublishRoot, 
-                "-o", debFile, 
-                "-p", packageName,
-                "-b", Monikers.CLISdkBrandName,
-                "-m", manPagesDir, 
-                "--framework-debian-package-name", sharedFxDebianPackageName,
-                "--framework-nuget-name", Monikers.SharedFrameworkName,
-                "--framework-nuget-version", CliDependencyVersions.SharedFrameworkVersion,
-                "--previous-version-url", previousVersionURL, 
-                "--obj-root", objRoot)
-                    .Execute()
-                    .EnsureSuccessful();
+            debCreator.CreateDeb(
+                debianConfigFile,
+                packageName,
+                version,
+                sdkPublishRoot,
+                debianConfigVariables,
+                debFile,
+                manpagesDirectory: manPagesDir,
+                versionManpages: true,
+                debianFiles: new string[] { postinstallFile });
+
             return c.Success();
         }
 
