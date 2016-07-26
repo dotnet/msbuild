@@ -17,7 +17,12 @@
     <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
     <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(OutputType)' == 'exe' ">true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
   
+  <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll" />
   <UsingTask TaskName="MakeNetCoreRunnable" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll" />
              
   <PropertyGroup>
@@ -47,8 +52,15 @@
   <Target Name="GenerateRuntimeConfigurationFiles"
         Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
 
-    <!-- TODO: Split up MakeNetCoreRunnable and implement this target-->
-    <!-- Putting this here to show the structure that we should use in production -->
+    <!--
+    TODO: Get RawRuntimeOptions from where it lives in the MSBuild world
+    -->
+    <GenerateRuntimeConfigurationFiles LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
+                                       RuntimeOutputPath="$(TargetDir)"
+                                       OutputName="$(AssemblyName)"
+                                       RawRuntimeOptions=""
+                                       IncludeDevConfig="true" />
+
   </Target>
 
   <!--

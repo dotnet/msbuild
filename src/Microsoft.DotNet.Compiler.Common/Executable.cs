@@ -50,10 +50,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             _compilerOptions = _context.ProjectFile.GetCompilerOptions(_context.TargetFramework, configuration);
         }
 
-        public void MakeCompilationOutputRunnable()
+        public void MakeCompilationOutputRunnable(bool skipRuntimeConfig = false)
         {
             CopyContentFiles();
-            ExportRuntimeAssets();
+            ExportRuntimeAssets(skipRuntimeConfig);
         }
 
         private void VerifyCoreClrPresenceInPackageGraph()
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        private void ExportRuntimeAssets()
+        private void ExportRuntimeAssets(bool skipRuntimeConfig)
         {
             if (_context.TargetFramework.IsDesktop())
             {
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
             else
             {
-                MakeCompilationOutputRunnableForCoreCLR();
+                MakeCompilationOutputRunnableForCoreCLR(skipRuntimeConfig);
             }
         }
 
@@ -93,9 +93,9 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             GenerateBindingRedirects(_exporter);
         }
 
-        private void MakeCompilationOutputRunnableForCoreCLR()
+        private void MakeCompilationOutputRunnableForCoreCLR(bool skipRuntimeConfig)
         {   
-            WriteDepsFileAndCopyProjectDependencies(_exporter);
+            WriteDepsFileAndCopyProjectDependencies(_exporter, skipRuntimeConfig);
 
             var isRunnable = _compilerOptions.EmitEntryPoint ?? _context.ProjectFile.OverrideIsRunnable;
 
@@ -155,14 +155,14 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
+        private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter, bool skipRuntimeConfig)
         {
             var exports = exporter.GetAllExports().ToList();
             var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name);
             var platformExclusionList = _context.GetPlatformExclusionList(exportsLookup);
             var filteredExports = exports.FilterExports(platformExclusionList);
 
-            WriteConfigurationFiles(exports, filteredExports, exports, includeDevConfig: true);
+            WriteConfigurationFiles(exports, filteredExports, exports, includeDevConfig: true, skipRuntimeConfig: skipRuntimeConfig);
 
             var projectExports = exporter.GetAllProjectTypeDependencies();
             CopyAssemblies(projectExports);
@@ -176,10 +176,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             IEnumerable<LibraryExport> allExports,
             IEnumerable<LibraryExport> depsRuntimeExports,
             IEnumerable<LibraryExport> depsCompilationExports,
-            bool includeDevConfig)
+            bool includeDevConfig,
+            bool skipRuntimeConfig = false)
         {
             WriteDeps(depsRuntimeExports, depsCompilationExports);
-            if (_context.ProjectFile.HasRuntimeOutput(_configuration))
+            if (_context.ProjectFile.HasRuntimeOutput(_configuration) && !skipRuntimeConfig)
             {
                 WriteRuntimeConfig(allExports);
                 if (includeDevConfig)

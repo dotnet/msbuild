@@ -39,7 +39,6 @@
   <!-- Default settings for .NET Core build logic -->
   <PropertyGroup>
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
-    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' ">true</GenerateRuntimeConfigurationFiles>
     
     <!-- This will turn off the base 'ResolveNuGetPackages' target since it is UWP specific, and .NET Core needs it to be split up -->
     <!--<ResolveNuGetPackages>false</ResolveNuGetPackages>-->
