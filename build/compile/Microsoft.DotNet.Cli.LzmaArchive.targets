@@ -23,6 +23,11 @@
 
       <Message Text="Publishing Archiver" />
 
+      <!-- TEMP HACK: need to restore with the current stage, until we get a Stage0 with the new NuGet build -->
+      <Delete Files="$(RepoRoot)/tools/Archiver/project.lock.json" />
+      <DotNetRestore ToolPath="$(Stage2Directory)"
+                     WorkingDirectory="$(RepoRoot)/tools/Archiver" />
+
       <DotNetPublish ToolPath="$(Stage2Directory)"
                      WorkingDirectory="$(RepoRoot)/tools/Archiver"
                      Output="$(ToolsOutputDirectory)"

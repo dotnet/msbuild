@@ -91,6 +91,14 @@
       <Copy SourceFiles="@(SharedFramework)"
             DestinationFiles="@(SharedFramework->'$(StageDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+      <!-- TEMP HACK: need to restore with the current stage, until we get a Stage0 with the new NuGet build -->
+      <ItemGroup>
+	    <SrcLockFiles Include="$(SrcDirectory)/**/project.lock.json" />
+      </ItemGroup>
+      <Delete Files="@(SrcLockFiles)" />
+      <DotNetRestore ToolPath="%(Stage.DotnetDir)"
+					 WorkingDirectory="$(SrcDirectory)" />
+
       <!-- Publish DotNet -->
       <DotNetPublish ToolPath="%(Stage.DotnetDir)"
                      NativeSubdirectory="True"
