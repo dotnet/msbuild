@@ -278,7 +278,11 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             foreach (var library in new[] { Tuple.Create("Microsoft.Data.OData", "5.6.4"), Tuple.Create("TestLibraryWithResources", "1.0.0") })
             {
-                var resources = depsJson["targets"][".NETCoreApp,Version=v1.0"][library.Item1 + "/" + library.Item2]["resources"];
+                var resources = depsJson
+                    ["targets"]
+                    [".NETCoreApp,Version=v1.0"]
+                    [library.Item1.ToLowerInvariant() + "/" + library.Item2.ToLowerInvariant()]
+                    ["resources"];
 
                 resources.Should().NotBeNull();
 
