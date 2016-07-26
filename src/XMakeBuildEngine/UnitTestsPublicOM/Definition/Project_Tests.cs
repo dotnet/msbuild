@@ -32,6 +32,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     public class Project_Tests : IDisposable
     {
         /// <summary>
+        /// Number of characters in a rooted path's prefix.
+        /// </summary>
+        /// <remarks>
+        /// The prefix is "c:\" on Windows, "/" on other OSes.
+        /// </remarks>
+        private readonly int RootPrefixLength = NativeMethodsShared.IsWindows ? 3 : 1;
+
+        /// <summary>
         /// Clear out the global project collection
         /// </summary>
         public Project_Tests()
@@ -705,24 +713,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                if (NativeMethodsShared.IsWindows)
-                {
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                Assert.Equal(
+                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                Assert.Equal(
+                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                }
-                else
-                {
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
-                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
-                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                }
             }
             finally
             {
@@ -756,24 +752,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                if (NativeMethodsShared.IsWindows)
-                {
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                Assert.Equal(
+                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                Assert.Equal(
+                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                }
-                else
-                {
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
-                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                    Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
-                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                }
             }
             finally
             {

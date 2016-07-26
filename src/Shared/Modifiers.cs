@@ -466,19 +466,33 @@ namespace Microsoft.Build.Shared
                         GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, ItemSpecModifiers.FullPath, ref fullPath);
 
                         modifiedItemSpec = GetDirectory(fullPath);
-                        Match root = FileUtilitiesRegex.DrivePattern.Match(modifiedItemSpec);
 
-                        if (!root.Success)
+                        if (NativeMethodsShared.IsWindows)
                         {
-                            root = FileUtilitiesRegex.UNCPattern.Match(modifiedItemSpec);
+                            Match root = FileUtilitiesRegex.DrivePattern.Match(modifiedItemSpec);
+
+                            if (!root.Success)
+                            {
+                                root = FileUtilitiesRegex.UNCPattern.Match(modifiedItemSpec);
+                            }
+
+                            if (root.Success)
+                            {
+                                ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > root.Length) && IsSlash(modifiedItemSpec[root.Length]),
+                                                           "Root directory must have a trailing slash.");
+
+                                modifiedItemSpec = modifiedItemSpec.Substring(root.Length + 1);
+                            }
                         }
-
-                        if (root.Success)
+                        else
                         {
-                            ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > root.Length) && IsSlash(modifiedItemSpec[root.Length]),
-                                "Root directory must have a trailing slash.");
+                            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(modifiedItemSpec) && IsSlash(modifiedItemSpec[0]),
+                                                       "Expected a full non-windows path rooted at '/'.");
 
-                            modifiedItemSpec = modifiedItemSpec.Substring(root.Length + 1);
+                            // A full unix path is always rooted at
+                            // `/`, and a root-relative path is the
+                            // rest of the string.
+                            modifiedItemSpec = modifiedItemSpec.Substring(1);
                         }
                     }
                     else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase) == 0)
