@@ -3108,50 +3108,50 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            string[,] validTests = {
-                {"$(input.ToString()[1])", "X"},
-                {"$(input[1])", "X"},
-                {"$(listofthings.Split(';')[$(position)])","e"},
-                {@"$([System.Text.RegularExpressions.Regex]::Match($(Input), `EXPORT\s+(.+)`).Groups[1].Value)","a"},
-                {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
-                {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
-                {"$([MSBuild]::Add(1,2).CompareTo(3.0))", "0"},
-                {"$([MSBuild]::Add(1,2).CompareTo('3'))", "0"},
-                {"$([MSBuild]::Add(1,2).CompareTo(3.1))", "-1"},
-                {"$([MSBuild]::Add(1,2).CompareTo(2))", "1"},
-                {"$([MSBuild]::Add(1,2).Equals(3))", "True"},
-                {"$([MSBuild]::Add(1,2).Equals(3.0))", "True"},
-                {"$([MSBuild]::Add(1,2).Equals('3'))", "True"},
-                {"$([MSBuild]::Add(1,2).Equals(3.1))", "False"},
-                {"$(a.Insert(0,'%28'))", "%28no"},
-                {"$(a.Insert(0,'\"'))", "\"no"},
-                {"$(a.Insert(0,'(('))", "%28%28no"},
-                {"$(a.Insert(0,'))'))", "%29%29no"},
-                {"A$(Reg:A)A", "AA"},
-                {"A$(Reg:AA)", "A"},
-                {"$(Reg:AA)", ""},
-                {"$(Reg:AAAA)", ""},
-                {"$(Reg:AAA)", ""},
-                {"$([MSBuild]::Add(2,$([System.Convert]::ToInt64('28', 16))))", "42"},
-                {"$([MSBuild]::Add(2,$([System.Convert]::ToInt64('28', $([System.Convert]::ToInt32(16))))))", "42"},
-                {"$(e.Length.ToString())", "3"},
-                {"$(e.get_Length().ToString())", "3"},
-                {"$(emptystring.Length)", "0" },
-                {"$(space.Length)", "1" },
-                {"$([System.TimeSpan]::Equals(null, null))", "True"}, // constant, unquoted null is a special value
-                {"$([MSBuild]::Add(40,null))", "40"},
-                {"$([MSBuild]::Add( 40 , null ))", "40"},
-                {"$([MSBuild]::Add(null,40))", "40"},
-                {"$([MSBuild]::Escape(';'))", "%3b"},
-                {"$([MSBuild]::UnEscape('%3b'))", ";"},
-                {"$(e.Substring($(e.Length)))", ""},
-                {"$([System.Int32]::MaxValue)", System.Int32.MaxValue.ToString()},
-                {"x$()", "x"},
-                {"A$(Reg:A)A", "AA"},
-                {"A$(Reg:AA)", "A"},
-                {"$(Reg:AA)", ""},
-                {"$(Reg:AAAA)", ""},
-                {"$(Reg:AAA)", ""}
+            var validTests = new List<string[]> {
+                new string[] {"$(input.ToString()[1])", "X"},
+                new string[] {"$(input[1])", "X"},
+                new string[] {"$(listofthings.Split(';')[$(position)])","e"},
+                new string[] {@"$([System.Text.RegularExpressions.Regex]::Match($(Input), `EXPORT\s+(.+)`).Groups[1].Value)","a"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3.0))", "0"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo('3'))", "0"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3.1))", "-1"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo(2))", "1"},
+                new string[] {"$([MSBuild]::Add(1,2).Equals(3))", "True"},
+                new string[] {"$([MSBuild]::Add(1,2).Equals(3.0))", "True"},
+                new string[] {"$([MSBuild]::Add(1,2).Equals('3'))", "True"},
+                new string[] {"$([MSBuild]::Add(1,2).Equals(3.1))", "False"},
+                new string[] {"$(a.Insert(0,'%28'))", "%28no"},
+                new string[] {"$(a.Insert(0,'\"'))", "\"no"},
+                new string[] {"$(a.Insert(0,'(('))", "%28%28no"},
+                new string[] {"$(a.Insert(0,'))'))", "%29%29no"},
+                new string[] {"A$(Reg:A)A", "AA"},
+                new string[] {"A$(Reg:AA)", "A"},
+                new string[] {"$(Reg:AA)", ""},
+                new string[] {"$(Reg:AAAA)", ""},
+                new string[] {"$(Reg:AAA)", ""},
+                new string[] {"$([MSBuild]::Add(2,$([System.Convert]::ToInt64('28', 16))))", "42"},
+                new string[] {"$([MSBuild]::Add(2,$([System.Convert]::ToInt64('28', $([System.Convert]::ToInt32(16))))))", "42"},
+                new string[] {"$(e.Length.ToString())", "3"},
+                new string[] {"$(e.get_Length().ToString())", "3"},
+                new string[] {"$(emptystring.Length)", "0" },
+                new string[] {"$(space.Length)", "1" },
+                new string[] {"$([System.TimeSpan]::Equals(null, null))", "True"}, // constant, unquoted null is a special value
+                new string[] {"$([MSBuild]::Add(40,null))", "40"},
+                new string[] {"$([MSBuild]::Add( 40 , null ))", "40"},
+                new string[] {"$([MSBuild]::Add(null,40))", "40"},
+                new string[] {"$([MSBuild]::Escape(';'))", "%3b"},
+                new string[] {"$([MSBuild]::UnEscape('%3b'))", ";"},
+                new string[] {"$(e.Substring($(e.Length)))", ""},
+                new string[] {"$([System.Int32]::MaxValue)", System.Int32.MaxValue.ToString()},
+                new string[] {"x$()", "x"},
+                new string[] {"A$(Reg:A)A", "AA"},
+                new string[] {"A$(Reg:AA)", "A"},
+                new string[] {"$(Reg:AA)", ""},
+                new string[] {"$(Reg:AAAA)", ""},
+                new string[] {"$(Reg:AAA)", ""}
                                    };
 
             var errorTests = new List<string>{
@@ -3279,10 +3279,6 @@ $(
                 "$(e.Substring($([System.IO.Path]::Combine(`a`, `b`))))",
                 "$([]::())",
                 "$((((",
-#if FEATURE_WIN32_REGISTRY
-                // If no registry, this gets expanded to the empty string
-                "$(Registry:X)",
-#endif
                 "$($())",
                 "$",
                 "()"
@@ -3294,20 +3290,34 @@ $(
                 errorTests.Add("$([System.IO.Path]::Combine(`|`,`b`))");
             }
 
-            string result;
-            for (int i = 0; i < validTests.GetLength(0); i++)
+#if FEATURE_WIN32_REGISTRY
+            if (NativeMethodsShared.IsWindows)
             {
-                result = expander.ExpandIntoStringLeaveEscaped(validTests[i, 0], ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                errorTests.Add("$(Registry:X)");
+            }
+#endif
 
-                if (!String.Equals(result, validTests[i, 1]))
+            if (!NativeMethodsShared.IsWindows)
+            {
+                // If no registry or not running on windows, this gets expanded to the empty string
+                // example: xplat build running on OSX
+                validTests.Add(new string[]{"$(Registry:X)", ""});
+            }
+
+            string result;
+            for (int i = 0; i < validTests.Count; i++)
+            {
+                result = expander.ExpandIntoStringLeaveEscaped(validTests[i][0], ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                if (!String.Equals(result, validTests[i][1]))
                 {
-                    string message = "FAILURE: " + validTests[i, 0] + " expanded to '" + result + "' instead of '" + validTests[i, 1] + "'";
+                    string message = "FAILURE: " + validTests[i][0] + " expanded to '" + result + "' instead of '" + validTests[i][1] + "'";
                     Console.WriteLine(message);
                     Assert.True(false, message);
                 }
                 else
                 {
-                    Console.WriteLine(validTests[i, 0] + " expanded to '" + result + "'");
+                    Console.WriteLine(validTests[i][0] + " expanded to '" + result + "'");
                 }
             }
 
