@@ -4,8 +4,6 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
-
 namespace Microsoft.DotNet.Cli.Build
 {
     public class ChangeEntryPointLibraryName : Task

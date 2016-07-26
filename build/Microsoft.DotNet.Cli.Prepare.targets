@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetPack" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="ExtractArchive" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(BuildToolsDir)/Microsoft.DotNet.Build.Tasks.dll"/>
-
+  <Import Project="Microsoft.DotNet.Cli.tasks" />
   <Import Project="prepare/CheckPrereqs.targets" />
 
   <Target Name="Prepare"
@@ -32,11 +22,17 @@
       <Output TaskParameter="OSName" PropertyName="OSName" />
     </GetCurrentRuntimeInformation>
 
+    <!-- NuGet Information -->
+    <PropertyGroup>
+      <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
+      <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
+    </PropertyGroup>
+    
     <!-- Common Properties -->
     <PropertyGroup>
       <IsDesktopAvailable>False</IsDesktopAvailable>
       <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
-      <DotNetPath>$(Stage0Path)</DotNetPath>
+      <DotNetPath>$(Stage0Directory)</DotNetPath>
 
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
       <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
@@ -53,11 +49,14 @@
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
     </PropertyGroup>
 
+    <GetCommitHash RepoRoot="$(RepoRoot)">
+      <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
+    </GetCommitHash>
+
     <GenerateBuildVersionInfo RepoRoot="$(RepoRoot)">
       <Output TaskParameter="VersionMajor" PropertyName="VersionMajor" />
       <Output TaskParameter="VersionMinor" PropertyName="VersionMinor" />
       <Output TaskParameter="VersionPatch" PropertyName="VersionPatch" />
-      <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
       <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
       <Output TaskParameter="ReleaseSuffix" PropertyName="ReleaseSuffix" />
       <Output TaskParameter="VersionSuffix" PropertyName="VersionSuffix" />
@@ -90,6 +89,12 @@
 
       <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' Or '$(Rid)' == 'fedora.23-x64' Or '$(Rid)' == 'opensuse.13.2-x64' ">$(Rid)</ProductMonikerRid>
       <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
+
+      <DynamicLibPrefix>lib</DynamicLibPrefix>
+      <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>
+      <DynamicLibExtension>.so</DynamicLibExtension>
+      <DynamicLibExtension Condition=" '$(OSName)' == 'win' ">.dll</DynamicLibExtension>
+      <DynamicLibExtension Condition=" '$(OSName)' == 'osx' ">.dylib</DynamicLibExtension>
 
       <ArtifactNameSdk>dotnet-sdk</ArtifactNameSdk>
       <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
@@ -133,14 +138,14 @@
                                Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
         <Url>$(SharedFrameworkArchiveBlobRootUrl)/$(CombinedFrameworkHostCompressedFileName)</Url>
         <DownloadFileName>$(CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
-        <ExtractDestintation>$(SharedFrameworkPublishDirectory)</ExtractDestintation>
+        <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
                                Condition="!Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
         <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)</Url>
         <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
-        <ExtractDestintation></ExtractDestintation>
+        <ExtractDestination></ExtractDestination>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
@@ -166,9 +171,15 @@
                   Uri="%(_DownloadAndExtractItem.Url)"
                   DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />
 
-    <ExtractArchive Condition=" '%(_DownloadAndExtractItem.ExtractDestintation)' != '' "
-                    InputFile="%(_DownloadAndExtractItem.DownloadFileName)"
-                    DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestintation)" />
+    <ZipFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND '$(OSName)' == 'win' "
+                               SourceArchive="%(_DownloadAndExtractItem.DownloadFileName)"
+                               DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestination)"
+                               OverwriteDestination="True" />
+
+    <TarGzFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND '$(OSName)' != 'win' "
+                               SourceArchive="%(_DownloadAndExtractItem.DownloadFileName)"
+                               DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestination)"
+                               OverwriteDestination="True" />
   </Target>
 
   <Target Name="RestorePackages"

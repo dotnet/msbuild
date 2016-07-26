@@ -8,8 +8,6 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
-
 namespace Microsoft.DotNet.Cli.Build
 {
     public class BranchInfo

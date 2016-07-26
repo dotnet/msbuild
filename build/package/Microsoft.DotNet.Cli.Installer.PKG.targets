@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(CLIBuildDll)" />
-  
     <Target Name="SetupPkgInputsOutputs">
       <PropertyGroup>
         <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
@@ -9,23 +7,23 @@
 
         <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
         <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
-        
+
         <!-- Properties for pkg build -->
         <SharedHostComponentId>com.microsoft.dotnet.sharedhost.component.osx.x64</SharedHostComponentId>
         <HostFxrComponentId>com.microsoft.dotnet.hostfxr.component.osx.x64</HostFxrComponentId>
         <SharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(SharedFrameworkVersion).component.osx.x64</SharedFrameworkComponentId>
         <SdkComponentId>com.microsoft.dotnet.dev.$(SdkVersion).component.osx.x64</SdkComponentId>
         <SdkProductArchiveId>com.microsoft.dotnet.dev.$(SdkVersion).osx.x64</SdkProductArchiveId>
-        
+
         <PkgInstallDirectory>/usr/local/share/dotnet</PkgInstallDirectory>
 
         <SdkPkgSourcesRootDirectory>$(RepoRoot)/packaging/osx/clisdk</SdkPkgSourcesRootDirectory>
         <SdkPkgScriptsDirectory>$(SdkPkgSourcesRootDirectory)/scripts</SdkPkgScriptsDirectory>
         <SdkProductArchiveResourcesDirectory>$(SdkPkgSourcesRootDirectory)/resources</SdkProductArchiveResourcesDirectory>
-        
+
         <SdkProductArchiveDistributionTemplateFile>$(SdkPkgSourcesRootDirectory)/Distribution-Template</SdkProductArchiveDistributionTemplateFile>
         <SdkProductArchiveDistributionFile>$(PkgIntermediateDirectory)/CLI-SDK-Formatted-Distribution-Template.xml</SdkProductArchiveDistributionFile>
-        
+
         <SdkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SdkComponentId).pkg</SdkPkgIntermediatePath>
         <SharedFrameworkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedFrameworkComponentId).pkg</SharedFrameworkPkgIntermediatePath>
         <SharedHostPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedHostComponentId).pkg</SharedHostPkgIntermediatePath>
@@ -80,12 +78,12 @@
       </ItemGroup>
     </Target>
 
-    <Target Name="GenerateSdkPkg" 
+    <Target Name="GenerateSdkPkg"
             Inputs="@(GenerateSdkPkgInputs)"
             Outputs="$(SdkInstallerFile)"
             DependsOnTargets="Init;Layout;SetupPkgInputsOutputs"
             Condition=" '$(OSName)' == 'osx' ">
-      
+
       <Exec Command="pkgbuild
                      --root '$(SdkLayoutOutputDirectory)'
                      --identifier '$(SdkComponentId)'
@@ -101,7 +99,7 @@
             DependsOnTargets="GenerateSdkPkg"
             Condition=" '$(OSName)' == 'osx' ">
       <!-- Move ProductArchive pkg components into place with component ids in the filenames -->
-      <Copy 
+      <Copy
         SourceFiles="$(SdkInstallerFile);
                      $(DownloadedSharedFrameworkInstallerFile);
                      $(DownloadedHostFxrInstallerFile);
@@ -110,14 +108,14 @@
                           $(SharedFrameworkPkgIntermediatePath);
                           $(HostFxrPkgIntermediatePath);
                           $(SharedHostPkgIntermediatePath);" />
-      
+
       <!-- Fill out parameters in the Distribution Template -->
       <ReplaceFileContents
         InputFile="$(SdkProductArchiveDistributionTemplateFile)"
         DestinationFile="$(SdkProductArchiveDistributionFile)"
         ReplacementPatterns="@(DistributionTemplateReplacement -> '%(Identity)')"
         ReplacementStrings="@(DistributionTemplateReplacement -> '%(ReplacementString)')" />
-      
+
       <Exec Command="productbuild
                      --version '$(SdkVersion)'
                      --identifier '$(SdkProductArchiveId)'
@@ -127,7 +125,7 @@
                      '$(CombinedFrameworkSdkHostInstallerFile)'" />
     </Target>
 
-    <Target Name="GeneratePkgs" 
+    <Target Name="GeneratePkgs"
             DependsOnTargets="Init;
                               Layout;
                               SetupPkgInputsOutputs;

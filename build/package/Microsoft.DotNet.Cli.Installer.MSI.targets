@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    
-    <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
-    <UsingTask TaskName="ExtractArchive" AssemblyFile="$(CLIBuildDll)" />
-    <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(CLIBuildDll)" />
-
     <Target Name="MsiTargetsSetupInputOutputs" DependsOnTargets="Init">
       <!-- AcquireWix Properties -->
       <PropertyGroup>
@@ -50,7 +45,7 @@
       </PropertyGroup>
     </Target>
 
-    <Target Name="AcquireWix" 
+    <Target Name="AcquireWix"
             DependsOnTargets="Init;MsiTargetsSetupInputOutputs"
             Inputs="$(WixDownloadSentinel)"
             Outputs="$(WixDestinationPath)">
@@ -62,14 +57,14 @@
           Lines="$(WixVersion)"
           Overwrite="true"
           Encoding="Unicode"/>
-        
+
       <DownloadFile
           Uri="$(WixDownloadUrl)"
           DestinationPath="$(WixDestinationPath)"
           Overwrite="false" />
 
-      <ExtractArchive
-          InputFile="$(WixDestinationPath)"
+      <ZipFileExtractToDirectory
+          SourceArchive="$(WixDestinationPath)"
           DestinationDirectory="$(WixRoot)" />
 
     </Target>
@@ -118,7 +113,7 @@
                       '$(Architecture)'" />
     </Target>
 
-    <Target Name="TestSdkMsi" 
+    <Target Name="TestSdkMsi"
             Inputs="$(SdkInstallerFile)"
             Outputs="$(SdkMsiTestedSentinel)"
             DependsOnTargets="Init;MsiTargetsSetupInputOutputs;GenerateSdkMsi"
@@ -135,7 +130,7 @@
           Encoding="Unicode"/>
     </Target>
 
-    <Target Name="GenerateMsis" 
+    <Target Name="GenerateMsis"
           DependsOnTargets="Init;
                             Layout;
                             MsiTargetsSetupInputOutputs;
@@ -147,14 +142,14 @@
 
     <!-- These targets are used in signing, don't remove them! -->
     <Target Name="ExtractEngineFromSdkBundle">
-      <Exec Command="$(WixRoot)/insignia.exe 
-                      -ib $(CombinedFrameworkSdkHostInstallerFile) 
+      <Exec Command="$(WixRoot)/insignia.exe
+                      -ib $(CombinedFrameworkSdkHostInstallerFile)
                       -o $(CombinedFrameworkSdkHostBundleEngineName)" />
     </Target>
 
     <Target Name="ReattachEngineToSdkBundle">
-      <Exec Command="$(WixRoot)/insignia.exe 
-                      -ab $(CombinedFrameworkSdkHostInstallerFile) 
+      <Exec Command="$(WixRoot)/insignia.exe
+                      -ab $(CombinedFrameworkSdkHostInstallerFile)
                       -o $(CombinedFrameworkSdkHostBundleEngineName)" />
     </Target>
 </Project>

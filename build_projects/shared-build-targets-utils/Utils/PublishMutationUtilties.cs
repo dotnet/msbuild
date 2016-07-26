@@ -11,27 +11,6 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class PublishMutationUtilties
     {
-        public static void CleanPublishOutput(
-            string path, 
-            string name, 
-            bool deleteRuntimeConfigJson=false, 
-            bool deleteDepsJson=false)
-        {
-            File.Delete(Path.Combine(path, $"{name}{Constants.ExeSuffix}"));
-            File.Delete(Path.Combine(path, $"{name}.dll"));
-            File.Delete(Path.Combine(path, $"{name}.pdb"));
-
-            if (deleteRuntimeConfigJson)
-            {
-                File.Delete(Path.Combine(path, $"{name}.runtimeconfig.json"));
-            }
-
-            if (deleteDepsJson)
-            {
-                File.Delete(Path.Combine(path, $"{name}.deps.json"));
-            }
-        }
-
         public static void ChangeEntryPointLibraryName(string depsFile, string newName)
         {
             JToken deps;

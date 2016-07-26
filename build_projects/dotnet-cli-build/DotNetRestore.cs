@@ -12,10 +12,12 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetVerbosity()} {GetFallbackSource()}"; }
+            get { return $"{GetVerbosity()} {GetFallbackSource()} {GetPackages()}"; }
         }
 
         public string FallbackSource { get; set; }
+
+        public string Packages { get; set; }
 
         public string Verbosity { get; set; }
 
@@ -24,6 +26,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (!string.IsNullOrEmpty(FallbackSource))
             {
                 return $"--fallbacksource {FallbackSource}";
+            }
+
+            return null;
+        }
+
+        private string GetPackages()
+        {
+            if (!string.IsNullOrEmpty(Packages))
+            {
+                return $"--packages {Packages}";
             }
 
             return null;

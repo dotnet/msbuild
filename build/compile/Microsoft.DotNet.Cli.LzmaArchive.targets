@@ -13,15 +13,20 @@
       <RemoveDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)" />
       <MakeDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)"/>
 
-      <Exec Command="$(DotnetStage2) new" WorkingDirectory="$(NuGetPackagesArchiveProject)" />
-      <Exec Command="$(DotnetStage2) restore --packages $(NuGetPackagesArchiveFolder)"
-          WorkingDirectory="$(NuGetPackagesArchiveProject)" />
+      <DotNetNew ToolPath="$(Stage2Directory)"
+                 WorkingDirectory="$(NuGetPackagesArchiveProject)" />
+      <DotNetRestore ToolPath="$(Stage2Directory)"
+                     Packages="$(NuGetPackagesArchiveFolder)"
+                     WorkingDirectory="$(NuGetPackagesArchiveProject)" />
 
       <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />
 
       <Message Text="Publishing Archiver" />
-      <Exec Command="$(DotnetStage2) publish --output $(ToolsOutputDirectory) --configuration $(Configuration)" 
-          WorkingDirectory="$(RepoRoot)/tools/Archiver" />
+
+      <DotNetPublish ToolPath="$(Stage2Directory)"
+                     WorkingDirectory="$(RepoRoot)/tools/Archiver"
+                     Output="$(ToolsOutputDirectory)"
+                     Configuration="$(Configuration)" />
 
       <Exec Command="$(ArchiverExe) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
 

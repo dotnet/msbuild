@@ -4,6 +4,8 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+using Microsoft.DotNet.Cli.Build.Framework;
+
 namespace Microsoft.DotNet.Cli.Build
 {
     public abstract class DotNetTool : ToolTask
@@ -20,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string ToolName
         {
-            get { return HostArtifactNames.DotnetHostBaseName; }
+            get { return $"dotnet{Constants.ExeSuffix}"; }
         }
 
         protected override MessageImportance StandardOutputLoggingImportance

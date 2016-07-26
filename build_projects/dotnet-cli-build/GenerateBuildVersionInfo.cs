@@ -6,7 +6,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class GenerateBuildVersionInfo : Task
+    public class GenerateBuildVersionInfo : ToolTask
     {
         [Required]
         public string RepoRoot { get; set; }
@@ -19,9 +19,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         [Output]
         public int VersionPatch { get; set; }
-
-        [Output]
-        public string CommitHash { get; set; }
 
         [Output]
         public string CommitCount { get; set; }
@@ -50,12 +47,13 @@ namespace Microsoft.DotNet.Cli.Build
         [Output]
         public string BranchName { get; set; }
 
+        private int _commitCount;
+
         public override bool Execute()
         {
-            var branchInfo = new BranchInfo(RepoRoot);
+            base.Execute();
 
-            var commitCount = GitUtils.GetCommitCount();
-            var commitHash = GitUtils.GetCommitHash();
+            var branchInfo = new BranchInfo(RepoRoot);
 
             var buildVersion = new BuildVersion()
             {
@@ -63,13 +61,12 @@ namespace Microsoft.DotNet.Cli.Build
                 Minor = int.Parse(branchInfo.Entries["MINOR_VERSION"]),
                 Patch = int.Parse(branchInfo.Entries["PATCH_VERSION"]),
                 ReleaseSuffix = branchInfo.Entries["RELEASE_SUFFIX"],
-                CommitCount = commitCount
+                CommitCount = _commitCount
             };
 
             VersionMajor = buildVersion.Major;
             VersionMinor = buildVersion.Minor;
             VersionPatch = buildVersion.Patch;
-            CommitHash = commitHash;
             CommitCount = buildVersion.CommitCountString;
             ReleaseSuffix = buildVersion.ReleaseSuffix;
             VersionSuffix = buildVersion.VersionSuffix;
@@ -81,6 +78,31 @@ namespace Microsoft.DotNet.Cli.Build
             BranchName= branchInfo.Entries["BRANCH_NAME"];
 
             return true;
+        }
+
+        protected override string ToolName
+        {
+            get { return "git"; }
+        }
+
+        protected override MessageImportance StandardOutputLoggingImportance
+        {
+            get { return MessageImportance.High; } // or else the output doesn't get logged by default
+        }
+
+        protected override string GenerateFullPathToTool()
+        {
+            return "git";
+        }
+
+        protected override string GenerateCommandLineCommands()
+        {
+            return $"rev-list --count HEAD";
+        }
+
+        protected override void LogEventsFromTextOutput(string line, MessageImportance importance)
+        {
+            _commitCount = int.Parse(line);
         }
     }
 }

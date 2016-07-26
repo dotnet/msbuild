@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <Target Name="SetupProjectsToPack"
           DependsOnTargets="Init">
     <PropertyGroup>
@@ -9,7 +9,7 @@
       <PackagingBuildBasePath>$(Stage2CompilationDirectory)/forPackaging</PackagingBuildBasePath>
       <NupkgOutputDirectory>$(PackagesDirectory)</NupkgOutputDirectory>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils" >
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
@@ -74,13 +74,13 @@
 
   <Target Name="BuildProjectsForNuGetPackages"
             DependsOnTargets="Init;
-                              SetupProjectsToPack"            
+                              SetupProjectsToPack"
             Condition=" '$(OS)' == 'Windows_NT' ">
         <MakeDir Directories="$(PackagingBuildBasePath)" />
 
-        <Exec Command="$(DotnetStage2) build
-                      --build-base-path $(PackagingBuildBasePath)
-                      --configuration $(Configuration)
-                      %(ProjectsToPack.Identity)" />
+        <DotNetBuild ToolPath="$(Stage2Directory)"
+                     BuildBasePath="$(PackagingBuildBasePath)"
+                     Configuration="$(Configuration)"
+                     ProjectPath="%(ProjectsToPack.Identity)" />
   </Target>
 </Project>

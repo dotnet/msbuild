@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    
     <Target Name="SetupGenerateDebInputsOutputs">
         <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
             <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
         </Exec>
 
         <!-- Workaround for Ubuntu16 Jenkins https://github.com/dotnet/core-setup/issues/167 -->
-        <Message Condition=" '$(DebuildPresent)'  != 'true' " 
+        <Message Condition=" '$(DebuildPresent)'  != 'true' "
                  Text="Debuild Not found, Debian packages will not be built."
                  Importance="High" />
 
@@ -17,10 +16,10 @@
 
             <DebianPackagingScript>$(RepoRoot)/scripts/package/package-debian.sh</DebianPackagingScript>
             <ManpagesDirectory>$(RepoRoot)/Documentation/manpages</ManpagesDirectory>
-            
+
             <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
             <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
-        
+
             <SdkDebianPackageName>dotnet-dev-$(SdkVersion)</SdkDebianPackageName>
             <SharedFrameworkDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkVersion)</SharedFrameworkDebianPackageName>
             <SharedFrameworkDebianPackageName>$(SharedFrameworkDebianPackageName.ToLower())</SharedFrameworkDebianPackageName>
@@ -29,7 +28,7 @@
             <SharedHostDebianPackageName>dotnet-host</SharedHostDebianPackageName>
 
             <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
-        
+
             <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
             <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
             <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
@@ -42,14 +41,14 @@
         <!-- Consumed By Publish -->
         <ItemGroup>
           <GeneratedInstallers Include="$(SdkInstallerFile)" />
-        </ItemGroup>        
+        </ItemGroup>
 
         <ItemGroup>
             <SdkDebInputFiles Include="$(SdkLayoutOutputDirectory)/**/*" />
         </ItemGroup>
     </Target>
 
-    <Target Name="GenerateSdkDeb" 
+    <Target Name="GenerateSdkDeb"
         Condition=" '$(OSName)' == 'ubuntu' and '$(DebuildPresent)'  == 'true' "
         Inputs="@(SdkDebInputFiles);"
         Outputs="$(SdkInstallerFile)" >
@@ -78,7 +77,7 @@
         <Exec Command="sudo dpkg -r $(SharedHostDebianPackageName)" />
     </Target>
 
-    <Target Name="TestSdkDeb" 
+    <Target Name="TestSdkDeb"
         Condition=" '$(OSName)' == 'ubuntu' and '$(DebuildPresent)'  == 'true' "
         Inputs="$(DownloadedSharedHostInstallerFile);
                 $(DownloadedHostFxrInstallerFile);
@@ -105,7 +104,7 @@
         <Exec Command="sudo dpkg -r $(SharedHostDebianPackageName)" />
     </Target>
 
-    <Target Name="GenerateDebs" 
+    <Target Name="GenerateDebs"
         DependsOnTargets="Init;
                           Layout;
                           SetupGenerateDebInputsOutputs;
