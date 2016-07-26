@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 .Any();
 
             // coreclr should be present for standalone apps
-            if (! isCoreClrPresent)
+            if (!isCoreClrPresent)
             {
                 throw new InvalidOperationException("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
             }
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         }
 
         private void MakeCompilationOutputRunnableForCoreCLR(bool skipRuntimeConfig)
-        {   
+        {
             WriteDepsFileAndCopyProjectDependencies(_exporter, skipRuntimeConfig);
 
             var isRunnable = _compilerOptions.EmitEntryPoint ?? _context.ProjectFile.OverrideIsRunnable;
@@ -276,8 +276,16 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private void AddAdditionalProbingPaths(JObject runtimeOptions)
         {
-            var additionalProbingPaths = new JArray(_context.PackagesDirectory);
-            runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
+            if (_context.LockFile != null)
+            {
+                var additionalProbingPaths = new JArray();
+                foreach (var packageFolder in _context.LockFile.PackageFolders)
+                {
+                    additionalProbingPaths.Add(packageFolder.Path);
+                }
+
+                runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
+            }
         }
 
         public void WriteDeps(IEnumerable<LibraryExport> runtimeExports, IEnumerable<LibraryExport> compilationExports)

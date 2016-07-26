@@ -4,7 +4,7 @@
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.DotNet.ProjectModel.Resolution;
+using NuGet.Configuration;
 
 namespace Microsoft.DotNet.Configurer
 {
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Configurer
             {
                 if (string.IsNullOrEmpty(_nugetCachePath))
                 {
-                    _nugetCachePath = PackageDependencyProvider.ResolvePackagesPath(null, null);
+                    _nugetCachePath = NuGetPathContext.Create(new NullSettings()).UserPackageFolder;
                 }
 
                 return _nugetCachePath;

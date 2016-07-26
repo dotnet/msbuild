@@ -3,14 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
+using NuGet.Common;
+using NuGet.Configuration;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel
@@ -210,7 +210,6 @@ namespace Microsoft.DotNet.ProjectModel
             }
 
             RootDirectory = globalSettings?.DirectoryPath ?? RootDirectory;
-            PackagesDirectory = PackagesDirectory ?? PackageDependencyProvider.ResolvePackagesPath(RootDirectory, globalSettings);
 
             FrameworkReferenceResolver frameworkReferenceResolver;
             if (string.IsNullOrEmpty(ReferenceAssembliesPath))
@@ -227,6 +226,17 @@ namespace Microsoft.DotNet.ProjectModel
             EnsureProjectLoaded();
 
             ReadLockFile(diagnostics);
+
+            // some callers only give ProjectContextBuilder a LockFile
+            ProjectDirectory = ProjectDirectory ?? TryGetProjectDirectoryFromLockFile();
+
+            INuGetPathContext nugetPathContext = null;
+            if (ProjectDirectory != null)
+            {
+                nugetPathContext = NuGetPathContext.Create(ProjectDirectory);
+            }
+
+            PackagesDirectory = PackagesDirectory ?? nugetPathContext?.UserPackageFolder;
 
             var validLockFile = true;
             string lockFileValidationMessage = null;
@@ -271,7 +281,7 @@ namespace Microsoft.DotNet.ProjectModel
                 target = SelectTarget(LockFile, isPortable);
                 if (target != null)
                 {
-                    var nugetPackageResolver = new PackageDependencyProvider(PackagesDirectory, frameworkReferenceResolver);
+                    var nugetPackageResolver = new PackageDependencyProvider(nugetPathContext, frameworkReferenceResolver);
                     var msbuildProjectResolver = new MSBuildDependencyProvider(Project, ProjectResolver);
                     ScanLibraries(target, lockFileLookup, libraries, msbuildProjectResolver, nugetPackageResolver, projectResolver);
 
@@ -375,6 +385,18 @@ namespace Microsoft.DotNet.ProjectModel
                 libraryManager,
                 LockFile,
                 diagnostics);
+        }
+
+        private string TryGetProjectDirectoryFromLockFile()
+        {
+            string result = null;
+
+            if (LockFile != null && !string.IsNullOrEmpty(LockFile.LockFilePath))
+            {
+                result = Path.GetDirectoryName(LockFile.LockFilePath);
+            }
+
+            return result;
         }
 
         private void ReadLockFile(ICollection<DiagnosticMessage> diagnostics)

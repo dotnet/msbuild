@@ -76,7 +76,7 @@ A command is running to initially populate your local package cache, to improve 
         [Fact]
         public void It_creates_a_sentinel_file_under_the_nuget_cache_folder()
         {
-            _nugetCacheFolder.Should().HaveDirectory("Microsoft.NETCore.App");
+            _nugetCacheFolder.Should().HaveDirectory("microsoft.netcore.app");
         }
 
     	private string GetDotnetVersion()

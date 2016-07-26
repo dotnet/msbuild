@@ -145,13 +145,16 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             List<string> hostArgs = new List<string>();
-            if (!_context.TargetFramework.IsDesktop())
+            if (!_context.TargetFramework.IsDesktop() && _context.LockFile != null)
             {
-                // Add Nuget Packages Probing Path
-                var nugetPackagesRoot = _context.PackagesDirectory;
-                var probingPathArg = "--additionalprobingpath";
-                hostArgs.Insert(0, nugetPackagesRoot);
-                hostArgs.Insert(0, probingPathArg);
+                // Add Nuget Packages Probing Paths
+                const string probingPathArg = "--additionalprobingpath";
+
+                foreach (var packageFolder in _context.LockFile.PackageFolders)
+                {
+                    hostArgs.Insert(0, packageFolder.Path);
+                    hostArgs.Insert(0, probingPathArg);
+                }
             }
 
             // Now launch the output and give it the results
