@@ -327,7 +327,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         <target state="translated">  /consoleloggerparameters:&lt;parametry&gt;
                      Parametry protokolovacího nástroje konzoly. (Short form: /clp)
                      Dostupné parametry:
-                        PerformanceSummary –  zobrazí dobu zpracování úloh,
+                        PerformanceSummary – zobrazí dobu zpracování úloh,
                             cílů a projektů.
                         Summary – na konci zobrazí souhrn chyb a upozornění.
                         NoSummary – na konci nezobrazí souhrny chyb
