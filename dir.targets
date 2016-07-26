@@ -38,6 +38,7 @@
     <XunitOptions Condition="'$(OS)'=='OSX' and '$(NetCoreBuild)'=='true'">-notrait category=nonosxtests -notrait category=netcore-osx-failing</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='FreeBSD'">$(XunitOptions) -notrait category=nonfreebsdtests</XunitOptions>
 
+    <XunitOptions Condition="'$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=non-mono-tests</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='OSX' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-osx-failing</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='Windows_NT' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
   </PropertyGroup>
