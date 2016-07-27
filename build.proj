@@ -81,6 +81,7 @@
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
+  <Import Project="$(BuildToolsDir)/Build.Common.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
