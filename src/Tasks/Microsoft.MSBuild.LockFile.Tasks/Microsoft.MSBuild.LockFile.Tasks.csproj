@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileGroup.cs" />
+    <Compile Include="LockFileToMSBuild2.cs" />
     <Compile Include="LockFileToMSBuild.cs" />
     <Compile Include="MetadataKeys.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

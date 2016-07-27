@@ -45,7 +45,9 @@
   <ItemGroup>
     <None Include="NetCoreApp1.0\project.lock.json" />
     <None Include="NetFramework4.5.2\project.lock.json" />
+    <None Include="RunSamples2.cmd" />
     <None Include="RunSamples.cmd" />
+    <None Include="SampleTargets2.targets" />
     <None Include="SampleTargets.targets" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

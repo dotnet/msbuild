@@ -13,6 +13,7 @@ namespace Microsoft.MSBuild.LockFile.Tasks
         internal const string Type = "Type";
         internal const string Version = "Version";
         internal const string FileGroup = "FileGroup";
+        internal const string Path = "Path";
 
         // Target Metadata
         internal const string RuntimeIdentifier = "RuntimeIdentifier";
@@ -23,5 +24,6 @@ namespace Microsoft.MSBuild.LockFile.Tasks
         // Foreign Keys
         internal const string ParentTarget = "ParentTarget";
         internal const string ParentTargetLibrary = "ParentTargetLibrary";
+        internal const string ParentPackage = "ParentPackage";
     }
 }

@@ -17,7 +17,7 @@ IF "%1" == "core" (
 
 REM ------------------------------------------------------
 REM SAMPLES: Set Default Command Prefix
-set RUNSAMPLE=call %MSBUILD% SampleTargets.targets /p:ProjectLockFile=%PROJECTLOCKFILE%
+set RUNSAMPLE=call %MSBUILD% SampleTargets2.targets /p:ProjectLockFile=%PROJECTLOCKFILE%
 
 REM ------------------------------------------------------
 echo Sample 1: Display Counts of all Items
@@ -32,12 +32,18 @@ REM echo Sample 3: Display The Targets in the LockFile
 REM %RUNSAMPLE% /t:DisplayAllTargets
 
 REM ------------------------------------------------------
-REM echo Sample 4: Display libraries in a specific Target: %TARGETMONIKER%
-REM %RUNSAMPLE% /t:DisplayLibrariesPerTarget /p:TargetMoniker=%TARGETMONIKER%
+REM echo Sample 4: Display Package Dependencies in a specific Target: %TARGETMONIKER%
+REM %RUNSAMPLE% /t:DisplayPackageDependenciesPerTarget /p:TargetMoniker=%TARGETMONIKER%
+
+REM echo Sample 4b: Display definitions for the Package Dependencies in a specific target: %TARGETMONIKER%
+REM %RUNSAMPLE% /t:DisplayPackageDefinitionsPerTarget /p:TargetMoniker=%TARGETMONIKER%
 
 REM ------------------------------------------------------
 REM echo Sample 5: Display Compile Time Assemblies in a specific Target: %TARGETMONIKER%
 REM %RUNSAMPLE% /t:DisplayCompilePerTarget /p:TargetMoniker=%TARGETMONIKER%
+
+REM echo Sample 5b: Display Path metadata for Compile Time Assemblies in a specific Target: %TARGETMONIKER%
+REM %RUNSAMPLE% /t:DisplayCompileDefnPerTarget /p:TargetMoniker=%TARGETMONIKER%
 
 REM ------------------------------------------------------
 REM echo Sample 6: Display libraries in a specific target and their dependencies: %TARGETMONIKER%

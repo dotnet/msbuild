@@ -16,6 +16,7 @@ namespace Microsoft.MSBuild.LockFile.Tasks
         ContentFile,
         NativeLibrary,
         ResourceAssembly,
-        RuntimeTarget
+        RuntimeTarget,
+        //FrameworkAssembly
     }
 }
