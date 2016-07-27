@@ -3,6 +3,7 @@ using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
@@ -15,7 +16,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void GetDescriptionShouldNotModifyTarget()
         {
-            var provider = new PackageDependencyProvider("/foo/packages", new FrameworkReferenceResolver("/foo/references"));
+            var provider = new PackageDependencyProvider(NuGetPathContext.Create("/foo/packages"), new FrameworkReferenceResolver("/foo/references"));
             var package = new LockFilePackageLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void HasCompileTimePlaceholderChecksAllCompileTimeAssets()
         {
-            var provider = new PackageDependencyProvider("/foo/packages", new FrameworkReferenceResolver("/foo/references"));
+            var provider = new PackageDependencyProvider(NuGetPathContext.Create("/foo/packages"), new FrameworkReferenceResolver("/foo/references"));
             var package = new LockFilePackageLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
@@ -74,7 +75,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void HasCompileTimePlaceholderReturnsFalseIfEmpty()
         {
-            var provider = new PackageDependencyProvider("/foo/packages", new FrameworkReferenceResolver("/foo/references"));
+            var provider = new PackageDependencyProvider(NuGetPathContext.Create("/foo/packages"), new FrameworkReferenceResolver("/foo/references"));
             var package = new LockFilePackageLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");

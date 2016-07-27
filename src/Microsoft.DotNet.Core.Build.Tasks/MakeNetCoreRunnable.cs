@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Tasks
                 LibraryExporter libraryExporter = projectContext.CreateExporter(Configuration, buildBasePath);
 
                 Executable executable = new Executable(projectContext, outputPaths, libraryExporter, Configuration);
-                executable.MakeCompilationOutputRunnable();
+                executable.MakeCompilationOutputRunnable(skipRuntimeConfig: true);
             }
 
             return true;

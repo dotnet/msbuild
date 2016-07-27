@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return Path.Combine(
                 GetBaseToolPath(packageId),
-                version.ToNormalizedString(),
+                version.ToNormalizedString().ToLowerInvariant(),
                 framework.GetShortFolderName(),
                 "project.lock.json");
         }
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return Path.Combine(
                 _packagesDirectory,
                 ".tools",
-                packageId);
+                packageId.ToLowerInvariant());
         }
 
         private IEnumerable<NuGetVersion> GetAvailableToolVersions(string packageId)

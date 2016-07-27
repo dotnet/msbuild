@@ -50,10 +50,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             _compilerOptions = _context.ProjectFile.GetCompilerOptions(_context.TargetFramework, configuration);
         }
 
-        public void MakeCompilationOutputRunnable()
+        public void MakeCompilationOutputRunnable(bool skipRuntimeConfig = false)
         {
             CopyContentFiles();
-            ExportRuntimeAssets();
+            ExportRuntimeAssets(skipRuntimeConfig);
         }
 
         private void VerifyCoreClrPresenceInPackageGraph()
@@ -67,13 +67,13 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 .Any();
 
             // coreclr should be present for standalone apps
-            if (! isCoreClrPresent)
+            if (!isCoreClrPresent)
             {
                 throw new InvalidOperationException("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
             }
         }
 
-        private void ExportRuntimeAssets()
+        private void ExportRuntimeAssets(bool skipRuntimeConfig)
         {
             if (_context.TargetFramework.IsDesktop())
             {
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
             else
             {
-                MakeCompilationOutputRunnableForCoreCLR();
+                MakeCompilationOutputRunnableForCoreCLR(skipRuntimeConfig);
             }
         }
 
@@ -93,9 +93,9 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             GenerateBindingRedirects(_exporter);
         }
 
-        private void MakeCompilationOutputRunnableForCoreCLR()
-        {   
-            WriteDepsFileAndCopyProjectDependencies(_exporter);
+        private void MakeCompilationOutputRunnableForCoreCLR(bool skipRuntimeConfig)
+        {
+            WriteDepsFileAndCopyProjectDependencies(_exporter, skipRuntimeConfig);
 
             var isRunnable = _compilerOptions.EmitEntryPoint ?? _context.ProjectFile.OverrideIsRunnable;
 
@@ -155,14 +155,14 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
+        private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter, bool skipRuntimeConfig)
         {
             var exports = exporter.GetAllExports().ToList();
             var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name);
             var platformExclusionList = _context.GetPlatformExclusionList(exportsLookup);
             var filteredExports = exports.FilterExports(platformExclusionList);
 
-            WriteConfigurationFiles(exports, filteredExports, exports, includeDevConfig: true);
+            WriteConfigurationFiles(exports, filteredExports, exports, includeDevConfig: true, skipRuntimeConfig: skipRuntimeConfig);
 
             var projectExports = exporter.GetAllProjectTypeDependencies();
             CopyAssemblies(projectExports);
@@ -176,10 +176,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             IEnumerable<LibraryExport> allExports,
             IEnumerable<LibraryExport> depsRuntimeExports,
             IEnumerable<LibraryExport> depsCompilationExports,
-            bool includeDevConfig)
+            bool includeDevConfig,
+            bool skipRuntimeConfig = false)
         {
             WriteDeps(depsRuntimeExports, depsCompilationExports);
-            if (_context.ProjectFile.HasRuntimeOutput(_configuration))
+            if (_context.ProjectFile.HasRuntimeOutput(_configuration) && !skipRuntimeConfig)
             {
                 WriteRuntimeConfig(allExports);
                 if (includeDevConfig)
@@ -275,8 +276,17 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private void AddAdditionalProbingPaths(JObject runtimeOptions)
         {
-            var additionalProbingPaths = new JArray(_context.PackagesDirectory);
-            runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
+            if (_context.LockFile != null)
+            {
+                var additionalProbingPaths = new JArray();
+                foreach (var packageFolder in _context.LockFile.PackageFolders)
+                {
+                    // DotNetHost doesn't handle additional probing paths with a trailing slash
+                    additionalProbingPaths.Add(PathUtility.EnsureNoTrailingSlash(packageFolder.Path));
+                }
+
+                runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
+            }
         }
 
         public void WriteDeps(IEnumerable<LibraryExport> runtimeExports, IEnumerable<LibraryExport> compilationExports)

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.Packaging;
 
@@ -15,12 +16,16 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public class PackageDependencyProvider
     {
-        private readonly VersionFolderPathResolver _packagePathResolver;
+        private readonly FallbackPackagePathResolver _packagePathResolver;
         private readonly FrameworkReferenceResolver _frameworkReferenceResolver;
 
-        public PackageDependencyProvider(string packagesPath, FrameworkReferenceResolver frameworkReferenceResolver)
+        public PackageDependencyProvider(INuGetPathContext nugetPathContext, FrameworkReferenceResolver frameworkReferenceResolver)
         {
-            _packagePathResolver = new VersionFolderPathResolver(packagesPath);
+            if (nugetPathContext != null)
+            {
+                _packagePathResolver = new FallbackPackagePathResolver(nugetPathContext);
+            }
+
             _frameworkReferenceResolver = frameworkReferenceResolver;
         }
 
@@ -40,8 +45,8 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary, targetFramework);
 
-            var path = _packagePathResolver.GetInstallPath(package.Name, package.Version);
-            var exists = Directory.Exists(path);
+            var path = _packagePathResolver?.GetPackageDirectory(package.Name, package.Version);
+            bool exists = path != null;
 
             if (exists)
             {
@@ -154,36 +159,6 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         public static bool IsPlaceholderFile(string path)
         {
             return string.Equals(Path.GetFileName(path), "_._", StringComparison.Ordinal);
-        }
-
-        public static string ResolvePackagesPath(string rootDirectory, GlobalSettings settings)
-        {
-            // Order
-            // 1. global.json { "packages": "..." }
-            // 2. EnvironmentNames.PackagesStore environment variable
-            // 3. NuGet.config repositoryPath (maybe)?
-            // 4. {DefaultLocalRuntimeHomeDir}\packages
-
-            if (!string.IsNullOrEmpty(settings?.PackagesPath))
-            {
-                return Path.Combine(rootDirectory, settings.PackagesPath);
-            }
-
-            var runtimePackages = Environment.GetEnvironmentVariable(EnvironmentNames.PackagesStore);
-
-            if (!string.IsNullOrEmpty(runtimePackages))
-            {
-                return runtimePackages;
-            }
-
-            var profileDirectory = Environment.GetEnvironmentVariable("USERPROFILE");
-
-            if (string.IsNullOrEmpty(profileDirectory))
-            {
-                profileDirectory = Environment.GetEnvironmentVariable("HOME");
-            }
-
-            return Path.Combine(profileDirectory, ".nuget", "packages");
         }
     }
 }

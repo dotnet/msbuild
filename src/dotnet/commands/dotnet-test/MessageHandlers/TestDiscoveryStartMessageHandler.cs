@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.Extensions.Testing.Abstractions;
-using NuGet.Protocol.Core.v3;
 
 namespace Microsoft.DotNet.Cli.Tools.Test
 {
