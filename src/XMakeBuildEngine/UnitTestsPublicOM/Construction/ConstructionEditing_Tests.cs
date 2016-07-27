@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -762,6 +763,83 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        [Fact]
+        public void AddItemWithUpdateAtSpecificLocation()
+        {
+            ProjectRootElement project = CreateProjectWithUpdates();
+
+            string expected = ObjectModelHelpers.CleanupFileContents(
+@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <i Include=""a"" />
+    <i Update=""a"">
+      <m1>metadata1</m1>
+    </i>
+    <i Include=""a"" />
+    <i Update=""a"">
+      <m1>metadata2</m1>
+    </i>
+  </ItemGroup>
+</Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        [Fact]
+        public void DeleteItemWithUpdateFromSpecificLocations()
+        {
+            ProjectRootElement project = CreateProjectWithUpdates();
+
+            var itemUpdateElements = project.Items.Where(i => i.UpdateLocation != null);
+
+            foreach (var updateElement in itemUpdateElements)
+            {
+                updateElement.Parent.RemoveChild(updateElement);
+            }
+
+            string expected = ObjectModelHelpers.CleanupFileContents(
+@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <i Include=""a"" />
+    <i Include=""a"" />
+  </ItemGroup>
+</Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        private static ProjectRootElement CreateProjectWithUpdates()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.CreateItemGroupElement();
+            var firstIncludeItem = project.CreateItemElement("i");
+            var secondIncludeItem = project.CreateItemElement("i");
+            var firstUpdateItem = project.CreateItemElement("i");
+            var secondUpdateItem = project.CreateItemElement("i");
+            var firstMetadata = project.CreateMetadataElement("m1");
+            var secondMetadata = project.CreateMetadataElement("m1");
+
+            firstIncludeItem.Include = "a";
+            secondIncludeItem.Include = "a";
+            firstUpdateItem.Update = "a";
+            secondUpdateItem.Update = "a";
+            firstMetadata.Value = "metadata1";
+            secondMetadata.Value = "metadata2";
+
+            project.AppendChild(itemGroup);
+            itemGroup.AppendChild(firstIncludeItem);
+            itemGroup.AppendChild(secondIncludeItem);
+
+            // add update between two include items
+            itemGroup.InsertAfterChild(firstUpdateItem, firstIncludeItem);
+            firstUpdateItem.AppendChild(firstMetadata);
+
+            // add update as the last child
+            itemGroup.AppendChild(secondUpdateItem);
+            secondUpdateItem.AppendChild(secondMetadata);
+            return project;
         }
 
         /// <summary>

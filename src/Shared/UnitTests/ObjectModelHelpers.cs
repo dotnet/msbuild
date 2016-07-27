@@ -1118,15 +1118,26 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static string[] CreateFiles(params string[] files)
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(directory);
 
-            string[] result = new string[files.Length];
+            return CreateFilesInDirectory(ref directory, files);
+        }
 
-            for (int i = 0; i < files.Length; i++)
+        /// <summary>
+        /// Creates a bunch of temporary files in the given directory with the specified names and returns
+        /// their full paths (so they can ultimately be cleaned up)
+        /// </summary>
+        internal static string[] CreateFilesInDirectory(ref string rootDirectory, params string[] files)
+        {
+            Assert.True(Directory.Exists(rootDirectory), $"Directory {rootDirectory} does not exist");
+
+            var result = new string[files.Length];
+
+            for (var i = 0; i < files.Length; i++)
             {
-                string fullPath = Path.Combine(directory, files[i]);
-                File.WriteAllText(fullPath, String.Empty);
+                var fullPath = Path.Combine(rootDirectory, files[i]);
+                File.WriteAllText(fullPath, string.Empty);
                 result[i] = fullPath;
             }
 
