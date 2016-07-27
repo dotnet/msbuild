@@ -25,7 +25,9 @@ namespace Microsoft.Build.Shared
         /// The most current Visual Studio Version known to this version of MSBuild. 
         /// </summary>
 #if STANDALONEBUILD
+#if STATIC_VERSION_NUMBER
         internal const string CurrentVisualStudioVersion = "15.0";
+#endif
 #else
         internal const string CurrentVisualStudioVersion = Microsoft.VisualStudio.Internal.BrandNames.VSGeneralVersion;
 #endif
