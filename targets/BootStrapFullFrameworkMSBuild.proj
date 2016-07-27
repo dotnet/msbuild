@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" InitialTargets="CheckForBootstrap" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="dir.props" />
+  <Import Project="../dir.props" />
 
   <ItemGroup>
     <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
@@ -19,14 +19,14 @@
 
     <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 
-    <FreshlyBuiltBinaries Include="$(OutputPath)*.dll" />
-    <FreshlyBuiltBinaries Include="$(OutputPath)*.exe" />
-    <FreshlyBuiltBinaries Include="$(OutputPath)*.pdb" />
-    <FreshlyBuiltBinaries Include="$(OutputPath)*.exe.config" />
+    <FreshlyBuiltBinaries Include="$(DeploymentDir)*.dll" />
+    <FreshlyBuiltBinaries Include="$(DeploymentDir)*.exe" />
+    <FreshlyBuiltBinaries Include="$(DeploymentDir)*.pdb" />
+    <FreshlyBuiltBinaries Include="$(DeploymentDir)*.exe.config" />
 
-    <FreshlyBuiltProjects Include="$(OutputPath)*props" />
-    <FreshlyBuiltProjects Include="$(OutputPath)*targets" />
-    <FreshlyBuiltProjects Include="$(OutputPath)*tasks" />
+    <FreshlyBuiltProjects Include="$(DeploymentDir)*props" />
+    <FreshlyBuiltProjects Include="$(DeploymentDir)*targets" />
+    <FreshlyBuiltProjects Include="$(DeploymentDir)*tasks" />
   </ItemGroup>
 
   <Target Name="Build">

@@ -202,7 +202,7 @@ setHome
 restoreBuildTools
 
 echo
-echo "** Rebuilding MSBuild with binaries from BuildTools"
+echo "** Rebuilding MSBuild with downloaded binaries"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
 
 if [[ $SKIP_BOOTSTRAP = true ]]; then
