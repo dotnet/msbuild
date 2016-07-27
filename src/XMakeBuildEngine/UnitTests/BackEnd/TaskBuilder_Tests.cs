@@ -642,7 +642,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NullMetadataOnOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -683,6 +682,7 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Fact]
+        [Trait("Category", "non-mono-tests")]
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
             string projectContents = @"

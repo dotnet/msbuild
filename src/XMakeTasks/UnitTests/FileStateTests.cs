@@ -288,6 +288,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void LastWriteTimeReset()
         {
             string file = null;
@@ -314,6 +315,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void LastWriteTimeUtcReset()
         {
             string file = null;

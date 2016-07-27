@@ -644,6 +644,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// explicitly instructed to launch the task host. 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void VerifySameFactoryCanGenerateDifferentTaskInstances()
         {
             ITask createdTask = null;
