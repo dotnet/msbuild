@@ -220,10 +220,10 @@ namespace Microsoft.MSBuild.LockFile.Tasks
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
             {
-                var fileItemList = GetFileItemListFor(package, fileGroup);
-                foreach (var fileItem in fileItemList)
+                var filePathList = GetFilePathListFor(package, fileGroup);
+                foreach (var filePath in filePathList)
                 {
-                    item = new TaskItem($"{packageId}/{fileItem.Path}");
+                    item = new TaskItem($"{packageId}/{filePath}");
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
@@ -233,35 +233,38 @@ namespace Microsoft.MSBuild.LockFile.Tasks
             }
         }
 
-        private IList<LockFileItem> GetFileItemListFor(LockFileTargetLibrary package, FileGroup fileGroup)
+        private IEnumerable<string> GetFilePathListFor(LockFileTargetLibrary package, FileGroup fileGroup)
         {
             switch (fileGroup)
             {
                 case FileGroup.CompileTimeAssembly:
-                    return package.CompileTimeAssemblies;
+                    return SelectPath(package.CompileTimeAssemblies);
 
                 case FileGroup.RuntimeAssembly:
-                    return package.RuntimeAssemblies;
+                    return SelectPath(package.RuntimeAssemblies);
 
                 case FileGroup.ContentFile:
-                    return package.ContentFiles;
+                    return SelectPath(package.ContentFiles);
 
                 case FileGroup.NativeLibrary:
-                    return package.NativeLibraries;
+                    return SelectPath(package.NativeLibraries);
 
                 case FileGroup.ResourceAssembly:
-                    return package.ResourceAssemblies;
+                    return SelectPath(package.ResourceAssemblies);
 
                 case FileGroup.RuntimeTarget:
-                    return package.RuntimeTargets;
+                    return SelectPath(package.RuntimeTargets);
 
-                //case FileGroup.FrameworkAssembly:
-                //    return library.FrameworkAssemblies;
+                case FileGroup.FrameworkAssembly:
+                    return package.FrameworkAssemblies;
 
                 default:
                     ReportException(null); return null;
             }
         }
+
+        private IEnumerable<string> SelectPath(IList<LockFileItem> fileItemList) 
+            => fileItemList.Select(c => c.Path);
 
         private NuGet.ProjectModel.LockFile GetLockFile()
         {

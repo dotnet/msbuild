@@ -17,6 +17,6 @@ namespace Microsoft.MSBuild.LockFile.Tasks
         NativeLibrary,
         ResourceAssembly,
         RuntimeTarget,
-        //FrameworkAssembly
+        FrameworkAssembly
     }
 }
