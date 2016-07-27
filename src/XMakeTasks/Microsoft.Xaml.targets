@@ -16,6 +16,6 @@
       <XamlBuildTaskPath Condition="'$(XamlBuildTaskPath)' == ''">$(MSBuildFrameworkToolsPath)</XamlBuildTaskPath>
    </PropertyGroup>
 
-   <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.Xaml.targets" />
+   <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.Xaml.targets" Condition="Exists('$(MSBuildFrameworkToolsPath)\Microsoft.Xaml.targets')" />
 
 </Project>
