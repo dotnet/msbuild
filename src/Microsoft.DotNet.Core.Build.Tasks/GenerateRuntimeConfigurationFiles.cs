@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -9,6 +10,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.DotNet.ProjectModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Tasks
@@ -50,39 +52,38 @@ namespace Microsoft.DotNet.Cli.Tasks
 
         private void WriteRuntimeConfig()
         {
-            var json = new JObject();
-            var runtimeOptions = new JObject();
-            json.Add("runtimeOptions", runtimeOptions);
+            RuntimeConfig config = new RuntimeConfig();
+            config.RuntimeOptions = new RuntimeOptions();
 
-            WriteFramework(runtimeOptions);
-            WriteRuntimeOptions(runtimeOptions);
+            AddFramework(config.RuntimeOptions);
+            AddRuntimeOptions(config.RuntimeOptions);
 
             var runtimeConfigJsonFile =
                 Path.Combine(RuntimeOutputPath, OutputName + FileNameSuffixes.RuntimeConfigJson);
 
-            using (var writer = new JsonTextWriter(new StreamWriter(File.Create(runtimeConfigJsonFile))))
-            {
-                writer.Formatting = Formatting.Indented;
-                json.WriteTo(writer);
-            }
+            WriteToJsonFile(runtimeConfigJsonFile, config);
         }
 
-        private void WriteFramework(JObject runtimeOptions)
+        private void AddFramework(RuntimeOptions runtimeOptions)
         {
             // TODO: get this from the lock file once https://github.com/NuGet/Home/issues/2695 is fixed.
             var packageName = "Microsoft.NETCore.App";
 
-            var redistExport = LockFile.Libraries.FirstOrDefault(e => e.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
+            var redistExport = LockFile
+                .Libraries
+                .FirstOrDefault(e => e.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
+
             if (redistExport != null)
             {
-                var framework = new JObject(
-                    new JProperty("name", redistExport.Name),
-                    new JProperty("version", redistExport.Version.ToNormalizedString()));
-                runtimeOptions.Add("framework", framework);
+                RuntimeConfigFramework framework = new RuntimeConfigFramework();
+                framework.Name = redistExport.Name;
+                framework.Version = redistExport.Version.ToNormalizedString();
+
+                runtimeOptions.Framework = framework;
             }
         }
 
-        private void WriteRuntimeOptions(JObject runtimeOptions)
+        private void AddRuntimeOptions(RuntimeOptions runtimeOptions)
         {
             if (string.IsNullOrEmpty(RawRuntimeOptions))
             {
@@ -92,37 +93,47 @@ namespace Microsoft.DotNet.Cli.Tasks
             var runtimeOptionsFromProject = JObject.Parse(RawRuntimeOptions);
             foreach (var runtimeOption in runtimeOptionsFromProject)
             {
-                runtimeOptions.Add(runtimeOption.Key, runtimeOption.Value);
+                runtimeOptions.RawOptions.Add(runtimeOption.Key, runtimeOption.Value);
             }
         }
 
         private void WriteDevRuntimeConfig()
         {
-            var json = new JObject();
-            var runtimeOptions = new JObject();
-            json.Add("runtimeOptions", runtimeOptions);
+            RuntimeConfig devConfig = new RuntimeConfig();
+            devConfig.RuntimeOptions = new RuntimeOptions();
 
-            AddAdditionalProbingPaths(runtimeOptions);
+            AddAdditionalProbingPaths(devConfig.RuntimeOptions);
 
             var runtimeConfigDevJsonFile =
                     Path.Combine(RuntimeOutputPath, OutputName + FileNameSuffixes.RuntimeConfigDevJson);
 
-            using (var writer = new JsonTextWriter(new StreamWriter(File.Create(runtimeConfigDevJsonFile))))
+            WriteToJsonFile(runtimeConfigDevJsonFile, devConfig);
+        }
+
+        private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions)
+        {
+            foreach (var packageFolder in LockFile.PackageFolders)
             {
-                writer.Formatting = Formatting.Indented;
-                json.WriteTo(writer);
+                if (runtimeOptions.AdditionalProbingPaths == null)
+                {
+                    runtimeOptions.AdditionalProbingPaths = new List<string>();
+                }
+
+                runtimeOptions.AdditionalProbingPaths.Add(packageFolder.Path);
             }
         }
 
-        private void AddAdditionalProbingPaths(JObject runtimeOptions)
+        private static void WriteToJsonFile(string fileName, object value)
         {
-            var additionalProbingPaths = new JArray();
-            foreach (var packageFolder in LockFile.PackageFolders)
-            {
-                additionalProbingPaths.Add(packageFolder.Path);
-            }
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            serializer.Formatting = Formatting.Indented;
+            serializer.DefaultValueHandling = DefaultValueHandling.Ignore;
 
-            runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
+            using (JsonTextWriter writer = new JsonTextWriter(new StreamWriter(File.Create(fileName))))
+            {
+                serializer.Serialize(writer, value);
+            }
         }
     }
 }
