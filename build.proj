@@ -19,6 +19,7 @@
     <CLIBuildFileName>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
     <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
     <BuildToolsDir>$(RepoRoot)/build_tools</BuildToolsDir>
+    <ToolsDir>$(BuildToolsDir)</ToolsDir>
 
     <CoreSetupChannel>preview</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
