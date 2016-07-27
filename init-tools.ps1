@@ -57,6 +57,25 @@ if (!(Test-Path "$BUILD_TOOLS_PACKAGE_PATH\init-tools.cmd"))
     exit 1
 }
 
+# Bring down the CLI for build tools
+$DOTNET_PATH=$BUILD_TOOLS_PATH + "\dotnetcli"
+
+Write-Host "Installing Build Tools CLI version..."
+if (!(Test-Path "$DOTNET_PATH"))
+{
+     mkdir "$DOTNET_PATH"
+}
+
+$DOTNET_VERSION = Get-Content "$RepoRoot\BuildToolsCliVersion.txt"
+$DOTNET_LOCAL_PATH=$DOTNET_PATH
+& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Channel "rel-1.0.0" -Version "$DOTNET_VERSION" -InstallDir "$DOTNET_LOCAL_PATH"
+
+if (!(Test-Path "$DOTNET_LOCAL_PATH"))
+{
+    Write-Host "Could not install Build Tools CLI version correctly"
+    exit 1
+}
+
 # Initialize build tools
 cmd /c "$BUILD_TOOLS_PACKAGE_PATH\init-tools.cmd $RepoRoot $env:DOTNET_INSTALL_DIR\dotnet.exe $BUILD_TOOLS_PATH" >> "$INIT_TOOLS_LOG"
 Write-Host "Done initializing tools."
