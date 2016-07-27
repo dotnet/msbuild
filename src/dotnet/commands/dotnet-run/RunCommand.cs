@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Run
@@ -152,7 +153,8 @@ namespace Microsoft.DotNet.Tools.Run
 
                 foreach (var packageFolder in _context.LockFile.PackageFolders)
                 {
-                    hostArgs.Insert(0, packageFolder.Path);
+                    // DotNetHost doesn't handle additional probing paths with a trailing slash
+                    hostArgs.Insert(0, PathUtility.EnsureNoTrailingSlash(packageFolder.Path));
                     hostArgs.Insert(0, probingPathArg);
                 }
             }

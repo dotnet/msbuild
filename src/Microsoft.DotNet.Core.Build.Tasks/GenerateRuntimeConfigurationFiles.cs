@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -119,7 +120,8 @@ namespace Microsoft.DotNet.Cli.Tasks
                     runtimeOptions.AdditionalProbingPaths = new List<string>();
                 }
 
-                runtimeOptions.AdditionalProbingPaths.Add(packageFolder.Path);
+                // DotNetHost doesn't handle additional probing paths with a trailing slash
+                runtimeOptions.AdditionalProbingPaths.Add(PathUtility.EnsureNoTrailingSlash(packageFolder.Path));
             }
         }
 

@@ -56,6 +56,20 @@ namespace Microsoft.DotNet.Tools.Common
             return path + trailingCharacter;
         }
 
+        public static string EnsureNoTrailingSlash(string path)
+        {
+            if (!string.IsNullOrEmpty(path))
+            {
+                char lastChar = path[path.Length - 1];
+                if (lastChar == Path.DirectorySeparatorChar || lastChar == '/')
+                {
+                    path = path.Substring(0, path.Length - 1);
+                }
+            }
+
+            return path;
+        }
+
         public static void EnsureParentDirectory(string filePath)
         {
             string directory = Path.GetDirectoryName(filePath);
