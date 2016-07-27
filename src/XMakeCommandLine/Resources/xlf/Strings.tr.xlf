@@ -68,7 +68,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      current working directory for a file that has a file
                      extension that ends in "proj" and uses that file.
 </source>
-        <target state="translated">Açıklama:         Proje dosyasında belirtilen hedefleri derler. Eğer
+        <target state="translated">Açıklama:         Proje dosyasında belirtilen hedefleri oluşturur. Eğer
                      bir proje dosyası belirtilmezse MSBuild
                      geçerli çalışma dizininde dosya uzantısının
                      sonu "proj" olan bir dosyayı arar ve bu dosyayı kullanır.
@@ -148,7 +148,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;dosya&gt;            Bir metin dosyasından komut satırı ayarlarını ekler. Birden fazla
+        <target state="translated">  @&lt;file&gt;            Bir metin dosyasından komut satırı ayarlarını ekler. Birden fazla
                      yanıt dosyası belirtmek için her bir yanıt dosyasını
                      ayrı ayrı belirtin.
                      
@@ -189,7 +189,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        /target:Resources;Compile
 </source>
-        <target state="translated">  /target:&lt;hedefler&gt;  Bu hedefleri bu projede derle. Birden fazla hedefi ayırmak için
+        <target state="translated">  /target:&lt;targets&gt;  Bu hedefleri bu projede oluştur. Birden fazla hedefi ayırmak için
                      noktalı virgül ya da virgül kullanın veya her bir
                      hedefi ayrı ayrı belirtin. (Kısa biçim: /t)
                      Örnek:
@@ -212,8 +212,8 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        /property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  /property:&lt;a&gt;=&lt;d&gt;  Bu proje düzeyi özelliklerini ayarlar veya geçersiz kılar. &lt;a&gt;
-                     özellik adı ve &lt;d&gt; özellik değeridir. Birden fazla
+        <target state="translated">  /property:&lt;n&gt;=&lt;v&gt;  Bu proje düzeyi özelliklerini ayarlar veya geçersiz kılar. &lt;n&gt;
+                     özellik adı ve &lt;v&gt; özellik değeridir. Birden fazla
                      özelliği ayırmak için noktalı virgül veya virgül kullanın
                      ya da her bir özelliği ayrı ayrı belirtin. (Kısa biçim: /p)
                      Örnek:
@@ -243,15 +243,15 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  /logger:&lt;günlükçü&gt;   MSBuild olaylarını günlüğe kaydetmek için bu günlükçüyü kullanın. Birden fazla
+        <target state="translated">  /logger:&lt;logger&gt;   MSBuild olaylarını günlüğe kaydetmek için bu günlükçüyü kullanın. Birden fazla
                      günlükçü belirtmek için her bir günlükçüyü ayrı ayrı belirtin.
-                     &lt;günlükçü&gt; söz dizimi:
+                     &lt;logger&gt; söz dizimi:
                        [&lt;günlükçü sınıfı&gt;,]&lt;günlükçü bütünleştirilmiş kodu&gt;[;&lt;günlükçü parametreleri&gt;]
                      &lt;günlükçü sınıfı&gt; söz dizimi:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü bütünleştirilmiş kodu&gt; söz dizimi:
-                       {&lt;bütünleştirilmiş kod adı &gt;[,&lt;tanımlayıcı ad&gt;] | &lt;bütünleştirilmiş kod adı&gt;}
-                     &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve günlükçüye
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     &lt;logger parameters&gt; isteğe bağlıdır ve günlükçüye
                      tam olarak yazdığınız şekilde geçirilir. (Kısa biçim: /l)
                      Örnekler:
                        /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -273,7 +273,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        /verbosity:quiet
 </source>
-        <target state="translated">  /verbosity:&lt;düzey&gt; Bu bilgi miktarını olay günlüğünde gösterir.
+        <target state="translated">  /verbosity:&lt;level&gt; Bu bilgi miktarını olay günlüğünde gösterir.
                      Kullanılabilir ayrıntı düzeyleri: q[uiet], m[inimal],
                      n[ormal], d[etailed] ve diag[nostic]. (Kısa biçim: /v)
                      Örnek:
@@ -335,7 +335,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                         ErrorsOnly--Yalnızca hataları gösterir.
                         WarningsOnly--Yalnızca uyarıları gösterir.
                         NoItemAndPropertyList--Öğe ve özellik listesini
-                            her bir proje derlemesinin başlangıcında göstermez.    
+                            her bir proje yapısının başlangıcında göstermez.    
                         ShowCommandLine--TaskCommandLineEvent iletilerini gösterir  
                         ShowTimestamp--Zaman Damgasını herhangi bir iletinin
                             ön eki olarak gösterir.                                           
@@ -372,7 +372,8 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <source>  /noconsolelogger   Disable the default console logger and do not log events
                      to the console. (Short form: /noconlog)
 </source>
-        <target state="translated">  /noconsolelogger   Varsayılan konsol günlükçüsünü devre dışı bırakır ve olayları
+        <target state="translated">  /noconsolelogger   Varsayılan konsol günlükçüsünü devre dışı bırakır ve
+                     olayları
                      konsolda günlüğe almaz. (Kısa biçim: /noconlog)
 </target>
         <note>
@@ -396,7 +397,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">  /validate          Projeyi varsayılan şemaya göre doğrular. (Kısa
                      biçim: /val)
 
-  /validate:&lt;şema&gt; Projeyi belirtilen şemaya göre doğrular. (Kısa
+  /validate:&lt;schema&gt; Projeyi belirtilen şemaya göre doğrular. (Kısa
                      biçim: /val)
                      Örnek:
                        /validate:MyExtendedBuildSchema.xsd
@@ -417,9 +418,9 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      MSBuild will use up to the number of processors on the 
                      computer. (Short form: /m[:n])
       </source>
-        <target state="translated">  /maxcpucount[:n]   Birlikte derlenecek en fazla eşzamanlı işlem 
-                     sayısını belirtir. Anahtar kullanılmazsa kullanılan
-                     varsayılan değer 1’dir. Anahtar bir değer olmadan kullanılırsa
+        <target state="translated">  /maxcpucount[:n]   Birlikte oluşturulacak en fazla eşzamanlı işlem 
+                     sayısını belirtir. Düğme kullanılmazsa kullanılan
+                     varsayılan değer 1’dir. Düğme bir değer olmadan kullanılırsa
                      MSBuild en fazla bilgisayardaki sayı kadar işlemci 
                      kullanır. (Kısa biçim: /m[:n])
       </target>
@@ -474,7 +475,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  /distributedlogger:&lt;merkezi günlükçü&gt;*&lt;ileten günlükçü&gt;                     
+        <target state="translated">  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;                     
                      MSBuild olaylarını günlüğe kaydetmek ve
                      her bir düğüme farklı bir günlükçü örneği eklemek için bu günlükçüyü kullanın. Birden fazla
                      günlükçü belirtmek için her bir günlükçüyü ayrı ayrı belirtin. 
@@ -484,8 +485,8 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      &lt;günlükçü sınıfı&gt; söz dizimi:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü bütünleştirilmiş kodu&gt; söz dizimi:
-                       {&lt;bütünleştirilmiş kod adı &gt;[,&lt;tanımlayıcı ad&gt;] | &lt;bütünleştirilmiş kod adı&gt;}
-                     &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve günlükçüye
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     &lt;logger parameters&gt; isteğe bağlıdır ve günlükçüye
                      tam olarak yazdığınız şekilde geçirilir. (Kısa biçim: /l)
                      Örnekler:
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -509,10 +510,10 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="translated">  /ignoreprojectextensions:&lt;uzantılar&gt;
+        <target state="translated">  /ignoreprojectextensions:&lt;extensions&gt;
                      Hangi proje dosyasının derleneceği belirlenirken 
                      yoksayılacak uzantılar listesi. Birden fazla uzantıyı ayırmak için 
-                     noktalı virgül veya virgül kullanın.
+                     noktalı virgül ya da virgül kullanın.
                      (Kısa biçim: /ignore)
                      Örnek:
                        /ignoreprojectextensions:.sln
@@ -535,10 +536,10 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="translated">  /toolsversion:&lt;sürüm&gt;
-                     Derleme sırasında kullanılacak MSBuild Araç Seti (görevler, hedefler, vb.)
-                     sürümü. Bu sürüm tek projeler tarafından belirtilen 
-                     sürümleri geçersiz kılar. (Kısa biçim: 
+        <target state="translated">  /toolsversion:&lt;version&gt;
+                     Derleme sırasında kullanılacak MS Build Araç Takımı
+                     (görevler, hedefler vb.) sürümü. Bu sürüm, ayrı ayrı projeler tarafından 
+                     belirtilen sürümleri geçersiz kılar. (Kısa biçim: 
                      /tv)
                      Örnek:
                        /toolsversion:3.5
@@ -562,14 +563,14 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      "n" if present can be a digit from 1-9, allowing up to 
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="translated">  /fileLogger[n]     Derleme çıktısını bir dosyaya kaydeder. Varsayılan olarak
-                     dosyalar geçerli dizindedir ve 
+        <target state="translated">  /fileLogger[n]     Derleme çıktısını bir dosyaya kaydeder. Dosya,
+                     varsayılan olarak geçerli dizindedir ve 
                      "msbuild[n].log" olarak adlandırılır. Tüm düğümlerdeki olaylar
-                     tek bir günlükte birleştirilir. Dosyanın ve diğer fileLogger parametrelerinin
-                     konumu, 
+                     tek bir günlükte birleştirilir. Dosyanın konumu ve
+                     diğer fileLogger parametreleri 
                      "/fileLoggerParameters[n]" anahtarı eklenerek belirtilebilir.
-                     Varsa "n", en fazla 10 dosya günlükçüsünün eklenmesine imkan tanıyan 
-                     1-9 aralığında bir sayı olabilir. (Kısa biçim: /fl[n])
+                     “n” varsa, 1-9 arasında bir rakam olabilir ve 10’a 
+                     kadar dosya günlükçüsünün eklenmesine izin verir. (Kısa biçim: /fl[n])
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -595,17 +596,17 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      create a log file for each node.
     </source>
         <target state="translated">  /distributedFileLogger                                                       
-                     Derleme çıktısını MSBuild düğümü başına bir günlük dosyası
-                     olacak şekilde birden fazla günlük dosyasına kaydeder. Bu dosyaların başlangıç konumu
-                     geçerli dizindir. Varsayılan olarak, dosyalar 
-                     "MSBuild&lt;düğümkimliği&gt;.log" adını alır. Dosyaların ve diğer
-                     fileLogger parametrelerinin konumu 
-                     "/fileLoggerParameters" anahtarı eklenerek belirtilebilir.
+                     Derleme çıktısını birden fazla günlük dosyasına yazar,
+                     her bir MSBuild düğümü için bir günlük dosyası kullanılır. Bu dosyaların başlangıç konumu
+                     geçerli dizindir. Dosyalar varsayılan olarak 
+                     "MSBuild&lt;nodeid&gt;.log" olarak adlandırılır. Dosyaların konumu ve
+                     diğer fileLogger parametreleri 
+                     "/fileLoggerParameters" anahtarı eklenerek belirlenebilir.
 
-                     fileLoggerParameters anahtarı
-                     ile bir günlük dosyası adı ayarlanırsa, dağıtılan günlükçü fileName öğesini bir 
-                     şablon olarak kullanır ve düğüm kimliğini bu fileName öğesine ekleyerek 
-                     her bir düğüm için bir günlük dosyası oluşturur.
+                     Bir günlük dosyasının adı fileLoggerParameters anahtarı ile ayarlanmışsa
+                     dağıtılmış günlükçü fileName değerini şablon olarak kullanır 
+                     ve düğüm kimliğini bu fileName değerine ekleyerek 
+                     her bir düğüm için günlük dosyası oluşturur.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -648,24 +649,24 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
     </source>
         <target state="translated">  /fileloggerparameters[n]:&lt;parametreler&gt;                                
                      Dosya günlükçüleri için fazladan parametreler sağlar.
-                     Bu anahtarın varlığı 
-                     karşılık gelen /filelogger[n] anahtarını belirtir.
+                     Bu anahtarın varlığı, karşılık gelen 
+                     /filelogger[n] anahtarına işaret eder.
                      Varsa "n" değeri 1-9 aralığında bir sayı olabilir.
-                     /fileloggerparameters ayrıca dağıtılmış bir
-                     dosya günlükçüsü tarafından kullanılır; /distributedFileLogger açıklamasına bakın.
+                     /fileloggerparameters ayrıca herhangi bir dağıtılmış dosya günlükçüsü
+                     tarafından kullanılabilir. /distributedFileLogger tanımına bakın.
                      (Kısa biçim: /flp[n])
-                     Konsol günlükçüsü için listelenen aynı parametreler
-                     kullanılabilir. Kullanılabilir diğer parametrelerden bazıları şunlardır:
-                        LogFile--derleme günlüğünün yazılacağı günlük dosyasının
-                            yolu.
-                        Append--derleme günlüğünün ekleneceğini
-                            veya günlük dosyasının üzerine yazılacağını belirler. Anahtarın
-                            ayarlanması derleme günlüğünü günlük dosyasına ekler;
-                            Anahtarın ayarlanmaması 
-                            mevcut günlük dosyasının içeriğinin üzerine yazar. 
+                     Konsol günlükçüsü için listelenen parametreler
+                     de kullanılabilir. Kullanılabilir diğer parametrelerden bazıları şunlardır:
+                        LogFile--derleme günlüğünün yazılacağı günlük
+                            dosyasının yolu.
+                        Append--derleme günlüğünün ekleneceğini ya da
+                            günlük dosyasının üzerine yazılacağını belirler. Anahtar ayarlandığında derleme günlüğü
+                            günlük dosyasına eklenir;
+                            Anahtar ayarlanmadığında mevcut 
+                            günlük dosyasındaki içeriğin üzerine yazılır. 
                             Varsayılan seçenek günlük dosyasına eklenmemesidir.
-                        Encoding--dosyanın kodlamasını belirtir, 
-                            örneğin, UTF-8, Unicode veya ASCII
+                        Encoding--dosyada kullanılacak kodlama türünü 
+                            (UTF-8, Unicode ya da ASCII gibi) belirler.
                      Varsayılan ayrıntı düzeyi değeri Detailed şeklindedir.
                      Örnekler:
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
@@ -698,7 +699,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">  /nodeReuse:&lt;parametreler&gt;
                      MSBuild düğümlerinin yeniden kullanılmasını etkinleştirir veya devre dışı bırakır.
                      Parametreler şunlardır:
-                     True --Derleme tamamlandıktan sonra düğümler kalır
+                     True--Derleme tamamlandıktan sonra düğümler kalır
                             ve sonraki derlemeler tarafından yeniden kullanılır (varsayılan)
                      False--Derleme tamamlandıktan sonra düğümler kalmaz
                      (Kısa biçim: /nr)
@@ -722,14 +723,14 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        /pp:out.txt
     </source>
         <target state="translated">  /preprocess[:file] 
-                     Derleme sırasında içeri aktarılacak tüm dosyaları,
-                     sınırları işaretlenecek şekilde içererek tek ve toplu bir
-                     proje dosyası oluşturur. Bunun yapılması hangi dosyaların
-                      nereden içeri aktarıldığını
-                     ve derlemeye hangi katkıyı yapacaklarını anlamak için
-                     yararlıdır. Varsayılan olarak, çıktı
-                     konsol penceresine yazılır. Bir çıktı dosyasının yolu belirtilirse 
-                     bu yol kullanılır.
+                     Bir derleme sırasında içeri aktarılacak tüm dosyaları
+                     satır içinde kullanarak ve sınırlarını belirleyerek
+                     tek bir toplanmış proje dosyası oluşturur. Bu, hangi
+                     dosyaların nereden içeri aktarılacağını ve derlemeye
+                     nasıl katkıda bulunacağını belirlemede yararlı
+                     olabilir. Çıkış, varsayılan olarak
+                     konsol penceresine yazılır. Bir çıkış dosyası yolu 
+                     belirtildiyse o dosya kullanılır.
                      (Kısa biçim: /pp)
                      Örnek:
                        /pp:out.txt
@@ -744,9 +745,9 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      (Short form: /ds)
     </source>
         <target state="translated">  /detailedsummary 
-                     Derlemenin sonunda, derlenen yapılandırmalar
-                     ve düğümlere nasıl zamanlandıklarıyla ilgili
-                     ayrıntılı bilgi gösterir. 
+                     Derleme sonunda, derlenen yapılandırmalar ve
+                     bu yapılandırmaların düğümlere nasıl zamanlandıkları
+                     hakkında ayrıntılı bilgi içerir. 
                      (Kısa biçim: /ds)
     </target>
         <note />
@@ -758,9 +759,9 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      MSBuild XML and any tasks and loggers it uses.
    </source>
         <target state="translated">  /debug
-                     Hemen bir hata ayıklayıcı isteminin görüntülenmesini, böylece MSBuild XML ve bunun kullandığı 
-                     tüm görevlerde ve günlükçülerde hata ayıklaması yapmak üzere sizin için Visual Studio’nun 
-                     eklenebilmesini sağlar.
+                     Bir hata ayıklayıcı isteminin görüntülenmesini, böylece sizin için 
+                     Visual Studio’nun eklenerek MSBuild XML’de ve kullandığı görevlerle günlükçülerde 
+                     hata ayıklaması yapabilmenizi sağlar.
    </target>
         <note />
       </trans-unit>

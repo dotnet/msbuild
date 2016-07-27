@@ -1452,9 +1452,9 @@
         <source>Considered "{0}",
 			but its name "{1}"
 			didn't match the expected name "{2}".</source>
-        <target state="translated">Byl proveden pokus o použití sestavení {0},
-			ale jeho název {1}
-			neodpovídá požadovanému názvu {2}.</target>
+        <target state="translated">Považovalo se za {0},
+			ale příslušný název "{1}"
+			neodpovídal očekávanému názvu "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">

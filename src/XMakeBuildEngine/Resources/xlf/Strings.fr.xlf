@@ -1861,7 +1861,7 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="MSBuild.ProjectUpgradeNeededToVcxProj">
         <source>MSB3204: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</source>
-        <target state="translated">MSB3204: Le fichier projet "{0}" utilise le format de fichier ".vcproj", qui n'est plus pris en charge par MSBuild. Convertissez le projet en l'ouvrant dans Visual Studio IDE ou en exécutant l'outil de conversion, ou générez le projet à l'aide de MSBuild 3.5 ou antérieur.</target>
+        <target state="translated">MSB3204: Le fichier projet "{0}" utilise le format de fichier ".vcproj", qui n'est plus pris en charge par MSBuild. Convertissez le projet en l'ouvrant dans Visual Studio IDE ou en exécutant l'outil de conversion, ou générez le projet à l'aide de MSBuild 3.5 ou version antérieure.</target>
         <note>{StrBegin="MSB3204: "} LOC: ".vcproj" should not be localized</note>
       </trans-unit>
       <trans-unit id="MSBuild.InvalidSkipNonexistentProjectValue">
@@ -1881,7 +1881,7 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="MSBuild.NotBuildingInParallel">
         <source>Overriding the BuildingInParallel property by setting it to false. This is due to the system being run in single process mode with StopOnFirstFailure set to true.</source>
-        <target state="translated">Remplacement de la propriété BuildingInParallel en lui attribuant la valeur false. Ceci est dû à l'exécution du système en mode de processus unique, avec StopOnFirstFailure défini sur la valeur true.</target>
+        <target state="translated">Remplacement de la propriété BuildingInParallel en lui attribuant la valeur false. Ceci est dû à l'exécution du système en mode de processus unique, avec StopOnFirstFailure défini à la valeur true.</target>
         <note>LOCALIZATION:  Do not localize the words "MSBuild", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
       <trans-unit id="MSBuild.NoStopOnFirstFailure">
