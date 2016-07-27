@@ -18,8 +18,8 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <CLIBuildFileName>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build</CLIBuildFileName>
     <CLIBuildDll>$(CLIBuildFileName).dll</CLIBuildDll>
-    <BuildToolsDir>$(RepoRoot)/build_tools</BuildToolsDir>
-    <ToolsDir>$(BuildToolsDir)</ToolsDir>
+    <BuildToolsDir>$(RepoRoot)/build_tools/</BuildToolsDir>
+    <ToolsDir>$(BuildToolsDir)/</ToolsDir>
 
     <CoreSetupChannel>preview</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
@@ -81,6 +81,7 @@
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
+  <Import Project="$(BuildToolsDir)/Build.Common.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
