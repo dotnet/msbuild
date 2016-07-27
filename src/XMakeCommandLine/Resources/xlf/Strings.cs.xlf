@@ -350,7 +350,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                             v jiném než víceprocesorovém režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
                             protokolování i při práci v jiném než víceprocesorovém
-                            režimu. Tento styl protokolování je ve výchozím nastavení zapnutý.  
+                            režimu. Tento styl protokolování je ve výchozím nastavení zapnutý. 
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
                         Verbosity – potlačí nastavení /verbosity pro tento
@@ -537,7 +537,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
    </source>
         <target state="translated">  /toolsversion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.),
-                     která se má použít při sestavení.  Tato verze má přednost před 
+                     která se má použít při sestavení. Tato verze má přednost před 
                      verzemi uvedenými v jednotlivých projektech. (Krátký tvar: 
                      /tv)
                      Příklad:
@@ -596,7 +596,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
     </source>
         <target state="translated">  /distributedFileLogger                                                       
                      Uloží výstup sestavení do několika souborů protokolu,
-                     po jednom pro každý uzel nástroje MSBuild.  Tyto soubory jsou na počátku umístěny
+                     po jednom pro každý uzel nástroje MSBuild. Tyto soubory jsou na počátku umístěny
                      v aktuálním adresáři. Ve výchozím nastavení mají tyto soubory 
                      název MSBuild&lt;id_uzlu&gt;.log. Umístění souborů
                      a další parametry možnosti fileLogger lze nastavit  
@@ -655,7 +655,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      protokolovací nástroje - viz popis přepínače /distributedFileLogger.
                      (Krátký tvar: /flp[n])
                      K dispozici jsou stejné parametry jako ty, 
-                     které jsou uvedeny u protokolovacího nástroje konzoly.  Některé další dostupné parametry:
+                     které jsou uvedeny u protokolovacího nástroje konzoly. Některé další dostupné parametry:
                         LogFile – cesta k souboru protokolu,
                             do kterého se zapíše protokol sestavení.
                         Append – určuje, jestli se protokol sestavení připojí
@@ -663,7 +663,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                             protokol sestavení připojí k souboru protokolu.
                             Pokud přepínač není nastavený, přepíše se obsah 
                             existujícího souboru. 
-                            Ve výchozím nastavení se soubor protokolu přepíše. 
+                            Ve výchozím nastavení se soubor protokolu přepíše.
                         Encoding – určuje kódování souboru, 
                             například UTF-8, Unicode nebo ASCII.
                      Výchozí úroveň podrobností je Detailed.
