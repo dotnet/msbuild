@@ -30,7 +30,7 @@ namespace Microsoft.Build.Shared
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
         internal static readonly char[] directorySeparatorCharacters = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
-        private static readonly GetFileSystemEntries s_defaultGetFileSystemEntries = new GetFileSystemEntries(GetAccessibleFileSystemEntries);
+        internal static readonly GetFileSystemEntries s_defaultGetFileSystemEntries = new GetFileSystemEntries(GetAccessibleFileSystemEntries);
         private static readonly DirectoryExists s_defaultDirectoryExists = new DirectoryExists(Directory.Exists);
 
         /// <summary>
@@ -1265,6 +1265,7 @@ namespace Microsoft.Build.Shared
             internal string filenamePart = String.Empty;
         }
 
+
         /// <summary>
         /// Given a pattern (filespec) and a candidate filename (fileToMatch)
         /// return matching information.
@@ -1318,10 +1319,11 @@ namespace Microsoft.Build.Shared
         internal static string[] GetFiles
         (
             string projectDirectoryUnescaped,
-            string filespecUnescaped
+            string filespecUnescaped,
+            IList<string> excludeSpecsUnescaped = null
         )
         {
-            string[] files = GetFiles(projectDirectoryUnescaped, filespecUnescaped, null, s_defaultGetFileSystemEntries, s_defaultDirectoryExists);
+            string[] files = GetFiles(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped, s_defaultGetFileSystemEntries, s_defaultDirectoryExists);
             return files;
         }
 
