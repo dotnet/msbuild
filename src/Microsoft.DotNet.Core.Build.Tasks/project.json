@@ -5,9 +5,10 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "Microsoft.DotNet.Compiler.Common": {
+    "Microsoft.Extensions.DependencyModel": {
       "target": "project"
-    }
+    },
+    "NuGet.ProjectModel": "3.5.0-rc1-1653"
   },
   "frameworks": {
     "net451": {

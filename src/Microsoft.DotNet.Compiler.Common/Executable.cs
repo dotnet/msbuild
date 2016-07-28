@@ -50,10 +50,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             _compilerOptions = _context.ProjectFile.GetCompilerOptions(_context.TargetFramework, configuration);
         }
 
-        public void MakeCompilationOutputRunnable(bool skipRuntimeConfig = false)
+        public void MakeCompilationOutputRunnable()
         {
             CopyContentFiles();
-            ExportRuntimeAssets(skipRuntimeConfig);
+            ExportRuntimeAssets();
         }
 
         private void VerifyCoreClrPresenceInPackageGraph()
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        private void ExportRuntimeAssets(bool skipRuntimeConfig)
+        private void ExportRuntimeAssets()
         {
             if (_context.TargetFramework.IsDesktop())
             {
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
             else
             {
-                MakeCompilationOutputRunnableForCoreCLR(skipRuntimeConfig);
+                MakeCompilationOutputRunnableForCoreCLR();
             }
         }
 
@@ -93,11 +93,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             GenerateBindingRedirects(_exporter);
         }
 
-        private void MakeCompilationOutputRunnableForCoreCLR(bool skipRuntimeConfig)
+        private void MakeCompilationOutputRunnableForCoreCLR()
         {
-            WriteDepsFileAndCopyProjectDependencies(_exporter, skipRuntimeConfig);
+            WriteDepsFileAndCopyProjectDependencies(_exporter);
 
-            var isRunnable = _compilerOptions.EmitEntryPoint ?? _context.ProjectFile.OverrideIsRunnable;
+            var isRunnable = _compilerOptions.EmitEntryPoint ?? false;
 
             if (isRunnable && !_context.IsPortable)
             {
@@ -155,14 +155,14 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter, bool skipRuntimeConfig)
+        private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
         {
             var exports = exporter.GetAllExports().ToList();
             var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name, StringComparer.OrdinalIgnoreCase);
             var platformExclusionList = _context.GetPlatformExclusionList(exportsLookup);
             var filteredExports = exports.FilterExports(platformExclusionList);
 
-            WriteConfigurationFiles(exports, filteredExports, exports, includeDevConfig: true, skipRuntimeConfig: skipRuntimeConfig);
+            WriteConfigurationFiles(exports, filteredExports, exports, includeDevConfig: true);
 
             var projectExports = exporter.GetAllProjectTypeDependencies();
             CopyAssemblies(projectExports);
@@ -176,11 +176,10 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             IEnumerable<LibraryExport> allExports,
             IEnumerable<LibraryExport> depsRuntimeExports,
             IEnumerable<LibraryExport> depsCompilationExports,
-            bool includeDevConfig,
-            bool skipRuntimeConfig = false)
+            bool includeDevConfig)
         {
             WriteDeps(depsRuntimeExports, depsCompilationExports);
-            if (_context.ProjectFile.HasRuntimeOutput(_configuration) && !skipRuntimeConfig)
+            if (_context.ProjectFile.HasRuntimeOutput(_configuration))
             {
                 WriteRuntimeConfig(allExports);
                 if (includeDevConfig)
@@ -289,7 +288,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        public void WriteDeps(IEnumerable<LibraryExport> runtimeExports, IEnumerable<LibraryExport> compilationExports)
+        private void WriteDeps(IEnumerable<LibraryExport> runtimeExports, IEnumerable<LibraryExport> compilationExports)
         {
             Directory.CreateDirectory(_runtimeOutputPath);
 
@@ -311,7 +310,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        public void GenerateBindingRedirects(LibraryExporter exporter)
+        private void GenerateBindingRedirects(LibraryExporter exporter)
         {
             var outputName = _outputPaths.RuntimeFiles.Assembly;
             var configFile = outputName + Constants.ConfigSuffix;

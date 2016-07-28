@@ -20,10 +20,11 @@
 
   <PropertyGroup>
     <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(OutputType)' == 'exe' ">true</GenerateRuntimeConfigurationFiles>
+    <Version Condition=" '$(Version)' == '' ">1.0.0</Version>
   </PropertyGroup>
-  
+
+  <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll" />
-  <UsingTask TaskName="MakeNetCoreRunnable" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll" />
              
   <PropertyGroup>
     <CoreBuildDependsOn>
@@ -41,12 +42,19 @@
     <Move SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)/$(AssemblyName).dll" />
 
     <!--
-    TODO: need to remove ProjectPath (to load up the project.json) and instead pass @(PackageDependency) 
+    TODO: Get RuntimeIdentifier
     -->
-    <MakeNetCoreRunnable ProjectPath="$(MSBuildProjectDirectory)"   
-                         Configuration="$(Configuration)"
-                         OutputPath="$(OutDir)"
-                         OutputType="$(OutputType)" />
+    <GenerateDepsFile LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
+                      DepsFilePath="$(TargetDir)$(AssemblyName).deps.json"
+                      TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                      AssemblyName="$(AssemblyName)"
+                      AssemblyVersion="$(Version)"
+                      RuntimeIdentifier="" />
+
+    <!--
+    TODO: When OutputType == 'exe' and !IsPortable, we need to verify CoreClr is present in the deps graph, and copy in a host to the output
+    See https://github.com/dotnet/cli/blob/6b54ae0bcc5c63e7c989ac19d851f234f9172bea/src/Microsoft.DotNet.Compiler.Common/Executable.cs#L102-L107
+    -->
   </Target>
 
   <Target Name="GenerateRuntimeConfigurationFiles"
@@ -57,7 +65,7 @@
     -->
     <GenerateRuntimeConfigurationFiles LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
                                        RuntimeOutputPath="$(TargetDir)"
-                                       OutputName="$(AssemblyName)"
+                                       AssemblyName="$(AssemblyName)"
                                        RawRuntimeOptions=""
                                        IncludeDevConfig="true" />
 
