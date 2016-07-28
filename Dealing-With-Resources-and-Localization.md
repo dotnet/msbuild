@@ -16,7 +16,7 @@
 
 ## What a localized build does
 - updates xlf files from their corresponding neutral resx
-- convert xlf files to localized resx files
+- converts xlf files to localized resx files
 - the localized resx files are generated into the `$(IntermediaryOutputPath)`
 - produces satellite assemblies for each language
 
