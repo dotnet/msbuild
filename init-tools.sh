@@ -37,7 +37,7 @@ if [ ! -e "$__PROJECT_JSON_FILE" ]; then
     echo "Restoring build tools version $__BUILD_TOOLS_PACKAGE_VERSION..."
     "$__DOTNET_CMD" restore "$__PROJECT_JSON_FILE" --packages "$NUGET_PACKAGES" --source "$__BUILD_TOOLS_SOURCE" >> "$__init_tools_log" 2>&1
 
-    if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."; fi
+    if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly." more $__init_tools_log; fi
   fi
 
   if [ ! -d "$__BUILD_TOOLS_CLI_DIR" ]; then
