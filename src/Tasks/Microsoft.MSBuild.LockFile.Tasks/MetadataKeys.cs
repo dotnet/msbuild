@@ -14,6 +14,7 @@ namespace Microsoft.MSBuild.LockFile.Tasks
         internal const string Version = "Version";
         internal const string FileGroup = "FileGroup";
         internal const string Path = "Path";
+        internal const string ResolvedPath = "ResolvedPath";
 
         // Target Metadata
         internal const string RuntimeIdentifier = "RuntimeIdentifier";

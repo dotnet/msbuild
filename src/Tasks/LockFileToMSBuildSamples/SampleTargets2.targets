@@ -79,7 +79,7 @@
       <TFMCompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(TFMCompileFileDefinitionsEx)"></TFMCompileFileDefinitions>
     </ItemGroup>
 
-    <Message Text="%(TFMCompileFileDefinitions.Identity) == %(Path)" Importance="high" />
+    <Message Text="%(TFMCompileFileDefinitions.Identity) == %(ResolvedPath)" Importance="high" />
   </Target>
 
   <!-- Sample 6: Display libraries in a specific target and their dependencies -->

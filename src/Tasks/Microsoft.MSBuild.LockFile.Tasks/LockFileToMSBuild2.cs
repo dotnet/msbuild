@@ -15,6 +15,9 @@ namespace Microsoft.MSBuild.LockFile.Tasks
     /// </summary>
     public sealed class LockFileToMSBuild2 : Task
     {
+        private readonly Dictionary<string, string> _projectReferencesToOutputBasePaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly List<string> _packageFolders = new List<string>();
+
         #region Output Items
 
         private readonly List<ITaskItem> _targetDefinitions = new List<ITaskItem>();
@@ -124,8 +127,45 @@ namespace Microsoft.MSBuild.LockFile.Tasks
         {
             var lockFile = GetLockFile();
 
+            PopulatePackageFolders(lockFile);
             GetPackageAndFileDefinitions(lockFile);
             RaiseLockFileTargets(lockFile);
+        }
+
+        private void PopulatePackageFolders(NuGet.ProjectModel.LockFile lockFile)
+        {
+            // TODO
+            // If we explicitly were given a path, let's use that
+            //if (!string.IsNullOrEmpty(NuGetPackagesDirectory))
+            //{
+            //    _packageFolders.Add(NuGetPackagesDirectory);
+            //}
+
+            // TODO
+            // Newer versions of NuGet can now specify the final list of locations in the lock file
+            //var packageFolders = lockFile["packageFolders"] as JObject;
+            //if (packageFolders != null)
+            //{
+            //    foreach (var packageFolder in packageFolders.Properties())
+            //    {
+            //        _packageFolders.Add(packageFolder.Name);
+            //    }
+            //}
+
+            // If we didn't have any folders, let's fall back to the environment variable or user profile
+            if (_packageFolders.Count == 0)
+            {
+                string packagesFolder = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+
+                if (!string.IsNullOrEmpty(packagesFolder))
+                {
+                    _packageFolders.Add(packagesFolder);
+                }
+                else
+                {
+                    _packageFolders.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"));
+                }
+            }
         }
 
         // get library and file definitions
@@ -139,18 +179,22 @@ namespace Microsoft.MSBuild.LockFile.Tasks
                 item.SetMetadata(MetadataKeys.Name, package.Name);
                 item.SetMetadata(MetadataKeys.Type, package.Type);
                 item.SetMetadata(MetadataKeys.Version, package.Version.ToString());
-                if (package.Path != null)
-                {
-                    item.SetMetadata(MetadataKeys.Path, package.Path);
-                    // todo resolved path
-                }
+
+                item.SetMetadata(MetadataKeys.Path, package.Path ?? string.Empty);
+
+                string resolvedPackagePath = ResolvePackagePath(package, lockFile);
+                item.SetMetadata(MetadataKeys.ResolvedPath, resolvedPackagePath ?? string.Empty);
+
                 _packageDefinitions.Add(item);
 
                 foreach (var file in package.Files)
                 {
                     var fileItem = new TaskItem($"{packageId}/{file}");
                     fileItem.SetMetadata(MetadataKeys.Path, file);
-                    // todo resolvedPath
+
+                    string resolvedPath = ResolveFilePath(file, resolvedPackagePath);
+                    fileItem.SetMetadata(MetadataKeys.ResolvedPath, resolvedPath ?? string.Empty);
+
                     // todo analyzer
                     _fileDefinitions.Add(fileItem);
                 }
@@ -275,6 +319,67 @@ namespace Microsoft.MSBuild.LockFile.Tasks
 
             // TODO adapt task logger to Nuget Logger
             return LockFileUtilities.GetLockFile(ProjectLockFile, NuGet.Logging.NullLogger.Instance);
+        }
+
+        private string ResolvePackagePath(LockFileLibrary package, NuGet.ProjectModel.LockFile lockFile)
+        {
+            if (package.Type == "project")
+            {
+                var relativeMSBuildProjectPath = package.MSBuildProject;
+
+                if (string.IsNullOrEmpty(relativeMSBuildProjectPath))
+                {
+                    ReportException("MissingMSBuildPathInProjectPackage");
+                }
+
+                var absoluteMSBuildProjectPath = GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
+                string fullPackagePath;
+                if (!_projectReferencesToOutputBasePaths.TryGetValue(absoluteMSBuildProjectPath, out fullPackagePath))
+                {
+                    ReportException("MissingProjectReference");
+                }
+
+                return fullPackagePath;
+            }
+            else
+            {
+                return GetNuGetPackagePath(package.Name, package.Version.ToString());
+            }
+        }
+
+        private string GetNuGetPackagePath(string packageId, string packageVersion)
+        {
+            foreach (var packagesFolder in _packageFolders)
+            {
+                string packagePath = Path.Combine(packagesFolder, packageId, packageVersion);
+
+                // The proper way to check if a package is available is to look for the hash file, since that's the last
+                // file written as a part of the restore process. If it's not there, it means something failed part way through.
+                if (File.Exists(Path.Combine(packagePath, $"{packageId}.{packageVersion}.nupkg.sha512")))
+                {
+                    return packagePath;
+                }
+            }
+
+            throw new Exception("PackageFolderNotFound");
+        }
+
+        private string ResolveFilePath(string relativePath, string resolvedPackagePath)
+        {
+            if (Path.GetFileName(relativePath) == "_._")
+            {
+                return null;
+            }
+
+            relativePath = relativePath.Replace('/', '\\');
+            return resolvedPackagePath != null
+                ? Path.Combine(resolvedPackagePath, relativePath)
+                : string.Empty;
+        }
+
+        private string GetAbsolutePathFromProjectRelativePath(string path)
+        {
+            return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(ProjectLockFile)), path));
         }
 
         private void ReportException(string message)
