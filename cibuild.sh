@@ -214,12 +214,6 @@ echo "** Moving bootstrapped MSBuild to the bootstrap folder"
 MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUILD_ARGS" "$MOVE_LOG_PATH"
 
-# Use the "current" coreclr runtime host; the one in tools/ may be
-# stale and incompatible.
-if [[ "$host" = "CoreCLR" ]]; then
-#    RUNTIME_HOST=$BOOTSTRAPPED_RUNTIME_HOST
-fi
-
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "$BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
