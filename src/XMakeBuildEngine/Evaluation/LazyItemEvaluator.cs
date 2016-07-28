@@ -244,6 +244,24 @@ namespace Microsoft.Build.Evaluation
             {
                 List<I> itemsToAdd = new List<I>();
 
+                Lazy<Func<string, bool>> excludeTester = null;
+                ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
+                if (_excludes != null)
+                {
+                    // STEP 4: Evaluate, split, expand and subtract any Exclude
+                    foreach (string exclude in _excludes)
+                    {
+                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
+                        IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
+                        excludePatterns.AddRange(excludeSplits);
+                    }
+
+                    if (excludePatterns.Any())
+                    {
+                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(excludePatterns));
+                    }
+                }
+
                 foreach (var operation in _operations)
                 {
                     if (operation.Item1 == IncludeOperationType.Expression)
@@ -254,18 +272,30 @@ namespace Microsoft.Build.Evaluation
                             (ExpressionShredder.ItemExpressionCapture) operation.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
                             false /* do not include null expansion results */, out throwaway, _itemElement.IncludeLocation);
 
-                        itemsToAdd.AddRange(itemsFromExpression);
+                        if (excludeTester != null)
+                        {
+                            itemsToAdd.AddRange(itemsFromExpression.Where(item => !excludeTester.Value(item.EvaluatedInclude)));
+                        }
+                        else
+                        {
+                            itemsToAdd.AddRange(itemsFromExpression);
+                        }
                     }
                     else if (operation.Item1 == IncludeOperationType.Value)
                     {
                         string value = (string)operation.Item2;
-                        var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
-                        itemsToAdd.Add(item);
+
+                        if (excludeTester == null ||
+                            !excludeTester.Value(value))
+                        {
+                            var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
+                            itemsToAdd.Add(item);
+                        }
                     }
                     else if (operation.Item1 == IncludeOperationType.Glob)
                     {
                         string glob = (string)operation.Item2;
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob, excludePatterns);
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
                             itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
@@ -275,39 +305,6 @@ namespace Microsoft.Build.Evaluation
                     {
                         throw new InvalidOperationException(operation.Item1.ToString());
                     }
-                }
-
-                if (_excludes.Any())
-                {
-                    //  TODO: Pass exclusion list to globbing code so excluded files don't need to be scanned (twice)
-
-                    HashSet<string> excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                    foreach (string exclude in _excludes)
-                    {
-                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
-                        foreach (var excludeSplit in ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded))
-                        {
-                            string[] excludeSplitFiles = EngineFileUtilities.GetFileListEscaped(_rootDirectory, excludeSplit);
-
-                            foreach (string excludeSplitFile in excludeSplitFiles)
-                            {
-                                excludes.Add(EscapingUtilities.UnescapeAll(excludeSplitFile));
-                            }
-                        }
-                    }
-
-                    List<I> remainingItems = new List<I>();
-
-                    for (int i = 0; i < itemsToAdd.Count; i++)
-                    {
-                        if (!excludes.Contains(itemsToAdd[i].EvaluatedInclude))
-                        {
-                            remainingItems.Add(itemsToAdd[i]);
-                        }
-                    }
-
-                    itemsToAdd = remainingItems;
                 }
 
                 if (_metadata != null)
@@ -586,6 +583,8 @@ namespace Microsoft.Build.Evaluation
             // STEP 4: Evaluate, split, expand and subtract any Exclude
             if (itemElement.Exclude.Length > 0)
             {
+                //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                //  if so we need to add the right item reference
                 string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
 
                 if (evaluatedExclude.Length > 0)
