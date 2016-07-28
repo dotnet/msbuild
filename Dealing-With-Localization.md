@@ -12,12 +12,12 @@
 - the resource logical name (what you specify in `ResourceManager`'s constructor) is: `<AssemblyName>.<NeutralResxName>.resources`
 
 ## How to edit a resource
-- if you need to add / remove / update a resource, only do so in the neutral resource. xlf files get update automatically during localized builds.
+- if you need to add / remove / update a resource, only do so in the neutral resource. xlf files get automatically updated during localized builds.
 
 ## What a localized build does
 - updates xlf files from their corresponding neutral resx
 - convert xlf files to localized resx files
-- the localized resx files are generated into the `IntermediaryOutputPath`
+- the localized resx files are generated into the `$(IntermediaryOutputPath)`
 - produces satellite assemblies for each language
 
 ## Doing a localized build
@@ -27,6 +27,6 @@
   - to replace the test string with a string of your own choice, use `build /t:build /p:LocalizedBuild=true;LocalizedTestBuild=true;LocalizedTestString=foo`
 
 ## Process for interacting with the localization team
-- 2-3 weeks before a VS release we need to ping the Microsoft localization team to update the xlf files with the latest changes in the neutral resources
+- 2-3 weeks before a VS release the MSBuild team needs to ping the Microsoft localization team to update the xlf files with the latest changes in the neutral resources
 - before pinging the loc team, we do a localized build and commit the xlf changes
-- this will be the ONLY time we do localized builds and commit xlf changes. Otherwise, if we commit xlfs while the loc team is translation, we might get races.
+- this will be the ONLY time we do localized builds and commit xlf changes. Otherwise, if we commit xlfs while the loc team is translating (between their checkout and merged PR), we might get races and loose resource updates.
