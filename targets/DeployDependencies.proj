@@ -155,15 +155,15 @@
         DestinationFiles="$(TestDeploymentDir)\Microsoft.CSharp.Targets"
         />
         
-    <!-- Csc task looks for corerun.exe even on non-Windows-->
+    <!-- Csc task looks for dotnet.exe even on non-Windows-->
      <Copy
-        SourceFiles="$(DeploymentDir)\corerun"
-        DestinationFiles="$(DeploymentDir)\corerun.exe"
+        SourceFiles="$(DeploymentDir)\dotnet"
+        DestinationFiles="$(DeploymentDir)\dotnet.exe"
         Condition="'$(MonoBuild)' != 'true'"
         />
     <Copy
-        SourceFiles="$(TestDeploymentDir)\corerun"
-        DestinationFiles="$(TestDeploymentDir)\corerun.exe"
+        SourceFiles="$(TestDeploymentDir)\dotnet"
+        DestinationFiles="$(TestDeploymentDir)\dotnet.exe"
         Condition="'$(MonoBuild)' != 'true'"
         />        
         

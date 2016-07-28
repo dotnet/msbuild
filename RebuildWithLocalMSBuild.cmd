@@ -9,7 +9,7 @@ setlocal
 :: Restore build tools
 call %~dp0init-tools.cmd
 
-set RUNTIME_HOST=%~dp0Tools\CoreRun.exe
+set RUNTIME_HOST=%~dp0Tools\dotnetcli\dotnet.exe
 
 :: build MSBuild with the MSBuild binaries from BuildTools
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build.log
@@ -18,7 +18,7 @@ set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
 echo.
 echo ** Rebuilding MSBuild with binaries from BuildTools
 
-call "%~dp0build.cmd" /t:Rebuild /p:Configuration=Debug-NetCore
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=Debug-NetCore /p:"OverrideToolHost=%RUNTIME_HOST%"
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
