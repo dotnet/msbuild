@@ -85,7 +85,7 @@ MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
-CORERUN_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/corerun"'"'
+BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/corerun"'"'
 MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.exe"'"'
 
 # Default msbuild arguments
@@ -217,7 +217,7 @@ runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUIL
 # Use the "current" coreclr runtime host; the one in tools/ may be
 # stale and incompatible.
 if [[ "$host" = "CoreCLR" ]]; then
-    RUNTIME_HOST=$CORERUN_BOOTSTRAPPED_EXE
+#    RUNTIME_HOST=$BOOTSTRAPPED_RUNTIME_HOST
 fi
 
 echo
