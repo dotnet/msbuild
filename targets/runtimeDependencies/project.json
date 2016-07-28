@@ -53,7 +53,7 @@
         "Microsoft.Net.Compilers.Targets.NetCore": "0.1.4-dev",
         "Microsoft.Portable.Targets": "0.1.1-dev",
         "Microsoft.Win32.Primitives": "4.0.1",
-        "Newtonsoft.Json": "8.0.3",
+        "Newtonsoft.Json": "9.0.1",
         "xunit.console.netcore": "1.0.3-prerelease-00524-01",
 
         "System.Net.Http": "4.1.0-rc3-24109-00",
