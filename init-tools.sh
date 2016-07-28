@@ -35,7 +35,7 @@ if [ ! -e "$__PROJECT_JSON_FILE" ]; then
 
   if [ ! -d "$__BUILD_TOOLS_PATH" ]; then
     echo "Restoring build tools version $__BUILD_TOOLS_PACKAGE_VERSION..."
-    "$__DOTNET_CMD" restore "$__PROJECT_JSON_FILE" --packages "$NUGET_PACKAGES" --source "$__BUILD_TOOLS_SOURCE" >> "$__init_tools_log" 2>&1
+    "$__DOTNET_CMD" restore "$__PROJECT_JSON_FILE" --packages "$NUGET_PACKAGES" --source "$__BUILD_TOOLS_SOURCE"
 
     "$__BUILD_TOOLS_PATH/init-tools.sh"
   fi
