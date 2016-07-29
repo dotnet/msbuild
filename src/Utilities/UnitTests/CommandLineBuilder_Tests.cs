@@ -405,19 +405,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Odd number of literal quotes. This should trigger an exception, because command line parsers
-        /// generally can't handle this case.
+        /// Ensure it's not an error to have an odd number of literal quotes. Sometimes
+        /// it's a mistake on the programmer's side, but we cannot reject odd numbers of
+        /// quotes in the general case because sometimes that's exactly what's needed (e.g.
+        /// passing a string with a single embedded double-quote to a compiler).
         /// </summary>
         [Fact]
         public void AppendSwitchWithOddNumberOfLiteralQuotesInParameter()
         {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                CommandLineBuilder c = new CommandLineBuilder();
-                c.AppendSwitchIfNotNull("/D", @"ASSEMBLY_KEY_FILE=""c:\\foo\\FinalKeyFile.snk");
-            }
-           );
+            CommandLineBuilder c = new CommandLineBuilder();
+            c.AppendSwitchIfNotNull("/D", @"A='""'");     //   /DA='"'
+            Assert.Equal(@"/D""A='\""'""", c.ToString()); //   /D"A='\"'"
         }
+
         internal class TestCommandLineBuilder : CommandLineBuilder
         {
             internal void TestVerifyThrow(string switchName, string parameter)
