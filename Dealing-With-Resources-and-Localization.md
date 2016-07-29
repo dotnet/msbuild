@@ -19,12 +19,14 @@
 - converts xlf files to localized resx files
 - the localized resx files are generated into the `$(IntermediaryOutputPath)`
 - produces satellite assemblies for each language
+ - satellite assemblies are used even on English machines. This is for testing purposes, to ensure that English builds are not different than non English builds
 
 ## Doing a localized build
 -  currently only supported on windows
 - `build /t:build /p:LocalizedBuild=true`
 - to test localized builds, use `build /t:build /p:LocalizedBuild=true;LocalizedTestBuild=true`. This replaces all resources with `!resource_id!english_resource!localized_resource!`
   - to replace the test string with a string of your own choice, use `build /t:build /p:LocalizedBuild=true;LocalizedTestBuild=true;LocalizedTestString=foo`
+  - testing does not work with the English satellite assemblies because they are directly copied from the neutral resources and do not have corresponding xlf files
 
 ## Process for interacting with the localization team
 - 2-3 weeks before a VS release the MSBuild team needs to ping the Microsoft localization team to update the xlf files with the latest changes in the neutral resources
