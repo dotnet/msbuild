@@ -215,6 +215,7 @@
     <value>MSB3884: Could not find rule set file "{0}".</value>
   <comment>{StrBegin="MSB3884: "}</comment>
   </data>
+
   <!--
         The Copy message bucket is: MSB3021 - MSB3030
 
@@ -285,9 +286,6 @@
     <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
     <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
   </data>
-  <data name="Copy.ExactlyOneTypeOfLink">
-    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
-  </data>
 
   <!--
         The CreateItem message bucket is: MSB3031 - MSB3040
@@ -298,6 +296,7 @@
     <value>MSB3031: Could not set additional metadata. "{0}" is a reserved metadata name and cannot be modified.</value>
     <comment>{StrBegin="MSB3031: "} UE: Tasks and OM users are not allowed to remove or change the value of the built-in meta-data on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
   </data>
+  
   <!--
         The CreateManifestResourceName message bucket is: MSB3041 - MSB3050
 
@@ -2600,6 +2599,14 @@
   <data name="CodeSharing.CannotBuildSharedProject">
     <value>MSB3871: Shared projects cannot be built on their own.  Please either build a project that references this project, or build the entire solution.</value>
     <comment>{StrBegin="MSB3871: "}</comment>
+  </data>
+  
+  <!--
+        MSB3891 - MSB3900   Targets: Copy Overflow
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Copy.ExactlyOneTypeOfLink">
+    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
   </data>
   
   <!--
