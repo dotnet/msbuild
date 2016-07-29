@@ -639,14 +639,20 @@
     </Compile>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
+
+    <!-- Resource Files -->
+
     <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
+
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Resources.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+
     <!-- Assemblies Files we depend on -->
     <!-- Be conservative when adding references... adding System.Xml.Linq can add .47 sec cold start time to our launch time, or 80 ms to warm start time -->
     <Reference Include="System" />

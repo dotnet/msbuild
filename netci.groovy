@@ -29,7 +29,7 @@ def project = GithubProject
             case 'Windows_NT':
                 newJob.with{
                     steps{
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && RebuildWithLocalMSBuild.cmd")
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && RebuildWithLocalMSBuild.cmd /p:LocalizedBuild=true")
                     }
 
                     skipTestsWhenResultsNotFound = false

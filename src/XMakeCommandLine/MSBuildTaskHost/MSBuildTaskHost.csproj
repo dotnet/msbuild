@@ -188,8 +188,8 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\Shared\Strings.shared.resx">
-      <LogicalName>MSBuildTaskHost.Strings.shared.resources</LogicalName>
+    <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

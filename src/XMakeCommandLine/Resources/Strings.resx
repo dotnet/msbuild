@@ -929,7 +929,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- #################################################################################################-->
   <!-- ######################################## Shared strings #########################################-->
   <!-- ###### These belong in Strings.shared.resx, but have been copied here for performance ###########-->
-  <!-- ##### If you change the string here, please also change it in Shared\Strings.shared.resx ########-->
+  <!-- ##### If you change the string here, please also change it in Shared\Resources\Strings.shared.resx ########-->
   <!-- #################### and in XMakeBuildEngine\Resources\Strings.resx #############################-->
   <!-- ############## Remove this block once ResourceManager bug 627270 has been fixed. ################-->
   <!-- #################################################################################################-->
