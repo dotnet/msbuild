@@ -60,7 +60,7 @@ namespace Microsoft.Build.Utilities
     {
         #region Static Member Data
         // The default path to temp, used to create explicitly short and long paths
-        private static string s_tempPath = Path.GetDirectoryName(Path.GetTempPath());
+        private static string s_tempPath = Path.GetTempPath();
 
         // The short path to temp
         private static string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());

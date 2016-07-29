@@ -331,24 +331,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetExecutablePath()
-        {
-            var path = Path.Combine(
-                Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath)
-                    .TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }),
-                "MSBuild.exe");
-
-            string configPath = FileUtilities.CurrentExecutableConfigurationFilePath;
-            string directoryName = FileUtilities.CurrentExecutableDirectory;
-            string executablePath = FileUtilities.CurrentExecutablePath;
-            Assert.Equal(path + ".config", configPath, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(path, executablePath, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(Path.GetDirectoryName(path), directoryName, StringComparer.OrdinalIgnoreCase);
-        }
-
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -360,7 +343,7 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_LEGACY_GETFULLPATH
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -378,8 +361,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void GetItemSpecModifierRootDirThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -410,14 +392,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadUNC1()
         {
-            // UNC is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(null, FileUtilities.NormalizePath(@"\\"));
@@ -426,14 +403,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadUNC2()
         {
-            // UNC is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(null, FileUtilities.NormalizePath(@"\\XXX\"));
@@ -442,14 +414,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadUNC3()
         {
-            // UNC is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
@@ -458,16 +425,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathGoodUNC()
         {
             Assert.Equal(@"\\localhost\share", FileUtilities.NormalizePath(@"\\localhost\share"));
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathTooLongWithDots()
         {
             string longPart = new string('x', 300);
@@ -476,14 +441,9 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_LEGACY_GETFULLPATH
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathBadGlobalroot()
         {
-            // device path is not useful outside Windows
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
-
             Assert.Throws<ArgumentException>(() =>
             {
                 /*
@@ -501,8 +461,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void NormalizePathInvalid()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -878,5 +837,37 @@ namespace Microsoft.Build.UnitTests
 
         private static string SystemSpecificAbsolutePath => FileUtilities.ExecutingAssemblyPath;
 
+
+        [Fact]
+        public void GetFolderAboveTest()
+        {
+            string root = NativeMethodsShared.IsWindows ? @"c:\" : "/";
+            string path = Path.Combine(root, "1", "2", "3", "4", "5");
+
+            Assert.Equal(Path.Combine(root, "1", "2", "3", "4", "5"), FileUtilities.GetFolderAbove(path, 0));
+            Assert.Equal(Path.Combine(root, "1", "2", "3", "4"), FileUtilities.GetFolderAbove(path));
+            Assert.Equal(Path.Combine(root, "1", "2", "3"), FileUtilities.GetFolderAbove(path, 2));
+            Assert.Equal(Path.Combine(root, "1", "2"), FileUtilities.GetFolderAbove(path, 3));
+            Assert.Equal(Path.Combine(root, "1"), FileUtilities.GetFolderAbove(path, 4));
+            Assert.Equal(root, FileUtilities.GetFolderAbove(path, 5));
+            Assert.Equal(root, FileUtilities.GetFolderAbove(path, 99));
+
+            Assert.Equal(root, FileUtilities.GetFolderAbove(root, 99));
+        }
+
+        [Fact]
+        public void CombinePathsTest()
+        {
+            // These tests run in .NET 4+, so we can cheat
+            var root = @"c:\";
+
+            Assert.Equal(
+                Path.Combine(root, "path1"),
+                FileUtilities.CombinePaths(root, "path1"));
+
+            Assert.Equal(
+                Path.Combine(root, "path1", "path2", "file.txt"),
+                FileUtilities.CombinePaths(root, "path1", "path2", "file.txt"));
+        }
     }
 }

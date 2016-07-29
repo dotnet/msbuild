@@ -1360,23 +1360,23 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            FileInfo outputInfo = FileUtilities.GetFileInfoNoThrow(outputFilePath);
+            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputFilePath);
 
             // Quick check to see if any uncorrelated input is newer in which case we can avoid checking source file timestamp
-            if (_foundNewestUncorrelatedInputWriteTime && outputInfo != null && GetNewestUncorrelatedInputWriteTime() > outputInfo.LastWriteTime)
+            if (_foundNewestUncorrelatedInputWriteTime && GetNewestUncorrelatedInputWriteTime() > outputTime)
             {
                 // An uncorrelated input is newer, need to build
                 return true;
             }
 
-            FileInfo sourceInfo = FileUtilities.GetFileInfoNoThrow(sourceFilePath);
+            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(sourceFilePath);
 
             if (!String.Equals(Path.GetExtension(sourceFilePath), ".resx", StringComparison.OrdinalIgnoreCase) &&
                 !String.Equals(Path.GetExtension(sourceFilePath), ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // If source file is NOT a .resx, for example a .restext file, 
                 // timestamp checking is simple, because there's no linked files to examine, and no references.
-                return NeedToRebuildSourceFile(sourceInfo, outputInfo);
+                return NeedToRebuildSourceFile(sourceTime, outputTime);
             }
 
 #if FEATURE_BINARY_SERIALIZATION
@@ -1407,7 +1407,7 @@ namespace Microsoft.Build.Tasks
 
             // if the .resources file is out of date even just with respect to the .resx or 
             // the additional inputs, we don't need to go to the point of checking the linked files. 
-            if (NeedToRebuildSourceFile(sourceInfo, outputInfo))
+            if (NeedToRebuildSourceFile(sourceTime, outputTime))
             {
                 return true;
             }
@@ -1419,16 +1419,16 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string linkedFilePath in resxFileInfo.LinkedFiles)
                 {
-                    FileInfo linkedFileInfo = FileUtilities.GetFileInfoNoThrow(linkedFilePath);
+                    DateTime linkedFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(linkedFilePath);
 
-                    if (linkedFileInfo == null)
+                    if (linkedFileTime == DateTime.MinValue)
                     {
                         // Linked file is missing - force a build, so that resource generation
                         // will produce a nice error message
                         return true;
                     }
 
-                    if (linkedFileInfo.LastWriteTime > outputInfo.LastWriteTime)
+                    if (linkedFileTime > outputTime)
                     {
                         // Linked file is newer, need to build
                         return true;
@@ -1446,23 +1446,15 @@ namespace Microsoft.Build.Tasks
         /// Returns true if the output does not exist, if the provided source is newer than the output, 
         /// or if any of the set of additional inputs is newer than the output.  Otherwise, returns false. 
         /// </summary>
-        private bool NeedToRebuildSourceFile(FileInfo sourceInfo, FileInfo outputInfo)
+        private bool NeedToRebuildSourceFile(DateTime sourceTime, DateTime outputTime)
         {
-            if (sourceInfo == null || outputInfo == null)
-            {
-                // Source file is missing - force a build, so that resource generation
-                // will produce a nice error message; or output file is missing,
-                // need to build it
-                return true;
-            }
-
-            if (sourceInfo.LastWriteTime > outputInfo.LastWriteTime)
+            if (sourceTime > outputTime)
             {
                 // Source file is newer, need to build
                 return true;
             }
 
-            if (GetNewestUncorrelatedInputWriteTime() > outputInfo.LastWriteTime)
+            if (GetNewestUncorrelatedInputWriteTime() > outputTime)
             {
                 // An uncorrelated input is newer, need to build
                 return true;
@@ -1506,17 +1498,17 @@ namespace Microsoft.Build.Tasks
             }
 
             // Now we have the filename, check if it's up to date
-            FileInfo sourceInfo = FileUtilities.GetFileInfoNoThrow(Sources[0].ItemSpec);
-            FileInfo outputInfo = FileUtilities.GetFileInfoNoThrow(StronglyTypedFileName);
+            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(Sources[0].ItemSpec);
+            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(StronglyTypedFileName);
 
-            if (sourceInfo == null || outputInfo == null)
+            if (sourceTime == DateTime.MinValue || outputTime == DateTime.MinValue)
             {
                 // Source file is missing - force a build, so that resource generation
                 // will produce a nice error message; or output file is missing,
                 // need to build it
                 needToRebuildSTR = true;
             }
-            else if (sourceInfo.LastWriteTime > outputInfo.LastWriteTime)
+            else if (sourceTime > outputTime)
             {
                 // Source file is newer, need to build
                 needToRebuildSTR = true;
@@ -1555,20 +1547,18 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem reference in this.References)
                     {
-                        // Get a FileInfo, so we can get existence and write time in a single
-                        // disk access
-                        FileInfo referenceInfo = FileUtilities.GetFileInfoNoThrow(reference.ItemSpec);
+                        DateTime referenceTime = NativeMethodsShared.GetLastWriteFileUtcTime(reference.ItemSpec);
 
-                        if (referenceInfo == null)
+                        if (referenceTime == DateTime.MinValue)
                         {
                             // File does not exist: force a build to produce an error message
                             _foundNewestUncorrelatedInputWriteTime = true;
                             return DateTime.MaxValue;
                         }
 
-                        if (referenceInfo.LastWriteTime > _newestUncorrelatedInputWriteTime)
+                        if (referenceTime > _newestUncorrelatedInputWriteTime)
                         {
-                            _newestUncorrelatedInputWriteTime = referenceInfo.LastWriteTime;
+                            _newestUncorrelatedInputWriteTime = referenceTime;
                         }
                     }
                 }
@@ -1578,20 +1568,18 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem additionalInput in this.AdditionalInputs)
                     {
-                        // Get a FileInfo, so we can get existence and write time in a single
-                        // disk access
-                        FileInfo additionalInputInfo = FileUtilities.GetFileInfoNoThrow(additionalInput.ItemSpec);
+                        DateTime additionalInputTime = NativeMethodsShared.GetLastWriteFileUtcTime(additionalInput.ItemSpec);
 
-                        if (additionalInputInfo == null)
+                        if (additionalInputTime == DateTime.MinValue)
                         {
                             // File does not exist: force a build to produce an error message
                             _foundNewestUncorrelatedInputWriteTime = true;
                             return DateTime.MaxValue;
                         }
 
-                        if (additionalInputInfo.LastWriteTime > _newestUncorrelatedInputWriteTime)
+                        if (additionalInputTime > _newestUncorrelatedInputWriteTime)
                         {
-                            _newestUncorrelatedInputWriteTime = additionalInputInfo.LastWriteTime;
+                            _newestUncorrelatedInputWriteTime = additionalInputTime;
                         }
                     }
                 }

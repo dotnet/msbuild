@@ -58,6 +58,9 @@
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>EnvironmentUtilities.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -759,6 +762,10 @@
     <EmbeddedResource Include="..\Shared\Strings.shared.resx">
       <SubType>Designer</SubType>
       <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManifestUtil\Strings.resx">
+      <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">

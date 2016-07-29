@@ -73,15 +73,10 @@ namespace Microsoft.Build.Tasks
                 SigningTarget.ItemSpec, TargetFrameworkVersion);
                 return true;
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))
             {
-                if (ex.ParamName.Equals("certThumbprint"))
-                {
-                    Log.LogErrorWithCodeFromResources("SignFile.CertNotInStore");
-                    return false;
-                }
-                else
-                    throw;
+                Log.LogErrorWithCodeFromResources("SignFile.CertNotInStore");
+                return false;
             }
             catch (FileNotFoundException ex)
             {

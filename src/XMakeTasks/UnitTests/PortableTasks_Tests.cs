@@ -11,7 +11,7 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class PortableTasks_Tests
     {
-        private static readonly string ProjectFilePath = Path.Combine(FileUtilities.CurrentExecutableDirectory, "portableTaskTest.proj");
+        private static readonly string ProjectFilePath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "portableTaskTest.proj");
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]

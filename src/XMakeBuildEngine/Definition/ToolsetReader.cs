@@ -171,7 +171,7 @@ namespace Microsoft.Build.Evaluation
                 else
 #endif
                 {
-                    var currentDir = FileUtilities.CurrentExecutableDirectory.TrimEnd(Path.DirectorySeparatorChar);
+                    var currentDir = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.TrimEnd(Path.DirectorySeparatorChar);
                     var props = new PropertyDictionary<ProjectPropertyInstance>();
 
                     var libraryPath = NativeMethodsShared.FrameworkBasePath;
@@ -739,7 +739,7 @@ namespace Microsoft.Build.Evaluation
                 if (trimmedValue.Length > 0 && !Path.IsPathRooted(trimmedValue))
                 {
                     path = Path.GetFullPath(
-                        Path.Combine(FileUtilities.CurrentExecutableDirectory, trimmedValue));
+                        Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, trimmedValue));
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

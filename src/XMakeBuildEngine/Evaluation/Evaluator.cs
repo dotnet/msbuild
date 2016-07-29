@@ -2090,7 +2090,7 @@ namespace Microsoft.Build.Evaluation
 
             var pathsToSearch =
                 // The actual value of the property, with no fallbacks
-                new[] {prop.EvaluatedValue}
+                new[] { prop?.EvaluatedValue }
                 // The list of fallbacks, in order
                 .Concat(fallbackSearchPathMatch.SearchPaths).ToList();
 
@@ -2107,6 +2107,11 @@ namespace Microsoft.Build.Evaluation
             // 2. 1 or more project files *found* but ignored (like circular, self imports)
             foreach (var extensionPath in pathsToSearch)
             {
+                // In the rare case that the property we've enabled for search paths hasn't been defined
+                // we will skip it, but continue with other paths in the fallback order.
+                if (string.IsNullOrEmpty(extensionPath))
+                    continue;
+
                 string extensionPathExpanded = _data.ExpandString(extensionPath);
 
                 if (!Directory.Exists(extensionPathExpanded))
