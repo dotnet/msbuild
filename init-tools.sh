@@ -33,18 +33,18 @@ if [ ! -e "$__PROJECT_JSON_FILE" ]; then
   mkdir -p "$__PROJECT_JSON_PATH"
   echo "$__PROJECT_JSON_CONTENTS" > "$__PROJECT_JSON_FILE"
 
+  if [ ! -d "$__BUILD_TOOLS_CLI_DIR" ]; then
+    echo "Installing Build Tools CLI Version: $__BUILD_TOOLS_CLI_VERSION"
+    "$DIR/scripts/obtain/dotnet-install.sh" --channel rel-1.0.0 --version "$__BUILD_TOOLS_CLI_VERSION" --install-dir "$__BUILD_TOOLS_CLI_DIR"
+  fi
+
   if [ ! -d "$__BUILD_TOOLS_PATH" ]; then
     echo "Restoring build tools version $__BUILD_TOOLS_PACKAGE_VERSION..."
     "$__DOTNET_CMD" restore "$__PROJECT_JSON_FILE" --packages "$NUGET_PACKAGES" --source "$__BUILD_TOOLS_SOURCE"
 
     if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."; fi
     find .  
-  fi
-
-  if [ ! -d "$__BUILD_TOOLS_CLI_DIR" ]; then
-    echo "Installing Build Tools CLI Version: $__BUILD_TOOLS_CLI_VERSION"
-    "$DIR/scripts/obtain/dotnet-install.sh" --channel rel-1.0.0 --version "$__BUILD_TOOLS_CLI_VERSION" --install-dir "$__BUILD_TOOLS_CLI_DIR"
-  fi
+  fi  
 
   echo "Initializing build tools..."
   "$__BUILD_TOOLS_PATH/init-tools.sh" "$DIR" "$__DOTNET_CMD" "$__BUILD_TOOLS_DIR" >> "$__init_tools_log" 2>&1
