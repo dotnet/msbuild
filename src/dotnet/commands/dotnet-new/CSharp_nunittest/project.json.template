@@ -1,7 +1,8 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0",
 
     "dependencies": {
+        "NUnit": "3.4.1",
         "dotnet-test-nunit": "3.4.0-beta-1"
     },
 
