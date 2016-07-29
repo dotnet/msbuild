@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tools.Build
             foreach (var context in contexts)
             {
                 var libraries = context.LibraryManager.GetLibraries();
-                var lookup = libraries.ToDictionary(l => l.Identity.Name);
+                var lookup = libraries.ToDictionary(l => l.Identity.Name, StringComparer.OrdinalIgnoreCase);
                 var root = lookup[context.ProjectFile.Name];
                 yield return TraverseProject((ProjectDescription) root, lookup, context);
             }

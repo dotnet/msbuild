@@ -77,6 +77,6 @@ if (!(Test-Path "$DOTNET_LOCAL_PATH"))
 }
 
 # Initialize build tools
-cmd /c "$BUILD_TOOLS_PACKAGE_PATH\init-tools.cmd $RepoRoot $env:DOTNET_INSTALL_DIR\dotnet.exe $BUILD_TOOLS_PATH" >> "$INIT_TOOLS_LOG"
+cmd /c "$BUILD_TOOLS_PACKAGE_PATH\init-tools.cmd $RepoRoot $env:DOTNET_LOCAL_PATH\dotnet.exe $BUILD_TOOLS_PATH" >> "$INIT_TOOLS_LOG"
 Write-Host "Done initializing tools."
 Write-Host "Init-Tools completed for BuildTools Version: $BUILD_TOOLS_VERSION" > $BUILD_TOOLS_SEMAPHORE

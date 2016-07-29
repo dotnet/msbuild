@@ -588,7 +588,10 @@ namespace Microsoft.DotNet.ProjectModel
                     type = LibraryType.Package;
                 }
 
-                description = description ?? UnresolvedDependencyProvider.GetDescription(new LibraryRange(library.Name, type), target.TargetFramework);
+                description = description ?? 
+                              UnresolvedDependencyProvider.GetDescription(
+                                new LibraryRange(library.Name, type),
+                                target.TargetFramework);
 
                 libraries.Add(new LibraryKey(library.Name), description);
             }
@@ -674,14 +677,14 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 var otherKey = (LibraryKey)obj;
 
-                return string.Equals(otherKey.Name, Name, StringComparison.Ordinal) &&
+                return string.Equals(otherKey.Name, Name, StringComparison.OrdinalIgnoreCase) &&
                     otherKey.LibraryType.Equals(LibraryType);
             }
 
             public override int GetHashCode()
             {
                 var combiner = new HashCodeCombiner();
-                combiner.Add(Name);
+                combiner.Add(Name.ToLowerInvariant());
                 combiner.Add(LibraryType);
 
                 return combiner.CombinedHash;

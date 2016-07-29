@@ -67,7 +67,9 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             if (targetLibrary != null)
             {
                 // The lock file entry might have a filtered set of dependencies
-                var lockFileDependencies = targetLibrary.Dependencies.ToDictionary(d => d.Id);
+                var lockFileDependencies = targetLibrary.Dependencies.ToDictionary(
+                    d => d.Id,
+                    StringComparer.OrdinalIgnoreCase);
 
                 // Remove all non-framework dependencies that don't appear in the lock file entry
                 dependencies.RemoveAll(m => !lockFileDependencies.ContainsKey(m.Name) && m.Target != LibraryType.ReferenceAssembly);
