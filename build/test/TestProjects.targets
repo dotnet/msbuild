@@ -58,6 +58,8 @@
 
       <PreTestProjectsToExclude Include="test$(PathSeparator)**$(PathSeparator)bin$(PathSeparator)**$(PathSeparator)project.json" />
 
+      <PreTestProjectsToExclude Include="test$(PathSeparator)dotnet-build3.Tests$(PathSeparator)project.json" />
+
       <TestProjectsToExclude Include="%(PreTestProjectsToExclude.RelativeDir)project.json" />
 
       <PreTestProjects Include="test$(PathSeparator)**$(PathSeparator)project.json;" />
