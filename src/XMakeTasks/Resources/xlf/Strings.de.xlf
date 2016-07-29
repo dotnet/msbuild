@@ -1310,7 +1310,7 @@
       </trans-unit>
       <trans-unit id="MSBuild.NoStopOnFirstFailure">
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
-        <target state="translated">StopOnFirstFailure hat keine Auswirkungen, wenn die folgenden Bedingungen gelten: 1) Das System wird im Mehrprozessmodus ausgeführt. 2) Die BuildInParallel-Eigenschaft ist TRUE. 3) Die RunEachTargetSeparately-Eigenschaft ist FALSE.</target>
+        <target state="translated">StopOnFirstFailure hat keine Auswirkungen, wenn die folgenden Bedingungen alle gelten: 1) Das System wird im Mehrprozessmodus ausgeführt. 2) Die BuildInParallel-Eigenschaft ist TRUE. 3) Die RunEachTargetSeparately-Eigenschaft ist FALSE.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
@@ -1937,7 +1937,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotFindWrapperForTypeLib">
         <source>MSB3283: Cannot find wrapper assembly for type library "{0}". Verify that (1) the COM component is registered correctly and (2) your target platform is the same as the bitness of the COM component. For example, if the COM component is 32-bit, your target platform must not be 64-bit.</source>
-        <target state="translated">MSB3283: Die Wrapperassembly für die Typbibliothek "{0}" wurde nicht gefunden. Stellen Sie sicher, dass (1) die COM-Komponente richtig registriert ist und dass (2) die Zielplattform mit der Bitanzahl der COM-Komponente übereinstimmt. Wenn die COM-Komponente z. B. 32-Bit ist, darf die Zielplattform nicht 64-Bit sein.</target>
+        <target state="translated">MSB3283: Die Wrapperassembly für die Typbibliothek "{0}" wurde nicht gefunden. Stellen Sie sicher, dass (1) die COM-Komponente richtig registriert ist und dass (2) die Zielplattform mit der Bitness der COM-Komponente übereinstimmt. Wenn die COM-Komponente z. B. 32-Bit ist, darf die Zielplattform nicht 64-Bit sein.</target>
         <note>{StrBegin="MSB3283: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotGetPathForTypeLib">

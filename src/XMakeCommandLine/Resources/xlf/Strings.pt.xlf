@@ -69,7 +69,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      extension that ends in "proj" and uses that file.
 </source>
         <target state="translated">Descrição:         Compila os destinos especificados no arquivo de projeto. Se
-                     não houver arquivo de projeto especificado, o MSBuild pesquisará no
+                     não houver arquivo de projeto especificado, o MSBuild pesquisa no
                      diretório de trabalho atual um arquivo que contenha uma extensão de
                      arquivo que termine em "proj" e usa esse arquivo.
 </target>

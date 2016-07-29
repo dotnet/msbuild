@@ -791,12 +791,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
             List<ExpressionShredder.ItemExpressionCapture> expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
-            expression = "@(Foo->Metadata('Meta0')->Directory())";
+            expression = "@(Foo->Metadata('Meta0')->Directory(),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
             capture = expressions[0];
             Assert.Equal(1, expressions.Count);
             Assert.Equal(2, capture.Captures.Count);
-            Assert.Equal(null, capture.Separator);
+            Assert.Equal(";", capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
             Assert.Equal("Metadata('Meta0')", capture.Captures[0].Value);
             Assert.Equal("Metadata", capture.Captures[0].FunctionName);

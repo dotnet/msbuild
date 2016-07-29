@@ -148,7 +148,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;            Insertar la configuración de la línea de comandos de un archivo de texto. Para incluir
+        <target state="translated">  @&lt;archivo&gt;            Insertar la configuración de la línea de comandos de un archivo de texto. Para incluir
                      varios archivos de respuesta, especifique cada uno de ellos
                      por separado.
                      
@@ -189,7 +189,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      Example:
                        /target:Resources;Compile
 </source>
-        <target state="translated">  /target:&lt;targets&gt;  Generar estos destinos en el proyecto. Use el carácter de punto y coma o
+        <target state="translated">  /target:&lt;destinos&gt;  Generar estos destinos en el proyecto. Use el carácter de punto y coma o
                      coma para separar varios destinos o especifique cada
                      uno de ellos por separado. (Formato corto: /t)
                      Ejemplo:
@@ -243,15 +243,15 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  /logger:&lt;logger&gt;   Usar este registrador para registrar eventos de MSBuild. Para incluir
+        <target state="translated">  /logger:&lt;registrador&gt;   Usar este registrador para registrar eventos de MSBuild. Para incluir
                      varios registradores, especifique cada uno de ellos por separado.
-                     La sintaxis del &lt;logger&gt; es:
+                     La sintaxis del &lt;registrador&gt; es:
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
                      La sintaxis de la &lt;logger class&gt; es:
                        [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
                      La sintaxis del &lt;logger assembly&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Los &lt;logger parameters&gt; son opcionales y se pasan
+                       {&lt;nombre del ensamblado&gt;[,&lt;nombre seguro&gt;] | &lt;archivo de ensamblado&gt;}
+                     Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador igual que como se escriben. (Formato corto: /l)
                      Ejemplos:
                        /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -396,7 +396,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
         <target state="translated">  /validate          Validar el proyecto comparándolo con el esquema predeterminado. (Formato
                      corto: /val)
 
-  /validate:&lt;schema&gt; Validar el proyecto comparándolo con el esquema especificado. (Formato
+  /validate:&lt;esquema&gt; Validar el proyecto comparándolo con el esquema especificado. (Formato
                      corto: /val)
                      Ejemplo:
                        /validate:MyExtendedBuildSchema.xsd
@@ -474,7 +474,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;                     
+        <target state="translated">  /distributedlogger:&lt;registrador central&gt;*&lt;registrador de reenvío&gt;                     
                      Use este registrador para registrar eventos de MSBuild, adjuntando una
                      interfaz de registrador diferente a cada nodo. Para incluir
                      varios registradores, especifique cada uno de ellos por separado. 
@@ -484,8 +484,8 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      La sintaxis de la &lt;logger class&gt; es:
                        [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
                      La sintaxis del &lt;logger assembly&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Los &lt;logger parameters&gt; son opcionales y se pasan
+                       {&lt;nombre del ensamblado&gt;[,&lt;nombre seguro&gt;] | &lt;archivo de ensamblado&gt;}
+                     Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador igual que como se escriben. (Formato corto: /l)
                      Ejemplos:
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -509,7 +509,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="translated">  /ignoreprojectextensions:&lt;extensions&gt;
+        <target state="translated">  /ignoreprojectextensions:&lt;extensiones&gt;
                      Lista de extensiones que se omiten al determinar el 
                      archivo de proyecto que se va a compilar. Use el carácter de punto y coma o coma 
                      para separar varias extensiones.
@@ -535,7 +535,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="translated">  /toolsversion:&lt;version&gt;
+        <target state="translated">  /toolsversion:&lt;versión&gt;
                      La versión del conjunto de herramientas de MSBuild (tareas, destinos, etc.)
                      que se utiliza durante la compilación. Esta versión invalidará las 
                      versiones especificadas por los distintos proyectos. (Formato corto: 
@@ -598,7 +598,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      Registra los resultados de la compilación en varios archivos de registro, uno
                      para cada nodo de MSBuild. La ubicación inicial de estos archivos es
                      el directorio actual. De forma predeterminada, estos archivos se denominan 
-                     "MSBuild&lt;nodeid&gt;.log". La ubicación del archivo y
+                     "MSBuild&lt;idNodo&gt;.log". La ubicación del archivo y
                      otros parámetros del registrador de archivos se pueden especificar 
                      agregando el modificador "/fileLoggerParameters".
 
@@ -646,7 +646,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        /flp1:warningsonly;logfile=msbuild.wrn 
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  /fileloggerparameters[n]:&lt;parameters&gt;                                
+        <target state="translated">  /fileloggerparameters[n]:&lt;parámetros&gt;                                
                      Proporciona parámetros adicionales de los registradores de archivos.
                      La presencia de este modificador implica el 
                      modificador /filelogger[n] correspondiente.
