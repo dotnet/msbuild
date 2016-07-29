@@ -22,35 +22,45 @@ if "%SCOPE%"=="Compile" (
 )
 
 :: Assign target configuration
+
+:: Default to full-framework build
+if not defined TARGET (
+    set TARGET=Desktop
+)
+
 set CONFIGURATION=
 if "%TARGET%"=="CoreCLR" (
     set CONFIGURATION=Debug-NetCore
-)
-if "%TARGET%"=="Desktop" (
+) else if "%TARGET%"=="Desktop" (
     set CONFIGURATION=Debug
-)
-
-if not defined CONFIGURATION (
-    echo Unsupported target detected: %TARGET%. Configuring as if for Desktop
-    set CONFIGURATION=Debug
+) else (
+    echo Unsupported target detected: %TARGET%. Aborting.
+    goto :error
 )
 
 :: Assign runtime host
+
+:: By default match host to target
+if not defined HOST (
+    if "%TARGET%"=="CoreCLR" (
+        set HOST=CoreCLR
+    ) else (
+        set HOST=Desktop
+    )
+)
+
 set RUNTIME_HOST=
 set HOST_SPECIFIED=
 if "%HOST%"=="CoreCLR" (
     set RUNTIME_HOST=%~dp0Tools\CoreRun.exe
     set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
     set HOST_SPECIFIED=true
-)
-if "%HOST%"=="Desktop" (
+) else if "%HOST%"=="Desktop" (
     set RUNTIME_HOST=
     set HOST_SPECIFIED=true
-)
-
-if not defined HOST_SPECIFIED (
-    echo Unsupported host detected: %HOST%. Configuring as if for Desktop
-    set RUNTIME_HOST=
+) else (
+    echo Unsupported host detected: %HOST%. Aborting.
+    goto :error
 )
 
 :: Restore build tools
