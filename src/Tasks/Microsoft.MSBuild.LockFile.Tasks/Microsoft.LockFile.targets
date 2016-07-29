@@ -16,9 +16,16 @@
   <!-- Add Targets to Dependency Lists, causing them to be triggered -->
   <PropertyGroup>
     <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);LockFileResolveReferences</ResolveAssemblyReferencesDependsOn>
-    <PrepareResourcesDependsOn>$(PrepareResourcesDependsOn);LockFileResolveReferences</PrepareResourcesDependsOn>
+    <PrepareResourcesDependsOn>LockFileResolveReferences;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
     <_FindDependencies>false</_FindDependencies>
   </PropertyGroup>
+
+  <!--<PropertyGroup>
+    <PrepareForRunDependsOn>
+      ClearCopyLocalIfBuild;
+      $(PrepareForRunDependsOn)
+    </PrepareForRunDependsOn>
+  </PropertyGroup>-->
 
   <!-- If a NuGetRuntimeIdentifier wasn't already specified, let's go generate it -->
   <PropertyGroup Condition="'$(NuGetRuntimeIdentifier)' == ''">
@@ -35,7 +42,9 @@
   <!--<Target Name="_CopyFilesMarkedCopyLocal" />-->
 
   <!-- Condition="'$(EnableLockFileToMSBuild)' == 'true' and Exists('$(ProjectLockFile)')" -->
-  <Target Name="LockFileResolveReferences" DependsOnTargets="ComputeReferencesFromNuGetPackages;ComputeAnalyzersFromNuGetPackages">
+  <Target Name="LockFileResolveReferences" 
+          DependsOnTargets="ComputeReferencesFromNuGetPackages;ComputeAnalyzersFromNuGetPackages;ComputeCopyLocalItems">
+    
     <Message Text="----[LockFileResolveReferences Called: POST ResolveNuGetPackageAssets]-------------" Importance="high" />
     <Message Text="ResolvedAnalyzers            -&gt;  @(Analyzer)" Importance="high" />
     <Message Text="ResolvedCopyLocalItems       -&gt;  @(ReferenceCopyLocalPaths)" Importance="high" />
@@ -44,6 +53,9 @@
     <Message Text="ContentItems                 -&gt;  @(_NuGetContentItems)" Importance="high" />
     <Message Text="FileWrites                   -&gt;  @(FileWrites)" Importance="high" />
     <Message Text="Reference                   -&gt;  @(Reference)" Importance="high" />
+    <Message Text="----------------------------------------------------------" Importance="high" />
+    <Message Text="_ReferencesFromNuGetPackages  -&gt;  @(_ReferencesFromNuGetPackages)" Importance="high" />
+    <Message Text="ResolvedCompileFileDefinitions  -&gt;  @(ResolvedCompileFileDefinitions)" Importance="high" />
     <Message Text="----------------------------------------------------------" Importance="high" />
 
     <!-- Temp: Remove what ResolveNuGetPackageAssets added -->
@@ -61,10 +73,22 @@
     <!-- Add the analyzers we computed -->
     <ItemGroup>
       <Analyzer Include="@(ResolvedAnalyzers)" />
-      <!--<ReferenceCopyLocalPaths Include="@(ResolvedAnalyzers)" />-->
     </ItemGroup>
     <Message Text="ResolvedAnalyzers            -&gt;  @(Analyzer)" Importance="high" />
 
+    <!-- Add the copy local items -->
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
+    </ItemGroup>
+    <Message Text="ResolvedCopyLocalItems       -&gt;  @(ReferenceCopyLocalPaths)" Importance="high" />
+
+  </Target>
+
+  <Target Name="ClearCopyLocalIfBuild">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+      <ReferenceCopyLocalPaths Include="@(RuntimeCopyLocalItems)" />
+    </ItemGroup>
   </Target>
   
   <!-- Run the task -->
@@ -92,7 +116,11 @@
       <!-- Get corresponding file definitions -->
       <TFMCompileFileDefinitionsEx Include="@(FileDefinitions)" Exclude="@(TFMCompileFileItems)" />
       <TFMCompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(TFMCompileFileDefinitionsEx)" />
-      <ResolvedCompileFileDefinitions Include="%(TFMCompileFileDefinitions.ResolvedPath)" />
+      <ResolvedCompileFileDefinitions Include="%(TFMCompileFileDefinitions.ResolvedPath)">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+      </ResolvedCompileFileDefinitions>
 
     </ItemGroup>
   </Target>
@@ -114,5 +142,39 @@
     </ItemGroup>
     <Message Text="AnalyzerFiles -&gt;  @(AnalyzerFiles)" Importance="high" />
   </Target>
-  
+
+  <!-- Compute CopyLocal -->
+  <Target Name="ComputeCopyLocalItems" 
+          DependsOnTargets="RunLockFileToMSBuild" 
+          Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
+    <ItemGroup>
+      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />
+      
+      <!--NativeLibrary-->
+      <_NativeFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
+      <__NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_NativeFileItems)" />
+      <_NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__NativeCopyLocalItems)" />
+      <NativeCopyLocalItems Include="%(_NativeCopyLocalItems.ResolvedPath)" />
+
+      <!--RuntimeAssembly-->
+      <_RuntimeFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'RuntimeAssembly'))" />
+      <__RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_RuntimeFileItems)" />
+      <_RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__RuntimeCopyLocalItems)" />
+      <RuntimeCopyLocalItems Include="%(_RuntimeCopyLocalItems.ResolvedPath)" />
+
+      <!--ResourceAssembly-->
+      <_ResourceFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'ResourceAssembly'))" />
+      <__ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_ResourceFileItems)" />
+      <_ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__ResourceCopyLocalItems)" />
+      <ResourceCopyLocalItems Include="%(_ResourceCopyLocalItems.ResolvedPath)" />
+
+      <!-- ALL -->
+      <AllCopyLocalItems Include="@(NativeCopyLocalItems);@(RuntimeCopyLocalItems);@(ResourceCopyLocalItems)">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+      </AllCopyLocalItems>
+      
+    </ItemGroup>
+  </Target>
 </Project>
