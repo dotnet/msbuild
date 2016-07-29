@@ -11,8 +11,6 @@ if /i "%1"=="--skip-bootstrap" set BOOTSTRAP_ONLY=true&& shift && goto parseArgu
 :: Unknown parameters
 goto :usage
 
-set CONFIGURATION=Debug-NetCore
-
 :doneParsingArguments
 
 if "%SCOPE%"=="Compile" (
@@ -28,11 +26,11 @@ if not defined TARGET (
     set TARGET=Desktop
 )
 
-set CONFIGURATION=
+set BUILD_CONFIGURATION=
 if "%TARGET%"=="CoreCLR" (
-    set CONFIGURATION=Debug-NetCore
+    set BUILD_CONFIGURATION=Debug-NetCore
 ) else if "%TARGET%"=="Desktop" (
-    set CONFIGURATION=Debug
+    set BUILD_CONFIGURATION=Debug
 ) else (
     echo Unsupported target detected: %TARGET%. Aborting.
     goto :error
@@ -70,7 +68,7 @@ echo.
 echo ** Rebuilding MSBuild with downloaded binaries
 
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build.log
-call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%CONFIGURATION%
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -89,7 +87,7 @@ echo ** Moving bootstrapped MSBuild to the bootstrap folder
 taskkill /F /IM vbcscompiler.exe
 
 set MSBUILDLOGPATH=%~dp0msbuild_move_bootstrap.log
-set MSBUILD_ARGS=/verbosity:minimal BootStrapMSbuild.proj /p:Configuration=%CONFIGURATION%
+set MSBUILD_ARGS=/verbosity:minimal BootStrapMSbuild.proj /p:Configuration=%BUILD_CONFIGURATION%
 
 call "%~dp0build.cmd"
 if %ERRORLEVEL% NEQ 0 (
@@ -110,7 +108,7 @@ if "%TARGET%"=="CoreCLR" (
 )
 
 if "%TARGET%"=="CoreCLR" (
-    set MSBUILD_CUSTOM_PATH="%dp0bin\Bootstrap\MSBuild.exe"
+    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild.exe"
 ) else (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
 )
@@ -118,7 +116,7 @@ if "%TARGET%"=="CoreCLR" (
 echo.
 echo ** Rebuilding MSBuild with locally built binaries
 
-call "%~dp0build.cmd" /t:RebuildAndTest /p:Configuration=%CONFIGURATION%
+call "%~dp0build.cmd" /t:RebuildAndTest /p:Configuration=%BUILD_CONFIGURATION%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
