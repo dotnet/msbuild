@@ -8,9 +8,9 @@
       <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
       <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
 
-      <CrossGenPackageName>runtime.$(CoreCLRRid).Microsoft.NETCore.Runtime.CoreCLR</CrossGenPackageName>
-      <LibCLRJitPackageName>runtime.$(CoreCLRRid).Microsoft.NETCore.Jit</LibCLRJitPackageName>
-      <CoreCLRPackageName>runtime.$(CoreCLRRid).Microsoft.NETCore.Runtime.CoreCLR</CoreCLRPackageName>
+      <CrossGenPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CrossGenPackageName>
+      <LibCLRJitPackageName>runtime.$(CoreCLRRid).microsoft.netcore.jit</LibCLRJitPackageName>
+      <CoreCLRPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CoreCLRPackageName>
 
       <CoreCLRLibsDir>$(NuGetPackagesDir)/$(CoreCLRPackageName)/$(CoreCLRVersion)/runtimes/$(CoreCLRRid)/lib/netstandard1.0</CoreCLRLibsDir>
       <CrossgenPath>$(NuGetPackagesDir)/$(CrossGenPackageName)/$(CoreCLRVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>

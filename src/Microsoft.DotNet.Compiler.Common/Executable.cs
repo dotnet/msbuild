@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter, bool skipRuntimeConfig)
         {
             var exports = exporter.GetAllExports().ToList();
-            var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name);
+            var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name, StringComparer.OrdinalIgnoreCase);
             var platformExclusionList = _context.GetPlatformExclusionList(exportsLookup);
             var filteredExports = exports.FilterExports(platformExclusionList);
 

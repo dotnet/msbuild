@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var exports = exporter.GetAllExports();
 
-            var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name);
+            var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name, StringComparer.OrdinalIgnoreCase);
             var platformExclusionList = context.GetPlatformExclusionList(exportsLookup);
             var buildExclusionList = context.GetTypeBuildExclusionList(exportsLookup);
             var allExclusionList = new HashSet<string>(platformExclusionList);

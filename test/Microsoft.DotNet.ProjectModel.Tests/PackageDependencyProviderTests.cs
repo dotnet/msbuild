@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
@@ -126,7 +127,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                                                      .Build();
 
             // Will fail with dupes if any
-            context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name);
+            context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name, StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -153,7 +154,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                                                      .Build();
 
             // Will fail with dupes if any
-            context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name);
+            context.LibraryManager.GetLibraries().ToDictionary(l => l.Identity.Name, StringComparer.OrdinalIgnoreCase);
         }
     }
 }
