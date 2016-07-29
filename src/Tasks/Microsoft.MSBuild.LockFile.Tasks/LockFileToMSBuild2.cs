@@ -195,10 +195,26 @@ namespace Microsoft.MSBuild.LockFile.Tasks
                     string resolvedPath = ResolveFilePath(file, resolvedPackagePath);
                     fileItem.SetMetadata(MetadataKeys.ResolvedPath, resolvedPath ?? string.Empty);
 
-                    // todo analyzer
+                    if (IsAnalyzer(file))
+                    {
+                        fileItem.SetMetadata(MetadataKeys.Analyzer, "true");
+                        //fileItem.SetMetadata(MetadataKeys.AnalyzerLanguage, GetAnalyzerLanguage(file));
+                    }
+
                     _fileDefinitions.Add(fileItem);
                 }
             }
+        }
+
+        private string GetAnalyzerLanguage(string file)
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool IsAnalyzer(string file)
+        {
+            return file.StartsWith("analyzers") 
+                && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase);
         }
 
         // get target definitions and package and file dependencies

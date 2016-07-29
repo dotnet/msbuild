@@ -26,5 +26,9 @@ namespace Microsoft.MSBuild.LockFile.Tasks
         internal const string ParentTarget = "ParentTarget";
         internal const string ParentTargetLibrary = "ParentTargetLibrary";
         internal const string ParentPackage = "ParentPackage";
+
+        // Tags
+        internal const string Analyzer = "Analyzer";
+        internal const string AnalyzerLanguage = "AnalyzerLanguage";
     }
 }
