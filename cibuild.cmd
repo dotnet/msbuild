@@ -27,9 +27,9 @@ if not defined TARGET (
 )
 
 set BUILD_CONFIGURATION=
-if "%TARGET%"=="CoreCLR" (
+if /i "%TARGET%"=="CoreCLR" (
     set BUILD_CONFIGURATION=Debug-NetCore
-) else if "%TARGET%"=="Desktop" (
+) else if /i "%TARGET%"=="Desktop" (
     set BUILD_CONFIGURATION=Debug
 ) else (
     echo Unsupported target detected: %TARGET%. Aborting.
@@ -40,7 +40,7 @@ if "%TARGET%"=="CoreCLR" (
 
 :: By default match host to target
 if not defined HOST (
-    if "%TARGET%"=="CoreCLR" (
+    if /i "%TARGET%"=="CoreCLR" (
         set HOST=CoreCLR
     ) else (
         set HOST=Desktop
@@ -49,11 +49,11 @@ if not defined HOST (
 
 set RUNTIME_HOST=
 set HOST_SPECIFIED=
-if "%HOST%"=="CoreCLR" (
+if /i "%HOST%"=="CoreCLR" (
     set RUNTIME_HOST=%~dp0Tools\CoreRun.exe
     set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
     set HOST_SPECIFIED=true
-) else if "%HOST%"=="Desktop" (
+) else if /i "%HOST%"=="Desktop" (
     set RUNTIME_HOST=
     set HOST_SPECIFIED=true
 ) else (
@@ -103,11 +103,11 @@ set MSBUILDLOGPATH=%~dp0msbuild_local_build.log
 :: Only CoreCLR requires an override--it should use the host
 :: downloaded as part of its NuGet package references, rather
 :: than the possibly-stale one from Tools.
-if "%TARGET%"=="CoreCLR" (
+if /i "%TARGET%"=="CoreCLR" (
     set RUNTIME_HOST="%~dp0bin\Bootstrap\CoreRun.exe"
 )
 
-if "%TARGET%"=="CoreCLR" (
+if /i "%TARGET%"=="CoreCLR" (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild.exe"
 ) else (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
