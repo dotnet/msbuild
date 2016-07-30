@@ -375,7 +375,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // If the hard link was not created (either because the user didn't want one, or because it couldn't be created)
+            // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
             if (!linkCreated)
             {
