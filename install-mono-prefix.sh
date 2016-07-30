@@ -14,4 +14,10 @@ cp -r $MSBUILD_OUT_DIR/ $MSBUILD_INSTALL_BIN_DIR
 rm $MSBUILD_INSTALL_BIN_DIR/*UnitTests*
 rm $MSBUILD_INSTALL_BIN_DIR/*xunit*
 
+# Add ImportBefore/ImportAfter files
+XBUILD_DIR=$MONO_PREFIX/lib/mono/xbuild
+mkdir -p $XBUILD_DIR/$MSBUILD_VERSION
+cp -R $XBUILD_DIR/14.0/Imports $XBUILD_DIR/$MSBUILD_VERSION
+cp -R $XBUILD_DIR/14.0/Microsoft.Common.targets $XBUILD_DIR/$MSBUILD_VERSION
+
 cp msbuild-mono-deploy.in $MONO_PREFIX/bin/msbuild
