@@ -15,56 +15,35 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        enum IncludeOperationType
-        {
-            //  Values are escaped
-            Value,
-            //  Globs are not escaped
-            Glob,
-            Expression
-        }
-
         class IncludeOperation : LazyItemOperation
         {
             readonly int _elementOrder;
             readonly ProjectItemElement _itemElement;
             readonly string _rootDirectory;
-            readonly string _itemType;
+            
             readonly bool _conditionResult;
-
-            readonly ImmutableList<Tuple<IncludeOperationType, object>> _operations;
-
-            readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
 
             readonly ImmutableList<string> _excludes;
 
             readonly ImmutableList<ProjectMetadataElement> _metadata;
 
-            readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
-            readonly EvaluatorData _evaluatorData;
-            readonly Expander<P, I> _expander;
             readonly IItemFactory<I, I> _itemFactory;
 
             public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+                : base(builder, lazyEvaluator)
             {
                 _elementOrder = builder.ElementOrder;
                 _itemElement = builder.ItemElement;
                 _rootDirectory = builder.RootDirectory;
-                _itemType = builder.ItemType;
+                
                 _conditionResult = builder.ConditionResult;
 
-                _operations = builder.Operations.ToImmutable();
-                _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
                 _excludes = builder.Excludes.ToImmutable();
                 if (builder.Metadata != null)
                 {
                     _metadata = builder.Metadata.ToImmutable();
                 }
 
-                _lazyEvaluator = lazyEvaluator;
-
-                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
-                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
 
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
             }
@@ -93,7 +72,7 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (var operation in _operations)
                 {
-                    if (operation.Item1 == IncludeOperationType.Expression)
+                    if (operation.Item1 == ItemOperationType.Expression)
                     {
                         // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                         bool throwaway;
@@ -110,7 +89,7 @@ namespace Microsoft.Build.Evaluation
                             itemsToAdd.AddRange(itemsFromExpression);
                         }
                     }
-                    else if (operation.Item1 == IncludeOperationType.Value)
+                    else if (operation.Item1 == ItemOperationType.Value)
                     {
                         string value = (string)operation.Item2;
 
@@ -121,7 +100,7 @@ namespace Microsoft.Build.Evaluation
                             itemsToAdd.Add(item);
                         }
                     }
-                    else if (operation.Item1 == IncludeOperationType.Glob)
+                    else if (operation.Item1 == ItemOperationType.Glob)
                     {
                         string glob = (string)operation.Item2;
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob, excludePatterns);
@@ -279,33 +258,17 @@ namespace Microsoft.Build.Evaluation
                 listBuilder.AddRange(itemsToAdd.Select(item => new ItemData(item, _elementOrder, _conditionResult)));
             }
 
-            IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
-            {
-                LazyItemList itemList;
-                if (_referencedItemLists.TryGetValue(itemType, out itemList))
-                {
-                    return itemList.GetItems(globsToIgnore)
-                        .Where(ItemData => ItemData.ConditionResult)
-                        .Select(itemData => itemData.Item)
-                        .ToList();
-                }
-                else
-                {
-                    return ImmutableList<I>.Empty;
-                }
-            }
+            
         }
 
-        class IncludeOperationBuilder
+        class IncludeOperationBuilder : OperationBuilder
         {
             public int ElementOrder { get; set; }
             public ProjectItemElement ItemElement { get; set; }
             public string RootDirectory { get; set; }
-            public string ItemType { get; set; }
+            
             public bool ConditionResult { get; set; }
-
-            public ImmutableList<Tuple<IncludeOperationType, object>>.Builder Operations = ImmutableList.CreateBuilder<Tuple<IncludeOperationType, object>>();
-            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
+            
             public ImmutableList<string>.Builder Excludes { get; set; } = ImmutableList.CreateBuilder<string>();
             public ImmutableList<ProjectMetadataElement>.Builder Metadata;
 
