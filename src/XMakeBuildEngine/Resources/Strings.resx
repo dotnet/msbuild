@@ -436,6 +436,10 @@
     <comment>{StrBegin="MSB4020: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
     attributes e.g. &lt;Import Project=""&gt; -- the value of Project should not be an empty string.</comment>
   </data>
+  <data name="InvalidAttributeExclusive" UESanitized="false" Visibility="Public">
+    <!-- TODO: Replace ???? with a real error code -->
+    <value>MSB????: At most one of the include, remove, and update attributes may be specified for an item element.</value>
+  </data>
   <data name="InvalidAttributeValueWithException" UESanitized="false" Visibility="Public">
     <value>MSB4102: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid. {3}</value>
     <comment>{StrBegin="MSB4102: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
@@ -1341,6 +1345,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
        these should not be used in an InvalidProjectFileException -->
   <data name="OM_EitherAttributeButNotBoth">
     <value>The &lt;{0}&gt; element must have either the "{1}" attribute or the "{2}" attribute but not both.</value>
+  </data>
+  <data name="OM_OneOfAttributeButNotMore">
+    <value>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</value>
   </data>
   <data name="OM_NoRemoveOutsideTargets">
     <value>The "Remove" attribute is not permitted on an item outside of a &lt;Target&gt;.</value>
