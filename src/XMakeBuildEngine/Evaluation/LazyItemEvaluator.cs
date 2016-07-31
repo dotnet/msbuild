@@ -181,9 +181,67 @@ namespace Microsoft.Build.Evaluation
         //      List<LazyItemList> itemListsToRemove
         //  Update - ???
 
+        enum ItemOperationType
+        {
+            //  Values are escaped
+            Value,
+            //  Globs are not escaped
+            Glob,
+            Expression
+        }
+
         abstract class LazyItemOperation
         {
+            protected readonly string _itemType;
+
+            //  If Item1 of tuplee is ItemOperationType.Expression, then Item2 is an ExpressionShredder.ItemExpressionCapture
+            //  Otherwise, Item2 is a string (representing either the value or the glob)
+            protected readonly ImmutableList<Tuple<ItemOperationType, object>> _operations;
+
+            protected readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
+
+            protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
+            protected readonly EvaluatorData _evaluatorData;
+            protected readonly Expander<P, I> _expander;
+
+
+            public LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+            {
+                _itemType = builder.ItemType;
+                _operations = builder.Operations.ToImmutable();
+                _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
+
+                _lazyEvaluator = lazyEvaluator;
+                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
+                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
+            }
+
+            IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
+            {
+                LazyItemList itemList;
+                if (_referencedItemLists.TryGetValue(itemType, out itemList))
+                {
+                    return itemList.GetItems(globsToIgnore)
+                        .Where(ItemData => ItemData.ConditionResult)
+                        .Select(itemData => itemData.Item)
+                        .ToList();
+                }
+                else
+                {
+                    return ImmutableList<I>.Empty;
+                }
+            }
+
             public abstract void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
+
+
+        }
+
+        abstract class OperationBuilder
+        {
+            public string ItemType { get; set; }
+            public ImmutableList<Tuple<ItemOperationType, object>>.Builder Operations = ImmutableList.CreateBuilder<Tuple<ItemOperationType, object>>();
+            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
         }
 
 
@@ -257,20 +315,20 @@ namespace Microsoft.Build.Evaluation
                             // happen because '*' is an illegal character to have in a filename.
 
                             // Just return the original string.
-                            operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Value, (object) includeSplitEscaped));
+                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Value, (object) includeSplitEscaped));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
                             // Unescape before handing it to the filesystem.
                             string filespecUnescaped = EscapingUtilities.UnescapeAll(includeSplitEscaped);
-                            operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Glob, (object)filespecUnescaped));
+                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Glob, (object)filespecUnescaped));
                         }
                         else
                         {
                             // No real wildcards means we just return the original string.  Don't even bother 
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
-                            operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Value, (object) includeSplitEscaped));
+                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Value, (object) includeSplitEscaped));
                         }
 
                     }
@@ -376,7 +434,7 @@ namespace Microsoft.Build.Evaluation
 
                 isItemListExpression = true;
 
-                operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Expression, (object) match));
+                operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Expression, (object) match));
 
                 AddReferencedItemLists(operationBuilder, match);
             }
