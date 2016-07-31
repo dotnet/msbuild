@@ -312,8 +312,8 @@ namespace Microsoft.Build.Construction
             string exclude = element.GetAttribute(XMakeAttributes.exclude);
             string remove = element.GetAttribute(XMakeAttributes.remove);
 
-            // Remove must be missing, unless inside a target and Include is missing
-            ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute((remove.Length == 0 || (belowTarget && include.Length == 0)), (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.remove]);
+            // Remove must be missing, unless Include is missing
+            ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute((remove.Length == 0 || include.Length == 0), (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.remove]);
 
             // Include must be present, unless inside a target
             ProjectErrorUtilities.VerifyThrowInvalidProject(include.Length > 0 || belowTarget, element.Location, "MissingRequiredAttribute", XMakeAttributes.include, itemType);
@@ -323,6 +323,9 @@ namespace Microsoft.Build.Construction
 
             // If we have an Include attribute at all, it must have non-zero length
             ProjectErrorUtilities.VerifyThrowInvalidProject(include.Length > 0 || element.Attributes[XMakeAttributes.include] == null, element.Location, "MissingRequiredAttribute", XMakeAttributes.include, itemType);
+
+            // If we have an Remove attribute at all, it must have non-zero length
+            ProjectErrorUtilities.VerifyThrowInvalidProject(remove.Length > 0 || element.Attributes[XMakeAttributes.remove] == null, element.Location, "MissingRequiredAttribute", XMakeAttributes.remove, itemType);
 
             XmlUtilities.VerifyThrowProjectValidElementName(element);
             ProjectErrorUtilities.VerifyThrowInvalidProject(XMakeElements.IllegalItemPropertyNames[itemType] == null, element.Location, "CannotModifyReservedItem", itemType);

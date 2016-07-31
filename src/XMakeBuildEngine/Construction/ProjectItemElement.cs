@@ -151,7 +151,6 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement, "OM_NoRemoveOutsideTargets");
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Include.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.remove, value);
                 _remove = value;
