@@ -2008,9 +2008,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Source item not found
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
         public void SourceItemMissing()
         {
             string txtFile = null;

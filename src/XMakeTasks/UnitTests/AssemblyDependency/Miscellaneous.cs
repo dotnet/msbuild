@@ -4005,9 +4005,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// A reference with a bogus version is provided. However, the user has chosen
         /// SpecificVersion='false' so we match the first one we come across.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
         public void SpecificVersionFalse()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
