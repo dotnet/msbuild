@@ -23,7 +23,7 @@ All messages have the format described here:
 The payload formats for each message is described in links to the classes used to serialize/deseralize the information in the description of the protocol.
 
 #### Test Execution
-![alt tag](../../../images/DotnetTestExecuteTests.png)
+![alt tag](./images/DotnetTestExecuteTests.png)
 
 1. After the optional version check, the adapter sends a TestExecution.GetTestRunnerProcessStartInfo, with the 
 [tests](https://github.com/dotnet/cli/blob/rel/1.0.0/src/Microsoft.Extensions.Testing.Abstractions/Messages/RunTestsMessage.cs) it wants to execute inside of it. Dotnet test sends back a FileName and Arguments inside a [TestStartInfo](https://github.com/dotnet/cli/blob/rel/1.0.0/src/dotnet/commands/dotnet-test/TestStartInfo.cs) payload that the adapter can use to start the runner. In the past, we would send the list of tests to run as part of that argument, but we were actually going over the command line size limit for some test projects.
@@ -36,7 +36,7 @@ The payload formats for each message is described in links to the classes used t
 7. Once the adapter is done, it sends dotnet test a TestSession.Terminate which will cause dotnet test to shutdown.
 
 #### Test discovery
-![alt tag](../../../images/DotnetTestDiscoverTests.png)
+![alt tag](./images/DotnetTestDiscoverTests.png)
 
 1. After the optional version check, the adapter sends a TestDiscovery.Start message. Because in this case, the adapter does not need to attach to the process, dotnet test will start the runner itself. Also, since there is no long list of arguments to be passed to the runner, no --wait-command flag is needed to be passed to the runner. dotnet test only passes a --list argument to the runner, which means the runner should not run the tests, just list them.
 2. The runner then sends dotnet test (and it passes forward to the adapter) a TestDiscovery.TestFound for each [test](https://github.com/dotnet/cli/blob/rel/1.0.0/src/Microsoft.Extensions.Testing.Abstractions/Test.cs) found.
