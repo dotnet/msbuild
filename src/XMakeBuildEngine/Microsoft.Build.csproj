@@ -166,6 +166,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
     <Compile Include="Evaluation\ProjectChangedEventArgs.cs" />
     <Compile Include="Evaluation\ProjectXmlChangedEventArgs.cs" />

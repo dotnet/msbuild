@@ -155,8 +155,22 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    //  TODO: remove operation should modify globsToIgnore
-                    items = _previous.GetItems(globsToIgnore);
+                    var globsToIgnoreForPreviousOperations = globsToIgnore;
+
+                    //  If this is a remove operation, then add any globs that will be removed
+                    //  to the list of globs to ignore in previous operations
+                    var removeOperation = _operation as RemoveOperation;
+                    if (removeOperation != null)
+                    {
+                        var globsToIgnoreBuilder = removeOperation.GetRemovedGlobs();
+                        foreach (var globToRemove in globsToIgnoreForPreviousOperations)
+                        {
+                            globsToIgnoreBuilder.Add(globToRemove);
+                        }
+                        globsToIgnoreForPreviousOperations = globsToIgnoreBuilder.ToImmutable();
+                    }
+
+                    items = _previous.GetItems(globsToIgnoreForPreviousOperations);
                 }
 
                 _operation.Apply(items, globsToIgnore);
@@ -181,6 +195,7 @@ namespace Microsoft.Build.Evaluation
         //      List<LazyItemList> itemListsToRemove
         //  Update - ???
 
+        // TODO: verify whether the ItemElement values are ever escaped
         enum ItemOperationType
         {
             //  Values are escaped
@@ -192,6 +207,7 @@ namespace Microsoft.Build.Evaluation
 
         abstract class LazyItemOperation
         {
+            protected readonly ProjectItemElement _itemElement;
             protected readonly string _itemType;
 
             //  If Item1 of tuplee is ItemOperationType.Expression, then Item2 is an ExpressionShredder.ItemExpressionCapture
@@ -207,6 +223,7 @@ namespace Microsoft.Build.Evaluation
 
             public LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
+                _itemElement = builder.ItemElement;
                 _itemType = builder.ItemType;
                 _operations = builder.Operations.ToImmutable();
                 _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
@@ -237,14 +254,13 @@ namespace Microsoft.Build.Evaluation
 
         }
 
-        abstract class OperationBuilder
+        class OperationBuilder
         {
+            public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
             public ImmutableList<Tuple<ItemOperationType, object>>.Builder Operations = ImmutableList.CreateBuilder<Tuple<ItemOperationType, object>>();
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
         }
-
-
 
         LazyItemList GetItemList(string itemType)
         {
@@ -264,9 +280,13 @@ namespace Microsoft.Build.Evaluation
 
         public void ProcessItemElement(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            if (itemElement.Include != null)
+            if (itemElement.Include != string.Empty)
             {
                 ProcessItemElementInclude(rootDirectory, itemElement, conditionResult);
+            }
+            else if (itemElement.Remove != string.Empty)
+            {
+                ProcessItemElementRemove(rootDirectory, itemElement);
             }
             else
             {
@@ -274,19 +294,12 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void ProcessItemElementInclude(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
+        void ProcessItemSpec(OperationBuilder operationBuilder, string itemSpec, ElementLocation itemSpecLocation)
         {
-            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder();
-            operationBuilder.ElementOrder = _nextElementOrder++;
-            operationBuilder.ItemElement = itemElement;
-            operationBuilder.RootDirectory = rootDirectory;
-            operationBuilder.ItemType = itemElement.ItemType;
-            operationBuilder.ConditionResult = conditionResult;
-
             //  Code corresponds to Evaluator.CreateItemsFromInclude
 
             // STEP 1: Expand properties in Include
-            string evaluatedIncludeEscaped = _outerExpander.ExpandIntoStringLeaveEscaped(itemElement.Include, ExpanderOptions.ExpandProperties, itemElement.IncludeLocation);
+            string evaluatedIncludeEscaped = _outerExpander.ExpandIntoStringLeaveEscaped(itemSpec, ExpanderOptions.ExpandProperties, itemSpecLocation);
 
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedIncludeEscaped.Length > 0)
@@ -297,7 +310,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     bool isItemListExpression;
-                    ProcessSingleItemVectorExpressionForInclude(includeSplitEscaped, operationBuilder, itemElement.IncludeLocation, out isItemListExpression);
+                    ProcessSingleItemVectorExpressionForInclude(includeSplitEscaped, operationBuilder, itemSpecLocation, out isItemListExpression);
 
                     if (!isItemListExpression)
                     {
@@ -334,6 +347,18 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
+        }
+
+        void ProcessItemElementInclude(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
+        {
+            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder();
+            operationBuilder.ElementOrder = _nextElementOrder++;
+            operationBuilder.ItemElement = itemElement;
+            operationBuilder.RootDirectory = rootDirectory;
+            operationBuilder.ItemType = itemElement.ItemType;
+            operationBuilder.ConditionResult = conditionResult;
+
+            ProcessItemSpec(operationBuilder, itemElement.Include, itemElement.IncludeLocation);
 
             //  Code corresponds to Evaluator.EvaluateItemElement
 
@@ -413,7 +438,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void ProcessSingleItemVectorExpressionForInclude(string expression, IncludeOperationBuilder operationBuilder, IElementLocation elementLocation, out bool isItemListExpression)
+        void ProcessSingleItemVectorExpressionForInclude(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation, out bool isItemListExpression)
         {
             isItemListExpression = false;
 
@@ -440,7 +465,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void AddReferencedItemLists(IncludeOperationBuilder operationBuilder, ExpressionShredder.ItemExpressionCapture match)
+        void AddReferencedItemLists(OperationBuilder operationBuilder, ExpressionShredder.ItemExpressionCapture match)
         {
             if (match.ItemType != null)
             {
@@ -459,5 +484,19 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        void ProcessItemElementRemove(string rootDirectory, ProjectItemElement itemElement)
+        {
+            OperationBuilder operationBuilder = new OperationBuilder();
+            operationBuilder.ItemElement = itemElement;
+            operationBuilder.ItemType = itemElement.ItemType;
+
+            ProcessItemSpec(operationBuilder, itemElement.Remove, itemElement.RemoveLocation);
+
+            var operation = new RemoveOperation(operationBuilder, this);
+
+            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
+            LazyItemList newList = new LazyItemList(previousItemList, operation);
+            _itemLists[itemElement.ItemType] = newList;
+        }
     }
 }

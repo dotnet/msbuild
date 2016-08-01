@@ -1320,7 +1320,7 @@ namespace Microsoft.Build.Shared
         (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IList<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsUnescaped = null
         )
         {
             string[] files = GetFiles(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped, s_defaultGetFileSystemEntries, s_defaultDirectoryExists);
@@ -1444,7 +1444,7 @@ namespace Microsoft.Build.Shared
             return GetSearchDataResult.RunSearch;
         }
 
-        static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, IList<string> excludeSpecsUnescaped)
+        static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, IEnumerable<string> excludeSpecsUnescaped)
         {
             if (excludeSpecsUnescaped != null)
             {
@@ -1477,7 +1477,7 @@ namespace Microsoft.Build.Shared
         (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IList<string> excludeSpecsUnescaped,
+            IEnumerable<string> excludeSpecsUnescaped,
             GetFileSystemEntries getFileSystemEntries,
             DirectoryExists directoryExists
         )
