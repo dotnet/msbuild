@@ -1441,6 +1441,45 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
+        //  TODO: Should remove tests go in project item tests, project item instance tests, or both?
+        [Fact]
+        public void Remove()
+        {
+            IList<ProjectItem> items = GetItemsFromFragment(
+                "<i Include='a;b' />" +
+                "<i Remove='b;c' />"
+                );
+
+            Assert.Equal(1, items.Count);
+            Assert.Equal("a", items[0].EvaluatedInclude);
+        }
+
+        [Fact]
+        public void RemoveGlob()
+        {
+            IList<ProjectItem> items = GetItemsFromFragment(
+                @"<i Include='a.txt;b.cs;bin\foo.cs' />" +
+                @"<i Remove='bin\**' />"
+                );
+
+            Assert.Equal(2, items.Count);
+            Assert.Equal(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude))); ;
+        }
+
+        [Fact]
+        public void RemoveItemReference()
+        {
+            IList<ProjectItem> items = GetItemsFromFragment(
+                @"<i Include='a;b;c;d' />" +
+                @"<j Include='b;d' />" +
+                @"<i Remove='@(j)' />"
+                );
+
+            Assert.Equal(2, items.Count);
+            Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude))); ;
+        }
+
         /// <summary>
         /// Get items of item type "i" with using the item xml fragment passed in
         /// </summary>

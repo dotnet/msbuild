@@ -18,7 +18,7 @@ namespace Microsoft.Build.Evaluation
         class IncludeOperation : LazyItemOperation
         {
             readonly int _elementOrder;
-            readonly ProjectItemElement _itemElement;
+            
             readonly string _rootDirectory;
             
             readonly bool _conditionResult;
@@ -33,7 +33,6 @@ namespace Microsoft.Build.Evaluation
                 : base(builder, lazyEvaluator)
             {
                 _elementOrder = builder.ElementOrder;
-                _itemElement = builder.ItemElement;
                 _rootDirectory = builder.RootDirectory;
                 
                 _conditionResult = builder.ConditionResult;
@@ -103,7 +102,8 @@ namespace Microsoft.Build.Evaluation
                     else if (operation.Item1 == ItemOperationType.Glob)
                     {
                         string glob = (string)operation.Item2;
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob, excludePatterns);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob,
+                            excludePatterns.Count > 0 ? (IEnumerable<string>) excludePatterns.Concat(globsToIgnore) : globsToIgnore);
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
                             itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
@@ -264,7 +264,6 @@ namespace Microsoft.Build.Evaluation
         class IncludeOperationBuilder : OperationBuilder
         {
             public int ElementOrder { get; set; }
-            public ProjectItemElement ItemElement { get; set; }
             public string RootDirectory { get; set; }
             
             public bool ConditionResult { get; set; }
