@@ -48,14 +48,11 @@ if not defined HOST (
 )
 
 set RUNTIME_HOST=
-set HOST_SPECIFIED=
 if /i "%HOST%"=="CoreCLR" (
     set RUNTIME_HOST=%~dp0Tools\CoreRun.exe
     set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
-    set HOST_SPECIFIED=true
 ) else if /i "%HOST%"=="Desktop" (
     set RUNTIME_HOST=
-    set HOST_SPECIFIED=true
 ) else (
     echo Unsupported host detected: %HOST%. Aborting.
     goto :error
