@@ -52,7 +52,7 @@ namespace Microsoft.Build.Internal
             (
             string directoryEscaped,
             string filespecEscaped,
-            IList<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsUnescaped = null
             )
         {
             return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, excludeSpecsUnescaped);
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Internal
             string directoryEscaped,
             string filespecEscaped,
             bool returnEscaped,
-            IList<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsUnescaped = null
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, "filespecEscaped");
@@ -162,6 +162,7 @@ namespace Microsoft.Build.Internal
                     Regex regexFileMatch;
                     bool isRecursive;
                     bool isLegal;
+                    //  TODO: If creating Regex's here ends up being expensive perf-wise, consider how to avoid it in common cases
                     FileMatcher.GetFileSpecInfo
                     (
                         spec,
