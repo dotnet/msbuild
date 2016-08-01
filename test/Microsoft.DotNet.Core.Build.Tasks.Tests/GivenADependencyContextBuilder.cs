@@ -1,8 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
+using FluentAssertions.Json;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -36,7 +36,9 @@ namespace Microsoft.DotNet.Core.Build.Tasks.Tests
             JObject result = Save(dependencyContext);
             JObject baseline = ReadJson($"{mainProjectName}.deps.json");
 
-            Assert.True(JToken.DeepEquals(baseline, result), $"Expected: {baseline}{Environment.NewLine}Result:   {result}");
+            baseline
+                .Should()
+                .BeEquivalentTo(result);
         }
 
         private static JObject ReadJson(string path)
