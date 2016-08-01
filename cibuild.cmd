@@ -6,7 +6,7 @@ if "%1"=="" goto doneParsingArguments
 if /i "%1"=="--scope" set SCOPE=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--target" set TARGET=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--host" set HOST=%2&& shift && shift && goto parseArguments
-if /i "%1"=="--skip-bootstrap" set BOOTSTRAP_ONLY=true&& shift && goto parseArguments
+if /i "%1"=="--bootstrap-only" set BOOTSTRAP_ONLY=true&& shift && goto parseArguments
 
 :: Unknown parameters
 goto :usage
@@ -134,7 +134,7 @@ echo Options
 echo   --scope ^<scope^>                Scope of the build ^(Compile / Test^)
 echo   --target ^<target^>              CoreCLR or Desktop ^(default: Desktop^)
 echo   --host ^<host^>                  CoreCLR or Desktop ^(default: Desktop^)
-echo   --skip-bootstrap               Do not rebuild msbuild with local binaries
+echo   --bootstrap-only               Do not rebuild msbuild with local binaries
 exit /b 1
 
 :error

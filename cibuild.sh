@@ -8,7 +8,7 @@ usage()
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
     echo "  --host <host>                  CoreCLR or Mono (default: CoreCLR)"
-    echo "  --skip-bootstrap               Do not rebuild msbuild with local binaries"
+    echo "  --bootstrap-only               Do not rebuild msbuild with local binaries"
 }
 
 restoreBuildTools(){
@@ -69,7 +69,7 @@ setMonoDir(){
     fi
 }
 
-SKIP_BOOTSTRAP=false
+BOOTSTRAP_ONLY=false
 
 # Paths
 THIS_SCRIPT_PATH="`dirname \"$0\"`"
@@ -118,8 +118,8 @@ do
         shift 2
         ;;
 
-        --skip-bootstrap)
-        SKIP_BOOTSTRAP=true
+        --bootstrap-only)
+        BOOTSTRAP_ONLY=true
         shift 1
         ;;
 
@@ -218,7 +218,7 @@ echo
 echo "** Rebuilding MSBuild with downloaded binaries"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
 
-if [[ $SKIP_BOOTSTRAP = true ]]; then
+if [[ $BOOTSTRAP_ONLY = true ]]; then
     exit $?
 fi
 
