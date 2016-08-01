@@ -8,10 +8,10 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "NuGet.Versioning": "3.5.0-rc1-1653",
-    "NuGet.Packaging": "3.5.0-rc1-1653",
-    "NuGet.Frameworks": "3.5.0-rc1-1653",
-    "NuGet.ProjectModel": "3.5.0-rc1-1653"
+    "NuGet.Versioning": "3.5.0-rc1-1697",
+    "NuGet.Packaging": "3.5.0-rc1-1697",
+    "NuGet.Frameworks": "3.5.0-rc1-1697",
+    "NuGet.ProjectModel": "3.5.0-rc1-1697"
   },
   "frameworks": {
     "net451": {
