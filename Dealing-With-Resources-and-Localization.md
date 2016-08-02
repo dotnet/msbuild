@@ -1,11 +1,11 @@
 ## Localizable resource structure
 - Neutral resources:
-  -  https://github.com/Microsoft/msbuild/blob/master/src/Utilities/Strings.resx
-  -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeTasks/Strings.resx
-  -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeCommandLine/Strings.resx
-  -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeTasks/ManifestUtil/Strings.resx
+  -  https://github.com/Microsoft/msbuild/blob/master/src/Utilities/Resources/Strings.resx
+  -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeTasks/Resources/Strings.resx
+  -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeCommandLine/Resources/Strings.resx
+  -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeTasks/ManifestUtil/Resources/Strings.resx
   -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeBuildEngine/Resources/Strings.resx
-  -  https://github.com/Microsoft/msbuild/blob/master/src/Shared/Strings.shared.resx
+  -  https://github.com/Microsoft/msbuild/blob/master/src/Shared/Resources/Strings.shared.resx
 - `Strings.shared.resx` is a shared resource and embedded into all msbuild dlls
 - each neutral resource has a directory named `xlf` besides it which contains its localized strings in .xlf format
 - there is one language per xlf
