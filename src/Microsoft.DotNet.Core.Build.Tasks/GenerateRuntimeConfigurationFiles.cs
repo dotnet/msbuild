@@ -7,14 +7,12 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Tools.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.Tasks
+namespace Microsoft.DotNet.Core.Build.Tasks
 {
     /// <summary>
     /// Generates the $(project).runtimeconfig.json and optionally $(project).runtimeconfig.dev.json files
@@ -23,17 +21,14 @@ namespace Microsoft.DotNet.Cli.Tasks
     public class GenerateRuntimeConfigurationFiles : Task
     {
         [Required]
-        public string RuntimeOutputPath { get; set; }
-
-        [Required]
-        public string OutputName { get; set; }
-
-        [Required]
         public string LockFilePath { get; set; }
 
-        public string RawRuntimeOptions { get; set; }
+        [Required]
+        public string RuntimeConfigPath { get; set; }
 
-        public bool IncludeDevConfig { get; set; }
+        public string RuntimeConfigDevPath { get; set; }
+
+        public string RawRuntimeOptions { get; set; }
 
         private LockFile LockFile { get; set; }
 
@@ -43,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Tasks
 
             WriteRuntimeConfig();
 
-            if (IncludeDevConfig)
+            if (!string.IsNullOrEmpty(RuntimeConfigDevPath))
             {
                 WriteDevRuntimeConfig();
             }
@@ -59,10 +54,7 @@ namespace Microsoft.DotNet.Cli.Tasks
             AddFramework(config.RuntimeOptions);
             AddRuntimeOptions(config.RuntimeOptions);
 
-            var runtimeConfigJsonFile =
-                Path.Combine(RuntimeOutputPath, OutputName + FileNameSuffixes.RuntimeConfigJson);
-
-            WriteToJsonFile(runtimeConfigJsonFile, config);
+            WriteToJsonFile(RuntimeConfigPath, config);
         }
 
         private void AddFramework(RuntimeOptions runtimeOptions)
@@ -105,10 +97,7 @@ namespace Microsoft.DotNet.Cli.Tasks
 
             AddAdditionalProbingPaths(devConfig.RuntimeOptions);
 
-            var runtimeConfigDevJsonFile =
-                    Path.Combine(RuntimeOutputPath, OutputName + FileNameSuffixes.RuntimeConfigDevJson);
-
-            WriteToJsonFile(runtimeConfigDevJsonFile, devConfig);
+            WriteToJsonFile(RuntimeConfigDevPath, devConfig);
         }
 
         private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions)
@@ -121,8 +110,22 @@ namespace Microsoft.DotNet.Cli.Tasks
                 }
 
                 // DotNetHost doesn't handle additional probing paths with a trailing slash
-                runtimeOptions.AdditionalProbingPaths.Add(PathUtility.EnsureNoTrailingSlash(packageFolder.Path));
+                runtimeOptions.AdditionalProbingPaths.Add(EnsureNoTrailingDirectorySeparator(packageFolder.Path));
             }
+        }
+
+        private static string EnsureNoTrailingDirectorySeparator(string path)
+        {
+            if (!string.IsNullOrEmpty(path))
+            {
+                char lastChar = path[path.Length - 1];
+                if (lastChar == Path.DirectorySeparatorChar)
+                {
+                    path = path.Substring(0, path.Length - 1);
+                }
+            }
+
+            return path;
         }
 
         private static void WriteToJsonFile(string fileName, object value)

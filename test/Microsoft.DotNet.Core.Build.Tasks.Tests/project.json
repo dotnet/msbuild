@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "keyFile": "../../tools/Key.snk"
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    },
+    "Microsoft.DotNet.Core.Build.Tasks": {
+      "target": "project"
+    },
+    "xunit": "2.1.0",
+    "FluentAssertions.Json": "4.12.0",
+    "dotnet-test-xunit": "1.0.0-rc2-192208-24"
+  },
+  "testRunner": "xunit",
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "netstandardapp1.5",
+        "dotnet5.4",
+        "portable-net451+win8"
+      ]
+    }
+  }
+}

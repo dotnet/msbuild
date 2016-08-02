@@ -84,8 +84,6 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool IsTestProject => !string.IsNullOrEmpty(TestRunner);
         
-        public bool OverrideIsRunnable { get; set; }
-
         public IEnumerable<TargetFrameworkInformation> GetTargetFrameworks()
         {
             return _targetFrameworks.Values;
@@ -130,7 +128,7 @@ namespace Microsoft.DotNet.ProjectModel
             var compilerOptions = GetCompilerOptions(targetFramework: null, configurationName: configuration);
 
             // TODO: Make this opt in via another mechanism
-            return compilerOptions.EmitEntryPoint.GetValueOrDefault() || IsTestProject || OverrideIsRunnable;
+            return compilerOptions.EmitEntryPoint.GetValueOrDefault() || IsTestProject;
         }
 
         private CommonCompilerOptions GetCompilerOptions()

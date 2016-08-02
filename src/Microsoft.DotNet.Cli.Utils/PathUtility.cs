@@ -56,12 +56,12 @@ namespace Microsoft.DotNet.Tools.Common
             return path + trailingCharacter;
         }
 
-        public static string EnsureNoTrailingSlash(string path)
+        public static string EnsureNoTrailingDirectorySeparator(string path)
         {
             if (!string.IsNullOrEmpty(path))
             {
                 char lastChar = path[path.Length - 1];
-                if (lastChar == Path.DirectorySeparatorChar || lastChar == '/')
+                if (lastChar == Path.DirectorySeparatorChar)
                 {
                     path = path.Substring(0, path.Length - 1);
                 }

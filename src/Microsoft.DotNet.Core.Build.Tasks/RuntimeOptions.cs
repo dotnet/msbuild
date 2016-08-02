@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.DotNet.Cli.Tasks
+namespace Microsoft.DotNet.Core.Build.Tasks
 {
     internal class RuntimeOptions
     {
