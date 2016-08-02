@@ -1,0 +1,12 @@
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
+              properties to any folder that exists to skip the GetReferenceAssemblyPaths task (not target) and
+              to prevent it from outputting a warning (MSB3644).
+          -->
+    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
+    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
+  </PropertyGroup>
+
+</Project>
