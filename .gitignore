@@ -7,6 +7,9 @@
 *.sln.docstates
 .vs/
 
+# dotnet cli install directory
+.dotnet_cli
+
 # Build results
 [Bb]inaries/
 [Dd]ebug/
