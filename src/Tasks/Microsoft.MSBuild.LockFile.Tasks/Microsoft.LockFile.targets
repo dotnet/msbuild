@@ -6,15 +6,16 @@
     <ProjectLockFile Condition="Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectName).project.lock.json</ProjectLockFile>
     <ProjectLockFile Condition="!Exists('$(_ProjectSpecificProjectJsonFile)')">project.lock.json</ProjectLockFile>
 
+  </PropertyGroup>
+
+  <!-- Add Targets to Dependency Lists, causing them to be triggered -->
+  <PropertyGroup>
     <!-- Turn off NuGet Task -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
 
     <!-- Flag LockFile Tasks -->
     <EnableLockFileToMSBuild Condition="'$(EnableLockFileToMSBuild)' == '' and '$(MSBuildProjectExtension)' != '.xproj'">true</EnableLockFileToMSBuild>
-  </PropertyGroup>
 
-  <!-- Add Targets to Dependency Lists, causing them to be triggered -->
-  <PropertyGroup>
     <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);LockFileResolveReferences</ResolveAssemblyReferencesDependsOn>
     <PrepareResourcesDependsOn>LockFileResolveReferences;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
     <_FindDependencies>false</_FindDependencies>
@@ -43,7 +44,8 @@
 
   <!-- Condition="'$(EnableLockFileToMSBuild)' == 'true' and Exists('$(ProjectLockFile)')" -->
   <Target Name="LockFileResolveReferences" 
-          DependsOnTargets="ComputeReferencesFromNuGetPackages;ComputeAnalyzersFromNuGetPackages;ComputeCopyLocalItems">
+          DependsOnTargets="ComputeReferencesFromNuGetPackages;ComputeAnalyzersFromNuGetPackages;ComputeCopyLocalItems"
+          Condition="'$(EnableLockFileToMSBuild)' == 'true' and Exists('$(ProjectLockFile)')">
     
     <Message Text="----[LockFileResolveReferences Called: POST ResolveNuGetPackageAssets]-------------" Importance="high" />
     <Message Text="ResolvedAnalyzers            -&gt;  @(Analyzer)" Importance="high" />

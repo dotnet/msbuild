@@ -49,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Microsoft.LockFile2.targets" />
     <None Include="project.json" />
     <None Include="Microsoft.LockFile.targets" />
   </ItemGroup>
