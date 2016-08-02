@@ -1133,8 +1133,7 @@ namespace Microsoft.Build.Evaluation
 
         private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
         {
-            var expander = new Expander<ProjectProperty, ProjectItem>(_data.Properties, _data.Items);
-            Func<IElementLocation, Func<string, ExpanderOptions, string>> expandForXmlLocation = (l) => (s, o) => expander.ExpandIntoStringLeaveEscaped(s, o, l);
+            Func<IElementLocation, Func<string, ExpanderOptions, string>> expandForXmlLocation = (l) => (s, o) => _data.Expander.ExpandIntoStringLeaveEscaped(s, o, l);
 
             var includeResult = ComputeProvenanceResult(itemToMatch, itemElement.Include, expandForXmlLocation(itemElement.IncludeLocation));
 
