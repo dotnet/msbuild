@@ -41,7 +41,7 @@ Build Status
 Installers and Binaries
 -----------------------
 
-You can download .NET Core as either an installer (MSI, PKG) or a zip (zip, gzip). You can download the product in two flavours:
+You can download .NET Core as either an installer (MSI, PKG) or a zip (zip, gzip). You can download the product in two flavors:
 
 - .NET Core - .NET Core runtime and framework
 - .NET Core SDK - .NET Core + CLI tools
