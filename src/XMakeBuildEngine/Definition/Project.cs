@@ -1089,7 +1089,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">The item type to constrain the search in</param>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType)
         {
-            return GetItemProvenance(itemToMatch, _data.EvaluatedItemElements.Where(i => i.ItemType.Equals(itemType)));
+            return GetItemProvenance(itemToMatch, GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
         /// <summary>
@@ -1102,15 +1102,26 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(ProjectItem item)
         {
-            var itemElementsAbove = _data.EvaluatedItemElements
-                                            .Where(i => i.ItemType.Equals(item.ItemType))
-                                            .TakeWhile(i => i != item.Xml)
-                                            .ToList();
-            itemElementsAbove.Add(item.Xml);
+            var itemElementsAbove = GetItemElementsAboveItem(_data.EvaluatedItemElements, item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
         }
 
+        private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
+        {
+            return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
+        }
+
+        private static List<ProjectItemElement> GetItemElementsAboveItem(IEnumerable<ProjectItemElement> itemElements, ProjectItem item)
+        {
+            var itemElementsAbove = itemElements
+                .Where(i => i.ItemType.Equals(item.ItemType))
+                .TakeWhile(i => i != item.Xml)
+                .ToList();
+
+            itemElementsAbove.Add(item.Xml);
+            return itemElementsAbove;
+        }
 
         private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
         {
