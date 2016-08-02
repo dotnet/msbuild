@@ -143,15 +143,11 @@
     <!-- These targets are used in signing, don't remove them! -->
     <Target Name="ExtractEngineFromSdkBundle"
             DependsOnTargets="MsiTargetsSetupInputOutputs">
-      <Exec Command="$(WixRoot)/insignia.exe
-                      -ib $(CombinedFrameworkSdkHostInstallerFile)
-                      -o $(CombinedFrameworkSdkHostBundleEngineName)" />
+      <Exec Command="$(WixRoot)/insignia.exe -ib $(CombinedFrameworkSdkHostInstallerFile) -o $(CombinedFrameworkSdkHostBundleEngineName)" />
     </Target>
 
     <Target Name="ReattachEngineToSdkBundle"
             DependsOnTargets="MsiTargetsSetupInputOutputs">
-      <Exec Command="$(WixRoot)/insignia.exe
-                      -ab $(CombinedFrameworkSdkHostInstallerFile)
-                      -o $(CombinedFrameworkSdkHostBundleEngineName)" />
+      <Exec Command="$(WixRoot)/insignia.exe -ab $(CombinedFrameworkSdkHostBundleEngineName) $(CombinedFrameworkSdkHostInstallerFile) -o $(CombinedFrameworkSdkHostInstallerFile)" />
     </Target>
 </Project>
