@@ -1033,6 +1033,53 @@ namespace Microsoft.Build.Evaluation
             return ((IItem)item).EvaluatedIncludeEscaped;
         }
 
+        public List<GlobResult> GetAllGlobs()
+        {
+            return GetAllGlobs(_data.EvaluatedItemElements);
+        }
+
+        public List<GlobResult> GetAllGlobs(string itemType)
+        {
+            return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
+        }
+
+        public List<GlobResult> GetAllGlobs(ProjectItem item)
+        {
+            return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
+        }
+
+        private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
+        {
+            return projectItemElements.SelectMany(GetAllGlobs).ToList();
+        }
+
+        private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
+        {
+            Func<string, IElementLocation, HashSet<string>> expandItemSpecIntoFragments = (s, l) =>
+                {
+                    var expandedItemSpec = _data.Expander.ExpandIntoStringListLeaveEscaped(s, ExpanderOptions.ExpandProperties, l);
+
+                    // don't care about duplicates
+                    var set = new HashSet<string>(expandedItemSpec);
+
+                    // take out item references, we can't reason about them
+                    set.RemoveWhere(IsItemReferenceFragment);
+
+                    return set;
+                };
+
+            var includeFragments = expandItemSpecIntoFragments(itemElement.Include, itemElement.IncludeLocation);
+            var excludeFragments = expandItemSpecIntoFragments(itemElement.Exclude, itemElement.ExcludeLocation);
+
+            foreach (var itemFragment in includeFragments)
+            {
+                if (IsGlobFragment(itemFragment))
+                {
+                    yield return new GlobResult(itemElement, itemFragment, excludeFragments);
+                }
+            }
+        }
+
         /// <summary>
         /// Finds all the item elements in the logical project with itemspecs that match the given string:
         /// - elements that would include (or exclude) the string
@@ -3378,6 +3425,20 @@ namespace Microsoft.Build.Evaluation
                 string value = (property == null) ? String.Empty : property.EvaluatedValue;
                 return value;
             }
+        }
+    }
+
+    public class GlobResult
+    {
+        public string Glob { get; private set; }
+        public ISet<string> Excludes{ get; private set; }
+        public ProjectItemElement ItemElement { get; private set; }
+
+        public GlobResult(ProjectItemElement itemElement, string glob, ISet<string> excludes)
+        {
+            ItemElement = itemElement;
+            Glob = glob;
+            Excludes = excludes;
         }
     }
 
