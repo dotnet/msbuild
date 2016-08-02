@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.Tools.Run
                 foreach (var packageFolder in _context.LockFile.PackageFolders)
                 {
                     // DotNetHost doesn't handle additional probing paths with a trailing slash
-                    hostArgs.Insert(0, PathUtility.EnsureNoTrailingSlash(packageFolder.Path));
+                    hostArgs.Insert(0, PathUtility.EnsureNoTrailingDirectorySeparator(packageFolder.Path));
                     hostArgs.Insert(0, probingPathArg);
                 }
             }

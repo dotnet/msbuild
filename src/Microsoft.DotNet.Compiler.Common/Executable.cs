@@ -281,7 +281,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 foreach (var packageFolder in _context.LockFile.PackageFolders)
                 {
                     // DotNetHost doesn't handle additional probing paths with a trailing slash
-                    additionalProbingPaths.Add(PathUtility.EnsureNoTrailingSlash(packageFolder.Path));
+                    additionalProbingPaths.Add(PathUtility.EnsureNoTrailingDirectorySeparator(packageFolder.Path));
                 }
 
                 runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);

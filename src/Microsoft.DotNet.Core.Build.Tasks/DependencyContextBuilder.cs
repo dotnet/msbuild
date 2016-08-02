@@ -31,10 +31,10 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             IEnumerable<LockFileTargetLibrary> runtimeExports = lockFileTarget.Libraries;
 
             // TODO: get this from the lock file once https://github.com/NuGet/Home/issues/2695 is fixed.
-            var packageName = "Microsoft.NETCore.App";
+            var platformPackageName = "Microsoft.NETCore.App";
             var platformExport = lockFileTarget
                 .Libraries
-                .FirstOrDefault(e => e.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(e => e.Name.Equals(platformPackageName, StringComparison.OrdinalIgnoreCase));
 
             bool portable = platformExport != null;
             if (portable)
@@ -107,20 +107,20 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             var builder = new StringBuilder();
             var packages = runtimeExports
                 .Where(libraryExport => libraryExport.Type == "package");
-            var seperator = "|";
+            var separator = "|";
             foreach (var libraryExport in packages)
             {
                 builder.Append(libraryExport.Name);
-                builder.Append(seperator);
+                builder.Append(separator);
                 builder.Append(libraryExport.Version.ToString());
-                builder.Append(seperator);
+                builder.Append(separator);
             }
             var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
 
             builder.Clear();
-            foreach (var b in hash)
+            foreach (var hashByte in hash)
             {
-                builder.AppendFormat("{0:x2}", b);
+                builder.AppendFormat("{0:x2}", hashByte);
             }
             return builder.ToString();
         }

@@ -67,10 +67,9 @@
     TODO: Get RawRuntimeOptions from where it lives in the MSBuild world
     -->
     <GenerateRuntimeConfigurationFiles LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
-                                       RuntimeOutputPath="$(TargetDir)"
-                                       AssemblyName="$(AssemblyName)"
-                                       RawRuntimeOptions=""
-                                       IncludeDevConfig="true" />
+                                       RuntimeConfigPath="$(TargetDir)/$(AssemblyName).runtimeconfig.json"
+                                       RuntimeConfigDevPath="$(TargetDir)/$(AssemblyName).runtimeconfig.dev.json"
+                                       RawRuntimeOptions="" />
 
   </Target>
 
