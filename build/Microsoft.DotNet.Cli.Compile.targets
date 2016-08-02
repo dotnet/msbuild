@@ -70,9 +70,6 @@
         <BinObj Include="$(SrcDirectory)/**/bin/**/*" />
         <BinObj Include="$(SrcDirectory)/**/obj/**/*" />
 
-        <FilesToRemoveFromStageDirectory Remove="*" />
-        <FilesToRemoveFromStageDirectory Include="$(StageDirectory)/**/*" />
-
         <SharedFramework Remove="*" />
         <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
 
@@ -83,21 +80,12 @@
 
       <Delete Files="@(BinObj)" />
 
-      <Delete Files="@(FilesToRemoveFromStageDirectory)" />
       <RemoveDir Directories="$(StageDirectory)" />
       <MakeDir Directories="$(StageDirectory)"/>
 
       <!-- CopySharedFramework -->
       <Copy SourceFiles="@(SharedFramework)"
             DestinationFiles="@(SharedFramework->'$(StageDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-      <!-- TEMP HACK: need to restore with the current stage, until we get a Stage0 with the new NuGet build -->
-      <ItemGroup>
-	    <SrcLockFiles Include="$(SrcDirectory)/**/project.lock.json" />
-      </ItemGroup>
-      <Delete Files="@(SrcLockFiles)" />
-      <DotNetRestore ToolPath="%(Stage.DotnetDir)"
-					 WorkingDirectory="$(SrcDirectory)" />
 
       <!-- Publish DotNet -->
       <DotNetPublish ToolPath="%(Stage.DotnetDir)"
