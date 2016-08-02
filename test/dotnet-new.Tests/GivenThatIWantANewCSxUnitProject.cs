@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
@@ -15,7 +14,6 @@ namespace Microsoft.DotNet.Tests
         public void When_xUnit_project_created_Then_project_restores()
         {
             var rootPath = Temp.CreateDirectory().Path;
-            var projectJsonFile = Path.Combine(rootPath, "project.json");
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute("new --type xunittest")
@@ -47,7 +45,5 @@ namespace Microsoft.DotNet.Tests
                 .And
                 .NotHaveStdErr();
         }
-
-
     }
 }
