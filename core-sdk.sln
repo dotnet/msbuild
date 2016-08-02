@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.PackageDependencyResolution.Tasks", "src\Tasks\Microsoft.PackageDependencyResolution.Tasks\Microsoft.PackageDependencyResolution.Tasks.csproj", "{DF7D2697-B3B4-45C2-8297-27245F528A99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF7D2697-B3B4-45C2-8297-27245F528A99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF7D2697-B3B4-45C2-8297-27245F528A99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF7D2697-B3B4-45C2-8297-27245F528A99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF7D2697-B3B4-45C2-8297-27245F528A99}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DF7D2697-B3B4-45C2-8297-27245F528A99} = {1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}
+	EndGlobalSection
+EndGlobal
