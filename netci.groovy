@@ -4,7 +4,7 @@ import jobs.generation.InternalUtilities
 def project = GithubProject
 def branch = GithubBranchName
 
-// Generate a PR/nonPR job for debug (test only), which just does testing.
+// Generate a PR job for debug (test only), which just does testing.
 ['Debug', 'Release'].each { config ->
     def lowerCaseConfig = config.toLowerCase()
 
