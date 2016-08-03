@@ -12,6 +12,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -493,7 +494,33 @@ namespace Microsoft.Build.BackEnd
             // Run the child process with the same host as the currently-running process.
             string pathToHost;
             using (Process currentProcess = Process.GetCurrentProcess()) pathToHost = currentProcess.MainModule.FileName;
-            commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+
+            string dotnetConfigArguments = string.Empty;
+
+            // We can't assume that just because we're running on .NET Core the host is dotnet.
+            // In our selfhost build, we're still using corerun.
+            // TODO: once we stop using and supporting corerun, this should be unconditional.
+            if (pathToHost.Contains("dotnet"))
+            {
+                // MSBuild may have been invoked with custom dependency and runtime information,
+                // and our child process should be run the same way.
+
+                // Get current `--depsfile` value
+                var appDomainType = typeof(object).GetTypeInfo().Assembly?.GetType("System.AppDomain");
+                var currentDomain = appDomainType?.GetProperty("CurrentDomain")?.GetValue(null);
+                var deps = (string)appDomainType?.GetMethod("GetData")?.Invoke(currentDomain, new object[] {"APP_CONTEXT_DEPS_FILES"});
+                var depsFile = deps.Split(';')[0];
+
+                // The current `--runtimeconfig` isn't programmatically available.
+                // Until it is, we'll optimize for the known case, where we're called
+                // from `dotnet build3`, using `dotnet.deps.json` and `dotnet.runtimeconfig.json`
+                var runtimeConfigFile = depsFile.Replace(".deps.json", ".runtimeconfig.json");
+
+                dotnetConfigArguments = $"exec --depsfile {depsFile} --runtimeconfig {runtimeConfigFile}";
+            }
+
+            commandLineArgs =
+                $"{dotnetConfigArguments} \"{msbuildLocation}\" {commandLineArgs}";
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = pathToHost;
