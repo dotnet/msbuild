@@ -48,6 +48,7 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 dotnet restore $RepoRoot
+if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 
 dotnet build3 $RepoRoot\core-sdk.sln /nologo /m /p:Configuration=$Configuration /p:Platform=$Platform
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }

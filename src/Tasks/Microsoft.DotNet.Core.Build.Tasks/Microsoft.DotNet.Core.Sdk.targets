@@ -1,4 +1,11 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MicrosoftDotNetCoreBuildTasksDirectory>$(MSBuildThisFileDirectory)../../tools/netstandard1.3/</MicrosoftDotNetCoreBuildTasksDirectory>
+    <MicrosoftDotNetCoreBuildTasksAssembly>$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll</MicrosoftDotNetCoreBuildTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
 
   <PropertyGroup>
     <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
@@ -8,5 +15,90 @@
     <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
     <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(OutputType)' == 'exe' ">true</GenerateRuntimeConfigurationFiles>
+    <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
+    
+    <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
+    <VersionSuffix Condition=" '$(VersionSuffix)' == '' "></VersionSuffix>
+    <Version Condition=" '$(Version)' == '' and '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
+    <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CoreBuildDependsOn>
+      $(CoreBuildDependsOn);
+      GenerateDependencyFile;
+      GenerateRuntimeConfigurationFiles
+    </CoreBuildDependsOn>
+  </PropertyGroup>
+
+  <!--
+    ============================================================
+                                        GenerateDependencyFile
+
+    Generates the $(project).deps.json file
+    ============================================================
+    -->
+
+  <Target Name="GenerateDependencyFile"
+          Condition=" '$(GenerateDependencyFile)' == 'true'">
+
+    <!--
+    TODO: Get RuntimeIdentifier
+    -->
+    <GenerateDepsFile LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
+                      DepsFilePath="$(TargetDir)$(AssemblyName).deps.json"
+                      TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                      AssemblyName="$(AssemblyName)"
+                      AssemblyVersion="$(Version)"
+                      RuntimeIdentifier="" />
+
+    <!--
+    TODO: When OutputType == 'exe' and !IsPortable, we need to verify CoreClr is present in the deps graph, and copy in a host to the output
+    See https://github.com/dotnet/cli/blob/6b54ae0bcc5c63e7c989ac19d851f234f9172bea/src/Microsoft.DotNet.Compiler.Common/Executable.cs#L102-L107
+    -->
+  </Target>
+
+  <!--
+    ============================================================
+                                        GenerateRuntimeConfigurationFiles
+
+    Generates the $(project).runtimeconfig.json and $(project).runtimeconfig.dev.json files
+    ============================================================
+    -->
+
+  <Target Name="GenerateRuntimeConfigurationFiles"
+          Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
+
+    <GenerateRuntimeConfigurationFiles LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
+                                       RuntimeConfigPath="$(TargetDir)/$(AssemblyName).runtimeconfig.json"
+                                       RuntimeConfigDevPath="$(TargetDir)/$(AssemblyName).runtimeconfig.dev.json"
+                                       UserRuntimeConfig="$(UserRuntimeConfig)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        GetRunInformation
+
+    Returns the ProcessStart information that can be used to run this project.
+    ============================================================
+    -->
+
+  <Target Name="GetRunInformation"
+          DependsOnTargets="GenerateRunInformation"
+          Outputs="@(RunInformation)" />
+
+  <Target Name="GenerateRunInformation">
+    <ItemGroup>
+      <RunInformation Include="$(MSBuildProjectFullPath)">
+        <!-- TODO: Need to get the Muxer path from MSBuild -->
+        <CommandName>dotnet</CommandName>
+        <Args>exec;$(TargetDir)/$(AssemblyName).dll</Args>
+      </RunInformation>
+    </ItemGroup>
+  </Target>
 
 </Project>
