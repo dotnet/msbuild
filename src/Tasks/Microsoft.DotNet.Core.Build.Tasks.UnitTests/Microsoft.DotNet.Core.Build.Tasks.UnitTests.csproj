@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Sdk.props" />
+  <Import Project="..\..\..\build\Targets\Settings.targets" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+    <ProjectGuid>{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.DotNet.Core.Build.Tasks.UnitTests</RootNamespace>
+    <AssemblyName>Microsoft.DotNet.Core.Build.Tasks.UnitTests</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <OutDir>$(OutDir)Tests\</OutDir>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="GivenADependencyContextBuilder.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dotnet.new.deps.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="dotnet.new.project.lock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="project.json" />
+    <None Include="simple.dependencies.deps.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="simple.dependencies.project.lock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Build.Tasks.csproj">
+      <Project>{df7d2697-b3b4-45c2-8297-27245f528a99}</Project>
+      <Name>Microsoft.DotNet.Core.Build.Tasks</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Sdk.targets" />
+</Project>

@@ -50,5 +50,6 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 dotnet restore $RepoRoot
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 
-dotnet build3 $RepoRoot\core-sdk.sln /nologo /m /p:Configuration=$Configuration /p:Platform=$Platform
+# TODO: add /m when the https://github.com/Microsoft/msbuild/pull/859 is in the CLI that we are using to build
+dotnet build3 $RepoRoot\core-sdk.sln /nologo /p:Configuration=$Configuration /p:Platform=$Platform
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
