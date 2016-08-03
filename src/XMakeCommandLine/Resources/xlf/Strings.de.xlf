@@ -213,7 +213,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        /property:WarningLevel=2;OutDir=bin\Debug\
 </source>
         <target state="translated">  /property:&lt;n&gt;=&lt;v&gt;  Legt diese Eigenschaften auf Projektebene fest
-                     oder überschreibt sie. &lt;n&gt; ist der Eigenschaftenname, und &lt; v&gt; ist der Eigenschaftswert.
+                     oder überschreibt sie. &lt;n&gt; ist der Eigenschaftenname, und &lt; v&gt; ist der Eigenschaftenwert.
                      Mehrere Eigenschaften werden durch ein Semikolon oder Komma getrennt.
                      Alternativ kann jede Eigenschaft gesondert angegeben werden. (Kurzform: /p)
                      Beispiel:
