@@ -13,14 +13,14 @@ def branch = GithubBranchName
 
         def newJob = job(newJobName) {
             steps {
-                batchFile("build.cmd /$lowerCaseConfig")
+                batchFile("build.cmd -Configuration $config")
             }
         }
 
         // TODO: For when we actually have unit tests in this repo
         // Utilities.addXUnitDotNETResults(myJob, '**/xUnitResults/*.xml')
 
-        Utilities.setMachineAffinity(newJob, 'Windows_NT')
+        Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-internal')
         InternalUtilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
         Utilities.addHtmlPublisher(newJob, "TestResults", "Unit Test Results", "index.html")
 
