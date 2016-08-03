@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Microsoft.MSBuild.LockFile.Tasks
+﻿namespace Microsoft.DotNet.Core.Build.Tasks
 {
     /// <summary>
     /// Values for File Group Metadata

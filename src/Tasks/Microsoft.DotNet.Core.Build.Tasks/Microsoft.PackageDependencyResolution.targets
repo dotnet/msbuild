@@ -1,6 +1,6 @@
 ﻿<!--
 ***********************************************************************************************
-Microsoft.LockFile.targets
+Microsoft.PackageDependencyResolution.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -14,7 +14,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     *************************************
     1. INPUT PROPERTIES
-    - Configure the LockFile targets
+    - That configure the LockFile targets
     *************************************
     -->
   
