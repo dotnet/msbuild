@@ -7,6 +7,7 @@ using FluentAssertions;
 
 namespace Microsoft.DotNet.Tests
 {
+    [Collection("'dotnet test' collection")]
     public class GivenThatIWantANewCSxUnitProject : TestBase
     {
         
