@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.DotNet.Core.Sdk</id>
+    <summary>The MSBuild targets and properties for building .NET Core projects.</summary>
+    <description>
+      The MSBuild targets and properties for building .NET Core projects.
+    </description>
+    <language>en-US</language>
+    <version>1.0.0</version>
+    <authors>dotnet</authors>
+    <projectUrl>http://dot.net</projectUrl>
+  </metadata>
+  <files>
+    <file src="Microsoft.DotNet.Core.Build.Tasks.dll" target="tools\netstandard1.3" />
+    <file src="Microsoft.DotNet.Core.Sdk.props" target="build\netstandard1.0" />
+    <file src="Microsoft.DotNet.Core.Sdk.targets" target="build\netstandard1.0" />
+  </files>
+</package>

@@ -19,8 +19,12 @@
     <Compile Include="RuntimeConfig.cs" />
     <Compile Include="RuntimeConfigFramework.cs" />
     <Compile Include="RuntimeOptions.cs" />
-    <None Include="Microsoft.DotNet.Core.Sdk.targets" />
-    <None Include="Microsoft.DotNet.Core.Sdk.props" />
+    <None Include="Microsoft.DotNet.Core.Sdk.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Microsoft.DotNet.Core.Sdk.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="project.json" />
     <Compile Include="DependencyContextBuilder.cs" />
     <Compile Include="GenerateDepsFile.cs" />
