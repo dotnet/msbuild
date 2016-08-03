@@ -181,6 +181,15 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Evaluation ordered list of project item elements that were evaluated by the Evaluator
+        /// It means that both the item element's condition and the item group element's conditions evaluated to true
+        /// </summary>
+        List<ProjectItemElement> EvaluatedItemElements
+        {
+            get;
+        }
+
+        /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
         void InitializeForEvaluation(IToolsetProvider toolsetProvider);
