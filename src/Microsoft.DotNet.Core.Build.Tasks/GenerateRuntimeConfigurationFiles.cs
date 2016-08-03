@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         public string RuntimeConfigDevPath { get; set; }
 
-        public string RawRuntimeOptions { get; set; }
+        public string UserRuntimeConfig { get; set; }
 
         private LockFile LockFile { get; set; }
 
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             config.RuntimeOptions = new RuntimeOptions();
 
             AddFramework(config.RuntimeOptions);
-            AddRuntimeOptions(config.RuntimeOptions);
+            AddUserRuntimeOptions(config.RuntimeOptions);
 
             WriteToJsonFile(RuntimeConfigPath, config);
         }
@@ -76,14 +76,16 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             }
         }
 
-        private void AddRuntimeOptions(RuntimeOptions runtimeOptions)
+        private void AddUserRuntimeOptions(RuntimeOptions runtimeOptions)
         {
-            if (string.IsNullOrEmpty(RawRuntimeOptions))
+            if (string.IsNullOrEmpty(UserRuntimeConfig) || !File.Exists(UserRuntimeConfig))
             {
                 return;
             }
 
-            var runtimeOptionsFromProject = JObject.Parse(RawRuntimeOptions);
+            var rawRuntimeOptions = File.ReadAllText(UserRuntimeConfig);
+
+            var runtimeOptionsFromProject = JObject.Parse(rawRuntimeOptions);
             foreach (var runtimeOption in runtimeOptionsFromProject)
             {
                 runtimeOptions.RawOptions.Add(runtimeOption.Key, runtimeOption.Value);
