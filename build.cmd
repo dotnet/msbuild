@@ -14,15 +14,8 @@ if not exist "%DeveloperCommandPrompt%" (
 
 call "%DeveloperCommandPrompt%" || goto :BuildFailed
 
-msbuild %~dp0core-sdk.sln /nologo /v:m /m /nodereuse:false
-IF %ERRORLEVEL% NEQ 0 (
-    echo Build failed, exiting with %ERRORLEVEL%
-    exit /b %ERRORLEVEL%
-)
-
-echo.
-echo Build completed successfully
-exit /b 0
+powershell -NoProfile -NoLogo -Command "& \"%~dp0build.ps1\" %*; exit $LastExitCode;"
+exit /b %ERRORLEVEL%
 
 :BuildFailed
 echo Build failed with ERRORLEVEL %ERRORLEVEL%
