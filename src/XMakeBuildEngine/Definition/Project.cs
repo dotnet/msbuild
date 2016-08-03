@@ -1338,7 +1338,10 @@ namespace Microsoft.Build.Evaluation
 
         private static bool IsGlobFragment(string itemFragment)
         {
-            return FileMatcher.HasWildcards(itemFragment);
+            var containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(itemFragment);
+            var containsRealWildcards = FileMatcher.HasWildcards(itemFragment);
+
+            return !containsEscapedWildcards && containsRealWildcards;
         }
 
         private static bool IsItemReferenceFragment(string itemFragment)
