@@ -1033,16 +1033,58 @@ namespace Microsoft.Build.Evaluation
             return ((IItem)item).EvaluatedIncludeEscaped;
         }
 
+        /// <summary>
+        /// Finds all the globs specified in item includes.
+        /// </summary>
+        /// <example>
+        /// 
+        /// <code>
+        ///<P>*.txt</P>
+        /// 
+        ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
+        ///<Foo Include="*.a" Exclude="3.a"/>
+        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b";**\bar\*.b"/>
+        ///<Foo Include="$(P)"/> 
+        ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
+        ///<Foo Include="*.cs"/ Exclude="@(Bar)"/> (out of project cone glob)
+        ///</code>
+        /// 
+        ///Example result: 
+        ///[
+        ///GlobResult(glob: "C:\**\*.foo", exclude: []),
+        ///GlobResult(glob: "*.a", exclude=["3.a"]),
+        ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
+        ///GlobResult(glob: "*.txt", exclude=[]),
+        ///GlobResult(glob: "*.a", exclude=[]),
+        ///GlobResult(glob: "*.cs", exclude=[])
+        ///]
+        /// </example>
+        /// <remarks>
+        /// Sources of innacuracies: 
+        /// - <code>GlobResult.Excludes</code> does not contain information from item references (e.g. Exclude="@(Item)")
+        /// (it sees items as they are at the end of evaluation)
+        /// </remarks>
+        /// <returns>
+        /// List of <see cref="GlobResult"/>. Sorted in project evaluation order.
+        /// </returns>
         public List<GlobResult> GetAllGlobs()
         {
             return GetAllGlobs(_data.EvaluatedItemElements);
         }
 
+        /// <summary>
+        /// Overload of <see cref="Project.GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="itemType">Confine search to item elements of this type</param>
         public List<GlobResult> GetAllGlobs(string itemType)
         {
             return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
+        /// <summary>
+        /// Overload of <see cref="Project.GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="item">Confine search to item elements appearing above this item, inclusively.</param>
         public List<GlobResult> GetAllGlobs(ProjectItem item)
         {
             return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
@@ -3427,7 +3469,9 @@ namespace Microsoft.Build.Evaluation
             }
         }
     }
-
+    /// <summary>
+    /// Data class representing a result from <see cref="Project.GetAllGlobs()"/> and its overloads.
+    /// </summary>
     public class GlobResult
     {
         public string Glob { get; private set; }
