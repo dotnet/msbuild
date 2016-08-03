@@ -27,6 +27,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <_ProjectLockFilePath>$(MSBuildProjectDirectory)/project.lock.json</_ProjectLockFilePath>
+    <_ProjectDepsFilePath>$(TargetDir)$(AssemblyName).deps.json</_ProjectDepsFilePath>
+    <_ProjectRuntimeConfigFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFilePath>
+    <_ProjectRuntimeConfigDevFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</_ProjectRuntimeConfigDevFilePath>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <CoreBuildDependsOn>
       $(CoreBuildDependsOn);
       GenerateDependencyFile;
@@ -43,13 +50,15 @@
     -->
 
   <Target Name="GenerateDependencyFile"
-          Condition=" '$(GenerateDependencyFile)' == 'true'">
+          Condition=" '$(GenerateDependencyFile)' == 'true'"
+          Inputs="$(_ProjectLockFilePath)"
+          Outputs="$(_ProjectDepsFilePath)">
 
     <!--
     TODO: Get RuntimeIdentifier
     -->
-    <GenerateDepsFile LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
-                      DepsFilePath="$(TargetDir)$(AssemblyName).deps.json"
+    <GenerateDepsFile LockFilePath="$(_ProjectLockFilePath)"
+                      DepsFilePath="$(_ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
@@ -70,11 +79,13 @@
     -->
 
   <Target Name="GenerateRuntimeConfigurationFiles"
-          Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
+          Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
+          Inputs="$(_ProjectLockFilePath);$(UserRuntimeConfig)"
+          Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
 
-    <GenerateRuntimeConfigurationFiles LockFilePath="$(MSBuildProjectDirectory)/project.lock.json"
-                                       RuntimeConfigPath="$(TargetDir)/$(AssemblyName).runtimeconfig.json"
-                                       RuntimeConfigDevPath="$(TargetDir)/$(AssemblyName).runtimeconfig.dev.json"
+    <GenerateRuntimeConfigurationFiles LockFilePath="$(_ProjectLockFilePath)"
+                                       RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
+                                       RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
   </Target>

@@ -39,7 +39,10 @@
   <!-- Default settings for .NET Core build logic -->
   <PropertyGroup>
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
-    
+
+    <!-- force the compiler to always emit .dll for .NET Core projects, even if $(OutputType) == 'exe' -->
+    <TargetExt>.dll</TargetExt>
+
     <!-- This will turn off the base 'ResolveNuGetPackages' target since it is UWP specific, and .NET Core needs it to be split up -->
     <!--<ResolveNuGetPackages>false</ResolveNuGetPackages>-->
   </PropertyGroup>
