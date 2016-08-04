@@ -13,11 +13,19 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="RuntimeConfig.cs" />
+    <Compile Include="RuntimeConfigFramework.cs" />
+    <Compile Include="RuntimeOptions.cs" />
     <None Include="Microsoft.DotNet.Core.Sdk.targets" />
     <None Include="Microsoft.DotNet.Core.Sdk.props" />
     <None Include="project.json" />
+    <Compile Include="DependencyContextBuilder.cs" />
+    <Compile Include="GenerateDepsFile.cs" />
+    <Compile Include="GenerateRuntimeConfigurationFiles.cs" />
+    <Compile Include="LockFileCache.cs" />
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
