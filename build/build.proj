@@ -2,12 +2,9 @@
   xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
   DefaultTargets="Build"
   ToolsVersion="14.0">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Directory.Build.props'))\Directory.Build.props" />
 
   <PropertyGroup>
-    <RepositoryRootDirectory>$(MSBuildThisFileDirectory)..\</RepositoryRootDirectory>
-    <DOTNET_INSTALL_DIR Condition=" '$(DOTNET_INSTALL_DIR)' == ''">$(RepositoryRootDirectory)\.dotnet_cli\</DOTNET_INSTALL_DIR>
-    <DotNetTool>$(DOTNET_INSTALL_DIR)dotnet</DotNetTool>
-
     <CommonMSBuildGlobalProperties>
       Configuration=$(Configuration);
     </CommonMSBuildGlobalProperties>

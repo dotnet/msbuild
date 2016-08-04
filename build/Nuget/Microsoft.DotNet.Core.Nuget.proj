@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-  </PropertyGroup>
-
-  <ImportGroup>
-    <Import Project="..\Targets\Settings.targets" />
-  </ImportGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Directory.Build.props'))\Directory.Build.props" />
 
   <PropertyGroup>
-    <RepoRoot>$(MSBuildThisFileDirectory)..\..\</RepoRoot>
-    <DOTNET_INSTALL_DIR Condition=" '$(DOTNET_INSTALL_DIR)' == ''">$(RepositoryRootDirectory)\.dotnet_cli\</DOTNET_INSTALL_DIR>
-    <DotNetTool>$(DOTNET_INSTALL_DIR)dotnet</DotNetTool>
     <NuGetOutDir>$(OutDir)Packages\</NuGetOutDir>
     <Version>1.0.0</Version>
   </PropertyGroup>
@@ -32,12 +23,12 @@
 
   <Target Name="Build" Inputs="@(NuSpec);@(PackageAssets)" Outputs="@(NuSpec->'%(NuPkgOutput)')" DependsOnTargets="LogOutput">
 
-    <ReadLinesFromFile File="$(RepoRoot)DotnetCLIVersion.txt">
+    <ReadLinesFromFile File="$(RepositoryRootDirectory)DotnetCLIVersion.txt">
       <Output TaskParameter="Lines" ItemName="CLIVersion" />
     </ReadLinesFromFile>
 
     <PropertyGroup>
-      <DotNetSdkPath>$(DOTNET_INSTALL_DIR)sdk\@(CLIVersion)\</DotNetSdkPath>
+      <DotNetSdkPath>$(DotNet_Install_Dir)\sdk\@(CLIVersion)\</DotNetSdkPath>
       <NuGetTool>$(DotNetTool) exec --runtimeconfig $(DotNetSdkPath)\dotnet.runtimeconfig.json $(DotNetSdkPath)\NuGet.CommandLine.XPlat.dll</NuGetTool>
     </PropertyGroup>
 
