@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         public override bool Execute()
         {
-            LockFile = LockFileCache.Instance.GetLockFile(LockFilePath);
+            LockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
 
             WriteRuntimeConfig();
 

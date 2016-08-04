@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         public override bool Execute()
         {
-            LockFile lockFile = LockFileCache.Instance.GetLockFile(LockFilePath);
+            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
 
             DependencyContext dependencyContext = new DependencyContextBuilder().Build(
                 projectName: AssemblyName,
