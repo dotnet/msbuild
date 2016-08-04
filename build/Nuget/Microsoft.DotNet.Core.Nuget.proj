@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <NuGetOutDir>$(OutDir)Packages\</NuGetOutDir>
-    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,7 +28,7 @@
 
     <PropertyGroup>
       <DotNetSdkPath>$(DotNet_Install_Dir)\sdk\@(CLIVersion)\</DotNetSdkPath>
-      <NuGetTool>$(DotNetTool) exec --runtimeconfig $(DotNetSdkPath)\dotnet.runtimeconfig.json $(DotNetSdkPath)\NuGet.CommandLine.XPlat.dll</NuGetTool>
+      <NuGetTool>$(DotNetTool) exec --runtimeconfig $(DotNetSdkPath)\dotnet.runtimeconfig.json --depsfile $(DotNetSdkPath)\dotnet.deps.json $(DotNetSdkPath)\NuGet.CommandLine.XPlat.dll</NuGetTool>
     </PropertyGroup>
 
     <MakeDir Directories="$(NuGetOutDir)" />

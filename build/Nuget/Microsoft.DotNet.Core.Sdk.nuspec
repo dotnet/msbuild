@@ -7,7 +7,7 @@
       The MSBuild targets and properties for building .NET Core projects.
     </description>
     <language>en-US</language>
-    <version>1.0.0</version>
+    <version>$version$</version>
     <authors>dotnet</authors>
     <projectUrl>http://dot.net</projectUrl>
   </metadata>

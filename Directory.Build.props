@@ -9,6 +9,10 @@
     <OutDir Condition="'$(OutDir)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
 
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
+    <VersionSuffix Condition="'$(VersionSuffix)' == ''">alpha-00001</VersionSuffix>
+    <Version Condition="'$(Version)' == ''">$(VersionPrefix)-$(VersionSuffix)</Version>
+    
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
   </PropertyGroup>
