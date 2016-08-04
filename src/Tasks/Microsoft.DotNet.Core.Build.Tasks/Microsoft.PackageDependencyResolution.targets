@@ -14,17 +14,18 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     *************************************
     1. INPUT PROPERTIES
-    - That configure the LockFile targets
+    - That configure the PackageDependency targets
     *************************************
     -->
   
   <!-- General Properties -->
   <PropertyGroup>
-    <!-- HACK: Turn off NuGet Task -->
+    <!-- Turn off NuGet Task -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
 
-    <!-- Flag LockFile Tasks -->
-    <EnableResolveLockFile Condition="'$(EnableLockFileToMSBuild)' == '' and '$(MSBuildProjectExtension)' != '.xproj'">true</EnableResolveLockFile>
+    <!-- Flag PackageDependency Tasks -->
+    <EnableResolvePackageDependencies 
+      Condition="'$(EnableResolvePackageDependencies)' == '' and '$(MSBuildProjectExtension)' != '.xproj'">true</EnableResolvePackageDependencies>
   </PropertyGroup>
 
   <!-- Project Lock File -->
@@ -40,10 +41,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NuGetRuntimeIdentifier Condition="'$(UseDotNetNativeToolchain)' == 'true'">$(_NuGetRuntimeIdentifierWithoutAot)-aot</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
-  <!-- Build and Publish Properties. (HACK: Temp use this to determine whether we are building or publishing) -->
   <PropertyGroup>
-    <ResolveLockFileForBuild Condition="'$(ResolveLockFileForBuild)' == ''">true</ResolveLockFileForBuild>
-    <ResolveLockFileForPublish Condition="'$(ResolveLockFileForPublish)' == ''">false</ResolveLockFileForPublish>
+    <!-- Build and Publish Properties to determine whether we are building or publishing. Default values -->
+    <ResolvePackageDependenciesForBuild Condition="'$(ResolvePackageDependenciesForBuild)' == ''">true</ResolvePackageDependenciesForBuild>
+    <ResolvePackageDependenciesForPublish Condition="'$(ResolvePackageDependenciesForPublish)' == ''">false</ResolvePackageDependenciesForPublish>
   </PropertyGroup>
 
 
@@ -57,17 +58,16 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <ResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
-      ResolveLockFileForBuild;
-      ResolveLockFileForPublish
+      ResolvePackageDependenciesForBuild;
+      ResolvePackageDependenciesForPublish
     </ResolveAssemblyReferencesDependsOn>
 
     <PrepareResourcesDependsOn>
-      ResolveLockFileForBuild;
-      ResolveLockFileForPublish;
+      ResolvePackageDependenciesForBuild;
+      ResolvePackageDependenciesForPublish;
       $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
 
-    <!--<_FindDependencies>false</_FindDependencies>-->
   </PropertyGroup>
 
 
@@ -80,63 +80,60 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                     ResolveLockFileForBuild
+                     ResolvePackageDependenciesForBuild
 
     Populate items for build...
     ============================================================
     -->
   <PropertyGroup>
-    <ResolveLockFileForBuildDependsOn>
+    <ResolvePackageDependenciesForBuildDependsOn>
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalProjectDeps;
-    </ResolveLockFileForBuildDependsOn>
+    </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
-  <Target Name="ResolveLockFileForBuild"
-          Condition="'$(ResolveLockFileForBuild)' == 'true' and '$(EnableResolveLockFile)' == 'true' and Exists('$(ProjectLockFile)')"
-          DependsOnTargets="$(ResolveLockFileForBuildDependsOn)" />
+  <Target Name="ResolvePackageDependenciesForBuild"
+          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectLockFile)')"
+          DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
 
   <!--
     ============================================================
-                     ResolveLockFileForPublish
+                     ResolvePackageDependenciesForPublish
 
     Populate items for publish...
     ============================================================
     -->
   <PropertyGroup>
-    <ResolveLockFileForPublishDependsOn>
+    <ResolvePackageDependenciesForPublishDependsOn>
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalFullFramework;
-    </ResolveLockFileForPublishDependsOn>
+    </ResolvePackageDependenciesForPublishDependsOn>
   </PropertyGroup>
-  <Target Name="ResolveLockFileForPublish"
-          Condition="'$(ResolveLockFileForPublish)' == 'true' and '$(EnableResolveLockFile)' == 'true' and Exists('$(ProjectLockFile)')"
-          DependsOnTargets="$(ResolveLockFileForPublishDependsOn)" />
+  <Target Name="ResolvePackageDependenciesForPublish"
+          Condition="'$(ResolvePackageDependenciesForPublish)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectLockFile)')"
+          DependsOnTargets="$(ResolvePackageDependenciesForPublishDependsOn)" />
 
   
   <!--
     *************************************
-    4. LOCKFILE TASK and TARGETS
+    4. Package Dependency TASK and TARGETS
     - Raise the lock file to MSBuild Items and create derived items
     *************************************
     -->
 
-  <!-- HACK: for testing. Move assembly to be along side targets file -->
-  <UsingTask TaskName="Microsoft.MSBuild.LockFile.Tasks.LockFileToMSBuild2" 
-             AssemblyFile="$(MSBuildThisFileDirectory)bin\Debug\Microsoft.MSBuild.LockFile.Tasks.dll" />
+  <UsingTask TaskName="Microsoft.DotNet.Core.Build.Tasks.ResolvePackageDependencies" 
+             AssemblyFile="Microsoft.DotNet.Core.Build.Tasks.dll" />
 
   <!--
     ============================================================
-                     RunLockFileToMSBuild
+                     RunResolvePackageDependencies
 
-    Generate Definitions and Dependencies based on LockFileToMSBuild task
+    Generate Definitions and Dependencies based on ResolvePackageDependencies task
     ============================================================
     -->
-  <Target Name="RunLockFileToMSBuild">
-    <Message Text="     -> (Raising Lock File: ProjectLockFile=$(ProjectLockFile))" Importance="high"/>
-
-    <LockFileToMSBuild2
+  <Target Name="RunResolvePackageDependencies">
+    <ResolvePackageDependencies
       ProjectLockFile="$(ProjectLockFile)">
 
       <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />
@@ -144,7 +141,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="FileDefinitions" ItemName="FileDefinitions" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
       <Output TaskParameter="FileDependencies" ItemName="FileDependencies" />
-    </LockFileToMSBuild2>
+    </ResolvePackageDependencies>
 
   </Target>
 
@@ -157,20 +154,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileReferences" 
-          DependsOnTargets="RunLockFileToMSBuild" 
+          DependsOnTargets="RunResolvePackageDependencies" 
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
       <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />
-      <TFMCompileFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
-
+      <_CompileFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'CompileAssembly'))" />
+      
       <!-- Get corresponding file definitions -->
-      <TFMCompileFileDefinitionsEx Include="@(FileDefinitions)" Exclude="@(TFMCompileFileItems)" />
-      <TFMCompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(TFMCompileFileDefinitionsEx)" />
-      <ResolvedCompileFileDefinitions Include="%(TFMCompileFileDefinitions.ResolvedPath)">
+      <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
+      <_CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(__CompileFileDefinitions)" />
+
+      <ResolvedCompileFileDefinitions Include="%(_CompileFileDefinitions.ResolvedPath)">
         <Private>false</Private>
         <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
         <NuGetSourceType>Package</NuGetSourceType>
       </ResolvedCompileFileDefinitions>
+      
     </ItemGroup>
   </Target>
 
@@ -198,15 +197,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileAnalyzers"
-        DependsOnTargets="RunLockFileToMSBuild"
+        DependsOnTargets="RunResolvePackageDependencies"
         Returns="ResolvedAnalyzers">
     <ItemGroup>
-      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />
-      <TFMAnalyzerFileItems Include="@(TFMFileItems->WithMetadataValue('Analyzer', 'true'))" />
+      <!--<TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />
+      <_AnalyzerFileItems Include="@(TFMFileItems->WithMetadataValue('Analyzer', 'true'))" />-->
 
       <!-- Get corresponding file definitions -->
-      <TFMCompileFileDefinitionsEx Include="@(FileDefinitions)" Exclude="@(TFMAnalyzerFileItems)" />
-      <TFMCompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(TFMCompileFileDefinitionsEx)" />
+      <!--<__AnalyzerFileDefinitions Include="@(FileDefinitions)" Exclude="@(_AnalyzerFileItems)" />
+      <_AnalyzerFileDefinitions Include="@(FileDefinitions)" Exclude="@(__AnalyzerFileDefinitions)" />-->
       <!--<ResolvedAnalyzers Include="%(TFMCompileFileDefinitions.ResolvedPath)" />-->
 
       <AnalyzerFiles Include="@(FileDefinitions->WithMetadataValue('Analyzer', 'true'))" />
@@ -237,7 +236,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileCopyLocal"
-        DependsOnTargets="RunLockFileToMSBuild"
+        DependsOnTargets="RunResolvePackageDependencies"
         Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
     <ItemGroup>
       <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />

@@ -17,7 +17,9 @@
   <ItemGroup>
     <None Include="Microsoft.DotNet.Core.Sdk.targets" />
     <None Include="Microsoft.DotNet.Core.Sdk.props" />
-    <None Include="Microsoft.PackageDependencyResolution.targets" />
+    <None Include="Microsoft.PackageDependencyResolution.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="project.json" />
     <Compile Include="FileGroup.cs" />
     <Compile Include="MetadataKeys.cs" />
