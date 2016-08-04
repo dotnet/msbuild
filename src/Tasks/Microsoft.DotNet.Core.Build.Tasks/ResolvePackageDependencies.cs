@@ -135,24 +135,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         private void PopulatePackageFolders(LockFile lockFile)
         {
-            // TODO
-            // If we explicitly were given a path, let's use that
-            //if (!string.IsNullOrEmpty(NuGetPackagesDirectory))
-            //{
-            //    _packageFolders.Add(NuGetPackagesDirectory);
-            //}
-
-            // TODO
-            // Newer versions of NuGet can now specify the final list of locations in the lock file
-            //var packageFolders = lockFile["packageFolders"] as JObject;
-            //if (packageFolders != null)
-            //{
-            //    foreach (var packageFolder in packageFolders.Properties())
-            //    {
-            //        _packageFolders.Add(packageFolder.Name);
-            //    }
-            //}
-
             // If we didn't have any folders, let's fall back to the environment variable or user profile
             if (_packageFolders.Count == 0)
             {
@@ -199,17 +181,11 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     if (IsAnalyzer(file))
                     {
                         fileItem.SetMetadata(MetadataKeys.Analyzer, "true");
-                        //fileItem.SetMetadata(MetadataKeys.AnalyzerLanguage, GetAnalyzerLanguage(file));
                     }
 
                     _fileDefinitions.Add(fileItem);
                 }
             }
-        }
-
-        private string GetAnalyzerLanguage(string file)
-        {
-            throw new NotImplementedException();
         }
 
         private bool IsAnalyzer(string file)

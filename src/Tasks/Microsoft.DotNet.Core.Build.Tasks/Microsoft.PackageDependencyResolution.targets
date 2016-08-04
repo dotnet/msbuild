@@ -175,17 +175,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolveLockFileReferences"
           DependsOnTargets="_ComputeLockFileReferences">
-    <!-- Temp: Remove what ResolveNuGetPackageAssets added -->
     <ItemGroup>
+      <!-- Remove any references from ResolveNuGetPackageAssets -->
       <Reference Remove="@(_ReferencesFromNuGetPackages)" />
-    </ItemGroup>
-    <Message Text="Reference                   -&gt;  @(Reference)" Importance="high" />
 
-    <!-- Add the references we computed -->
-    <ItemGroup>
+      <!-- Add the references we computed -->
       <Reference Include="@(ResolvedCompileFileDefinitions)" />
     </ItemGroup>
-    <Message Text="Reference                   -&gt;  @(Reference)" Importance="high" />
   </Target>
 
   <!--
@@ -200,30 +196,19 @@ Copyright (c) .NET Foundation. All rights reserved.
         DependsOnTargets="RunResolvePackageDependencies"
         Returns="ResolvedAnalyzers">
     <ItemGroup>
-      <!--<TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />
-      <_AnalyzerFileItems Include="@(TFMFileItems->WithMetadataValue('Analyzer', 'true'))" />-->
-
-      <!-- Get corresponding file definitions -->
-      <!--<__AnalyzerFileDefinitions Include="@(FileDefinitions)" Exclude="@(_AnalyzerFileItems)" />
-      <_AnalyzerFileDefinitions Include="@(FileDefinitions)" Exclude="@(__AnalyzerFileDefinitions)" />-->
-      <!--<ResolvedAnalyzers Include="%(TFMCompileFileDefinitions.ResolvedPath)" />-->
-
       <AnalyzerFiles Include="@(FileDefinitions->WithMetadataValue('Analyzer', 'true'))" />
       <ResolvedAnalyzers Include="%(AnalyzerFiles.ResolvedPath)" />
-
     </ItemGroup>
-    <Message Text="AnalyzerFiles -&gt;  @(AnalyzerFiles)" Importance="high" />
   </Target>
 
   <Target Name="ResolveLockFileAnalyzers"
-          DependsOnTargets="_ComputeLockFileAnalyzers">
-    
-    <!-- Add the analyzers we computed -->
+          DependsOnTargets="_ComputeLockFileAnalyzers">    
     <ItemGroup>
+      
+      <!-- Add the analyzers we computed -->
       <Analyzer Include="@(ResolvedAnalyzers)" />
+      
     </ItemGroup>
-    <Message Text="ResolvedAnalyzers            -&gt;  @(Analyzer)" Importance="high" />
-
   </Target>
 
   <!--
@@ -277,7 +262,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
       <ReferenceCopyLocalPaths Include="@(RuntimeCopyLocalItems)" />
     </ItemGroup>
-    <Message Text="ResolvedCopyLocalItems       -&gt;  @(ReferenceCopyLocalPaths)" Importance="high" />
 
   </Target>
 
@@ -289,7 +273,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
       <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
     </ItemGroup>
-    <Message Text="ResolvedCopyLocalItems       -&gt;  @(ReferenceCopyLocalPaths)" Importance="high" />
 
   </Target>
   
