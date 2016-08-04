@@ -2748,7 +2748,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void GetItemProvenanceShouldMatchStringsWithIllegalPathCharacters()
+        public void GetItemProvenanceShouldNotFailWithIllegalPathCharacters()
         {
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
@@ -2764,7 +2764,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void GetItemProvenanceShouldWorkWithStringsExceedingMaxPath()
+        public void GetItemProvenanceShouldNotFailWithStringsExceedingMaxPath()
         {
             var longString = new string('a', 1000);
 
@@ -2799,6 +2799,36 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             AssertProvenanceResult(expected, project, "A");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldWorkWithUpdateElements()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1.foo`/>
+
+                    <B Update=`1.bar`/>
+                    <C Update=`1.foo`/>
+                    <D Update=`1.foo;*.foo`/>
+                    <E Update=`$(P);@(A)`/>
+                  </ItemGroup>
+                  <PropertyGroup>
+                    <P>*.foo;@(A)</P>
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("C", Operation.Update, Provenance.StringLiteral, 1),
+                Tuple.Create("D", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 2),
+                Tuple.Create("E", Operation.Update, Provenance.Glob | Provenance.Inconclusive, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo");
         }
 
         [Fact]
