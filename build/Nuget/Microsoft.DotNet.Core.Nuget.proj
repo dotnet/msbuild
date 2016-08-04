@@ -10,8 +10,8 @@
 
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)..\..\</RepoRoot>
-    <DotNetPath>$(RepoRoot).dotnet_cli\</DotNetPath>
-    <DotNetTool>$(DotNetPath)dotnet</DotNetTool>
+    <DOTNET_INSTALL_DIR Condition=" '$(DOTNET_INSTALL_DIR)' == ''">$(RepositoryRootDirectory)\.dotnet_cli\</DOTNET_INSTALL_DIR>
+    <DotNetTool>$(DOTNET_INSTALL_DIR)dotnet</DotNetTool>
     <NuGetOutDir>$(OutDir)Packages\</NuGetOutDir>
     <Version>1.0.0</Version>
   </PropertyGroup>
@@ -37,7 +37,7 @@
     </ReadLinesFromFile>
 
     <PropertyGroup>
-      <DotNetSdkPath>$(DotNetPath)sdk\@(CLIVersion)\</DotNetSdkPath>
+      <DotNetSdkPath>$(DOTNET_INSTALL_DIR)sdk\@(CLIVersion)\</DotNetSdkPath>
       <NuGetTool>$(DotNetTool) exec --runtimeconfig $(DotNetSdkPath)\dotnet.runtimeconfig.json $(DotNetSdkPath)\NuGet.CommandLine.XPlat.dll</NuGetTool>
     </PropertyGroup>
 
