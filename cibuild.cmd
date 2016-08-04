@@ -101,7 +101,7 @@ set MSBUILDLOGPATH=%~dp0msbuild_local_build.log
 :: downloaded as part of its NuGet package references, rather
 :: than the possibly-stale one from Tools.
 if /i "%TARGET%"=="CoreCLR" (
-    set RUNTIME_HOST="%~dp0bin\Bootstrap\DotNet.exe"
+    set RUNTIME_HOST=%~dp0Tools\DotNetCLI\Dotnet.exe
 )
 
 if /i "%TARGET%"=="CoreCLR" (
