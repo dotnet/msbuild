@@ -126,12 +126,23 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [str
         $VersionFileUrl = "$AzureFeed/Sdk/$AzureChannel/latest.version"
     }
     
-    $Response = Invoke-WebRequest -UseBasicParsing $VersionFileUrl
+    try {
+        # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
+        Add-Type -Assembly System.Net.Http | Out-Null
+        $HttpClient = New-Object System.Net.Http.HttpClient
+        $Response = $HttpClient.GetAsync($VersionFileUrl).Result
+        $StringContent = $Response.Content.ReadAsStringAsync().Result
 
-    switch ($Response.Headers.'Content-Type'){
-        { ($_ -eq "application/octet-stream") } { $VersionText = [Text.Encoding]::UTF8.GetString($Response.Content) }
-        { ($_ -eq "text/plain") } { $VersionText = $Response.Content }
-        default { throw "``$Response.Headers.'Content-Type'`` is an unknown .version file content type." }
+        switch ($Response.Content.Headers.ContentType) {
+            { ($_ -eq "application/octet-stream") } { $VersionText = [Text.Encoding]::UTF8.GetString($StringContent) }
+            { ($_ -eq "text/plain") } { $VersionText = $StringContent }
+            default { throw "``$Response.Content.Headers.ContentType`` is an unknown .version file content type." }
+        }
+    }
+    finally {
+        if ($HttpClient -ne $null) {
+            $HttpClient.Dispose()
+        }
     }
     
 
@@ -281,7 +292,13 @@ function Get-List-Of-Directories-And-Versions-To-Unpack-From-Dotnet-Package([Sys
 function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     Say-Invocation $MyInvocation
 
-    Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
+    try {
+        Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
+    }
+    catch {
+        # Loading FileSystem is unnecessary and will fail on Nano Server
+    }
+
     Set-Variable -Name Zip
     try {
         $Zip = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
@@ -304,6 +321,26 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     finally {
         if ($Zip -ne $null) {
             $Zip.Dispose()
+        }
+    }
+}
+
+function DownloadFile([Uri]$Uri, [string]$OutPath) {
+    try {
+        # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
+        Add-Type -Assembly System.Net.Http | Out-Null
+        $HttpClient = New-Object System.Net.Http.HttpClient
+        $Stream = $HttpClient.GetAsync($Uri).Result.Content.ReadAsStreamAsync().Result
+        $File = [System.IO.File]::Create($OutPath)
+        $Stream.CopyTo($File)
+        $File.Close()
+    }
+    finally {
+        if ($HttpClient -ne $null) {
+            $HttpClient.Dispose()
+        }
+        if ($Stream -ne $null) {
+            $Stream.Dispose()
         }
     }
 }
@@ -337,7 +374,7 @@ New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 foreach ($DownloadLink in $DownloadLinks) {
     $ZipPath = [System.IO.Path]::GetTempFileName()
     Say "Downloading $DownloadLink"
-    $resp = Invoke-WebRequest -UseBasicParsing $DownloadLink -OutFile $ZipPath
+    DownloadFile -Uri $DownloadLink -OutPath $ZipPath
 
     Say "Extracting zip from $DownloadLink"
     Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $InstallRoot
