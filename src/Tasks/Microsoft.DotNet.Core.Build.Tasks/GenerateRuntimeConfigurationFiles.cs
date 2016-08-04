@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         private void AddFramework(RuntimeOptions runtimeOptions)
         {
-            // TODO: get this from the lock file once https://github.com/NuGet/Home/issues/2695 is fixed.
+            // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
             var packageName = "Microsoft.NETCore.App";
 
             var redistExport = LockFile

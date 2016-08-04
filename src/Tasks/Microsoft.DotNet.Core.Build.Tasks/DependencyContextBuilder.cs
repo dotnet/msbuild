@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
             IEnumerable<LockFileTargetLibrary> runtimeExports = lockFileTarget.Libraries;
 
-            // TODO: get this from the lock file once https://github.com/NuGet/Home/issues/2695 is fixed.
+            // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
             var platformPackageName = "Microsoft.NETCore.App";
             var platformExport = lockFileTarget
                 .Libraries
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             return new DependencyContext(
                 new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, portable),
                 compilerOptions ?? CompilationOptions.Default,
-                Enumerable.Empty<CompilationLibrary>(), //GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(),
+                Enumerable.Empty<CompilationLibrary>(), //GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(), - https://github.com/dotnet/sdk/issues/11
                 runtimeLibraries,
                 new RuntimeFallbacks[] { });
         }
@@ -132,6 +132,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             LockFileTarget lockFileTarget,
             Dictionary<string, Dependency> dependencyLookup)
         {
+            // TODO: What other information about the current project needs to be included here? - https://github.com/dotnet/sdk/issues/12
+
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, $"{projectName}.dll") };
 
             List<Dependency> dependencies = new List<Dependency>();
@@ -219,6 +221,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     serviceable
                     );
             }
+            // TODO: PreserveCompilationContext - https://github.com/dotnet/sdk/issues/11
             //else
             //{
             //    IEnumerable<string> assemblies = export
@@ -244,7 +247,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             assemblyGroups.Add(
                 new RuntimeAssetGroup(string.Empty, export.RuntimeAssemblies.Select(a => a.Path)));
 
-            // TODO RuntimeTargets
+            // TODO RuntimeTargets - https://github.com/dotnet/sdk/issues/12
             //export.RuntimeTargets.GroupBy(l => l.)
 
             return assemblyGroups;
@@ -257,7 +260,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         private ResourceAssembly CreateResourceAssembly(LockFileItem resourceAssembly)
         {
-            // TODO: implement
+            // TODO: implement - https://github.com/dotnet/sdk/issues/12
             return null;
 
             //return new ResourceAssembly(

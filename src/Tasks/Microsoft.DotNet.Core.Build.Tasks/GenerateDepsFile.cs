@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             DependencyContext dependencyContext = new DependencyContextBuilder().Build(
                 projectName: AssemblyName,
                 projectVersion: AssemblyVersion,
-                compilerOptions: null, // TODO: PreservceCompliationContext
+                compilerOptions: null, // TODO: PreserveCompilationContext - https://github.com/dotnet/sdk/issues/11
                 lockFile: lockFile,
                 framework: TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework),
                 runtime: RuntimeIdentifier);

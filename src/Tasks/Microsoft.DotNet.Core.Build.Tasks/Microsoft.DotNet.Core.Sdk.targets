@@ -66,7 +66,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(_ProjectDepsFilePath)">
 
     <!--
-    TODO: Get RuntimeIdentifier
+    TODO: https://github.com/dotnet/sdk/issues/19 - Get RuntimeIdentifier
     -->
     <GenerateDepsFile LockFilePath="$(_ProjectLockFilePath)"
                       DepsFilePath="$(_ProjectDepsFilePath)"
@@ -76,7 +76,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeIdentifier="" />
 
     <!--
-    TODO: When OutputType == 'exe' and !IsPortable, we need to verify CoreClr is present in the deps graph, and copy in a host to the output
+    TODO: https://github.com/dotnet/sdk/issues/21
+    When OutputType == 'exe' and !IsPortable, we need to verify CoreClr is present in the deps graph, and copy in a host to the output
     See https://github.com/dotnet/cli/blob/6b54ae0bcc5c63e7c989ac19d851f234f9172bea/src/Microsoft.DotNet.Compiler.Common/Executable.cs#L102-L107
     -->
   </Target>
@@ -116,7 +117,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateRunInformation">
     <ItemGroup>
       <RunInformation Include="$(MSBuildProjectFullPath)">
-        <!-- TODO: Need to get the Muxer path from MSBuild -->
+        <!-- TODO: https://github.com/dotnet/sdk/issues/20 Need to get the DotNetHost path from MSBuild -->
         <CommandName>dotnet</CommandName>
         <Args>exec;$(TargetDir)/$(AssemblyName).dll</Args>
       </RunInformation>
