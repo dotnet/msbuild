@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Strings.shared.resx">
+    <body>
+      <group id="SHARED/RESOURCES/STRINGS.RESX" datatype="resx" />
+      <trans-unit id="BuildAborted">
+        <source>MSB4188: Build was canceled.</source>
+        <target state="translated">MSB4188: 빌드가 취소되었습니다.</target>
+        <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: MSBuild 작업 호스트는 IBuildEngine 콜백을 수행하는 작업의 실행을 지원하지 않습니다. 이러한 작업을 수행하려면 대신 코어 MSBuild 프로세스에서 작업을 실행하세요.  UsingTask에 "Runtime" 또는 "Architecture" 값이 사용되었거나 작업 호출에 MSBuild의 현재 런타임 또는 아키텍처와 일치하지 않는 "MSBuildRuntime" 또는 "MSBuildArchitecture" 값이 사용된 경우 작업 호스트에서 작업이 자동으로 실행됩니다.</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="BuildStarted">
+        <source>Build started.</source>
+        <target state="translated">빌드를 시작했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictingTaskAssembly">
+        <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
+        <target state="translated">MSB4008: 작업 어셈블리 "{0}"과(와) 충돌하는 어셈블리가 "{1}"에 있습니다.</target>
+        <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
+      </trans-unit>
+      <trans-unit id="ExpectedEventToBeSerializable">
+        <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
+        <target state="translated">이벤트 유형 "{0}"은(는) .NET serializer를 사용하여 serialize할 수 있어야 합니다. 이 이벤트는 serialize할 수 없으므로 무시되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileLocation">
+        <source>{0} ({1},{2})</source>
+        <target state="translated">{0}({1},{2})</target>
+        <note>A file location to be embedded in a string.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">작업 호스트에 적용하기 전에 부모 노드로부터 받은 환경을 다음과 같이 수정하고 있습니다.</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  '{0}'을(를) 부모 환경 값인 '{2}' 대신 '{1}'(으)로 설정하고 있습니다.</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="InvalidProjectFile">
+        <source>MSB4025: The project file could not be loaded. {0}</source>
+        <target state="translated">MSB4025: 프로젝트 파일을 로드할 수 없습니다. {0}</target>
+        <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
+    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
+    provided separately to loggers.
+    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
+      </trans-unit>
+      <trans-unit id="InvalidVerbosity">
+        <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
+        <target state="translated">MSB4103: "{0}"은(는) 로거의 자세한 정도로 알맞지 않습니다.</target>
+        <note>{StrBegin="MSB4103: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingProject">
+        <source>MSBuild is expecting a valid "{0}" object.</source>
+        <target state="translated">MSBuild에 올바른 "{0}" 개체가 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedToolsVersion">
+        <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
+        <target state="translated">MSB4132: 도구 버전 "{0}"을(를) 인식할 수 없습니다. 사용할 수 있는 도구 버전은 {1}입니다.</target>
+        <note>{StrBegin="MSB4132: "}LOCALIZATION: {1} contains a comma separated list.</note>
+      </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="translated">MSB5016: 이름 "{0}"에 잘못된 문자 "{1}"이(가) 사용되었습니다.</target>
+        <note>{StrBegin="MSB5016: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.CannotChangeItemSpecModifiers">
+        <source>"{0}" is a reserved item metadata, and cannot be modified or deleted.</source>
+        <target state="translated">"{0}"은(는) 예약된 항목 메타데이터이므로 수정 또는 삭제할 수 없습니다.</target>
+        <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
+      </trans-unit>
+      <trans-unit id="Shared.CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">"{0}" 문자열을 부울 값(true/false)으로 변환할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.FailedCreatingTempFile">
+        <source>MSB5003: Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">MSB5003: 임시 파일을 만들지 못했습니다. 임시 파일 폴더가 꽉 찼거나 경로가 올바르지 않습니다. {0}</target>
+        <note>{StrBegin="MSB5003: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.FailedDeletingTempFile">
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1}</source>
+        <target state="translated">MSB5018: 임시 파일 "{0}"을(를) 삭제하지 못했습니다. {1}</target>
+        <note>{StrBegin="MSB5018: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">항목 메타데이터 "%({0})"을(를) "{1}" 경로에 적용할 수 없습니다. {2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="TaskNotMarshalByRef">
+        <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
+        <target state="translated">MSB4077: "{0}" 작업이 LoadInSeparateAppDomain 특성으로 표시되었지만 MarshalByRefObject에서 파생되지 않습니다. 해당 작업이 MarshalByRefObject 또는 AppDomainIsolatedTask에서 파생되는지 확인하세요.</target>
+        <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">.NET Framework 버전 "{0}"이(가) 지원되지 않습니다. Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 값을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">.NET 4.5 이상에서만 지원되는 Windows SDK를 명시적으로 대상으로 지정하는 경우 .NET Framework 버전 "{0}"이(가) 지원되지 않습니다.  Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 Version45 이상인 값을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkLocationHelper.UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Visual Studio 버전 "{0}"이(가) 지원되지 않습니다.  Microsoft.Build.Utilities.VisualStudioVersion 열거형에서 값을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">"{0}" 경로 및 프레임워크 모니커 "{1}"에서 참조 어셈블리 경로를 생성하는 동안 오류가 발생했습니다. {2}</target>
+        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
+      </trans-unit>
+      <trans-unit id="DirectoryNotFound">
+        <source>Could not find directory path: {0}</source>
+        <target state="translated">디렉터리 경로를 찾을 수 없습니다. {0}</target>
+        <note>Directory must exist</note>
+      </trans-unit>
+      <trans-unit id="UnauthorizedAccess">
+        <source>You do not have access to: {0}</source>
+        <target state="translated">{0}에 액세스할 수 있는 권한이 없습니다.</target>
+        <note>Directory must have access</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">스키마 유효성 검사</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="Shared.KillingProcess">
+        <source>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</source>
+        <target state="translated">MSB5002: 작업 실행 파일이 지정한 제한 시간인 {0}밀리초 안에 완료되지 않았으므로 종료합니다.</target>
+        <note>{StrBegin="MSB5002: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotBeNull">
+        <source>Parameter "{0}" cannot be null.</source>
+        <target state="translated">"{0}" 매개 변수는 null일 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
+        <source>Parameter "{0}" cannot have zero length.</source>
+        <target state="translated">"{0}" 매개 변수의 길이는 0일 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.ParametersMustHaveTheSameLength">
+        <source>Parameters "{0}" and "{1}" must have the same number of elements.</source>
+        <target state="translated">"{0}" 및 "{1}" 매개 변수에는 동일한 수의 요소를 사용해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.TaskResourceNotFound">
+        <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
+        <target state="translated">"{1}" 작업의 리소스 문자열 "{0}"을(를) 찾을 수 없습니다. 리소스 이름 "{0}"의 맞춤법이 올바른지 그리고 리소스가 작업 어셈블리에 있는지 확인하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.TaskResourcesNotRegistered">
+        <source>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</source>
+        <target state="translated">{0} 작업의 리소스가 등록되지 않았습니다. "TaskLoggingHelper.FormatResourceString()" 메서드를 사용하려면 생성 시 또는 "TaskResources" 속성을 통해 이 작업의 리소스를 등록해야 합니다.</target>
+        <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseDuplicateProject">
+        <source>MSB5004: The solution file has two projects named "{0}".</source>
+        <target state="translated">MSB5004: 솔루션 파일에 이름이 "{0}"인 프로젝트가 두 개 있습니다.</target>
+        <note>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameCharacters">
+        <source>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</source>
+        <target state="translated">MSB5005: "{0}" 프로젝트의 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다. 프로젝트 파일 이름 "{1}"에 잘못된 문자가 있습니다.</target>
+        <note>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameEmpty">
+        <source>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</source>
+        <target state="translated">MSB5006: "{0}" 프로젝트의 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다. 프로젝트 파일 이름이 비어 있습니다.</target>
+        <note>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectSolutionConfigurationEntry">
+        <source>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5007: 솔루션 파일의 프로젝트 구성 섹션을 구문 분석하는 동안 오류가 발생했습니다. "{0}" 항목이 잘못되었습니다.</target>
+        <note>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidSolutionConfigurationEntry">
+        <source>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5008: 솔루션 파일의 솔루션 구성 섹션을 구문 분석하는 동안 오류가 발생했습니다. "{0}" 항목이 잘못되었습니다.</target>
+        <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectError">
+        <source>MSB5009: Error parsing the nested project section in solution file.</source>
+        <target state="translated">MSB5009: 솔루션 파일의 중첩된 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectUndefinedError">
+        <source>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</source>
+        <target state="translated">MSB5023: 솔루션 파일의 중첩된 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다. GUID가 "{0}"인 프로젝트는 "{1}" 프로젝트 아래에 중첩되고 있는 것으로 나열되지만 솔루션에 없습니다.</target>
+        <note>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNoHeaderError">
+        <source>MSB5010: No file format header found.</source>
+        <target state="translated">MSB5010: 파일 형식 헤더가 없습니다.</target>
+        <note>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectDepGuidError">
+        <source>MSB5011: Parent project GUID not found in "{0}" project dependency section.</source>
+        <target state="translated">MSB5011: "{0}" 프로젝트 종속성 섹션에 부모 프로젝트 GUID가 없습니다.</target>
+        <note>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectEofError">
+        <source>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</source>
+        <target state="translated">MSB5012: "{0}" 프로젝트 섹션에서 예기치 않은 파일 끝에 도달했습니다.</target>
+        <note>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectError">
+        <source>MSB5013: Error parsing a project section.</source>
+        <target state="translated">MSB5013: 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다.</target>
+        <note>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseVersionMismatchError">
+        <source>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</source>
+        <target state="translated">MSB5014: 파일 형식 버전을 인식할 수 없습니다.  MSBuild는 {0}.0 버전에서 {1}.0 버전까지의 솔루션 파일만 읽을 수 있습니다.</target>
+        <note>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseWebProjectPropertiesError">
+        <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
+        <target state="translated">MSB5015: "{0}" 프로젝트의 WebsiteProperties 섹션에서 속성을 읽을 수 없습니다.</target>
+        <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedSolutionComment">
+        <source>Unrecognized solution version "{0}", attempting to continue.</source>
+        <target state="translated">인식할 수 없는 솔루션 버전 "{0}"입니다. 작업을 계속하려고 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SubCategoryForSolutionParsingErrors">
+        <source>Solution file</source>
+        <target state="translated">솔루션 파일</target>
+        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</note>
+      </trans-unit>
+      <trans-unit id="Shared.InvalidProjectFile">
+        <source>MSB5019: The project file is malformed: "{0}". {1}</source>
+        <target state="translated">MSB5019: 프로젝트 파일의 형식이 잘못되었습니다. "{0}". {1}</target>
+        <note>{StrBegin="MSB5019: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.ProjectFileCouldNotBeLoaded">
+        <source>MSB5020: Could not load the project file: "{0}". {1}</source>
+        <target state="translated">MSB5020: 프로젝트 파일을 로드할 수 없습니다. "{0}". {1}</target>
+        <note>{StrBegin="MSB5020: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.KillingProcessByCancellation">
+        <source>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</source>
+        <target state="translated">MSB5021: 빌드를 취소하기 위해 "{0}" 및 자식 프로세스가 종료되고 있습니다.</target>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="OM_NotSupportedReadOnlyCollection">
+        <source>This collection is read-only.</source>
+        <target state="translated">이 컬렉션은 읽기 전용입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
+        <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
+        <target state="translated">MSB5024: 유효한 MSBuild 위치를 확인할 수 없습니다. Visual Studio용 개발자 명령 프롬프트에서 프로세스를 실행해 보세요.</target>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

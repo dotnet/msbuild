@@ -28,6 +28,9 @@
     <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
     <Compile Include="..\..\Shared\Constants.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

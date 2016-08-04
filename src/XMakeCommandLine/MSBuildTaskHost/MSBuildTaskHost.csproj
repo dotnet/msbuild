@@ -18,8 +18,6 @@
   </PropertyGroup>
 
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
@@ -39,6 +37,9 @@
 
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="..\..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
     <Compile Include="..\..\Shared\AssemblyNameComparer.cs">
       <Link>AssemblyNameComparer.cs</Link>
     </Compile>

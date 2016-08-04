@@ -871,28 +871,24 @@ namespace Microsoft.Build.Shared
         /// Given a ToolsVersion, find the path to the build tools folder for that ToolsVersion. 
         /// </summary>
         /// <param name="toolsVersion">The ToolsVersion to look up</param>
+        /// <param name="architecture">Target build tools architecture.</param>
         /// <returns>The path to the build tools folder for that ToolsVersion, if it exists, or 
         /// null otherwise</returns>
         internal static string GeneratePathToBuildToolsForToolsVersion(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {
-            // Much like when reading toolsets, first check the .exe.config
-            string toolsPath = GetPathToBuildToolsFromConfig(toolsVersion, architecture);
+            if (string.Compare(toolsVersion, MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal) == 0)
+            {
+                return GetPathToBuildToolsFromEnvironment(architecture);
+            }
 
+            string toolsPath = null;
 #if FEATURE_WIN32_REGISTRY
-            if (String.IsNullOrEmpty(toolsPath) && NativeMethodsShared.IsWindows)
-            {
-                // Or if it's not defined there, look it up in the registry
-                toolsPath = GetPathToBuildToolsFromRegistry(toolsVersion, architecture);
-            }
-#endif
-#if !FEATURE_SYSTEM_CONFIGURATION && !FEATURE_REGISTRY_TOOLSETS
-            if (string.IsNullOrEmpty(toolsPath))
-            {
-                toolsPath = FileUtilities.CurrentExecutableDirectory;
-            }
+            // If we're not looking for the current tools version, try the registry.
+            toolsPath = GetPathToBuildToolsFromRegistry(toolsVersion, architecture);
 #endif
 
-            return toolsPath;
+            // If all else fails, always use the current environment.
+            return toolsPath ?? GetPathToBuildToolsFromEnvironment(architecture);
         }
 
         /// <summary>
@@ -981,52 +977,17 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Look up the path to the build tools directory for the requested ToolsVersion in the .exe.config file of this executable 
         /// </summary>
-        private static string GetPathToBuildToolsFromConfig(string toolsVersion, DotNetFrameworkArchitecture architecture)
+        private static string GetPathToBuildToolsFromEnvironment(DotNetFrameworkArchitecture architecture)
         {
-            string toolPath = null;
-
-#if FEATURE_SYSTEM_CONFIGURATION
-            if (ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
+            switch (architecture)
             {
-                string toolsPathPropertyName = architecture == DotNetFrameworkArchitecture.Bitness64
-                    ? MSBuildConstants.ToolsPath64
-                    : MSBuildConstants.ToolsPath;
-
-                try
-                {
-                    Configuration configuration = ReadApplicationConfiguration();
-                    ToolsetConfigurationSection configurationSection = ToolsetConfigurationReaderHelpers.ReadToolsetConfigurationSection(configuration);
-
-                    ToolsetElement toolset = configurationSection?.Toolsets.GetElement(toolsVersion);
-                    PropertyElement toolsPathFromConfiguration = toolset?.PropertyElements.GetElement(toolsPathPropertyName);
-
-                    if (toolsPathFromConfiguration != null)
-                    {
-                        toolPath = toolsPathFromConfiguration.Value;
-
-                        if (toolPath != null)
-                        {
-                            if (!FileUtilities.IsRootedNoThrow(toolPath))
-                            {
-                                toolPath = FileUtilities.NormalizePath(Path.Combine(FileUtilities.CurrentExecutableDirectory, toolPath));
-                            }
-
-                            toolPath = FileUtilities.EnsureTrailingSlash(toolPath);
-                        }
-                    }
-                }
-                catch (ConfigurationException)
-                {
-                    // may happen if the .exe.config contains bad data.  Shouldn't ever happen in 
-                    // practice since we'll long since have loaded all toolsets in the toolset loading 
-                    // code and thrown errors to the user at that point if anything was invalid, but just 
-                    // in case, just eat the exception here, so that we can go on to look in the registry
-                    // to see if there is any valid data there.  
-                }
+                case DotNetFrameworkArchitecture.Bitness64:
+                    return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+                case DotNetFrameworkArchitecture.Bitness32:
+                    return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+                default:
+                    return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
             }
-#endif
-
-            return toolPath;
         }
 
 #if FEATURE_WIN32_REGISTRY
@@ -1152,10 +1113,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
-            var msbuildExeConfig = FileUtilities.CurrentExecutableConfigurationFilePath;
+            var msbuildExeConfig = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
 
             // When running from the command-line or from VS, use the msbuild.exe.config file
-            if (!FileUtilities.RunningTests && File.Exists(msbuildExeConfig))
+            if (!BuildEnvironmentHelper.Instance.RunningTests && File.Exists(msbuildExeConfig))
             {
                 var configFile = new ExeConfigurationFileMap { ExeConfigFilename = msbuildExeConfig };
                 return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);

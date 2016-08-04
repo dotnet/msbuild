@@ -99,12 +99,12 @@ namespace Microsoft.Build.Shared
                         // Apply the appdomain settings to the new appdomain before creating it
                         appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
 
-                        if (FileUtilities.RunningTests)
+                        if (BuildEnvironmentHelper.Instance.RunningTests)
                         {
                             // Prevent the new app domain from looking in the VS test runner location. If this
                             // is not done, we will not be able to find Microsoft.Build.* assemblies.
-                            appDomainInfo.ApplicationBase = FileUtilities.CurrentExecutableDirectory;
-                            appDomainInfo.ConfigurationFile = FileUtilities.CurrentExecutableConfigurationFilePath;
+                            appDomainInfo.ApplicationBase = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+                            appDomainInfo.ConfigurationFile = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
                         }
 
                         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;

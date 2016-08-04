@@ -762,14 +762,33 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
 #pragma warning disable 618 // Disabling warning on using internal ToolLocationHelper API. At some point we should migrate this.
             string toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
-            if (toolPath == null)
-                toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.Version45, VisualStudioVersion.Version110);
-            if (toolPath == null)
-                toolPath = Path.Combine(ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100), "bin", ToolName);
-            if (toolPath == null)
+            if (toolPath == null || !File.Exists(toolPath))
+            {
+                toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.Version45,
+                    VisualStudioVersion.Version110);
+            }
+            if (toolPath == null || !File.Exists(toolPath))
+            {
+                var pathToDotNetFrameworkSdk = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100);
+                if (pathToDotNetFrameworkSdk != null)
+                {
+                    toolPath = Path.Combine(pathToDotNetFrameworkSdk, "bin", ToolName);
+                }
+            }
+            if (toolPath == null || !File.Exists(toolPath))
+            {
+                toolPath = GetVersionIndependentToolPath(ToolName);
+            }
+            if (toolPath == null || !File.Exists(toolPath))
+            {
                 toolPath = Path.Combine(Directory.GetCurrentDirectory(), ToolName);
+            }
             if (!File.Exists(toolPath))
-                throw new ApplicationException(String.Format(CultureInfo.CurrentCulture, resources.GetString("SecurityUtil.SigntoolNotFound"), toolPath));
+            {
+                throw new ApplicationException(String.Format(CultureInfo.CurrentCulture,
+                    resources.GetString("SecurityUtil.SigntoolNotFound"), toolPath));
+            }
+
             return toolPath;
 #pragma warning restore 618
         }
@@ -808,6 +827,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 personalStore.Close();
             }
             return false;
+        }
+
+        private static string GetVersionIndependentToolPath(string toolName)
+        {
+            RegistryKey localMachineKey = Registry.LocalMachine;
+            const string versionIndependentToolKeyName = @"Software\Microsoft\ClickOnce\SignTool";
+
+            using (RegistryKey versionIndependentToolKey = localMachineKey.OpenSubKey(versionIndependentToolKeyName, writable: false))
+            {
+                string versionIndependentToolPath = null;
+
+                if (versionIndependentToolKey != null)
+                {
+                    versionIndependentToolPath = versionIndependentToolKey.GetValue("Path") as string;
+                }
+
+                return versionIndependentToolPath != null ? Path.Combine(versionIndependentToolPath, toolName) : null;
+            }
         }
     }
 }

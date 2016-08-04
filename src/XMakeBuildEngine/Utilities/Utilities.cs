@@ -459,7 +459,7 @@ namespace Microsoft.Build.Internal
             // environment or as a global property.  
 
 #if !FEATURE_INSTALLED_MSBUILD
-            string extensionsPath = Path.Combine(FileUtilities.CurrentExecutableDirectory, ReservedPropertyNames.appLocalExtensionsPathSuffix);
+            string extensionsPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, ReservedPropertyNames.appLocalExtensionsPathSuffix);
             string extensionsPath32 = extensionsPath;
 #else
             // "MSBuildExtensionsPath32". This points to whatever the value of "Program Files (x86)" environment variable is;
@@ -541,7 +541,7 @@ namespace Microsoft.Build.Internal
 
             if (String.IsNullOrEmpty(localAppData))
             {
-                localAppData = FileUtilities.CurrentExecutableDirectory;
+                localAppData = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
             }
 
 

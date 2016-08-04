@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Framework", "Framework\Microsoft.Build.Framework.csproj", "{571F09DB-A81A-4444-945C-6F7B530054CD}"
 EndProject
@@ -55,6 +55,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{144F834D
 		nuget\Microsoft.Build.Tasks.Core.nuspec = nuget\Microsoft.Build.Tasks.Core.nuspec
 		nuget\Microsoft.Build.Utilities.Core.nuspec = nuget\Microsoft.Build.Utilities.Core.nuspec
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildTaskHost", "XMakeCommandLine\MSBuildTaskHost\MSBuildTaskHost.csproj", "{53733ECF-0D81-43DA-B602-2AE9417F614F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -628,11 +630,12 @@ Global
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore|x64.ActiveCfg = Debug-MONO|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore|x86.ActiveCfg = Debug-MONO|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|Any CPU.ActiveCfg = Debug-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x64.ActiveCfg = Debug-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x64.Build.0 = Debug-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x86.ActiveCfg = Debug-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x86.Build.0 = Debug-NetCore-Ubuntu|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|Any CPU.Build.0 = Debug-NetCore|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x64.ActiveCfg = Debug-NetCore|x64
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x64.Build.0 = Debug-NetCore|x64
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x86.ActiveCfg = Debug-NetCore|x86
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore-Ubuntu|x86.Build.0 = Debug-NetCore|x86
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|x64.ActiveCfg = Port-Progress|Any CPU
@@ -651,11 +654,12 @@ Global
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore|Any CPU.ActiveCfg = Release-NetCore|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore|x64.ActiveCfg = Release-MONO|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore|x86.ActiveCfg = Release-MONO|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|Any CPU.ActiveCfg = Release-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x64.ActiveCfg = Release-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x64.Build.0 = Release-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x86.ActiveCfg = Release-NetCore-Ubuntu|Any CPU
-		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x86.Build.0 = Release-NetCore-Ubuntu|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|Any CPU.ActiveCfg = Release-NetCore|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|Any CPU.Build.0 = Release-NetCore|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x64.ActiveCfg = Release-NetCore|x64
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x64.Build.0 = Release-NetCore|x64
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x86.ActiveCfg = Release-NetCore|x86
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release-NetCore-Ubuntu|x86.Build.0 = Release-NetCore|x86
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -764,6 +768,60 @@ Global
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release-NetCore-Ubuntu|x64.Build.0 = Release|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release-NetCore-Ubuntu|x86.ActiveCfg = Release|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release-NetCore-Ubuntu|x86.Build.0 = Release|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x64.ActiveCfg = Debug|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x64.Build.0 = Debug|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x86.ActiveCfg = Debug|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x86.Build.0 = Debug|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|Any CPU.ActiveCfg = Debug-MONO|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|Any CPU.Build.0 = Debug-MONO|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x64.ActiveCfg = Debug-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x64.Build.0 = Debug-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x86.ActiveCfg = Debug-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x86.Build.0 = Debug-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|Any CPU.Build.0 = Debug-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.Build.0 = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore-Ubuntu|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore-Ubuntu|Any CPU.Build.0 = Debug-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore-Ubuntu|x64.ActiveCfg = Debug-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore-Ubuntu|x64.Build.0 = Debug-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore-Ubuntu|x86.ActiveCfg = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore-Ubuntu|x86.Build.0 = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.Build.0 = Port-Progress|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x64.ActiveCfg = Release|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x64.Build.0 = Release|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x86.ActiveCfg = Release|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x86.Build.0 = Release|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|Any CPU.ActiveCfg = Release-MONO|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|Any CPU.Build.0 = Release-MONO|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x64.ActiveCfg = Release-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x64.Build.0 = Release-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x86.ActiveCfg = Release-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x86.Build.0 = Release-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|Any CPU.ActiveCfg = Release-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|Any CPU.Build.0 = Release-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x64.ActiveCfg = Release-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x64.Build.0 = Release-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x86.ActiveCfg = Release-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x86.Build.0 = Release-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore-Ubuntu|Any CPU.ActiveCfg = Release-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore-Ubuntu|Any CPU.Build.0 = Release-NetCore|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore-Ubuntu|x64.ActiveCfg = Release-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore-Ubuntu|x64.Build.0 = Release-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore-Ubuntu|x86.ActiveCfg = Release-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore-Ubuntu|x86.Build.0 = Release-NetCore|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -234,7 +234,7 @@ namespace Microsoft.Build.CommandLine
         {
             string[] newArgArray = new string[args.Length + 1];
 
-            newArgArray[0] = FileUtilities.CurrentExecutablePath;
+            newArgArray[0] = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             Array.Copy(args, 0, newArgArray, 1, args.Length);
 
             return newArgArray;
@@ -482,18 +482,18 @@ namespace Microsoft.Build.CommandLine
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
+            switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
+            {
 #if FEATURE_DEBUG_LAUNCH
-            string debugFlag = Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART");
-            if (debugFlag == "1")
-            {
-                Debugger.Launch();
-            }
-            else if (debugFlag == "2")
-            {
-                // Sometimes easier to attach rather than deal with JIT prompt
-                Console.ReadLine();
-            }
+                case "1":
+                    Debugger.Launch();
+                    break;
 #endif
+                case "2":
+                    // Sometimes easier to attach rather than deal with JIT prompt
+                    Console.ReadLine();
+                    break;
+            }
 
 #if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, "commandLine");
@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_ASSEMBLY_LOCATION
                     parameters.NodeExeLocation = Assembly.GetExecutingAssembly().Location;
 #else
-                    parameters.NodeExeLocation = FileUtilities.CurrentExecutablePath;
+                    parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
                     parameters.MaxNodeCount = cpuCount;
                     parameters.Loggers = projectCollection.Loggers;
@@ -1340,7 +1340,7 @@ namespace Microsoft.Build.CommandLine
 #else
             ArrayList commandLineArgs = new ArrayList(commandLine);
 
-            s_exeName = FileUtilities.CurrentExecutablePath;
+            s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
 
             if (!s_exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))

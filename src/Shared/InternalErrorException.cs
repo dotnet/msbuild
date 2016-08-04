@@ -116,7 +116,7 @@ namespace Microsoft.Build.Shared
             }
 
 #if DEBUG
-            if (!FileUtilities.RunningTests && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
+            if (!BuildEnvironmentHelper.Instance.RunningTests && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
                 && Environment.GetEnvironmentVariable("_NTROOT") == null)
             {
                 LaunchDebugger(message, innerMessage);

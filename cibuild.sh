@@ -8,7 +8,7 @@ usage()
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
     echo "  --host <host>                  CoreCLR or Mono (default: CoreCLR)"
-    echo "  --skip-bootstrap               Do not rebuild msbuild with local binaries"
+    echo "  --bootstrap-only               Do not rebuild msbuild with local binaries"
 }
 
 restoreBuildTools(){
@@ -53,13 +53,13 @@ runMSBuildWith()
     echo
     echo "** using MSBuild in path: $msbuildExe"
     echo "** using runtime host in path: $runtimeHost"
-	echo "** $buildCommand"
+    echo "** $buildCommand"
     eval "$buildCommand"
 
     echo
-	echo "** Build completed. Exit code: $?"
-	egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$logPath"
-	echo "** Log: $logPath"
+    echo "** Build completed. Exit code: $?"
+    egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$logPath"
+    echo "** Log: $logPath"
 }
 
 setMonoDir(){
@@ -69,10 +69,10 @@ setMonoDir(){
     fi
 }
 
-SKIP_BOOTSTRAP=false
+BOOTSTRAP_ONLY=false
 
 # Paths
-THIS_SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+THIS_SCRIPT_PATH="`dirname \"$0\"`"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
 TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.2/mono_msbuild_bootstrap_5e01f07.zip"
@@ -85,7 +85,7 @@ MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
-BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/corerun"'"'
+BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/dotnet"'"'
 MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.exe"'"'
 
 # Default msbuild arguments
@@ -118,8 +118,8 @@ do
         shift 2
         ;;
 
-        --skip-bootstrap)
-        SKIP_BOOTSTRAP=true
+        --bootstrap-only)
+        BOOTSTRAP_ONLY=true
         shift 1
         ;;
 
@@ -148,12 +148,18 @@ case $OS_NAME in
 esac
 
 if [ "$SCOPE" = "Compile" ]; then
-	TARGET_ARG="Build"
+    TARGET_ARG="Build"
 elif [ "$SCOPE" = "Test" ]; then
-	TARGET_ARG="BuildAndTest"
+    TARGET_ARG="BuildAndTest"
 fi
 
 # Determine configuration
+
+# If unspecified, default
+if [ "$target" = "" ]; then
+    target=CoreCLR
+fi
+
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-NetCore
@@ -166,34 +172,41 @@ case $target in
         RUNTIME_HOST_ARGS="--debug"
         ;;
     *)
-        echo "Unsupported target detected: $target. Configuring as if for CoreCLR"
-        CONFIGURATION=Debug-NetCore
+        echo "Unsupported target detected: $target. Aborting."
+        usage
+        exit 1
         ;;
 esac
 
 # Determine runtime host
-until [[ "$RUNTIME_HOST" != "" ]]; do
-      case $host in
-          CoreCLR)
-              RUNTIME_HOST="$TOOLS_DIR/dotnetcli/dotnet"
-              RUNTIME_HOST_ARGS=""
-              MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
-              EXTRA_ARGS="$EXTRA_ARGS /m"
-              ;;
 
-          Mono)
-              setMonoDir
-              RUNTIME_HOST="${MONO_BIN_DIR}mono"
-              MSBUILD_EXE="$PACKAGES_DIR/msbuild/MSBuild.exe"
+# If no host was specified, default to the one that makes sense for
+# the selected target.
+if [ "$host" = "" ]; then
+    host=$target
+fi
 
-              downloadMSBuildForMono
-              ;;
-          *)
-              echo "Unsupported host detected: $host. Configuring as if for CoreCLR"
-              host=CoreCLR
-              ;;
-      esac
-done
+case $host in
+    CoreCLR)
+        RUNTIME_HOST="$TOOLS_DIR/dotnetcli/dotnet"
+        RUNTIME_HOST_ARGS=""
+        MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
+        EXTRA_ARGS="$EXTRA_ARGS /m"
+        ;;
+
+    Mono)
+        setMonoDir
+        RUNTIME_HOST="${MONO_BIN_DIR}mono"
+        MSBUILD_EXE="$PACKAGES_DIR/msbuild/MSBuild.exe"
+
+        downloadMSBuildForMono
+        ;;
+    *)
+        echo "Unsupported host detected: $host. Aborting."
+        usage
+        exit 1
+        ;;
+esac
 
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
@@ -202,10 +215,10 @@ setHome
 restoreBuildTools
 
 echo
-echo "** Rebuilding MSBuild with binaries from BuildTools"
+echo "** Rebuilding MSBuild with downloaded binaries"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
 
-if [[ $SKIP_BOOTSTRAP = true ]]; then
+if [[ $BOOTSTRAP_ONLY = true ]]; then
     exit $?
 fi
 
@@ -213,6 +226,12 @@ echo
 echo "** Moving bootstrapped MSBuild to the bootstrap folder"
 MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUILD_ARGS" "$MOVE_LOG_PATH"
+
+# Use the "current" coreclr runtime host; the one in tools/ may be
+# stale and incompatible.
+if [[ "$host" = "CoreCLR" ]]; then
+    RUNTIME_HOST=$BOOTSTRAPPED_RUNTIME_HOST
+fi
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
