@@ -8,6 +8,7 @@
         "commands/dotnet-new/CSharp_Lib.zip",
         "commands/dotnet-new/CSharp_xunittest.zip",
         "commands/dotnet-new/CSharp_Web.zip",
+        "commands/dotnet-new/CSharp_nunittest.zip",
         "commands/dotnet-new/FSharp_Console.zip",
         "commands/dotnet-new/FSharp_Lib.zip"
       ]
@@ -19,7 +20,8 @@
         "commands/dotnet-new/CSharp_Web/**",
         "commands/dotnet-new/CSharp_Lib/**",
         "commands/dotnet-new/FSharp_Lib/**",
-        "commands/dotnet-new/CSharp_xunittest/**"
+        "commands/dotnet-new/CSharp_xunittest/**",
+        "commands/dotnet-new/CSharp_nunittest/**"
       ]
     }
   },

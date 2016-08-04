@@ -8,23 +8,22 @@ using FluentAssertions;
 namespace Microsoft.DotNet.Tests
 {
     [Collection("'dotnet test' collection")]
-    public class GivenThatIWantANewCSxUnitProject : TestBase
+    public class GivenThatIWantANewCSnUnitProject : TestBase
     {
         
         [Fact]
-        public void When_xUnit_project_created_Then_project_restores()
+        public void When_nUnit_project_created_Then_project_restores()
         {
             var rootPath = Temp.CreateDirectory().Path;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("new --type xunittest")
+                .Execute("new --type nunittest")
                 .Should()
                 .Pass();
             
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute("restore")
                 .Should().Pass();
-            
         }
 
         [Fact]
@@ -33,7 +32,7 @@ namespace Microsoft.DotNet.Tests
             var rootPath = Temp.CreateDirectory().Path;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("new --type xunittest");
+                .Execute("new --type nunittest");
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute("restore");

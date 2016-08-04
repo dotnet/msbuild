@@ -32,6 +32,7 @@ Type of the project. Valid values for C# are:
 * `web`
 * `lib`
 * `xunittest`
+* `nunittest`
 
 Valid values for F# are:
 
