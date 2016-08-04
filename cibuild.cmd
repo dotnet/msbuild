@@ -140,6 +140,6 @@ exit /b 1
 :error
 echo.
 echo ---------------------------------------
-echo - RebuildWithLocalMSBuild.cmd FAILED. -
+echo - cibuild.cmd FAILED. -
 echo ---------------------------------------
 exit /b 1
