@@ -31,6 +31,14 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            public List<ProjectItemElement> EvaluatedItemElements
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
             public ICollection<I> GetItems(string itemType)
             {
                 return _itemGetter(itemType);
