@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Common
 {

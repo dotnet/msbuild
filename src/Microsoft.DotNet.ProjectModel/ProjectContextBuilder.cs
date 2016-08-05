@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using NuGet.Common;

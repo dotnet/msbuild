@@ -48,9 +48,7 @@ namespace Microsoft.DotNet.Tests
                 .WithWorkingDirectory(rootPath)
                 .ExecuteWithCapturedOutput("test")
                 .Should()
-                .Pass()
-                .And
-                .NotHaveStdErr();
+                .Pass();
         }
 
 
