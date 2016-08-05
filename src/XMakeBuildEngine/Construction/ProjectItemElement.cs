@@ -40,6 +40,11 @@ namespace Microsoft.Build.Construction
         private string _remove;
 
         /// <summary>
+        /// Update value cached for performance
+        /// </summary>
+        private string _update;
+
+        /// <summary>
         /// Whether the include value has wildcards, 
         /// cached for performance.
         /// </summary>
@@ -94,7 +99,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Remove.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0) , "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.include, value);
                 _include = value;
                 _includeHasWildcards = null;
@@ -124,6 +129,7 @@ namespace Microsoft.Build.Construction
             set
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Remove.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.exclude, XMakeAttributes.remove);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Update.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.exclude, XMakeAttributes.update);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.exclude, value);
                 _exclude = value;
                 MarkDirty("Set item Exclude {0}", value);
@@ -151,11 +157,33 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement, "OM_NoRemoveOutsideTargets");
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Include.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Include.Length == 0 && Update.Length == 0), "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.remove, value);
                 _remove = value;
                 MarkDirty("Set item Remove {0}", value);
+            }
+        }
+
+        public string Update
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                // No thread-safety lock required here because many reader threads would set the same value to the field.
+                if (_update == null)
+                {
+                    _update = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.update);
+                }
+
+                return _update;
+            }
+
+            set
+            {
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Include.Length == 0), "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
+                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.update, value);
+                _update = value;
+                MarkDirty("Set item Update {0}", value);
             }
         }
 

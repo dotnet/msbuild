@@ -166,6 +166,10 @@
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
     <Compile Include="Evaluation\ProjectChangedEventArgs.cs" />
     <Compile Include="Evaluation\ProjectXmlChangedEventArgs.cs" />
@@ -666,6 +670,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
