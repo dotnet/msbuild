@@ -1,0 +1,19 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="OutDir;Configuration">
+  <!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
+  <!-- This file is imported by all projects at the beginning of the project files -->
+
+  <PropertyGroup>
+    <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+
+    <OutDir Condition="'$(OutDir)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutDir>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
+
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
+    <VersionSuffix Condition="'$(VersionSuffix)' == ''">alpha-00001</VersionSuffix>
+    <Version Condition="'$(Version)' == ''">$(VersionPrefix)-$(VersionSuffix)</Version>
+    
+    <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
+    <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
+  </PropertyGroup>
+</Project>

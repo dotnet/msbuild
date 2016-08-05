@@ -47,9 +47,6 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet restore $RepoRoot
-if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
-
 # TODO: https://github.com/dotnet/sdk/issues/13 add back `/m` when the MSBuild hang is fixed
-dotnet build3 $RepoRoot\core-sdk.sln /nologo /p:Configuration=$Configuration /p:Platform=$Platform
+dotnet build3 $RepoRoot\build\build.proj /nologo /p:Configuration=$Configuration /p:Platform=$Platform
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
