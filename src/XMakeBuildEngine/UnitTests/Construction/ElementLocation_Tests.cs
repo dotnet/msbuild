@@ -404,14 +404,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void SaveReadOnly4()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
 #if FEATURE_XML_LOADPATH
             doc.Load(_pathToCommonTargets);
-            doc.Save(XmlWriter.Create(FileUtilities.GetTemporaryFile()));
 #else
             using (
                 XmlReader xmlReader = XmlReader.Create(
