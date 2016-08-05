@@ -1,0 +1,12 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <AssemblyPath Condition="'$(AssemblyPath)' == ''">TaskWithDependency.dll</AssemblyPath>
+  </PropertyGroup>
+  
+  <UsingTask TaskName="LogStringFromDependency" AssemblyFile="$(AssemblyPath)"/>
+  <Target Name="Build">
+    <Message Text="Loading task from: $(AssemblyPath)"/>
+    <LogStringFromDependency />
+  </Target>
+</Project>

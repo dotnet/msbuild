@@ -8,7 +8,7 @@
     <RootNamespace>TaskUsageLogger</RootNamespace>
     <AssemblyName>TaskUsageLogger</AssemblyName>
     <FileAlignment>512</FileAlignment>
-	<CopyNuGetImplementations>false</CopyNuGetImplementations> 
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -33,7 +33,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\src\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
-      <Name>Microsoft.Build.Utilities.Core</Name>
+      <Name>Microsoft.Build.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,8 @@
 
   <ItemGroup>    
     <Project Include="PortableTask\PortableTask.csproj" />
+    <Project Include="Dependency\Dependency.csproj" />
+    <Project Include="TaskWithDependency\TaskWithDependency.csproj" />
   </ItemGroup>
 
   <Import Project="..\dir.traversal.targets" />
