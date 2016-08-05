@@ -841,16 +841,12 @@ namespace Microsoft.Build.Evaluation
                             _data.AddToAllEvaluatedItemsList(itemData.Item);
                         }
                     }
-                }
 
-                if (_data.ShouldEvaluateForDesignTime)
-                {
-                    foreach (var itemData in items)
+                    if (_data.ShouldEvaluateForDesignTime)
                     {
                         _data.AddItemIgnoringCondition(itemData.Item);
                     }
                 }
-
             }
 
 #if (!STANDALONEBUILD)
