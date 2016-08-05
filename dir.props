@@ -47,7 +47,7 @@
     <ToolsDir>$(RepoRoot)Tools$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
     <MicroBuildDir>$(ToolPackagesDir)\MicroBuild.Core\$(MicroBuildVersion)\build\</MicroBuildDir>
-    <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning.$(GitVersioningVersion)\build\</GitVersioningDir>
+    <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning\$(GitVersioningVersion)\build\</GitVersioningDir>
 
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
     <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>

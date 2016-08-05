@@ -700,9 +700,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Verifies that the Save method saves an otherwise unmodified project
         /// with a specified file encoding.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
         public void SaveUnmodifiedWithNewEncoding()
         {
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"

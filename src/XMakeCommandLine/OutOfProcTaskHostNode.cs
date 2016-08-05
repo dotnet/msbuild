@@ -736,10 +736,17 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.Disconnect();
 
             // Dispose these WaitHandles
+#if CLR2COMPATIBILITY
+            _packetReceivedEvent.Close();
+            _shutdownEvent.Close();
+            _taskCompleteEvent.Close();
+            _taskCancelledEvent.Close();
+#else
             _packetReceivedEvent.Dispose();
             _shutdownEvent.Dispose();
             _taskCompleteEvent.Dispose();
             _taskCancelledEvent.Dispose();
+#endif
 
             return _shutdownReason;
         }

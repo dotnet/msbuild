@@ -279,7 +279,11 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+#if CLR2COMPATIBILITY
+                taskRunnerFinished.Close();
+#else
                 taskRunnerFinished.Dispose();
+#endif
                 taskRunnerFinished = null;
             }
 

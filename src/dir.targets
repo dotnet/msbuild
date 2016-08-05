@@ -50,8 +50,12 @@
     <StartAction>Program</StartAction>
   </PropertyGroup>
 
-  <!-- TODO: re-enable Versioning https://github.com/Microsoft/msbuild/issues/694
-       <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" /> -->
+  <!-- TODO: enable for all runtime hosts https://github.com/Microsoft/msbuild/issues/694 -->
+  <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets"
+          Condition="'$(MSBuildRuntimeType)' == 'Desktop'" />
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' != 'Desktop'">
+    <DefineConstants>$(DefineConstants);STATIC_VERSION_NUMBER</DefineConstants>
+  </PropertyGroup>
 
   <!-- Restore packages -->
   <PropertyGroup>

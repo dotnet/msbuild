@@ -445,7 +445,11 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
+#if CLR2COMPATIBILITY
+                    delegateMethod = Delegate.CreateDelegate(type, firstArgument, methodInfo);
+#else
                     delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
+#endif
                 }
                 catch (FileLoadException)
                 {

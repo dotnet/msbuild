@@ -613,17 +613,42 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// System information, initialized when required.
         /// </summary>
-        private static readonly Lazy<SystemInformationData> SystemInformation = new Lazy<SystemInformationData>(true);
+        /// <remarks>
+        /// Initially implemented as <see cref="Lazy{SystemInformationData}"/>, but
+        /// that's .NET 4+, and this is used in MSBuildTaskHost.
+        /// </remarks>
+        private static SystemInformationData SystemInformation
+        {
+            get
+            {
+                if (!_systemInformationInitialized)
+                {
+                    lock (SystemInformationLock)
+                    {
+                        if (!_systemInformationInitialized)
+                        {
+                            _systemInformation = new SystemInformationData();
+                            _systemInformationInitialized = true;
+                        }
+                    }
+                }
+                return _systemInformation;
+            }
+        }
+
+        private static SystemInformationData _systemInformation;
+        private static bool _systemInformationInitialized;
+        private static readonly object SystemInformationLock = new object();
 
         /// <summary>
         /// Architecture getter
         /// </summary>
-        internal static ProcessorArchitectures ProcessorArchitecture => SystemInformation.Value.ProcessorArchitectureType;
+        internal static ProcessorArchitectures ProcessorArchitecture => SystemInformation.ProcessorArchitectureType;
 
         /// <summary>
         /// Native architecture getter
         /// </summary>
-        internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.Value.ProcessorArchitectureTypeNative;
+        internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
 
         #endregion
 
@@ -1051,6 +1076,7 @@ namespace Microsoft.Build.Shared
         internal static int GetParentProcessId(int processId)
         {
             int ParentID = 0;
+#if !CLR2COMPATIBILITY
             if (IsUnixLike)
             {
                 string line = null;
@@ -1080,6 +1106,7 @@ namespace Microsoft.Build.Shared
                 }
             }
             else
+#endif
             {
                 SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
 
