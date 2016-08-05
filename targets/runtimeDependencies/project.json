@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "xunit": "2.1.0",
-    "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00520-01"
+    "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09"
   },
   "frameworks": {
     "net46": {
