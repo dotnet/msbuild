@@ -1643,7 +1643,15 @@ namespace Microsoft.Build.Evaluation
 
             if (lazyEvaluator != null)
             {
-                lazyEvaluator.ProcessItemElement(_projectRootElement.DirectoryPath, itemElement, itemGroupConditionResult && itemConditionResult);
+                var conditionResult = itemGroupConditionResult && itemConditionResult;
+
+                lazyEvaluator.ProcessItemElement(_projectRootElement.DirectoryPath, itemElement, conditionResult);
+
+                if (conditionResult)
+                {
+                    _data.EvaluatedItemElements.Add(itemElement);
+                }
+
                 return;
             }
             
