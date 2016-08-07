@@ -1,4 +1,22 @@
+<!--
+***********************************************************************************************
+Microsoft.DotNet.Core.Sdk.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MicrosoftDotNetCoreBuildTasksDirectory>$(MSBuildThisFileDirectory)../../tools/netstandard1.3/</MicrosoftDotNetCoreBuildTasksDirectory>
+    <MicrosoftDotNetCoreBuildTasksAssembly>$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll</MicrosoftDotNetCoreBuildTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
 
   <PropertyGroup>
     <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
@@ -8,5 +26,102 @@
     <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
     <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(OutputType)' == 'exe' ">true</GenerateRuntimeConfigurationFiles>
+    <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
+    
+    <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
+    <VersionSuffix Condition=" '$(VersionSuffix)' == '' "></VersionSuffix>
+    <Version Condition=" '$(Version)' == '' and '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
+    <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_ProjectLockFilePath>$(MSBuildProjectDirectory)/project.lock.json</_ProjectLockFilePath>
+    <_ProjectDepsFilePath>$(TargetDir)$(AssemblyName).deps.json</_ProjectDepsFilePath>
+    <_ProjectRuntimeConfigFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFilePath>
+    <_ProjectRuntimeConfigDevFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</_ProjectRuntimeConfigDevFilePath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CoreBuildDependsOn>
+      $(CoreBuildDependsOn);
+      GenerateDependencyFile;
+      GenerateRuntimeConfigurationFiles
+    </CoreBuildDependsOn>
+  </PropertyGroup>
+
+  <!--
+    ============================================================
+                                        GenerateDependencyFile
+
+    Generates the $(project).deps.json file
+    ============================================================
+    -->
+
+  <Target Name="GenerateDependencyFile"
+          Condition=" '$(GenerateDependencyFile)' == 'true'"
+          Inputs="$(_ProjectLockFilePath)"
+          Outputs="$(_ProjectDepsFilePath)">
+
+    <!--
+    TODO: https://github.com/dotnet/sdk/issues/19 - Get RuntimeIdentifier
+    -->
+    <GenerateDepsFile LockFilePath="$(_ProjectLockFilePath)"
+                      DepsFilePath="$(_ProjectDepsFilePath)"
+                      TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                      AssemblyName="$(AssemblyName)"
+                      AssemblyVersion="$(Version)"
+                      RuntimeIdentifier="" />
+
+    <!--
+    TODO: https://github.com/dotnet/sdk/issues/21
+    When OutputType == 'exe' and !IsPortable, we need to verify CoreClr is present in the deps graph, and copy in a host to the output
+    See https://github.com/dotnet/cli/blob/6b54ae0bcc5c63e7c989ac19d851f234f9172bea/src/Microsoft.DotNet.Compiler.Common/Executable.cs#L102-L107
+    -->
+  </Target>
+
+  <!--
+    ============================================================
+                                        GenerateRuntimeConfigurationFiles
+
+    Generates the $(project).runtimeconfig.json and $(project).runtimeconfig.dev.json files
+    ============================================================
+    -->
+
+  <Target Name="GenerateRuntimeConfigurationFiles"
+          Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
+          Inputs="$(_ProjectLockFilePath);$(UserRuntimeConfig)"
+          Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
+
+    <GenerateRuntimeConfigurationFiles LockFilePath="$(_ProjectLockFilePath)"
+                                       RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
+                                       RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
+                                       UserRuntimeConfig="$(UserRuntimeConfig)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        GetRunInformation
+
+    Returns the ProcessStart information that can be used to run this project.
+    ============================================================
+    -->
+
+  <Target Name="GetRunInformation"
+          DependsOnTargets="GenerateRunInformation"
+          Outputs="@(RunInformation)" />
+
+  <Target Name="GenerateRunInformation">
+    <ItemGroup>
+      <RunInformation Include="$(MSBuildProjectFullPath)">
+        <!-- TODO: https://github.com/dotnet/sdk/issues/20 Need to get the DotNetHost path from MSBuild -->
+        <CommandName>dotnet</CommandName>
+        <Args>exec;$(TargetDir)/$(AssemblyName).dll</Args>
+      </RunInformation>
+    </ItemGroup>
+  </Target>
 
 </Project>
