@@ -26,9 +26,9 @@
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ],
       "dependencies": {
-        "Microsoft.Build.Framework": "0.1.0-preview-00024-160610",
-        "Microsoft.Build.Tasks.Core": "0.1.0-preview-00024-160610",
-        "Microsoft.Build.Utilities.Core": "0.1.0-preview-00024-160610"
+        "Microsoft.Build.Framework": "0.1.0-preview-00029-160805",
+        "Microsoft.Build.Tasks.Core": "0.1.0-preview-00029-160805",
+        "Microsoft.Build.Utilities.Core": "0.1.0-preview-00029-160805"
       }
     }
   }
