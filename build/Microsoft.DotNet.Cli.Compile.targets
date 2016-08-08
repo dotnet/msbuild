@@ -225,5 +225,12 @@
           DestinationFiles="@(FilesToCopy->'$(StageSymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <Delete Files="@(PdbsToClean)" />
+
+      <!-- workaround for https://github.com/Microsoft/msbuild/issues/872 -->
+      <Copy SourceFiles="$(RepoRoot)/resources/MSBuild.exe.config"
+            DestinationFiles="$(SdkOutputDirectory)/MSBuild.exe.config" />
+
+      <Copy SourceFiles="$(RepoRoot)/resources/MSBuild.exe.config"
+            DestinationFiles="$(MSBuildTargetsDirectory)/MSBuild.exe.config" />
   </Target>
 </Project>
