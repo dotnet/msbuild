@@ -15,5 +15,7 @@
     
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
+
+    <NuGet_Packages Condition=" '$(NuGet_Packages)' == ''">$(RepositoryRootDirectory)packages\</NuGet_Packages>
   </PropertyGroup>
 </Project>
