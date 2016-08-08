@@ -191,7 +191,7 @@ case $host in
         RUNTIME_HOST="$TOOLS_DIR/dotnetcli/dotnet"
         RUNTIME_HOST_ARGS=""
         MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
-        EXTRA_ARGS="$EXTRA_ARGS /m"
+        EXTRA_ARGS="$EXTRA_ARGS"
         ;;
 
     Mono)
