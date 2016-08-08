@@ -60,6 +60,13 @@ namespace Microsoft.DotNet.Cli.Compiler.Common.Tests
             var mockedLibraryAssetFileName = $"{mockedLibraryAssetName}.dll";
 
             var fakeFile = Path.Combine(AppContext.BaseDirectory, mockedLibraryAssetFileName);
+
+            if (File.Exists(fakeFile))
+            {
+                File.SetAttributes(fakeFile, FileAttributes.Normal);
+                File.Delete(fakeFile);
+            }
+
             File.WriteAllText(fakeFile, mockedLibraryAssetName);
 
             return new LibraryAsset(mockedLibraryAssetName, mockedLibraryAssetFileName, fakeFile);
