@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         // Target Metadata
         internal const string RuntimeIdentifier = "RuntimeIdentifier";
-        internal const string TargetFramework = "TargetFramework";
+        internal const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
         internal const string FrameworkName = "FrameworkName";
         internal const string FrameworkVersion = "FrameworkVersion";
 

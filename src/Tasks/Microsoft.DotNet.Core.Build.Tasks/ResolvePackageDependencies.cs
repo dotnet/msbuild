@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             {
                 item = new TaskItem(target.Name);
                 item.SetMetadata(MetadataKeys.RuntimeIdentifier, target.RuntimeIdentifier ?? string.Empty);
-                item.SetMetadata(MetadataKeys.TargetFramework, target.TargetFramework.DotNetFrameworkName);
+                item.SetMetadata(MetadataKeys.TargetFrameworkMoniker, target.TargetFramework.DotNetFrameworkName);
                 item.SetMetadata(MetadataKeys.FrameworkName, target.TargetFramework.Framework);
                 item.SetMetadata(MetadataKeys.FrameworkVersion, target.TargetFramework.Version.ToString());
 
