@@ -11,7 +11,7 @@ The `xplat` branch is soon to be merged back upstream. Follow the [The Great Mer
 
 | Configuration | Windows | Ubuntu |Mac OS X|
 |:------|:------:|:------:|:------:|
-| **Full Framework** | [![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_Windows_NT_CoreCLR)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Windows_NT_CoreCLR/) | N/A | N/A |
+| **Full Framework** |[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_Windows_NT_Desktop)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Windows_NT_Desktop/)| N/A | N/A |
 |**.NET Core**|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_Windows_NT_CoreCLR)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Windows_NT_CoreCLR/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_Ubuntu_CoreCLR)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Ubuntu_CoreCLR/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_OSX_CoreCLR)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_OSX_CoreCLR/)|
 
 [![Join the chat at https://gitter.im/Microsoft/msbuild](https://badges.gitter.im/Microsoft/msbuild.svg)](https://gitter.im/Microsoft/msbuild?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
