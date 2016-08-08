@@ -50,24 +50,10 @@
   </Target>
 
   <Target Name="BuildDotnetCliBuildFramework"
-          Inputs="@(DotnetCliBuildFrameworkInputs)"
-          Outputs="$(CLIBuildDll)"
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <ItemGroup>
-      <DotnetSdkDirectories Include="$([System.IO.Directory]::GetDirectories(&quot;$(Stage0Directory)/sdk&quot;))" />
-      <AzureStorageToCopy Include="@(DotnetSdkDirectories)">
-        <Source>$(DotnetCliBuildDirectory)/bin/Microsoft.WindowsAzure.Storage.dll</Source>
-        <Destination>%(Identity)/Microsoft.WindowsAzure.Storage.dll</Destination>
-      </AzureStorageToCopy>
-    </ItemGroup>
-
     <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
-
-    <!-- This is a work around to issue https://github.com/Microsoft/msbuild/issues/658 -->
-    <Copy SourceFiles="%(AzureStorageToCopy.Source)"
-          DestinationFiles="%(AzureStorageToCopy.Destination)" />
   </Target>
 
   <Target Name="RestoreDotnetCliBuildFramework"

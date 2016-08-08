@@ -3,7 +3,7 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build
 {
