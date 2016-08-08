@@ -115,6 +115,16 @@ function Get-Version-Info-From-Version-Text([string]$VersionText) {
     return $VersionInfo
 }
 
+function Load-Assembly([string] $Assembly) {
+    try {
+        Add-Type -Assembly $Assembly | Out-Null
+    }
+    catch {
+        # On Nano Server, Powershell Core Edition is used.  Add-Type is unable to resolve base class assemblies because they are not GAC'd.
+        # Loading the base class assemblies is not unnecessary as the types will automatically get resolved.
+    }
+}
+
 function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [string]$CLIArchitecture) {
     Say-Invocation $MyInvocation
 
@@ -128,7 +138,7 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [str
     
     try {
         # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
-        Add-Type -Assembly System.Net.Http | Out-Null
+        Load-Assembly -Assembly System.Net.Http
         $HttpClient = New-Object System.Net.Http.HttpClient
         $Response = $HttpClient.GetAsync($VersionFileUrl).Result
         $StringContent = $Response.Content.ReadAsStringAsync().Result
@@ -292,13 +302,7 @@ function Get-List-Of-Directories-And-Versions-To-Unpack-From-Dotnet-Package([Sys
 function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     Say-Invocation $MyInvocation
 
-    try {
-        Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
-    }
-    catch {
-        # Loading FileSystem is unnecessary and will fail on Nano Server
-    }
-
+    Load-Assembly -Assembly System.IO.Compression.FileSystem
     Set-Variable -Name Zip
     try {
         $Zip = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
@@ -328,7 +332,7 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
 function DownloadFile([Uri]$Uri, [string]$OutPath) {
     try {
         # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
-        Add-Type -Assembly System.Net.Http | Out-Null
+        Load-Assembly -Assembly System.Net.Http
         $HttpClient = New-Object System.Net.Http.HttpClient
         $Stream = $HttpClient.GetAsync($Uri).Result.Content.ReadAsStreamAsync().Result
         $File = [System.IO.File]::Create($OutPath)
