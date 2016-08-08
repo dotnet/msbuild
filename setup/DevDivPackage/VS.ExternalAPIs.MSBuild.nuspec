@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <id>VS.ExternalAPIs.MSBuild.$architecture$</id>
-    <summary>CoreXT package for the VS build.</summary>
-    <description>CoreXT package for the VS build.</description>
+    <id>VS.ExternalAPIs.MSBuild</id>
+    <summary>CoreXT package containing MSBuild binaries for the VS build.</summary>
+    <description>CoreXT package containing MSBuild binaries for the VS build. Produced from the MSBuild $branchname$ branch.</description>
     <authors>MSBuild</authors>
     <version>0.0</version>
   </metadata>
