@@ -2,6 +2,11 @@
   <!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
   <!-- This file is imported by all projects at the beginning of the project files -->
 
+  <!-- Project language -->
+  <PropertyGroup Condition="'$(ProjectLanguage)' == ''">
+    <ProjectLanguage Condition="'$(MSBuildProjectExtension)' == '.csproj' OR '$(Language)' == 'C#'">CSharp</ProjectLanguage>
+  </PropertyGroup>
+  
   <PropertyGroup>
     <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

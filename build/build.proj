@@ -5,6 +5,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Directory.Build.props'))\Directory.Build.props" />
 
   <PropertyGroup>
+    <TestsDirectory>$(RepositoryRootDirectory)bin\$(Configuration)\Tests\</TestsDirectory>
+
     <CommonMSBuildGlobalProperties>
       Configuration=$(Configuration);
     </CommonMSBuildGlobalProperties>
@@ -64,7 +66,37 @@
              />
   </Target>
 
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;BuildNuGetPackages" />
-  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;RebuildNuGetPackages" />
+  <Target Name="Test">
+
+    <ItemGroup>
+      <TestAssembly Include="$(TestsDirectory)*Tests.dll" />
+      <XmlTestFile Include="$(TestsDirectory)TestResults.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProductAssets Include="$(OutDir)\*" />
+    </ItemGroup>
+    
+    <Message Text="Running tests for %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
+
+    <!-- Copy all the product assemblies to the test directory, so the tests can load them. -->
+    <Copy SourceFiles="@(ProductAssets)"
+          DestinationFolder="$(TestsDirectory)"
+          />
+    
+    <Exec Command="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;"
+          LogStandardErrorAsError="true"
+          WorkingDirectory="$(TestsDirectory)"
+          IgnoreExitCode="true"
+          >
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+    </Exec>
+
+    <Error Text="There were test failures, for full log see %(XmlTestFile.FullPath)" Condition="$(ExitCode) == 1" />
+
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;BuildNuGetPackages;Test" />
+  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;RebuildNuGetPackages;Test" />
 
 </Project>

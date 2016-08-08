@@ -76,6 +76,11 @@
         <TFM>netstandard1.0</TFM>
       </CopyLocalAssembly>
 
+      <CopyLocalAssembly Include="System.Runtime.Serialization.Primitives">
+        <Version>4.1.1</Version>
+        <TFM>netstandard1.3</TFM>
+      </CopyLocalAssembly>
+
       <CopyLocalAssembly>
         <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.Identity)\%(CopyLocalAssembly.Version)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
       </CopyLocalAssembly>
