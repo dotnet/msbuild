@@ -28,7 +28,7 @@ if not defined RUNTIME_HOST (
 	    exit /b 1
 	)
 ) ELSE (
-	set BUILD_COMMAND= "%RUNTIME_HOST%" "%MSBUILD_CUSTOM_PATH%" %MSBUILD_ARGS%
+	set BUILD_COMMAND= "%RUNTIME_HOST%" "%MSBUILD_CUSTOM_PATH%" %MSBUILD_ARGS% /p:"OverrideToolHost=%RUNTIME_HOST%"
 )
 
 echo.

@@ -49,7 +49,7 @@ if not defined HOST (
 
 set RUNTIME_HOST=
 if /i "%HOST%"=="CoreCLR" (
-    set RUNTIME_HOST=%~dp0Tools\CoreRun.exe
+    set RUNTIME_HOST=%~dp0Tools\DotNetCLI\Dotnet.exe
     set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
 ) else if /i "%HOST%"=="Desktop" (
     set RUNTIME_HOST=
@@ -101,7 +101,7 @@ set MSBUILDLOGPATH=%~dp0msbuild_local_build.log
 :: downloaded as part of its NuGet package references, rather
 :: than the possibly-stale one from Tools.
 if /i "%TARGET%"=="CoreCLR" (
-    set RUNTIME_HOST="%~dp0bin\Bootstrap\CoreRun.exe"
+    set RUNTIME_HOST=%~dp0Tools\DotNetCLI\Dotnet.exe
 )
 
 if /i "%TARGET%"=="CoreCLR" (

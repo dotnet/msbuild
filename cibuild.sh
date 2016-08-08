@@ -53,13 +53,13 @@ runMSBuildWith()
     echo
     echo "** using MSBuild in path: $msbuildExe"
     echo "** using runtime host in path: $runtimeHost"
-	echo "** $buildCommand"
+    echo "** $buildCommand"
     eval "$buildCommand"
 
     echo
-	echo "** Build completed. Exit code: $?"
-	egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$logPath"
-	echo "** Log: $logPath"
+    echo "** Build completed. Exit code: $?"
+    egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$logPath"
+    echo "** Log: $logPath"
 }
 
 setMonoDir(){
@@ -72,7 +72,7 @@ setMonoDir(){
 BOOTSTRAP_ONLY=false
 
 # Paths
-THIS_SCRIPT_PATH="`dirname \"$0\"`"
+THIS_SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
 TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.2/mono_msbuild_bootstrap_5e01f07.zip"
@@ -85,7 +85,7 @@ MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
-CORERUN_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/corerun"'"'
+BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/dotnet"'"'
 MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.exe"'"'
 
 # Default msbuild arguments
@@ -148,9 +148,9 @@ case $OS_NAME in
 esac
 
 if [ "$SCOPE" = "Compile" ]; then
-	TARGET_ARG="Build"
+    TARGET_ARG="Build"
 elif [ "$SCOPE" = "Test" ]; then
-	TARGET_ARG="BuildAndTest"
+    TARGET_ARG="BuildAndTest"
 fi
 
 # Determine configuration
@@ -188,7 +188,7 @@ fi
 
 case $host in
     CoreCLR)
-        RUNTIME_HOST="$TOOLS_DIR/corerun"
+        RUNTIME_HOST="$TOOLS_DIR/dotnetcli/dotnet"
         RUNTIME_HOST_ARGS=""
         MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
         EXTRA_ARGS="$EXTRA_ARGS /m"
@@ -208,7 +208,7 @@ case $host in
         ;;
 esac
 
-BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS"
+BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
 setHome
 
@@ -224,14 +224,8 @@ fi
 
 echo
 echo "** Moving bootstrapped MSBuild to the bootstrap folder"
-MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal"
+MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUILD_ARGS" "$MOVE_LOG_PATH"
-
-# Use the "current" coreclr runtime host; the one in tools/ may be
-# stale and incompatible.
-if [[ "$host" = "CoreCLR" ]]; then
-    RUNTIME_HOST=$CORERUN_BOOTSTRAPPED_EXE
-fi
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"

@@ -38,8 +38,8 @@
   <!-- Debugging support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
-    <TestHost Condition="'$(OsEnvironment)' == 'Windows_NT'">CoreRun.exe</TestHost>
-    <TestHost Condition="'$(OsEnvironment)' != 'Windows_NT'">corerun</TestHost>
+    <TestHost Condition="'$(OsEnvironment)' == 'Windows_NT'">dotnet.exe</TestHost>
+    <TestHost Condition="'$(OsEnvironment)' != 'Windows_NT'">dotnet</TestHost>
     <StartProgram Condition="'$(StartProgram)'==''">$(DeploymentDir)\$(TestHost)</StartProgram>
     <StartArguments>msbuild.exe</StartArguments>
   </PropertyGroup>
