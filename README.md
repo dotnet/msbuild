@@ -9,7 +9,7 @@ Full framework build from `master` (stable, inserted into Visual Studio builds):
 
 The `xplat` branch is soon to be merged back upstream. Follow the [The Great Merge](https://github.com/Microsoft/msbuild/milestone/6) milestone for progress.
 
-| Configuration | Windows | Ubuntu |Mac OS X|
+| Runtime\OS | Windows | Ubuntu |Mac OS X|
 |:------|:------:|:------:|:------:|
 | **Full Framework** |[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_Windows_NT_Desktop)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Windows_NT_Desktop/)| N/A | N/A |
 |**.NET Core**|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_Windows_NT_CoreCLR)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Windows_NT_CoreCLR/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_Ubuntu_CoreCLR)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_Ubuntu_CoreCLR/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=Microsoft_msbuild/innerloop_xplat_OSX_CoreCLR)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_OSX_CoreCLR/)|
