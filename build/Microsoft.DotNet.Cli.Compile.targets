@@ -227,6 +227,9 @@
       <Delete Files="@(PdbsToClean)" />
 
       <!-- workaround for https://github.com/Microsoft/msbuild/issues/872 -->
+      <Copy SourceFiles="$(MSBuildTargetsDirectory)/MSBuild.exe"
+            DestinationFiles="$(SdkOutputDirectory)/MSBuild.exe" />
+
       <Copy SourceFiles="$(RepoRoot)/resources/MSBuild.exe.config"
             DestinationFiles="$(SdkOutputDirectory)/MSBuild.exe.config" />
 
