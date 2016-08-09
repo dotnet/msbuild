@@ -24,13 +24,9 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.Testin
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}"
 EndProject
-<<<<<<< HEAD
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.DependencyModel", "src\Microsoft.Extensions.DependencyModel\Microsoft.Extensions.DependencyModel.xproj", "{688870C8-9843-4F9E-8576-D39290AD0F25}"
-=======
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{0722D325-24C8-4E83-B5AF-0A083E7F0749}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MultiProjectValidator", "tools\MultiProjectValidator\MultiProjectValidator.xproj", "{08A68C6A-86F6-4ED2-89A7-B166D33E9F85}"
->>>>>>> 20c8295... Removing dependency model from CLI repo.
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EndToEnd", "test\EndToEnd\EndToEnd.xproj", "{65741CB1-8AEE-4C66-8198-10A7EA0E4258}"
 EndProject
