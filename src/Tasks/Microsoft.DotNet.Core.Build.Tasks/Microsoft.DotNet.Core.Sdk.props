@@ -26,8 +26,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- User-facing configuration-specific defaults -->
   <PropertyGroup>
-    <!-- TODO: This property can't be set in the CLI since ResolveNuGetPackageAssets needs an exact RID from the project.json, and the RID is made up of the PlatformTarget -->
-    <!--<PlatformTarget>AnyCPU</PlatformTarget>-->
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>$(NoWarn);1701</NoWarn>
