@@ -134,10 +134,19 @@ namespace Microsoft.Build.Shared
         /// <returns>True when the path to MSBuild is valid.</returns>
         private static bool IsValidMSBuildPath(string path)
         {
-            return !string.IsNullOrEmpty(path) &&
-                   Path.GetFileName(path).Equals("MSBuild.exe", StringComparison.OrdinalIgnoreCase) &&
-                   File.Exists(path) &&
+            bool msbuildExeExists = !string.IsNullOrEmpty(path) &&
+                    Path.GetFileName(path).Equals("MSBuild.exe", StringComparison.OrdinalIgnoreCase) &&
+                    File.Exists(path);
+#if FEATURE_SYSTEM_CONFIGURATION
+            // If we can read toolsets out of msbuild.exe.config, we must
+            // try to do so.
+            return msbuildExeExists &&
                    File.Exists($"{path}.config");
+#else
+            // On .NET Core, we can't read the contents of msbuild.exe.config,
+            // so it doesn't matter if it exists.
+            return msbuildExeExists;
+#endif
         }
 
         /// <summary>
