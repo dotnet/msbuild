@@ -210,6 +210,10 @@
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
             DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!-- Temporary workaround for MSBuild placing their .props files in the old 14.1 directory -->
+    <Move SourceFiles="$(SdkOutputDirectory)/14.1/Microsoft.Common.props"
+          DestinationFolder="$(SdkOutputDirectory)/15.0" />
+    
       <ItemGroup>
         <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
       </ItemGroup>
