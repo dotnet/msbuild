@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "xunit.console.netcore": "1.0.3-prerelease-00607-01",
+    "xunit.runner.reporters": "2.1.0"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dotnet5.4",
+        "portable-net451+win8"
+      ]
+    }
+  }
+}
