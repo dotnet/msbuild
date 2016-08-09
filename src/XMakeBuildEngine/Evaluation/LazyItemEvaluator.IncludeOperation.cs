@@ -47,7 +47,7 @@ namespace Microsoft.Build.Evaluation
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
             }
 
-            public override void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 List<I> itemsToAdd = new List<I>();
 
@@ -115,6 +115,11 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
+                return itemsToAdd;
+            }
+
+            protected override void MutateItems(ICollection<I> items)
+            {
                 if (_metadata != null)
                 {
                     ////////////////////////////////////////////////////
@@ -178,7 +183,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (needToProcessItemsIndividually)
                     {
-                        foreach (I item in itemsToAdd)
+                        foreach (I item in items)
                         {
                             _expander.Metadata = item;
 
@@ -229,10 +234,10 @@ namespace Microsoft.Build.Evaluation
                             }
 
 #if FEATURE_MSBUILD_DEBUGGER
-                        //if (DebuggerManager.DebuggingEnabled)
-                        //{
-                        //    DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
-                        //}
+                            //if (DebuggerManager.DebuggingEnabled)
+                            //{
+                            //    DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
+                            //}
 #endif
 
                             string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
@@ -248,17 +253,18 @@ namespace Microsoft.Build.Evaluation
                         // This is valuable in the case where one item element evaluates to
                         // many items (either by semicolon or wildcards)
                         // and that item also has the same piece/s of metadata for each item.
-                        _itemFactory.SetMetadata(metadataList, itemsToAdd);
+                        _itemFactory.SetMetadata(metadataList, items);
 
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;
                     }
                 }
-
-                listBuilder.AddRange(itemsToAdd.Select(item => new ItemData(item, _elementOrder, _conditionResult)));
             }
 
-            
+            protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            {
+                listBuilder.AddRange(items.Select(item => new ItemData(item, _elementOrder, _conditionResult)));
+            }
         }
 
         class IncludeOperationBuilder : OperationBuilder

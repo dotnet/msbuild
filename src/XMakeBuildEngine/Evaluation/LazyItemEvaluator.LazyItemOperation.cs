@@ -59,9 +59,24 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            public abstract void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
+            public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            {
+                var items = SelectItems(listBuilder, globsToIgnore).ToList();
+                MutateItems(items);
+                SaveItems(items, listBuilder);
+            }
 
+            /// <summary>
+            /// Produce the items to operate on. For example, create new ones or select existing ones
+            /// </summary>
+            protected virtual ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            {
+                return listBuilder.Select(itemData => itemData.Item).ToList();
+            }
 
+            protected virtual void MutateItems(ICollection<I> items) { }
+
+            protected virtual void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
         }
     }
 }
