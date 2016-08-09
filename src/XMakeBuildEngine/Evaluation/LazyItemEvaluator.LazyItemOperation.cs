@@ -29,6 +29,9 @@ namespace Microsoft.Build.Evaluation
             protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
             protected readonly EvaluatorData _evaluatorData;
             protected readonly Expander<P, I> _expander;
+
+            //  This is used only when evaluating an expression, which instantiates
+            //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
 
 
@@ -222,6 +225,56 @@ namespace Microsoft.Build.Evaluation
                         _expander.Metadata = null;
                     }
                 }
+            }
+
+            /// <summary>
+            /// Collects all the items of this item element's type that match the items (represented as operations)
+            /// </summary>
+            protected ICollection<I> SelectItemsMatchingItemSpec(ImmutableList<ItemData>.Builder listBuilder, IElementLocation elementLocation)
+            {
+                //  TODO: Figure out case sensitivity on non-Windows OS's
+                HashSet<string> itemValuesToMatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                List<string> globsToMatch = new List<string>();
+
+                foreach (var operation in _operations)
+                {
+                    if (operation.Item1 == ItemOperationType.Expression)
+                    {
+                        //  TODO: consider optimizing the case where an item element removes all items of its
+                        //  item type, for example:
+                        //      <Compile Remove="@(Compile)" />
+                        //  In this case we could avoid evaluating previous versions of the list entirely
+                        bool throwaway;
+                        var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
+                            (ExpressionShredder.ItemExpressionCapture)operation.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
+                            false /* do not include null expansion results */, out throwaway, elementLocation);
+
+                        foreach (var item in itemsFromExpression)
+                        {
+                            itemValuesToMatch.Add(item.EvaluatedInclude);
+                        }
+                    }
+                    else if (operation.Item1 == ItemOperationType.Value)
+                    {
+                        itemValuesToMatch.Add((string)operation.Item2);
+                    }
+                    else if (operation.Item1 == ItemOperationType.Glob)
+                    {
+                        string glob = (string)operation.Item2;
+                        globsToMatch.Add(glob);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(operation.Item1.ToString());
+                    }
+                }
+
+                var globbingMatcher = EngineFileUtilities.GetMatchTester(globsToMatch);
+
+                return listBuilder
+                    .Select(itemData => itemData.Item)
+                    .Where(item => itemValuesToMatch.Contains(item.EvaluatedInclude) || globbingMatcher(item.EvaluatedInclude))
+                    .ToImmutableHashSet();
             }
         }
     }
