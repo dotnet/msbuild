@@ -59,6 +59,7 @@ param(
    [switch]$DryRun,
    [switch]$NoPath,
    [string]$AzureFeed="https://dotnetcli.azureedge.net/dotnet"
+   [string]$UncachedFeed="https://dotnetcli.azureedge.net/dotnet"
 )
 
 Set-StrictMode -Version Latest
@@ -120,10 +121,10 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [str
 
     $VersionFileUrl = $null
     if ($SharedRuntime) {
-        $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.sharedfx.win.$CLIArchitecture.version"
+        $VersionFileUrl = "$UncachedFeed/$AzureChannel/dnvm/latest.sharedfx.win.$CLIArchitecture.version"
     }
     else {
-        $VersionFileUrl = "$AzureFeed/Sdk/$AzureChannel/latest.version"
+        $VersionFileUrl = "$UncachedFeed/Sdk/$AzureChannel/latest.version"
     }
     
     $Response = Invoke-WebRequest -UseBasicParsing $VersionFileUrl
