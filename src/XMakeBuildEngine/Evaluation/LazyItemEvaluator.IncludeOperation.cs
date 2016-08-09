@@ -120,7 +120,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override void MutateItems(ICollection<I> items)
             {
-                if (_metadata != null)
+                if (_metadata.Any())
                 {
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
@@ -267,7 +267,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        class IncludeOperationBuilder : OperationBuilder
+        class IncludeOperationBuilder : OperationBuildWithMetadata
         {
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }
@@ -275,7 +275,6 @@ namespace Microsoft.Build.Evaluation
             public bool ConditionResult { get; set; }
             
             public ImmutableList<string>.Builder Excludes { get; set; } = ImmutableList.CreateBuilder<string>();
-            public ImmutableList<ProjectMetadataElement>.Builder Metadata;
 
             public IncludeOperation CreateOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {

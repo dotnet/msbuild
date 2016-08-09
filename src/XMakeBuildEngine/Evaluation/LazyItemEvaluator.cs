@@ -213,6 +213,11 @@ namespace Microsoft.Build.Evaluation
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
         }
 
+        class OperationBuilderWithMetadata : OperationBuilder
+        {
+            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
+        }
+
         LazyItemList GetItemList(string itemType)
         {
             LazyItemList ret;
@@ -309,11 +314,12 @@ namespace Microsoft.Build.Evaluation
             operationBuilder.ItemType = itemElement.ItemType;
             operationBuilder.ConditionResult = conditionResult;
 
+            // Process include
             ProcessItemSpec(operationBuilder, itemElement.Include, itemElement.IncludeLocation);
 
             //  Code corresponds to Evaluator.EvaluateItemElement
 
-            // STEP 4: Evaluate, split, expand and subtract any Exclude
+            // Process exclude (STEP 4: Evaluate, split, expand and subtract any Exclude)
             if (itemElement.Exclude.Length > 0)
             {
                 //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
@@ -325,7 +331,7 @@ namespace Microsoft.Build.Evaluation
                     IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
 
                     operationBuilder.Excludes.AddRange(excludeSplits);
-                    
+
                     foreach (var excludeSplit in excludeSplits)
                     {
                         AddItemReferences(excludeSplit, operationBuilder, itemElement.ExcludeLocation);
@@ -333,10 +339,21 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            // STEP 5: Evaluate each metadata XML and apply them to each item we have so far
+            // Process Metadata (STEP 5: Evaluate each metadata XML and apply them to each item we have so far)
+            ProcessMetadataElements(itemElement, operationBuilder);
+
+            var operation = operationBuilder.CreateOperation(this);
+
+            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
+            LazyItemList newList = new LazyItemList(previousItemList, operation);
+            _itemLists[itemElement.ItemType] = newList;
+
+        }
+
+        private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
+        {
             if (itemElement.HasMetadata)
             {
-                operationBuilder.Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
                 List<string> values = new List<string>(itemElement.Metadata.Count * 2);
@@ -360,13 +377,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-
-            var operation = operationBuilder.CreateOperation(this);
-
-            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
-            LazyItemList newList = new LazyItemList(previousItemList, operation);
-            _itemLists[itemElement.ItemType] = newList;
-            
         }
 
         void AddItemReferences(string expression, IncludeOperationBuilder operationBuilder, IElementLocation elementLocation)
