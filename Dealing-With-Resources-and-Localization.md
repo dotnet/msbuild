@@ -6,7 +6,7 @@
   -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeTasks/ManifestUtil/Resources/Strings.resx
   -  https://github.com/Microsoft/msbuild/blob/master/src/XMakeBuildEngine/Resources/Strings.resx
   -  https://github.com/Microsoft/msbuild/blob/master/src/Shared/Resources/Strings.shared.resx
-- `Strings.shared.resx` is a shared resource and embedded into all msbuild dlls
+- `Strings.shared.resx` is a shared resource and gets embedded into all msbuild dlls
 - each neutral resource has a directory named `xlf` besides it which contains its localized strings in .xlf format
 - there is one language per xlf
 - the resource logical name (what you specify in `ResourceManager`'s constructor) is: `<AssemblyName>.<NeutralResxName>.resources`
