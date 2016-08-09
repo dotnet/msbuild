@@ -14,7 +14,7 @@
     },
     "xunit": "2.2.0-beta3-build3330",
     "xunit.netcore.extensions": "1.0.0-prerelease-00206",
-    "dotnet-test-xunit": "1.0.0-rc2-318883-21",
+    "dotnet-test-xunit": "1.0.0-rc2-330423-54",
     "System.Runtime.InteropServices.RuntimeInformation": "4.0.0"
   },
   "frameworks": {

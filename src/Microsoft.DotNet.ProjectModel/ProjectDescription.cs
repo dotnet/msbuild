@@ -19,7 +19,8 @@ namespace Microsoft.DotNet.ProjectModel
                   framework: null,
                   resolved: false,
                   compatible: false)
-        { }
+        {
+        }
 
         public ProjectDescription(
             LibraryRange libraryRange,
