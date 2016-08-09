@@ -21,8 +21,6 @@ namespace Microsoft.DotNet.Cli
             _forwardingApp = new ForwardingApp(
                 GetMSBuildExePath(),
                 argsToForward,
-                depsFile: GetDepsFile(),
-                runtimeConfig: GetRuntimeConfig(),
                 environmentVariables: GetEnvironmentVariables());
         }
 
@@ -56,19 +54,18 @@ namespace Microsoft.DotNet.Cli
 
         private static string GetRuntimeConfig()
         {
-            return Path.Combine(AppContext.BaseDirectory, "dotnet.runtimeconfig.json");
+            return Path.Combine(AppContext.BaseDirectory, "msbuild.runtimeconfig.json");
         }
 
         private static string GetDepsFile()
         {
-            return Path.Combine(AppContext.BaseDirectory, "dotnet.deps.json");
+            return Path.Combine(AppContext.BaseDirectory, "msbuild.deps.json");
         }
 
         private static string GetMSBuildExePath()
         {
             return Path.Combine(
                 AppContext.BaseDirectory,
-                "runtimes", "any", "native",
                 s_msbuildExeName);
         }
 

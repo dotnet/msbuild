@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0-featmsbuild-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    },
+    "NuGet.Commands": {
+      "version": "3.5.0-rc1-1697",
+      "exclude": "compile"
+    },
+    "NuGet.CommandLine.XPlat": "3.5.0-rc1-1697"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dnxcore50",
+        "netstandardapp1.5",
+        "portable-net45+win8",
+        "portable-net45+wp80+win8+wpa81+dnxcore50"
+      ]
+    }
+  }
+}

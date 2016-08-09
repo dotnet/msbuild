@@ -3,8 +3,16 @@
   <Import Project="compile/Microsoft.DotNet.Cli.LzmaArchive.targets" />
   <Import Project="crossgen/Microsoft.DotNet.Cli.Crossgen.targets" />
 
+  <PropertyGroup>
+    <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
+    <CoreSDKDir>$(RepoRoot)/resources/core-sdk</CoreSDKDir>
+  </PropertyGroup>
+
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
+    <FilesToMove Include="$(BinaryToCorehostifyRelDir)/csc.exe;$(BinaryToCorehostifyRelDir)/MSBuild.exe;" />
+    <BundledTools Include="csc;MSBuild;NuGet.CommandLine.XPlat;dotnet" />
+    <CoreSDKContent Include="$(CoreSDKDir)/**/*" />
   </ItemGroup>
 
   <Target Name="Compile" DependsOnTargets="Prepare;
@@ -58,7 +66,6 @@
         <StageDirectory>%(Stage.StageDirectory)</StageDirectory>
         <StageSymbolsDirectory>%(Stage.StageSymbolsDirectory)</StageSymbolsDirectory>
         <SdkOutputDirectory>$(StageDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
-        <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
         <BinaryToCorehostifyOutDir>$(SdkOutputDirectory)/$(BinaryToCorehostifyRelDir)</BinaryToCorehostifyOutDir>
         <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
 
@@ -76,6 +83,7 @@
         <BinariesToRemove Remove="*" />
         <BinariesToRemove Include="csc" />
         <BinariesToRemove Include="vbc" />
+        <BinariesToRemove Include="MSBuild" />
       </ItemGroup>
 
       <Delete Files="@(BinObj)" />
@@ -85,7 +93,7 @@
 
       <!-- CopySharedFramework -->
       <Copy SourceFiles="@(SharedFramework)"
-            DestinationFiles="@(SharedFramework->'$(StageDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <!-- Publish DotNet -->
       <DotNetPublish ToolPath="%(Stage.DotnetDir)"
@@ -93,7 +101,7 @@
                      Output="$(SdkOutputDirectory)"
                      Configuration="$(Configuration)"
                      VersionSuffix="$(CommitCount)"
-                     ProjectPath="$(SrcDirectory)/dotnet" />
+                     ProjectPath="$(SrcDirectory)/redist" />
 
       <!-- Corehostify Binaries -->
       <ItemGroup Condition=" '$(OSName)' != 'win' ">
@@ -121,36 +129,26 @@
              File="%(SdkOutputChModTargets.FullPath)"
              Mode="%(SdkOutputChModTargets.Mode)" />
 
-      <DotNetPublish ToolPath="%(Stage.DotnetDir)"
-                     Output="$(SdkOutputDirectory)"
-                     Framework="netcoreapp1.0"
-                     ProjectPath="$(SrcDirectory)/compilers" />
+      <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
+                                   SectionName="runtimeTargets"
+                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(BinariesToRemove.Identity).exe" />
 
-      <Copy SourceFiles="$(BinaryToCorehostifyOutDir)/csc.exe"
-            DestinationFiles="$(SdkOutputDirectory)/csc.dll" />
+      <Copy SourceFiles="$(SdkOutputDirectory)/%(FilesToMove.Identity)"
+            DestinationFiles="$(SdkOutputDirectory)/%(FilesToMove.Filename).dll" />
 
-      <Move SourceFiles="$(BinaryToCorehostifyOutDir)/csc.exe"
-            DestinationFiles="$(SdkOutputDirectory)/csc.exe" />
+      <Copy SourceFiles="$(SdkOutputDirectory)/redist.deps.json"
+            DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
 
-      <Copy SourceFiles="$(SdkOutputDirectory)/compilers.deps.json"
-            DestinationFiles="$(SdkOutputDirectory)/csc.deps.json" />
-
-      <Copy SourceFiles="$(SdkOutputDirectory)/compilers.runtimeconfig.json"
-            DestinationFiles="$(SdkOutputDirectory)/csc.runtimeconfig.json" />
+      <Copy SourceFiles="$(SdkOutputDirectory)/redist.runtimeconfig.json"
+            DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).runtimeconfig.json" />
 
       <ChangeEntryPointLibraryName
-            DepsFile="$(SdkOutputDirectory)/csc.deps.json"
-            NewName="csc.deps.json" />
+            DepsFile="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json"
+            NewName="%(BundledTools.Identity).deps.json" />
 
-      <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/csc.deps.json"
-                                   SectionName="runtimeTargets"
-                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(BinariesToRemove.Identity).exe" />
-      <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/dotnet.deps.json"
-                                   SectionName="runtimeTargets"
-                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(BinariesToRemove.Identity).exe" />
-
-      <!-- cleanup compilers project output we don't need -->
-      <Delete Files="$(SdkOutputDirectory)/compilers%(PublishOutputExtensions.Identity)" />
+      <!-- cleanup project output we don't need -->
+      <Delete Files="$(SdkOutputDirectory)/redist%(PublishOutputExtensions.Identity)" />
+      <Delete Files="$(SdkOutputDirectory)/tool_msbuild%(PublishOutputExtensions.Identity)" />
 
       <!-- Copy Host to SDK Directory -->
       <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(DotnetHostBaseName)"
@@ -161,6 +159,10 @@
 
       <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(HostPolicyBaseName)"
             DestinationFiles="$(SdkOutputDirectory)/$(HostPolicyBaseName)" />
+
+      <!-- copy core sdk -->
+      <Copy SourceFiles="@(CoreSDKContent)"
+            DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
 
       <!-- Crossgen the Shared Framework -->
       <ItemGroup>
@@ -208,12 +210,8 @@
       </ItemGroup>
 
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
-            DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <!-- Temporary workaround for MSBuild placing their .props files in the old 14.1 directory -->
-    <Move SourceFiles="$(SdkOutputDirectory)/14.1/Microsoft.Common.props"
-          DestinationFolder="$(SdkOutputDirectory)/15.0" />
-    
       <ItemGroup>
         <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
       </ItemGroup>
