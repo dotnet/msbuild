@@ -7,7 +7,9 @@
   },
   "dependencies": {
     "xunit": "2.1.0",
-    "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09"
+    "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09",
+    "System.IO.FileSystem": "4.0.1",
+    "System.IO.Compression": "4.1.0"
   },
   "frameworks": {
     "net46": {
@@ -28,9 +30,7 @@
         "System.Collections.NonGeneric": "4.0.1",
         "System.Console": "4.0.0",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
-        "System.IO.Compression": "4.1.0",
         "System.IO.FileSystem.Watcher": "4.0.0",
-        "System.IO.FileSystem": "4.0.1",
         "System.IO.FileSystem.DriveInfo": "4.0.0",
         "System.IO.Pipes": "4.0.0",
         "System.Diagnostics.Contracts": "4.0.1",
