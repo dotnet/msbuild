@@ -35,18 +35,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectLockFile Condition="!Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/project.lock.json</ProjectLockFile>
   </PropertyGroup>
 
-  <!-- If a NuGetRuntimeIdentifier wasn't already specified, let's go generate it -->
-  <PropertyGroup Condition="'$(NuGetRuntimeIdentifier)' == ''">
-    <NuGetRuntimeIdentifier>$(_NuGetRuntimeIdentifierWithoutAot)</NuGetRuntimeIdentifier>
-    <NuGetRuntimeIdentifier Condition="'$(UseDotNetNativeToolchain)' == 'true'">$(_NuGetRuntimeIdentifierWithoutAot)-aot</NuGetRuntimeIdentifier>
-  </PropertyGroup>
-
   <PropertyGroup>
     <!-- Build and Publish Properties to determine whether we are building or publishing. Default values -->
     <ResolvePackageDependenciesForBuild Condition="'$(ResolvePackageDependenciesForBuild)' == ''">true</ResolvePackageDependenciesForBuild>
     <ResolvePackageDependenciesForPublish Condition="'$(ResolvePackageDependenciesForPublish)' == ''">false</ResolvePackageDependenciesForPublish>
   </PropertyGroup>
 
+  <!-- Target Moniker + RID-->
+  <PropertyGroup Condition="'$(_NugetTargetMonikerAndRID)' == ''">
+    <_NugetTargetMonikerAndRID Condition="'$(NuGetRuntimeIdentifier)' == ''">$(NuGetTargetMoniker)</_NugetTargetMonikerAndRID>
+    <_NugetTargetMonikerAndRID Condition="'$(NuGetRuntimeIdentifier)' != ''">$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)</_NugetTargetMonikerAndRID>
+  </PropertyGroup>
 
   <!--
     *************************************
@@ -157,7 +156,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="RunResolvePackageDependencies" 
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
-      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />
+      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
       <_CompileFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'CompileAssembly'))" />
       
       <!-- Get corresponding file definitions -->
@@ -221,7 +220,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         DependsOnTargets="RunResolvePackageDependencies"
         Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
     <ItemGroup>
-      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)'))" />
+      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
 
       <!--NativeLibrary-->
       <_NativeFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'NativeLibrary'))" />

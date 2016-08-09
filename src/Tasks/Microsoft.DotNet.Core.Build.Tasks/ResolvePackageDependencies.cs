@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         private bool IsAnalyzer(string file)
         {
-            return file.StartsWith("analyzers")
+            return file.StartsWith("analyzers", StringComparison.Ordinal)
                 && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase);
         }
 
@@ -310,8 +310,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 ReportException("Could not find lock file");
             }
 
-            // TODO adapt task logger to Nuget Logger
-            return LockFileUtilities.GetLockFile(ProjectLockFile, NullLogger.Instance);
+            return new LockFileCache(BuildEngine4).GetLockFile(ProjectLockFile);
         }
 
         private string ResolvePackagePath(LockFileLibrary package, LockFile lockFile)
