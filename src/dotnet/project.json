@@ -65,7 +65,8 @@
 
     "Microsoft.DotNet.Core.Build.Tasks": {
       "target": "project"
-    }
+    },
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000914"
   },
   "frameworks": {
     "netcoreapp1.0": {

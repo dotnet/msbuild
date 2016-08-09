@@ -16,7 +16,7 @@
     },
     "xunit": "2.1.0",
     "FluentAssertions.Json": "4.12.0",
-    "dotnet-test-xunit": "1.0.0-rc2-192208-24"
+    "dotnet-test-xunit": "1.0.0-rc2-318883-21"
   },
   "testRunner": "xunit",
   "frameworks": {

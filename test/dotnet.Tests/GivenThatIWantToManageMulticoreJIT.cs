@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tests
 {
