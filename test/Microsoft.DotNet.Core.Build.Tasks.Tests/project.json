@@ -14,7 +14,7 @@
     "Microsoft.DotNet.InternalAbstractions": {
       "target": "project"
     },
-    "xunit": "2.1.0",
+    "xunit": "2.2.0-beta3-build3330",
     "FluentAssertions.Json": "4.12.0",
     "dotnet-test-xunit": "1.0.0-rc2-318883-21"
   },
