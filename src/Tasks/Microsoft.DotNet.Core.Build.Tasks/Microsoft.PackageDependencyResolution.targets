@@ -31,8 +31,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Project Lock File -->
   <PropertyGroup Condition="'$(ProjectLockFile)' == ''">
     <_ProjectSpecificProjectJsonFile>$(MSBuildProjectName).project.json</_ProjectSpecificProjectJsonFile>
-    <ProjectLockFile Condition="Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectName).project.lock.json</ProjectLockFile>
-    <ProjectLockFile Condition="!Exists('$(_ProjectSpecificProjectJsonFile)')">project.lock.json</ProjectLockFile>
+    <ProjectLockFile Condition="Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/$(MSBuildProjectName).project.lock.json</ProjectLockFile>
+    <ProjectLockFile Condition="!Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/project.lock.json</ProjectLockFile>
   </PropertyGroup>
 
   <!-- If a NuGetRuntimeIdentifier wasn't already specified, let's go generate it -->
@@ -123,7 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <UsingTask TaskName="Microsoft.DotNet.Core.Build.Tasks.ResolvePackageDependencies" 
-             AssemblyFile="Microsoft.DotNet.Core.Build.Tasks.dll" />
+             AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
 
   <!--
     ============================================================
@@ -176,9 +176,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ResolveLockFileReferences"
           DependsOnTargets="_ComputeLockFileReferences">
     <ItemGroup>
-      <!-- Remove any references from ResolveNuGetPackageAssets -->
-      <Reference Remove="@(_ReferencesFromNuGetPackages)" />
-
       <!-- Add the references we computed -->
       <Reference Include="@(ResolvedCompileFileDefinitions)" />
     </ItemGroup>
@@ -259,7 +256,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Add the copy local items -->
     <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
       <ReferenceCopyLocalPaths Include="@(RuntimeCopyLocalItems)" />
     </ItemGroup>
 
