@@ -466,6 +466,7 @@
     <Compile Include="Instance\TaskFactoryWrapper.cs" />
     <Compile Include="Instance\TaskRegistry.cs" />
     <!-- ######################## -->
+    <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
