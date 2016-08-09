@@ -11,7 +11,7 @@ if not defined MSBUILD_CUSTOM_PATH (
 )
 
 if not defined MSBUILD_ARGS (
-    set MSBUILD_ARGS="%~dp0build.proj" /verbosity:minimal %*
+    set MSBUILD_ARGS="%~dp0build.proj" /m /verbosity:minimal %*
 )
 
 :: Add a the file logger with diagnostic verbosity to the msbuild args
