@@ -1,14 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Restore
 {
@@ -17,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Restore
         private const string s_nugetExeName = "NuGet.CommandLine.XPlat.dll";
         private readonly ForwardingApp _forwardingApp;
 
-        public NuGetForwardingApp(string[] argsToForward)
+        public NuGetForwardingApp(IEnumerable<string> argsToForward)
         {
             _forwardingApp = new ForwardingApp(
                 GetNuGetExePath(),
@@ -27,6 +23,13 @@ namespace Microsoft.DotNet.Tools.Restore
         public int Execute()
         {
             return _forwardingApp.Execute();
+        }
+
+        public NuGetForwardingApp WithEnvironmentVariable(string name, string value)
+        {
+            _forwardingApp.WithEnvironmentVariable(name, value);
+
+            return this;
         }
 
         private static string GetNuGetExePath()
