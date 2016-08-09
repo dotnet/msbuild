@@ -58,8 +58,8 @@ param(
    [switch]$DebugSymbols, # TODO: Switch does not work yet. Symbols zip is not being uploaded yet.
    [switch]$DryRun,
    [switch]$NoPath,
-   [string]$AzureFeed="https://dotnetcli.azureedge.net/dotnet"
-   [string]$UncachedFeed="https://dotnetcli.azureedge.net/dotnet"
+   [string]$AzureFeed="https://dotnetcli.azureedge.net/dotnet",
+   [string]$UncachedFeed="https://dotnetcli.blob.core.windows.net/dotnet"
 )
 
 Set-StrictMode -Version Latest

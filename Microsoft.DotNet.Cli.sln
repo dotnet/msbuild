@@ -122,6 +122,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\Microsoft.DotNet.Cli.Monikers.props = build\Microsoft.DotNet.Cli.Monikers.props
 		build\Microsoft.DotNet.Cli.Package.targets = build\Microsoft.DotNet.Cli.Package.targets
 		build\Microsoft.DotNet.Cli.Prepare.targets = build\Microsoft.DotNet.Cli.Prepare.targets
+		build\Microsoft.DotNet.Cli.Publish.targets = build\Microsoft.DotNet.Cli.Publish.targets
+		build\Microsoft.DotNet.Cli.Run.targets = build\Microsoft.DotNet.Cli.Run.targets
+		build\Microsoft.DotNet.Cli.tasks = build\Microsoft.DotNet.Cli.tasks
 		build\Microsoft.DotNet.Cli.Test.targets = build\Microsoft.DotNet.Cli.Test.targets
 	EndProjectSection
 EndProject
@@ -152,6 +155,12 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Tests.Utilities", "test\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.xproj", "{E4F46EAB-B5A5-4E60-9B9D-40A1FADBF45C}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Core.Build.Tasks.Tests", "test\Microsoft.DotNet.Core.Build.Tasks.Tests\Microsoft.DotNet.Core.Build.Tasks.Tests.xproj", "{EDD6C92D-0A58-4FCB-A0E9-9D0FFC045177}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "publish", "publish", "{27B12960-ABB0-4903-9C60-5E9157E659C8}"
+	ProjectSection(SolutionItems) = preProject
+		build\publish\Microsoft.DotNet.Cli.Badge.targets = build\publish\Microsoft.DotNet.Cli.Badge.targets
+		build\publish\PublishContent.targets = build\publish\PublishContent.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -994,5 +1003,6 @@ Global
 		{E8E7D24B-4830-4662-80A8-255D6FE3B0BE} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{E4F46EAB-B5A5-4E60-9B9D-40A1FADBF45C} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{EDD6C92D-0A58-4FCB-A0E9-9D0FFC045177} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{27B12960-ABB0-4903-9C60-5E9157E659C8} = {89905EC4-BC0F-443B-8ADF-691321F10108}
 	EndGlobalSection
 EndGlobal
