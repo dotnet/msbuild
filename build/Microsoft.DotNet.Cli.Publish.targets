@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(BuildToolsDir)PublishContent.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Microsoft.DotNet.Cli.Badge.targets" />
-
-  <UsingTask TaskName="UploadToAzure" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.CloudTestTasks.dll"/>
-  <UsingTask TaskName="FinalizeBuild" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="SetBlobPropertiesBasedOnFileType" AssemblyFile="$(CLIBuildDll)" />
 
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"

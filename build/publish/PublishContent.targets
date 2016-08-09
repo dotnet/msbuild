@@ -1,0 +1,41 @@
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <OverwriteOnPublish Condition="'$(OverwriteOnPublish)' == ''">false</OverwriteOnPublish>
+  </PropertyGroup>
+
+  <!-- gathers the items to be published -->
+  <Target Name="GatherItemsForPattern">
+    <Error Condition="'$(PublishPattern)' == ''" Text="Please specify a value for PublishPattern using standard msbuild 'include' syntax." />
+    <ItemGroup>
+      <ForPublishing Include="$(PublishPattern)" />
+    </ItemGroup>
+    <!-- add relative blob path metadata -->
+    <ItemGroup>
+      <ForPublishing>
+        <RelativeBlobPath>$([System.String]::Copy('%(RecursiveDir)%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath> 
+      </ForPublishing>
+    </ItemGroup>
+    <Error Condition="'@(ForPublishing)' == ''" Text="No items were found matching pattern '$(PublishPattern)'." />
+  </Target>
+
+  <!-- publishes items to blob storage in Azure -->
+  <Target Name="UploadToAzure" DependsOnTargets="GatherItemsForPattern">
+    <Error Condition="'$(ContainerName)' == ''" Text="Missing property ContainerName." />
+    <Error Condition="'$(CloudDropAccountName)' == ''" Text="Missing property CloudDropAccountName." />
+    <Error Condition="'$(CloudDropAccessToken)' == ''" Text="Missing property CloudDropAccessToken." />
+    <!-- create the container if it doesn't exist -->
+    <CreateAzureContainer
+      AccountKey="$(CloudDropAccessToken)"
+      AccountName="$(CloudDropAccountName)"
+      ContainerName="$(ContainerName)" />
+    <!-- now upload the items -->
+    <UploadToAzure
+      AccountKey="$(CloudDropAccessToken)"
+      AccountName="$(CloudDropAccountName)"
+      ContainerName="$(ContainerName)"
+      Items="@(ForPublishing)"
+      Overwrite="$(OverwriteOnPublish)" />
+  </Target>
+
+</Project>

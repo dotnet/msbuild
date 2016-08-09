@@ -27,7 +27,7 @@
   },
   "publishOptions": {
     "include": [
-      "14.1/**",
+      "15.0/**",
       "*.props",
       "*.targets"
     ]
