@@ -167,6 +167,7 @@
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
