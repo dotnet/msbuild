@@ -52,16 +52,6 @@ namespace Microsoft.DotNet.Cli
             return new Muxer().MuxerPath;
         }
 
-        private static string GetRuntimeConfig()
-        {
-            return Path.Combine(AppContext.BaseDirectory, "msbuild.runtimeconfig.json");
-        }
-
-        private static string GetDepsFile()
-        {
-            return Path.Combine(AppContext.BaseDirectory, "msbuild.deps.json");
-        }
-
         private static string GetMSBuildExePath()
         {
             return Path.Combine(

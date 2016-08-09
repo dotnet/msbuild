@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
-    <CoreSDKDir>$(RepoRoot)/resources/core-sdk</CoreSDKDir>
+    <CoreSDKDir>$(RepoRoot)/resources/MSBuildImports</CoreSDKDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -80,10 +80,10 @@
         <SharedFramework Remove="*" />
         <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
 
-        <BinariesToRemove Remove="*" />
-        <BinariesToRemove Include="csc" />
-        <BinariesToRemove Include="vbc" />
-        <BinariesToRemove Include="MSBuild" />
+        <AssetsToRemoveFromDeps Remove="*" />
+        <AssetsToRemoveFromDeps Include="csc" />
+        <AssetsToRemoveFromDeps Include="vbc" />
+        <AssetsToRemoveFromDeps Include="MSBuild" />
       </ItemGroup>
 
       <Delete Files="@(BinObj)" />
@@ -131,7 +131,7 @@
 
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
                                    SectionName="runtimeTargets"
-                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(BinariesToRemove.Identity).exe" />
+                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(AssetsToRemoveFromDeps.Identity).exe" />
 
       <Copy SourceFiles="$(SdkOutputDirectory)/%(FilesToMove.Identity)"
             DestinationFiles="$(SdkOutputDirectory)/%(FilesToMove.Filename).dll" />
@@ -211,6 +211,11 @@
 
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
             DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+      <!-- Temporary workaround for MSBuild placing their .props files in the old 14.1 directory -->
+      <Move SourceFiles="$(SdkOutputDirectory)/14.1/Microsoft.Common.props"
+            DestinationFolder="$(SdkOutputDirectory)/15.0" />
+      <RemoveDir Directories="$(SdkOutputDirectory)/14.1" />
 
       <ItemGroup>
         <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />

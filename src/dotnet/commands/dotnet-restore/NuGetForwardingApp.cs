@@ -29,11 +29,6 @@ namespace Microsoft.DotNet.Tools.Restore
             return _forwardingApp.Execute();
         }
 
-        private static string GetHostPath()
-        {
-            return new Muxer().MuxerPath;
-        }
-
         private static string GetNuGetExePath()
         {
             return Path.Combine(

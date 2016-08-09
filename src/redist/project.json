@@ -8,10 +8,17 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "csc": "1.0.0-featmsbuild-*",
+    "tool_csc": "1.0.0-featmsbuild-*",
     "dotnet": "1.0.0-featmsbuild-*",
-    "nuget": "1.0.0-featmsbuild-*",    
-    "tool_msbuild": "1.0.0-featmsbuild-*"
+    "tool_nuget": "1.0.0-featmsbuild-*",
+    "tool_msbuild": "1.0.0-featmsbuild-*",
+
+    "MSBuild": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Framework": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Tasks.Core": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Targets": "0.1.0-preview-00029-160805",
+    "Microsoft.Build": "0.1.0-preview-00029-160805"
   },
   "frameworks": {
     "netcoreapp1.0": {

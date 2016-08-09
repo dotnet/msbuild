@@ -8,7 +8,7 @@
     "Microsoft.Extensions.DependencyModel": {
       "target": "project"
     },
-    "NuGet.ProjectModel": "3.5.0-rc1-1653"
+    "NuGet.ProjectModel": "3.5.0-rc1-1697"
   },
   "frameworks": {
     "net451": {
