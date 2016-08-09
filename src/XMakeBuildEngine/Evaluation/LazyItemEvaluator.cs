@@ -236,18 +236,40 @@ namespace Microsoft.Build.Evaluation
 
         public void ProcessItemElement(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            if (itemElement.Include != string.Empty)
+            if (itemElement.IncludeLocation != null)
             {
                 ProcessItemElementInclude(rootDirectory, itemElement, conditionResult);
             }
-            else if (itemElement.Remove != string.Empty)
+            else if (itemElement.RemoveLocation != null)
             {
                 ProcessItemElementRemove(rootDirectory, itemElement);
+            }
+            else if (itemElement.UpdateLocation != null)
+            {
+                ProcessItemElementUpdate(rootDirectory, itemElement);
             }
             else
             {
                 throw new NotImplementedException();
             }
+        }
+
+        void ProcessItemElementUpdate(string rootDirectory, ProjectItemElement itemElement)
+        {
+            OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata();
+            operationBuilder.ItemElement = itemElement;
+            operationBuilder.ItemType = itemElement.ItemType;
+
+            // Proces Update attribute
+            ProcessItemSpec(operationBuilder, itemElement.Update, itemElement.UpdateLocation);
+
+            ProcessMetadataElements(itemElement, operationBuilder);
+
+            var operation = new UpdateOperation(operationBuilder, this);
+
+            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
+            LazyItemList newList = new LazyItemList(previousItemList, operation);
+            _itemLists[itemElement.ItemType] = newList;
         }
 
         void ProcessItemSpec(OperationBuilder operationBuilder, string itemSpec, ElementLocation itemSpecLocation)
