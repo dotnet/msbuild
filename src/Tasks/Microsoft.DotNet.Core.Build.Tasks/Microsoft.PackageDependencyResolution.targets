@@ -22,7 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <!-- Flag PackageDependency Tasks -->
     <EnableResolvePackageDependencies 
-      Condition="'$(EnableResolvePackageDependencies)' == '' and '$(MSBuildProjectExtension)' != '.xproj'">true</EnableResolvePackageDependencies>
+      Condition="'$(EnableResolvePackageDependencies)' == ''">true</EnableResolvePackageDependencies>
   </PropertyGroup>
 
   <!-- Project Lock File -->
