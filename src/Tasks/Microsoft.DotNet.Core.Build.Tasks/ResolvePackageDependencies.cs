@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Framework;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
 using NuGet.ProjectModel;
@@ -296,7 +299,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     return package.FrameworkAssemblies;
 
                 default:
-                    ReportException(null); return null;
+                    throw new Exception($"Unexpected file group in project.lock.json target library {package.Name}");
             }
         }
 
@@ -307,7 +310,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         {
             if (!File.Exists(ProjectLockFile))
             {
-                ReportException("Could not find lock file");
+                ReportException($"Lock file {ProjectLockFile} couldn't be found. Run a NuGet package restore to generate this file.");
             }
 
             return new LockFileCache(BuildEngine4).GetLockFile(ProjectLockFile);
@@ -321,14 +324,14 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
                 if (string.IsNullOrEmpty(relativeMSBuildProjectPath))
                 {
-                    ReportException("MissingMSBuildPathInProjectPackage");
+                    ReportException($"Your project is consuming assets from the project but no MSBuild project is found in the project.lock.json.");
                 }
 
                 var absoluteMSBuildProjectPath = GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
                 string fullPackagePath;
                 if (!_projectReferencesToOutputBasePaths.TryGetValue(absoluteMSBuildProjectPath, out fullPackagePath))
                 {
-                    ReportException("MissingProjectReference");
+                    ReportException("The project.json is referencing the project, but an output path was not specified.");
                 }
 
                 return fullPackagePath;
@@ -353,7 +356,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 }
             }
 
-            throw new Exception("PackageFolderNotFound");
+            throw new Exception($"The package {packageId} with version {packageVersion} could not be found. Run a NuGet package restore to download the package.");
         }
 
         private string ResolveFilePath(string relativePath, string resolvedPackagePath)
