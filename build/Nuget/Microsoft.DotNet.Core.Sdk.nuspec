@@ -32,6 +32,8 @@
 
     <file src="Newtonsoft.Json.dll" target="tools\netstandard1.3" />
 
+    <file src="System.Runtime.Serialization.Primitives.dll" target="tools\netstandard1.3" />
+
     <file src="Microsoft.PackageDependencyResolution.targets" target="build\netstandard1.0" />
     <file src="Microsoft.DotNet.Core.Sdk.props" target="build\netstandard1.0" />
     <file src="Microsoft.DotNet.Core.Sdk.targets" target="build\netstandard1.0" />

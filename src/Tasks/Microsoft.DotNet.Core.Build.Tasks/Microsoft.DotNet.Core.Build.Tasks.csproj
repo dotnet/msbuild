@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Directory.Build.props'))\Directory.Build.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="Microsoft.DotNet.Core.Sdk.props" />
   <PropertyGroup>
@@ -81,6 +80,11 @@
       <CopyLocalAssembly Include="Newtonsoft.Json">
         <Version>9.0.1</Version>
         <TFM>netstandard1.0</TFM>
+      </CopyLocalAssembly>
+
+      <CopyLocalAssembly Include="System.Runtime.Serialization.Primitives">
+        <Version>4.1.1</Version>
+        <TFM>netstandard1.3</TFM>
       </CopyLocalAssembly>
 
       <CopyLocalAssembly>
