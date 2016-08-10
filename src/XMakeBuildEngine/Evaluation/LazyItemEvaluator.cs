@@ -210,12 +210,23 @@ namespace Microsoft.Build.Evaluation
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
             public ImmutableList<Tuple<ItemOperationType, object>>.Builder Operations = ImmutableList.CreateBuilder<Tuple<ItemOperationType, object>>();
+
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
+
+            public OperationBuilder(ProjectItemElement itemElement)
+            {
+                ItemElement = itemElement;
+                ItemType = itemElement.ItemType;
+            }
         }
 
         class OperationBuilderWithMetadata : OperationBuilder
         {
             public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
+
+            public OperationBuilderWithMetadata(ProjectItemElement itemElement) : base(itemElement)
+            {
+            }
         }
 
         LazyItemList GetItemList(string itemType)
@@ -236,40 +247,40 @@ namespace Microsoft.Build.Evaluation
 
         public void ProcessItemElement(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
+            LazyItemOperation operation = null;
+
             if (itemElement.IncludeLocation != null)
             {
-                ProcessItemElementInclude(rootDirectory, itemElement, conditionResult);
+                operation = BuildIncludeOperation(rootDirectory, itemElement, conditionResult);
             }
             else if (itemElement.RemoveLocation != null)
             {
-                ProcessItemElementRemove(rootDirectory, itemElement);
+                operation = BuildRemoveOperation(rootDirectory, itemElement);
             }
             else if (itemElement.UpdateLocation != null)
             {
-                ProcessItemElementUpdate(rootDirectory, itemElement);
+                operation = BuildUpdateOperation(rootDirectory, itemElement);
             }
             else
             {
                 throw new NotImplementedException();
             }
+
+            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
+            LazyItemList newList = new LazyItemList(previousItemList, operation);
+            _itemLists[itemElement.ItemType] = newList;
         }
 
-        void ProcessItemElementUpdate(string rootDirectory, ProjectItemElement itemElement)
+        UpdateOperation BuildUpdateOperation(string rootDirectory, ProjectItemElement itemElement)
         {
-            OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata();
-            operationBuilder.ItemElement = itemElement;
-            operationBuilder.ItemType = itemElement.ItemType;
+            OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata(itemElement);
 
             // Proces Update attribute
             ProcessItemSpec(operationBuilder, itemElement.Update, itemElement.UpdateLocation);
 
             ProcessMetadataElements(itemElement, operationBuilder);
 
-            var operation = new UpdateOperation(operationBuilder, this);
-
-            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
-            LazyItemList newList = new LazyItemList(previousItemList, operation);
-            _itemLists[itemElement.ItemType] = newList;
+            return new UpdateOperation(operationBuilder, this);
         }
 
         void ProcessItemSpec(OperationBuilder operationBuilder, string itemSpec, ElementLocation itemSpecLocation)
@@ -327,13 +338,11 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void ProcessItemElementInclude(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
+        IncludeOperation BuildIncludeOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder();
+            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder(itemElement);
             operationBuilder.ElementOrder = _nextElementOrder++;
-            operationBuilder.ItemElement = itemElement;
             operationBuilder.RootDirectory = rootDirectory;
-            operationBuilder.ItemType = itemElement.ItemType;
             operationBuilder.ConditionResult = conditionResult;
 
             // Process include
@@ -364,12 +373,7 @@ namespace Microsoft.Build.Evaluation
             // Process Metadata (STEP 5: Evaluate each metadata XML and apply them to each item we have so far)
             ProcessMetadataElements(itemElement, operationBuilder);
 
-            var operation = operationBuilder.CreateOperation(this);
-
-            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
-            LazyItemList newList = new LazyItemList(previousItemList, operation);
-            _itemLists[itemElement.ItemType] = newList;
-
+            return new IncludeOperation(operationBuilder, this);
         }
 
         private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
@@ -467,19 +471,13 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void ProcessItemElementRemove(string rootDirectory, ProjectItemElement itemElement)
+        RemoveOperation BuildRemoveOperation(string rootDirectory, ProjectItemElement itemElement)
         {
-            OperationBuilder operationBuilder = new OperationBuilder();
-            operationBuilder.ItemElement = itemElement;
-            operationBuilder.ItemType = itemElement.ItemType;
+            OperationBuilder operationBuilder = new OperationBuilder(itemElement);
 
             ProcessItemSpec(operationBuilder, itemElement.Remove, itemElement.RemoveLocation);
 
-            var operation = new RemoveOperation(operationBuilder, this);
-
-            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
-            LazyItemList newList = new LazyItemList(previousItemList, operation);
-            _itemLists[itemElement.ItemType] = newList;
+            return new RemoveOperation(operationBuilder, this);
         }
     }
 }

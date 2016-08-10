@@ -130,9 +130,8 @@ namespace Microsoft.Build.Evaluation
             
             public ImmutableList<string>.Builder Excludes { get; set; } = ImmutableList.CreateBuilder<string>();
 
-            public IncludeOperation CreateOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+            public IncludeOperationBuilder(ProjectItemElement itemElement) : base(itemElement)
             {
-                return new IncludeOperation(this, lazyEvaluator);
             }
         }
     }
