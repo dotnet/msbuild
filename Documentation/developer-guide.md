@@ -53,7 +53,7 @@ For E2E and functional tests, they all depend on the binaries located under `art
 1. `cd src\dotnet\`
 2. `dotnet build`
 3. `cp bin\debug\netstandardapp1.5\dotnet.dll artifacts\rid\stage2`
-4. `cd ..\..\test\dotnet-build.Tests`
+4. `cd ..\..\test\dotnet.Tests`
 5. `dotnet test`
 
 ##Adding a Command
