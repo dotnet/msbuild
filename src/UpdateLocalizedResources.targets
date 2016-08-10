@@ -108,6 +108,7 @@
     <ItemGroup>
       <FilesToSign Include="@(IntermediateSatelliteAssembliesWithTargetPath -> '$(OutputPath)%(Culture)\%(FileName)%(Extension)')">
         <Authenticode>Microsoft</Authenticode>
+        <StrongName>StrongName</StrongName>
       </FilesToSign>
     </ItemGroup>
 
