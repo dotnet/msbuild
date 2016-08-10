@@ -416,6 +416,11 @@
                 <xs:documentation><!-- _locID_text="SimpleItemType_Remove" _locComment="" -->Semi-colon separated list of files (wildcards are allowed) or other item names to remove from the existing list contents</xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="Update" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation><!-- _locID_text="SimpleItemType_Remove" _locComment="" -->Semi-colon separated list of files (wildcards are allowed) or other item names to be updated with the metadata from contained in this xml element</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
           <xs:annotation>
             <xs:documentation>
