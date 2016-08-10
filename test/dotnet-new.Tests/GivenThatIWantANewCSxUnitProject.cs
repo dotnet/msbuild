@@ -36,16 +36,20 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void When_dotnet_test_is_invoked_Then_tests_run_without_errors()
         {
+            const string testFolder = "test";
             var rootPath = Temp.CreateDirectory().Path;
+            var testDirectory = Directory.CreateDirectory(Path.Combine(rootPath, testFolder)).FullName;
 
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
+            File.WriteAllText(Path.Combine(rootPath, "global.json"), $"{{ \"projects\": [\"{testFolder}\"] }}");
+
+            new TestCommand("dotnet") { WorkingDirectory = testDirectory }
                 .Execute("new --type xunittest");
 
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
+            new TestCommand("dotnet") { WorkingDirectory = testDirectory }
                 .Execute("restore");
 
             var buildResult = new TestCommand("dotnet")
-                .WithWorkingDirectory(rootPath)
+                .WithWorkingDirectory(testDirectory)
                 .ExecuteWithCapturedOutput("test")
                 .Should()
                 .Pass()

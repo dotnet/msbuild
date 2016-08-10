@@ -8,6 +8,7 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000914",
     "NuGet.Versioning": "3.5.0-rc1-1697",
     "NuGet.Packaging": "3.5.0-rc1-1697",
     "NuGet.Frameworks": "3.5.0-rc1-1697",

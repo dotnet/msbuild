@@ -5,9 +5,8 @@
   },
   "description": "Types to model a .NET Project",
   "dependencies": {
-    "Microsoft.Extensions.DependencyModel": {
-      "target": "project"
-    },
+    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000914",
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000914",
     "Newtonsoft.Json": "9.0.1",
     "NuGet.Configuration": "3.5.0-rc1-1697",
     "NuGet.Packaging": "3.5.0-rc1-1697",

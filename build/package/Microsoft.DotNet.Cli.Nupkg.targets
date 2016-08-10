@@ -39,10 +39,6 @@
         <ProjectName>Microsoft.DotNet.ProjectModel.Workspaces</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.DependencyModel">
-        <ProjectName>Microsoft.Extensions.DependencyModel</ProjectName>
-        <Version>$(DependencyModelAndInternalAbstractionsNugetVersion)</Version>
-      </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions">
         <ProjectName>Microsoft.Extensions.Testing.Abstractions</ProjectName>
         <Version>$(SdkNugetVersion)</Version>

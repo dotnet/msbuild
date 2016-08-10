@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 

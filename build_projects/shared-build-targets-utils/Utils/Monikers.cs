@@ -1,5 +1,5 @@
 ﻿using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

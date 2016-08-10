@@ -1,9 +1,8 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "dotnet-test-xunit": "1.0.0-rc2-192208-24",
-    "Microsoft.NETCore.Platforms": "1.0.1",
-    "xunit": "2.1.0"
+    "dotnet-test-xunit": "1.0.0-rc2-318883-21",
+    "xunit": "2.2.0-beta3-build3330"
   },
   "frameworks": {
     "netcoreapp1.0": {

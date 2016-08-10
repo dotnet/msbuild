@@ -5,10 +5,8 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "Microsoft.Extensions.DependencyModel": {
-      "target": "project"
-    },
-    "NuGet.ProjectModel": "3.5.0-rc1-1697"
+    "NuGet.ProjectModel": "3.5.0-rc1-1697",
+    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000914"
   },
   "frameworks": {
     "net451": {
