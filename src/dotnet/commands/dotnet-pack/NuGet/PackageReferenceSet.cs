@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NuGet.Frameworks;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public class PackageReferenceSet
     {

@@ -14,7 +14,7 @@ using System.Xml;
 using System.Xml.Linq;
 // TODO: Resources using NuGet.Resources;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     internal static class ManifestReader
     {

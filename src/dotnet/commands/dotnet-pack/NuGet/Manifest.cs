@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public class Manifest
     {

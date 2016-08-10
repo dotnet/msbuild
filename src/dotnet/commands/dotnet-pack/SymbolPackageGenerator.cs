@@ -6,7 +6,7 @@ using System.IO;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.Tools.Pack;
-using NuGet;
+using NuGet.Legacy;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {

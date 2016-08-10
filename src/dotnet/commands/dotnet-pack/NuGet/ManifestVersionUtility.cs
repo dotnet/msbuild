@@ -6,7 +6,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     internal static class ManifestVersionUtility
     {

@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using NuGet.Versioning;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public class ManifestMetadata
     {

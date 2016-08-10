@@ -3,7 +3,7 @@
 
 using System;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     internal sealed class ManifestVersionAttribute : Attribute

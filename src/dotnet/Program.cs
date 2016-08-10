@@ -16,6 +16,7 @@ using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.New;
+using Microsoft.DotNet.Tools.NuGet;
 using Microsoft.DotNet.Tools.Publish;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.Run;
@@ -32,6 +33,7 @@ namespace Microsoft.DotNet.Cli
             ["compile-csc"] = CompileCscCommand.Run,
             ["help"] = HelpCommand.Run,
             ["new"] = NewCommand.Run,
+            ["nuget"] = NuGetCommand.Run,
             ["pack"] = PackCommand.Run,
             ["projectmodel-server"] = ProjectModelServerCommand.Run,
             ["publish"] = PublishCommand.Run,

@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public static class PathResolver
     {

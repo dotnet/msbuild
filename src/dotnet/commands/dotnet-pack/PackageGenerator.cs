@@ -14,11 +14,11 @@ using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resources;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Pack;
-using NuGet;
+using NuGet.Legacy;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using PackageBuilder = NuGet.PackageBuilder;
+using PackageBuilder = NuGet.Legacy.PackageBuilder;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var packageOutputPath = Path.Combine(
                 ArtifactPathsCalculator.PackageOutputPath,
-                GetPackageName() + NuGet.Constants.PackageExtension);
+                GetPackageName() + global::NuGet.Legacy.Constants.PackageExtension);
 
             if (GeneratePackage(packageOutputPath, packDiagnostics))
             {

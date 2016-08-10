@@ -27,6 +27,7 @@ namespace Microsoft.DotNet.Cli.Build
             // TODO: https://github.com/dotnet/cli/issues/3558
             // "dotnet-compile-fsc.Tests",
             "dotnet-new.Tests",
+            "dotnet-nuget.UnitTests",
             "dotnet-pack.Tests",
             "dotnet-projectmodel-server.Tests",
             "dotnet-publish.Tests",
