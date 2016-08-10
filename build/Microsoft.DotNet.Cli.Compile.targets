@@ -136,6 +136,10 @@
       <Copy SourceFiles="$(SdkOutputDirectory)/%(FilesToMove.Identity)"
             DestinationFiles="$(SdkOutputDirectory)/%(FilesToMove.Filename).dll" />
 
+      <!-- MSBuild needs csc.exe to be in the SdkOutputDirectory, or else it can't invoke it -->
+      <Move SourceFiles="$(BinaryToCorehostifyOutDir)/csc.exe"
+            DestinationFiles="$(SdkOutputDirectory)/csc.exe" />
+
       <Copy SourceFiles="$(SdkOutputDirectory)/redist.deps.json"
             DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
 
