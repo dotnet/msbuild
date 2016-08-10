@@ -58,7 +58,9 @@
 
       <PreTestProjectsToExclude Include="test$(PathSeparator)**$(PathSeparator)bin$(PathSeparator)**$(PathSeparator)project.json" />
 
-      <PreTestProjectsToExclude Include="test$(PathSeparator)dotnet-build3.Tests$(PathSeparator)project.json" />
+      <!-- The current ResolveNuGetAssets target does not work on case-sensitive file systems.  We need https://github.com/dotnet/sdk/pull/10 -->
+      <PreTestProjectsToExclude Condition="'$(OSName)' != 'win' and '$(OSName)' != 'osx'"
+                                Include="test$(PathSeparator)dotnet-build3.Tests$(PathSeparator)project.json" />
 
       <TestProjectsToExclude Include="%(PreTestProjectsToExclude.RelativeDir)project.json" />
 
