@@ -2,7 +2,7 @@
 <package>
   <metadata minClientVersion="2.8.1">
     <id>Microsoft.Build.Targets</id>
-    <version>0.1.0-preview</version>
+    <version>$version$</version>
     <title>MSBuild APIs</title>
     <authors>Microsoft</authors>
     <owners>Microsoft</owners>
@@ -17,10 +17,10 @@
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
       <group targetFramework="netstandard1.3">
-        <dependency id="Microsoft.Build.Framework" />
-        <dependency id="Microsoft.Build" />
-        <dependency id="Microsoft.Build.Utilities.Core" />
-        <dependency id="Microsoft.Build.Tasks.Core" />
+        <dependency id="Microsoft.Build.Framework" version="$version$" />
+        <dependency id="Microsoft.Build" version="$version$" />
+        <dependency id="Microsoft.Build.Utilities.Core" version="$version$" />
+        <dependency id="Microsoft.Build.Tasks.Core" version="$version$" />
         <dependency id="MSBuild" />
       </group>
     </dependencies>

@@ -31,9 +31,21 @@
 
   <PropertyGroup>
     <SkipVersionGeneration>true</SkipVersionGeneration>
+    <BaseVersion>0.1.0-preview</BaseVersion>
     <BuildNumberMajor>$(RevisionNumber)</BuildNumberMajor>
     <BuildNumberMinor>$([System.DateTime]::Now.ToString(`yMMdd`))</BuildNumberMinor>
+
+    <!-- The version for msbuild nuget packages. Used by packages.targets:AddNuGetPackageVersionMetadataToNuspecs -->
+    <PackageVersion>$(BaseVersion)-$(BuildNumberMajor)-$(BuildNumberMinor)</PackageVersion>
+
+    <!-- Turn off the automated package generation in packages.targets:AddNuGetPackageVersionMetadataToNuspecs and use the above PackageVersion-->
+    <DoNotGeneratePackageVersion>true</DoNotGeneratePackageVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Used by packages.targets:BuildPackages to inject properties into the nuspec-->
+    <NuspecProperties Include="version=$(PackageVersion)"/>
+  </ItemGroup>
 
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
 

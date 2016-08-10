@@ -2,7 +2,7 @@
 <package>
   <metadata minClientVersion="2.8.1">
     <id>Microsoft.Build.Framework</id>
-    <version>0.1.0-preview</version>
+    <version>$version$</version>
     <title>MSBuild APIs</title>
     <authors>Microsoft</authors>
     <owners>Microsoft</owners>

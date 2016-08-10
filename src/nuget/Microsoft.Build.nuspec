@@ -2,7 +2,7 @@
 <package>
   <metadata minClientVersion="2.8.1">
     <id>Microsoft.Build</id>
-    <version>0.1.0-preview</version>
+    <version>$version$</version>
     <title>MSBuild APIs</title>
     <authors>Microsoft</authors>
     <owners>Microsoft</owners>
@@ -17,7 +17,7 @@
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
       <group targetFramework="netstandard1.3">
-        <dependency id="Microsoft.Build.Framework" />
+        <dependency id="Microsoft.Build.Framework" version="$version$" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
         <dependency id="System.AppContext" version="4.1.0" />
         <dependency id="System.Collections" version="4.0.11" />
