@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.InternalAbstractions;
 using Xunit;
@@ -15,8 +16,7 @@ namespace Microsoft.DotNet.Tests
 {
     public class PackagedCommandTests : TestBase
     {
-        private readonly string _testProjectsRoot;
-        private readonly string _desktopTestProjectsRoot;
+        private readonly TestAssetsManager _desktopTestAssetsManager = GetTestGroupTestAssetsManager("DesktopTestProjects");
 
         public static IEnumerable<object[]> DependencyToolArguments
         {
@@ -46,18 +46,16 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
-        public PackagedCommandTests()
-        {
-            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
-            _desktopTestProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "DesktopTestProjects");
-        }
-
         [Theory]
         [InlineData("AppWithDirectAndToolDependency")]
         [InlineData("AppWithToolDependency")]
         public void TestProjectToolIsAvailableThroughDriver(string appName)
         {
-            var appDirectory = Path.Combine(_testProjectsRoot, appName);
+            var testInstance = TestAssetsManager
+                .CreateTestInstance(appName, identifier: appName)
+                .WithLockFiles();
+
+            var appDirectory = testInstance.Path;
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
                 .Execute()
@@ -75,7 +73,11 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void CanInvokeToolWhosePackageNameIsDifferentFromDllName()
         {
-            var appDirectory = Path.Combine(_testProjectsRoot, "AppWithDependencyOnToolWithOutputName");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("AppWithDependencyOnToolWithOutputName")
+                .WithLockFiles();
+
+            var appDirectory = testInstance.Path;
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
                 .Execute()
@@ -93,7 +95,11 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
         {
-            var appDirectory = Path.Combine(_testProjectsRoot, "AppWithDirectDependencyWithOutputName");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("AppWithDirectDependencyWithOutputName")
+                .WithLockFiles();
+
+            var appDirectory = testInstance.Path;
             const string framework = ".NETCoreApp,Version=v1.0";
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
@@ -119,7 +125,11 @@ namespace Microsoft.DotNet.Tests
                 return;
             }
 
-            var appDirectory = Path.Combine(_desktopTestProjectsRoot, "AppWithDirectDependencyDesktopAndPortable");
+            var testInstance = _desktopTestAssetsManager
+                .CreateTestInstance("AppWithDirectDependencyWithOutputName", identifier: framework)
+                .WithLockFiles();
+
+            var appDirectory = testInstance.Path;
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
                 .Execute()
@@ -144,8 +154,12 @@ namespace Microsoft.DotNet.Tests
             {
                 return;
             }
+            
+            var testInstance = _desktopTestAssetsManager
+                .CreateTestInstance("LibraryWithDirectDependencyDesktopAndPortable", identifier: framework)
+                .WithLockFiles();
 
-            var appDirectory = Path.Combine(_desktopTestProjectsRoot, "LibraryWithDirectDependencyDesktopAndPortable");
+            var appDirectory = testInstance.Path;
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
                 .Execute()
@@ -162,7 +176,9 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ToolsCanAccessDependencyContextProperly()
         {
-            var appDirectory = Path.Combine(_testProjectsRoot, "DependencyContextFromTool");
+            var testInstance = TestAssetsManager.CreateTestInstance("DependencyContextFromTool");
+
+            var appDirectory = testInstance.Path;
 
             CommandResult result = new DependencyContextTestCommand() { WorkingDirectory = appDirectory }
                 .Execute(Path.Combine(appDirectory, "project.json"));
@@ -173,8 +189,11 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void TestProjectDependencyIsNotAvailableThroughDriver()
         {
-            var appName = "AppWithDirectDependency";
-            var appDirectory = Path.Combine(_testProjectsRoot, appName);
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("AppWithDirectDependency")
+                .WithLockFiles();
+
+            var appDirectory = testInstance.Path;
 
             new BuildCommand(Path.Combine(appDirectory, "project.json"))
                 .Execute()
