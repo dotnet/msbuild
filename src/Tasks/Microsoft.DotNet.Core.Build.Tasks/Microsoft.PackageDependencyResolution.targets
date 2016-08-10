@@ -40,8 +40,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Target Moniker + RID-->
   <PropertyGroup Condition="'$(_NugetTargetMonikerAndRID)' == ''">
-    <_NugetTargetMonikerAndRID Condition="'$(NuGetRuntimeIdentifier)' == ''">$(NuGetTargetMoniker)</_NugetTargetMonikerAndRID>
-    <_NugetTargetMonikerAndRID Condition="'$(NuGetRuntimeIdentifier)' != ''">$(NuGetTargetMoniker)/$(NuGetRuntimeIdentifier)</_NugetTargetMonikerAndRID>
+    <_NugetTargetMonikerAndRID Condition="'$(RuntimeIdentifier)' == ''">$(NuGetTargetMoniker)</_NugetTargetMonikerAndRID>
+    <_NugetTargetMonikerAndRID Condition="'$(RuntimeIdentifier)' != ''">$(NuGetTargetMoniker)/$(RuntimeIdentifier)</_NugetTargetMonikerAndRID>
   </PropertyGroup>
 
   <!--
@@ -154,7 +154,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
       <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
-      <_CompileFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'CompileAssembly'))" />
+      <_CompileFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
       
       <!-- Get corresponding file definitions -->
       <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
