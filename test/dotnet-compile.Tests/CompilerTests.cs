@@ -16,7 +16,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void XmlDocumentationFileIsGenerated()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestAppWithLibrary")
+                .WithLockFiles();
 
             var testLibDir = Path.Combine(testInstance.TestRoot, "TestLibrary");
 
@@ -37,7 +39,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void SatelliteAssemblyIsGeneratedByDotnetBuild()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("TestProjectWithCultureSpecificResource");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestProjectWithCultureSpecificResource")
+                .WithLockFiles();
 
             var testLibDir = testInstance.TestRoot;
 
@@ -60,7 +64,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void LibraryWithAnalyzer()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("TestLibraryWithAnalyzer");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestLibraryWithAnalyzer")
+                .WithLockFiles();
 
             var testLibDir = testInstance.TestRoot;
 
@@ -79,19 +85,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         {
             var root = Temp.CreateDirectory();
 
-            var spaceBufferDirectory = root.CreateDirectory("space directory");
-
-            var testInstance = TestAssetsManager.CreateTestInstance("TestAppCompilationContext");
-
-            var testAppDir = testInstance.TestRoot;
-
-            Directory.Move(testInstance.TestRoot, spaceBufferDirectory.Path);
-
-            Directory.Move(spaceBufferDirectory.Path, testInstance.TestRoot);
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestAppCompilationContext", identifier: "A SPACE")
+                .WithLockFiles();
 
             var testProjectDir = Path.Combine(
                     Directory.GetParent(testInstance.TestRoot).FullName, 
-                    "space directory", 
                     "TestAppCompilationContext", 
                     "TestApp");
 
