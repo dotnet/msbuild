@@ -2830,6 +2830,36 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             AssertProvenanceResult(expected, project, "1.foo");
         }
+		
+		[Fact]
+        public void GetItemProvenanceShouldWorkWithRemoveElements()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1.foo`/>
+
+                    <B Remove=`1.bar`/>
+                    <C Remove=`1.foo`/>
+                    <D Remove=`1.foo;*.foo`/>
+                    <E Remove=`$(P);@(A)`/>
+                  </ItemGroup>
+                  <PropertyGroup>
+                    <P>*.foo;@(A)</P>
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("C", Operation.Remove, Provenance.StringLiteral, 1),
+                Tuple.Create("D", Operation.Remove, Provenance.StringLiteral | Provenance.Glob, 2),
+                Tuple.Create("E", Operation.Remove, Provenance.Glob | Provenance.Inconclusive, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo");
+        }
 
         [Fact]
         public void GetAllGlobsShouldNotFindGlobsIfThereAreNone()
