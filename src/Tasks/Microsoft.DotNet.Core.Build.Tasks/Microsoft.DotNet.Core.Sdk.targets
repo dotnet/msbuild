@@ -15,6 +15,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MicrosoftDotNetCoreBuildTasksAssembly>$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll</MicrosoftDotNetCoreBuildTasksAssembly>
   </PropertyGroup>
 
+  <ImportGroup>
+    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
+  </ImportGroup>
+
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
 
@@ -38,7 +42,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <_ProjectLockFilePath>$(MSBuildProjectDirectory)/project.lock.json</_ProjectLockFilePath>
     <_ProjectDepsFilePath>$(TargetDir)$(AssemblyName).deps.json</_ProjectDepsFilePath>
     <_ProjectRuntimeConfigFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFilePath>
     <_ProjectRuntimeConfigDevFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</_ProjectRuntimeConfigDevFilePath>
@@ -62,13 +65,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateDependencyFile"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
-          Inputs="$(_ProjectLockFilePath)"
+          Inputs="$(ProjectLockFile)"
           Outputs="$(_ProjectDepsFilePath)">
 
     <!--
     TODO: https://github.com/dotnet/sdk/issues/19 - Get RuntimeIdentifier
     -->
-    <GenerateDepsFile LockFilePath="$(_ProjectLockFilePath)"
+    <GenerateDepsFile LockFilePath="$(ProjectLockFile)"
                       DepsFilePath="$(_ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
@@ -92,10 +95,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateRuntimeConfigurationFiles"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
-          Inputs="$(_ProjectLockFilePath);$(UserRuntimeConfig)"
+          Inputs="$(ProjectLockFile);$(UserRuntimeConfig)"
           Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
 
-    <GenerateRuntimeConfigurationFiles LockFilePath="$(_ProjectLockFilePath)"
+    <GenerateRuntimeConfigurationFiles LockFilePath="$(ProjectLockFile)"
                                        RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />

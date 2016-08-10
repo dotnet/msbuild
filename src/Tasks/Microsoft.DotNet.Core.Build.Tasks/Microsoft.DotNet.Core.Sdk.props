@@ -54,7 +54,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetExt>.dll</TargetExt>
 
     <!-- This will turn off the base 'ResolveNuGetPackages' target since it is UWP specific, and .NET Core needs it to be split up -->
-    <!--<ResolveNuGetPackages>false</ResolveNuGetPackages>-->
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
   </PropertyGroup>
   
   <PropertyGroup>

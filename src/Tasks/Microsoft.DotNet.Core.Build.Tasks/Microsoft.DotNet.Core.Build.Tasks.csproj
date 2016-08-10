@@ -13,6 +13,8 @@
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
+    <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="RuntimeConfig.cs" />
@@ -24,11 +26,16 @@
     <None Include="Microsoft.DotNet.Core.Sdk.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Microsoft.PackageDependencyResolution.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="project.json" />
     <Compile Include="DependencyContextBuilder.cs" />
     <Compile Include="GenerateDepsFile.cs" />
     <Compile Include="GenerateRuntimeConfigurationFiles.cs" />
     <Compile Include="LockFileCache.cs" />
+    <Compile Include="FileGroup.cs" />
+    <Compile Include="MetadataKeys.cs" />
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
