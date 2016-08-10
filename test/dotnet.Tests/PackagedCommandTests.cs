@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Tests
                 var projectOutputPath = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
-                    new object[] { ".NETCoreApp,Version=v1.0", "CoreFX", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll", true },
-                    new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath, true }
+                    new object[] { "CoreFX", ".NETCoreApp,Version=v1.0", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll", true },
+                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath, true }
                 };
             }
         }
@@ -40,8 +40,8 @@ namespace Microsoft.DotNet.Tests
                 var projectOutputPath = $"LibraryWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
-                    new object[] { ".NETStandard,Version=v1.6", "CoreFX", "lib\\netstandard1.6\\dotnet-desktop-and-portable.dll", true },
-                    new object[] { ".NETFramework,Version=v4.5.1", "NetFX", projectOutputPath, true }
+                    new object[] { "CoreFX", ".NETStandard,Version=v1.6", "lib\\netstandard1.6\\dotnet-desktop-and-portable.dll", true },
+                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath, true }
                 };
             }
         }
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Tests
         // need conditional theories so we can skip on non-Windows
         [Theory]
         [MemberData("DependencyToolArguments")]
-        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string framework, string args, string expectedDependencyToolPath, bool windowsOnly)
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string identifier, string framework, string expectedDependencyToolPath, bool windowsOnly)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && windowsOnly)
             {
@@ -126,7 +126,8 @@ namespace Microsoft.DotNet.Tests
             }
 
             var testInstance = _desktopTestAssetsManager
-                .CreateTestInstance("AppWithDirectDependencyWithOutputName", identifier: framework)
+                .CreateTestInstance("AppWithDirectDependencyDesktopAndPortable", identifier: identifier)
+                .WithBuildArtifacts()
                 .WithLockFiles();
 
             var appDirectory = testInstance.Path;
@@ -137,10 +138,10 @@ namespace Microsoft.DotNet.Tests
                 .Pass();
 
             CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
-                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, args);
+                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, identifier);
 
             result.Should().HaveStdOutContaining(framework);
-            result.Should().HaveStdOutContaining(args);
+            result.Should().HaveStdOutContaining(identifier);
             result.Should().HaveStdOutContaining(expectedDependencyToolPath);
             result.Should().NotHaveStdErr();
             result.Should().Pass();
@@ -148,7 +149,7 @@ namespace Microsoft.DotNet.Tests
 
         [Theory]
         [MemberData("LibraryDependencyToolArguments")]
-        public void TestFrameworkSpecificLibraryDependencyToolsCannotBeInvoked(string framework, string args, string expectedDependencyToolPath, bool windowsOnly)
+        public void TestFrameworkSpecificLibraryDependencyToolsCannotBeInvoked(string identifier, string framework, string expectedDependencyToolPath, bool windowsOnly)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && windowsOnly)
             {
@@ -156,7 +157,7 @@ namespace Microsoft.DotNet.Tests
             }
             
             var testInstance = _desktopTestAssetsManager
-                .CreateTestInstance("LibraryWithDirectDependencyDesktopAndPortable", identifier: framework)
+                .CreateTestInstance("LibraryWithDirectDependencyDesktopAndPortable", identifier: identifier)
                 .WithLockFiles();
 
             var appDirectory = testInstance.Path;
@@ -167,7 +168,7 @@ namespace Microsoft.DotNet.Tests
                 .Pass();
 
             CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
-                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, args);
+                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, identifier);
 
             result.Should().HaveStdOutContaining("Command not found");
             result.Should().Fail();
