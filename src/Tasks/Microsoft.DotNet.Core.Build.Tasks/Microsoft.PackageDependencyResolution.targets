@@ -20,9 +20,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <!-- General Properties -->
   <PropertyGroup>
-    <!-- Turn off NuGet Task -->
-    <ResolveNuGetPackages>false</ResolveNuGetPackages>
-
     <!-- Flag PackageDependency Tasks -->
     <EnableResolvePackageDependencies 
       Condition="'$(EnableResolvePackageDependencies)' == '' and '$(MSBuildProjectExtension)' != '.xproj'">true</EnableResolvePackageDependencies>

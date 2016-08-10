@@ -15,6 +15,8 @@
     <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
+    <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GivenADependencyContextBuilder.cs" />

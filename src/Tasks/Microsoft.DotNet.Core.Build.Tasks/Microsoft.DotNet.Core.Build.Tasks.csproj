@@ -14,6 +14,8 @@
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
+    <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="RuntimeConfig.cs" />

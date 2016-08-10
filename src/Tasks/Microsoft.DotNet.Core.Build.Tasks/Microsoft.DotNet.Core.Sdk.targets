@@ -16,8 +16,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <ImportGroup>
-    <!-- Import Package Dependency Resolution task TODO currently this breaks the build -->
-    <!--<Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />-->
+    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
   </ImportGroup>
 
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
