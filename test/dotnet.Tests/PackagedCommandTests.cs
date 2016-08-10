@@ -97,6 +97,7 @@ namespace Microsoft.DotNet.Tests
         {
             var testInstance = TestAssetsManager
                 .CreateTestInstance("AppWithDirectDependencyWithOutputName")
+                .WithBuildArtifacts()
                 .WithLockFiles();
 
             var appDirectory = testInstance.Path;
