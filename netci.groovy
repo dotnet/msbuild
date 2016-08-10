@@ -16,11 +16,9 @@ def branch = GithubBranchName
         }
     }
 
-    // TODO: For when we actually have unit tests in this repo
-    // Utilities.addXUnitDotNETResults(myJob, '**/xUnitResults/*.xml')
-
     Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-internal')
     InternalUtilities.standardJobSetup(newJob, project, true /* isPR */, "*/${branch}")
+    Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
 
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "Windows $config")
 }
