@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageDependencies : Task
     {
-        private readonly Dictionary<string, string> _projectReferencesToOutputBasePaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly List<string> _packageFolders = new List<string>();
 
         #region Output Items
@@ -327,14 +326,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     ReportException($"Your project is consuming assets from the project but no MSBuild project is found in the project.lock.json.");
                 }
 
-                var absoluteMSBuildProjectPath = GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
-                string fullPackagePath;
-                if (!_projectReferencesToOutputBasePaths.TryGetValue(absoluteMSBuildProjectPath, out fullPackagePath))
-                {
-                    ReportException("The project.json is referencing the project, but an output path was not specified.");
-                }
-
-                return fullPackagePath;
+                return GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
             }
             else
             {
