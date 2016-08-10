@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdErr();;
+                .NotHaveStdErr();
         }
 
 
