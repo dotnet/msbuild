@@ -1,33 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="dogfood" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="BuildProps">
-    <BuildPropsFile>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Build.props))\Build.props</BuildPropsFile>
-  </PropertyGroup>
-  <Import Project="$(BuildPropsFile)" Condition="'$(BuildProps_Imported)'!='True' AND Exists('$(BuildPropsFile)') AND '$(VisualStudioDir)'==''" />
-  <Import Project="..\Microsoft.Xmake.props" />
-  <PropertyGroup Label="Dependencies">
-    <UsingPartitionVSCommon>true</UsingPartitionVSCommon>
-    <UsingProjectVscommonCodeMarkers>true</UsingProjectVscommonCodeMarkers>
-    <UsingProjectVscommonCodeMarkers_CompileManagedCodeMarkers>true</UsingProjectVscommonCodeMarkers_CompileManagedCodeMarkers>
-    <UsingProjectVSCommonCodeMarkersDesignTime>true</UsingProjectVSCommonCodeMarkersDesignTime>
-  </PropertyGroup>
-  <ImportGroup Label="Dependencies">
-    <Import Project="$(PartitionExports)" />
-  </ImportGroup>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <OutputType>library</OutputType>
-    <AssemblyName>Microsoft.Build.Engine</AssemblyName>
-    <NoWarn>$(NoWarn);618</NoWarn>
-    <DevdivCLRCodeAnalysis>true</DevdivCLRCodeAnalysis>
-    <UseVsVersion>true</UseVsVersion>
-    <BuildArchitecturesAllowed>$(BuildArchitecturesAllowed);amd64;arm</BuildArchitecturesAllowed>
-  </PropertyGroup>
-  <!-- IDE specific Information -->
-  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D21C4BF9-E131-4ACB-8960-794797F19A39}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <AssemblyName>Microsoft.Build.Engine</AssemblyName>
+    <RootNamespace>Microsoft.Build.Engine</RootNamespace>
   </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
-    <!-- Source Files -->
     <Compile Include="$(BrandingIncPath)\BrandNames.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -210,9 +200,6 @@
     <Compile Include="Shared\XMakeAttributes.cs" />
     <Compile Include="Shared\XMakeElements.cs" />
     <Compile Include="Shared\XmlUtilities.cs" />
-    <!-- Win32 RC Files -->
-    <RCResourceFile Include="native.rc" />
-    <!-- Resource Files -->
     <EmbeddedResource Include="Resources\Strings.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -225,36 +212,24 @@
     <Reference Include="System.Data" />
     <Reference Include="System.XML" />
     <Reference Include="System.Configuration" />
-    <!-- Necessary to enable VS Marks -->
-    <Reference Include="Microsoft.VisualStudio.Profiler" Condition="'$(MSBUILDENABLEVSPROFILING)' != ''" />
-    <ProjectReference Include="..\Framework\Framework.csproj">
-      <Project>{784BF121-CE8F-4314-AA55-E86AB61670FE}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Name>Framework</Name>
-      <Comment>Needs 'microsoft.build.framework.dll'</Comment>
-      <SpecificVersion>true</SpecificVersion>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
+      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
+      <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <CreateTlb>true</CreateTlb>
     <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
     <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
-    <DocumentationFile>$(IntermediateOutputPath)Microsoft.Build.Engine.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <PublishPartLinked Include="$(OutputPath)$(AssemblyName)$(TargetExt)">
-      <Visibility>Inter</Visibility>
-      <FileType>Reference</FileType>
-    </PublishPartLinked>
-  </ItemGroup>
   <Import Project="..\Microsoft.Xmake.targets" />
   <PropertyGroup>
     <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
     <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
     <CopyToSuiteBin>true</CopyToSuiteBin>
   </PropertyGroup>
-  <!-- IDE specific Information -->
   <ItemGroup>
-    <AppDesigner Include="Properties\" />
+    <None Include="project.json" />
   </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
