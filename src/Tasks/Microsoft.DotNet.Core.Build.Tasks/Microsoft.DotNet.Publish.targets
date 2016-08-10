@@ -1,0 +1,133 @@
+<!--
+***********************************************************************************************
+Microsoft.DotNet.Publish.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    ============================================================
+                                        Publish
+ 
+    The main publish entry point.
+    ============================================================
+  -->
+  <PropertyGroup>
+    <PublishDependsOn>
+      BeforePublish;
+      CorePublish;
+      AfterPublish
+    </PublishDependsOn>
+
+    <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
+  </PropertyGroup>
+
+  <Target Name="Publish"
+          DependsOnTargets="$(PublishDependsOn)" />
+
+  <!--
+    ============================================================
+                                        BeforePublish
+
+    Redefine this target in your project in order to run tasks just before Publish
+    ============================================================
+    -->
+  <Target Name="BeforePublish"/>
+
+  <!--
+    ============================================================
+                                        AfterPublish
+
+    Redefine this target in your project in order to run tasks just after Publish
+    ============================================================
+    -->
+  <Target Name="AfterPublish"/>
+
+  <!--
+    ============================================================
+                                        CorePublish
+
+    The core publish step calls each of the publish targets.
+    ============================================================
+    -->
+
+  <PropertyGroup>
+    <CorePublishDependsOn>
+      Build;
+      PrepareForPublish;
+      CopyFilesToPublishDirectory
+    </CorePublishDependsOn>
+  </PropertyGroup>
+  <Target Name="CorePublish"
+          DependsOnTargets="$(CorePublishDependsOn)">
+  </Target>
+
+  <!--
+    ============================================================
+                                        PrepareForPublish
+
+    Prepare the prerequisites for publishing.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <PrepareForPublishDependsOn></PrepareForPublishDependsOn>
+  </PropertyGroup>
+  <Target Name="PrepareForPublish"
+          DependsOnTargets="$(PrepareForPublishDependsOn)">
+
+    <MakeDir Directories="$(PublishDir)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        CopyFilesToPublishDirectory
+
+    Copy all build outputs, satellites and other necessary files to the publish directory.
+    ============================================================
+    -->
+  <Target Name="CopyFilesToPublishDirectory">
+
+    <PropertyGroup>
+      <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
+      <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
+    </PropertyGroup>
+
+    <!-- Copy the build product (.dll or .exe). -->
+    <Copy SourceFiles="@(IntermediateAssembly)"
+          DestinationFolder="$(PublishDir)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+    <!-- Copy the debug information file (.pdb), if any -->
+    <ItemGroup>
+      <_DebugSymbolsPublishPath Include="@(_DebugSymbolsIntermediatePath->'$(PublishDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
+          DestinationFiles="@(_DebugSymbolsPublishPath)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+</Project>
