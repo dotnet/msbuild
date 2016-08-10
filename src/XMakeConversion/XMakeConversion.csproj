@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="dogfood" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="BuildProps">
+    <BuildPropsFile>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Build.props))\Build.props</BuildPropsFile>
+  </PropertyGroup>
+  <Import Project="$(BuildPropsFile)" Condition="'$(BuildProps_Imported)'!='True' AND Exists('$(BuildPropsFile)') AND '$(VisualStudioDir)'==''" />
+  <Import Project="..\Microsoft.Xmake.props" />
+  <PropertyGroup>
+    <OutputType>library</OutputType>
+    <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <BuildArchitecturesAllowed>$(BuildArchitecturesAllowed);amd64;arm</BuildArchitecturesAllowed>
+  </PropertyGroup>
+  <!-- IDE specific Information -->
+  <PropertyGroup>
+    <ProjectGuid>{5274C277-F122-4A44-B7A0-00A1B3F39803}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Source Files -->
+    <Compile Include="AdditionalOptionsParser.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyResources.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Constants.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FxCopExclusions\Microsoft.Build.Conversion.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="OldVSProjectFileReader.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ProjectFileConverter.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <!-- Win32 RC Files -->
+    <RCResourceFile Include="native.rc" />
+    <!-- Resource Files -->
+    <EmbeddedResource Include="Strings.resx">
+      <SubType>Designer</SubType>
+      <LogicalName>Microsoft.Build.Conversion.Strings.resources</LogicalName>
+    </EmbeddedResource>
+    <!-- Assemblies Files we depend on -->
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <ProjectReference Include="..\XMakeBuildEngine\XMakeBuildEngine.csproj">
+      <Project>{3F1F7307-EE89-4110-B636-BDE1E45358C4}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>XMakeBuildEngine</Name>
+      <Comment>Needs 'microsoft.build.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+    <ProjectReference Include="..\OrcasEngine\OrcasEngine.csproj">
+      <Project>{D21C4Bf9-E131-4ACB-8960-794797f19A39}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>OrcasEngine</Name>
+      <Comment>Needs 'microsoft.build.engine.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+    <ProjectReference Include="..\Framework\Framework.csproj">
+      <Project>{784BF121-CE8F-4314-AA55-E86AB61670FE}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>Framework %28components\xmake\Framework\Framework%29</Name>
+      <Comment>Needs 'microsoft.build.framework.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
+    <DocumentationFile>$(IntermediateOutputPath)Microsoft.Build.Conversion.Core.XML</DocumentationFile>
+    <UseVsVersion>true</UseVsVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StyleCopEnabled>true</StyleCopEnabled>
+    <CopyToSuiteBin>true</CopyToSuiteBin>
+  </PropertyGroup>
+  <!-- IDE specific Information -->
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PublishPartLinked Include="$(OutputPath)$(AssemblyName)$(TargetExt)">
+      <Visibility>Inter</Visibility>
+      <FileType>Reference</FileType>
+    </PublishPartLinked>
+  </ItemGroup>
+  <Import Project="..\Microsoft.Xmake.targets" />
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>
