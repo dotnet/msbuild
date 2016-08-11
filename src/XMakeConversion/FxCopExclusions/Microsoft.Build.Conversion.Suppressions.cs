@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 // FxCop Suppression file
 // To Use:
 // Add module level suppressions to this file to have them suppressed in the assembly

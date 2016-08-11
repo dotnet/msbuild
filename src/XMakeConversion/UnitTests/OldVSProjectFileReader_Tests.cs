@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.IO;
 using System.Text;
@@ -440,7 +443,7 @@ namespace Microsoft.Build.UnitTests
         {
             // The contents of the project file that we'll be testing.  Look at the
             // right side, for a cleaner copy without all the escaping.
-            char c = 'Ã';
+            char c = 'ï¿½';
             string projectFileContents = new string(c,1);
 
             // Create a temp file on disk with the above contents.
