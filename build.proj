@@ -62,9 +62,6 @@
       <TaskDependenciesDlls Include="$(DotnetCliBuildDirectory)/bin/Microsoft.WindowsAzure.Storage.dll">
         <Name>Microsoft.WindowsAzure.Storage.dll</Name>
       </TaskDependenciesDlls>
-      <TaskDependenciesDlls Include="$(DotnetCliBuildDirectory)/bin/Microsoft.DotNet.PlatformAbstractions.dll">
-        <Name>Microsoft.DotNet.PlatformAbstractions.dll</Name>
-      </TaskDependenciesDlls>
     </ItemGroup>
 
     <!-- This is a work around to issue https://github.com/Microsoft/msbuild/issues/658 -->
