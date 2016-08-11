@@ -21,7 +21,7 @@ platformList.each { platform ->
     def (os, config) = platform.tokenize(':')
 
     // Calculate job name
-    def jobName = getBuildJobName(configuration, os)
+    def jobName = getBuildJobName(config, os)
     def buildCommand = '';
 
     // Calculate the build command
