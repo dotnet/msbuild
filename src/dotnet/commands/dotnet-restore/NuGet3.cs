@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Restore
 {
@@ -19,11 +16,18 @@ namespace Microsoft.DotNet.Tools.Restore
             }
             prefixArgs.Add("restore");
 
-            var result = new NuGetForwardingApp(Enumerable.Concat(
-                    prefixArgs,
-                    args).ToArray()).Execute();
+            var nugetApp = new NuGetForwardingApp(Enumerable.Concat(prefixArgs, args));
 
-            return result;
+            // setting NUGET_XPROJ_WRITE_TARGETS will tell nuget restore to install .props and .targets files
+            // coming from NuGet packages
+            const string nugetXProjWriteTargets = "NUGET_XPROJ_WRITE_TARGETS";
+            bool setXProjWriteTargets = Environment.GetEnvironmentVariable(nugetXProjWriteTargets) == null;
+            if (setXProjWriteTargets)
+            {
+                nugetApp.WithEnvironmentVariable(nugetXProjWriteTargets, "true");
+            }
+
+            return nugetApp.Execute();
         }
     }
 }

@@ -1,38 +1,34 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli
 {
-   /// <summary>
-   /// A class which encapsulates logic needed to forward arguments from the current process to another process
-   /// invoked with the dotnet.exe host.
-   /// </summary>
+    /// <summary>
+    /// A class which encapsulates logic needed to forward arguments from the current process to another process
+    /// invoked with the dotnet.exe host.
+    /// </summary>
     public class ForwardingApp
     {
         private const string s_hostExe = "dotnet";
 
         private readonly string _forwardApplicationPath;
-        private readonly string[] _argsToForward;
+        private readonly IEnumerable<string> _argsToForward;
         private readonly string _depsFile;
         private readonly string _runtimeConfig;
         private readonly string _additionalProbingPath;
-        private readonly Dictionary<string, string> _environmentVariables;
+        private Dictionary<string, string> _environmentVariables;
 
         private readonly string[] _allArgs;
-        
+
         public ForwardingApp(
-            string forwardApplicationPath, 
-            string[] argsToForward, 
-            string depsFile = null, 
+            string forwardApplicationPath,
+            IEnumerable<string> argsToForward,
+            string depsFile = null,
             string runtimeConfig = null,
             string additionalProbingPath = null,
             Dictionary<string, string> environmentVariables = null)
@@ -43,7 +39,7 @@ namespace Microsoft.DotNet.Cli
             _runtimeConfig = runtimeConfig;
             _additionalProbingPath = additionalProbingPath;
             _environmentVariables = environmentVariables;
-            
+
             var allArgs = new List<string>();
             allArgs.Add("exec");
 
@@ -97,6 +93,15 @@ namespace Microsoft.DotNet.Cli
             process.WaitForExit();
 
             return process.ExitCode;
+        }
+
+        public ForwardingApp WithEnvironmentVariable(string name, string value)
+        {
+            _environmentVariables = _environmentVariables ?? new Dictionary<string, string>();
+
+            _environmentVariables.Add(name, value);
+
+            return this;
         }
 
         private string GetHostExeName()

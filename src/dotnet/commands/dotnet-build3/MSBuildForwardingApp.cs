@@ -6,8 +6,6 @@ using Microsoft.DotNet.PlatformAbstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -35,16 +33,7 @@ namespace Microsoft.DotNet.Cli
             {
                 { "MSBuildExtensionsPath", AppContext.BaseDirectory },
                 { "DotnetHostPath", GetHostPath() },
-                { "BaseNuGetRuntimeIdentifier", GetCurrentBaseRid() },
-                { "Platform", GetCurrentArchitecture() },
-                { "PlatformTarget", GetCurrentArchitecture() }
             };
-        }
-
-        private static string GetCurrentBaseRid()
-        {
-            return RuntimeEnvironment.GetRuntimeIdentifier()
-                .Replace("-" + RuntimeEnvironment.RuntimeArchitecture, "");
         }
 
         private static string GetHostPath()
@@ -57,11 +46,6 @@ namespace Microsoft.DotNet.Cli
             return Path.Combine(
                 AppContext.BaseDirectory,
                 s_msbuildExeName);
-        }
-
-        private static string GetCurrentArchitecture()
-        {
-            return RuntimeEnvironment.RuntimeArchitecture;
         }
     }
 }

@@ -98,15 +98,6 @@ namespace Microsoft.DotNet.Tools.New
             File.Move(
                 Path.Combine(projectDirectory, "project.json.template"),
                 projectJsonFile);
-
-            string originalProjectJsonText = File.ReadAllText(projectJsonFile);
-            string replacedProjectJsonText = originalProjectJsonText
-                .Replace("$currentruntime$", RuntimeEnvironment.GetRuntimeIdentifier());
-
-            if (replacedProjectJsonText != originalProjectJsonText)
-            {
-                File.WriteAllText(projectJsonFile, replacedProjectJsonText);
-            }
         }
 
         private static void ReplaceFileTemplateNames(string projectDirectory)
