@@ -311,7 +311,7 @@ namespace Microsoft.Build.Tasks
 
             // If we want to create hard or symbolic links, then try that first
             if (UseHardlinksIfPossible)
-                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.Low, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateHardLink(destination, source, IntPtr.Zero /* reserved, must be NULL */));
+                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateHardLink(destination, source, IntPtr.Zero /* reserved, must be NULL */));
             else if (UseSymboliclinksIfPossible)
                 TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateSymbolicLink(destination, source, SymbolicLink.File));
 
