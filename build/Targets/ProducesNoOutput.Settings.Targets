@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\Directory.Build.props" />
+  <PropertyGroup>
+    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+    <OutputType>Library</OutputType>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
+  </PropertyGroup>
+</Project>
