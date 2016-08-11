@@ -18,7 +18,7 @@ def static getBuildJobName(def configuration, def os) {
 
 platformList.each { platform ->
     // Calculate names
-    def (os, configuration) = platform.tokenize(':')
+    def (os, config) = platform.tokenize(':')
 
     // Calculate job name
     def jobName = getBuildJobName(configuration, os)
@@ -27,8 +27,7 @@ platformList.each { platform ->
     // Calculate the build command
     if (os == 'Windows_NT' || os == 'Windows_2016') {
         buildCommand = ".\\build.cmd -Configuration $config"
-    }
-    else {
+    } else {
         // Jenkins non-Ubuntu CI machines don't have docker
         buildCommand = "./build.sh --configuration $config"
     }
