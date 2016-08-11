@@ -17,8 +17,9 @@
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
     <!-- When running on VSO (for official builds) use a real number. -->
-    <BUILD_BUILDNUMBER Condition="'$(BUILD_BUILDNUMBER)' == ''">00001</BUILD_BUILDNUMBER>
-    <VersionSuffix Condition="'$(VersionSuffix)' == ''">$(VersionPrereleasePrefix)-$(BUILD_BUILDNUMBER)</VersionSuffix>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">00000001-01</BuildNumber>
+    <VersionSuffix Condition="'$(VersionSuffix)' == ''">$(VersionPrereleasePrefix)-$(BuildNumber)</VersionSuffix>
     <Version Condition="'$(Version)' == ''">$(VersionPrefix)-$(VersionSuffix)</Version>
 
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
