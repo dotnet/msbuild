@@ -17,56 +17,15 @@ Copyright (c) .NET Foundation. All rights reserved.
  
     The main publish entry point.
     ============================================================
-  -->
+    -->
   <PropertyGroup>
-    <PublishDependsOn>
-      BeforePublish;
-      CorePublish;
-      AfterPublish
-    </PublishDependsOn>
-
     <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
   </PropertyGroup>
 
   <Target Name="Publish"
-          DependsOnTargets="$(PublishDependsOn)" />
-
-  <!--
-    ============================================================
-                                        BeforePublish
-
-    Redefine this target in your project in order to run tasks just before Publish
-    ============================================================
-    -->
-  <Target Name="BeforePublish"/>
-
-  <!--
-    ============================================================
-                                        AfterPublish
-
-    Redefine this target in your project in order to run tasks just after Publish
-    ============================================================
-    -->
-  <Target Name="AfterPublish"/>
-
-  <!--
-    ============================================================
-                                        CorePublish
-
-    The core publish step calls each of the publish targets.
-    ============================================================
-    -->
-
-  <PropertyGroup>
-    <CorePublishDependsOn>
-      Build;
-      PrepareForPublish;
-      CopyFilesToPublishDirectory
-    </CorePublishDependsOn>
-  </PropertyGroup>
-  <Target Name="CorePublish"
-          DependsOnTargets="$(CorePublishDependsOn)">
-  </Target>
+          DependsOnTargets="Build;
+                            PrepareForPublish;
+                            CopyFilesToPublishDirectory" />
 
   <!--
     ============================================================
@@ -75,11 +34,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     Prepare the prerequisites for publishing.
     ============================================================
     -->
-  <PropertyGroup>
-    <PrepareForPublishDependsOn></PrepareForPublishDependsOn>
-  </PropertyGroup>
-  <Target Name="PrepareForPublish"
-          DependsOnTargets="$(PrepareForPublishDependsOn)">
+  <Target Name="PrepareForPublish">
+
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
@@ -121,6 +77,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="_ComputeFilesToPublish"
           Returns="ResolvedFilesToPublish">
+
     <PropertyGroup>
       <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
       <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
@@ -138,8 +95,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                               Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
       </ResolvedFilesToPublish>
-
     </ItemGroup>
+
   </Target>
 
 </Project>
