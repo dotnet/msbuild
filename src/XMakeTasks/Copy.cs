@@ -311,9 +311,9 @@ namespace Microsoft.Build.Tasks
 
             // If we want to create hard or symbolic links, then try that first
             if (UseHardlinksIfPossible)
-                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.Low, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, () => NativeMethods.CreateHardLink(destinationFileState.Name, sourceFileState.Name, IntPtr.Zero /* reserved, must be NULL */));
+                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.Low, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateHardLink(destination, source, IntPtr.Zero /* reserved, must be NULL */));
             else if (UseSymboliclinksIfPossible)
-                TryCopyViaLink("Copy.SymLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, () => NativeMethods.CreateSymbolicLink(destinationFileState.Name, sourceFileState.Name, SymbolicLink.File));
+                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateSymbolicLink(destination, source, SymbolicLink.File));
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
@@ -337,7 +337,7 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, Func<bool> createLink)
+        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, Func<string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessageFromResources(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
@@ -359,7 +359,7 @@ namespace Microsoft.Build.Tasks
                 FileUtilities.DeleteNoThrow(destinationFileState.Name);
             }
                         
-            linkCreated = createLink();
+            linkCreated = createLink(sourceFileState.Name, destinationFileState.Name);
 
             if (!linkCreated)
             {
