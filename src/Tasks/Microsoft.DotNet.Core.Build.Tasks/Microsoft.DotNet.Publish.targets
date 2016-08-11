@@ -80,6 +80,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
   <Target Name="PrepareForPublish"
           DependsOnTargets="$(PrepareForPublishDependsOn)">
+    <PropertyGroup>
+      <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
+      <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
+    </PropertyGroup>
 
     <MakeDir Directories="$(PublishDir)" />
 
@@ -92,42 +96,50 @@ Copyright (c) .NET Foundation. All rights reserved.
     Copy all build outputs, satellites and other necessary files to the publish directory.
     ============================================================
     -->
-  <Target Name="CopyFilesToPublishDirectory">
+  <Target Name="CopyFilesToPublishDirectory"
+          DependsOnTargets="_ComputeFilesToPublish">
 
+    <Copy SourceFiles="@(ResolvedFilesToPublish)"
+          DestinationFiles="$(PublishDir)%(ResolvedFilesToPublish.RelativePath)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ComputeFilesToPublish
+
+    Gathers all the files that need to be copied to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_ComputeFilesToPublish"
+          Returns="ResolvedFilesToPublish">
     <PropertyGroup>
       <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
       <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
     </PropertyGroup>
 
-    <!-- Copy the build product (.dll or .exe). -->
-    <Copy SourceFiles="@(IntermediateAssembly)"
-          DestinationFolder="$(PublishDir)"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
-
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-
-    </Copy>
-
-    <!-- Copy the debug information file (.pdb), if any -->
     <ItemGroup>
-      <_DebugSymbolsPublishPath Include="@(_DebugSymbolsIntermediatePath->'$(PublishDir)%(Filename)%(Extension)')" />
+      <!-- Copy the build product (.dll or .exe). -->
+      <ResolvedFilesToPublish Include="@(IntermediateAssembly)"
+                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
+        <RelativePath>@(IntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFilesToPublish>
+
+      <!-- Copy the debug information file (.pdb), if any -->
+      <ResolvedFilesToPublish Include="@(_DebugSymbolsIntermediatePath)"
+                              Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
+        <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFilesToPublish>
+
     </ItemGroup>
-    <Copy SourceFiles="@(_DebugSymbolsIntermediatePath)"
-          DestinationFiles="@(_DebugSymbolsPublishPath)"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
-
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-
-    </Copy>
-
   </Target>
 
 </Project>
