@@ -1193,10 +1193,6 @@
     <value>MSB4207: Only an in-process affinity may be specified for projects which have registered host objects.</value>
     <comment>{StrBegin="MSB4207: "}</comment>
   </data>
-  <data name="InvalidAffinityForProjectWithHostObject" UESanitized="false" Visibility="Public">
-    <value>MSB4208: Only an in-process affinity may be specified for projects which have registered host objects.</value>
-    <comment>{StrBegin="MSB4208: "}</comment>
-  </data>
   <data name="ProjectInstanceConflictsWithAffinity" UESanitized="false" Visibility="Public">
     <value>MSB4209: The specified project instance conflicts with the affinity specified in the HostServices.</value>
     <comment>{StrBegin="MSB4209: "}</comment>
@@ -1448,7 +1444,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!-- #################################################################################################-->
   <!-- ######################################## Shared strings #########################################-->
   <!-- ###### These belong in Strings.shared.resx, but have been copied here for performance ###########-->
-  <!-- ##### If you change the string here, please also change it in Shared\Strings.shared.resx ########-->
+  <!-- ##### If you change the string here, please also change it in Shared\Resources\Strings.shared.resx ########-->
   <!-- ############################ and in XMakeCommandLine\Strings.resx ###############################-->
   <!-- ############## Remove this block once ResourceManager bug 627270 has been fixed. ################-->
   <!-- #################################################################################################-->

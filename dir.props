@@ -119,6 +119,7 @@
     <PlatformTarget Condition="'$(PlatformSpecificBuild)'=='true'">$(Platform)</PlatformTarget>
 
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
+    <DefineConstants Condition="$(LocalizedBuild) == 'true'">$(DefineConstants);LOCALIZED_BUILD</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' ==''">

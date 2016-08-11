@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (s_engineResourceManager == null)
                 {
-                    s_engineResourceManager = new ResourceManager("Microsoft.Build.Resources.Strings", typeof(ProjectCollection).GetTypeInfo().Assembly);
+                     s_engineResourceManager = new ResourceManager("Microsoft.Build.Strings", typeof(ProjectCollection).GetTypeInfo().Assembly);
                 }
 
                 return s_engineResourceManager;

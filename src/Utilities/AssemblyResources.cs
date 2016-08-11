@@ -96,8 +96,8 @@ namespace Microsoft.Build.Shared
         }
 
         // assembly resources
-        private static readonly ResourceManager s_resources = new ResourceManager("Microsoft.Build.Utilities.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
+        private static readonly ResourceManager s_resources = new ResourceManager("Microsoft.Build.Utilities.Core.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
         // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("Microsoft.Build.Utilities.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
+        private static readonly ResourceManager s_sharedResources = new ResourceManager("Microsoft.Build.Utilities.Core.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
     }
 }

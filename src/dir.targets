@@ -28,10 +28,11 @@
   <Import Condition="Exists('$(ToolsDir)\sign.targets')" Project="$(ToolsDir)\sign.targets" />
   
   <Import Project="$(MicroBuildDir)\MicroBuild.Core.targets" Condition="Exists('$(MicroBuildDir)\MicroBuild.Core.targets')" />
-  
-  <!-- nuget targets -->
-  <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
 
+    <!-- Targets from buildtools that restore packages before building. -->
+  <!-- TODO: ideally replaced by a standard "dotnet restore" over the solution. -->
+  <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
+  
   <!-- Use NuSpec.ReferenceGenerator to create / update the .NET Core dependencies of the packages -->
   <Import Condition="'$(NetCoreBuild)'=='true' and Exists('$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets')"  Project="$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets"/>
 
@@ -56,6 +57,9 @@
   <PropertyGroup Condition="'$(MSBuildRuntimeType)' != 'Desktop'">
     <DefineConstants>$(DefineConstants);STATIC_VERSION_NUMBER</DefineConstants>
   </PropertyGroup>
+
+  <!-- Update localized resources from the default English ones-->
+  <Import Project="UpdateLocalizedResources.targets" Condition="'$(LocalizedBuild)' == 'true' and '$(IsTestProject)' != 'true'"/>
 
   <!-- Restore packages -->
   <PropertyGroup>

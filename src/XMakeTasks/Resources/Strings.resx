@@ -1562,12 +1562,6 @@
         LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
    </comment>
   </data>
-  <data name="ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac">
-    <value>This reference is not "CopyLocal" because the CopyLocalDependenciesWhenParentReferenceInGac property is set to false and all the parent references for this reference are found in the GAC.</value>
-    <comment>
-        LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name. "CopyLocalDependenciesWhenParentReferenceInGac" is a property name.
-   </comment>
-  </data>
   <data name="ResolveAssemblyReference.NotCopyLocalBecauseFrameworksFiles">
     <value>This reference is not "CopyLocal" because it's in a Frameworks directory.</value>
     <comment>

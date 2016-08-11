@@ -117,9 +117,6 @@
     <data name="General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName">
         <value>Illegal quote in the command line value [{0}].</value>
     </data>
-    <data name="General.StringsCannotContainOddNumberOfDoubleQuotes">
-        <value>The value [{0}] contains an odd number of double-quote characters. Only even numbers of literal double-quote characters are acceptable to command line tools.</value>
-    </data>
     <data name="General.ToolCommandFailedNoErrorCode">
         <value>The command exited with code {0}.</value>
     </data>
