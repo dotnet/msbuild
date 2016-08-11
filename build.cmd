@@ -19,7 +19,7 @@ set MSBUILD_ARGS=%MSBUILD_ARGS% /fileloggerparameters:Verbosity=diag;LogFile="%M
 
 :: Check for a runtime host. If not defined, do not use a host
 if not defined RUNTIME_HOST (
-	set BUILD_COMMAND="%MSBUILD_CUSTOM_PATH%" %MSBUILD_ARGS%
+	set BUILD_COMMAND="%MSBUILD_CUSTOM_PATH%" /nodeReuse:false %MSBUILD_ARGS%
 
     :: Check prerequisites for full framework build
  	if not "%VisualStudioVersion%" == "14.0" (
