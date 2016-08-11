@@ -15,9 +15,10 @@
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
 
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
+    <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
     <!-- When running on VSO (for official builds) use a real number. -->
-    <VersionSuffix Condition="'$(VersionSuffix)' == ''">$(BUILD_BUILDNUMBER)</VersionSuffix>
-    <VersionSuffix Condition="'$(VersionSuffix)' == ''">alpha-00001</VersionSuffix>
+    <BUILD_BUILDNUMBER Condition="'$(BUILD_BUILDNUMBER)' == ''">00001</BUILD_BUILDNUMBER>
+    <VersionSuffix Condition="'$(VersionSuffix)' == ''">$(VersionPrereleasePrefix)-$(BUILD_BUILDNUMBER)</VersionSuffix>
     <Version Condition="'$(Version)' == ''">$(VersionPrefix)-$(VersionSuffix)</Version>
 
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
