@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
         private const string s_msbuildExeName = "MSBuild.exe";
         private readonly ForwardingApp _forwardingApp;
 
-        public MSBuildForwardingApp(string[] argsToForward)
+        public MSBuildForwardingApp(IEnumerable<string> argsToForward)
         {
             _forwardingApp = new ForwardingApp(
                 GetMSBuildExePath(),

@@ -20,10 +20,10 @@
     },
     "System.Diagnostics.TraceSource": "4.0.0",
     "System.Runtime.Serialization.Primitives": "4.1.1",
-    "NuGet.Versioning": "3.5.0-rc1-1697",
-    "NuGet.Packaging": "3.5.0-rc1-1697",
-    "NuGet.Frameworks": "3.5.0-rc1-1697",
-    "NuGet.ProjectModel": "3.5.0-rc1-1697",
+    "NuGet.Versioning": "3.6.0-beta.1.msbuild.1",
+    "NuGet.Packaging": "3.6.0-beta.1.msbuild.1",
+    "NuGet.Frameworks": "3.6.0-beta.1.msbuild.1",
+    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.1",
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },

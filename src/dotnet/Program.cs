@@ -17,6 +17,7 @@ using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.Publish;
 using Microsoft.DotNet.Tools.Restore;
+using Microsoft.DotNet.Tools.Restore3;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
 using NuGet.Frameworks;
@@ -37,7 +38,8 @@ namespace Microsoft.DotNet.Cli
             ["run"] = RunCommand.Run,
             ["test"] = TestCommand.Run,
             ["build3"] = Build3Command.Run,
-            ["run3"] = Run3Command.Run
+            ["run3"] = Run3Command.Run,
+            ["restore3"] = Restore3Command.Run,
         };
 
         public static int Main(string[] args)

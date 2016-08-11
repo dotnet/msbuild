@@ -14,4 +14,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NuGetTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.NuGet.targets</NuGetTargets>
   </PropertyGroup>
   <Import Condition="Exists('$(NuGetTargets)')" Project="$(NuGetTargets)" />
+
+  <!-- Import NuGet.targets for Restore -->
+  <PropertyGroup>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildExtensionsPath)\NuGet.targets</NuGetRestoreTargets>
+  </PropertyGroup>
+  <Import Condition="Exists('$(NuGetRestoreTargets)')" Project="$(NuGetRestoreTargets)" />
 </Project>
