@@ -14,10 +14,51 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 REPOROOT="$DIR"
-DOTNET_CLI_VERSION=$(cat "$REPOROOT/DotnetCLIVersion.txt")
+DOTNET_CLI_VERSION="$(cat "$REPOROOT/DotnetCLIVersion.txt")"
 
 CONFIGURATION="Debug"
 PLATFORM="Any CPU"
+
+args=( "$@" )
+
+while [[ $# > 0 ]]; do
+    lowerI="$(echo $1 | awk '{print tolower($0)}')"
+    case $lowerI in
+        -c|--configuration)
+            CONFIGURATION=$2
+            args=( "${args[@]/$1}" )
+            args=( "${args[@]/$2}" )
+            shift
+            ;;
+        --platform)
+            PLATFORM=$2
+            args=( "${args[@]/$1}" )
+            args=( "${args[@]/$2}" )
+            shift
+            ;;        
+        --help)
+            echo "Usage: $0 [--configuration <CONFIGURATION>] [--platform <PLATFORM>] [--help]"
+            echo ""
+            echo "Options:"
+            echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
+            echo "  --platform <PLATFORM>               Skip checks for pre-reqs in dotnet_install"
+            echo "  --help                              Display this help message"
+            exit 0
+            ;;
+        *)
+            break
+            ;;
+    esac
+
+    shift
+done
+
+# $args array may have empty elements in it.
+# The easiest way to remove them is to cast to string and back to array.
+# This will actually break quoted arguments, arguments like 
+# -test "hello world" will be broken into three arguments instead of two, as it should.
+temp="${args[@]}"
+args=($temp)
 
 # Set nuget package cache under the repo
 export NUGET_PACKAGES="$REPOROOT/packages"
@@ -30,12 +71,10 @@ export NUGET_PACKAGES="$REPOROOT/packages"
 DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/feature/msbuild/scripts/obtain/dotnet-install.sh"
 curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --version $DOTNET_CLI_VERSION --verbose
 
-# Put stage 0 on the PATH (for this shell only)
-PATH="$DOTNET_INSTALL_DIR:$PATH"
+# Put stage 0 on the PATH
+export PATH="$DOTNET_INSTALL_DIR:$PATH"
 
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-
-echo "${args[@]}"
 
 dotnet build3 $REPOROOT/build/build.proj /m /nologo /p:Configuration=$CONFIGURATION /p:Platform="$PLATFORM" "${args[@]}"
