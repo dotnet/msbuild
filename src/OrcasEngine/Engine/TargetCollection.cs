@@ -4,7 +4,9 @@ using System.Xml;
 using System.Collections;
 using System.Globalization;
 
+#if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
+#endif
 
 using Microsoft.Build.BuildEngine.Shared;
 

@@ -11,9 +11,11 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Threading;
 
+#if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
+#endif
 #endif
 
 using Microsoft.Build.Framework;
@@ -1864,7 +1866,9 @@ namespace Microsoft.Build.BuildEngine
                 SetBuildItemCurrentDirectory(project);
                 if (initialCall)
                 {
+#if (!STANDALONEBUILD)
                     CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildEngineBuildProjectBegin);
+#endif
 #if MSBUILDENABLEVSPROFILING 
                     string beginProjectBuild = String.Format(CultureInfo.CurrentCulture, "Build Project {0} Using Old OM - Start", project.FullFileName);
                     DataCollection.CommentMarkProfile(8802, beginProjectBuild);
@@ -1940,7 +1944,9 @@ namespace Microsoft.Build.BuildEngine
 
                 if (buildRequest != null && buildRequest.BuildCompleted || exitedDueToError)
                 {
+#if (!STANDALONEBUILD)
                     CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildEngineBuildProjectEnd);
+#endif
 #if MSBUILDENABLEVSPROFILING 
                     string endProjectBuild = String.Format(CultureInfo.CurrentCulture, "Build Project {0} Using Old OM - End", project.FullFileName);
                     DataCollection.CommentMarkProfile(8803, endProjectBuild);

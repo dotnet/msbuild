@@ -14,12 +14,13 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Globalization;
-
+#if (!STANDALONEBUILD)
+using Microsoft.Internal.Performance;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
+#endif
 
-using Microsoft.Internal.Performance;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
@@ -352,7 +353,9 @@ namespace Microsoft.Build.BuildEngine
             {
                 DataCollection.CommentMarkProfile(8808, "Construct Project Using Old OM - Start");
 #endif 
+#if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectConstructBegin, CodeMarkerEvent.perfMSBuildProjectConstructEnd))
+#endif
             {
                 if (engine == null)
                 {
@@ -1786,7 +1789,9 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrowArgument(projectFileName.Length > 0, "EmptyProjectFileName");
             ErrorUtilities.VerifyThrowArgument(File.Exists(projectFileName), "ProjectFileNotFound", projectFileName);
 
+#if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectLoadFromFileBegin, CodeMarkerEvent.perfMSBuildProjectLoadFromFileEnd))
+#endif
             {
                 string projectFullFileName = Path.GetFullPath(projectFileName);
 
@@ -2125,7 +2130,9 @@ namespace Microsoft.Build.BuildEngine
             Encoding encoding
             )
         {
+#if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectSaveToFileBegin, CodeMarkerEvent.perfMSBuildProjectSaveToFileEnd))
+#endif
             {
 #if MSBUILDENABLEVSPROFILING 
             try
@@ -4282,7 +4289,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         private void EvaluateProject(bool currentlyLoading)
         {
+#if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
+#endif
             {
 #if MSBUILDENABLEVSPROFILING 
                 try

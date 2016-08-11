@@ -84,7 +84,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                Version version = new Version(ThisAssembly.Version);
+                Version version = new Version(ThisAssembly.AssemblyVersion);
 
                 // "4.0.0.0" --> "4.0"
                 return version.Major + "." + version.Minor;

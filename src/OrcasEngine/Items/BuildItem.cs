@@ -9,7 +9,9 @@ using System.Security;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
+#if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
+#endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;

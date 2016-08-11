@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Microsoft.Build.Engine</AssemblyName>
     <RootNamespace>Microsoft.Build.Engine</RootNamespace>
+    <NoWarn>$(NoWarn);618</NoWarn>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -18,9 +19,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
-    <Compile Include="$(BrandingIncPath)\BrandNames.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\Constants.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Caching\BuildResultCacheEntry.cs" />
@@ -222,7 +220,6 @@
     <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
     <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
   </PropertyGroup>
-  <Import Project="..\Microsoft.Xmake.targets" />
   <PropertyGroup>
     <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
     <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
