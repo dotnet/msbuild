@@ -4,6 +4,7 @@
 // Import the utility functionality.
 
 import jobs.generation.Utilities;
+import jobs.generation.InternalUtilities;
 
 def project = GithubProject
 def branch = GithubBranchName
