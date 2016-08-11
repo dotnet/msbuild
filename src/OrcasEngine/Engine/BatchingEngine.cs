@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Xml;
 using System.Collections;
@@ -23,14 +26,14 @@ namespace Microsoft.Build.BuildEngine
     /// refers, for example %(a.m).
     /// 
     /// If metadata is qualified, for example %(a.m), then this is considered distinct to metadata with the 
-    /// same name on a different item type. For example, %(a.m) is distinct to %(b.m), and items of type ‘b’ 
-    /// are considered to always have a blank value for %(a.m). This means items of type ‘b’ will only be 
-    /// placed in buckets where %(a.m) is blank. However %(a.m) is equivalent to %(m) on items of type ‘a’.
+    /// same name on a different item type. For example, %(a.m) is distinct to %(b.m), and items of type ï¿½bï¿½ 
+    /// are considered to always have a blank value for %(a.m). This means items of type ï¿½bï¿½ will only be 
+    /// placed in buckets where %(a.m) is blank. However %(a.m) is equivalent to %(m) on items of type ï¿½aï¿½.
     /// 
     /// There is an extra ambiguity rule: every items consumed by the object must have an explicit value for 
     /// every piece of unqualified metadata. For example, if @(a), %(m), and %(a.n) are consumed, every item 
-    /// of type ‘a’ must have a value for the metadata ‘m’ but need not all necessarily have a value for the 
-    /// metadata ‘n’. This rule eliminates ambiguity about whether items that do not define values for an 
+    /// of type ï¿½aï¿½ must have a value for the metadata ï¿½mï¿½ but need not all necessarily have a value for the 
+    /// metadata ï¿½nï¿½. This rule eliminates ambiguity about whether items that do not define values for an 
     /// unqualified metadata should go in all buckets, or just into buckets with a blank value for 
     /// that metadata.
     /// 

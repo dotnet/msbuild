@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Xml;
 using System.Text;
@@ -1181,7 +1184,7 @@ namespace Microsoft.Build.BuildEngine
                     // fails the comparison, because what we have on the right is generally a string.
                     // This special casing is to realize that its a comparison that is taking place and handle the
                     // argument type coercion accordingly; effectively pre-preparing the argument type so 
-                    // that it matches the left hand side ready for the default binder’s method invoke.
+                    // that it matches the left hand side ready for the default binderï¿½s method invoke.
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", this.name, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", this.name, StringComparison.OrdinalIgnoreCase)))
                     {
                         // change the type of the final unescaped string into the destination

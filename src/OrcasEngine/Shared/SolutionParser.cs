@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -681,7 +684,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                         // If a solution file contains a project without a guid it fails to 
                         // load in Everett. But if an etp project contains a project without 
                         // a guid it loads well in Everett and p2p references to/from this project
-                        // are preserved. So we should make sure that we don’t error in this 
+                        // are preserved. So we should make sure that we donï¿½t error in this 
                         // situation while upgrading.
                         else
                         {
