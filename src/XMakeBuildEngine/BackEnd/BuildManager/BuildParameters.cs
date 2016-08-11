@@ -986,29 +986,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Try what we think is the current executable path.
-            location = FileUtilities.CurrentExecutablePath;
-
-            if (CheckMSBuildExeExistsAt(location))
-            {
-                return location;
-            }
-
-            // Get the location pointed to by the MSBuildToolsPath in the "current" ToolsVersion 
-            // for this version of MSBuild. In certain strange circumstances (e.g. checked-in redist
-            // the current toolset might not be available.  In which case, shrug and move on.) 
-            EnsureToolsets();
-            Toolset currentToolset = _toolsetProvider.GetToolset(MSBuildConstants.CurrentToolsVersion);
-
-            if (currentToolset != null && !string.IsNullOrEmpty(currentToolset.ToolsPath))
-            {
-                location = Path.Combine(currentToolset.ToolsPath, "MSBuild.exe");
-                if (CheckMSBuildExeExistsAt(location))
-                {
-                    return location;
-                }
-            }
-
-            return location;
+            return BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
         }
 
         /// <summary>

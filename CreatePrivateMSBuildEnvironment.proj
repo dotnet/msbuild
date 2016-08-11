@@ -19,7 +19,7 @@
 
     <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 
-    <FreshlyBuiltBinaries Include="$(OutputPath)*.dll" />
+    <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll" />
     <FreshlyBuiltBinaries Include="$(OutputPath)*.exe" />
     <FreshlyBuiltBinaries Include="$(OutputPath)*.pdb" />
     <FreshlyBuiltBinaries Include="$(OutputPath)*.exe.config" />
@@ -45,7 +45,7 @@
 
     <!-- Copy our binaries -->
     <Copy SourceFiles="@(FreshlyBuiltBinaries)"
-          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin" />
+          DestinationFiles="@(FreshlyBuiltBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltProjects)"

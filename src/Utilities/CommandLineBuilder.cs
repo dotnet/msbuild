@@ -302,9 +302,6 @@ namespace Microsoft.Build.Utilities
                 }
                 if (literalQuotes > 0)
                 {
-                    // Command line parsers typically break if you attempt to pass in an odd number of
-                    // escaped double quotes. We can only error if there isn't an even number.
-                    ErrorUtilities.VerifyThrowArgument(((literalQuotes % 2) == 0), "General.StringsCannotContainOddNumberOfDoubleQuotes", unquotedTextToAppend);
                     // Replace any \" sequences with \\"
                     unquotedTextToAppend = unquotedTextToAppend.Replace("\\\"", "\\\\\"");
                     // Now replace any " with \"

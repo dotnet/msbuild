@@ -304,25 +304,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetExecutablePath()
-        {
-            // This test will fail when CurrentDirectory is changed in another test. We will change it here
-            // to the path to Microsoft.Build.dll (debug build output folder). This is what it *should* be
-            // anyway.
-            var msbuildPath = Path.GetDirectoryName(typeof(Project).Assembly.Location);
-            Directory.SetCurrentDirectory(msbuildPath);
-
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "msbuild.exe").ToLowerInvariant();
-            string configPath = FileUtilities.CurrentExecutableConfigurationFilePath.ToLowerInvariant();
-            string directoryName = FileUtilities.CurrentExecutableDirectory.ToLowerInvariant();
-            string executablePath = FileUtilities.CurrentExecutablePath.ToLowerInvariant();
-
-            Assert.Equal(configPath, executablePath + ".config");
-            Assert.Equal(path, executablePath);
-            Assert.Equal(directoryName, Path.GetDirectoryName(path));
-        }
-
-        [Fact]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -755,6 +736,37 @@ namespace Microsoft.Build.UnitTests
                 Shared.FileUtilities.GetTemporaryFile("|", ".tmp");
             }
            );
+        }
+
+        [Fact]
+        public void GetFolderAboveTest()
+        {
+            string path = @"c:\1\2\3\4\5";
+
+            Assert.Equal(@"c:\1\2\3\4\5", FileUtilities.GetFolderAbove(path, 0));
+            Assert.Equal(@"c:\1\2\3\4", FileUtilities.GetFolderAbove(path));
+            Assert.Equal(@"c:\1\2\3", FileUtilities.GetFolderAbove(path, 2));
+            Assert.Equal(@"c:\1\2", FileUtilities.GetFolderAbove(path, 3));
+            Assert.Equal(@"c:\1", FileUtilities.GetFolderAbove(path, 4));
+            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(path, 5));
+            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(path, 99));
+
+            Assert.Equal(@"c:\", FileUtilities.GetFolderAbove(@"c:\", 99));
+        }
+
+        [Fact]
+        public void CombinePathsTest()
+        {
+            // These tests run in .NET 4+, so we can cheat
+            var root = @"c:\";
+
+            Assert.Equal(
+                Path.Combine(root, "path1"),
+                FileUtilities.CombinePaths(root, "path1"));
+
+            Assert.Equal(
+                Path.Combine(root, "path1", "path2", "file.txt"),
+                FileUtilities.CombinePaths(root, "path1", "path2", "file.txt"));
         }
     }
 }

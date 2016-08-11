@@ -91,11 +91,24 @@ namespace Microsoft.Build.Tasks
         internal const string InvalidIdentifier = "InvalidIdentifier";
 
         private static SR s_loader = null;
-        private ResourceManager _resources;
+        private MainAssemblyFallbackResourceManager _resources;
+
+        /// <summary>
+        /// The containing assembly is set to lookup resources for the neutral language in satellite assemblies, not in the main assembly.
+        /// System.Design resources are not meant to be translated, so the ResourceManager should not look for satellite assemblies.
+        /// This ResourceManager forces resource lookup to be constrained to the current assembly and not look for satellites.
+        /// </summary>
+        private class MainAssemblyFallbackResourceManager : ResourceManager
+        {
+            public MainAssemblyFallbackResourceManager(string baseName, Assembly assembly) : base(baseName, assembly)
+            {
+                this.FallbackLocation = UltimateResourceFallbackLocation.MainAssembly;
+            }
+        }
 
         internal SR()
         {
-            _resources = new System.Resources.ResourceManager("System.Design", this.GetType().Assembly);
+            _resources = new MainAssemblyFallbackResourceManager("System.Design", this.GetType().Assembly);            
         }
 
         private static SR GetLoader()

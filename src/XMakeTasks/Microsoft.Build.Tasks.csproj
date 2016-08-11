@@ -41,6 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -729,17 +732,25 @@
     <Content Include="Microsoft.VisualStudioVersion.v14.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Strings.resx">
+
+    <!-- Resource Files -->
+
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
+
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="ManifestUtil\Strings.resx">
-      <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings.resources</LogicalName>
+
+    <EmbeddedResource Include="ManifestUtil\Resources\Strings.ManifestUtilities.resx">
+      <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+
     <!-- ==========================================================================================-->
     <!-- Assemblies Files we depend on -->
     <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->

@@ -413,8 +413,8 @@ namespace Microsoft.Build.BackEnd
             string toolName = GetTaskHostNameFromHostContext(hostContext);
             string toolPath = null;
 
-            s_baseTaskHostPath = FileUtilities.CurrentExecutableDirectory;
-            s_baseTaskHostPath64 = Path.Combine(FileUtilities.CurrentExecutableDirectory, "amd64");
+            s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
 
             switch (hostContext)
             {

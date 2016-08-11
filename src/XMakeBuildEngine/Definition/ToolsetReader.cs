@@ -611,7 +611,7 @@ namespace Microsoft.Build.Evaluation
                 if (trimmedValue.Length > 0 && !Path.IsPathRooted(trimmedValue))
                 {
                     path = Path.GetFullPath(
-                        Path.Combine(FileUtilities.CurrentExecutableDirectory, trimmedValue));
+                        Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, trimmedValue));
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
