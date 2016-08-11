@@ -1837,9 +1837,26 @@ namespace Microsoft.Build.UnitTests
                     .EnumerateFiles(source)
                     .Where(f=> f.EndsWith(".dll") || f.EndsWith(".tasks") || f.EndsWith(".exe") || f.EndsWith(".exe.config"));
 
+                var directoriesToCopy = Directory
+                    .EnumerateDirectories(source)
+                    .Where(d => Directory.EnumerateFiles(d).Any(f => f.EndsWith("resources.dll")));  // Copy satellite assemblies
+
                 foreach (var file in filesToCopy)
                 {
                     File.Copy(file, Path.Combine(dest, Path.GetFileName(file)));
+                }
+
+                foreach (var directory in directoriesToCopy)
+                {
+                    foreach (var sourceFile in Directory.EnumerateFiles(directory, "*"))
+                    {
+                        var destinationFile = sourceFile.Replace(source, dest);
+
+                        var directoryName = Path.GetDirectoryName(destinationFile);
+                        Directory.CreateDirectory(directoryName);
+                        
+                        File.Copy(sourceFile, destinationFile);
+                    }
                 }
 
                 return dest;

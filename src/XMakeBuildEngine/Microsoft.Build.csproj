@@ -703,13 +703,18 @@
     </Compile>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
+
+    <!-- Resource Files -->
+
     <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
+
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Resources.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">

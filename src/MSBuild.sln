@@ -62,6 +62,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dependency", "..\Samples\De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskWithDependency", "..\Samples\TaskWithDependency\TaskWithDependency.csproj", "{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.LocalizationTasks", "..\build\LocalizationTasks\Microsoft.Build.LocalizationTasks.csproj", "{06347A6C-32A4-4218-A930-0A22699C726C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -622,6 +624,42 @@ Global
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Release-NetCore|x64.Build.0 = Release-NetCore|Any CPU
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Release-NetCore|x86.ActiveCfg = Release-NetCore|Any CPU
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Release-NetCore|x86.Build.0 = Release-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug|x64.Build.0 = Debug|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug|x86.Build.0 = Debug|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-MONO|Any CPU.ActiveCfg = Debug-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-MONO|Any CPU.Build.0 = Debug-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-MONO|x64.ActiveCfg = Debug-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-MONO|x64.Build.0 = Debug-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-MONO|x86.ActiveCfg = Debug-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-MONO|x86.Build.0 = Debug-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|Any CPU.Build.0 = Debug-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|x64.ActiveCfg = Release|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|x64.Build.0 = Release|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|x86.ActiveCfg = Release|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|x86.Build.0 = Release|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-MONO|Any CPU.ActiveCfg = Release-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-MONO|Any CPU.Build.0 = Release-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-MONO|x64.ActiveCfg = Release-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-MONO|x64.Build.0 = Release-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-MONO|x86.ActiveCfg = Release-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-MONO|x86.Build.0 = Release-MONO|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-NetCore|Any CPU.ActiveCfg = Release-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-NetCore|Any CPU.Build.0 = Release-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-NetCore|x64.ActiveCfg = Release-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-NetCore|x64.Build.0 = Release-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-NetCore|x86.ActiveCfg = Release-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-NetCore|x86.Build.0 = Release-NetCore|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

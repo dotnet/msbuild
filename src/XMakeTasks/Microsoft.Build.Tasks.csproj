@@ -756,15 +756,22 @@
     <Content Include="Microsoft.VisualStudioVersion.v14.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Strings.resx">
+
+    <!-- Resource Files -->
+
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
+
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="ManifestUtil\Strings.resx">
-      <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings.resources</LogicalName>
+
+    <EmbeddedResource Include="ManifestUtil\Resources\Strings.ManifestUtilities.resx">
+      <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <!-- Other Source Files -->

@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System.Reflection;
+using System.Resources;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -57,3 +58,8 @@ using System.Windows.Markup;
 // This will enable passing the SafeDirectories flag to any P/Invoke calls/implementations within the assembly, 
 // so that we don't run into known security issues with loading libraries from unsafe locations 
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+
+#if (LOCALIZED_BUILD)
+// Needed for the "hub-and-spoke model to locate and retrieve localized resources": https://msdn.microsoft.com/en-us/library/21a15yht(v=vs.110).aspx
+[assembly: NeutralResourcesLanguage("en", UltimateResourceFallbackLocation.Satellite)]
+#endif

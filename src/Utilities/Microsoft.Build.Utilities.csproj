@@ -224,14 +224,18 @@
     </Compile>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
+
     <!-- Resource Files -->
-    <EmbeddedResource Include="Strings.resx">
+
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
-      <Link>Strings.shared.resx</Link>
+
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>Microsoft.Build.Utilities.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
     <!-- Assemblies Files we depend on -->

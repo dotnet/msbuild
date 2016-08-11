@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- <Import Project="..\dir.targets" /> -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+
+    <!-- Targets from buildtools that restore packages before building. -->
+  <!-- TODO: ideally replaced by a standard "dotnet restore" over the solution. -->
+  <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
+
+  <Target Name="Test"/>
+</Project>

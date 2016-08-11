@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="UpdateXlf" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <UsingTask AssemblyFile="$(DeploymentDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="SaveXlfToResx"/>
+  <UsingTask AssemblyFile="$(DeploymentDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="UpdateXlfFromResx"/>
+  <UsingTask AssemblyFile="$(DeploymentDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="EmitLocalizedResources"/>
+
+  <!-- Emit the localized EmbeddedResource items before the common targets start using them -->
+  <Target Name="EmitLocalizedResources"
+          BeforeTargets="$(PrepareResourceNamesDependsOn);PrepareResourceNames">
+    <ItemGroup>
+      <NeutralResources Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.resx'"/> 
+    </ItemGroup>
+
+    <EmitLocalizedResources 
+      NeutralResources="@(NeutralResources)"
+      AssemblyName="$(AssemblyName)"
+      LocalizedResxRoot="$(IntermediateOutputPath)"
+      RelativePathToXlfRoot=".\xlf\">
+
+      <Output TaskParameter="ResolvedXlfResources" ItemName="XlfFiles" />
+      <Output TaskParameter="ResolvedLocalizedResxResources" ItemName="EmbeddedResource" />
+
+    </EmitLocalizedResources>
+  </Target>
+
+  <!-- The default english resources do not have corresponding xlf files. Simply copy them and add en in the name 
+       Can't have english xlf (for uniformity) because the xlf sync code only updates the <source> tags, not the <target> targ.
+       That would cause the english xlf files to become out of date
+
+       This target needs to run after EmitLocalizedResource, otherwise the copied intermediary files would leak into NeutralResource
+  -->
+  <Target Name="UpdateLocalizedResxForEnglishResx"
+          BeforeTargets="$(PrepareResourceNamesDependsOn);PrepareResourceNames"
+          AfterTargets="EmitLocalizedResources">
+
+      <ItemGroup>
+        <EnglishResources Include="@(NeutralResources -> '$(IntermediateOutputPath)%(Filename).en%(Extension)')"/>
+      </ItemGroup>
+
+      <Copy
+        SourceFiles="@(NeutralResources)"
+        DestinationFiles="@(EnglishResources)"
+      />
+
+      <ItemGroup>
+        <EmbeddedResource Include="@(EnglishResources)">
+          <LogicalName>$(AssemblyName).%(FileName).resources</LogicalName>
+        </EmbeddedResource>
+      </ItemGroup>      
+
+  </Target>
+
+  <Target Name="UpdateXlf"
+          BeforeTargets="CoreResGen"
+          AfterTargets="SplitResourcesByCulture"
+          DependsOnTargets="EmitLocalizedResources;UpdateLocalizedResxForEnglishResx" 
+          Condition="$(LocalizedBuild) == 'true' and $(IsTestProject) != 'true'">
+    
+    <UpdateXlfFromResx
+      Condition="%(Identity) != ''"
+      ResxPath="%(NeutralResx)"
+      XlfPath="@(XlfFiles)"
+    />
+
+  </Target>
+
+  <Target Name="ConvertXlfToLocalizedResx"
+          AfterTargets="UpdateXlf"
+          BeforeTargets="CoreResGen">
+
+    <SaveXlfToResx
+      Condition="%(Identity) != ''"
+      ResxPath="%(ChildResx)"
+      XlfPath="@(XlfFiles)"
+      ReplaceWithTestString="$(LocalizedTestBuild)"
+      TestString="$(LocalizedTestString)"
+    />
+
+  </Target>
+
+    <!-- Copy paste and modify OpenSourceSign from sign.targets because it only signs the main assembly 
+  and provides no extension mechanism to add more assemblies to it
+  
+  If satellite assemblies do not get their delay sign bit switched off, the main assemblies won't load them
+  -->
+  <Target Name="OpenSourceSignSatelliteAssemblies"
+          Condition="'$(DelaySign)' == 'true' and '@(IntermediateSatelliteAssembliesWithTargetPath)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' == 'oss'"
+          AfterTargets="CreateSatelliteAssemblies"
+          BeforeTargets="CopyFilesToOutputDirectory"
+          Inputs="@(IntermediateSatelliteAssembliesWithTargetPath)"
+          Outputs="%(IntermediateSatelliteAssembliesWithTargetPath.Identity).oss_signed"
+          >
+    <OpenSourceSign AssemblyPath="%(IntermediateSatelliteAssembliesWithTargetPath.Identity)" />
+    <Touch Files="%(IntermediateSatelliteAssembliesWithTargetPath.Identity).oss_signed" AlwaysCreate="true" />
+    <ItemGroup>
+       <FileWrites Include="%(IntermediateSatelliteAssembliesWithTargetPath.Identity).oss_signed" />
+    </ItemGroup>
+  </Target>
+
+</Project>
