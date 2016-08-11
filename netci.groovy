@@ -24,7 +24,7 @@ osList.each { os ->
         def buildCommand = '';
 
         // Calculate the build command
-        if (os == 'Windows_NT' || os == 'Windows_2016') {
+        if (os == 'Windows_NT') {
             buildCommand = ".\\build.cmd -Configuration $config"
         } else {
             // Jenkins non-Ubuntu CI machines don't have docker
@@ -34,7 +34,7 @@ osList.each { os ->
         def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
             // Set the label.
             steps {
-                if (os == 'Windows_NT' || os == 'Windows_2016') {
+                if (os == 'Windows_NT') {
                     // Batch
                     batchFile(buildCommand)
                 }
