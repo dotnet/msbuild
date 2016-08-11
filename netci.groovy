@@ -9,14 +9,14 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Windows_NT', 'Ubuntu14.04']
+def osList = ['Windows_NT', 'Ubuntu14.04']
 def configList = ['Release', 'Debug']
 
 def static getBuildJobName(def configuration, def os) {
     return configuration.toLowerCase() + '_' + os.toLowerCase()
 }
 
-platformList.each { platform ->
+osList.each { os ->
     configList.each { config ->
         // Calculate job name
         def jobName = getBuildJobName(config, os)
