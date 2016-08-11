@@ -4,53 +4,50 @@
 // Import the utility functionality.
 
 import jobs.generation.Utilities;
+import jobs.generation.InternalUtilities;
 
 def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Debian8.2:Debug', 'Ubuntu:Release', 'Ubuntu16.04:Debug', 'OSX:Release', 'Windows_NT:Release', 'Windows_NT:Debug', 'RHEL7.2:Release', 'CentOS7.1:Debug', 'Fedora23:Debug', 'OpenSUSE13.2:Debug']
+def osList = ['Windows_NT', 'Ubuntu14.04']
+def configList = ['Release', 'Debug']
 
 def static getBuildJobName(def configuration, def os) {
     return configuration.toLowerCase() + '_' + os.toLowerCase()
 }
 
+osList.each { os ->
+    configList.each { config ->
+        // Calculate job name
+        def jobName = getBuildJobName(config, os)
+        def buildCommand = '';
 
-platformList.each { platform ->
-    // Calculate names
-    def (os, configuration) = platform.tokenize(':')
+        // Calculate the build command
+        if (os == 'Windows_NT') {
+            buildCommand = ".\\build.cmd -Configuration $config"
+        } else {
+            // Jenkins non-Ubuntu CI machines don't have docker
+            buildCommand = "./build.sh --configuration $config"
+        }
 
-    // Calculate job name
-    def jobName = getBuildJobName(configuration, os)
-    def buildCommand = '';
-
-    // Calculate the build command
-    if (os == 'Windows_NT' || os == 'Windows_2016') {
-        buildCommand = ".\\build.cmd -Configuration $config"
-    }
-    else {
-        // Jenkins non-Ubuntu CI machines don't have docker
-        buildCommand = "./build.sh --configuration $config"
-    }
-
-    def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
-        // Set the label.
-        steps {
-            if (os == 'Windows_NT' || os == 'Windows_2016') {
-                // Batch
-                batchFile(buildCommand)
-            }
-            else {
-                // Shell
-                shell(buildCommand)
+        def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
+            // Set the label.
+            steps {
+                if (os == 'Windows_NT') {
+                    // Batch
+                    batchFile(buildCommand)
+                }
+                else {
+                    // Shell
+                    shell(buildCommand)
+                }
             }
         }
+
+        Utilities.setMachineAffinity(newJob, os, 'latest-or-auto-internal')
+        InternalUtilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+        Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
+        Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
     }
-
-    Utilities.setMachineAffinity(newJob, os, 'latest-or-auto-internal')
-    InternalUtilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-    Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
-    Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
 }
-
-
