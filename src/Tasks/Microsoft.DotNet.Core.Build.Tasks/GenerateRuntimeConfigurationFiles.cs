@@ -28,9 +28,13 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         public string RuntimeConfigDevPath { get; set; }
 
+        public string RuntimeIdentifier { get; set; }
+
         public string UserRuntimeConfig { get; set; }
 
         private LockFile LockFile { get; set; }
+
+        private bool IsPortable => string.IsNullOrEmpty(RuntimeIdentifier);
 
         public override bool Execute()
         {
@@ -59,20 +63,23 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
         private void AddFramework(RuntimeOptions runtimeOptions)
         {
-            // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
-            var packageName = "Microsoft.NETCore.App";
-
-            var redistExport = LockFile
-                .Libraries
-                .FirstOrDefault(e => e.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
-
-            if (redistExport != null)
+            if (IsPortable)
             {
-                RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                framework.Name = redistExport.Name;
-                framework.Version = redistExport.Version.ToNormalizedString();
+                // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
+                var packageName = "Microsoft.NETCore.App";
 
-                runtimeOptions.Framework = framework;
+                var redistExport = LockFile
+                    .Libraries
+                    .FirstOrDefault(e => e.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
+
+                if (redistExport != null)
+                {
+                    RuntimeConfigFramework framework = new RuntimeConfigFramework();
+                    framework.Name = redistExport.Name;
+                    framework.Version = redistExport.Version.ToNormalizedString();
+
+                    runtimeOptions.Framework = framework;
+                }
             }
         }
 

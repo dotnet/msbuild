@@ -45,41 +45,40 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <_ProjectDepsFilePath>$(TargetDir)$(AssemblyName).deps.json</_ProjectDepsFilePath>
-    <_ProjectRuntimeConfigFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFilePath>
+    <_ProjectDepsFileName>$(AssemblyName).deps.json</_ProjectDepsFileName>
+    <_ProjectDepsFilePath>$(TargetDir)$(_ProjectDepsFileName)</_ProjectDepsFilePath>
+    <_ProjectRuntimeConfigFileName>$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFileName>
+    <_ProjectRuntimeConfigFilePath>$(TargetDir)$(_ProjectRuntimeConfigFileName)</_ProjectRuntimeConfigFilePath>
     <_ProjectRuntimeConfigDevFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</_ProjectRuntimeConfigDevFilePath>
   </PropertyGroup>
 
   <PropertyGroup>
     <CoreBuildDependsOn>
       $(CoreBuildDependsOn);
-      GenerateDependencyFile;
-      GenerateRuntimeConfigurationFiles
+      GenerateBuildDependencyFile;
+      GenerateBuildRuntimeConfigurationFiles
     </CoreBuildDependsOn>
   </PropertyGroup>
 
   <!--
     ============================================================
-                                        GenerateDependencyFile
+                                        GenerateBuildDependencyFile
 
-    Generates the $(project).deps.json file
+    Generates the $(project).deps.json file during Build
     ============================================================
     -->
 
-  <Target Name="GenerateDependencyFile"
+  <Target Name="GenerateBuildDependencyFile"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectLockFile)"
           Outputs="$(_ProjectDepsFilePath)">
 
-    <!--
-    TODO: https://github.com/dotnet/sdk/issues/19 - Get RuntimeIdentifier
-    -->
     <GenerateDepsFile LockFilePath="$(ProjectLockFile)"
                       DepsFilePath="$(_ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
-                      RuntimeIdentifier="" />
+                      RuntimeIdentifier="$(RuntimeIdentifier)" />
 
     <!--
     TODO: https://github.com/dotnet/sdk/issues/21
@@ -90,13 +89,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        GenerateRuntimeConfigurationFiles
+                                        GenerateBuildRuntimeConfigurationFiles
 
-    Generates the $(project).runtimeconfig.json and $(project).runtimeconfig.dev.json files
+    Generates the $(project).runtimeconfig.json and $(project).runtimeconfig.dev.json files during Build
     ============================================================
     -->
 
-  <Target Name="GenerateRuntimeConfigurationFiles"
+  <Target Name="GenerateBuildRuntimeConfigurationFiles"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="$(ProjectLockFile);$(UserRuntimeConfig)"
           Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
@@ -104,6 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateRuntimeConfigurationFiles LockFilePath="$(ProjectLockFile)"
                                        RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
+                                       RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
   </Target>
