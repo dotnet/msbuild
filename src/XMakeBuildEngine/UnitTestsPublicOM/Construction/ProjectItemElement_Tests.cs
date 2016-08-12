@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
 using System.Text;
 using System.Xml;
 
@@ -19,6 +20,8 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -27,13 +30,63 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// </summary>
     public class ProjectItemElement_Tests
     {
+        private const string RemoveInTarget = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Remove='i'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ";
+
+        private const string RemoveOutsideTarget = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                            <ItemGroup>
+                                <i Remove='i'/>
+                            </ItemGroup>
+                    </Project>
+                ";
+        private const string IncludeOutsideTarget = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='i'/>
+                        </ItemGroup>
+                    </Project>
+                ";
+        private const string IncludeInsideTarget = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Include='i'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ";
+        private const string UpdateOutsideTarget = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                            <ItemGroup>
+                                <i Update='i'/>
+                            </ItemGroup>
+                    </Project>
+                ";
+        private const string UpdateInTarget = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                            <ItemGroup>
+                                <i Update='i'/>
+                            </ItemGroup>
+                    </Project>
+                ";
+
         /// <summary>
         /// Read item with no children
         /// </summary>
-        [Fact]
-        public void ReadNoChildren()
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void ReadNoChildren(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             Assert.Equal(0, Helpers.Count(item.Metadata));
         }
@@ -41,110 +94,154 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with no include
         /// </summary>
-        [Fact]
-        public void ReadInvalidNoInclude()
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string content = @"
+        [Theory]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i/>
                         </ItemGroup>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
-        }
-        /// <summary>
-        /// Read item which contains text
-        /// </summary>
-        [Fact]
-        public void ReadInvalidContainsText()
+                ")]
+        // https://github.com/Microsoft/msbuild/issues/900
+        //[InlineData(@"
+        //            <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+        //                <Target Name='t'>
+        //                    <ItemGroup>
+        //                        <i/>
+        //                    </ItemGroup>
+        //                </Target>
+        //            </Project>
+        //        ")]
+        public void ReadInvalidNoInclude(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            }
+           );
+        }
+
+        /// <summary>
+        /// Read item which contains text
+        /// </summary>
+        [Theory]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i Include='a'>error text</i>
                         </ItemGroup>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Include='a'>error text</i>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidContainsText(string project)
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
+
         /// <summary>
         /// Read item with empty include
         /// </summary>
-        [Fact]
-        public void ReadInvalidEmptyInclude()
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include=''/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Include=''/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidEmptyInclude(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <ItemGroup>
-                            <i Include=''>
-                        </ItemGroup>
-                    </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
+
         /// <summary>
         /// Read item with reserved element name
         /// </summary>
-        [Fact]
-        public void ReadInvalidReservedElementName()
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string content = @"
+        [Theory]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <PropertyGroup Include='i1'/>
                         </ItemGroup>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
-        }
-        /// <summary>
-        /// Read item with Exclude without Include
-        /// </summary>
-        [Fact]
-        public void ReadInvalidExcludeWithoutInclude()
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <PropertyGroup Include='i1'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidReservedElementName(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            }
+           );
+        }
+
+        /// <summary>
+        /// Read item with Exclude without Include
+        /// </summary>
+        [Theory]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i Exclude='i1'/>
                         </ItemGroup>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Exclude='i1'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidExcludeWithoutInclude(string project)
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
+
         /// <summary>
         /// Basic reading of items
         /// </summary>
-        [Fact]
-        public void ReadBasic()
-        {
-            string content = @"
+        [Theory]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i1 Include='i'>
@@ -155,10 +252,25 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </i2>
                         </ItemGroup>
                     </Project>
-                ";
-
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i'>
+                                    <m1>v1</m1>
+                                </i1>
+                                <i2 Include='i' Exclude='j'>
+                                    <m2>v2</m2>
+                                </i2>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadBasic(string project)
+        {
+            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement) projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
 
@@ -182,10 +294,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadata on item
         /// </summary>
-        [Fact]
-        public void ReadMetadata()
-        {
-            string content = @"
+        [Theory]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i1 Include='i'>
@@ -195,10 +305,24 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </i1>
                         </ItemGroup>
                     </Project>
-                ";
-
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i'>
+                                    <m1>v1</m1>
+                                    <m2 Condition='c'>v2</m2>
+                                    <m1>v3</m1>
+                                </i1>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadMetadata(string project)
+        {
+            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
             ProjectItemElement item = Helpers.GetFirst(itemGroup.Items);
 
             var metadata = Helpers.MakeList(item.Metadata);
@@ -212,88 +336,130 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("v3", metadata[2].Value);
         }
 
-        [Fact]
-        public void ReadInvalidUpdateWithInclude()
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='i1' Update='i2'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Include='i1' Update='i2'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidUpdateWithInclude(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                         <i Include='i1' Update='i2'/>
-                    </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
 
-        [Fact]
-        public void ReadInvalidUpdateWithIncludeAndExclude()
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='i1' Exclude='i1' Update='i2'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Include='i1' Exclude='i1' Update='i2'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidUpdateWithIncludeAndExclude(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                         <i Include='i1' Exclude='i1' Update='i2'/>
-                    </Project>
-                ";
 
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
 
-        [Fact]
-        public void ReadInvalidUpdateWithExclude()
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Exclude='i1' Update='i2'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Exclude='i1' Update='i2'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidUpdateWithExclude(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                         <i Exclude='i1' Update='i2'/>
-                    </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
-
 
         /// <summary>
         /// Read item with Remove inside of Target, but with metadata
         /// </summary>
-        [Fact]
-        public void ReadInvalidRemoveWithMetadataInsideTarget()
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string content = @"
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Remove='i1'>
+                                    <m> </m>
+                            </i>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Remove='i1'>
-                                    <m/>
+                                    <m> </m>
                                 </i>
                             </ItemGroup>
                         </Target>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
-        }
-        /// <summary>
-        /// Read item with Remove inside of Target, but with Exclude: not currently supported
-        /// </summary>
-        [Fact]
-        public void ReadInvalidExcludeAndRemoveInsideTarget()
+                ")]
+        public void ReadInvalidRemoveWithMetadata(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            }
+           );
+        }
+
+        /// <summary>
+        /// Read item with Remove inside of Target, but with Exclude: not currently supported
+        /// </summary>
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Exclude='i1' Remove='i1'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <ItemGroup>
@@ -301,21 +467,28 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </ItemGroup>
                         </Target>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
-        }
-        /// <summary>
-        /// Read item with Remove inside of Target, but with Include: not currently supported
-        /// </summary>
-        [Fact]
-        public void ReadInvalidIncludeAndRemoveInsideTarget()
+                ")]
+        public void ReadInvalidExcludeAndRemove(string project)
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            }
+           );
+        }
+
+        /// <summary>
+        /// Read item with Remove inside of Target, but with Include: not currently supported
+        /// </summary>
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='i1' Remove='i1'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <ItemGroup>
@@ -323,42 +496,54 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </ItemGroup>
                         </Target>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ")]
+        public void ReadInvalidIncludeAndRemove(string project)
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
+
         /// <summary>
         /// Read item with Remove inside of Target
         /// </summary>
-        [Fact]
-        public void ReadValidRemoveInsideTarget()
+        [Theory]
+        [InlineData(RemoveInTarget)]
+        [InlineData(RemoveOutsideTarget)]
+        public void ReadValidRemove(string project)
         {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <Target Name='t'>
-                            <ItemGroup>
-                                <i Remove='i1'/>
-                            </ItemGroup>
-                        </Target>
-                    </Project>
-                ";
+            var item = GetItemFromContent(project);
 
-            var item = GetItemFromContent(content);
+            Assert.Equal("i", item.Remove);
+        }
 
-            Assert.Equal("i1", item.Remove);
+        /// <summary>
+        /// Read item with Remove inside of Target
+        /// </summary>
+        [Theory]
+        [InlineData(UpdateInTarget)]
+        [InlineData(UpdateOutsideTarget)]
+        public void ReadValidUpdate(string project)
+        {
+            var item = GetItemFromContent(project);
+
+            Assert.Equal("i", item.Update);
         }
 
         /// <summary>
         /// Read item with Exclude without Include, inside of Target
         /// </summary>
-        [Fact]
-        public void ReadInvalidExcludeWithoutIncludeWithinTarget()
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string content = @"
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Exclude='i1'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <ItemGroup>
@@ -366,19 +551,27 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </ItemGroup>
                         </Target>
                     </Project>
-                ";
-
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ")]
+        public void ReadInvalidExcludeWithoutIncludeWithinTarget(string project)
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );
         }
         /// <summary>
         /// Read item with Exclude without Include, inside of Target
         /// </summary>
-        [Fact]
-        public void ReadValidIncludeExcludeWithinTarget()
-        {
-            string content = @"
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='i1' Exclude='i2'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <ItemGroup>
@@ -386,9 +579,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </ItemGroup>
                         </Target>
                     </Project>
-                ";
-
-            var item = GetItemFromContent(content);
+                ")]
+        public void ReadValidIncludeExclude(string project)
+        {
+            var item = GetItemFromContent(project);
 
             Assert.Equal("i1", item.Include);
             Assert.Equal("i2", item.Exclude);
@@ -397,10 +591,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the include on an item
         /// </summary>
-        [Fact]
-        public void SetInclude()
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetInclude(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Include = "ib";
 
@@ -410,10 +606,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty include: this removes it
         /// </summary>
-        [Fact]
-        public void SetEmptyInclude()
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetEmptyInclude(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Include = String.Empty;
 
@@ -423,10 +621,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null empty : this removes it
         /// </summary>
-        [Fact]
-        public void SetNullInclude()
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetNullInclude(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Include = null;
 
@@ -436,10 +636,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the Exclude on an item
         /// </summary>
-        [Fact]
-        public void SetExclude()
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetExclude(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Exclude = "ib";
 
@@ -449,10 +651,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty Exclude: this removes it
         /// </summary>
-        [Fact]
-        public void SetEmptyExclude()
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetEmptyExclude(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Exclude = String.Empty;
 
@@ -462,10 +666,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null Exclude: this removes it
         /// </summary>
-        [Fact]
-        public void SetNullExclude()
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetNullExclude(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Exclude = null;
 
@@ -473,12 +679,48 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
+        /// Set Remove when Include is present, inside a target
+        /// </summary>
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetInvalidRemoveWithInclude(string project)
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                ProjectItemElement item = GetItemFromContent(project);
+
+                item.Remove = "i1";
+            }
+           );
+        }
+
+        /// <summary>
+        /// Set Update when Include is present
+        /// </summary>
+        [Theory]
+        [InlineData(IncludeInsideTarget)]
+        [InlineData(IncludeOutsideTarget)]
+        public void SetInvalidUpdateWithInclude(string project)
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                ProjectItemElement item = GetItemFromContent(project);
+
+                item.Update = "i1";
+            }
+           );
+        }
+
+        /// <summary>
         /// Set the Remove on an item
         /// </summary>
-        [Fact]
-        public void SetRemove()
+        [Theory]
+        [InlineData(RemoveInTarget)]
+        [InlineData(RemoveOutsideTarget)]
+        public void SetRemove(string project)
         {
-            ProjectItemElement item = GetItemXmlWithRemove();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Remove = "ib";
 
@@ -488,10 +730,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty Remove: this removes it
         /// </summary>
-        [Fact]
-        public void SetEmptyRemove()
+        [Theory]
+        [InlineData(RemoveInTarget)]
+        [InlineData(RemoveOutsideTarget)]
+        public void SetEmptyRemove(string project)
         {
-            ProjectItemElement item = GetItemXmlWithRemove();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Remove = String.Empty;
 
@@ -501,10 +745,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null Remove: this removes it
         /// </summary>
-        [Fact]
-        public void SetNullRemove()
+        [Theory]
+        [InlineData(RemoveInTarget)]
+        [InlineData(RemoveOutsideTarget)]
+        public void SetNullRemove(string project)
         {
-            ProjectItemElement item = GetItemXmlWithRemove();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Remove = null;
 
@@ -514,12 +760,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Include when Remove is present
         /// </summary>
-        [Fact]
-        public void SetInvalidIncludeWithRemove()
+        [Theory]
+        [InlineData(RemoveInTarget)]
+        [InlineData(RemoveOutsideTarget)]
+        public void SetInvalidIncludeWithRemove(string project)
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                ProjectItemElement item = GetItemXmlWithRemove();
+                ProjectItemElement item = GetItemFromContent(project);
 
                 item.Include = "i1";
             }
@@ -529,39 +777,47 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Exclude when Remove is present
         /// </summary>
-        [Fact]
-        public void SetInvalidExcludeWithRemove()
+        [Theory]
+        [InlineData(RemoveInTarget)]
+        [InlineData(RemoveOutsideTarget)]
+        public void SetInvalidExcludeWithRemove(string project)
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                ProjectItemElement item = GetItemXmlWithRemove();
+                ProjectItemElement item = GetItemFromContent(project);
 
                 item.Exclude = "i1";
             }
            );
         }
+        
         /// <summary>
-        /// Set Remove when Include is present, inside a target
+        /// Set Update when Remove is present
         /// </summary>
-        [Fact]
-        public void SetInvalidRemoveWithInclude()
+        [Theory]
+        [InlineData(RemoveInTarget)]
+        [InlineData(RemoveOutsideTarget)]
+        public void SetInvalidUpdateWithRemove(string project)
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                ProjectItemElement item = GetItemXmlInsideTarget();
+                ProjectItemElement item = GetItemFromContent(project);
 
-                item.Remove = "i1";
+                item.Update = "i1";
             }
            );
         }
+
         /// 
         /// <summary>
         /// Set the Update on an item
         /// </summary>
-        [Fact]
-        public void SetUpdate()
+        [Theory]
+        [InlineData(UpdateInTarget)]
+        [InlineData(UpdateOutsideTarget)]
+        public void SetUpdate(string project)
         {
-            ProjectItemElement item = GetItemXmlWithUpdate();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Update = "ib";
 
@@ -571,10 +827,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty Update: this removes it
         /// </summary>
-        [Fact]
-        public void SetEmptyUpdate()
+        [Theory]
+        [InlineData(UpdateInTarget)]
+        [InlineData(UpdateOutsideTarget)]
+        public void SetEmptyUpdate(string project)
         {
-            ProjectItemElement item = GetItemXmlWithUpdate();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Update = String.Empty;
 
@@ -584,10 +842,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null Update: this removes it
         /// </summary>
-        [Fact]
-        public void SetNullUpdate()
+        [Theory]
+        [InlineData(UpdateInTarget)]
+        [InlineData(UpdateOutsideTarget)]
+        public void SetNullUpdate(string project)
         {
-            ProjectItemElement item = GetItemXmlWithUpdate();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Update = null;
 
@@ -597,12 +857,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Include when Update is present
         /// </summary>
-        [Fact]
-        public void SetInvalidIncludeWithUpdate()
+        [Theory]
+        [InlineData(UpdateInTarget)]
+        [InlineData(UpdateOutsideTarget)]
+        public void SetInvalidIncludeWithUpdate(string project)
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                ProjectItemElement item = GetItemXmlWithUpdate();
+                ProjectItemElement item = GetItemFromContent(project);
 
                 item.Include = "i1";
             }
@@ -610,29 +872,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Set Update when Include is present
-        /// </summary>
-        [Fact]
-        public void SetInvalidUpdateWithInclude()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                ProjectItemElement item = GetItemXmlWithInclude();
-
-                item.Update = "i1";
-            }
-           );
-        }
-
-        /// <summary>
         /// Set Exclude when Update is present
         /// </summary>
-        [Fact]
-        public void SetInvalidExcludeWithUpdate()
+        [Theory]
+        [InlineData(UpdateInTarget)]
+        [InlineData(UpdateOutsideTarget)]
+        public void SetInvalidExcludeWithUpdate(string project)
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                ProjectItemElement item = GetItemXmlWithUpdate();
+                ProjectItemElement item = GetItemFromContent(project);
 
                 item.Exclude = "i1";
             }
@@ -640,27 +889,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Set Remove outside of a target: this is currently invalid
-        /// </summary>
-        [Fact]
-        public void SetInvalidRemoveOutsideTarget()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                ProjectItemElement item = GetItemXmlWithInclude();
-
-                item.Remove = "i1";
-            }
-           );
-        }
-
-        /// <summary>
         /// Set the condition on an item
         /// </summary>
-        [Fact]
-        public void SetCondition()
+        [Theory]
+        [InlineData(UpdateInTarget)]
+        [InlineData(UpdateOutsideTarget)]
+        public void SetCondition(string project)
         {
-            ProjectItemElement item = GetItemXmlWithInclude();
+            ProjectItemElement item = GetItemFromContent(project);
 
             item.Condition = "c";
 
@@ -753,74 +989,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.Equal("i2", item.Update);
             Assert.Equal(true, project.HasUnsavedChanges);
-        }
-
-        /// <summary>
-        /// Get a valid ProjectItemElement with no metadata
-        /// </summary>
-        private static ProjectItemElement GetItemXmlWithInclude()
-        {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <ItemGroup>
-                            <i Include='i'/>
-                        </ItemGroup>
-                    </Project>
-                ";
-
-            return GetItemFromContent(content);
-        }
-
-        /// <summary>
-        /// Get a valid ProjectItemElement with an Include on it (inside a Target)
-        /// </summary>
-        private static ProjectItemElement GetItemXmlInsideTarget()
-        {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <Target Name='t'>
-                            <ItemGroup>
-                                <i Include='i'/>
-                            </ItemGroup>
-                        </Target>
-                    </Project>
-                ";
-
-            return GetItemFromContent(content);
-        }
-
-        /// <summary>
-        /// Get a valid ProjectItemElement with a Remove on it (in a target)
-        /// </summary>
-        private static ProjectItemElement GetItemXmlWithRemove()
-        {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <Target Name='t'>
-                            <ItemGroup>
-                                <i Remove='i'/>
-                            </ItemGroup>
-                        </Target>
-                    </Project>
-                ";
-
-            return GetItemFromContent(content);
-        }
-
-        /// <summary>
-        /// Get a valid ProjectItemElement with a Remove on it (in a target)
-        /// </summary>
-        private static ProjectItemElement GetItemXmlWithUpdate()
-        {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                            <ItemGroup>
-                                <i Update='i'/>
-                            </ItemGroup>
-                    </Project>
-                ";
-
-            return GetItemFromContent(content);
         }
 
         private static ProjectItemElement GetItemFromContent(string content)

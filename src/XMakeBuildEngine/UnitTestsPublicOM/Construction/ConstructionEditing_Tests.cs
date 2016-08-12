@@ -679,31 +679,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Attempt to insert item without include in itemgroup in project
         /// </summary>
         [Fact]
-        public void InvalidAttemptToAddItemWithoutIncludeToItemGroupInProject()
+        public void InvalidAttemptToAddEmptyItem()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 ProjectItemGroupElement itemGroup = project.CreateItemGroupElement();
                 ProjectItemElement item = project.CreateItemElement("i");
-
-                project.AppendChild(itemGroup);
-                itemGroup.AppendChild(item);
-            }
-           );
-        }
-        /// <summary>
-        /// Attempt to insert item with remove in itemgroup in project
-        /// </summary>
-        [Fact]
-        public void InvalidAttemptToAddItemWithRemoveToItemGroupInProject()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                ProjectRootElement project = ProjectRootElement.Create();
-                ProjectItemGroupElement itemGroup = project.CreateItemGroupElement();
-                ProjectItemElement item = project.CreateItemElement("i");
-                item.Remove = "r";
 
                 project.AppendChild(itemGroup);
                 itemGroup.AppendChild(item);
@@ -760,6 +742,47 @@ namespace Microsoft.Build.UnitTests.OM.Construction
       <i Remove=""r"" />
     </ItemGroup>
   </Target>
+</Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+        
+        /// <summary>
+        /// Add item with remove in itemgroup in target
+        /// </summary>
+        [Fact]
+        public void AddItemWithRemoveToItemGroupOutsideTarget()
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectItemGroupElement itemGroup = project.CreateItemGroupElement();
+            ProjectItemElement itemRemoveFirst = project.CreateItemElement("i");
+            ProjectItemElement itemInclude = project.CreateItemElement("i");
+            ProjectItemElement itemRemoveSecond = project.CreateItemElement("i");
+            ProjectItemElement itemUpdate = project.CreateItemElement("i");
+            ProjectItemElement itemRemoveThird = project.CreateItemElement("i");
+
+            itemRemoveFirst.Remove = "i";
+            itemInclude.Include = "i";
+            itemRemoveSecond.Remove = "i";
+            itemUpdate.Update = "i";
+            itemRemoveThird.Remove = "i";
+
+            project.AppendChild(itemGroup);
+            itemGroup.AppendChild(itemRemoveFirst);
+            itemGroup.InsertAfterChild(itemInclude, itemRemoveFirst);
+            itemGroup.InsertAfterChild(itemRemoveSecond, itemInclude);
+            itemGroup.InsertAfterChild(itemUpdate, itemRemoveSecond);
+            itemGroup.InsertAfterChild(itemRemoveThird, itemUpdate);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(
+@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <i Remove=""i"" />
+    <i Include=""i"" />
+    <i Remove=""i"" />
+    <i Update=""i"" />
+    <i Remove=""i"" />
+  </ItemGroup>
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
