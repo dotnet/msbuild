@@ -3,6 +3,6 @@
         "RoslynTools.Microsoft.SignTool": "0.1.0-beta"
     },
     "frameworks": {
-        "netstandard1.3": {}
+        ".netcoreapp1.0": {}
     }
 }
