@@ -200,6 +200,9 @@
     <Compile Include="ToolTask.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ProcessExtensions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <!-- FileTracker Managed Libraries -->
     <Compile Include="TrackedDependencies\CanonicalTrackedInputFiles.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

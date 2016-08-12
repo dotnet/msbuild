@@ -1091,20 +1091,6 @@ namespace Microsoft.Build.Utilities
                     LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", proc.ProcessName);
                 }
 
-                try
-                {
-                    // issue the kill command
-                    NativeMethodsShared.KillTree(proc.Id);
-                }
-                catch (InvalidOperationException)
-                {
-                    // The process already exited, which is fine,
-                    // just continue.
-                }
-
-                // wait until the process finishes exiting/getting killed. 
-                // We don't want to wait forever here because the task is already supposed to be dieing, we just want to give it long enough
-                // to try and flush what it can and stop. If it cannot do that in a reasonable time frame then we will just ignore it.
                 int timeout = 5000;
                 string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
@@ -1116,7 +1102,7 @@ namespace Microsoft.Build.Utilities
                     }
                 }
 
-                proc.WaitForExit(timeout);
+                proc.KillTree(timeout);
             }
         }
 
