@@ -816,11 +816,39 @@ namespace Microsoft.Build.Evaluation
             string endPass2 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 2 (Item Definitions)", projectFile);
             DataCollection.CommentMarkProfile(8818, endPass2);
 #endif
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
+            lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _buildEventContext, _loggingService);
+
             // Pass3: evaluate project items
             foreach (ProjectItemGroupElement itemGroupElement in _itemGroupElements)
             {
-                EvaluateItemGroupElement(itemGroupElement);
+                EvaluateItemGroupElement(itemGroupElement, lazyEvaluator);
             }
+
+            if (lazyEvaluator != null)
+            {
+
+                // Tell the lazy evaluator to compute the items and add them to _data
+                IList<LazyItemEvaluator<P, I, M, D>.ItemData> items = lazyEvaluator.GetAllItems();
+                foreach (var itemData in items)
+                {
+                    if (itemData.ConditionResult)
+                    {
+                        _data.AddItem(itemData.Item);
+
+                        if (_data.ShouldEvaluateForDesignTime)
+                        {
+                            _data.AddToAllEvaluatedItemsList(itemData.Item);
+                        }
+                    }
+
+                    if (_data.ShouldEvaluateForDesignTime)
+                    {
+                        _data.AddItemIgnoringCondition(itemData.Item);
+                    }
+                }
+            }
+
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass3End);
 #endif
@@ -1200,7 +1228,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate the items in the itemgroup and add the applicable ones to the data passed in
         /// </summary>
-        private void EvaluateItemGroupElement(ProjectItemGroupElement itemGroupElement)
+        private void EvaluateItemGroupElement(ProjectItemGroupElement itemGroupElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
 #if FEATURE_MSBUILD_DEBUGGER
             if (DebuggerManager.DebuggingEnabled)
@@ -1209,13 +1237,21 @@ namespace Microsoft.Build.Evaluation
             }
 #endif
 
-            bool itemGroupConditionResult = EvaluateCondition(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
+            bool itemGroupConditionResult;
+            if (lazyEvaluator != null)
+            {
+                itemGroupConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
+            }
+            else
+            {
+                itemGroupConditionResult = EvaluateCondition(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
+            }
 
             if (itemGroupConditionResult || _data.ShouldEvaluateForDesignTime)
             {
                 foreach (ProjectItemElement itemElement in itemGroupElement.Items)
                 {
-                    EvaluateItemElement(itemGroupConditionResult, itemElement);
+                    EvaluateItemElement(itemGroupConditionResult, itemElement, lazyEvaluator);
                 }
             }
         }
@@ -1572,7 +1608,7 @@ namespace Microsoft.Build.Evaluation
         /// If specified, or if the condition on the item itself is false, only gathers the result into the list of items-ignoring-condition,
         /// and not into the real list of items.
         /// </summary>
-        private void EvaluateItemElement(bool itemGroupConditionResult, ProjectItemElement itemElement)
+        private void EvaluateItemElement(bool itemGroupConditionResult, ProjectItemElement itemElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
 #if FEATURE_MSBUILD_DEBUGGER
             if (DebuggerManager.DebuggingEnabled)
@@ -1581,7 +1617,15 @@ namespace Microsoft.Build.Evaluation
             }
 #endif
 
-            bool itemConditionResult = EvaluateCondition(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
+            bool itemConditionResult;
+            if (lazyEvaluator != null)
+            {
+                itemConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
+            }
+            else
+            {
+                itemConditionResult = EvaluateCondition(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
+            }
 
             if (!itemConditionResult && !_data.ShouldEvaluateForDesignTime)
             {
@@ -1595,6 +1639,20 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
+            if (lazyEvaluator != null)
+            {
+                var conditionResult = itemGroupConditionResult && itemConditionResult;
+
+                lazyEvaluator.ProcessItemElement(_projectRootElement.DirectoryPath, itemElement, conditionResult);
+
+                if (conditionResult)
+                {
+                    _data.EvaluatedItemElements.Add(itemElement);
+                }
+
+                return;
+            }
+            
             // Paths in items are evaluated relative to the outer project file, rather than relative to any targets file they may be contained in
             IList<I> items = CreateItemsFromInclude(_projectRootElement.DirectoryPath, itemElement, _itemFactory, itemElement.Include, _expander);
 
@@ -1780,6 +1838,8 @@ namespace Microsoft.Build.Evaluation
             // FINALLY: Add the items to the project
             if (itemConditionResult && itemGroupConditionResult)
             {
+                _data.EvaluatedItemElements.Add(itemElement);
+
                 foreach (I item in items)
                 {
                     _data.AddItem(item);
