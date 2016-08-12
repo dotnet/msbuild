@@ -1,0 +1,102 @@
+<!--
+***********************************************************************************************
+Microsoft.DotNet.Publish.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    ============================================================
+                                        Publish
+ 
+    The main publish entry point.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
+  </PropertyGroup>
+
+  <Target Name="Publish"
+          DependsOnTargets="Build;
+                            PrepareForPublish;
+                            CopyFilesToPublishDirectory" />
+
+  <!--
+    ============================================================
+                                        PrepareForPublish
+
+    Prepare the prerequisites for publishing.
+    ============================================================
+    -->
+  <Target Name="PrepareForPublish">
+
+    <PropertyGroup>
+      <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
+      <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(PublishDir)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        CopyFilesToPublishDirectory
+
+    Copy all build outputs, satellites and other necessary files to the publish directory.
+    ============================================================
+    -->
+  <Target Name="CopyFilesToPublishDirectory"
+          DependsOnTargets="_ComputeFilesToPublish">
+
+    <Copy SourceFiles="@(ResolvedFilesToPublish)"
+          DestinationFiles="$(PublishDir)%(ResolvedFilesToPublish.RelativePath)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ComputeFilesToPublish
+
+    Gathers all the files that need to be copied to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_ComputeFilesToPublish"
+          Returns="ResolvedFilesToPublish">
+
+    <PropertyGroup>
+      <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
+      <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <!-- Copy the build product (.dll or .exe). -->
+      <ResolvedFilesToPublish Include="@(IntermediateAssembly)"
+                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
+        <RelativePath>@(IntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFilesToPublish>
+
+      <!-- Copy the debug information file (.pdb), if any -->
+      <ResolvedFilesToPublish Include="@(_DebugSymbolsIntermediatePath)"
+                              Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
+        <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFilesToPublish>
+    </ItemGroup>
+
+  </Target>
+
+</Project>
