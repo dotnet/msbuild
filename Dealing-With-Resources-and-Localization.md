@@ -32,3 +32,7 @@
 - 2-3 weeks before a VS release the MSBuild team needs to ping the Microsoft localization team to update the xlf files with the latest changes in the neutral resources
 - before pinging the loc team, we do a localized build and commit the xlf changes
 - this will be the ONLY time we do localized builds and commit xlf changes. Otherwise, if we commit xlfs while the loc team is translating (between their checkout and merged PR), we might get races and loose resource updates.
+
+## Contributing better translation
+- send a PR with an updated `<target>` element of the xlf resource (do not include other non-localization changes)
+- we will notify the localization team, which will then take over and review the PR
