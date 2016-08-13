@@ -216,18 +216,49 @@ namespace Microsoft.Build.Evaluation
                                 // Create standard properties. On Mono they are well known
                                 var buildProperties =
                                     CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
-
-                                toolsets.Add(
-                                    version,
-                                    new Toolset(
+                                if (NativeMethodsShared.IsOSX)
+                                {
+                                    toolsets.Add(
                                         version,
-                                        binPath,
-                                        buildProperties,
-                                        environmentProperties,
-                                        globalProperties,
-                                        null,
-                                        currentDir,
-                                        string.Empty));
+                                        new Toolset(
+                                            version,
+                                            binPath,
+                                            buildProperties,
+                                            environmentProperties,
+                                            globalProperties,
+                                            null,
+                                            currentDir,
+                                            string.Empty,
+                                            new Dictionary<string, List<string>>
+                                            {
+                                                ["MSBuildExtensionsPath"] = new List<string>
+                                                {
+                                                    "/Library/Frameworks/Mono.framework/External/xbuild/"
+                                                },
+                                                ["MSBuildExtensionsPath32"] = new List<string>
+                                                {
+                                                    "/Library/Frameworks/Mono.framework/External/xbuild/"
+                                                },
+                                                ["MSBuildExtensionsPath64"] = new List<string>
+                                                {
+                                                    "/Library/Frameworks/Mono.framework/External/xbuild/"
+                                                }
+                                            }));
+                                }
+                                else
+                                {
+                                    toolsets.Add(
+                                        version,
+                                        new Toolset(
+                                            version,
+                                            binPath,
+                                            buildProperties,
+                                            environmentProperties,
+                                            globalProperties,
+                                            null,
+                                            currentDir,
+                                            string.Empty));
+                                }
                             }
                         }
                     }
