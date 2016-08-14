@@ -1,7 +1,5 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-  <!-- Temporary, until implicitly included -->
-  <Import Project="Microsoft.NETCore.props" /> 
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,6 +14,4 @@
   </ItemGroup>
   
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- Temporary, until implicitly included -->
-  <Import Project="Microsoft.NETCore.targets" />  
 </Project>

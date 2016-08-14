@@ -17,9 +17,6 @@
   </TemplateData>
   <TemplateContent>
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
-      <ProjectItem>Microsoft.NETCore.props</ProjectItem>
-      <ProjectItem>Microsoft.CSharp.DesignTime.targets</ProjectItem>
-      <ProjectItem>Microsoft.NETCore.targets</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="project.json">NuGet.json</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Program.cs</ProjectItem>      

@@ -27,21 +27,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
-    <SharedTemplateFiles Include="..\..\..\..\..\Targets\Microsoft.CSharp.DesignTime.targets">
-      <Link>Microsoft.CSharp.DesignTime.targets</Link>
-      <Type>Project</Type>
-      <TargetPath>Microsoft.CSharp.DesignTime.targets</TargetPath>
-    </SharedTemplateFiles>
-    <SharedTemplateFiles Include="..\..\..\..\..\Targets\Microsoft.NETCore.props">
-      <Link>Microsoft.NETCore.props</Link>
-      <Type>Project</Type>
-      <TargetPath>Microsoft.NETCore.props</TargetPath>
-    </SharedTemplateFiles>
-    <SharedTemplateFiles Include="..\..\..\..\..\Targets\Microsoft.NETCore.targets">
-      <Link>Microsoft.NETCore.targets</Link>
-      <Type>Project</Type>
-      <TargetPath>Microsoft.NETCore.targets</TargetPath>
-    </SharedTemplateFiles>
     <SharedTemplateFiles Include="..\Common\AssemblyInfo.cs">
       <Link>AssemblyInfo.cs</Link>
       <Type>Project</Type>
