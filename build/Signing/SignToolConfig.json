@@ -1,8 +1,8 @@
 {
     sign: [
         {
-            "certificate": "Microsoft",
-            "strongName": "MicrosoftShared",
+            "certificate": "Microsoft402",
+            "strongName": "MsSharedLib72",
             "values": [
                 "Microsoft.DotNet.Core.Build.Tasks.dll"
             ]
