@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Sdk.props" />
+  <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.props" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}</ProjectGuid>
@@ -43,5 +43,5 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Sdk.targets" />
+  <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
 </Project>

@@ -74,13 +74,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProductAssets Include="$(OutDir)\*" />
+      <NetCoreAppProductAssets Include="$(PackagesLayoutToolsNetCoreAppDir)\*" />
     </ItemGroup>
     
     <Message Text="Running tests for %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
 
-    <!-- Copy all the product assemblies to the test directory, so the tests can load them. -->
-    <Copy SourceFiles="@(ProductAssets)"
+    <!-- Copy all the 'netcore1.0' product assemblies to the test directory, so the tests can load them. -->
+    <Copy SourceFiles="@(NetCoreAppProductAssets)"
           DestinationFolder="$(TestsDirectory)"
           />
     

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\Tasks\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Sdk.props" />
+  <Import Project="..\..\Tasks\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.props" />
   <PropertyGroup>
     <ProjectGuid>{94F9B889-635A-48A7-A0CB-BAE5D6C9A91A}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -22,7 +22,7 @@
     </None>
   </ItemGroup>
   <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.targets" />
-  <Import Project="..\..\Tasks\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Sdk.targets" />
+  <Import Project="..\..\Tasks\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
 
   <Target Name="AfterBuild">
     <PropertyGroup>
