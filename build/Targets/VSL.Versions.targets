@@ -1,0 +1,68 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <RoslynSemanticVersion Condition="'$(RoslynSemanticVersion)' == '' AND '$(UseVisualStudioVersion)' == 'true'">15.0.0</RoslynSemanticVersion>
+    <RoslynSemanticVersion Condition="'$(RoslynSemanticVersion)' == ''">2.0.0</RoslynSemanticVersion>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition="'$(BuildVersion)' != ''">
+      <!-- The user specified a build version number. In that case, we'll use their version number
+          for the file version, and force the assembly version to $(RoslynSemanticVersion).0.  That way
+          day-to-day upgrades don't break assembly references to other installed apps. -->
+      <PropertyGroup>
+        <AssemblyVersion>$(RoslynSemanticVersion).0</AssemblyVersion>
+      </PropertyGroup>
+    </When>
+
+    <When Condition="('$(BuildNumber)' != '') and ($(BuildNumber.Split('.').Length) == 2)">
+      <!-- The user specified a build number, so we should use that. -->
+      <PropertyGroup>
+        <AssemblyVersion>$(RoslynSemanticVersion).0</AssemblyVersion>
+        <BuildVersion>$(RoslynSemanticVersion).$(BuildNumber.Split('.')[0])</BuildVersion>
+      </PropertyGroup>
+    </When>
+
+    <When Condition="'$(OfficialBuild)' == 'true' OR '$(RealSignBuild)' == 'true' OR '$(SignType)' == 'real'">
+      <!-- We're creating an official or real-signed build, but don't have a build number. Just use the RoslynSemanticVersion.
+          This happens if the build template does not pass BuildNumber down to MSBuild. -->
+      <PropertyGroup>
+        <AssemblyVersion>$(RoslynSemanticVersion).0</AssemblyVersion>
+        <BuildVersion>$(RoslynSemanticVersion).0</BuildVersion>
+      </PropertyGroup>
+    </When>
+
+    <Otherwise>
+      <!-- No build version was supplied.  We'll use a special version, higher than anything
+          installed, so that the assembly identity is different.  This will allows us to
+          have a build with an actual number installed, but then build and F5 a build with
+          this number.  -->
+      <PropertyGroup>
+        <BuildVersion>42.42.42.42</BuildVersion>
+        <AssemblyVersion>42.42.42.42</AssemblyVersion>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <!-- Returns the current build version. Used in .vsixmanifests to substitute our build version into them -->
+  <Target Name="GetBuildVersion" Outputs="$(BuildVersion)" />
+
+  <!-- NuGet version -->
+  <PropertyGroup>
+    <VSSemanticVersion>15.0.0</VSSemanticVersion>
+
+    <BuildNumberPart1 Condition="'$(BUILD_BUILDNUMBER)' != ''">
+      $(BUILD_BUILDNUMBER.Split('.')[0])
+    </BuildNumberPart1>
+    <BuildNumberPart2 Condition="'$(BUILD_BUILDNUMBER)' != ''">
+      $(BUILD_BUILDNUMBER.Split('.')[1].PadLeft(2,'0'))
+    </BuildNumberPart2>
+
+    <RoslynNuGetPreReleaseVersion>$(RoslynSemanticVersion)-beta1</RoslynNuGetPreReleaseVersion>
+    <RoslynNuGetPerBuildPreReleaseVersion Condition="'$(BuildNumberPart1)' != '' AND '$(BuildNumberPart2)' != ''">$(RoslynNuGetPreReleaseVersion)-$(BuildNumberPart1.Trim())-$(BuildNumberPart2.Trim())</RoslynNuGetPerBuildPreReleaseVersion>
+    <RoslynNuGetPerBuildPreReleaseVersion Condition="'$(RoslynNuGetPerBuildPreReleaseVersion)' == ''">1.0.0.0</RoslynNuGetPerBuildPreReleaseVersion>
+    <VSNuGetPreReleaseVersion>$(VSSemanticVersion)-beta1</VSNuGetPreReleaseVersion>
+    <VSNuGetPerBuildPreReleaseVersion Condition="'$(BuildNumberPart1)' != '' AND '$(BuildNumberPart2)' != ''">$(VSNuGetPreReleaseVersion)-$(BuildNumberPart1.Trim())-$(BuildNumberPart2.Trim())</VSNuGetPerBuildPreReleaseVersion>
+    <VSNuGetPerBuildPreReleaseVersion Condition="'$(VSNuGetPerBuildPreReleaseVersion)' == ''">1.0.0.0</VSNuGetPerBuildPreReleaseVersion>
+  </PropertyGroup>
+  
+</Project>
