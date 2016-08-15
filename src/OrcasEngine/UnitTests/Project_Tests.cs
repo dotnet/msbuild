@@ -589,7 +589,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <ItemGroup>
                         <MyWildCard Include=`a.cs; *.weirdo; c.cs`>
-                            <Culture>indian</Culture>
+                            <Culture>fr</Culture>
                         </MyWildCard>
                     </ItemGroup>
                 </Project>
@@ -603,7 +603,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <ItemGroup>
                         <MyWildCard Include=`a.cs; *.weirdo; c.cs`>
-                            <Culture>indian</Culture>
+                            <Culture>fr</Culture>
                         </MyWildCard>
                     </ItemGroup>
                 </Project>
@@ -616,7 +616,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             Assertion.AssertEquals("Newly added item should have correct Include", "a.cs; *.weirdo; c.cs", newItem.Include);
             Assertion.AssertEquals("Newly added item should have correct FinalItemSpec", "foo.weirdo", newItem.FinalItemSpecEscaped);
 
-            newItem.SetMetadata("Culture", "english");
+            newItem.SetMetadata("Culture", "en");
 
             // ************************************
             //               AFTER MODIFICATION
@@ -625,13 +625,13 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <ItemGroup>
                         <MyWildCard Include=`a.cs`>
-                            <Culture>indian</Culture>
+                            <Culture>fr</Culture>
                         </MyWildCard>
                         <MyWildCard Include=`c.cs`>
-                            <Culture>indian</Culture>
+                            <Culture>fr</Culture>
                         </MyWildCard>
                         <MyWildCard Include=`foo.weirdo`>
-                            <Culture>english</Culture>
+                            <Culture>en</Culture>
                         </MyWildCard>
                     </ItemGroup>
                 </Project>
@@ -657,7 +657,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
-                        <MyCulture>indian</MyCulture>
+                        <MyCulture>fr</MyCulture>
                     </PropertyGroup>
 
                     <ItemGroup>
@@ -677,7 +677,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
-                        <MyCulture>indian</MyCulture>
+                        <MyCulture>fr</MyCulture>
                     </PropertyGroup>
 
                     <ItemGroup>
@@ -696,7 +696,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             Assertion.AssertEquals("Newly added item should have correct Include", "*.weirdo", newItem.Include);
             Assertion.AssertEquals("Newly added item should have correct FinalItemSpec", "foo.weirdo", newItem.FinalItemSpecEscaped);
             Assertion.AssertEquals("Newly added item should have correct metadata Culture", "$(MyCulture)", newItem.GetMetadata("Culture"));
-            Assertion.AssertEquals("Newly added item should have correct evaluated metadata Culture", "indian", newItem.GetEvaluatedMetadata("Culture"));
+            Assertion.AssertEquals("Newly added item should have correct evaluated metadata Culture", "fr", newItem.GetEvaluatedMetadata("Culture"));
         }
 
         /// <summary>
@@ -743,7 +743,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         /// There's a wildcard in the project already, but it's part of a semicolon-separated
         /// list of items, and it uses a property reference.  Now the user tries to add a new 
         /// item that matches that wildcard.  In this case, we don't touch the project at all.
-        /// We're so damn smart.
+        /// We're so smart.
         /// </summary>
         /// <owner>RGoel</owner>
         [Test]
@@ -890,7 +890,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // The VS IDE does a few re-evaluations with different sets of global properties
             // (i.e., Configuration=Debug, Configuration=Release, etc.).  This is to simulate
             // that.  If there's a bug in the Project object, then re-evaluation can 
-            // potentially screw up the number of items hanging around.
+            // potentially mess up the number of items hanging around.
             project.MarkProjectAsDirty ();
             BuildItemGroup evaluatedItems2 = project.EvaluatedItemsIgnoringCondition;
 
@@ -1695,7 +1695,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // The VS IDE does a few re-evaluations with different sets of global properties
             // (i.e., Configuration=Debug, Configuration=Release, etc.).  This is to simulate
             // that.  If there's a bug in the Project object, then re-evaluation can 
-            // potentially screw up the number of items hanging around.
+            // potentially mess up the number of items hanging around.
             project.MarkProjectAsDirty ();
             BuildItemGroup evaluatedItems2 = project.EvaluatedItemsIgnoringCondition;
 
@@ -2101,7 +2101,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // The VS IDE does a few re-evaluations with different sets of global properties
             // (i.e., Configuration=Debug, Configuration=Release, etc.).  This is to simulate
             // that.  If there's a bug in the Project object, then re-evaluation can 
-            // potentially screw up the number of items hanging around.
+            // potentially mess up the number of items hanging around.
             project.MarkProjectAsDirty();
             BuildItemGroup evaluatedItems2 = project.EvaluatedItemsIgnoringCondition;
 
@@ -3208,7 +3208,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             Project project = ObjectModelHelpers.CreateInMemoryProject(projectOriginalContents);
 
             // Force an evaluation of the project.  If there were a bug in the project code, this might
-            // cause the back pointers from properties to the parent BuildPropertyGroup to get screwed up.
+            // cause the back pointers from properties to the parent BuildPropertyGroup to get messed up.
             BuildPropertyGroup evaluatedProperties = project.EvaluatedProperties;
 
             Assertion.Assert("Project shouldn't be dirty", !project.IsDirtyNeedToReevaluate);

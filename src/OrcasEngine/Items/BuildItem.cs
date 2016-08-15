@@ -554,7 +554,7 @@ namespace Microsoft.Build.BuildEngine
         /// Accessor for the item's "type" string.  Note that changing the "Type"
         /// of an BuildItem requires the whole project to be re-evalauted.  This is because
         /// items are frequently stored in hash tables based on their item types,
-        /// so changing an item type would screw up the tables.  In the current
+        /// so changing an item type would mess up the tables.  In the current
         /// implementation the caller who changes the item type is responsible
         /// for calling Project.MarkAsDirty().
         /// </summary>
@@ -1706,7 +1706,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 Expander propertyExpander = new Expander(evaluatedProperties);
                 string newItemSpecExpandedEscaped = propertyExpander.ExpandAllIntoStringLeaveEscaped(newItemSpec, null);
-                // New item spec should not have any unescaped semicolons ... this can really screw us up.
+                // New item spec should not have any unescaped semicolons ... this can really mess us up.
                 if (-1 == newItemSpecExpandedEscaped.IndexOf(';'))
                 {
                     // Expand any properties in the new item spec that the user gave us.
@@ -1962,7 +1962,7 @@ namespace Microsoft.Build.BuildEngine
             virtualClone.SetEvaluatedItemSpecEscaped(evaluatedItemSpecEscaped);
             virtualClone.SetFinalItemSpecEscaped(FinalItemSpecEscaped);
 
-            // NOTE: itemSpecModifiers don't need to be deep-cloned because they are slaved to the finalItemSpec -- when the
+            // NOTE: itemSpecModifiers don't need to be deep-cloned because they are tied to the finalItemSpec -- when the
             // finalItemSpec changes, they will get reset
             virtualClone.itemSpecModifiers = itemSpecModifiers;
             virtualClone.recursivePortionOfFinalItemSpecDirectory = recursivePortionOfFinalItemSpecDirectory;

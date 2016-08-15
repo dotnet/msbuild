@@ -128,7 +128,7 @@ namespace Microsoft.Build.BuildEngine
          * Find and record all of the properties that are referenced in the given
          * condition.
          *
-         * FUTURE: it kind of sucks that we have to completely parse+evaluate the expression
+         * FUTURE: it is unfortunate that we have to completely parse+evaluate the expression
          */
         internal static void GatherReferencedPropertyNames
         (

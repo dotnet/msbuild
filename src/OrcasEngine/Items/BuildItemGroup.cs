@@ -590,7 +590,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Removes all Items from this BuildItemGroup, and also nukes the Condition
+        /// Removes all Items from this BuildItemGroup, and also deletes the Condition
         /// and Name.
         /// </summary>
         public void Clear()

@@ -1638,7 +1638,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 int eventType = 0;
 
-                // See if we have anything to do without waiting on the handles which is freaking expensive 
+                // See if we have anything to do without waiting on the handles which is expensive 
                 // for kernel mode objects.
                 if (this.engineAbortCachedValue == true)
                 {
