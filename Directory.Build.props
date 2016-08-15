@@ -27,4 +27,8 @@
 
     <NuGet_Packages Condition=" '$(NuGet_Packages)' == ''">$(RepositoryRootDirectory)packages\</NuGet_Packages>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <SignAssembly Condition="'$(SignAssembly)'==''">true</SignAssembly>
+  </PropertyGroup>
 </Project>

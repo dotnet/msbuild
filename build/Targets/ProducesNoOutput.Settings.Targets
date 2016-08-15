@@ -9,5 +9,6 @@
     <OutputType>Library</OutputType>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
+    <NonShipping>true</NonShipping>
   </PropertyGroup>
 </Project>

@@ -17,11 +17,11 @@
 
   <Target Name="Build" Inputs="@(SigningConfig);$(PackageAssets)" Outputs="@(PackageAssets)">
     <!-- If not RealSigning -->
-    <Message Text="Skipping Real Signing" Condition="'$(RealSign)'=='false'"/>
+    <Message Text="Skipping Real Signing" Condition="'$(SignType)'!='real'"/>
 
     <!-- If RealSigning -->
-    <Message Text="Performing Real Signing" Condition="'$(RealSign)'=='true'"/>
+    <Message Text="Performing Real Signing" Condition="'$(SignType)'=='real'"/>
     <Exec Command="$(SignTool) -nugetPackagesPath &quot;$(NuGet_Packages)&quot; -config &quot;@(SigningConfig)&quot; &quot;$(OutDir.TrimEnd('\'))&quot;"
-          Condition="'$(RealSign)'=='true'"/>
+          Condition="'$(SignType)'=='real'"/>
   </Target>
 </Project>
