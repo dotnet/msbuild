@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <!-- 
+        Microsoft ResX Schema
+
+        Version 1.3
+
+        The primary goals of this format is to allow a simple XML format 
+        that is mostly human readable. The generation and parsing of the 
+        various data types are done through the TypeConverter classes 
+        associated with the data types.
+
+        Example:
+
+        ... ado.net/XML headers & schema ...
+        <resheader name="resmimetype">text/microsoft-resx</resheader>
+        <resheader name="version">1.3</resheader>
+        <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+        <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+        <data name="Name1">this is my long string</data>
+        <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+        <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+            [base64 mime encoded serialized .NET Framework object]
+        </data>
+        <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+            [base64 mime encoded string representing a byte array form of the .NET Framework object]
+        </data>
+
+        There are any number of "resheader" rows that contain simple 
+        name/value pairs.
+
+        Each data row contains a name, and value. The row also contains a 
+        type or mimetype. Type corresponds to a .NET class that support 
+        text/value conversion through the TypeConverter architecture. 
+        Classes that don't support this are serialized and stored with the 
+        mimetype set.
+
+        The mimetype is used for serialized objects, and tells the 
+        ResXResourceReader how to depersist the object. This is currently not 
+        extensible. For a given mimetype the value must be set accordingly:
+
+        Note - application/x-microsoft.net.object.binary.base64 is the format 
+        that the ResXResourceWriter will generate, however the reader can 
+        read any of the formats listed below.
+
+        mimetype: application/x-microsoft.net.object.binary.base64
+        value   : The object must be serialized with 
+            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+        mimetype: application/x-microsoft.net.object.soap.base64
+        value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+        mimetype: application/x-microsoft.net.object.bytearray.base64
+        value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+    
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+                            <xsd:attribute name="UESanitized" type="xsd:boolean" msdata:Ordinal="3" />
+                            <xsd:attribute name="Visibility" type="Visibility_Type" msdata:Ordinal="4" />
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="5" />
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="6" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+        <xsd:simpleType name="Visibility_Type">
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="Public" />
+                <xsd:enumeration value="Obsolete" />
+                <xsd:enumeration value="Private_OM" />
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="NameInvalid" UESanitized="false" Visibility="Public">
+        <value>MSB5016: The name "{0}" contains an invalid character "{1}".</value>
+      <comment>{StrBegin="MSB5016: "}</comment>
+  </data>
+    <data name="Shared.CannotChangeItemSpecModifiers" UESanitized="false" Visibility="Private_OM">
+        <value>"{0}" is a reserved item meta-data, and cannot be modified or deleted.</value>
+        <comment>UE: Tasks and OM users are not allowed to remove or change the value of the built-in meta-data on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
+    </data>
+    <data name="Shared.CannotConvertStringToBool" UESanitized="false" Visibility="Public">
+        <value>The string "{0}" cannot be converted to a boolean (true/false) value.</value>
+    </data>
+    <data name="Shared.ExecCommand">
+        <value>Command:</value>
+    </data>
+    <data name="Shared.FailedCreatingTempFile" UESanitized="false" Visibility="Public">
+        <value>MSB5003: Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</value>
+      <comment>{StrBegin="MSB5003: "}</comment>
+  </data>
+    <data name="Shared.FailedDeletingTempFile" UESanitized="false" Visibility="Public">
+        <value>MSB5018: Failed to delete the temporary file "{0}". {1}</value>
+      <comment>{StrBegin="MSB5018: "}</comment>
+  </data>
+  <data name="Shared.InvalidFilespecForTransform" UESanitized="false" Visibility="Public">
+        <value>The item meta-data "%({0})" cannot be applied to the path "{1}". {2}</value>
+        <comment>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item meta-data e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</comment>
+    </data>
+    <data name="FileExtensionCannotBeEmpty" UESanitized="false" Visibility="Public">
+        <value>File extension cannot be null or empty</value>
+        <comment>File name must be more than null, empty or just a .</comment>
+    </data>
+    <data name="DirectoryNotFound" UESanitized="false" Visibility="Public">
+        <value>Could not find directory path: {0}</value>
+        <comment>Directory must exist</comment>
+    </data>
+  <data name="UnauthorizedAccess" UESanitized="false" Visibility="Public">
+    <value>You do not have access to: {0}</value>
+    <comment>Directory must have access</comment>
+  </data>
+    <data name="Shared.KillingProcess">
+        <value>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</value>
+      <comment>{StrBegin="MSB5002: "}</comment>
+  </data>
+    <data name="Shared.ParameterCannotBeNull" UESanitized="false" Visibility="Public">
+        <value>Parameter "{0}" cannot be null.</value>
+    </data>
+    <data name="Shared.ParameterCannotContainNulls" UESanitized="false" Visibility="Public">
+        <value>Parameter "{0}" cannot contain null values.</value>
+    </data>
+    <data name="Shared.ParameterCannotHaveZeroLength" UESanitized="false" Visibility="Public">
+        <value>Parameter "{0}" cannot have zero length.</value>
+    </data>
+    <data name="Shared.ParametersMustHaveTheSameLength" UESanitized="false" Visibility="Public">
+        <value>Parameters "{0}" and "{1}" must have the same number of elements.</value>
+    </data>
+    <data name="Shared.TaskResourceNotFound" UESanitized="false" Visibility="Private_OM">
+        <value>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</value>
+        <comment></comment>
+    </data>
+    <data name="Shared.TaskResourcesNotRegistered" UESanitized="false" Visibility="Private_OM">
+        <value>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</value>
+        <comment>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</comment>
+    </data>
+    <data name="SolutionParseDuplicateProject" UESanitized="false" Visibility="Public">
+      <value>MSB5004: The solution file has two projects named "{0}".</value>
+      <comment>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseInvalidProjectFileNameCharacters" UESanitized="false" Visibility="Public">
+      <value>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</value>
+      <comment>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseInvalidProjectFileNameEmpty" UESanitized="false" Visibility="Public">
+      <value>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</value>
+      <comment>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseInvalidProjectSolutionConfigurationEntry" UESanitized="false" Visibility="Public">
+      <value>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</value>
+      <comment>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseInvalidSolutionConfigurationEntry" UESanitized="false" Visibility="Public">
+      <value>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</value>
+      <comment>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseNestedProjectError" UESanitized="false" Visibility="Public">
+      <value>MSB5009: Error parsing the nested project section in solution file.</value>
+      <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseNoHeaderError" UESanitized="false" Visibility="Public">
+      <value>MSB5010: No file format header found.</value>
+      <comment>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseProjectDepGuidError" UESanitized="false" Visibility="Public">
+      <value>MSB5011: Parent project GUID not found in "{0}" project dependency section.</value>
+      <comment>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseProjectEofError" UESanitized="false" Visibility="Public">
+      <value>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</value>
+      <comment>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseProjectError" UESanitized="false" Visibility="Public">
+      <value>MSB5013: Error parsing a project section.</value>
+      <comment>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseVersionMismatchError" UESanitized="false" Visibility="Public">
+      <value>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</value>
+      <comment>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="SolutionParseWebProjectPropertiesError" UESanitized="false" Visibility="Public">
+      <value>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</value>
+      <comment>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</comment>
+    </data>
+    <data name="UnrecognizedSolutionComment" UESanitized="false" Visibility="Public">
+      <value>Unrecognized solution version "{0}", attempting to continue.</value>
+    </data>
+    <data name="SubCategoryForSolutionParsingErrors" UESanitized="false" Visibility="Public">
+      <value>Solution file</value>
+      <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</comment>
+    </data>
+    <data name="Shared.CannotCreateDirectory" UESanitized="false" Visibility="Public">
+      <value>MSB5017: Cannot create directory "{0}". {1}</value>
+      <comment>{StrBegin="MSB5017: "}</comment>
+  </data>
+    <data name="Shared.InvalidProjectFile" UESanitized="false" Visibility="Public">
+      <value>MSB5019: The project file is malformed: "{0}". {1}</value>
+      <comment>{StrBegin="MSB5019: "}</comment>
+  </data>
+    <data name="Shared.ProjectFileCouldNotBeLoaded" UESanitized="false" Visibility="Public">
+      <value>MSB5020: Could not load the project file: "{0}". {1}</value>
+      <comment>{StrBegin="MSB5020: "}</comment>
+  </data>
+    <!--
+        The shared message bucket is: MSB5001 - MSB5999
+
+        Next message code should be MSB5021
+
+        Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
+            <none>
+
+        Don't forget to update this comment after using a new code.
+  -->
+</root>

@@ -1,0 +1,116 @@
+This table lists all the places in a project file where properties, item lists
+and item attributes (meta-data) can (and cannot) be referenced.
+
+Key:
+    yes         == is possible and we should allow it
+    no          == is not possible by design
+    disallow    == is possible but we don't want to allow it
+
+----------------------------------------------------------------------------------------------------------------
+                        Properties                      Items                   Attributes          Suite
+----------------------------------------------------------------------------------------------------------------
+Project
+
+    DefaultTargets      yes (env-vars & command-line)   no                          no              Evaluation
+
+PropertyGroup
+
+    Condition           yes (all in scope)              no                          no              Evaluation
+
+<Property>
+
+    Condition           yes (all in scope)              no                          no              Evaluation
+
+    [Value]             yes (all in scope)              no                          no              Evaluation
+
+ItemGroup
+
+    Condition           yes                             yes (all in scope)          no              Evaluation
+
+<Item>
+
+    Include             yes                             yes (all in scope)          no              Evaluation
+
+    Exclude             yes                             yes (all in scope)          no              Evaluation
+
+    Condition           yes                             yes (all in scope)          no              Evaluation
+
+<Attribute>
+
+    Condition           yes                             yes (all in scope)          no              Evaluation
+
+    [Value]             yes                             yes (all in scope)          no              Evaluation
+
+Import
+
+    Project             yes (all in scope)              no                          no              Evaluation
+
+    Condition           yes (all in scope)              no                          no              Evaluation
+
+Error
+
+    Condition           yes                             yes                         no
+
+    Text                yes                             yes                         no
+
+Warning
+
+    Condition           yes                             yes                         no
+
+    Text                yes                             yes                         no
+
+Message
+
+    Condition           yes                             yes                         no
+
+    Text                yes                             yes                         no
+
+UsingTask
+
+    AssemblyName        yes                             yes                         no              Evaluation
+
+    AssemblyFile        yes                             yes                         no              Evaluation
+
+    TaskName            yes                             yes                         no              Evaluation
+
+    Condition           yes                             yes                         no              Evaluation
+
+Target
+
+    Name                disallow                        disallow                    no              Evaluation
+
+    DependsOnTargets    yes                             yes                         no              Evaluation
+
+    Inputs              yes                             yes                         yes
+
+    Outputs             yes                             yes                         yes
+
+    Condition           yes                             yes                         no              Evaluation
+
+OnError
+
+    Condition           yes                             yes                         no
+
+    ExecuteTargets      yes                             yes                         no
+
+<Task>
+
+    Condition           yes                             yes                         yes
+
+    ContinueOnError     yes                             yes                         yes             Evaluation
+
+    [Parameter]         yes                             yes                         yes
+
+Output
+
+    TaskParameter       yes                             yes                         yes             Evaluation
+
+    ItemName            yes                             yes                         yes             Evaluation
+
+    PropertyName        yes                             yes                         yes             Evaluation
+
+    Condition           yes                             yes                         yes             Evaluation
+
+ProjectExtensions
+
+    [Inner XML]         disallow                        disallow                    no
