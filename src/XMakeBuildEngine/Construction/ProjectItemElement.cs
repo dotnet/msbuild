@@ -409,7 +409,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer parent, ProjectElement previousSibling, ProjectElement nextSibling)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectTargetElement || ((Include.Length > 0 || Update.Length > 0) && Remove.Length == 0), "OM_ItemsOutsideTargetMustHaveIncludeOrUpdateButNoRemove");
+            ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectTargetElement || (Include.Length > 0 || Update.Length > 0 || Remove.Length > 0), "OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove");
             ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectRootElement || parent.Parent is ProjectTargetElement || parent.Parent is ProjectWhenElement || parent.Parent is ProjectOtherwiseElement, "OM_CannotAcceptParent");
         }
 
