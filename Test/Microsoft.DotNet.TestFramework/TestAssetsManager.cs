@@ -12,6 +12,22 @@ namespace Microsoft.DotNet.TestFramework
 {
     public class TestAssetsManager
     {
+        private static TestAssetsManager _testProjectsAssetsManager;
+
+        public static TestAssetsManager TestProjectsAssetsManager
+        {
+            get
+            {
+                if(_testProjectsAssetsManager == null)
+                {
+                    var testProjectsDirectory = Path.Combine(RepoInfo.RepoRoot, "TestAssets", "TestProjects");
+                    _testProjectsAssetsManager = new TestAssetsManager(testProjectsDirectory);
+                }
+
+                return _testProjectsAssetsManager;
+            }
+        }
+
         public string AssetsRoot
         {
             get; private set;
@@ -27,24 +43,35 @@ namespace Microsoft.DotNet.TestFramework
             AssetsRoot = assetsRoot;
         }
 
-        public TestInstance CopyTestAsset(
+        public TestAsset CopyTestAsset(
             string testProjectName,
             [CallerMemberName] string callingMethod = "",
             string identifier = "")
         {
-            string testProjectDir = Path.Combine(AssetsRoot, testProjectName);
+            var testProjectDirectory = GetAndValidateTestProjectDirectory(testProjectName);
+            var testDestinationDirectory =
+                GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
 
-            if (!Directory.Exists(testProjectDir))
+            var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory);
+            return testAsset;
+        }
+
+        private string GetAndValidateTestProjectDirectory(string testProjectName)
+        {
+            string testProjectDirectory = Path.Combine(AssetsRoot, testProjectName);
+
+            if (!Directory.Exists(testProjectDirectory))
             {
                 throw new Exception($"Cannot find '{testProjectName}' at '{AssetsRoot}'");
             }
 
-            var testDestination = GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
-            var testInstance = new TestInstance(testProjectDir, testDestination);
-            return testInstance;
+            return testProjectDirectory;
         }
 
-        private string GetTestDestinationDirectoryPath(string testProjectName, string callingMethod, string identifier)
+        private string GetTestDestinationDirectoryPath(
+            string testProjectName,
+            string callingMethod,
+            string identifier)
         {
 #if NET451
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;

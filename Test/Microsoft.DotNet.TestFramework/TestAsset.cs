@@ -6,17 +6,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.TestFramework.Assertions;
+using Microsoft.DotNet.TestFramework.Commands;
+using static Microsoft.DotNet.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.DotNet.TestFramework
 {
-    public class TestInstance: TestDirectory
+    public class TestAsset : TestDirectory
     {
         // made tolower because the rest of the class works with normalized tolower strings
-        private static readonly IEnumerable<string> BuildArtifactBlackList = new List<string>() {".IncrementalCache", ".SDKVersion"}.Select(s => s.ToLower()).ToArray();
+        private static readonly IEnumerable<string> BuildArtifactBlackList = new List<string>()
+        {
+          ".IncrementalCache",
+          ".SDKVersion"
+        }.Select(s => s.ToLower()).ToArray();
 
         private string _testAssetRoot;
 
-        internal TestInstance(string testAssetRoot, string testDestination) : base(testDestination)
+        public string TestRoot => Path;
+
+        internal TestAsset(string testAssetRoot, string testDestination) : base(testDestination)
         {
             if (string.IsNullOrEmpty(testAssetRoot))
             {
@@ -24,21 +33,12 @@ namespace Microsoft.DotNet.TestFramework
             }
 
             _testAssetRoot = testAssetRoot;
-
-            CopySource();
         }
 
-        private void CopySource()
+        public TestAsset WithSource()
         {
             var sourceDirs = Directory.GetDirectories(_testAssetRoot, "*", SearchOption.AllDirectories)
-                                 .Where(dir =>
-                                 {
-                                     dir = dir.ToLower();
-                                     return !dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}bin")
-                                            && !dir.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}")
-                                            && !dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}obj")
-                                            && !dir.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}");
-                                 });
+              .Where(dir => !IsBinOrObjFolder(dir));
 
             foreach (string sourceDir in sourceDirs)
             {
@@ -48,10 +48,7 @@ namespace Microsoft.DotNet.TestFramework
             var sourceFiles = Directory.GetFiles(_testAssetRoot, "*.*", SearchOption.AllDirectories)
                                   .Where(file =>
                                   {
-                                      file = file.ToLower();
-                                      return !file.EndsWith("project.lock.json")
-                                            && !file.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}")
-                                            && !file.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}");
+                                      return !IsLockFile(file) && !IsInBinOrObjFolder(file);
                                   });
 
             foreach (string srcFile in sourceFiles)
@@ -59,58 +56,58 @@ namespace Microsoft.DotNet.TestFramework
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
                 File.Copy(srcFile, destFile, true);
             }
-        }
-
-        public TestInstance WithLockFiles()
-        {
-            foreach (string lockFile in Directory.GetFiles(_testAssetRoot, "project.lock.json", SearchOption.AllDirectories))
-            {
-                string destinationLockFile = lockFile.Replace(_testAssetRoot, Path);
-                File.Copy(lockFile, destinationLockFile, true);
-            }
 
             return this;
         }
 
-        public TestInstance WithBuildArtifacts()
+        // This is temporary, we won't need it once the rest of the targets are updated to use
+        // project.assets.json
+        public TestAsset WithLockFile()
         {
-            var binDirs = Directory.GetDirectories(_testAssetRoot, "*", SearchOption.AllDirectories)
-                                 .Where(dir =>
-                                 {
-                                     dir = dir.ToLower();
-                                     return dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}bin")
-                                            || dir.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}")
-                                            || dir.EndsWith($"{System.IO.Path.DirectorySeparatorChar}obj")
-                                            || dir.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}");
-                                 });
-
-            foreach (string dirPath in binDirs)
-            {
-                Directory.CreateDirectory(dirPath.Replace(_testAssetRoot, Path));
-            }
-
-            var binFiles = Directory.GetFiles(_testAssetRoot, "*.*", SearchOption.AllDirectories)
-                                 .Where(file =>
-                                 {
-                                     file = file.ToLower();
-
-                                     var isArtifact = file.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}")
-                                            || file.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}");
-
-                                     var isBlackListed = BuildArtifactBlackList.Any(b => file.Contains(b));
-
-                                     return isArtifact && !isBlackListed;
-                                 });
-
-            foreach (string binFile in binFiles)
-            {
-                string destFile = binFile.Replace(_testAssetRoot, Path);
-                File.Copy(binFile, destFile, true);
-            }
+            var sourceProjectLockJson = System.IO.Path.Combine(_testAssetRoot, "project.lock.json");
+            var targetProjectLockJson = sourceProjectLockJson.Replace(_testAssetRoot, Path);
+            File.Copy(sourceProjectLockJson, targetProjectLockJson);
 
             return this;
         }
 
-        public string TestRoot => Path;
+        public TestAsset Restore(params string[] args)
+        {
+            var restoreCommand = new RestoreCommand(Stage0MSBuild, TestRoot);
+            var commandResult = restoreCommand.Execute(args);
+
+            commandResult.Should().Pass();
+
+            return this;
+        }
+
+        private bool IsLockFile(string file)
+        {
+            file = file.ToLower();
+            return file.EndsWith("project.lock.json");
+        }
+
+        private bool IsBinOrObjFolder(string directory)
+        {
+            var binFolder = $"{System.IO.Path.DirectorySeparatorChar}bin";
+            var objFolder = $"{System.IO.Path.DirectorySeparatorChar}obj";
+
+            directory = directory.ToLower();
+            return directory.EndsWith(binFolder)
+                  || directory.EndsWith(objFolder)
+                  || IsInBinOrObjFolder(directory);
+        }
+
+        private bool IsInBinOrObjFolder(string path)
+        {
+            var objFolderWithTrailingSlash =
+              $"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}";
+            var binFolderWithTrailingSlash =
+              $"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}";
+
+            path = path.ToLower();
+            return path.Contains(binFolderWithTrailingSlash)
+                  || path.Contains(objFolderWithTrailingSlash);
+        }
     }
 }
