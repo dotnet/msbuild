@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(OutputType)' == 'exe' ">true</GenerateRuntimeConfigurationFiles>
     <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
-    
+
     <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
     <VersionSuffix Condition=" '$(VersionSuffix)' == '' "></VersionSuffix>
     <Version Condition=" '$(Version)' == '' and '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
@@ -126,5 +126,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </RunInformation>
     </ItemGroup>
   </Target>
+
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.DotNet.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.DotNet.Publish.targets')" />
 
 </Project>
