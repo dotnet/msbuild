@@ -15,6 +15,7 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)MSBuildTaskHost.exe vs.file.ngen=yes
   file source=$(X86BinPath)MSBuildTaskHost.exe.config
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngen=yes
+  file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
@@ -132,6 +133,7 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngen=yes
+  file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
