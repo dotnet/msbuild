@@ -56,5 +56,10 @@ namespace Microsoft.Build.Tasks
         /// Special AssemblyFoldersEx indicator.  May be passed in where SearchPaths are taken. 
         /// </summary>
         public const string assemblyFoldersExSentinel = "{registry:";
+
+        /// <summary>
+        /// Special AssemblyFoldersFromConfig indicator.  May be passed in where SearchPaths are taken. 
+        /// </summary>
+        public const string assemblyFoldersFromConfigSentinel = "{assemblyfoldersfromconfig:";
     }
 }
