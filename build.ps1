@@ -6,6 +6,7 @@
 param(
     [string]$Configuration="Debug",
     [string]$Platform="Any CPU",
+    [switch]$RealSign,
     [switch]$Help)
 
 if($Help)
@@ -15,6 +16,7 @@ if($Help)
     Write-Host "Options:"
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
     Write-Host "  -Platform <PLATFORM>               Build the specified Platform (Any CPU)"
+    Write-Host "  -RealSign                          Sign the output DLLs"
     Write-Host "  -Help                              Display this help message"
     exit 0
 }
@@ -47,5 +49,5 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build3 $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform
+dotnet build3 $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:RealSign=$RealSign
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }

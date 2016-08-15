@@ -25,6 +25,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{13EE1E3C
 		build\Nuget\Microsoft.DotNet.Core.Sdk.nuspec = build\Nuget\Microsoft.DotNet.Core.Sdk.nuspec
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signing", "Signing", "{385C3C61-B7FC-4447-A88D-6D018B7CE5E4}"
+	ProjectSection(SolutionItems) = preProject
+		build\Signing\Microsoft.DotNet.Core.Signing.proj = build\Signing\Microsoft.DotNet.Core.Signing.proj
+		build\Signing\SignToolConfig.json = build\Signing\SignToolConfig.json
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Core.Build.Tasks.UnitTests", "src\Tasks\Microsoft.DotNet.Core.Build.Tasks.UnitTests\Microsoft.DotNet.Core.Build.Tasks.UnitTests.csproj", "{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{3B295650-6CBF-486F-9E25-F96EE03B7CAE}"
@@ -67,6 +73,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DF7D2697-B3B4-45C2-8297-27245F528A99} = {1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}
 		{13EE1E3C-D7F4-48D3-87AE-94CBCCF574E9} = {50A89C27-BA35-44B2-AC57-E54551791C64}
+		{385C3C61-B7FC-4447-A88D-6D018B7CE5E4} = {50A89C27-BA35-44B2-AC57-E54551791C64}
 		{6A698C1D-F604-4295-B6FC-7FC726F9FE5F} = {1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}
 		{94F9B889-635A-48A7-A0CB-BAE5D6C9A91A} = {3B295650-6CBF-486F-9E25-F96EE03B7CAE}
 		{98883ACD-BE3A-4533-953D-1BE25981BA02} = {3B295650-6CBF-486F-9E25-F96EE03B7CAE}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Directory.Build.props'))\Directory.Build.props" />
+
+  <PropertyGroup>
+    <SignTool>$(NuGet_Packages)\roslyntools.microsoft.signtool\0.2.0-beta\tools\SignTool.exe</SignTool>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SigningConfig Include="$(MSBuildThisFileDirectory)SignToolConfig.json"/>
+
+    <!-- Make note, without actually knowing what's included in the SigningConfig,
+         we just assume that everything in the output dir is, and treat them
+         as inputs so that we rerun packaging if they change. -->
+    <PackageAssets Include="$(OutDir)\*.*" Exclude="*.log" />
+  </ItemGroup>
+
+  <Target Name="Build" Inputs="@(SigningConfig);$(PackageAssets)" Outputs="@(PackageAssets)">
+    <!-- If not RealSigning -->
+    <Message Text="Skipping Real Signing" Condition="'$(RealSign)'=='false'"/>
+
+    <!-- If RealSigning -->
+    <Message Text="Performing Real Signing" Condition="'$(RealSign)'=='true'"/>
+    <Exec Command="$(SignTool) -nugetPackagesPath &quot;$(NuGet_Packages)&quot; -config &quot;@(SigningConfig)&quot; &quot;$(OutDir.TrimEnd('\'))&quot;"
+          Condition="'$(RealSign)'=='true'"/>
+  </Target>
+</Project>
