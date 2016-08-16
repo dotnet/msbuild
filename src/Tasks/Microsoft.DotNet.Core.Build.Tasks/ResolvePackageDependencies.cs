@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                         throw new Exception("Unable to determine user home directory.");
                     }
                     
-                    _packageFolders.Add(Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), ".nuget", "packages"));
+                    _packageFolders.Add(Path.Combine(userHome, ".nuget", "packages"));
                 }
             }
         }
