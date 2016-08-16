@@ -25,7 +25,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="Publish"
           DependsOnTargets="Build;
                             PrepareForPublish;
-                            CopyFilesToPublishDirectory" />
+                            CopyFilesToPublishDirectory;
+                            GeneratePublishDependencyFile;
+                            GeneratePublishRuntimeConfigurationFile" />
 
   <!--
     ============================================================
@@ -99,4 +101,49 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!--
+    ============================================================
+                                        GeneratePublishDependencyFile
+
+    Generates the $(project).deps.json file for a published app
+    ============================================================
+    -->
+  <Target Name="GeneratePublishDependencyFile"
+          Condition="'$(GenerateDependencyFile)' == 'true'">
+
+    <PropertyGroup>
+      <_PublishDepsFilePath Condition=" '$(_PublishDepsFilePath)' == '' ">$(PublishDir)$(_ProjectDepsFileName)</_PublishDepsFilePath>
+    </PropertyGroup>
+
+    <GenerateDepsFile LockFilePath="$(ProjectLockFile)"
+                      DepsFilePath="$(_PublishDepsFilePath)"
+                      TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                      AssemblyName="$(AssemblyName)"
+                      AssemblyVersion="$(Version)"
+                      RuntimeIdentifier="$(RuntimeIdentifier)" />
+    
+  </Target>
+
+  <!--
+    ============================================================
+                                        GeneratePublishRuntimeConfigurationFile
+
+    Generates the $(project).runtimeconfig.json file for a published app
+    ============================================================
+    -->
+
+  <Target Name="GeneratePublishRuntimeConfigurationFile"
+          Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'">
+
+    <PropertyGroup>
+      <_PublishRuntimeConfigFilePath Condition=" '$(_PublishRuntimeConfigFilePath)' == '' ">$(PublishDir)$(_ProjectRuntimeConfigFileName)</_PublishRuntimeConfigFilePath>
+    </PropertyGroup>
+
+    <GenerateRuntimeConfigurationFiles LockFilePath="$(ProjectLockFile)"
+                                       RuntimeConfigPath="$(_PublishRuntimeConfigFilePath)"
+                                       RuntimeIdentifier="$(RuntimeIdentifier)"
+                                       UserRuntimeConfig="$(UserRuntimeConfig)" />
+    
+  </Target>
+  
 </Project>
