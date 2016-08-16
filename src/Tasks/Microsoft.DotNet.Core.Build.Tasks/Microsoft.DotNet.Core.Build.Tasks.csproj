@@ -18,6 +18,7 @@
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="LockFileTargetExtensions.cs" />
     <Compile Include="RuntimeConfig.cs" />
     <Compile Include="RuntimeConfigFramework.cs" />
     <Compile Include="RuntimeOptions.cs" />

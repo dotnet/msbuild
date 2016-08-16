@@ -27,20 +27,28 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             NuGetFramework framework,
             string runtime)
         {
+            bool isPortable = string.IsNullOrEmpty(runtime);
+
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
             IEnumerable<LockFileTargetLibrary> runtimeExports = lockFileTarget.Libraries;
+            Dictionary<string, LockFileTargetLibrary> exportsLookup = runtimeExports.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
 
-            // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
-            var platformPackageName = "Microsoft.NETCore.App";
-            var platformExport = lockFileTarget
-                .Libraries
-                .FirstOrDefault(e => e.Name.Equals(platformPackageName, StringComparison.OrdinalIgnoreCase));
+            HashSet<string> allExclusionList = new HashSet<string>();
 
-            bool portable = platformExport != null;
-            if (portable)
+            if (isPortable)
             {
-                runtimeExports = FilterPlatformDependencies(runtimeExports, platformExport);
+                var platformExport = lockFileTarget.GetPlatformLibrary();
+
+                isPortable = platformExport != null;
+                if (isPortable)
+                {
+                    allExclusionList.UnionWith(LockFileTargetExtensions.GetPlatformExclusionList(platformExport, exportsLookup));
+                }
             }
+
+            // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
+
+            runtimeExports = runtimeExports.FilterExports(allExclusionList).ToArray();
 
             var dependencyLookup = runtimeExports
                .Select(identity => new Dependency(identity.Name, identity.Version.ToString()))
@@ -55,50 +63,11 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>());
 
             return new DependencyContext(
-                new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, portable),
+                new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, isPortable),
                 compilerOptions ?? CompilationOptions.Default,
                 Enumerable.Empty<CompilationLibrary>(), //GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(), - https://github.com/dotnet/sdk/issues/11
                 runtimeLibraries,
                 new RuntimeFallbacks[] { });
-        }
-
-        private static IEnumerable<LockFileTargetLibrary> FilterPlatformDependencies(
-            IEnumerable<LockFileTargetLibrary> runtimeExports,
-            LockFileTargetLibrary platformExport)
-        {
-            var exportsLookup = runtimeExports.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
-
-            HashSet<string> exclusionList = GetPlatformExclusionList(platformExport, exportsLookup);
-
-            return runtimeExports.Where(e => !exclusionList.Contains(e.Name));
-        }
-
-        private static HashSet<string> GetPlatformExclusionList(
-            LockFileTargetLibrary platformExport,
-            IDictionary<string, LockFileTargetLibrary> exportsLookup)
-        {
-            var exclusionList = new HashSet<string>();
-
-            exclusionList.Add(platformExport.Name);
-            CollectDependencies(exportsLookup, platformExport.Dependencies, exclusionList);
-
-            return exclusionList;
-        }
-
-        private static void CollectDependencies(
-            IDictionary<string, LockFileTargetLibrary> exportsLookup,
-            IEnumerable<PackageDependency> dependencies,
-            HashSet<string> exclusionList)
-        {
-            foreach (PackageDependency dependency in dependencies)
-            {
-                LockFileTargetLibrary export = exportsLookup[dependency.Id];
-                if (export.Version.Equals(dependency.VersionRange.MinVersion))
-                {
-                    exclusionList.Add(export.Name);
-                    CollectDependencies(exportsLookup, export.Dependencies, exclusionList);
-                }
-            }
         }
 
         private static string GenerateRuntimeSignature(IEnumerable<LockFileTargetLibrary> runtimeExports)
