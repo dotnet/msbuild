@@ -13,8 +13,6 @@ namespace Microsoft.DotNet.TestFramework.Commands
     {
         private const string PublishSubfolderName = "app.publish";
 
-        private readonly string _projectFile;
-
         public PublishCommand(MSBuildTest msbuild, string projectPath)
             : base(msbuild, projectPath)
         {

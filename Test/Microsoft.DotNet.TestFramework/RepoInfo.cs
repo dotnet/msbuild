@@ -61,22 +61,7 @@ namespace Microsoft.DotNet.TestFramework
 
         private static string FindConfigurationInBasePath()
         {
-            string baseDirectory = GetBaseDirectory();
-
-            var configuration = StripBinPathPrefixFromDirectory(baseDirectory);
-            configuration = StripTestPathSuffixFromDirectory(configuration);
-
-            return configuration;
-        }
-
-        private static string StripBinPathPrefixFromDirectory(string directory)
-        {
-            return directory.Remove(0, Bin.Length + 1);
-        }
-
-        private static string StripTestPathSuffixFromDirectory(string directory)
-        {
-            return directory.Remove(directory.IndexOf("Tests") - 1);
+            return new DirectoryInfo(GetBaseDirectory()).Parent.Name;
         }
 
         private static string GetBaseDirectory()
