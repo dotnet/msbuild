@@ -133,6 +133,40 @@ namespace Microsoft.Build.UnitTests
             Assert.True(false, "Didn't throw " + exception.ToString());
         }
 
+        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem)
+        {
+            Assert.Equal(expectedItems.Length, items.Count);
+
+            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
+
+            for (int i = 0; i < expectedItems.Length; i++)
+            {
+                Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+            }
+        }
+
+        /// <summary>
+        /// Asserts that the list of items has the specified evaluated includes.
+        /// </summary>
+        internal static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null)
+        {
+            if (expectedDirectMetadata == null)
+            {
+                expectedDirectMetadata = new Dictionary<string, string>();
+            }
+
+            // all items have the same metadata
+            var metadata = new Dictionary<string, string>[expectedItems.Length];
+
+            for (var i = 0; i < metadata.Length; i++)
+            {
+                metadata[i] = expectedDirectMetadata;
+            }
+
+            AssertItems(expectedItems, items, metadata);
+        }
+
         /// <summary>
         /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
@@ -280,6 +314,15 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("Expected:  " + expectedItemSpecs);
                 Console.WriteLine("Actual:    " + actualItemSpecs);
                 Assert.True(false, "Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
+            }
+        }
+        internal static void AssertItemHasMetadata(Dictionary<string, string> expected, ProjectItem item)
+        {
+            Assert.Equal(expected.Keys.Count, item.DirectMetadataCount);
+
+            foreach (var key in expected.Keys)
+            {
+                Assert.Equal(expected[key], item.GetMetadataValue(key));
             }
         }
 
@@ -886,6 +929,41 @@ namespace Microsoft.Build.UnitTests
                 File.SetLastWriteTime(files[i], lastWriteTime);
             }
             return files;
+        }
+
+        /// <summary>
+        /// Get items of item type "i" with using the item xml fragment passed in
+        /// </summary>
+        internal static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false)
+        {
+            string content = FormatProjectContentsWithItemGroupFragment(fragment);
+
+            IList<ProjectItem> items = GetItems(content, allItems);
+            return items;
+        }
+
+        /// <summary>
+        /// Get the items of type "i" in the project provided
+        /// </summary>
+        internal static IList<ProjectItem> GetItems(string content, bool allItems = false)
+        {
+            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            Project project = new Project(projectXml);
+            IList<ProjectItem> item = Helpers.MakeList(allItems ? project.Items : project.GetItems("i"));
+
+            return item;
+        }
+
+        internal static string FormatProjectContentsWithItemGroupFragment(string fragment)
+        {
+            return
+                $@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            {fragment}
+                        </ItemGroup>
+                    </Project>
+                ";
         }
     }
 

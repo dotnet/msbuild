@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 File.WriteAllText(file, String.Empty);
 
-                IList<ProjectItem> items = GetItemsFromFragment("<i Include='i0;" + directory + @"\**\*;i2'/>");
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment("<i Include='i0;" + directory + @"\**\*;i2'/>");
 
                 Assert.Equal(3, items.Count);
                 Assert.Equal("i0", items[0].EvaluatedInclude);
@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void Exclude()
         {
-            IList<ProjectItem> items = GetItemsFromFragment("<i Include='a;b' Exclude='b;c'/>");
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment("<i Include='a;b' Exclude='b;c'/>");
 
             Assert.Equal(1, items.Count);
             Assert.Equal("a", items[0].EvaluatedInclude);
@@ -407,11 +407,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             // Should contain a, b, c, x, z, a, c, u, w
             Assert.Equal(9, items.Count);
-            AssertEvaluatedIncludes(items, new string[] { "a", "b", "c", "x", "z", "a", "c", "u", "w" });
+            ObjectModelHelpers.AssertItems(new[] { "a", "b", "c", "x", "z", "a", "c", "u", "w" }, items);
         }
 
         /// <summary>
@@ -435,11 +435,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             // Should contain a, b, c, z, a, c, u
             Assert.Equal(7, items.Count);
-            AssertEvaluatedIncludes(items, new string[] { "a", "b", "c", "z", "a", "c", "u" });
+            ObjectModelHelpers.AssertItems(new[] { "a", "b", "c", "z", "a", "c", "u" }, items);
         }
 
         /// <summary>
@@ -466,7 +466,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 File.WriteAllText(file2, String.Empty);
                 File.WriteAllText(file3, String.Empty);
 
-                IList<ProjectItem> items = GetItemsFromFragment(String.Format(@"<i Include='{0}\a.*' Exclude='{0}\*.1'/>", directory));
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(String.Format(@"<i Include='{0}\a.*' Exclude='{0}\*.1'/>", directory));
 
                 Assert.Equal(1, items.Count);
                 Assert.Equal(String.Format(@"{0}\a.2", directory), items[0].EvaluatedInclude);
@@ -957,7 +957,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(@"i1.obj", items[0].GetMetadataValue("m"));
             Assert.Equal(@"i2.obj", items[1].GetMetadataValue("m"));
@@ -984,7 +984,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(@"m1", items[0].GetMetadataValue("m"));
             Assert.Equal(String.Empty, items[1].GetMetadataValue("m"));
@@ -1009,7 +1009,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(@".x", items[0].GetMetadataValue("m"));
             Assert.Equal(@".y", items[1].GetMetadataValue("m"));
@@ -1034,7 +1034,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(@"h0.baz.obj", items[0].GetMetadataValue("m"));
             Assert.Equal(@"h1.baz.obj", items[1].GetMetadataValue("m"));
@@ -1059,7 +1059,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(@"i0;h0;h1", items[1].GetMetadataValue("m"));
             Assert.Equal(@"i0;h0;h1", items[2].GetMetadataValue("m"));
@@ -1084,7 +1084,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(@"i0.x;h0;h1;.y", items[1].GetMetadataValue("m"));
             Assert.Equal(@"i0.x;h0;h1;", items[2].GetMetadataValue("m"));
@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal("h0;i0", items[1].GetMetadataValue("m1"));
         }
@@ -1132,7 +1132,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal("v1", items[1].GetMetadataValue("m1"));
             Assert.Equal(String.Empty, items[1].GetMetadataValue("m2"));
@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal("0", items[0].GetMetadataValue("m0"));
             Assert.Equal("1", items[0].GetMetadataValue("m1"));
@@ -1447,7 +1447,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void Remove()
         {
-            IList<ProjectItem> items = GetItemsFromFragment(
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 "<i Include='a;b' />" +
                 "<i Remove='b;c' />"
                 );
@@ -1459,7 +1459,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveGlob()
         {
-            IList<ProjectItem> items = GetItemsFromFragment(
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 @"<i Include='a.txt;b.cs;bin\foo.cs' />" +
                 @"<i Remove='bin\**' />"
                 );
@@ -1471,7 +1471,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItemReference()
         {
-            IList<ProjectItem> items = GetItemsFromFragment(
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 @"<i Include='a;b;c;d' />" +
                 @"<j Include='b;d' />" +
                 @"<i Remove='@(j)' />"
@@ -1495,9 +1495,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                   <m4>added</m4>
                               </i>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            AssertItemHasMetadata(
+            ObjectModelHelpers.AssertItemHasMetadata(
                 new Dictionary<string, string>
                 {
                     {"m1", "updated"},
@@ -1507,7 +1507,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 }
                 , items[0]);
 
-            AssertItemHasMetadata(
+            ObjectModelHelpers.AssertItemHasMetadata(
                 new Dictionary<string, string>
                 {
                     {"m1", "m1_contents"},
@@ -1537,7 +1537,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                   <m1 Condition='1 == 0'>from_false_metadata</m1>
                               </i>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
             var expectedInitial = new Dictionary<string, string>
             {
@@ -1554,9 +1554,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m1", "from_false_item"}
             };
 
-            AssertItemHasMetadata(expectedUpdateFromTrue, items[0]);
-            AssertItemHasMetadata(expectedUpdateFromFalseOnItem, items[1]);
-            AssertItemHasMetadata(expectedInitial, items[2]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromTrue, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromFalseOnItem, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, items[2]);
         }
 
         [Fact]
@@ -1572,14 +1572,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                   <m1>second</m1>
                               </i>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
             var expectedUpdate = new Dictionary<string, string>
             {
                 {"m1", "second"}
             };
 
-            AssertItemHasMetadata(expectedUpdate, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdate, items[0]);
         }
 
         [Fact]
@@ -1593,7 +1593,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                               <i Update='a'>
                               </i>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
             var expectedMetadata = new Dictionary<string, string>
             {
@@ -1604,8 +1604,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal(2, items.Count);
 
-            AssertItemHasMetadata(expectedMetadata, items[0]);
-            AssertItemHasMetadata(expectedMetadata, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata, items[1]);
         }
 
         [Fact]
@@ -1621,7 +1621,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                   <m3>added</m3>
                               </i>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
             Assert.Equal(2, items.Count);
 
@@ -1631,8 +1631,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m2", "m2_contents"},
             };
 
-            AssertItemHasMetadata(expectedMetadata, items[0]);
-            AssertItemHasMetadata(expectedMetadata, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata, items[1]);
         }
 
         [Fact]
@@ -1650,7 +1650,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var exception = Assert.Throws<InvalidProjectFileException>(() =>
             {
-                IList<ProjectItem> items = GetItemsFromFragment(content);
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
             });
 
             Assert.Equal("The required attribute \"Update\" is empty or missing from the element <i>.", exception.Message);
@@ -1673,7 +1673,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                   <m2>%(m1)@(i1 -> '%(m1)')</m2>
                               </i2>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content, true);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
 
             Assert.Equal(3, items.Count);
 
@@ -1694,9 +1694,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m2", "bx"},
             };
 
-            AssertItemHasMetadata(expectedMetadataX, items[0]);
-            AssertItemHasMetadata(expectedMetadataA, items[1]);
-            AssertItemHasMetadata(expectedMetadataB, items[2]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataX, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataB, items[2]);
         }
 
         [Fact]
@@ -1733,10 +1733,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     {"m3", "added"},
                 };
 
-                AssertItemHasMetadata(expectedInitialMetadata, items[0]);
-                AssertItemHasMetadata(expectedInitialMetadata, items[1]);
-                AssertItemHasMetadata(expectedUpdatedMetadata, items[2]);
-                AssertItemHasMetadata(expectedUpdatedMetadata, items[3]);
+                ObjectModelHelpers.AssertItemHasMetadata(expectedInitialMetadata, items[0]);
+                ObjectModelHelpers.AssertItemHasMetadata(expectedInitialMetadata, items[1]);
+                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatedMetadata, items[2]);
+                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatedMetadata, items[3]);
             }
             finally
             {
@@ -1763,7 +1763,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                 <m1>m1_i2_updated</m1>
                             </i2>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content, true);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
 
             Assert.Equal(4, items.Count);
 
@@ -1785,10 +1785,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m2", "m2_i2_contents"}
             };
 
-            AssertItemHasMetadata(expected_i1, items[0]);
-            AssertItemHasMetadata(expected_i1, items[1]);
-            AssertItemHasMetadata(expected_i2_a, items[2]);
-            AssertItemHasMetadata(expected_i2_y, items[3]);
+            ObjectModelHelpers.AssertItemHasMetadata(expected_i1, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expected_i1, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expected_i2_a, items[2]);
+            ObjectModelHelpers.AssertItemHasMetadata(expected_i2_y, items[3]);
         }
 
         [Fact]
@@ -1812,7 +1812,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>"
 ;
 
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(3, items.Count);
 
@@ -1828,9 +1828,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m2", "m2_updated"}
             };
 
-            AssertItemHasMetadata(expectedUpdated, items[0]);
-            AssertItemHasMetadata(expectedUpdated, items[1]);
-            AssertItemHasMetadata(expectedInitial, items[2]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, items[2]);
         }
 
         [Fact]
@@ -1846,7 +1846,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                 <m2>m2_updated</m2>
                             </i>";
 
-            IList<ProjectItem> items = GetItemsFromFragment(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
             var expectedUpdated = new Dictionary<string, string>
             {
@@ -1854,12 +1854,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m2", "m2_updated"},
             };
 
-            AssertItemHasMetadata(expectedUpdated, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
         }
 
         private static List<ProjectItem> GetItemsFromFragmentWithGlobs(out string rootDir, string itemGroupFragment, params string[] globFiles)
         {
-            var projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory($"{Guid.NewGuid()}.proj", FormatProjectContentsWithItemGroupFragment(itemGroupFragment));
+            var projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory($"{Guid.NewGuid()}.proj", ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment));
             rootDir = Path.GetDirectoryName(projectFile);
 
             Helpers.CreateFilesInDirectory(ref rootDir, globFiles);
@@ -1868,50 +1868,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Get items of item type "i" with using the item xml fragment passed in
-        /// </summary>
-        private static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false)
-        {
-            string content = FormatProjectContentsWithItemGroupFragment(fragment);
-
-            IList<ProjectItem> items = GetItems(content, allItems);
-            return items;
-        }
-
-        private static string FormatProjectContentsWithItemGroupFragment(string fragment)
-        {
-            return
-                $@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <ItemGroup>
-                            {fragment}
-                        </ItemGroup>
-                    </Project>
-                ";
-        }
-
-        /// <summary>
         /// Get the item of type "i" using the item Xml fragment provided.
         /// If there is more than one, fail. 
         /// </summary>
         private static ProjectItem GetOneItemFromFragment(string fragment)
         {
-            IList<ProjectItem> items = GetItemsFromFragment(fragment);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(fragment);
 
             Assert.Equal(1, items.Count);
             return items[0];
-        }
-
-        /// <summary>
-        /// Get the items of type "i" in the project provided
-        /// </summary>
-        private static IList<ProjectItem> GetItems(string content, bool allItems = false)
-        {
-            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            Project project = new Project(projectXml);
-            IList<ProjectItem> item = Helpers.MakeList(allItems ? project.Items : project.GetItems("i"));
-
-            return item;
         }
 
         /// <summary>
@@ -1920,31 +1885,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         private static ProjectItem GetOneItem(string content)
         {
-            IList<ProjectItem> items = GetItems(content);
+            IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             Assert.Equal(1, items.Count);
             return items[0];
-        }
-
-        /// <summary>
-        /// Asserts that the list of items has the specified includes.
-        /// </summary>
-        private static void AssertEvaluatedIncludes(IList<ProjectItem> items, string[] includes)
-        {
-            for (int i = 0; i < includes.Length; i++)
-            {
-                Assert.Equal(includes[i], items[i].EvaluatedInclude);
-            }
-        }
-
-        private static void AssertItemHasMetadata(Dictionary<string, string> expected, ProjectItem item)
-        {
-            Assert.Equal(expected.Keys.Count, item.DirectMetadataCount);
-
-            foreach (var key in expected.Keys)
-            {
-                Assert.Equal(expected[key], item.GetMetadataValue(key));
-            }
         }
     }
 }
