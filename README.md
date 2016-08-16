@@ -1,1 +1,1 @@
-# core-sdk
+# dotnet sdk
