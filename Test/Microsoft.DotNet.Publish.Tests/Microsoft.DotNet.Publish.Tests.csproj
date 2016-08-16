@@ -36,8 +36,6 @@
 
   <Target Name="AfterBuild">
     <ItemGroup>
-      <CliCopyLocalAssembly Include="Microsoft.DotNet.Cli.Utils" />
-
       <CopyLocalAssembly Include="Microsoft.DotNet.Cli.Utils">
         <Version>1.0.0-preview2-003121</Version>
         <TFM>netstandard1.6</TFM>

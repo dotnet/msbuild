@@ -33,8 +33,8 @@ namespace Microsoft.DotNet.TestFramework.Commands
 
             if(buildProjectFiles.Length != 1)
             {
-                var erroMsg = $"Found {buildProjectFiles.Length} csproj files under {ProjectRootPath} instead of just 1.";
-                throw new ArgumentException(erroMsg);
+                var errorMsg = $"Found {buildProjectFiles.Length} csproj files under {ProjectRootPath} instead of just 1.";
+                throw new ArgumentException(errorMsg);
             }
 
             return buildProjectFiles[0];

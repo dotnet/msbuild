@@ -22,14 +22,15 @@ namespace Microsoft.DotNet.Publish.Tests
         [Fact]
         public void It_publishes_the_project_binary_to_the_publish_folder()
         {
-            var packagesDirectory = Path.Combine(RepoInfo.RepoRoot, "bin", "Debug", "Packages");
-            var helloWorlAsset = _testAssetsManager
+            var packagesDirectory =
+                Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");
+            var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
                 .WithLockFile()
                 .Restore($"/p:RestoreSources={packagesDirectory}");
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorlAsset.TestRoot);
+            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();

@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.TestFramework
     {
         private static string s_repoRoot;
 
+        private static string s_configuration;
+
         public static string RepoRoot
         {
             get
@@ -19,11 +21,7 @@ namespace Microsoft.DotNet.TestFramework
                     return s_repoRoot;
                 }
 
-#if NET451
-            string directory = AppDomain.CurrentDomain.BaseDirectory;
-#else
-            string directory = AppContext.BaseDirectory;
-#endif
+                string directory = GetBaseDirectory();
 
                 while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
                 {
@@ -38,6 +36,58 @@ namespace Microsoft.DotNet.TestFramework
                 s_repoRoot = directory;
                 return s_repoRoot;
             }
+        }
+
+        public static string Configuration
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(s_configuration))
+                {
+                    s_configuration = FindConfigurationInBasePath();
+                }
+
+                return s_configuration;
+            }
+        }
+
+        public static string Bin
+        {
+            get
+            {
+                return Path.Combine(RepoRoot, "bin");
+            }
+        }
+
+        private static string FindConfigurationInBasePath()
+        {
+            string baseDirectory = GetBaseDirectory();
+
+            var configuration = StripBinPathPrefixFromDirectory(baseDirectory);
+            configuration = StripTestPathSuffixFromDirectory(configuration);
+
+            return configuration;
+        }
+
+        private static string StripBinPathPrefixFromDirectory(string directory)
+        {
+            return directory.Remove(0, Bin.Length + 1);
+        }
+
+        private static string StripTestPathSuffixFromDirectory(string directory)
+        {
+            return directory.Remove(directory.IndexOf("Tests") - 1);
+        }
+
+        private static string GetBaseDirectory()
+        {
+#if NET451
+            string directory = AppDomain.CurrentDomain.BaseDirectory;
+#else
+            string directory = AppContext.BaseDirectory;
+#endif
+
+            return directory;
         }
     }
 }

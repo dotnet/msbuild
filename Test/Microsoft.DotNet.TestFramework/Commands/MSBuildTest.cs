@@ -37,19 +37,15 @@ namespace Microsoft.DotNet.TestFramework.Commands
 
         private static string GetStage0Path()
         {
-            DirectoryInfo currentDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            while (currentDirectory != null)
-            {
-                foreach (DirectoryInfo cliDirectory in currentDirectory.GetDirectories(".dotnet_cli"))
-                {
-                    return cliDirectory.FullName;
-                }
+            var stage0Path = Path.Combine(RepoInfo.RepoRoot, ".dotnet_cli");
 
-                currentDirectory = currentDirectory.Parent;
+            if(!Directory.Exists(stage0Path))
+            {
+                throw new InvalidOperationException(
+                    $"Could not find a directory '.dotnet_cli' in any of the directories above {Directory.GetCurrentDirectory()}");
             }
 
-            throw new InvalidOperationException(
-                $"Could not find a directory '.dotnet_cli' in any of the directories above {Directory.GetCurrentDirectory()}");
+            return stage0Path;
          }
     }
 }
