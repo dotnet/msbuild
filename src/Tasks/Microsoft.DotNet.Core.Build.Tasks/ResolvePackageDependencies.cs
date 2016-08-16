@@ -147,7 +147,13 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     _packageFolders.Add(packagesFolder);
                 }
                 else
-                {                    
+                {
+                    var userHome = Environment.GetEnvironmentVariable("USERPROFILE") ?? Environment.GetEnvironmentVariable("HOME");
+                    if (userHome == null)
+                    {
+                        throw new Exception("Unable to determine user home directory.");
+                    }
+                    
                     _packageFolders.Add(Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), ".nuget", "packages"));
                 }
             }
