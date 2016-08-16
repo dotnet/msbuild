@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Settings.targets" />
+  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Settings.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <ProjectGuid>{98883ACD-BE3A-4533-953D-1BE25981BA02}</ProjectGuid>
@@ -9,5 +9,5 @@
   <ItemGroup>
     <Content Include="project.json" />
   </ItemGroup>
-  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.targets" />
+  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.props" />
 </Project>

@@ -41,7 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignTool", "src\Dependencie
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{0C1312C0-0A29-4EB2-8294-6D1C54D78F61}"
 	ProjectSection(SolutionItems) = preProject
-		build\Targets\ProducesNoOutput.Imports.targets = build\Targets\ProducesNoOutput.Imports.targets
+		build\Targets\ProducesNoOutput.Imports.props = build\Targets\ProducesNoOutput.Imports.props
+		build\Targets\ProducesNoOutput.Settings.props = build\Targets\ProducesNoOutput.Settings.props
 	EndProjectSection
 EndProject
 Global
