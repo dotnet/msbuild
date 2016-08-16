@@ -43,6 +43,7 @@
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <Import Project="..\..\..\build\Targets\Signing.Imports.targets"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
 </Project>

@@ -14,13 +14,14 @@
 
   <ItemGroup>
     <SolutionFile Include="$(RepositoryRootDirectory)core-sdk.sln" />
+    <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.DotNet.Core.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.DotNet.Core.Nuget.proj" />
   </ItemGroup>
 
   <Target Name="RestorePackages">
 
     <Message Text="Restoring packages for %(SolutionFile.Filename)" Importance="high" />
-    
+
     <Exec Command="$(DotNetTool) restore --verbosity Minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
@@ -29,7 +30,7 @@
   <Target Name="BuildSolution">
 
     <Message Text="Building %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
-    
+
     <MSBuild BuildInParallel="true"
              Projects="@(SolutionFile)"
              Targets="Build"
@@ -47,8 +48,17 @@
              Properties="$(CommonMSBuildGlobalProperties)"
              />
   </Target>
-  
-  <Target Name="BuildNuGetPackages">
+
+  <Target Name="SignPackages">
+
+    <MSBuild BuildInParallel="true"
+             Projects="@(SigningProjectFile)"
+             Targets="Build"
+             Properties="$(CommonMSBuildGlobalProperties)"
+             />
+  </Target>
+
+  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
@@ -57,7 +67,7 @@
              />
   </Target>
 
-  <Target Name="RebuildNuGetPackages">
+  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
@@ -76,14 +86,14 @@
     <ItemGroup>
       <NetCoreAppProductAssets Include="$(PackagesLayoutToolsNetCoreAppDir)\*" />
     </ItemGroup>
-    
+
     <Message Text="Running tests for %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
 
     <!-- Copy all the 'netcore1.0' product assemblies to the test directory, so the tests can load them. -->
     <Copy SourceFiles="@(NetCoreAppProductAssets)"
           DestinationFolder="$(TestsDirectory)"
           />
-    
+
     <Exec Command="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"
@@ -96,7 +106,7 @@
 
   </Target>
 
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;BuildNuGetPackages;Test" />
-  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;RebuildNuGetPackages;Test" />
+  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;Test" />
+  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;Test" />
 
 </Project>

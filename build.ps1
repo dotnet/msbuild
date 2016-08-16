@@ -6,6 +6,7 @@
 param(
     [string]$Configuration="Debug",
     [string]$Platform="Any CPU",
+    [switch]$RealSign,
     [switch]$Help)
 
 if($Help)
@@ -15,6 +16,7 @@ if($Help)
     Write-Host "Options:"
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
     Write-Host "  -Platform <PLATFORM>               Build the specified Platform (Any CPU)"
+    Write-Host "  -RealSign                          Sign the output DLLs"
     Write-Host "  -Help                              Display this help message"
     exit 0
 }
@@ -47,5 +49,19 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build3 $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform
+$logPath = "$RepoRoot\bin\log"
+if (!(Test-Path -Path $logPath)) {
+    New-Item -Path $logPath -Force -ItemType 'Directory' | Out-Null
+}
+
+$msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
+$msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
+$msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
+
+$signType = 'public'
+if ($RealSign) {
+    $signType = 'real'
+}
+
+dotnet build3 $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }

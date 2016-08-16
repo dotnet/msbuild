@@ -1,19 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Settings.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="..\..\Tasks\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.props" />
   <PropertyGroup>
     <ProjectGuid>{94F9B889-635A-48A7-A0CB-BAE5D6C9A91A}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
     <OutDir>$(OutDir)Tests\</OutDir>
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
-    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-    <OutputType>Library</OutputType>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
-    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
@@ -22,7 +15,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.targets" />
+  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.props" />
   <Import Project="..\..\Tasks\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
 
   <Target Name="AfterBuild">
@@ -52,7 +45,7 @@
       <CopyLocalAssembly Include="xunit.runner.utility.dotnet">
         <RelativePath>xunit.runner.utility\$(XUnitVersion)\lib\dotnet\xunit.runner.utility.dotnet.dll</RelativePath>
       </CopyLocalAssembly>
-      
+
       <TestCopyLocalAssembly Include="$(NuGet_Packages)\%(CopyLocalAssembly.RelativePath)" />
 
       <FluentAssertionsPackage Include="fluentassertions" />

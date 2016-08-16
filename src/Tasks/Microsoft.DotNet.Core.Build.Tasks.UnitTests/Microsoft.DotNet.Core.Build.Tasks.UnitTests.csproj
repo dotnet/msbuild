@@ -15,6 +15,7 @@
     <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <NonShipping>true</NonShipping>
     <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
@@ -43,6 +44,7 @@
       <Name>Microsoft.DotNet.Core.Build.Tasks</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\..\..\build\Targets\Signing.Imports.targets"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
 </Project>
