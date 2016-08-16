@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // <summary>Implementation of an in-proc node provider.</summary>
@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Value used to ensure multiple in-proc nodes which save the operating environment are not created.
         /// </summary>
-        private Semaphore _inProcNodeOwningOperatingEnvironment;
+        private static Semaphore InProcNodeOwningOperatingEnvironment;
 
         /// <summary>
         /// The component host.
@@ -205,7 +205,6 @@ namespace Microsoft.Build.BackEnd
             {
                 // We can only create additional in-proc nodes if we have decided not to save the operating environment.  This is the global
                 // DTAR case in Visual Studio, but other clients might enable this as well under certain special circumstances.
-                ErrorUtilities.VerifyThrow(_inProcNodeOwningOperatingEnvironment == null, "Unexpected non-null in-proc node semaphore.");
 
                 if (Environment.GetEnvironmentVariable("MSBUILDINPROCENVCHECK") == "1")
                 {
@@ -214,8 +213,12 @@ namespace Microsoft.Build.BackEnd
 
                 if (_exclusiveOperatingEnvironment)
                 {
-                    _inProcNodeOwningOperatingEnvironment = new Semaphore(1, 1, "MSBuildIPN_" + Process.GetCurrentProcess().Id);
-                    if (!_inProcNodeOwningOperatingEnvironment.WaitOne(0))
+                    if (InProcNodeOwningOperatingEnvironment == null)
+                    {
+                        InProcNodeOwningOperatingEnvironment = new Semaphore(1, 1);
+                    }
+
+                    if (!InProcNodeOwningOperatingEnvironment.WaitOne(0))
                     {
                         // Can't take the operating environment.
                         return false;
@@ -290,11 +293,11 @@ namespace Microsoft.Build.BackEnd
 
                     // Release the operating environment semaphore if we were holding it.
                     if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&
-                        (_inProcNodeOwningOperatingEnvironment != null))
+                        (InProcNodeOwningOperatingEnvironment != null))
                     {
-                        _inProcNodeOwningOperatingEnvironment.Release();
-                        _inProcNodeOwningOperatingEnvironment.Dispose();
-                        _inProcNodeOwningOperatingEnvironment = null;
+                        InProcNodeOwningOperatingEnvironment.Release();
+                        InProcNodeOwningOperatingEnvironment.Dispose();
+                        InProcNodeOwningOperatingEnvironment = null;
                     }
 
                     if (!_componentHost.BuildParameters.EnableNodeReuse)
@@ -431,13 +434,6 @@ namespace Microsoft.Build.BackEnd
             {
                 if (disposing)
                 {
-                    if (_inProcNodeOwningOperatingEnvironment != null)
-                    {
-                        _inProcNodeOwningOperatingEnvironment.Release();
-                        _inProcNodeOwningOperatingEnvironment.Dispose();
-                        _inProcNodeOwningOperatingEnvironment = null;
-                    }
-
                     if (_endpointConnectedEvent != null)
                     {
                         _endpointConnectedEvent.Dispose();
