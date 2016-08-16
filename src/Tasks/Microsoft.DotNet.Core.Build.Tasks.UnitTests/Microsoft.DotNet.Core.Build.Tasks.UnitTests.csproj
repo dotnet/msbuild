@@ -20,6 +20,8 @@
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Mocks\MockTaskItem.cs" />
+    <Compile Include="PreprocessPackageDependenciesDesignTimeTests.cs" />
     <Compile Include="GivenADependencyContextBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -47,4 +49,23 @@
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
+  <Target Name="AfterBuild">
+    <PropertyGroup>
+      <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
+    </PropertyGroup>
+    <ItemGroup>
+      <CopyLocalAssembly Include="Microsoft.Build.Framework">
+        <Version>$(MsBuildPackagesVersion)</Version>
+        <TFM>netstandard1.3</TFM>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly Include="Microsoft.Build.Utilities.Core">
+        <Version>$(MsBuildPackagesVersion)</Version>
+        <TFM>netstandard1.3</TFM>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly>
+        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.Identity)\%(CopyLocalAssembly.Version)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
+      </CopyLocalAssembly>
+    </ItemGroup>
+    <Copy SourceFiles="%(CopyLocalAssembly.FullFilePath)" DestinationFolder="$(OutDir)" />
+  </Target>
 </Project>
