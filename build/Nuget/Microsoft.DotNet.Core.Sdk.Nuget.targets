@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Target Name="LayoutSdkPackage">
+    <PropertyGroup>
+      <CoreSetupVersion>1.0.1-beta-000914</CoreSetupVersion>
+      <NuGetVersion>3.5.0-rc1-1697</NuGetVersion>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <NuGetCopyLocalAssembly Include="NuGet.ProjectModel" />
+      <NuGetCopyLocalAssembly Include="NuGet.DependencyResolver.Core" />
+      <NuGetCopyLocalAssembly Include="NuGet.LibraryModel" />
+      <NuGetCopyLocalAssembly Include="NuGet.Frameworks" />
+      <NuGetCopyLocalAssembly Include="NuGet.Protocol.Core.v3" />
+      <NuGetCopyLocalAssembly Include="NuGet.Repositories" />
+      <NuGetCopyLocalAssembly Include="NuGet.RuntimeModel" />
+      <NuGetCopyLocalAssembly Include="NuGet.Common" />
+      <NuGetCopyLocalAssembly Include="NuGet.Packaging" />
+      <NuGetCopyLocalAssembly Include="NuGet.Protocol.Core.Types" />
+      <NuGetCopyLocalAssembly Include="NuGet.Packaging.Core.Types" />
+      <CopyLocalAssembly Include="@(NuGetCopyLocalAssembly)">
+        <Version>$(NuGetVersion)</Version>
+        <TFM>netstandard1.3</TFM>
+        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly Include="NuGet.Versioning">
+        <Version>$(NuGetVersion)</Version>
+        <TFM>netstandard1.0</TFM>
+        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+      </CopyLocalAssembly>
+
+      <CopyLocalAssembly Include="Microsoft.Extensions.DependencyModel">
+        <Version>$(CoreSetupVersion)</Version>
+        <TFM>netstandard1.3</TFM>
+        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly Include="Microsoft.DotNet.PlatformAbstractions">
+        <Version>$(CoreSetupVersion)</Version>
+        <TFM>netstandard1.3</TFM>
+        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+      </CopyLocalAssembly>
+
+      <CopyLocalAssembly Include="Newtonsoft.Json">
+        <Version>9.0.1</Version>
+        <TFM>netstandard1.0</TFM>
+        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+      </CopyLocalAssembly>
+
+      <CopyLocalAssembly Include="System.Runtime.Serialization.Primitives">
+        <Version>4.1.1</Version>
+        <TFM>netstandard1.3</TFM>
+        <DestinationTFM>netcoreapp1.0</DestinationTFM>
+      </CopyLocalAssembly>
+
+      <CopyLocalAssembly Include="System.Security.Cryptography.Algorithms">
+        <Version>4.2.0</Version>
+        <TFM>net46</TFM>
+        <DestinationTFM>net46</DestinationTFM>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly Include="System.Security.Cryptography.Primitives">
+        <Version>4.0.0</Version>
+        <TFM>net46</TFM>
+        <DestinationTFM>net46</DestinationTFM>
+      </CopyLocalAssembly>
+
+      <CopyLocalAssembly>
+        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.Identity)\%(CopyLocalAssembly.Version)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
+      </CopyLocalAssembly>
+
+      <!-- Add our tasks assembly -->
+      <CopyLocalAssembly Include="Microsoft.DotNet.Core.Build.Tasks">
+        <FullFilePath>$(OutDir)\Microsoft.DotNet.Core.Build.Tasks.dll</FullFilePath>
+        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+      </CopyLocalAssembly>
+
+      <Net46CopyLocalAssembly Include="@(CopyLocalAssembly)"
+                              Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(DestinationTFM)', '(^|;)net46($|;)'))" />
+      <NetCoreAppCopyLocalAssembly Include="@(CopyLocalAssembly)"
+                                   Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(DestinationTFM)', '(^|;)netcoreapp1.0($|;)'))" />
+
+      <CopyLocalBuildFile Include="$(OutDir)build\**\*.*" />
+      <CopyLocalBuildFile>
+        <RelativePath>build\%(RecursiveDir)</RelativePath>
+      </CopyLocalBuildFile>
+    </ItemGroup>
+
+    <Copy SourceFiles="%(Net46CopyLocalAssembly.FullFilePath)"
+          DestinationFolder="$(PackagesLayoutToolsNet46Dir)" />
+
+    <Copy SourceFiles="%(NetCoreAppCopyLocalAssembly.FullFilePath)"
+          DestinationFolder="$(PackagesLayoutToolsNetCoreAppDir)" />
+
+    <Copy SourceFiles="@(CopyLocalBuildFile)"
+          DestinationFiles="$(PackagesLayoutDir)%(CopyLocalBuildFile.RelativePath)\%(CopyLocalBuildFile.Filename)%(CopyLocalBuildFile.Extension)" />
+  </Target>
+
+</Project>
