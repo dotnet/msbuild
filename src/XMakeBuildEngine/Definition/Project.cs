@@ -1034,6 +1034,95 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Finds all the globs specified in item includes.
+        /// </summary>
+        /// <example>
+        /// 
+        /// <code>
+        ///<P>*.txt</P>
+        /// 
+        ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
+        ///<Foo Include="*.a" Exclude="3.a"/>
+        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b";**\bar\*.b"/>
+        ///<Foo Include="$(P)"/> 
+        ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
+        ///<Foo Include="*.cs"/ Exclude="@(Bar)"/> (out of project cone glob)
+        ///</code>
+        /// 
+        ///Example result: 
+        ///[
+        ///GlobResult(glob: "C:\**\*.foo", exclude: []),
+        ///GlobResult(glob: "*.a", exclude=["3.a"]),
+        ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
+        ///GlobResult(glob: "*.txt", exclude=[]),
+        ///GlobResult(glob: "*.a", exclude=[]),
+        ///GlobResult(glob: "*.cs", exclude=[])
+        ///]
+        /// </example>
+        /// <remarks>
+        /// Sources of innacuracies: 
+        /// - <code>GlobResult.Excludes</code> does not contain information from item references (e.g. Exclude="@(Item)")
+        /// (it sees items as they are at the end of evaluation)
+        /// </remarks>
+        /// <returns>
+        /// List of <see cref="GlobResult"/>. Sorted in project evaluation order.
+        /// </returns>
+        public List<GlobResult> GetAllGlobs()
+        {
+            return GetAllGlobs(_data.EvaluatedItemElements);
+        }
+
+        /// <summary>
+        /// Overload of <see cref="Project.GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="itemType">Confine search to item elements of this type</param>
+        public List<GlobResult> GetAllGlobs(string itemType)
+        {
+            return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
+        }
+
+        /// <summary>
+        /// Overload of <see cref="Project.GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="item">Confine search to item elements appearing above this item, inclusively.</param>
+        public List<GlobResult> GetAllGlobs(ProjectItem item)
+        {
+            return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
+        }
+
+        private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
+        {
+            return projectItemElements.SelectMany(GetAllGlobs).ToList();
+        }
+
+        private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
+        {
+            Func<string, IElementLocation, HashSet<string>> expandItemSpecIntoFragments = (s, l) =>
+                {
+                    var expandedItemSpec = _data.Expander.ExpandIntoStringListLeaveEscaped(s, ExpanderOptions.ExpandProperties, l);
+
+                    // don't care about duplicates
+                    var set = new HashSet<string>(expandedItemSpec);
+
+                    // take out item references, we can't reason about them
+                    set.RemoveWhere(IsItemReferenceFragment);
+
+                    return set;
+                };
+
+            var includeFragments = expandItemSpecIntoFragments(itemElement.Include, itemElement.IncludeLocation);
+            var excludeFragments = expandItemSpecIntoFragments(itemElement.Exclude, itemElement.ExcludeLocation);
+
+            foreach (var itemFragment in includeFragments)
+            {
+                if (IsGlobFragment(itemFragment))
+                {
+                    yield return new GlobResult(itemElement, itemFragment, excludeFragments);
+                }
+            }
+        }
+
+        /// <summary>
         /// Finds all the item elements in the logical project with itemspecs that match the given string:
         /// - elements that would include (or exclude) the string
         /// - elements that would update the string (not yet implemented)
@@ -1089,7 +1178,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">The item type to constrain the search in</param>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType)
         {
-            return GetItemProvenance(itemToMatch, _data.EvaluatedItemElements.Where(i => i.ItemType.Equals(itemType)));
+            return GetItemProvenance(itemToMatch, GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
         /// <summary>
@@ -1102,15 +1191,26 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(ProjectItem item)
         {
-            var itemElementsAbove = _data.EvaluatedItemElements
-                                            .Where(i => i.ItemType.Equals(item.ItemType))
-                                            .TakeWhile(i => i != item.Xml)
-                                            .ToList();
-            itemElementsAbove.Add(item.Xml);
+            var itemElementsAbove = GetItemElementsAboveItem(_data.EvaluatedItemElements, item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
         }
 
+        private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
+        {
+            return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
+        }
+
+        private static List<ProjectItemElement> GetItemElementsAboveItem(IEnumerable<ProjectItemElement> itemElements, ProjectItem item)
+        {
+            var itemElementsAbove = itemElements
+                .Where(i => i.ItemType.Equals(item.ItemType))
+                .TakeWhile(i => i != item.Xml)
+                .ToList();
+
+            itemElementsAbove.Add(item.Xml);
+            return itemElementsAbove;
+        }
 
         private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
         {
@@ -1122,8 +1222,7 @@ namespace Microsoft.Build.Evaluation
 
         private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
         {
-            var expander = new Expander<ProjectProperty, ProjectItem>(_data.Properties, _data.Items);
-            Func<IElementLocation, Func<string, ExpanderOptions, string>> expandForXmlLocation = (l) => (s, o) => expander.ExpandIntoStringLeaveEscaped(s, o, l);
+            Func<IElementLocation, Func<string, ExpanderOptions, string>> expandForXmlLocation = (l) => (s, o) => _data.Expander.ExpandIntoStringLeaveEscaped(s, o, l);
 
             var includeResult = ComputeProvenanceResult(itemToMatch, itemElement.Include, expandForXmlLocation(itemElement.IncludeLocation));
 
@@ -1239,7 +1338,10 @@ namespace Microsoft.Build.Evaluation
 
         private static bool IsGlobFragment(string itemFragment)
         {
-            return FileMatcher.HasWildcards(itemFragment);
+            var containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(itemFragment);
+            var containsRealWildcards = FileMatcher.HasWildcards(itemFragment);
+
+            return !containsEscapedWildcards && containsRealWildcards;
         }
 
         private static bool IsItemReferenceFragment(string itemFragment)
@@ -3368,6 +3470,22 @@ namespace Microsoft.Build.Evaluation
                 string value = (property == null) ? String.Empty : property.EvaluatedValue;
                 return value;
             }
+        }
+    }
+    /// <summary>
+    /// Data class representing a result from <see cref="Project.GetAllGlobs()"/> and its overloads.
+    /// </summary>
+    public class GlobResult
+    {
+        public string Glob { get; private set; }
+        public ISet<string> Excludes{ get; private set; }
+        public ProjectItemElement ItemElement { get; private set; }
+
+        public GlobResult(ProjectItemElement itemElement, string glob, ISet<string> excludes)
+        {
+            ItemElement = itemElement;
+            Glob = glob;
+            Excludes = excludes;
         }
     }
 

@@ -1674,6 +1674,10 @@
     <value>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</value>
     <comment></comment>
   </data>
+  <data name="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
+    <value>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</value>
+    <comment></comment>
+  </data>
   <!--
         The ResolveComReference message bucket is: MSB3281 - MSB3320
 
