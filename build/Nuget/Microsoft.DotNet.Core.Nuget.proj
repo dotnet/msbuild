@@ -10,6 +10,7 @@
     <NuSpec Include="Microsoft.DotNet.Core.Sdk.nuspec">
       <NuPkgOutput>$(NuGetOutDir)%(FileName).$(Version).nupkg</NuPkgOutput>
       <NuGetArguments>--version "$(Version)"</NuGetArguments>
+      <LayoutTargetName>LayoutSdkPackage</LayoutTargetName>
     </NuSpec>
 
     <!-- Make note, without actually knowing what's included in the NuSpec, 
@@ -17,10 +18,13 @@
          as inputs so that we rerun packaging if they change. 
          Long term we'll want to use a packaging project, such as NuProj where 
          the NuSpec is auto-generated based on the inputs. -->
-    <PackageAssets Include="$(OutDir)\*.*" Exclude="*.log" />
+    <PackageAssets Include="$(OutDir)**\*.*" Exclude="*.log" />
   </ItemGroup>
 
-  <Target Name="Build" Inputs="@(NuSpec);@(PackageAssets)" Outputs="@(NuSpec->'%(NuPkgOutput)')" DependsOnTargets="LogOutput">
+  <Target Name="Build"
+          DependsOnTargets="LogOutput;@(NuSpec->'%(LayoutTargetName)')"
+          Inputs="@(NuSpec);@(PackageAssets)"
+          Outputs="@(NuSpec->'%(NuPkgOutput)')">
 
     <ReadLinesFromFile File="$(RepositoryRootDirectory)DotnetCLIVersion.txt">
       <Output TaskParameter="Lines" ItemName="CLIVersion" />
@@ -45,5 +49,7 @@
   <Target Name="LogOutput">
     <Message Importance="High" Text="%(NuSpec.Identity) -> %(NuSpec.NuPkgOutput)'" />
   </Target>
+
+  <Import Project="Microsoft.DotNet.Core.Sdk.Nuget.targets" />
 
 </Project>

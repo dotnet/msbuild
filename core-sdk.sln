@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{13EE1E3C
 	ProjectSection(SolutionItems) = preProject
 		build\Nuget\Microsoft.DotNet.Core.Nuget.proj = build\Nuget\Microsoft.DotNet.Core.Nuget.proj
 		build\Nuget\Microsoft.DotNet.Core.Sdk.nuspec = build\Nuget\Microsoft.DotNet.Core.Sdk.nuspec
+		build\Nuget\Microsoft.DotNet.Core.Sdk.Nuget.targets = build\Nuget\Microsoft.DotNet.Core.Sdk.Nuget.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Core.Build.Tasks.UnitTests", "src\Tasks\Microsoft.DotNet.Core.Build.Tasks.UnitTests\Microsoft.DotNet.Core.Build.Tasks.UnitTests.csproj", "{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}"
