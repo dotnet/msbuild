@@ -58,7 +58,7 @@
              />
   </Target>
 
-  <Target Name="BuildNuGetPackages">
+  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
@@ -67,7 +67,7 @@
              />
   </Target>
 
-  <Target Name="RebuildNuGetPackages">
+  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"

@@ -7,21 +7,5 @@
                 "Microsoft.DotNet.Core.Build.Tasks.dll"
             ]
         }
-    ],
-    exclude: [
-        "Microsoft.DotNet.PlatformAbstractions.dll",
-        "Microsoft.Extensions.DependencyModel.dll",
-        "Newtonsoft.Json.dll",
-        "NuGet.Common.dll",
-        "Nuget.DependencyResolver.Core.dll",
-        "NuGet.Frameworks.dll",
-        "NuGet.LibraryModel.dll",
-        "NuGet.Packaging.dll",
-        "NuGet.Protocol.Core.Types.dll",
-        "NuGet.Protocol.Core.v3.dll",
-        "NuGet.Repositories.dll",
-        "NuGet.RuntimeModel.dll",
-        "NuGet.Versioning.dll",
-        "System.Runtime.Serialization.Primitives.dll"
     ]
 }
