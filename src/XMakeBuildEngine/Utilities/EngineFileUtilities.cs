@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using Microsoft.Build.Shared;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Internal
 {
@@ -50,10 +51,35 @@ namespace Microsoft.Build.Internal
         internal static string[] GetFileListEscaped
             (
             string directoryEscaped,
-            string filespecEscaped
+            string filespecEscaped,
+            IEnumerable<string> excludeSpecsUnescaped = null
             )
         {
-            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */);
+            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, excludeSpecsUnescaped);
+        }
+
+        private static bool FilespecHasWildcards(string filespecEscaped)
+        {
+            bool containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(filespecEscaped);
+            bool containsRealWildcards = FileMatcher.HasWildcards(filespecEscaped);
+
+            if (containsEscapedWildcards && containsRealWildcards)
+            {
+                // Umm, this makes no sense.  The item's Include has both escaped wildcards and 
+                // real wildcards.  What does he want us to do?  Go to the file system and find
+                // files that literally have '*' in their filename?  Well, that's not going to 
+                // happen because '*' is an illegal character to have in a filename.
+
+                return false;
+            }
+            else if (!containsEscapedWildcards && containsRealWildcards)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -73,27 +99,15 @@ namespace Microsoft.Build.Internal
             (
             string directoryEscaped,
             string filespecEscaped,
-            bool returnEscaped
+            bool returnEscaped,
+            IEnumerable<string> excludeSpecsUnescaped = null
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, "filespecEscaped");
 
             string[] fileList;
 
-            bool containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(filespecEscaped);
-            bool containsRealWildcards = FileMatcher.HasWildcards(filespecEscaped);
-
-            if (containsEscapedWildcards && containsRealWildcards)
-            {
-                // Umm, this makes no sense.  The item's Include has both escaped wildcards and 
-                // real wildcards.  What does he want us to do?  Go to the file system and find
-                // files that literally have '*' in their filename?  Well, that's not going to 
-                // happen because '*' is an illegal character to have in a filename.
-
-                // Just return the original string.
-                fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
-            }
-            else if (!containsEscapedWildcards && containsRealWildcards)
+            if (FilespecHasWildcards(filespecEscaped))
             {
                 // Unescape before handing it to the filesystem.
                 string directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
@@ -104,7 +118,7 @@ namespace Microsoft.Build.Internal
                 // as a relative path, we will get back a bunch of relative paths.
                 // If the filespec started out as an absolute path, we will get
                 // back a bunch of absolute paths.
-                fileList = FileMatcher.GetFiles(directoryUnescaped, filespecUnescaped);
+                fileList = FileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
                 ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
 
@@ -128,13 +142,84 @@ namespace Microsoft.Build.Internal
             }
             else
             {
-                // No real wildcards means we just return the original string.  Don't even bother 
-                // escaping ... it should already be escaped appropriately since it came directly
-                // from the project file or the OM host.
+                // Just return the original string.
                 fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
             }
 
             return fileList;
+        }
+
+        //  Returns a Func that will return true IFF its argument matches any of the specified filespecs
+        internal static Func<string, bool> GetMatchTester(IList<string> filespecs)
+        {
+            List<Regex> regexes = null;
+            HashSet<string> exactmatches = null;
+
+            foreach (var spec in filespecs)
+            {
+                if (FilespecHasWildcards(spec))
+                {
+                    Regex regexFileMatch;
+                    bool isRecursive;
+                    bool isLegal;
+                    //  TODO: If creating Regex's here ends up being expensive perf-wise, consider how to avoid it in common cases
+                    FileMatcher.GetFileSpecInfo
+                    (
+                        spec,
+                        out regexFileMatch,
+                        out isRecursive,
+                        out isLegal,
+                        FileMatcher.s_defaultGetFileSystemEntries
+                    );
+
+                    if (isLegal)
+                    {
+                        if (regexes == null)
+                        {
+                            regexes = new List<Regex>();
+                        }
+                        regexes.Add(regexFileMatch);
+                    }
+                    else
+                    {
+                        //  If the spec is not legal, it doesn't match anything
+                    }
+                }
+                else
+                {
+                    if (exactmatches == null)
+                    {
+                        //  TODO: How to handle case sensitivity here?  Existing behavior is to be case-insensitive,
+                        //  which works for Windows but probably isn't the right thing on other OS's
+                        exactmatches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    }
+                    exactmatches.Add(spec);
+                }
+            }
+
+            return file =>
+            {
+                if (exactmatches != null)
+                {
+                    if (exactmatches.Contains(file))
+                    {
+                        return true;
+                    }
+                }
+
+                if (regexes != null)
+                {
+                    foreach (Regex regex in regexes)
+                    {
+                        if (regex.IsMatch(file))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            };
         }
     }
 }
