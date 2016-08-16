@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
     public sealed class ResolvePackageDependencies : Task
     {
         private readonly List<string> _packageFolders = new List<string>();
+        private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>();
 
         #region Output Items
 
@@ -131,8 +132,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             var lockFile = GetLockFile();
 
             PopulatePackageFolders(lockFile);
-            GetPackageAndFileDefinitions(lockFile);
             RaiseLockFileTargets(lockFile);
+            GetPackageAndFileDefinitions(lockFile);
         }
 
         private void PopulatePackageFolders(LockFile lockFile)
@@ -174,7 +175,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
                 foreach (var file in package.Files)
                 {
-                    var fileItem = new TaskItem($"{packageId}/{file}");
+                    var fileKey = $"{packageId}/{file}";
+                    var fileItem = new TaskItem(fileKey);
                     fileItem.SetMetadata(MetadataKeys.Path, file);
 
                     string resolvedPath = ResolveFilePath(file, resolvedPackagePath);
@@ -184,6 +186,14 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     {
                         fileItem.SetMetadata(MetadataKeys.Analyzer, "true");
                     }
+
+                    // get a type for the file if one is available
+                    string fileType;
+                    if (!_fileTypes.TryGetValue(fileKey, out fileType))
+                    {
+                        fileType = "unknown";
+                    }
+                    fileItem.SetMetadata(MetadataKeys.Type, fileType);
 
                     _fileDefinitions.Add(fileItem);
                 }
@@ -207,6 +217,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 item.SetMetadata(MetadataKeys.TargetFrameworkMoniker, target.TargetFramework.DotNetFrameworkName);
                 item.SetMetadata(MetadataKeys.FrameworkName, target.TargetFramework.Framework);
                 item.SetMetadata(MetadataKeys.FrameworkVersion, target.TargetFramework.Version.ToString());
+                item.SetMetadata(MetadataKeys.Type, "target");
 
                 _targetDefinitions.Add(item);
 
@@ -262,12 +273,16 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 var filePathList = GetFilePathListFor(package, fileGroup);
                 foreach (var filePath in filePathList)
                 {
-                    item = new TaskItem($"{packageId}/{filePath}");
+                    var fileKey = $"{packageId}/{filePath}";
+                    item = new TaskItem(fileKey);
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
 
                     _fileDependencies.Add(item);
+
+                    // map each file key to a Type metadata value
+                    SaveFileKeyType(fileKey, fileGroup);
                 }
             }
         }
@@ -299,6 +314,46 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
                 default:
                     throw new Exception($"Unexpected file group in project.lock.json target library {package.Name}");
+            }
+        }
+
+        // save file type metadata based on the group the file appears in
+        private void SaveFileKeyType(string fileKey, FileGroup fileGroup)
+        {
+            string fileType = GetFileType(fileGroup);
+            if (fileType != null)
+            {
+                string currentFileType;
+                if (!_fileTypes.TryGetValue(fileKey, out currentFileType))
+                {
+                    _fileTypes.Add(fileKey, fileType);
+                }
+                else if (currentFileType != fileType)
+                {
+                    throw new Exception($"Unexpected file type for {fileKey}. Type is both {fileType} and {currentFileType}");
+                }
+            }
+        }
+
+        private string GetFileType(FileGroup fileGroup)
+        {
+            switch (fileGroup)
+            {
+                case FileGroup.CompileTimeAssembly:
+                case FileGroup.RuntimeAssembly:
+                case FileGroup.NativeLibrary:
+                case FileGroup.ResourceAssembly:
+                    return "assembly";
+
+                case FileGroup.FrameworkAssembly:
+                    return "frameworkAssembly";
+
+                case FileGroup.ContentFile:
+                    return "content";
+
+                case FileGroup.RuntimeTarget:
+                default:
+                    return null;
             }
         }
 
