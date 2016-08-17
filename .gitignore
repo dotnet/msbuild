@@ -169,5 +169,5 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 
-# Workaround: See #292.
+# Workaround: See https://github.com/dotnet/roslyn-project-system/issues/292
 /src/Templates/ProjectTemplates/CSharp/.NETCore/ConsoleApplication/AssemblyInfo.cs
