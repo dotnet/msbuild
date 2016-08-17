@@ -368,7 +368,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 File.WriteAllText(file, String.Empty);
 
-                IList<ProjectItem> items = GetItemsFromFragment("<i Include='i0;" + directory + (NativeMethodsShared.IsWindows ? @"\**\*;i2'/>" : "/**/*;i2'/>"));
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment("<i Include='i0;" + directory + (NativeMethodsShared.IsWindows ? @"\**\*;i2'/>" : "/**/*;i2'/>"));
 
                 Assert.Equal(3, items.Count);
                 Assert.Equal("i0", items[0].EvaluatedInclude);
@@ -474,7 +474,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 File.WriteAllText(file2, String.Empty);
                 File.WriteAllText(file3, String.Empty);
 
-                IList<ProjectItem> items = GetItemsFromFragment(String.Format(NativeMethodsShared.IsWindows ?
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(String.Format(NativeMethodsShared.IsWindows ?
                     @"<i Include='{0}\a.*' Exclude='{0}\*.1'/>" :
                     @"<i Include='{0}/a.*' Exclude='{0}/*.1'/>", directory));
 

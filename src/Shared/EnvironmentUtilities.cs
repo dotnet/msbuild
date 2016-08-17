@@ -10,52 +10,12 @@ namespace Microsoft.Build.Shared
     {
         public static bool Is64BitProcess => Marshal.SizeOf<IntPtr>() == 8;
 
-        //  Copied from .NET Framework source for Environment.Is64BitOperatingSystem (along with Win32Native APIs)
-        public static bool Is64BitOperatingSystem
-            => NativeMethodsShared.ProcessorArchitecture == NativeMethodsShared.ProcessorArchitectures.X64
-                || NativeMethodsShared.ProcessorArchitecture
-                == NativeMethodsShared.ProcessorArchitectures.IA64;
-
-        private static class Win32Native
-        {
-            internal const String KERNEL32 = "kernel32.dll";
-
-            [DllImport(KERNEL32, CharSet = NativeMethodsShared.AutoOrUnicode, SetLastError = true)]
-            internal static extern IntPtr GetCurrentProcess();
-
-            // Note - do NOT use this to call methods.  Use P/Invoke, which will
-            // do much better things w.r.t. marshaling, pinning memory, security 
-            // stuff, better interactions with thread aborts, etc.  This is used
-            // solely by DoesWin32MethodExist for avoiding try/catch EntryPointNotFoundException
-            // in scenarios where an OS Version check is insufficient
-            [DllImport(KERNEL32, CharSet = CharSet.Ansi, BestFitMapping = false, SetLastError = true, ExactSpelling = true)]
-            private static extern IntPtr GetProcAddress(IntPtr hModule, String methodName);
-
-            [DllImport(KERNEL32, CharSet = NativeMethodsShared.AutoOrUnicode, BestFitMapping = false, SetLastError = true)]
-            private static extern IntPtr GetModuleHandle(String moduleName);
-
-            internal static bool DoesWin32MethodExist(String moduleName, String methodName)
-            {
-                // GetModuleHandle does not increment the module's ref count, so we don't need to call FreeLibrary.
-                IntPtr hModule = Win32Native.GetModuleHandle(moduleName);
-                if (hModule == IntPtr.Zero)
-                {
-                    //BCLDebug.Assert(hModule != IntPtr.Zero, "GetModuleHandle failed.  Dll isn't loaded?");
-                    return false;
-                }
-                IntPtr functionPointer = Win32Native.GetProcAddress(hModule, methodName);
-                return (functionPointer != IntPtr.Zero);
-            }
-
-            // There is no need to call CloseProcess or to use a SafeHandle if you get the handle
-            // using GetCurrentProcess as it returns a pseudohandle
-            [DllImport(KERNEL32, SetLastError = true, CallingConvention = CallingConvention.Winapi)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool IsWow64Process(
-                       [In]
-                       IntPtr hSourceProcessHandle,
-                       [Out, MarshalAs(UnmanagedType.Bool)]
-                       out bool isWow64);
-        }
+        public static bool Is64BitOperatingSystem =>
+#if FEATURE_64BIT_ENVIRONMENT_QUERY
+            Environment.Is64BitOperatingSystem;
+#else
+            RuntimeInformation.OSArchitecture == Architecture.Arm64 ||
+            RuntimeInformation.OSArchitecture == Architecture.X64;
+#endif
     }
 }

@@ -934,8 +934,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reflection" />
+    <Reference Include="System.Runtime.Serialization" />
     <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
-	<Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Security" />
     <Reference Include="System.Xml" />

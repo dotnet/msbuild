@@ -725,9 +725,10 @@ namespace Microsoft.Build.UnitTests
                 FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory");
                 Assert.Equal(strings[0], "\\Machine\\1.file");
 
-            strings = new string[1] { "\\Machine\\directorymorechars\\1.file" };
-            FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory");
-            Assert.Equal(strings[0], "\\Machine\\directorymorechars\\1.file");
+                strings = new string[1] { "\\Machine\\directorymorechars\\1.file" };
+                FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory");
+                Assert.Equal(strings[0], "\\Machine\\directorymorechars\\1.file");
+            }
         }
 
         [Fact]

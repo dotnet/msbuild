@@ -38,7 +38,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             // Platform-agnostic folders first.
             FindDirectories(assemblyTargets, target => string.IsNullOrEmpty(target.Platform));
 
-            if (Environment.Is64BitOperatingSystem)
+            if (EnvironmentUtilities.Is64BitOperatingSystem)
             {
                 if (targeting64Bit)
                 {
