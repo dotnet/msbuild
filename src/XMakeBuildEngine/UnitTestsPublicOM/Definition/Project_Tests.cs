@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -19,6 +20,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using Task = System.Threading.Tasks.Task;
+// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock. 
+using ProvenanceResultTupleList = System.Collections.Generic.List<System.Tuple<string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int>>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -2473,6 +2476,425 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
+        [Fact]
+        public void GetItemProvenanceShouldReturnEmptyListOnNoMatches()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1;2;3`/>
+                    <B Include=`1;2;3` Exclude=`1;4`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, "4");
+        }
+
+        [Fact]
+        public void GetItemProvenanceOnlyStringLiteral()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1;2;3`/>
+                    <B Include=`1;2;3` Exclude=`1`/>
+                    <C Include=`2;3` Exclude=`2`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("B", Operation.Exclude, Provenance.StringLiteral, 1)
+            };
+
+            AssertProvenanceResult(expected, project, "1");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldNotReportMatchesInExcludesIfNoIncludeMatchesExist()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1,2,3` Exclude=`4`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, "4");
+        }
+
+        [Fact]
+        public void GetItemProvenanceOnlyGlob()
+        {
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.foo`/>
+                    <B Include=`1.foo;2.foo` Exclude=`*.foo`/>
+                    <C Include=`2` Exclude=`*.bar`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+                Tuple.Create("B", Operation.Exclude, Provenance.Glob, 1)
+            };
+
+            AssertProvenanceResult(expected, project, "2.foo");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldHandleComplexGlobExclusion()
+        {
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`**\*.cs` Exclude=`**\bin\**`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Exclude, Provenance.Glob, 1)
+            };
+
+            AssertProvenanceResult(expected, project, @"bin\1.cs");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldHandleComplexGlobMismatch()
+        {
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`**\*.cs` Exclude=`**\bin\**`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, @"bin\1.foo");
+        }
+
+        [Fact]
+        public void GetItemProvenanceGlobAndLiteral()
+        {
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.foo;1.foo;1.foo`/>
+                    <B Include=`1;2;1.foo` Exclude=`*.foo;1.foo;*.foo;1.foo;2.foo`/>
+                    <C Include=`2;3` Exclude=`2`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.Glob | Provenance.StringLiteral, 3),
+                Tuple.Create("B", Operation.Exclude, Provenance.Glob | Provenance.StringLiteral, 4)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo");
+        }
+
+        [Fact]
+        public void GetItemProvenanceByItemType()
+        {
+            var project = 
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.foo;1.foo`/>
+                    <B Include=`*.foo;1.foo`/>
+                    <B Include=`1;2;1.foo` Exclude=`*.foo;1.foo`/>
+                    <C Include=`2;3` Exclude=`2`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Include, Provenance.Glob | Provenance.StringLiteral, 2),
+                Tuple.Create("B", Operation.Exclude, Provenance.Glob | Provenance.StringLiteral, 2)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo", "B");
+        }
+
+        [Fact]
+        public void GetItemProvenanceByProjectItem()
+        {
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.foo;1.foo`/>
+                    <B Include=`1;2;3;*.foo` Exclude=`*.foo;1.foo`/>
+                    <B Include=`*.foo;1.foo`/>
+                    <C Include=`2;3` Exclude=`2`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Exclude, Provenance.Glob | Provenance.StringLiteral, 2),
+                Tuple.Create("B", Operation.Include, Provenance.Glob | Provenance.StringLiteral, 2)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo", 1);
+        }
+
+        [Fact]
+        public void GetItemProvenanceWhenExcludeHasIndirectReferences()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <B Include=`1;2;3`/>
+                    <A Include=`1;2;3` Exclude=`$(P);@(B)`/>
+                  </ItemGroup>
+
+                  <PropertyGroup>
+                    <P>1;2;3;@(B)</P>  
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("A", Operation.Exclude, Provenance.Inconclusive | Provenance.StringLiteral, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1");
+        }
+
+        [Fact]
+        public void GetItemProvenanceWhenIncludeHasIndirectReferences()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <B Include=`1;2;3`/>
+                    <A Include=`$(P);@(B)`/>
+                    <C Include=`@(A)`/>
+                  </ItemGroup>
+
+                  <PropertyGroup>
+                    <P>1;2;3;@(B)</P>  
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("A", Operation.Include, Provenance.Inconclusive | Provenance.StringLiteral, 3),
+                Tuple.Create("C", Operation.Include, Provenance.Inconclusive, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1");
+        }
+
+        [Fact]
+        public void GetItemProvenanceWhenIncludeHasIndirectItemReferencesAndOnlyGlobsExistDirectly()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <B Include=`1;2;3`/>
+                    <A Include=`*;$(P);@(B)`/>
+                  </ItemGroup>
+
+                  <PropertyGroup>
+                    <P>@(B)</P>  
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("A", Operation.Include, Provenance.Inconclusive | Provenance.Glob, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldRespectItemConditions()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1` Condition=`1 == 0`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, "1");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldRespectItemGroupConditions()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup Condition=`1 == 0`>
+                    <A Include=`1`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, "1");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldNotLookIntoTargets()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <Target Name=`Build`>
+                      <ItemGroup>
+                        <A Include=`1`/>
+                      </ItemGroup>
+                  </Target>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, "1");
+        }
+
+        [Fact]
+        public void GetItemProvenanceMatchesLiteralsWithNonCanonicPaths()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1.foo;.\1.foo;.\.\1.foo`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo");
+            AssertProvenanceResult(expected, project, @".\1.foo");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldMatchStringsWithIllegalPathCharacters()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`|:/\?*`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, @"?:/*\|");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldWorkWithStringsExceedingMaxPath()
+        {
+            var longString = new string('a', 1000);
+
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`" + longString +  @"`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            AssertProvenanceResult(expected, project, longString + "a");
+        }
+
+        // todo: on xplat, split this to windows and non-windows test
+        [Fact]
+        public void GetItemProvenancePathMatchingShouldBeCaseInsensitive()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`a`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1)
+            };
+
+            AssertProvenanceResult(expected, project, "A");
+        }
+
+        private static void AssertProvenanceResult(ProvenanceResultTupleList expected, string project, string itemValue)
+        {
+            var provenanceResult = ObjectModelHelpers.CreateInMemoryProject(project).GetItemProvenance(itemValue);
+            AssertProvenanceResult(expected, provenanceResult);
+        }
+
+        private static void AssertProvenanceResult(ProvenanceResultTupleList expected, string project, string itemValue, string itemType)
+        {
+            var provenanceResult = ObjectModelHelpers.CreateInMemoryProject(project).GetItemProvenance(itemValue, itemType);
+            AssertProvenanceResult(expected, provenanceResult);
+        }
+
+        private static void AssertProvenanceResult(ProvenanceResultTupleList expected, string project, string itemValue, int position)
+        {
+            var p = ObjectModelHelpers.CreateInMemoryProject(project);
+            var item = p.Items.Where(i => i.EvaluatedInclude.Equals(itemValue)).ElementAt(position);
+
+            var provenanceResult = p.GetItemProvenance(item);
+            AssertProvenanceResult(expected, provenanceResult);
+        }
+
+        private static void AssertProvenanceResult(ProvenanceResultTupleList expected, List<ProvenanceResult> actual)
+        {
+            Assert.Equal(expected.Count, actual.Count);
+
+            for (var i = 0; i < expected.Count; i++)
+            {
+                var expectedProvenance = expected[i];
+                var actualProvenance = actual[i];
+
+                Assert.Equal(expectedProvenance.Item1, actualProvenance.ItemElement.ItemType);
+                Assert.Equal(expectedProvenance.Item2, actualProvenance.Operation);
+                Assert.Equal(expectedProvenance.Item3, actualProvenance.Provenance);
+                Assert.Equal(expectedProvenance.Item4, actualProvenance.Occurrences);
+            }
+        }
+
         /// <summary>
         /// Creates a simple ProjectRootElement object.
         /// (When ProjectRootElement supports editing, we need not load from a string here.)

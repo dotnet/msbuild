@@ -98,4 +98,20 @@
     </ItemGroup>
   </Target>
 
+  <!-- Target SignFiles from MicroBuild.Plugins.Signing.targets signs @(FilesToSign) -->
+  <Target Name="AddSatelliteAssembliesToFilesToSignItem"
+          Condition="('$(SignType)' == 'real' OR '$(SignType)' == 'test')"
+          BeforeTargets="@(SignFilesDependsOn);SignFiles"
+          AfterTargets="CreateSatelliteAssemblies"
+          >
+
+    <ItemGroup>
+      <FilesToSign Include="@(IntermediateSatelliteAssembliesWithTargetPath -> '$(OutputPath)%(Culture)\%(FileName)%(Extension)')">
+        <Authenticode>Microsoft</Authenticode>
+        <StrongName>StrongName</StrongName>
+      </FilesToSign>
+    </ItemGroup>
+
+  </Target>
+
 </Project>
