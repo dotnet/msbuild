@@ -397,6 +397,22 @@ namespace Microsoft.Build.Evaluation
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
 
+        internal static ExpressionShredder.ItemExpressionCapture ExpandSingleItemVectorExpressionIntoExpressionCapture(
+                string expression, ExpanderOptions options, IElementLocation elementLocation)
+        {
+            return ItemExpander.ExpandSingleItemVectorExpressionIntoExpressionCapture(expression, options, elementLocation);
+        }
+
+        internal IList<T> ExpandExpressionCaptureIntoItems<S, T>(
+                ExpressionShredder.ItemExpressionCapture expressionCapture, IItemProvider<S> items, IItemFactory<S, T> itemFactory,
+                ExpanderOptions options, bool includeNullEntries, out bool isTransformExpression, IElementLocation elementLocation)
+            where S : class, IItem
+            where T : class, IItem
+        {
+            return ItemExpander.ExpandExpressionCaptureIntoItems<S, T>(expressionCapture, this, items, itemFactory, options,
+                includeNullEntries, out isTransformExpression, elementLocation);
+        }
+
         /// <summary>
         /// Returns true if the supplied string contains a valid property name
         /// </summary>
@@ -1541,18 +1557,31 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <typeparam name="S">Type of the items provided by the item source used for expansion</typeparam>
             /// <typeparam name="T">Type of the items that should be returned</typeparam>
-            internal static IList<T> ExpandSingleItemVectorExpressionIntoItems<S, T>(Expander<P, I> expander, string expression, IItemProvider<S> items, IItemFactory<S, T> itemFactory, ExpanderOptions options, bool includeNullEntries, out bool isTransformExpression, IElementLocation elementLocation)
+            internal static IList<T> ExpandSingleItemVectorExpressionIntoItems<S, T>(
+                    Expander<P, I> expander, string expression, IItemProvider<S> items, IItemFactory<S, T> itemFactory, ExpanderOptions options,
+                    bool includeNullEntries, out bool isTransformExpression, IElementLocation elementLocation)
                 where S : class, IItem
                 where T : class, IItem
             {
                 isTransformExpression = false;
 
-                if (((options & ExpanderOptions.ExpandItems) == 0) || (expression.Length == 0))
+                var expressionCapture = ExpandSingleItemVectorExpressionIntoExpressionCapture(expression, options, elementLocation);
+                if (expressionCapture == null)
                 {
                     return null;
                 }
 
-                ErrorUtilities.VerifyThrow(items != null, "Cannot expand items without providing items");
+                return ExpandExpressionCaptureIntoItems(expressionCapture, expander, items, itemFactory, options, includeNullEntries,
+                    out isTransformExpression, elementLocation);
+            }
+
+            internal static ExpressionShredder.ItemExpressionCapture ExpandSingleItemVectorExpressionIntoExpressionCapture(
+                    string expression, ExpanderOptions options, IElementLocation elementLocation)
+            {
+                if (((options & ExpanderOptions.ExpandItems) == 0) || (expression.Length == 0))
+                {
+                    return null;
+                }
 
                 List<ExpressionShredder.ItemExpressionCapture> matches = null;
 
@@ -1579,18 +1608,31 @@ namespace Microsoft.Build.Evaluation
                 ProjectErrorUtilities.VerifyThrowInvalidProject(match.Value == expression, elementLocation, "EmbeddedItemVectorCannotBeItemized", expression);
                 ErrorUtilities.VerifyThrow(matches.Count == 1, "Expected just one item vector");
 
+                return match;
+            }
+
+            internal static IList<T> ExpandExpressionCaptureIntoItems<S, T>(
+                    ExpressionShredder.ItemExpressionCapture expressionCapture, Expander<P, I> expander, IItemProvider<S> items, IItemFactory<S, T> itemFactory,
+                    ExpanderOptions options, bool includeNullEntries, out bool isTransformExpression, IElementLocation elementLocation)
+                where S : class, IItem
+                where T : class, IItem
+            {
+                ErrorUtilities.VerifyThrow(items != null, "Cannot expand items without providing items");
+
+                isTransformExpression = false;
+
                 // If the incoming factory doesn't have an item type that it can use to 
                 // create items, it's our indication that the caller wants its items to have the type of the
                 // expression being expanded. For example, items from expanding "@(Compile") should
                 // have the item type "Compile".
                 if (itemFactory.ItemType == null)
                 {
-                    itemFactory.ItemType = match.ItemType;
+                    itemFactory.ItemType = expressionCapture.ItemType;
                 }
 
                 IList<T> result = null;
 
-                if (match.Separator != null)
+                if (expressionCapture.Separator != null)
                 {
                     // Reference contains a separator, for example @(Compile, ';').
                     // We need to flatten the list into 
@@ -1599,7 +1641,7 @@ namespace Microsoft.Build.Evaluation
                     string expandedItemVector;
                     using (var builder = new ReuseableStringBuilder())
                     {
-                        bool brokeEarlyNonEmpty = ExpandItemVectorMatchIntoStringBuilder(expander, match, items, elementLocation, builder, options);
+                        bool brokeEarlyNonEmpty = ExpandItemVectorMatchIntoStringBuilder(expander, expressionCapture, items, elementLocation, builder, options);
 
                         if (brokeEarlyNonEmpty)
                         {
@@ -1626,18 +1668,18 @@ namespace Microsoft.Build.Evaluation
                 // eg.,:
                 // expands @(Compile) to a set of items cloned from the items in the "Compile" list
                 // expands @(Compile->'%(foo)') to a set of items with the Include value of items in the "Compile" list.
-                if (match.Captures != null)
+                if (expressionCapture.Captures != null)
                 {
                     isTransformExpression = true;
                 }
 
-                ICollection<S> itemsOfType = items.GetItems(match.ItemType);
+                ICollection<S> itemsOfType = items.GetItems(expressionCapture.ItemType);
 
                 // If there are no items of the given type, then bail out early
                 if (itemsOfType.Count == 0)
                 {
                     // .. but only if there isn't a function "Count()", since that will want to return something (zero) for an empty list
-                    if (match.Captures == null || !match.Captures.Any(capture => String.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)))
+                    if (expressionCapture.Captures == null || !expressionCapture.Captures.Any(capture => String.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)))
                     {
                         return new List<T>();
                     }
@@ -1663,7 +1705,7 @@ namespace Microsoft.Build.Evaluation
                     return result;
                 }
 
-                Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, match);
+                Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
 
                 // iterate over our tranform chain, creating the final items from its results
                 foreach (Tuple<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemTupleEnumerator(itemsOfType)))
