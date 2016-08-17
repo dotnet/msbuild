@@ -1,0 +1,9 @@
+{
+    "dependencies": {
+        "RoslynTools.Microsoft.SignTool": "0.2.0-beta",
+        "Microbuild.Core" : "0.2.0"
+    },
+    "frameworks": {
+        ".netcoreapp1.0": {}
+    }
+}

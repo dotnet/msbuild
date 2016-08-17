@@ -14,7 +14,7 @@ if not exist "%DeveloperCommandPrompt%" (
 
 call "%DeveloperCommandPrompt%" || goto :BuildFailed
 
-powershell -NoProfile -NoLogo -Command "& \"%~dp0build.ps1\" %*; exit $LastExitCode;"
+powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -Command "& \"%~dp0build.ps1\" %*; exit $LastExitCode;"
 exit /b %ERRORLEVEL%
 
 :BuildFailed

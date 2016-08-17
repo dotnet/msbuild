@@ -12,31 +12,6 @@
     <projectUrl>http://dot.net</projectUrl>
   </metadata>
   <files>
-    <file src="Microsoft.DotNet.Core.Build.Tasks.dll" target="tools\netstandard1.3" />
-
-    <file src="Microsoft.Extensions.DependencyModel.dll" target="tools\netstandard1.3" />
-    <file src="Microsoft.DotNet.PlatformAbstractions.dll" target="tools\netstandard1.3" />
-
-    <file src="NuGet.ProjectModel.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.DependencyResolver.Core.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.LibraryModel.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Frameworks.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Protocol.Core.v3.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Repositories.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.RuntimeModel.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Common.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Packaging.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Protocol.Core.Types.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Packaging.Core.Types.dll" target="tools\netstandard1.3" />
-    <file src="NuGet.Versioning.dll" target="tools\netstandard1.3" />
-
-    <file src="Newtonsoft.Json.dll" target="tools\netstandard1.3" />
-
-    <file src="System.Runtime.Serialization.Primitives.dll" target="tools\netstandard1.3" />
-
-    <file src="Microsoft.PackageDependencyResolution.targets" target="build\netstandard1.0" />
-    <file src="Microsoft.DotNet.Publish.targets" target="build\netstandard1.0" />
-    <file src="Microsoft.DotNet.Core.Sdk.props" target="build\netstandard1.0" />
-    <file src="Microsoft.DotNet.Core.Sdk.targets" target="build\netstandard1.0" />
+    <file src="PackagesLayout\**" />
   </files>
 </package>

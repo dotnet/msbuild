@@ -1,0 +1,11 @@
+{
+    sign: [
+        {
+            "certificate": "Microsoft402",
+            "strongName": "MsSharedLib72",
+            "values": [
+                "Microsoft.DotNet.Core.Build.Tasks.dll"
+            ]
+        }
+    ]
+}
