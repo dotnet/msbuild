@@ -22,7 +22,7 @@
 
     <Message Text="Restoring packages for %(SolutionFile.Filename)" Importance="high" />
 
-    <Exec Command="$(DotNetTool) restore --verbosity Minimal"
+    <Exec Command="$(DotNetTool) restore --legacy-packages-directory --verbosity Minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
   </Target>
