@@ -19,7 +19,7 @@ namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
         /// <returns>New deserialized collection instance.</returns>
         internal static AssemblyFolderCollection Load(string filePath)
         {
-            using (FileStream fs = new FileStream(filePath, FileMode.Open))
+            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(fs, new XmlDictionaryReaderQuotas()))
             {
                 DataContractSerializer serializer = new DataContractSerializer(typeof(AssemblyFolderCollection));
