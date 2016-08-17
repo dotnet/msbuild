@@ -396,6 +396,34 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        /// <summary>
+        /// Overload for four string format arguments.
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="resourceName"></param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <param name="arg3"></param>
+        internal static void VerifyThrowInvalidOperation
+        (
+            bool condition,
+            string resourceName,
+            object arg0,
+            object arg1,
+            object arg2,
+            object arg3
+        )
+        {
+            // PERF NOTE: check the condition here instead of pushing it into
+            // the ThrowInvalidOperation() method, because that method always
+            // allocates memory for its variable array of arguments
+            if (!condition)
+            {
+                ThrowInvalidOperation(resourceName, arg0, arg1, arg2, arg3);
+            }
+        }
+
         #endregion
 
         #region VerifyThrowArgument

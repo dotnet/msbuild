@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -678,31 +679,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Attempt to insert item without include in itemgroup in project
         /// </summary>
         [Fact]
-        public void InvalidAttemptToAddItemWithoutIncludeToItemGroupInProject()
+        public void InvalidAttemptToAddEmptyItem()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 ProjectItemGroupElement itemGroup = project.CreateItemGroupElement();
                 ProjectItemElement item = project.CreateItemElement("i");
-
-                project.AppendChild(itemGroup);
-                itemGroup.AppendChild(item);
-            }
-           );
-        }
-        /// <summary>
-        /// Attempt to insert item with remove in itemgroup in project
-        /// </summary>
-        [Fact]
-        public void InvalidAttemptToAddItemWithRemoveToItemGroupInProject()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                ProjectRootElement project = ProjectRootElement.Create();
-                ProjectItemGroupElement itemGroup = project.CreateItemGroupElement();
-                ProjectItemElement item = project.CreateItemElement("i");
-                item.Remove = "r";
 
                 project.AppendChild(itemGroup);
                 itemGroup.AppendChild(item);
@@ -762,6 +745,124 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
+        }
+        
+        /// <summary>
+        /// Add item with remove in itemgroup in target
+        /// </summary>
+        [Fact]
+        public void AddItemWithRemoveToItemGroupOutsideTarget()
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectItemGroupElement itemGroup = project.CreateItemGroupElement();
+            ProjectItemElement itemRemoveFirst = project.CreateItemElement("i");
+            ProjectItemElement itemInclude = project.CreateItemElement("i");
+            ProjectItemElement itemRemoveSecond = project.CreateItemElement("i");
+            ProjectItemElement itemUpdate = project.CreateItemElement("i");
+            ProjectItemElement itemRemoveThird = project.CreateItemElement("i");
+
+            itemRemoveFirst.Remove = "i";
+            itemInclude.Include = "i";
+            itemRemoveSecond.Remove = "i";
+            itemUpdate.Update = "i";
+            itemRemoveThird.Remove = "i";
+
+            project.AppendChild(itemGroup);
+            itemGroup.AppendChild(itemRemoveFirst);
+            itemGroup.InsertAfterChild(itemInclude, itemRemoveFirst);
+            itemGroup.InsertAfterChild(itemRemoveSecond, itemInclude);
+            itemGroup.InsertAfterChild(itemUpdate, itemRemoveSecond);
+            itemGroup.InsertAfterChild(itemRemoveThird, itemUpdate);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(
+@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <i Remove=""i"" />
+    <i Include=""i"" />
+    <i Remove=""i"" />
+    <i Update=""i"" />
+    <i Remove=""i"" />
+  </ItemGroup>
+</Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        [Fact]
+        public void AddItemWithUpdateAtSpecificLocation()
+        {
+            ProjectRootElement project = CreateProjectWithUpdates();
+
+            string expected = ObjectModelHelpers.CleanupFileContents(
+@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <i Include=""a"" />
+    <i Update=""a"">
+      <m1>metadata1</m1>
+    </i>
+    <i Include=""a"" />
+    <i Update=""a"">
+      <m1>metadata2</m1>
+    </i>
+  </ItemGroup>
+</Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        [Fact]
+        public void DeleteItemWithUpdateFromSpecificLocations()
+        {
+            ProjectRootElement project = CreateProjectWithUpdates();
+
+            var itemUpdateElements = project.Items.Where(i => i.UpdateLocation != null);
+
+            foreach (var updateElement in itemUpdateElements)
+            {
+                updateElement.Parent.RemoveChild(updateElement);
+            }
+
+            string expected = ObjectModelHelpers.CleanupFileContents(
+@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <i Include=""a"" />
+    <i Include=""a"" />
+  </ItemGroup>
+</Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        private static ProjectRootElement CreateProjectWithUpdates()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.CreateItemGroupElement();
+            var firstIncludeItem = project.CreateItemElement("i");
+            var secondIncludeItem = project.CreateItemElement("i");
+            var firstUpdateItem = project.CreateItemElement("i");
+            var secondUpdateItem = project.CreateItemElement("i");
+            var firstMetadata = project.CreateMetadataElement("m1");
+            var secondMetadata = project.CreateMetadataElement("m1");
+
+            firstIncludeItem.Include = "a";
+            secondIncludeItem.Include = "a";
+            firstUpdateItem.Update = "a";
+            secondUpdateItem.Update = "a";
+            firstMetadata.Value = "metadata1";
+            secondMetadata.Value = "metadata2";
+
+            project.AppendChild(itemGroup);
+            itemGroup.AppendChild(firstIncludeItem);
+            itemGroup.AppendChild(secondIncludeItem);
+
+            // add update between two include items
+            itemGroup.InsertAfterChild(firstUpdateItem, firstIncludeItem);
+            firstUpdateItem.AppendChild(firstMetadata);
+
+            // add update as the last child
+            itemGroup.AppendChild(secondUpdateItem);
+            secondUpdateItem.AppendChild(secondMetadata);
+            return project;
         }
 
         /// <summary>

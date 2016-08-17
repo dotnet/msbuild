@@ -1610,11 +1610,6 @@ namespace Microsoft.Build.Evaluation
 #endif
         }
 
-        /// <summary>
-        /// Evaluate a single ProjectItemElement into zero or more items.
-        /// If specified, or if the condition on the item itself is false, only gathers the result into the list of items-ignoring-condition,
-        /// and not into the real list of items.
-        /// </summary>
         private void EvaluateItemElement(bool itemGroupConditionResult, ProjectItemElement itemElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
 #if FEATURE_MSBUILD_DEBUGGER
@@ -1659,7 +1654,49 @@ namespace Microsoft.Build.Evaluation
 
                 return;
             }
-            
+
+            if (!string.IsNullOrEmpty(itemElement.Include))
+            {
+                EvaluateItemElementInclude(itemGroupConditionResult, itemConditionResult, itemElement);
+            }
+            else if (!string.IsNullOrEmpty(itemElement.Update))
+            {
+                EvaluateItemElementUpdate(itemElement);
+            }
+        }
+
+        private void EvaluateItemElementUpdate(ProjectItemElement itemElement)
+        {
+            _data.EvaluatedItemElements.Add(itemElement);
+
+            var expandedItemSet =
+                new HashSet<string>(
+                    ExpressionShredder.SplitSemiColonSeparatedList
+                        (
+                            _expander.ExpandIntoStringLeaveEscaped(itemElement.Update, ExpanderOptions.ExpandPropertiesAndItems, itemElement.Location)
+                        )
+                        .SelectMany(i => EngineFileUtilities.GetFileListEscaped(_projectRootElement.DirectoryPath, i))
+                        .Select(EscapingUtilities.UnescapeAll));
+
+            var itemsToUpdate = _data.GetItems(itemElement.ItemType).Where(i => expandedItemSet.Contains(i.EvaluatedInclude)).ToList();
+
+            DecorateItemsWithMetadataFromProjectItemElement(itemElement, itemsToUpdate);
+        }
+
+        /// <summary>
+        /// Evaluate a single ProjectItemElement into zero or more items.
+        /// If specified, or if the condition on the item itself is false, only gathers the result into the list of items-ignoring-condition,
+        /// and not into the real list of items.
+        /// </summary>
+        private void EvaluateItemElementInclude(bool itemGroupConditionResult, bool itemConditionResult, ProjectItemElement itemElement)
+        {
+#if FEATURE_MSBUILD_DEBUGGER
+            if (DebuggerManager.DebuggingEnabled)
+            {
+                DebuggerManager.EnterState(itemElement.Location, _itemPassLocals);
+            }
+#endif
+
             // Paths in items are evaluated relative to the outer project file, rather than relative to any targets file they may be contained in
             IList<I> items = CreateItemsFromInclude(_projectRootElement.DirectoryPath, itemElement, _itemFactory, itemElement.Include, _expander);
 
@@ -1699,6 +1736,42 @@ namespace Microsoft.Build.Evaluation
             }
 
             // STEP 5: Evaluate each metadata XML and apply them to each item we have so far
+            DecorateItemsWithMetadataFromProjectItemElement(itemElement, items);
+
+            // FINALLY: Add the items to the project
+            if (itemConditionResult && itemGroupConditionResult)
+            {
+                _data.EvaluatedItemElements.Add(itemElement);
+
+                foreach (I item in items)
+                {
+                    _data.AddItem(item);
+
+                    if (_data.ShouldEvaluateForDesignTime)
+                    {
+                        _data.AddToAllEvaluatedItemsList(item);
+                    }
+                }
+            }
+
+            if (_data.ShouldEvaluateForDesignTime)
+            {
+                foreach (I item in items)
+                {
+                    _data.AddItemIgnoringCondition(item);
+                }
+            }
+
+#if FEATURE_MSBUILD_DEBUGGER
+            if (DebuggerManager.DebuggingEnabled)
+            {
+                DebuggerManager.LeaveState(itemElement.Location);
+            }
+#endif
+        }
+
+        private void DecorateItemsWithMetadataFromProjectItemElement(ProjectItemElement itemElement, IList<I> items)
+        {
             if (itemElement.HasMetadata)
             {
                 ////////////////////////////////////////////////////
@@ -1841,37 +1914,6 @@ namespace Microsoft.Build.Evaluation
                     _expander.Metadata = null;
                 }
             }
-
-            // FINALLY: Add the items to the project
-            if (itemConditionResult && itemGroupConditionResult)
-            {
-                _data.EvaluatedItemElements.Add(itemElement);
-
-                foreach (I item in items)
-                {
-                    _data.AddItem(item);
-
-                    if (_data.ShouldEvaluateForDesignTime)
-                    {
-                        _data.AddToAllEvaluatedItemsList(item);
-                    }
-                }
-            }
-
-            if (_data.ShouldEvaluateForDesignTime)
-            {
-                foreach (I item in items)
-                {
-                    _data.AddItemIgnoringCondition(item);
-                }
-            }
-
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.LeaveState(itemElement.Location);
-            }
-#endif
         }
 
         /// <summary>

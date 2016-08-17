@@ -133,6 +133,40 @@ namespace Microsoft.Build.UnitTests
             Assert.True(false, "Didn't throw " + exception.ToString());
         }
 
+        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem)
+        {
+            Assert.Equal(expectedItems.Length, items.Count);
+
+            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
+
+            for (int i = 0; i < expectedItems.Length; i++)
+            {
+                Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+            }
+        }
+
+        /// <summary>
+        /// Asserts that the list of items has the specified evaluated includes.
+        /// </summary>
+        internal static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null)
+        {
+            if (expectedDirectMetadata == null)
+            {
+                expectedDirectMetadata = new Dictionary<string, string>();
+            }
+
+            // all items have the same metadata
+            var metadata = new Dictionary<string, string>[expectedItems.Length];
+
+            for (var i = 0; i < metadata.Length; i++)
+            {
+                metadata[i] = expectedDirectMetadata;
+            }
+
+            AssertItems(expectedItems, items, metadata);
+        }
+
         /// <summary>
         /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
@@ -280,6 +314,15 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("Expected:  " + expectedItemSpecs);
                 Console.WriteLine("Actual:    " + actualItemSpecs);
                 Assert.True(false, "Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
+            }
+        }
+        internal static void AssertItemHasMetadata(Dictionary<string, string> expected, ProjectItem item)
+        {
+            Assert.Equal(expected.Keys.Count, item.DirectMetadataCount);
+
+            foreach (var key in expected.Keys)
+            {
+                Assert.Equal(expected[key], item.GetMetadataValue(key));
             }
         }
 
@@ -889,6 +932,41 @@ namespace Microsoft.Build.UnitTests
             }
             return files;
         }
+
+        /// <summary>
+        /// Get items of item type "i" with using the item xml fragment passed in
+        /// </summary>
+        internal static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false)
+        {
+            string content = FormatProjectContentsWithItemGroupFragment(fragment);
+
+            IList<ProjectItem> items = GetItems(content, allItems);
+            return items;
+        }
+
+        /// <summary>
+        /// Get the items of type "i" in the project provided
+        /// </summary>
+        internal static IList<ProjectItem> GetItems(string content, bool allItems = false)
+        {
+            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            Project project = new Project(projectXml);
+            IList<ProjectItem> item = Helpers.MakeList(allItems ? project.Items : project.GetItems("i"));
+
+            return item;
+        }
+
+        internal static string FormatProjectContentsWithItemGroupFragment(string fragment)
+        {
+            return
+                $@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            {fragment}
+                        </ItemGroup>
+                    </Project>
+                ";
+        }
     }
 
     /// <summary>
@@ -1120,15 +1198,26 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static string[] CreateFiles(params string[] files)
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(directory);
 
-            string[] result = new string[files.Length];
+            return CreateFilesInDirectory(ref directory, files);
+        }
 
-            for (int i = 0; i < files.Length; i++)
+        /// <summary>
+        /// Creates a bunch of temporary files in the given directory with the specified names and returns
+        /// their full paths (so they can ultimately be cleaned up)
+        /// </summary>
+        internal static string[] CreateFilesInDirectory(ref string rootDirectory, params string[] files)
+        {
+            Assert.True(Directory.Exists(rootDirectory), $"Directory {rootDirectory} does not exist");
+
+            var result = new string[files.Length];
+
+            for (var i = 0; i < files.Length; i++)
             {
-                string fullPath = Path.Combine(directory, files[i]);
-                File.WriteAllText(fullPath, String.Empty);
+                var fullPath = Path.Combine(rootDirectory, files[i]);
+                File.WriteAllText(fullPath, string.Empty);
                 result[i] = fullPath;
             }
 

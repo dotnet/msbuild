@@ -10,6 +10,8 @@
     <Project Include="XMakeCommandLine\MSBuildTaskHost\MSBuildTaskHost.csproj"
              Condition="'$(FullFrameworkBuild)' == 'true'" />
     <Project Include="XMakeTasks\Microsoft.Build.Tasks.csproj" />
+    <Project Include="OrcasEngine\OrcasEngine.csproj" />
+    <Project Include="XMakeConversion\XMakeConversion.csproj" />
 
     <Project Include="Framework\UnitTests\Microsoft.Build.Framework.UnitTests.csproj" />
     <Project Include="XMakeCommandLine\UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />

@@ -313,7 +313,8 @@ namespace Microsoft.Build.Tasks
                     installedAssemblies,
                     getRuntimeVersion,
                     targetedRuntimeVersion,
-                    getAssemblyPathInGac
+                    getAssemblyPathInGac,
+                    log
                 );
         }
 

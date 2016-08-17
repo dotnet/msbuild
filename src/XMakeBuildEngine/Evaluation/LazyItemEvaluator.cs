@@ -157,8 +157,22 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    //  TODO: remove operation should modify globsToIgnore
-                    items = _previous.GetItems(globsToIgnore);
+                    var globsToIgnoreForPreviousOperations = globsToIgnore;
+
+                    //  If this is a remove operation, then add any globs that will be removed
+                    //  to the list of globs to ignore in previous operations
+                    var removeOperation = _operation as RemoveOperation;
+                    if (removeOperation != null)
+                    {
+                        var globsToIgnoreBuilder = removeOperation.GetRemovedGlobs();
+                        foreach (var globToRemove in globsToIgnoreForPreviousOperations)
+                        {
+                            globsToIgnoreBuilder.Add(globToRemove);
+                        }
+                        globsToIgnoreForPreviousOperations = globsToIgnoreBuilder.ToImmutable();
+                    }
+
+                    items = _previous.GetItems(globsToIgnoreForPreviousOperations);
                 }
 
                 _operation.Apply(items, globsToIgnore);
@@ -183,12 +197,8 @@ namespace Microsoft.Build.Evaluation
         //      List<LazyItemList> itemListsToRemove
         //  Update - ???
 
-        abstract class LazyItemOperation
-        {
-            public abstract void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
-        }
-
-        enum IncludeOperationType
+        // TODO: verify whether the ItemElement values are ever escaped
+        enum ItemOperationType
         {
             //  Values are escaped
             Value,
@@ -197,300 +207,27 @@ namespace Microsoft.Build.Evaluation
             Expression
         }
 
-        class IncludeOperation : LazyItemOperation
+        class OperationBuilder
         {
-            readonly int _elementOrder;
-            readonly ProjectItemElement _itemElement;
-            readonly string _rootDirectory;
-            readonly string _itemType;
-            readonly bool _conditionResult;
+            public ProjectItemElement ItemElement { get; set; }
+            public string ItemType { get; set; }
+            public ImmutableList<Tuple<ItemOperationType, object>>.Builder Operations = ImmutableList.CreateBuilder<Tuple<ItemOperationType, object>>();
 
-            readonly ImmutableList<Tuple<IncludeOperationType, object>> _operations;
+            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
 
-            readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-
-            readonly ImmutableList<string> _excludes;
-
-            readonly ImmutableList<ProjectMetadataElement> _metadata;
-
-            readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
-            readonly EvaluatorData _evaluatorData;
-            readonly Expander<P, I> _expander;
-            readonly IItemFactory<I, I> _itemFactory;
-
-            public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+            public OperationBuilder(ProjectItemElement itemElement)
             {
-                _elementOrder = builder.ElementOrder;
-                _itemElement = builder.ItemElement;
-                _rootDirectory = builder.RootDirectory;
-                _itemType = builder.ItemType;
-                _conditionResult = builder.ConditionResult;
-
-                _operations = builder.Operations.ToImmutable();
-                _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
-                _excludes = builder.Excludes.ToImmutable();
-                if (builder.Metadata != null)
-                {
-                    _metadata = builder.Metadata.ToImmutable();
-                }
-
-                _lazyEvaluator = lazyEvaluator;
-
-                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
-                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
-
-                _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
-            }
-
-            public override void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
-            {
-                List<I> itemsToAdd = new List<I>();
-
-                foreach (var operation in _operations)
-                {
-                    if (operation.Item1 == IncludeOperationType.Expression)
-                    {
-                        // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                        bool throwaway;
-                        var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            (ExpressionShredder.ItemExpressionCapture) operation.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
-                            false /* do not include null expansion results */, out throwaway, _itemElement.IncludeLocation);
-
-                        itemsToAdd.AddRange(itemsFromExpression);
-                    }
-                    else if (operation.Item1 == IncludeOperationType.Value)
-                    {
-                        string value = (string)operation.Item2;
-                        var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
-                        itemsToAdd.Add(item);
-                    }
-                    else if (operation.Item1 == IncludeOperationType.Glob)
-                    {
-                        string glob = (string)operation.Item2;
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob);
-                        foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
-                        {
-                            itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(operation.Item1.ToString());
-                    }
-                }
-
-                if (_excludes.Any())
-                {
-                    //  TODO: Pass exclusion list to globbing code so excluded files don't need to be scanned (twice)
-
-                    HashSet<string> excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                    foreach (string exclude in _excludes)
-                    {
-                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
-                        foreach (var excludeSplit in ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded))
-                        {
-                            string[] excludeSplitFiles = EngineFileUtilities.GetFileListEscaped(_rootDirectory, excludeSplit);
-
-                            foreach (string excludeSplitFile in excludeSplitFiles)
-                            {
-                                excludes.Add(EscapingUtilities.UnescapeAll(excludeSplitFile));
-                            }
-                        }
-                    }
-
-                    List<I> remainingItems = new List<I>();
-
-                    for (int i = 0; i < itemsToAdd.Count; i++)
-                    {
-                        if (!excludes.Contains(itemsToAdd[i].EvaluatedInclude))
-                        {
-                            remainingItems.Add(itemsToAdd[i]);
-                        }
-                    }
-
-                    itemsToAdd = remainingItems;
-                }
-
-                if (_metadata != null)
-                {
-                    ////////////////////////////////////////////////////
-                    // UNDONE: Implement batching here.
-                    //
-                    // We want to allow built-in metadata in metadata values here. 
-                    // For example, so that an Idl file can specify that its Tlb output should be named %(Filename).tlb.
-                    // 
-                    // In other words, we want batching. However, we won't need to go to the trouble of using the regular batching code!
-                    // That's because that code is all about grouping into buckets of similar items. In this context, we're not
-                    // invoking a task, and it's fine to process each item individually, which will always give the correct results.
-                    //
-                    // For the CTP, to make the minimal change, we will not do this quite correctly.
-                    //
-                    // We will do this:
-                    // -- check whether any metadata values or their conditions contain any bare built-in metadata expressions,
-                    //    or whether they contain any custom metadata && the Include involved an @(itemlist) expression.
-                    // -- if either case is found, we go ahead and evaluate all the metadata separately for each item.
-                    // -- otherwise we can do the old thing (evaluating all metadata once then applying to all items)
-                    // 
-                    // This algorithm gives the correct results except when:
-                    // -- batchable expressions exist on the include, exclude, or condition on the item element itself
-                    //
-                    // It means that 99% of cases still go through the old code, which is best for the CTP.
-                    // When we ultimately implement this correctly, we should make sure we optimize for the case of very many items
-                    // and little metadata, none of which varies between items.
-                    List<string> values = new List<string>(_metadata.Count * 2);
-
-                    foreach (ProjectMetadataElement metadatumElement in _metadata)
-                    {
-                        values.Add(metadatumElement.Value);
-                        values.Add(metadatumElement.Condition);
-                    }
-
-                    ItemsAndMetadataPair itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
-
-                    bool needToProcessItemsIndividually = false;
-
-                    if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
-                    {
-                        // If there is bare metadata of any kind, and the Include involved an item list, we should
-                        // run items individually, as even non-built-in metadata might differ between items
-
-                        if (_referencedItemLists.Count >= 0)
-                        {
-                            needToProcessItemsIndividually = true;
-                        }
-                        else
-                        {
-                            // If there is bare built-in metadata, we must always run items individually, as that almost
-                            // always differs between items.
-
-                            // UNDONE: When batching is implemented for real, we need to make sure that
-                            // item definition metadata is included in all metadata operations during evaluation
-                            if (itemsAndMetadataFound.Metadata.Values.Count > 0)
-                            {
-                                needToProcessItemsIndividually = true;
-                            }
-                        }
-                    }
-
-                    if (needToProcessItemsIndividually)
-                    {
-                        foreach (I item in itemsToAdd)
-                        {
-                            _expander.Metadata = item;
-
-                            foreach (ProjectMetadataElement metadatumElement in _metadata)
-                            {
-#if FEATURE_MSBUILD_DEBUGGER
-                                //if (DebuggerManager.DebuggingEnabled)
-                                //{
-                                //    DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
-                                //}
-#endif
-
-                                if (!EvaluateCondition(metadatumElement, ExpanderOptions.ExpandAll, ParserOptions.AllowAll, _expander, _lazyEvaluator))
-                                {
-                                    continue;
-                                }
-
-                                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
-
-                                item.SetMetadata(metadatumElement, evaluatedValue);
-                            }
-                        }
-
-                        // End of legal area for metadata expressions.
-                        _expander.Metadata = null;
-                    }
-
-                    // End of pseudo batching
-                    ////////////////////////////////////////////////////
-                    // Start of old code
-                    else
-                    {
-                        // Metadata expressions are allowed here.
-                        // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType);
-                        _expander.Metadata = metadataTable;
-
-                        // Also keep a list of everything so we can get the predecessor objects correct.
-                        List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>();
-
-                        foreach (ProjectMetadataElement metadatumElement in _metadata)
-                        {
-                            // Because of the checking above, it should be safe to expand metadata in conditions; the condition
-                            // will be true for either all the items or none
-                            if (!EvaluateCondition(metadatumElement, ExpanderOptions.ExpandAll, ParserOptions.AllowAll, _expander, _lazyEvaluator))
-                            {
-                                continue;
-                            }
-
-#if FEATURE_MSBUILD_DEBUGGER
-                        //if (DebuggerManager.DebuggingEnabled)
-                        //{
-                        //    DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
-                        //}
-#endif
-
-                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
-
-                            metadataTable.SetValue(metadatumElement, evaluatedValue);
-                            metadataList.Add(new Pair<ProjectMetadataElement, string>(metadatumElement, evaluatedValue));
-                        }
-
-                        // Apply those metadata to each item
-                        // Note that several items could share the same metadata objects
-
-                        // Set all the items at once to make a potential copy-on-write optimization possible.
-                        // This is valuable in the case where one item element evaluates to
-                        // many items (either by semicolon or wildcards)
-                        // and that item also has the same piece/s of metadata for each item.
-                        _itemFactory.SetMetadata(metadataList, itemsToAdd);
-
-                        // End of legal area for metadata expressions.
-                        _expander.Metadata = null;
-                    }
-                }
-
-                listBuilder.AddRange(itemsToAdd.Select(item => new ItemData(item, _elementOrder, _conditionResult)));
-            }
-
-            IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
-            {
-                LazyItemList itemList;
-                if (_referencedItemLists.TryGetValue(itemType, out itemList))
-                {
-                    return itemList.GetItems(globsToIgnore)
-                        .Where(ItemData => ItemData.ConditionResult)
-                        .Select(itemData => itemData.Item)
-                        .ToList();
-                }
-                else
-                {
-                    return ImmutableList<I>.Empty;
-                }
+                ItemElement = itemElement;
+                ItemType = itemElement.ItemType;
             }
         }
 
-        class IncludeOperationBuilder
+        class OperationBuilderWithMetadata : OperationBuilder
         {
-            public int ElementOrder { get; set; }
-            public ProjectItemElement ItemElement { get; set; }
-            public string RootDirectory { get; set; }
-            public string ItemType { get; set; }
-            public bool ConditionResult { get; set; }
+            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
 
-            public ImmutableList<Tuple<IncludeOperationType, object>>.Builder Operations = ImmutableList.CreateBuilder<Tuple<IncludeOperationType, object>>();
-            //public ImmutableList<string>.Builder Values { get; set; } = ImmutableList.CreateBuilder<string>();
-            //public ImmutableList<string>.Builder Globs { get; set; } = ImmutableList.CreateBuilder<string>();
-            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
-            //public ImmutableList<ExpressionShredder.ItemExpressionCapture>.Builder ItemExpressions { get; set; } = ImmutableList.CreateBuilder<ExpressionShredder.ItemExpressionCapture>();
-            public ImmutableList<string>.Builder Excludes { get; set; } = ImmutableList.CreateBuilder<string>();
-            public ImmutableList<ProjectMetadataElement>.Builder Metadata;
-
-            public IncludeOperation CreateOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+            public OperationBuilderWithMetadata(ProjectItemElement itemElement) : base(itemElement)
             {
-                return new IncludeOperation(this, lazyEvaluator);
             }
         }
 
@@ -512,29 +249,48 @@ namespace Microsoft.Build.Evaluation
 
         public void ProcessItemElement(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            if (itemElement.Include != null)
+            LazyItemOperation operation = null;
+
+            if (itemElement.IncludeLocation != null)
             {
-                ProcessItemElementInclude(rootDirectory, itemElement, conditionResult);
+                operation = BuildIncludeOperation(rootDirectory, itemElement, conditionResult);
+            }
+            else if (itemElement.RemoveLocation != null)
+            {
+                operation = BuildRemoveOperation(rootDirectory, itemElement);
+            }
+            else if (itemElement.UpdateLocation != null)
+            {
+                operation = BuildUpdateOperation(rootDirectory, itemElement);
             }
             else
             {
                 throw new NotImplementedException();
             }
+
+            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
+            LazyItemList newList = new LazyItemList(previousItemList, operation);
+            _itemLists[itemElement.ItemType] = newList;
         }
 
-        void ProcessItemElementInclude(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
+        UpdateOperation BuildUpdateOperation(string rootDirectory, ProjectItemElement itemElement)
         {
-            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder();
-            operationBuilder.ElementOrder = _nextElementOrder++;
-            operationBuilder.ItemElement = itemElement;
-            operationBuilder.RootDirectory = rootDirectory;
-            operationBuilder.ItemType = itemElement.ItemType;
-            operationBuilder.ConditionResult = conditionResult;
+            OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata(itemElement);
 
+            // Proces Update attribute
+            ProcessItemSpec(operationBuilder, itemElement.Update, itemElement.UpdateLocation);
+
+            ProcessMetadataElements(itemElement, operationBuilder);
+
+            return new UpdateOperation(operationBuilder, this);
+        }
+
+        void ProcessItemSpec(OperationBuilder operationBuilder, string itemSpec, ElementLocation itemSpecLocation)
+        {
             //  Code corresponds to Evaluator.CreateItemsFromInclude
 
             // STEP 1: Expand properties in Include
-            string evaluatedIncludeEscaped = _outerExpander.ExpandIntoStringLeaveEscaped(itemElement.Include, ExpanderOptions.ExpandProperties, itemElement.IncludeLocation);
+            string evaluatedIncludeEscaped = _outerExpander.ExpandIntoStringLeaveEscaped(itemSpec, ExpanderOptions.ExpandProperties, itemSpecLocation);
 
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedIncludeEscaped.Length > 0)
@@ -545,7 +301,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     bool isItemListExpression;
-                    ProcessSingleItemVectorExpressionForInclude(includeSplitEscaped, operationBuilder, itemElement.IncludeLocation, out isItemListExpression);
+                    ProcessSingleItemVectorExpressionForInclude(includeSplitEscaped, operationBuilder, itemSpecLocation, out isItemListExpression);
 
                     if (!isItemListExpression)
                     {
@@ -563,31 +319,44 @@ namespace Microsoft.Build.Evaluation
                             // happen because '*' is an illegal character to have in a filename.
 
                             // Just return the original string.
-                            operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Value, (object) includeSplitEscaped));
+                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Value, (object) includeSplitEscaped));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
                             // Unescape before handing it to the filesystem.
                             string filespecUnescaped = EscapingUtilities.UnescapeAll(includeSplitEscaped);
-                            operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Glob, (object)filespecUnescaped));
+                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Glob, (object)filespecUnescaped));
                         }
                         else
                         {
                             // No real wildcards means we just return the original string.  Don't even bother 
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
-                            operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Value, (object) includeSplitEscaped));
+                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Value, (object) includeSplitEscaped));
                         }
 
                     }
                 }
             }
+        }
+
+        IncludeOperation BuildIncludeOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
+        {
+            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder(itemElement);
+            operationBuilder.ElementOrder = _nextElementOrder++;
+            operationBuilder.RootDirectory = rootDirectory;
+            operationBuilder.ConditionResult = conditionResult;
+
+            // Process include
+            ProcessItemSpec(operationBuilder, itemElement.Include, itemElement.IncludeLocation);
 
             //  Code corresponds to Evaluator.EvaluateItemElement
 
-            // STEP 4: Evaluate, split, expand and subtract any Exclude
+            // Process exclude (STEP 4: Evaluate, split, expand and subtract any Exclude)
             if (itemElement.Exclude.Length > 0)
             {
+                //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                //  if so we need to add the right item reference
                 string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
 
                 if (evaluatedExclude.Length > 0)
@@ -595,7 +364,7 @@ namespace Microsoft.Build.Evaluation
                     IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
 
                     operationBuilder.Excludes.AddRange(excludeSplits);
-                    
+
                     foreach (var excludeSplit in excludeSplits)
                     {
                         AddItemReferences(excludeSplit, operationBuilder, itemElement.ExcludeLocation);
@@ -603,10 +372,16 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            // STEP 5: Evaluate each metadata XML and apply them to each item we have so far
+            // Process Metadata (STEP 5: Evaluate each metadata XML and apply them to each item we have so far)
+            ProcessMetadataElements(itemElement, operationBuilder);
+
+            return new IncludeOperation(operationBuilder, this);
+        }
+
+        private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
+        {
             if (itemElement.HasMetadata)
             {
-                operationBuilder.Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
                 List<string> values = new List<string>(itemElement.Metadata.Count * 2);
@@ -630,13 +405,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-
-            var operation = operationBuilder.CreateOperation(this);
-
-            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
-            LazyItemList newList = new LazyItemList(previousItemList, operation);
-            _itemLists[itemElement.ItemType] = newList;
-            
         }
 
         void AddItemReferences(string expression, IncludeOperationBuilder operationBuilder, IElementLocation elementLocation)
@@ -659,7 +427,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void ProcessSingleItemVectorExpressionForInclude(string expression, IncludeOperationBuilder operationBuilder, IElementLocation elementLocation, out bool isItemListExpression)
+        void ProcessSingleItemVectorExpressionForInclude(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation, out bool isItemListExpression)
         {
             isItemListExpression = false;
 
@@ -680,13 +448,13 @@ namespace Microsoft.Build.Evaluation
 
                 isItemListExpression = true;
 
-                operationBuilder.Operations.Add(Tuple.Create(IncludeOperationType.Expression, (object) match));
+                operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Expression, (object) match));
 
                 AddReferencedItemLists(operationBuilder, match);
             }
         }
 
-        void AddReferencedItemLists(IncludeOperationBuilder operationBuilder, ExpressionShredder.ItemExpressionCapture match)
+        void AddReferencedItemLists(OperationBuilder operationBuilder, ExpressionShredder.ItemExpressionCapture match)
         {
             if (match.ItemType != null)
             {
@@ -705,5 +473,13 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        RemoveOperation BuildRemoveOperation(string rootDirectory, ProjectItemElement itemElement)
+        {
+            OperationBuilder operationBuilder = new OperationBuilder(itemElement);
+
+            ProcessItemSpec(operationBuilder, itemElement.Remove, itemElement.RemoveLocation);
+
+            return new RemoveOperation(operationBuilder, this);
+        }
     }
 }

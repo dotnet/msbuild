@@ -835,6 +835,43 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal(String.Empty, items[0].GetMetadataValue("m2"));
         }
 
+        [Fact]
+        public void UpdateShouldRespectConditions()
+        {
+            string content = @"
+                      <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                          <ItemGroup>
+                              <i Include='a;b'>
+                                  <m1>m1_contents</m1>
+                              </i>
+                              <i Update='a' Condition='1 == 1'>
+                                  <m1>from_true</m1>
+                              </i>
+                              <i Update='b' Condition='1 == 0'>
+                                  <m1>from_false_on_item</m1>
+                              </i>
+                              <i Update='b'>
+                                  <m1 Condition='1 == 0'>from_false_on_metadata</m1>
+                              </i>
+                          </ItemGroup>
+                      </Project>";
+
+            var items = GetItems(content);
+
+            var expectedInitial = new Dictionary<string, string>
+            {
+                {"m1", "m1_contents"}
+            };
+
+            var expectedUpdateFromTrue = new Dictionary<string, string>
+            {
+                {"m1", "from_true"}
+            };
+
+            AssertItemHasMetadata(expectedUpdateFromTrue, items[0]);
+            AssertItemHasMetadata(expectedInitial, items[1]);
+        }
+
         /// <summary>
         /// Gets the first item of type 'i'
         /// </summary>
@@ -874,6 +911,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance projectInstance = project.CreateProjectInstance();
             ProjectItemInstance item = projectInstance.AddItem("i", "i1");
             return item;
+        }
+
+        private static void AssertItemHasMetadata(Dictionary<string, string> expected, ProjectItemInstance item)
+        {
+            Assert.Equal(expected.Keys.Count, item.DirectMetadataCount);
+
+            foreach (var key in expected.Keys)
+            {
+                Assert.Equal(expected[key], item.GetMetadataValue(key));
+            }
         }
     }
 }

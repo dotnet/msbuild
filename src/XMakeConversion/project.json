@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+  },
+  "frameworks": {
+    "net46": { }
+  },
+  "runtimes": {
+    "win": {},
+    "win-x86": {},
+    "win-x64": {},
+  }
+}

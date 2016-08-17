@@ -125,6 +125,7 @@
     <Compile Include="MockTypeLib.cs" />
     <Compile Include="ResGen_Tests.cs" />
     <Compile Include="ResGenDependencies_Tests.cs" />
+	<Compile Include="AssemblyDependency\AssemblyFoldersFromConfig_Tests.cs" />
     <Compile Include="AssemblyDependency\FilePrimary.cs" />
     <Compile Include="AssemblyDependency\GlobalAssemblyCacheTests.cs" />
     <Compile Include="AssemblyDependency\InstalledSDKResolverFixture.cs" />

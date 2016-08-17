@@ -25,6 +25,18 @@
       <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
     <!-- Source Files -->
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
+      <Link>AssemblyFolders\AssemblyFoldersEx.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
+      <Link>AssemblyFolders\AssemblyFoldersFromConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
+      <Link>AssemblyFolders\Serialization\AssemblyFolderCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
+      <Link>AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>EnvironmentUtilities.cs</Link>
     </Compile>
@@ -35,10 +47,6 @@
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFoldersEx.cs">
-      <Link>AssemblyFoldersEx.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
@@ -163,7 +171,8 @@
     <Compile Include="AppDomainIsolatedTask.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AssemblyFoldersExInfo.cs" />
+    <Compile Include="AssemblyFolders\AssemblyFoldersExInfo.cs" />
+    <Compile Include="AssemblyFolders\AssemblyFoldersFromConfigInfo.cs" />
     <Compile Include="AssemblyInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -227,14 +236,11 @@
     </Compile>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
-
     <!-- Resource Files -->
-
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-
     <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
@@ -245,7 +251,8 @@
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.XML" />
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>

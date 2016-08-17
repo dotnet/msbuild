@@ -22,6 +22,7 @@ using Microsoft.Build.Shared;
 using Task = System.Threading.Tasks.Task;
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock. 
 using ProvenanceResultTupleList = System.Collections.Generic.List<System.Tuple<string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int>>;
+using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Generic.HashSet<string>>>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -2805,7 +2806,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void GetItemProvenanceShouldMatchStringsWithIllegalPathCharacters()
+        public void GetItemProvenanceShouldNotFailWithIllegalPathCharacters()
         {
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
@@ -2821,7 +2822,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void GetItemProvenanceShouldWorkWithStringsExceedingMaxPath()
+        public void GetItemProvenanceShouldNotFailWithStringsExceedingMaxPath()
         {
             var longString = new string('a', 1000);
 
@@ -2856,6 +2857,169 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             AssertProvenanceResult(expected, project, "A");
+        }
+
+        [Fact]
+        public void GetItemProvenanceShouldWorkWithUpdateElements()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1.foo`/>
+
+                    <B Update=`1.bar`/>
+                    <C Update=`1.foo`/>
+                    <D Update=`1.foo;*.foo`/>
+                    <E Update=`$(P);@(A)`/>
+                  </ItemGroup>
+                  <PropertyGroup>
+                    <P>*.foo;@(A)</P>
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("C", Operation.Update, Provenance.StringLiteral, 1),
+                Tuple.Create("D", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 2),
+                Tuple.Create("E", Operation.Update, Provenance.Glob | Provenance.Inconclusive, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo");
+        }
+		
+		[Fact]
+        public void GetItemProvenanceShouldWorkWithRemoveElements()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1.foo`/>
+
+                    <B Remove=`1.bar`/>
+                    <C Remove=`1.foo`/>
+                    <D Remove=`1.foo;*.foo`/>
+                    <E Remove=`$(P);@(A)`/>
+                  </ItemGroup>
+                  <PropertyGroup>
+                    <P>*.foo;@(A)</P>
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                Tuple.Create("C", Operation.Remove, Provenance.StringLiteral, 1),
+                Tuple.Create("D", Operation.Remove, Provenance.StringLiteral | Provenance.Glob, 2),
+                Tuple.Create("E", Operation.Remove, Provenance.Glob | Provenance.Inconclusive, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "1.foo");
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldNotFindGlobsIfThereAreNone()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1;2;3` Exclude=`1;*;3`/>
+                    <B Include=`a;b;c` Exclude=`**`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList();
+
+            AssertGlobResult(expected, project);
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldFindDirectlyReferencedGlobs()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.a;1;*;2;**;` Exclude=`1;*;3`/>
+                    <B Include=`a;b;c` Exclude=`**`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expectedExcludes = new HashSet<string> { "1", "*", "3" };
+            var expected = new GlobResultList
+            {
+                Tuple.Create("A", "*.a", expectedExcludes),
+                Tuple.Create("A", "*", expectedExcludes),
+                Tuple.Create("A", "**", expectedExcludes)
+            };
+
+            AssertGlobResult(expected, project);
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldFindIndirectlyReferencedGlobsFromProperties()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`$(P)` Exclude=`$(P)`/>
+                  </ItemGroup>
+                  <PropertyGroup>
+                    <P>*</P>
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList
+            {
+                Tuple.Create("A", "*", new HashSet<string> {"*"}),
+            };
+
+            AssertGlobResult(expected, project);
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldNotFindIndirectlyReferencedGlobsFromItems()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*`/>
+                    <B Include=`@(A)`/>
+                    <C Include=`**` Exclude=`@(A)`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList
+            {
+                Tuple.Create("A", "*", new HashSet<string>()),
+                Tuple.Create("C", "**", new HashSet<string>()),
+            };
+
+            AssertGlobResult(expected, project);
+        }
+
+        private void AssertGlobResult(GlobResultList expected, string project)
+        {
+            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();
+
+            AssertGlobResultsEqual(expected, globs);
+        }
+
+        private static void AssertGlobResultsEqual(GlobResultList expected, List<GlobResult> globs)
+        {
+            Assert.Equal(expected.Count, globs.Count);
+
+            for (var i = 0; i < expected.Count; i++)
+            {
+                Assert.Equal(expected[i].Item1, globs[i].ItemElement.ItemType);
+                Assert.Equal(expected[i].Item2, globs[i].Glob);
+                Assert.Equal(expected[i].Item3, globs[i].Excludes);
+            }
         }
 
         private static void AssertProvenanceResult(ProvenanceResultTupleList expected, string project, string itemValue)
