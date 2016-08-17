@@ -41,6 +41,7 @@
 
     <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
     <BuildToolsTaskDir>$(ToolsDir)net45\</BuildToolsTaskDir>
+    <PackagingTaskDir>$(ToolsDir)net45\</PackagingTaskDir>
     <CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>    
     <MicroBuildDir>$(PackagesDir)\MicroBuild.Core.$(MicroBuildVersion)\build\</MicroBuildDir>
     <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning.$(GitVersioningVersion)\build\</GitVersioningDir>
