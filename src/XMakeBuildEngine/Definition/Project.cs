@@ -1224,18 +1224,45 @@ namespace Microsoft.Build.Evaluation
         {
             Func<IElementLocation, Func<string, ExpanderOptions, string>> expandForXmlLocation = (l) => (s, o) => _data.Expander.ExpandIntoStringLeaveEscaped(s, o, l);
 
-            var includeResult = ComputeProvenanceResult(itemToMatch, itemElement.Include, expandForXmlLocation(itemElement.IncludeLocation));
-
-            if (includeResult == null)
+            Func<string, IElementLocation, Operation, ProvenanceResult> singleItemSpecProvenance = (itemSpec, elementLocation, operation) =>
             {
-                return null;
-            }
+                if (elementLocation == null)
+                {
+                    return null;
+                }
 
-            var excludeResult = ComputeProvenanceResult(itemToMatch, itemElement.Exclude, expandForXmlLocation(itemElement.ExcludeLocation));
+                var result = ComputeProvenanceResult(itemToMatch, itemSpec, expandForXmlLocation(elementLocation));
 
-            return excludeResult != null
-                ? new ProvenanceResult(itemElement, Operation.Exclude, excludeResult.Item1, excludeResult.Item2)
-                : new ProvenanceResult(itemElement, Operation.Include, includeResult.Item1, includeResult.Item2);
+                return result?.Item2 > 0
+                    ? new ProvenanceResult(itemElement, operation, result.Item1, result.Item2)
+                    : null;
+            };
+
+            Func<ProvenanceResult>[] provenanceProviders =
+            {
+                // provenance provider for include item elements
+                () =>
+                {
+                    var includeResult = singleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
+
+                    if (includeResult == null)
+                    {
+                        return null;
+                    }
+
+                    var excludeResult = singleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude);
+
+                    return excludeResult ?? includeResult;
+                },
+
+                // provenance provider for update item elements
+                () => singleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update),
+                
+                // provenance provider for remove item elements
+                () => singleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove)
+            };
+
+            return provenanceProviders.Select(provider => provider()).FirstOrDefault(provenanceResult => provenanceResult != null);
         }
 
         private Tuple<Provenance, int> ComputeProvenanceResult(string itemToMatch, string itemSpecToLookIn, Func<string, ExpanderOptions, string> expand)
@@ -3522,7 +3549,9 @@ namespace Microsoft.Build.Evaluation
     public enum Operation
     {
         Include, 
-        Exclude
+        Exclude,
+        Update,
+        Remove
     }
 
     /// <summary>
