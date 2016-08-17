@@ -13,6 +13,10 @@
 
     <OutDir Condition="'$(OutDir)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
+    <PackagesLayoutDir>$(OutDir)\PackagesLayout\</PackagesLayoutDir>
+    <PackagesLayoutToolsDir>$(PackagesLayoutDir)tools\</PackagesLayoutToolsDir>
+    <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
+    <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
 
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
@@ -26,5 +30,10 @@
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
 
     <NuGet_Packages Condition=" '$(NuGet_Packages)' == ''">$(RepositoryRootDirectory)packages\</NuGet_Packages>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Assembly signing isn't supported by non-Windows MSBuild. Disable until supported. See #55 (https://github.com/dotnet/sdk/issues/55) -->
+    <SignAssembly Condition="'$(SignAssembly)'=='' AND '$(OS)'=='Windows_NT'">true</SignAssembly>
   </PropertyGroup>
 </Project>

@@ -11,7 +11,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftDotNetCoreBuildTasksDirectory>$(MSBuildThisFileDirectory)../../tools/netstandard1.3/</MicrosoftDotNetCoreBuildTasksDirectory>
+    <MicrosoftDotNetCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../tools/</MicrosoftDotNetCoreBuildTasksDirectoryRoot>
+    <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</MicrosoftDotNetCoreBuildTasksTFM>
+    <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MicrosoftDotNetCoreBuildTasksTFM)' == ''">net46</MicrosoftDotNetCoreBuildTasksTFM>
+    <MicrosoftDotNetCoreBuildTasksDirectory>$(MicrosoftDotNetCoreBuildTasksDirectoryRoot)$(MicrosoftDotNetCoreBuildTasksTFM)/</MicrosoftDotNetCoreBuildTasksDirectory>
     <MicrosoftDotNetCoreBuildTasksAssembly>$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll</MicrosoftDotNetCoreBuildTasksAssembly>
   </PropertyGroup>
 
@@ -34,7 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(OutputType)' == 'exe' ">true</GenerateRuntimeConfigurationFiles>
     <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
-    
+
     <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
     <VersionSuffix Condition=" '$(VersionSuffix)' == '' "></VersionSuffix>
     <Version Condition=" '$(Version)' == '' and '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
@@ -42,41 +45,40 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <_ProjectDepsFilePath>$(TargetDir)$(AssemblyName).deps.json</_ProjectDepsFilePath>
-    <_ProjectRuntimeConfigFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFilePath>
+    <_ProjectDepsFileName>$(AssemblyName).deps.json</_ProjectDepsFileName>
+    <_ProjectDepsFilePath>$(TargetDir)$(_ProjectDepsFileName)</_ProjectDepsFilePath>
+    <_ProjectRuntimeConfigFileName>$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFileName>
+    <_ProjectRuntimeConfigFilePath>$(TargetDir)$(_ProjectRuntimeConfigFileName)</_ProjectRuntimeConfigFilePath>
     <_ProjectRuntimeConfigDevFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</_ProjectRuntimeConfigDevFilePath>
   </PropertyGroup>
 
   <PropertyGroup>
     <CoreBuildDependsOn>
       $(CoreBuildDependsOn);
-      GenerateDependencyFile;
-      GenerateRuntimeConfigurationFiles
+      GenerateBuildDependencyFile;
+      GenerateBuildRuntimeConfigurationFiles
     </CoreBuildDependsOn>
   </PropertyGroup>
 
   <!--
     ============================================================
-                                        GenerateDependencyFile
+                                        GenerateBuildDependencyFile
 
-    Generates the $(project).deps.json file
+    Generates the $(project).deps.json file during Build
     ============================================================
     -->
 
-  <Target Name="GenerateDependencyFile"
+  <Target Name="GenerateBuildDependencyFile"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectLockFile)"
           Outputs="$(_ProjectDepsFilePath)">
 
-    <!--
-    TODO: https://github.com/dotnet/sdk/issues/19 - Get RuntimeIdentifier
-    -->
     <GenerateDepsFile LockFilePath="$(ProjectLockFile)"
                       DepsFilePath="$(_ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
-                      RuntimeIdentifier="" />
+                      RuntimeIdentifier="$(RuntimeIdentifier)" />
 
     <!--
     TODO: https://github.com/dotnet/sdk/issues/21
@@ -87,13 +89,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        GenerateRuntimeConfigurationFiles
+                                        GenerateBuildRuntimeConfigurationFiles
 
-    Generates the $(project).runtimeconfig.json and $(project).runtimeconfig.dev.json files
+    Generates the $(project).runtimeconfig.json and $(project).runtimeconfig.dev.json files during Build
     ============================================================
     -->
 
-  <Target Name="GenerateRuntimeConfigurationFiles"
+  <Target Name="GenerateBuildRuntimeConfigurationFiles"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="$(ProjectLockFile);$(UserRuntimeConfig)"
           Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
@@ -101,6 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateRuntimeConfigurationFiles LockFilePath="$(ProjectLockFile)"
                                        RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
+                                       RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
   </Target>
@@ -126,5 +129,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </RunInformation>
     </ItemGroup>
   </Target>
+
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.DotNet.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.DotNet.Publish.targets')" />
 
 </Project>
