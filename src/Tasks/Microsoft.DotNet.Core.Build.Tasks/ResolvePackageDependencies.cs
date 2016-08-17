@@ -90,24 +90,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             get; set;
         }
 
-        /// <summary>
-        /// Filter processed items to those that match specified frameworks.
-        /// If this is not provided, all frameworks are returned.
-        /// </summary>
-        public string[] TargetFrameworks
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Filter processed items to those that match specified runtime identifiers.
-        /// If this is not provided, all RIDs are used.
-        /// </summary>
-        public string[] RuntimeIdentifiers
-        {
-            get; set;
-        }
-
         #endregion
 
         /// <summary>
