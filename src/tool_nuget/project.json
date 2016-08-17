@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0-featmsbuild-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    },
+    "NuGet.CommandLine.XPlat": "3.6.0-beta.1.msbuild.1"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+    }
+  }
+}

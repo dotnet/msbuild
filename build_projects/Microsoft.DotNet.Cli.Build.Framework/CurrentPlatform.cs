@@ -1,6 +1,7 @@
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build.Framework
 {
@@ -103,6 +104,11 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         public static bool IsPlatform(BuildPlatform platform, string version = null)
         {
             return IsPlatform(platform) && (version == null || IsVersion(version));
+        }
+
+        public static bool IsAnyPlatform(params BuildPlatform[] platforms)
+        {
+            return platforms.Any(p => IsPlatform(p));
         }
 
         public static bool IsPlatform(BuildPlatform platform)

@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Run.Tests
             TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine(RunTestsBase, "TestAppMultiTargetNoCoreClr"))
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
-            new RunCommand(instance.TestRoot).Execute().Should().Fail();
+            new RunCommand(instance.TestRoot).ExecuteWithCapturedOutput().Should().Fail();
         }
 
         [Fact]

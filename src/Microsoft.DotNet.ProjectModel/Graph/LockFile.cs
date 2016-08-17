@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
         public IList<LockFileProjectLibrary> ProjectLibraries { get; set; } = new List<LockFileProjectLibrary>();
         public IList<LockFileTarget> Targets { get; set; } = new List<LockFileTarget>();
         public ExportFile ExportFile { get; set; }
+        public IList<LockFilePackageFolder> PackageFolders { get; set; } = new List<LockFilePackageFolder>();
 
         public LockFile(string lockFilePath)
         {

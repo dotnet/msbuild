@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
  
-        public TempDirectory CreateDirectory()
+        public DisposableDirectory CreateDirectory()
         {
             var dir = new DisposableDirectory(this);
             _temps.Add(dir);

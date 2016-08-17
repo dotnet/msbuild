@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.DependencyModel
                 .Select(export => export.Library.Identity)
                 .Distinct()
                 .Select(identity => new Dependency(identity.Name, identity.Version.ToString()))
-                .ToDictionary(dependency => dependency.Name);
+                .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
 
             var compilationOptions = compilerOptions != null
                 ? GetCompilationOptions(compilerOptions)

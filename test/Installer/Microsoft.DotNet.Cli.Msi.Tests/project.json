@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "xunit": "2.1.0",
+        "xunit": "2.2.0-beta3-build3330",
         "xunit.runner.console": "2.1.0",
         "Microsoft.Deployment.WindowsInstaller": "1.0.0"
     },

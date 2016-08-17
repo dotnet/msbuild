@@ -8,9 +8,7 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "Microsoft.Extensions.DependencyModel": {
-      "target": "project"
-    }
+    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000914"
   },
   "frameworks": {
     "netcoreapp1.0": {

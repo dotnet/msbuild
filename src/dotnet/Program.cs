@@ -9,8 +9,7 @@ using System.Runtime.Loader;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.ProjectModel.Server;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
@@ -19,6 +18,7 @@ using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
 using Microsoft.DotNet.Tools.Publish;
 using Microsoft.DotNet.Tools.Restore;
+using Microsoft.DotNet.Tools.Restore3;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
 using NuGet.Frameworks;
@@ -35,11 +35,13 @@ namespace Microsoft.DotNet.Cli
             ["new"] = NewCommand.Run,
             ["nuget"] = NuGetCommand.Run,
             ["pack"] = PackCommand.Run,
-            ["projectmodel-server"] = ProjectModelServerCommand.Run,
             ["publish"] = PublishCommand.Run,
             ["restore"] = RestoreCommand.Run,
             ["run"] = RunCommand.Run,
-            ["test"] = TestCommand.Run
+            ["test"] = TestCommand.Run,
+            ["build3"] = Build3Command.Run,
+            ["run3"] = Run3Command.Run,
+            ["restore3"] = Restore3Command.Run,
         };
 
         public static int Main(string[] args)

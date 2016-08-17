@@ -18,12 +18,12 @@ This section describes placeholders used inside this spec.
 # Build Output
 Each official, successful build should create and upload packages to location described by following URLs:
 ```
-https://dotnetcli.blob.core.windows.net/dotnet/<Channel>/<Version>/dotnet.<OSID>.<Version>.<Extension>
+https://dotnetcli.azureedge.net/dotnet/<Channel>/<Version>/dotnet.<OSID>.<Version>.<Extension>
 
 Currently:
-https://dotnetcli.blob.core.windows.net/dotnet/<Channel>/Binaries/<Version>/dotnet-sharedframework-<OSName>-<Architecture>.<Version>.zip
-https://dotnetcli.blob.core.windows.net/dotnet/<Channel>/Binaries/<Version>/dotnet-host-<OSName>-<Architecture>.<Version>.zip
-https://dotnetcli.blob.core.windows.net/dotnet/<Channel>/Binaries/<Version>/dotnet-<OSName>-<Architecture>.<Version>.zip
+https://dotnetcli.azureedge.net/dotnet/<Channel>/Binaries/<Version>/dotnet-sharedframework-<OSName>-<Architecture>.<Version>.zip
+https://dotnetcli.azureedge.net/dotnet/<Channel>/Binaries/<Version>/dotnet-host-<OSName>-<Architecture>.<Version>.zip
+https://dotnetcli.azureedge.net/dotnet/<Channel>/Binaries/<Version>/dotnet-<OSName>-<Architecture>.<Version>.zip
 ```
 Content of the package should contain binaries which layout will be described later.
 
@@ -105,7 +105,7 @@ WIP: Exact script action description.
 | -DryRun | --dry-run | `<not set>` | If switch present, installation will not be performed and instead deterministic invocation with specific version and zip location will be displayed. |
 | -NoPath | --no-path | `<not set>` | If switch present the script will not set PATH environmental variable for the current process. |
 | -Verbose | --verbose | `<not set>` | If switch present displays diagnostics information. |
-| -AzureFeed | --azure-feed | See description | Azure feed URL, default: `https://dotnetcli.blob.core.windows.net/dotnet` |
+| -AzureFeed | --azure-feed | See description | Azure feed URL, default: `https://dotnetcli.azureedge.net/dotnet` |
 
 ### Script location
 WIP: permanent link for obtaining latest version
@@ -143,7 +143,7 @@ Version files can be found in multiple places:
 
 URL:
 ```
-https://dotnetcli.blob.core.windows.net/dotnet/<Channel>/<VersionPointer>.<OSID>.version
+https://dotnetcli.azureedge.net/dotnet/<Channel>/<VersionPointer>.<OSID>.version
 ```
 
 ### File content
@@ -156,7 +156,7 @@ Each version file contains two lines describing the build:
 ## Version badge
 Version badge (SVG) is an image with textual representation of `<Version>`. It can be found under following URL:
 ```
-https://dotnetcli.blob.core.windows.net/dotnet/<Channel>/<VersionPointer>.<OSID>.svg
+https://dotnetcli.azureedge.net/dotnet/<Channel>/<VersionPointer>.<OSID>.svg
 ```
 
 ## Questions/gaps

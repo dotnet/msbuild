@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Target Name="SetupGenerateDebInputsOutputs">
+        <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
+            <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
+        </Exec>
+
+        <!-- Workaround for Ubuntu16 Jenkins https://github.com/dotnet/core-setup/issues/167 -->
+        <Message Condition=" '$(DebuildPresent)'  != 'true' "
+                 Text="Debuild Not found, Debian packages will not be built."
+                 Importance="High" />
+
+        <PropertyGroup>
+            <DebuildPresent>false</DebuildPresent>
+            <DebuildPresent Condition=" '$(DebuildExitCode)' == '0' ">true</DebuildPresent>
+
+            <DebianPackagingScript>$(RepoRoot)/scripts/package/package-debian.sh</DebianPackagingScript>
+            <ManpagesDirectory>$(RepoRoot)/Documentation/manpages</ManpagesDirectory>
+
+            <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
+            <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
+
+            <SdkDebianPackageName>dotnet-dev-$(SdkVersion)</SdkDebianPackageName>
+            <SharedFrameworkDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkVersion)</SharedFrameworkDebianPackageName>
+            <SharedFrameworkDebianPackageName>$(SharedFrameworkDebianPackageName.ToLower())</SharedFrameworkDebianPackageName>
+            <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrVersion)</HostFxrDebianPackageName>
+            <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
+            <SharedHostDebianPackageName>dotnet-host</SharedHostDebianPackageName>
+
+            <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
+
+            <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
+            <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
+            <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
+        </PropertyGroup>
+
+        <ItemGroup>
+          <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
+        </ItemGroup>
+
+        <!-- Consumed By Publish -->
+        <ItemGroup>
+          <GeneratedInstallers Include="$(SdkInstallerFile)" />
+        </ItemGroup>
+
+        <ItemGroup>
+            <SdkDebInputFiles Include="$(SdkLayoutOutputDirectory)/**/*" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="GenerateSdkDeb"
+        Condition=" '$(OSName)' == 'ubuntu' and '$(DebuildPresent)'  == 'true' "
+        Inputs="@(SdkDebInputFiles);"
+        Outputs="$(SdkInstallerFile)" >
+
+        <!-- Install Packages -->
+        <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
+        <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
+        <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
+
+        <Exec Command="'$(DebianPackagingScript)'
+                       -v '$(SdkVersion)'
+                       -i '$(SdkLayoutOutputDirectory)'
+                       -o '$(SdkInstallerFile)'
+                       -p '$(SdkDebianPackageName)'
+                       -b '$(SdkBrandName)'
+                       -m '$(ManpagesDirectory)'
+                       --framework-debian-package-name '$(SharedFrameworkDebianPackageName)'
+                       --framework-nuget-name '$(SharedFrameworkName)'
+                       --framework-nuget-version '$(SharedFrameworkVersion)'
+                       --obj-root '$(SdkDebianIntermediateDirectory)'" />
+
+        <!-- Remove Packages -->
+        <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
+        <Exec Command="sudo dpkg -r $(SharedFrameworkDebianPackageName)" />
+        <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
+        <Exec Command="sudo dpkg -r $(SharedHostDebianPackageName)" />
+    </Target>
+
+    <Target Name="TestSdkDeb"
+        Condition=" '$(OSName)' == 'ubuntu' and '$(DebuildPresent)'  == 'true' "
+        Inputs="$(DownloadedSharedHostInstallerFile);
+                $(DownloadedHostFxrInstallerFile);
+                $(DownloadedSharedFrameworkInstallerFile);
+                $(SdkInstallerFile);"
+        Outputs="$(DebianTestResultsXmlFile)" >
+
+        <!-- Install Packages -->
+        <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
+        <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
+        <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
+        <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
+
+        <!-- Run E2E -->
+        <DotNetTest WorkingDirectory="$(EndToEndTestDirectory)"
+                    EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
+                    ToolPath="$(DebianInstalledDirectory)"
+                    Xml="$(DebianTestResultsXmlFile)" />
+
+        <!-- Remove Packages -->
+        <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
+        <Exec Command="sudo dpkg -r $(SharedFrameworkDebianPackageName)" />
+        <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
+        <Exec Command="sudo dpkg -r $(SharedHostDebianPackageName)" />
+    </Target>
+
+    <Target Name="GenerateDebs"
+        DependsOnTargets="Init;
+                          Layout;
+                          SetupGenerateDebInputsOutputs;
+                          GenerateSdkDeb;
+                          TestSdkDeb;"
+        Condition=" '$(OSName)' == 'ubuntu' " />
+</Project>

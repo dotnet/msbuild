@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests
 
             new RestoreCommand()
                 .WithWorkingDirectory(testInstance.TestRoot)
-                .Execute()
+                .ExecuteWithCapturedOutput()
                 .Should()
                 .Fail();
             new DirectoryInfo(testInstance.TestRoot)

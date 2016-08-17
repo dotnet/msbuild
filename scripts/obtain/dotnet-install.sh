@@ -286,9 +286,9 @@ get_latest_version_info() {
     
     local version_file_url=null
     if [ "$shared_runtime" = true ]; then
-        version_file_url="$azure_feed/$azure_channel/dnvm/latest.sharedfx.$osname.$normalized_architecture.version"
+        version_file_url="$uncached_feed/$azure_channel/dnvm/latest.sharedfx.$osname.$normalized_architecture.version"
     else
-        version_file_url="$azure_feed/Sdk/$azure_channel/latest.version"
+        version_file_url="$uncached_feed/Sdk/$azure_channel/latest.version"
     fi
     say_verbose "get_latest_version_info: latest url: $version_file_url"
     
@@ -556,7 +556,8 @@ architecture="<auto>"
 debug_symbols=false
 dry_run=false
 no_path=false
-azure_feed="https://dotnetcli.blob.core.windows.net/dotnet"
+azure_feed="https://dotnetcli.azureedge.net/dotnet"
+uncached_feed="https://dotnetcli.blob.core.windows.net/dotnet"
 verbose=false
 shared_runtime=false
 

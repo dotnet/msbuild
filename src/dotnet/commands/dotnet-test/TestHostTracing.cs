@@ -20,5 +20,10 @@ namespace Microsoft.DotNet.Tools.Test
 
             Source.Listeners.Add(new TextWriterTraceListener(Console.Error));
         }
+
+        public static void ClearListeners()
+        {
+            Source.Listeners.Clear();
+        }
     }
 }
