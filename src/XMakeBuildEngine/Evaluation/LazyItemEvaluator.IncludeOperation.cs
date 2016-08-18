@@ -61,14 +61,14 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                foreach (var fragment in _fragments)
+                foreach (var fragment in _itemSpec.Fragments)
                 {
-                    if (fragment.Item1 == ItemFragmentType.Expression)
+                    if (fragment is ItemExpressionFragment)
                     {
                         // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                         bool throwaway;
                         var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            (ExpressionShredder.ItemExpressionCapture) fragment.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
+                            ((ItemExpressionFragment)fragment).Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
                             false /* do not include null expansion results */, out throwaway, _itemElement.IncludeLocation);
 
                         if (excludeTester != null)
@@ -80,9 +80,9 @@ namespace Microsoft.Build.Evaluation
                             itemsToAdd.AddRange(itemsFromExpression);
                         }
                     }
-                    else if (fragment.Item1 == ItemFragmentType.Value)
+                    else if (fragment is ValueFragment)
                     {
-                        string value = (string)fragment.Item2;
+                        string value = ((ValueFragment)fragment).Value;
 
                         if (excludeTester == null ||
                             !excludeTester.Value(value))
@@ -91,9 +91,9 @@ namespace Microsoft.Build.Evaluation
                             itemsToAdd.Add(item);
                         }
                     }
-                    else if (fragment.Item1 == ItemFragmentType.Glob)
+                    else if (fragment is GlobFragment)
                     {
-                        string glob = (string)fragment.Item2;
+                        string glob = ((GlobFragment)fragment).Glob;
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob,
                             excludePatterns.Count > 0 ? (IEnumerable<string>) excludePatterns.Concat(globsToIgnore) : globsToIgnore);
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        throw new InvalidOperationException(fragment.Item1.ToString());
+                        throw new InvalidOperationException(fragment.GetType().ToString());
                     }
                 }
 

@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
-        Dictionary<string, LazyItemList> _itemLists = new Dictionary<string, LazyItemList>();
+        private Dictionary<string, LazyItemList> _itemLists = new Dictionary<string, LazyItemList>();
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, BuildEventContext buildEventContext, ILoggingService loggingService)
         {
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Evaluation
             _loggingService = loggingService;
         }
 
-        ICollection<ItemData> GetItems(string itemType)
+        private ICollection<ItemData> GetItems(string itemType)
         {
             LazyItemList itemList = GetItemList(itemType);
             if (itemList == null)
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Evaluation
             return EvaluateCondition(element, expanderOptions, parserOptions, _expander, this);
         }
 
-        static bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        private static bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
             if (element.Condition.Length == 0)
             {
@@ -118,9 +118,9 @@ namespace Microsoft.Build.Evaluation
 
         public struct ItemData
         {
-            I _item;
-            int _elementOrder;
-            bool _conditionResult;
+            private I _item;
+            private int _elementOrder;
+            private bool _conditionResult;
 
             public ItemData(I item, int elementOrder, bool conditionResult)
             {
@@ -135,10 +135,10 @@ namespace Microsoft.Build.Evaluation
         }
 
 
-        class LazyItemList
+        private class LazyItemList
         {
-            readonly LazyItemList _previous;
-            readonly LazyItemOperation _operation;
+            private readonly LazyItemList _previous;
+            private readonly LazyItemOperation _operation;
 
             public LazyItemList(LazyItemList previous, LazyItemOperation operation)
             {
@@ -181,35 +181,11 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        //  ItemFragments:
-        //  Add
-        //      Previous value
-        //      List<string> globs
-        //      List<string> values
-        //      List<LazyItemList> itemLists
-        //      List<string> excludes
-        //  Remove
-        //      Previous value
-        //      List<string> globsToRemove
-        //      List<string> valuesToRemove
-        //      List<LazyItemList> itemListsToRemove
-        //  Update - ???
-
-        // TODO: verify whether the ItemElement values are ever escaped
-        enum ItemFragmentType
-        {
-            //  Values are escaped
-            Value,
-            //  Globs are not escaped
-            Glob,
-            Expression
-        }
-
-        class OperationBuilder
+        private class OperationBuilder
         {
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
-            public ImmutableList<Tuple<ItemFragmentType, object>>.Builder ItemFragments = ImmutableList.CreateBuilder<Tuple<ItemFragmentType, object>>();
+            public ItemSpec ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
 
@@ -220,7 +196,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        class OperationBuilderWithMetadata : OperationBuilder
+        private class OperationBuilderWithMetadata : OperationBuilder
         {
             public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
 
@@ -229,7 +205,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        LazyItemList GetItemList(string itemType)
+        private LazyItemList GetItemList(string itemType)
         {
             LazyItemList ret;
             _itemLists.TryGetValue(itemType, out ret);
@@ -271,74 +247,19 @@ namespace Microsoft.Build.Evaluation
             _itemLists[itemElement.ItemType] = newList;
         }
 
-        UpdateOperation BuildUpdateOperation(string rootDirectory, ProjectItemElement itemElement)
+        private UpdateOperation BuildUpdateOperation(string rootDirectory, ProjectItemElement itemElement)
         {
             OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata(itemElement);
 
             // Proces Update attribute
-            ProcessItemSpec(operationBuilder, itemElement.Update, itemElement.UpdateLocation);
+            ProcessItemSpec(itemElement.Update, itemElement.UpdateLocation, operationBuilder);
 
             ProcessMetadataElements(itemElement, operationBuilder);
 
             return new UpdateOperation(operationBuilder, this);
         }
 
-        void ProcessItemSpec(OperationBuilder operationBuilder, string itemSpec, ElementLocation itemSpecLocation)
-        {
-            //  Code corresponds to Evaluator.CreateItemsFromInclude
-
-            // STEP 1: Expand properties in Include
-            string evaluatedIncludeEscaped = _outerExpander.ExpandIntoStringLeaveEscaped(itemSpec, ExpanderOptions.ExpandProperties, itemSpecLocation);
-
-            // STEP 2: Split Include on any semicolons, and take each split in turn
-            if (evaluatedIncludeEscaped.Length > 0)
-            {
-                IList<string> includeSplitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
-
-                foreach (string includeSplitEscaped in includeSplitsEscaped)
-                {
-                    // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                    bool isItemListExpression;
-                    ProcessSingleItemVectorExpression(includeSplitEscaped, operationBuilder, itemSpecLocation, out isItemListExpression);
-
-                    if (!isItemListExpression)
-                    {
-                        // The expression is not of the form "@(X)". Treat as string
-
-                        //  Code corresponds to EngineFileUtilities.GetFileList
-                        bool containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(includeSplitEscaped);
-                        bool containsRealWildcards = FileMatcher.HasWildcards(includeSplitEscaped);
-
-                        if (containsEscapedWildcards && containsRealWildcards)
-                        {
-                            // Umm, this makes no sense.  The item's Include has both escaped wildcards and 
-                            // real wildcards.  What does he want us to do?  Go to the file system and find
-                            // files that literally have '*' in their filename?  Well, that's not going to 
-                            // happen because '*' is an illegal character to have in a filename.
-
-                            // Just return the original string.
-                            operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Value, (object) includeSplitEscaped));
-                        }
-                        else if (!containsEscapedWildcards && containsRealWildcards)
-                        {
-                            // Unescape before handing it to the filesystem.
-                            string filespecUnescaped = EscapingUtilities.UnescapeAll(includeSplitEscaped);
-                            operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Glob, (object)filespecUnescaped));
-                        }
-                        else
-                        {
-                            // No real wildcards means we just return the original string.  Don't even bother 
-                            // escaping ... it should already be escaped appropriately since it came directly
-                            // from the project file
-                            operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Value, (object) includeSplitEscaped));
-                        }
-
-                    }
-                }
-            }
-        }
-
-        IncludeOperation BuildIncludeOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
+        private IncludeOperation BuildIncludeOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
             IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder(itemElement);
             operationBuilder.ElementOrder = _nextElementOrder++;
@@ -346,7 +267,7 @@ namespace Microsoft.Build.Evaluation
             operationBuilder.ConditionResult = conditionResult;
 
             // Process include
-            ProcessItemSpec(operationBuilder, itemElement.Include, itemElement.IncludeLocation);
+            ProcessItemSpec(itemElement.Include, itemElement.IncludeLocation, operationBuilder);
 
             //  Code corresponds to Evaluator.EvaluateItemElement
 
@@ -374,6 +295,21 @@ namespace Microsoft.Build.Evaluation
             ProcessMetadataElements(itemElement, operationBuilder);
 
             return new IncludeOperation(operationBuilder, this);
+        }
+
+        private RemoveOperation BuildRemoveOperation(string rootDirectory, ProjectItemElement itemElement)
+        {
+            OperationBuilder operationBuilder = new OperationBuilder(itemElement);
+
+            ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, operationBuilder);
+
+            return new RemoveOperation(operationBuilder, this);
+        }
+
+        private void ProcessItemSpec(string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
+        {
+            builder.ItemSpec = ItemSpec.BuildItemSpec(itemSpec, _outerExpander, itemSpecLocation);
+            AddReferencedItemLists(builder, builder.ItemSpec.Fragments.OfType<ItemExpressionFragment>().Select(i => i.Capture));
         }
 
         private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
@@ -405,7 +341,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void AddItemReferences(string expression, IncludeOperationBuilder operationBuilder, IElementLocation elementLocation)
+        private void AddItemReferences(string expression, IncludeOperationBuilder operationBuilder, IElementLocation elementLocation)
         {
             if (expression.Length == 0)
             {
@@ -425,34 +361,15 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void ProcessSingleItemVectorExpression(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation, out bool isItemListExpression)
+        private void AddReferencedItemLists(OperationBuilder operationBuilder, IEnumerable<ExpressionShredder.ItemExpressionCapture> captures)
         {
-            isItemListExpression = false;
-
-            //  Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
-            if (expression.Length == 0)
+            foreach (var capture in captures)
             {
-                return;
-            }
-            else
-            {
-                ExpressionShredder.ItemExpressionCapture match = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
-                    expression, ExpanderOptions.ExpandItems, elementLocation);
-
-                if (match == null)
-                {
-                    return;
-                }
-
-                isItemListExpression = true;
-
-                operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Expression, (object) match));
-
-                AddReferencedItemLists(operationBuilder, match);
+                AddReferencedItemLists(operationBuilder, capture);
             }
         }
 
-        void AddReferencedItemLists(OperationBuilder operationBuilder, ExpressionShredder.ItemExpressionCapture match)
+        private void AddReferencedItemLists(OperationBuilder operationBuilder, ExpressionShredder.ItemExpressionCapture match)
         {
             if (match.ItemType != null)
             {
@@ -469,15 +386,6 @@ namespace Microsoft.Build.Evaluation
                     AddReferencedItemLists(operationBuilder, subMatch);
                 }
             }
-        }
-
-        RemoveOperation BuildRemoveOperation(string rootDirectory, ProjectItemElement itemElement)
-        {
-            OperationBuilder operationBuilder = new OperationBuilder(itemElement);
-
-            ProcessItemSpec(operationBuilder, itemElement.Remove, itemElement.RemoveLocation);
-
-            return new RemoveOperation(operationBuilder, this);
         }
     }
 }

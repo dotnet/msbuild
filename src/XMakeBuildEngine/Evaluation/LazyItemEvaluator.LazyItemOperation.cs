@@ -19,13 +19,8 @@ namespace Microsoft.Build.Evaluation
         {
             protected readonly ProjectItemElement _itemElement;
             protected readonly string _itemType;
-
-            //  If Item1 of tuplee is ItemFragmentType.Expression, then Item2 is an ExpressionShredder.ItemExpressionCapture
-            //  Otherwise, Item2 is a string (representing either the value or the glob)
-            protected readonly ImmutableList<Tuple<ItemFragmentType, object>> _fragments;
-
+            protected readonly ItemSpec _itemSpec;
             protected readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-
             protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
             protected readonly EvaluatorData _evaluatorData;
             protected readonly Expander<P, I> _expander;
@@ -34,12 +29,11 @@ namespace Microsoft.Build.Evaluation
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
 
-
             public LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
                 _itemType = builder.ItemType;
-                _fragments = builder.ItemFragments.ToImmutable();
+                _itemSpec = builder.ItemSpec;
                 _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
 
                 _lazyEvaluator = lazyEvaluator;
@@ -236,9 +230,9 @@ namespace Microsoft.Build.Evaluation
                 HashSet<string> itemValuesToMatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 List<string> globsToMatch = new List<string>();
 
-                foreach (var fragment in _fragments)
+                foreach (var fragment in _itemSpec.Fragments)
                 {
-                    if (fragment.Item1 == ItemFragmentType.Expression)
+                    if (fragment is ItemExpressionFragment)
                     {
                         //  TODO: consider optimizing the case where an item element removes all items of its
                         //  item type, for example:
@@ -246,7 +240,7 @@ namespace Microsoft.Build.Evaluation
                         //  In this case we could avoid evaluating previous versions of the list entirely
                         bool throwaway;
                         var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            (ExpressionShredder.ItemExpressionCapture)fragment.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
+                            ((ItemExpressionFragment)fragment).Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
                             false /* do not include null expansion results */, out throwaway, elementLocation);
 
                         foreach (var item in itemsFromExpression)
@@ -254,18 +248,18 @@ namespace Microsoft.Build.Evaluation
                             itemValuesToMatch.Add(item.EvaluatedInclude);
                         }
                     }
-                    else if (fragment.Item1 == ItemFragmentType.Value)
+                    else if (fragment is ValueFragment)
                     {
-                        itemValuesToMatch.Add((string)fragment.Item2);
+                        itemValuesToMatch.Add(((ValueFragment)fragment).Value);
                     }
-                    else if (fragment.Item1 == ItemFragmentType.Glob)
+                    else if (fragment is GlobFragment)
                     {
-                        string glob = (string)fragment.Item2;
+                        string glob = ((GlobFragment)fragment).Glob;
                         globsToMatch.Add(glob);
                     }
                     else
                     {
-                        throw new InvalidOperationException(fragment.Item1.ToString());
+                        throw new InvalidOperationException(fragment.GetType().FullName);
                     }
                 }
 

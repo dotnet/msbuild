@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -24,16 +25,12 @@ namespace Microsoft.Build.Evaluation
 
             public ImmutableHashSet<string>.Builder GetRemovedGlobs()
             {
-                var ret = ImmutableHashSet.CreateBuilder<string>();
-                foreach (var operation in _fragments)
-                {
-                    if (operation.Item1 == ItemFragmentType.Glob)
-                    {
-                        ret.Add((string)operation.Item2);
-                    }
-                }
+                var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment);
+                var builder = ImmutableHashSet.CreateBuilder<string>();
 
-                return ret;
+                builder.UnionWith(globs);
+
+                return builder;
             }
         }
     }
