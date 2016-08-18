@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         Project,
         ExternalProject,
         Reference,
-        Winmd
+        Winmd,
+        Unresolved
     }
 }

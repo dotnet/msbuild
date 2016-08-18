@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             {
                 var dependencyType = GetDependencyType(packageDef.GetMetadata(MetadataKeys.Type));
                 if (dependencyType != DependencyType.Package &&
-                    dependencyType != DependencyType.Unknown)
+                    dependencyType != DependencyType.Unresolved)
                 {
                     // we ignore all other dependency types since 
                     //      - assemblies we handle separatelly below 
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
                 var dependency = new DependencyMetadata(name: packageDef.GetMetadata(MetadataKeys.Name),
                                                         version: packageDef.GetMetadata(MetadataKeys.Version),
-                                                        type: dependencyType,
+                                                        type: DependencyType.Package,
                                                         path: packageDef.GetMetadata(MetadataKeys.Path),
                                                         resolvedPath: packageDef.GetMetadata(MetadataKeys.ResolvedPath));
                 Packages[packageDef.ItemSpec] = dependency;

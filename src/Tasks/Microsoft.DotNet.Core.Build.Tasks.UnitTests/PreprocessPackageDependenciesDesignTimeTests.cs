@@ -150,7 +150,65 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
 
             // Assert
             Assert.True(result);
-            Assert.Equal(3, task.DependenciesDesignTime.Count());
+            Assert.Equal(1, task.DependenciesDesignTime.Count());
+
+            // Target with type
+            var resultTargets = task.DependenciesDesignTime
+                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
+            Assert.Equal(1, resultTargets.Length);
+            VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
+        }
+
+        [Fact]
+        public void PreprocessPackageDependenciesDesignTime_Packages_Unresolved()
+        {
+            // Arrange 
+            // target definitions 
+            var mockTarget = new MockTaskItem(
+                itemSpec: ".Net Framework,Version=v4.5",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.RuntimeIdentifier, "net45" },
+                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
+                    { MetadataKeys.FrameworkName, ".Net Framework" },
+                    { MetadataKeys.FrameworkVersion, "4.5" },
+                    { MetadataKeys.Type, "Target" }
+                });
+
+            // package definitions
+            var mockPackageUnresolved = new MockTaskItem(
+                itemSpec: "mockPackageUnresolved/1.0.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, "mockPackageUnresolved" },
+                    { MetadataKeys.Version, "1.0.0" },
+                    { MetadataKeys.Path, "some path" },
+                    { MetadataKeys.ResolvedPath, "" },
+                    { MetadataKeys.Type, "Unresolved" },
+                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
+                });
+
+            // package dependencies
+            var mockPackageDepUnresolved = new MockTaskItem(
+                itemSpec: "mockPackageUnresolved/1.0.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                });
+
+            var task = new PreprocessPackageDependenciesDesignTime();
+            task.TargetDefinitions = new[] { mockTarget };
+            task.PackageDefinitions = new ITaskItem[] { mockPackageUnresolved };
+            task.FileDefinitions = new ITaskItem[] { };
+            task.PackageDependencies = new ITaskItem[] { mockPackageDepUnresolved };
+            task.FileDependencies = new ITaskItem[] { };
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(2, task.DependenciesDesignTime.Count());
 
             // Target with type
             var resultTargets = task.DependenciesDesignTime
@@ -158,21 +216,15 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             Assert.Equal(1, resultTargets.Length);
             VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
 
-            // package unknown, no Type, Resolved = false
-            var resultPackageNoType = task.DependenciesDesignTime
-                    .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/mockPackageNoType/1.0.0")).ToArray();
-            Assert.Equal(1, resultPackageNoType.Length);
-            VerifyTargetTaskItem(DependencyType.Unknown, mockPackageNoType, resultPackageNoType[0]);
-
             // Package unknown Resolved = false
-            var resultPackageUnknown = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/mockPackageUnknown/1.0.0")).ToArray();
-            Assert.Equal(1, resultPackageUnknown.Length);
-            VerifyTargetTaskItem(DependencyType.Unknown, mockPackageUnknown, resultPackageUnknown[0]);
+            var resultPackageUnresolved = task.DependenciesDesignTime
+                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/mockPackageUnresolved/1.0.0")).ToArray();
+            Assert.Equal(1, resultPackageUnresolved.Length);
+            VerifyTargetTaskItem(DependencyType.Package, mockPackageUnresolved, resultPackageUnresolved[0]);
         }
 
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Packages_WhenTypeIsNotPackageOrUnknown()
+        public void PreprocessPackageDependenciesDesignTime_Packages_WhenTypeIsNotPackageOrUnresolved()
         {
             // Arrange 
             // target definitions 
