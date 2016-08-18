@@ -7,14 +7,14 @@
   "dependencies": {
     "FluentAssertions": "4.0.0",
     "xunit": "2.2.0-beta3-build3330",
-    "dotnet-test-xunit": "1.0.0-rc2-318883-21",
+    "dotnet-test-xunit": "1.0.0-rc2-330423-54",
     "Microsoft.DotNet.TestFramework": { "target": "project" },
     "Microsoft.DotNet.Cli.Utils": { "target": "project" },
     "Microsoft.DotNet.ProjectModel": { "target": "project" },
     "Microsoft.DotNet.InternalAbstractions": {
       "target": "project"
     },
-    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000914"
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
   },
   "frameworks": {
     "netcoreapp1.0": {

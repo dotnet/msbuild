@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.TestFramework;
@@ -8,16 +10,46 @@ using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
-using System.IO;
 
 namespace Microsoft.DotNet.ProjectModel.Tests
 {
     public class PackageDependencyProviderTests : TestBase
     {
         [Fact]
+        public void GetDescriptionShouldLeavePackageLibraryPathAlone()
+        {
+            // Arrange
+            var provider = new PackageDependencyProvider(
+                NuGetPathContext.Create("/foo/packages"),
+                new FrameworkReferenceResolver("/foo/references"));
+            var package = new LockFilePackageLibrary();
+            package.Name = "Something";
+            package.Version = NuGetVersion.Parse("1.0.0");
+            package.Files.Add("lib/dotnet/_._");
+            package.Files.Add("runtimes/any/native/Microsoft.CSharp.CurrentVersion.targets");
+            package.Path = "SomePath";
+
+            var target = new LockFileTargetLibrary();
+            target.Name = "Something";
+            target.Version = package.Version;
+
+            target.RuntimeAssemblies.Add("lib/dotnet/_._");
+            target.CompileTimeAssemblies.Add("lib/dotnet/_._");
+            target.NativeLibraries.Add("runtimes/any/native/Microsoft.CSharp.CurrentVersion.targets");
+
+            // Act
+            var p = provider.GetDescription(NuGetFramework.Parse("netcoreapp1.0"), package, target);
+
+            // Assert
+            p.PackageLibrary.Path.Should().Be("SomePath");
+        }
+
+        [Fact]
         public void GetDescriptionShouldNotModifyTarget()
         {
-            var provider = new PackageDependencyProvider(NuGetPathContext.Create("/foo/packages"), new FrameworkReferenceResolver("/foo/references"));
+            var provider = new PackageDependencyProvider(
+                NuGetPathContext.Create("/foo/packages"),
+                new FrameworkReferenceResolver("/foo/references"));
             var package = new LockFilePackageLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
@@ -48,7 +80,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void HasCompileTimePlaceholderChecksAllCompileTimeAssets()
         {
-            var provider = new PackageDependencyProvider(NuGetPathContext.Create("/foo/packages"), new FrameworkReferenceResolver("/foo/references"));
+            var provider = new PackageDependencyProvider(
+                NuGetPathContext.Create("/foo/packages"),
+                new FrameworkReferenceResolver("/foo/references"));
             var package = new LockFilePackageLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
@@ -76,7 +110,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void HasCompileTimePlaceholderReturnsFalseIfEmpty()
         {
-            var provider = new PackageDependencyProvider(NuGetPathContext.Create("/foo/packages"), new FrameworkReferenceResolver("/foo/references"));
+            var provider = new PackageDependencyProvider(
+                NuGetPathContext.Create("/foo/packages"),
+                new FrameworkReferenceResolver("/foo/references"));
             var package = new LockFilePackageLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");

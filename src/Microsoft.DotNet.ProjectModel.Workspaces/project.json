@@ -11,7 +11,7 @@
       "target": "project"
     },
     "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.3.0",
-    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000914"
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
   },
   "frameworks": {
     "net451": {

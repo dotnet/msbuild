@@ -12,7 +12,7 @@
     "Microsoft.DotNet.Cli.Build.Framework": {
       "target": "project"
     },
-    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000914"
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
   },
   "frameworks": {
     "netstandard1.6": {
