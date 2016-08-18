@@ -3,8 +3,8 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
     <Identity Id="A45AB8EC-B6A9-439E-9473-CB6C62C0C09D" Version="|%CurrentProject%;GetBuildVersion|" Language="en-US" Publisher="Microsoft" />
-    <DisplayName>CSharp and Visual Basic templates</DisplayName>
-    <Description xml:space="preserve">CSharp and Visual Basic templates</Description>
+    <DisplayName>CSharp templates</DisplayName>
+    <Description xml:space="preserve">CSharp templates</Description>
   </Metadata>
   <Installation SystemComponent="true" >
     <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.Pro" />
