@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <DotnetDebToolPackageId>dotnet-deb-tool</DotnetDebToolPackageId>
+    <DotnetDebToolVersion>1.0.0-*</DotnetDebToolVersion>
+    <DotnetDebToolConsumerProjectName>dotnet-deb-tool-consumer</DotnetDebToolConsumerProjectName>
+    <DotnetDebToolConfigJsonFileName>debian_config.json</DotnetDebToolConfigJsonFileName>
+
+    <DebLayoutPackageRootDirName>package_root</DebLayoutPackageRoot>
+    <DebLayoutAbsolutePlacementDirName>$</DebLayoutAbsolutePlacement>
+    <DebLayoutSamplesDirName>samples</DebLayoutSamplesDirName>
+    <DebLayoutDocsDirName>docs</DebLayoutDocsDirName>
+    <DebLayoutDebianFilesDirName>debian</DebLayoutDebianFilesDirName>
+  </PropertyGroup>
+</Project>

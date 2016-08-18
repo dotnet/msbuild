@@ -9,35 +9,22 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Build.Framework;
 
-using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
-
 namespace Microsoft.DotNet.Cli.Build
 {
     public class DebPackageCreator
     {
-        private static readonly string s_dotnetDebToolPackageId = "dotnet-deb-tool";
-        private static readonly string s_toolConsumerProjectName = "dotnet-deb-tool-consumer";
-        private static readonly string s_debianConfigJsonFileName = "debian_config.json";
-
-        private DotNetCli _dotnet;
+        private string _dotnet;
         private string _intermediateDirectory;
         private string _dotnetDebToolVersion;
         private string _dotnetDebToolPackageSource;
         private string _consumingProjectDirectory;
 
         public DebPackageCreator(
-            DotNetCli dotnet,
+            string dotnet,
             string intermediateDirectory,
-            string dotnetDebToolVersion = "1.0.0-*",
+            string dotnetDebToolVersion,
             string dotnetDebToolPackageSource = null)
         {
-            _dotnet = dotnet;
-            _intermediateDirectory = intermediateDirectory;
-            _dotnetDebToolVersion = dotnetDebToolVersion;
-            _dotnetDebToolPackageSource = dotnetDebToolPackageSource;
-
-            _consumingProjectDirectory = Path.Combine(_intermediateDirectory, s_toolConsumerProjectName);
-
             InitializeDotnetDebTool();
         }
 
@@ -53,11 +40,6 @@ namespace Microsoft.DotNet.Cli.Build
             IEnumerable<string> debianFiles = null)
         {
             string debIntermediatesDirectory = Path.Combine(_intermediateDirectory, packageName, packageVersion);
-            if (Directory.Exists(debIntermediatesDirectory))
-            {
-                FS.Rmdir(debIntermediatesDirectory);
-            }
-            FS.Mkdirp(debIntermediatesDirectory);
 
             string layoutDirectory = Path.Combine(debIntermediatesDirectory, "debianLayoutDirectory");
             var debianLayoutDirectories = new DebianLayoutDirectories(layoutDirectory);
@@ -77,12 +59,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         private void CreateEmptyDebianLayout(DebianLayoutDirectories layoutDirectories)
         {
-            if (Directory.Exists(layoutDirectories.LayoutDirectory))
-            {
-                FS.Rmdir(layoutDirectories.LayoutDirectory);
-            }
-            Directory.CreateDirectory(layoutDirectories.LayoutDirectory);
-
             Directory.CreateDirectory(layoutDirectories.AbsolutePlacement);
             Directory.CreateDirectory(layoutDirectories.PackageRoot);
             Directory.CreateDirectory(layoutDirectories.Samples);
