@@ -20,9 +20,9 @@ namespace Microsoft.Build.Evaluation
             protected readonly ProjectItemElement _itemElement;
             protected readonly string _itemType;
 
-            //  If Item1 of tuplee is ItemOperationType.Expression, then Item2 is an ExpressionShredder.ItemExpressionCapture
+            //  If Item1 of tuplee is ItemFragmentType.Expression, then Item2 is an ExpressionShredder.ItemExpressionCapture
             //  Otherwise, Item2 is a string (representing either the value or the glob)
-            protected readonly ImmutableList<Tuple<ItemOperationType, object>> _operations;
+            protected readonly ImmutableList<Tuple<ItemFragmentType, object>> _fragments;
 
             protected readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
 
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Evaluation
             {
                 _itemElement = builder.ItemElement;
                 _itemType = builder.ItemType;
-                _operations = builder.Operations.ToImmutable();
+                _fragments = builder.ItemFragments.ToImmutable();
                 _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
 
                 _lazyEvaluator = lazyEvaluator;
@@ -236,9 +236,9 @@ namespace Microsoft.Build.Evaluation
                 HashSet<string> itemValuesToMatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 List<string> globsToMatch = new List<string>();
 
-                foreach (var operation in _operations)
+                foreach (var fragment in _fragments)
                 {
-                    if (operation.Item1 == ItemOperationType.Expression)
+                    if (fragment.Item1 == ItemFragmentType.Expression)
                     {
                         //  TODO: consider optimizing the case where an item element removes all items of its
                         //  item type, for example:
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Evaluation
                         //  In this case we could avoid evaluating previous versions of the list entirely
                         bool throwaway;
                         var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            (ExpressionShredder.ItemExpressionCapture)operation.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
+                            (ExpressionShredder.ItemExpressionCapture)fragment.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
                             false /* do not include null expansion results */, out throwaway, elementLocation);
 
                         foreach (var item in itemsFromExpression)
@@ -254,18 +254,18 @@ namespace Microsoft.Build.Evaluation
                             itemValuesToMatch.Add(item.EvaluatedInclude);
                         }
                     }
-                    else if (operation.Item1 == ItemOperationType.Value)
+                    else if (fragment.Item1 == ItemFragmentType.Value)
                     {
-                        itemValuesToMatch.Add((string)operation.Item2);
+                        itemValuesToMatch.Add((string)fragment.Item2);
                     }
-                    else if (operation.Item1 == ItemOperationType.Glob)
+                    else if (fragment.Item1 == ItemFragmentType.Glob)
                     {
-                        string glob = (string)operation.Item2;
+                        string glob = (string)fragment.Item2;
                         globsToMatch.Add(glob);
                     }
                     else
                     {
-                        throw new InvalidOperationException(operation.Item1.ToString());
+                        throw new InvalidOperationException(fragment.Item1.ToString());
                     }
                 }
 

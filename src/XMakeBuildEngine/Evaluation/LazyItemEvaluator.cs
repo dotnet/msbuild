@@ -181,7 +181,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        //  Operations:
+        //  ItemFragments:
         //  Add
         //      Previous value
         //      List<string> globs
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Evaluation
         //  Update - ???
 
         // TODO: verify whether the ItemElement values are ever escaped
-        enum ItemOperationType
+        enum ItemFragmentType
         {
             //  Values are escaped
             Value,
@@ -209,7 +209,7 @@ namespace Microsoft.Build.Evaluation
         {
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
-            public ImmutableList<Tuple<ItemOperationType, object>>.Builder Operations = ImmutableList.CreateBuilder<Tuple<ItemOperationType, object>>();
+            public ImmutableList<Tuple<ItemFragmentType, object>>.Builder ItemFragments = ImmutableList.CreateBuilder<Tuple<ItemFragmentType, object>>();
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
 
@@ -299,7 +299,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     bool isItemListExpression;
-                    ProcessSingleItemVectorExpressionForInclude(includeSplitEscaped, operationBuilder, itemSpecLocation, out isItemListExpression);
+                    ProcessSingleItemVectorExpression(includeSplitEscaped, operationBuilder, itemSpecLocation, out isItemListExpression);
 
                     if (!isItemListExpression)
                     {
@@ -317,20 +317,20 @@ namespace Microsoft.Build.Evaluation
                             // happen because '*' is an illegal character to have in a filename.
 
                             // Just return the original string.
-                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Value, (object) includeSplitEscaped));
+                            operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Value, (object) includeSplitEscaped));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
                             // Unescape before handing it to the filesystem.
                             string filespecUnescaped = EscapingUtilities.UnescapeAll(includeSplitEscaped);
-                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Glob, (object)filespecUnescaped));
+                            operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Glob, (object)filespecUnescaped));
                         }
                         else
                         {
                             // No real wildcards means we just return the original string.  Don't even bother 
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
-                            operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Value, (object) includeSplitEscaped));
+                            operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Value, (object) includeSplitEscaped));
                         }
 
                     }
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        void ProcessSingleItemVectorExpressionForInclude(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation, out bool isItemListExpression)
+        void ProcessSingleItemVectorExpression(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation, out bool isItemListExpression)
         {
             isItemListExpression = false;
 
@@ -446,7 +446,7 @@ namespace Microsoft.Build.Evaluation
 
                 isItemListExpression = true;
 
-                operationBuilder.Operations.Add(Tuple.Create(ItemOperationType.Expression, (object) match));
+                operationBuilder.ItemFragments.Add(Tuple.Create(ItemFragmentType.Expression, (object) match));
 
                 AddReferencedItemLists(operationBuilder, match);
             }

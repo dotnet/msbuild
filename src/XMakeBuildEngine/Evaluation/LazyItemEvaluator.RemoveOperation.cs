@@ -25,9 +25,9 @@ namespace Microsoft.Build.Evaluation
             public ImmutableHashSet<string>.Builder GetRemovedGlobs()
             {
                 var ret = ImmutableHashSet.CreateBuilder<string>();
-                foreach (var operation in _operations)
+                foreach (var operation in _fragments)
                 {
-                    if (operation.Item1 == ItemOperationType.Glob)
+                    if (operation.Item1 == ItemFragmentType.Glob)
                     {
                         ret.Add((string)operation.Item2);
                     }
