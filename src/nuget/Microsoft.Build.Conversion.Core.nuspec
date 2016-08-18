@@ -19,7 +19,6 @@
       <group targetFramework="net46">
         <dependency id="Microsoft.Build" version="$version$" />
         <dependency id="Microsoft.Build.Engine" version="$version$" />
-        <dependency id="Microsoft.Build.Framework" version="$version$" />
       </group>
     </dependencies>
   </metadata>
