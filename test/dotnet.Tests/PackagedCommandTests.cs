@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tests
             get
             {
                 var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
-                var projectOutputPath = $"AppWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
+                var projectOutputPath = $"AppWithDirectDepDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
                     new object[] { "CoreFX", ".NETCoreApp,Version=v1.0", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll", true },
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Theory]
-        [InlineData("AppWithDirectAndToolDependency")]
+        [InlineData("AppWithDirectAndToolDep")]
         [InlineData("AppWithToolDependency")]
         public void TestProjectToolIsAvailableThroughDriver(string appName)
         {
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tests
         public void CanInvokeToolWhosePackageNameIsDifferentFromDllName()
         {
             var testInstance = TestAssetsManager
-                .CreateTestInstance("AppWithDependencyOnToolWithOutputName")
+                .CreateTestInstance("AppWithDepOnToolWithOutputName")
                 .WithLockFiles();
 
             var appDirectory = testInstance.Path;
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Tests
         public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
         {
             var testInstance = TestAssetsManager
-                .CreateTestInstance("AppWithDirectDependencyWithOutputName")
+                .CreateTestInstance("AppWithDirectDepWithOutputName")
                 .WithBuildArtifacts()
                 .WithLockFiles();
 
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Tests
             }
 
             var testInstance = _desktopTestAssetsManager
-                .CreateTestInstance("AppWithDirectDependencyDesktopAndPortable", identifier: identifier)
+                .CreateTestInstance("AppWithDirectDepDesktopAndPortable", identifier: identifier)
                 .WithBuildArtifacts()
                 .WithLockFiles();
 
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Tests
         public void TestProjectDependencyIsNotAvailableThroughDriver()
         {
             var testInstance = TestAssetsManager
-                .CreateTestInstance("AppWithDirectDependency")
+                .CreateTestInstance("AppWithDirectDep")
                 .WithLockFiles();
 
             var appDirectory = testInstance.Path;

@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
     public class GivenAProjectDependenciesCommandResolver : TestBase
     {
 
-        private const string TestProjectName = "AppWithDirectDependency";
+        private const string TestProjectName = "AppWithDirectDep";
 
         [Fact]
         public void It_returns_null_when_CommandName_is_null()

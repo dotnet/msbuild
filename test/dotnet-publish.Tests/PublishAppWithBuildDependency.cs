@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [Fact]
         public void PublishExcludesBuildDependencies()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("AppWithDirectDependencyAndTypeBuild")
+            var testInstance = TestAssetsManager.CreateTestInstance("AppWithDirectDepAndTypeBuild")
                 .WithLockFiles();
 
             var publishCommand = new PublishCommand(testInstance.TestRoot);
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             // Check the deps file
             var reader = new DependencyContextJsonReader();
             DependencyContext context;
-            using (var file = File.OpenRead(Path.Combine(publishDir.FullName, "AppWithDirectDependencyAndTypeBuild.deps.json")))
+            using (var file = File.OpenRead(Path.Combine(publishDir.FullName, "AppWithDirectDepAndTypeBuild.deps.json")))
             {
                 context = reader.Read(file);
             }
