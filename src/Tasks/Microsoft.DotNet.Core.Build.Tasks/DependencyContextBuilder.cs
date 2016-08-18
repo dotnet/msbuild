@@ -27,28 +27,10 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             NuGetFramework framework,
             string runtime)
         {
-            bool isPortable = string.IsNullOrEmpty(runtime);
-
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
-            IEnumerable<LockFileTargetLibrary> runtimeExports = lockFileTarget.Libraries;
-            Dictionary<string, LockFileTargetLibrary> exportsLookup = runtimeExports.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
 
-            HashSet<string> allExclusionList = new HashSet<string>();
-
-            if (isPortable)
-            {
-                var platformExport = lockFileTarget.GetPlatformLibrary();
-
-                isPortable = platformExport != null;
-                if (isPortable)
-                {
-                    allExclusionList.UnionWith(LockFileTargetExtensions.GetPlatformExclusionList(platformExport, exportsLookup));
-                }
-            }
-
-            // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
-
-            runtimeExports = runtimeExports.FilterExports(allExclusionList).ToArray();
+            bool isPortable;
+            IEnumerable<LockFileTargetLibrary> runtimeExports = lockFileTarget.GetRuntimeLibraries(out isPortable);
 
             var dependencyLookup = runtimeExports
                .Select(identity => new Dependency(identity.Name, identity.Version.ToString()))

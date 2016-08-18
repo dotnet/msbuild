@@ -78,6 +78,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeFilesToPublish"
+          DependsOnTargets="_ComputeNetCorePublishAssets"
           Returns="ResolvedFilesToPublish">
 
     <PropertyGroup>
@@ -97,7 +98,42 @@ Copyright (c) .NET Foundation. All rights reserved.
                               Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
       </ResolvedFilesToPublish>
+
+      <!-- Copy all the assemblies -->
+      <ResolvedFilesToPublish Include="@(ResolvedAssembliesToPublish)">
+        <RelativePath>%(ResolvedAssembliesToPublish.DestinationSubPath)</RelativePath>
+      </ResolvedFilesToPublish>
     </ItemGroup>
+
+  </Target>
+
+  <Target Name="_ComputeNetCorePublishAssets"
+          DependsOnTargets="RunResolveNetCorePublishAssemblies">
+    <ItemGroup>
+      <!-- TODO get the content files -->
+      <!-- TODO perform any preprocess transforms on the files -->
+
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                     RunResolveNetCorePublishAssemblies
+
+    Gets the assemblies to be copied to the publish directory
+    ============================================================
+    -->
+  <UsingTask TaskName="ResolveNetCorePublishAssemblies" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <Target Name="RunResolveNetCorePublishAssemblies">
+    
+    <ResolveNetCorePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
+                                     LockFilePath="$(ProjectLockFile)"
+                                     TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                                     RuntimeIdentifier="$(RuntimeIdentifier)">
+
+      <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
+
+    </ResolveNetCorePublishAssemblies>
 
   </Target>
 
@@ -121,7 +157,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
                       RuntimeIdentifier="$(RuntimeIdentifier)" />
-    
+
   </Target>
 
   <!--
@@ -143,7 +179,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(_PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
-    
+
   </Target>
-  
+
 </Project>
