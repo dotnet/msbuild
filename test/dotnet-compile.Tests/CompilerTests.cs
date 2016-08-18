@@ -13,28 +13,18 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 {
     public class CompilerTests : TestBase
     {
-        private readonly string _testProjectsRoot;
-
-        public CompilerTests()
-        {
-            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
-        }
-
         [Fact]
         public void XmlDocumentationFileIsGenerated()
         {
-            // create unique directories in the 'temp' folder
-            var root = Temp.CreateDirectory();
-            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestAppWithLibrary")
+                .WithLockFiles();
 
-            var testLibDir = root.CreateDirectory("TestLibrary");
-            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestAppWithLibrary", "TestLibrary");
-
-            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
+            var testLibDir = Path.Combine(testInstance.TestRoot, "TestLibrary");
 
             // run compile
-            var outputDir = Path.Combine(testLibDir.Path, "bin");
-            var testProject = GetProjectPath(testLibDir);
+            var outputDir = Path.Combine(testLibDir, "bin");
+            var testProject = Path.Combine(testLibDir, "project.json");
             var buildCommand = new BuildCommand(testProject, output: outputDir, framework: DefaultLibraryFramework);
             var result = buildCommand.ExecuteWithCapturedOutput();
             result.Should().Pass();
@@ -49,16 +39,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void SatelliteAssemblyIsGeneratedByDotnetBuild()
         {
-            // create unique directories in the 'temp' folder
-            var root = Temp.CreateDirectory();
-            var testLibDir = root.CreateDirectory("TestProjectWithCultureSpecificResource");
-            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestProjectWithCultureSpecificResource");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestProjectWithCultureSpecificResource")
+                .WithLockFiles();
 
-            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
+            var testLibDir = testInstance.TestRoot;
 
             // run compile on a project with resources
-            var outputDir = Path.Combine(testLibDir.Path, "bin");
-            var testProject = GetProjectPath(testLibDir);
+            var outputDir = Path.Combine(testLibDir, "bin");
+            var testProject = Path.Combine(testLibDir, "project.json");
             var buildCmd = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
             var result = buildCmd.ExecuteWithCapturedOutput();
             result.Should().Pass();
@@ -75,15 +64,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void LibraryWithAnalyzer()
         {
-            var root = Temp.CreateDirectory();
-            var testLibDir = root.CreateDirectory("TestLibraryWithAnalyzer");
-            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibraryWithAnalyzer");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestLibraryWithAnalyzer")
+                .WithLockFiles();
 
-            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
+            var testLibDir = testInstance.TestRoot;
 
             // run compile
-            var outputDir = Path.Combine(testLibDir.Path, "bin");
-            var testProject = GetProjectPath(testLibDir);
+            var outputDir = Path.Combine(testLibDir, "bin");
+            var testProject = Path.Combine(testLibDir, "project.json");
             var buildCmd = new BuildCommand(testProject, output: outputDir, framework: DefaultLibraryFramework);
             var result = buildCmd.ExecuteWithCapturedOutput();
             result.Should().Pass();
@@ -96,12 +85,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         {
             var root = Temp.CreateDirectory();
 
-            var spaceBufferDirectory = root.CreateDirectory("space directory");
-            var testAppDir = spaceBufferDirectory.CreateDirectory("TestAppCompilationContext");
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestAppCompilationContext", identifier: "A SPACE")
+                .WithLockFiles();
 
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestAppCompilationContext"), testAppDir);
+            var testProjectDir = Path.Combine(
+                    Directory.GetParent(testInstance.TestRoot).FullName, 
+                    "TestAppCompilationContext", 
+                    "TestApp");
 
-            var testProjectDir = Path.Combine(_testProjectsRoot, "TestAppCompilationContext", "TestApp");
             var testProject = Path.Combine(testProjectDir, "project.json");
 
             var buildCommand = new BuildCommand(testProject);

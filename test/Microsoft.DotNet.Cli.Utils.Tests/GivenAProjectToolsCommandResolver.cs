@@ -7,6 +7,7 @@ using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
@@ -14,12 +15,11 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
-    public class GivenAProjectToolsCommandResolver
+    public class GivenAProjectToolsCommandResolver : TestBase
     {
         private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
-        private static readonly string s_liveProjectDirectory =
-            Path.Combine(AppContext.BaseDirectory, "TestAssets/TestProjects/AppWithToolDependency");
+        private const string TestProjectName = "AppWithToolDependency";
 
         [Fact]
         public void It_returns_null_when_CommandName_is_null()
@@ -60,11 +60,14 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
+            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+                .WithLockFiles();
+
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
-                ProjectDirectory = s_liveProjectDirectory
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -77,11 +80,14 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
+            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+                .WithLockFiles();
+
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = s_liveProjectDirectory
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -100,11 +106,14 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
+            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+                .WithLockFiles();
+
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = new[] { "arg with space" },
-                ProjectDirectory = s_liveProjectDirectory
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -118,11 +127,14 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
+            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+                .WithLockFiles();
+
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = s_liveProjectDirectory
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -138,14 +150,17 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
+            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+                .WithLockFiles();
+
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = s_liveProjectDirectory
+                ProjectDirectory = testInstance.Path
             };
 
-            var context = ProjectContext.Create(Path.Combine(s_liveProjectDirectory, "project.json"), s_toolPackageFramework);
+            var context = ProjectContext.Create(Path.Combine(testInstance.Path, "project.json"), s_toolPackageFramework);
 
             var nugetPackagesRoot = context.PackagesDirectory;
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
@@ -180,7 +195,10 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void Generate_deps_json_method_doesnt_overwrite_when_deps_file_already_exists()
         {
-            var context = ProjectContext.Create(Path.Combine(s_liveProjectDirectory, "project.json"), s_toolPackageFramework);
+            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+                .WithLockFiles();
+
+            var context = ProjectContext.Create(Path.Combine(testInstance.Path, "project.json"), s_toolPackageFramework);
 
             var nugetPackagesRoot = context.PackagesDirectory;
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);

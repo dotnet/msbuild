@@ -14,18 +14,10 @@ namespace StreamForwarderTests
     public class StreamForwarderTests : TestBase
     {
         private static readonly string s_rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
-        private static readonly string s_testProjectRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
-
-        private TempDirectory _root;
 
         public static void Main()
         {
             Console.WriteLine("Dummy Entrypoint");
-        }
-
-        public StreamForwarderTests()
-        {
-            _root = Temp.CreateDirectory();
         }
 
         public static IEnumerable<object[]> ForwardingTheoryVariations
@@ -127,15 +119,15 @@ namespace StreamForwarderTests
 
         private string SetupTestProject()
         {
-            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "OutputStandardOutputAndError");
 
-            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
+            var testInstance = TestAssetsManager.CreateTestInstance("OutputStandardOutputAndError")
+                .WithLockFiles();
 
-            var buildCommand = new BuildCommand(Path.Combine(binTestProjectPath, "project.json"));
+            var buildCommand = new BuildCommand(Path.Combine(testInstance.Path, "project.json"));
             buildCommand.Execute();
 
             var buildOutputExe = "OutputStandardOutputAndError" + Constants.ExeSuffix;
-            var buildOutputPath = Path.Combine(binTestProjectPath, "bin/Debug/netcoreapp1.0", buildOutputExe);
+            var buildOutputPath = Path.Combine(testInstance.Path, "bin/Debug/netcoreapp1.0", buildOutputExe);
 
             return buildOutputPath;
         }

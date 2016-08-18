@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var configuration = "Debug";
 
             var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets", "DesktopTestProjects"));
-            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDependencyDesktopAndPortable")
+            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDepDesktopAndPortable")
                 .WithLockFiles();
 
             var buildCommand = new BuildCommand(
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var configuration = "Debug";
 
             var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets", "DesktopTestProjects"));
-            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDependencyDesktopAndPortable")
+            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDepDesktopAndPortable")
                 .WithLockFiles();
 
             var buildCommand = new BuildCommand(
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var configuration = "Release";
 
             var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets", "DesktopTestProjects"));
-            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDependencyDesktopAndPortable")
+            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDepDesktopAndPortable")
                 .WithLockFiles();
 
             var buildCommand = new BuildCommand(
@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var configuration = "Release";
 
             var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets", "DesktopTestProjects"));
-            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDependencyDesktopAndPortable")
+            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDepDesktopAndPortable")
                 .WithLockFiles();
 
             var buildCommand = new BuildCommand(
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var configuration = "Debug";
 
             var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets", "TestProjects"));
-            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDependencyWithOutputName")
+            var testInstance = testAssetManager.CreateTestInstance("AppWithDirectDepWithOutputName")
                 .WithLockFiles();
 
             var buildCommand = new BuildCommand(
