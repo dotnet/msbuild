@@ -197,8 +197,8 @@
                 CrossgenPath="$(CrossgenPath)"
                 ReadyToRun="True"
                 PlatformAssemblyPaths="@(PlatformAssemblies);
-                                       $(SharedFrameworkNameVersionPath);
-                                       @(CompileStageSdkDirectories)" />
+                                       @(CompileStageSdkDirectories);
+                                       $(SharedFrameworkNameVersionPath)" />
 
       <!-- Generate .version file -->
       <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
