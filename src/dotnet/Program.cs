@@ -15,6 +15,7 @@ using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.New;
+using Microsoft.DotNet.Tools.Pack3;
 using Microsoft.DotNet.Tools.Publish;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.Restore3;
@@ -40,6 +41,7 @@ namespace Microsoft.DotNet.Cli
             ["build3"] = Build3Command.Run,
             ["run3"] = Run3Command.Run,
             ["restore3"] = Restore3Command.Run,
+            ["pack3"] = Pack3Command.Run,
         };
 
         public static int Main(string[] args)
