@@ -78,7 +78,7 @@
 
   <Target Name="RestoreTests"
           DependsOnTargets="CreateTestAssetPackageNuPkgs;
-                            CleanTestProjectsBinObj;
+                            CleanTestProjectsBinObjProjectJson;
                             SetupRestoreTestsInputs;"
           Inputs="@(RestoreTestsInputs)"
           Outputs="@(RestoreTestsInputs->'%(RelativeDir)project.lock.json')">
@@ -89,13 +89,13 @@
                     WorkingDirectory="$(TestDirectory)" />
   </Target>
 
-  <Target Name="CleanTestProjectsBinObj"
+  <Target Name="CleanTestProjectsBinObjProjectJson"
           DependsOnTargets="SetupRestoreTestsInputs;"
           Inputs="@(RestoreTestsInputs)"
           Outputs="@(RestoreTestsInputs->'%(RelativeDir)project.lock.json')">
     <ItemGroup>
-      <FilesToDelete Include="$(TestDirectory)**/bin/**/*.*" />
-      <FilesToDelete Include="$(TestDirectory)**/obj/**/*.*" />
+      <FilesToDelete Include="$(TestDirectory)**/bin/**/project.json" />
+      <FilesToDelete Include="$(TestDirectory)**/obj/**/project.json" />
     </ItemGroup>
 
     <Delete Files="@(FilesToDelete)" />
