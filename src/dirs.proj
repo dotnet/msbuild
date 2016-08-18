@@ -34,12 +34,11 @@
   <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
     <TraversalBuildDependsOn>
       $(TraversalBuildDependsOn);
-      GetNuspecProperties;
       BuildPackages;
     </TraversalBuildDependsOn>
     <!-- We use Microsoft.DotNet.Build tools to create our packages, but we want the version comes from 
          NerdBack.GitVersioning. -->
-    <GetNuGetPackageVersionsDependsOn>SetPackageVersion</GetNuGetPackageVersionsDependsOn>
+    <GetNuGetPackageVersionsDependsOn>SetupPackageVersion</GetNuGetPackageVersionsDependsOn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -47,16 +46,15 @@
     <OutDir>$(BaseOutputPathWithConfig)</OutDir>
   </PropertyGroup>
 
-  <Target Name="SetPackageVersion" DependsOnTargets="GetNuGetPackageVersion" Returns="$(PackageVersion)">
+  <Target Name="SetupPackageVersion"
+        DependsOnTargets="GetNuGetPackageVersion"
+        BeforeTargets="BuildPackages">
     <PropertyGroup>
       <PackageVersion>$(NuGetPackageVersion)</PackageVersion>
     </PropertyGroup>
-  </Target>
-
-  <Target Name="GetNuSpecProperties" DependsOnTargets="GetNuGetPackageVersion">
     <ItemGroup>
       <!-- Used by packages.targets:BuildPackages to inject properties into the nuspec-->
-      <NuspecProperties Include="version=$(NuGetPackageVersion)"/>
+      <NuspecProperties Include="version=$(NuGetPackageVersion)" />
     </ItemGroup>
   </Target>
 </Project>
