@@ -161,7 +161,6 @@
     </Otherwise>
   </Choose>
 
-  <Import Project="References.targets" />
   <Import Project="$(MSBuildTargetsFilePath)" />
 
   <!-- On Mono on *nix the NuGet targets aren't imported by default, so we do that here -->
@@ -333,22 +332,6 @@
 
   <Import Project="GenerateAssemblyInfo.targets" Condition="'$(ProjectLanguage)' == 'CSharp' OR '$(ProjectLanguage)' == 'VB'" />
   <Import Project="GenerateVersionInfoResourceFile.targets" Condition="'$(ProjectLanguage)' == 'C++'" />
-
-  <!-- ====================================================================================
-
-         Generation of InternalsVisibleTo attributes from the project
-
-       ==================================================================================== -->
-
-  <Import Project="GenerateInternalsVisibleTo.targets" />
-
-  <!-- ====================================================================================
-
-         Generation of syntax models, syntax model tests, and bound trees from xml files
-
-       ==================================================================================== -->
-
-  <Import Project="GenerateCompilerInternals.targets" />
 
   <!-- ====================================================================================
 
