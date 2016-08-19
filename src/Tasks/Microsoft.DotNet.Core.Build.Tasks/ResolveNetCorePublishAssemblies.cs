@@ -12,9 +12,9 @@ using NuGet.ProjectModel;
 namespace Microsoft.DotNet.Core.Build.Tasks
 {
     /// <summary>
-    /// Resolves the assemblies to be published for a .NET Core app.
+    /// Resolves the assemblies to be published for a .NET app.
     /// </summary>
-    public class ResolveNetCorePublishAssemblies : Task
+    public class ResolvePublishAssemblies : Task
     {
         private readonly List<ITaskItem> _assembliesToPublish = new List<ITaskItem>();
 
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
 
             IEnumerable<ResolvedFile> resolvedAssemblies = 
-                new PublishAssembliesResolver(lockFile, nugetPathContext)
+                new PublishAssembliesResolver(lockFile, new NuGetPackageResolver(nugetPathContext))
                     .Resolve(framework, RuntimeIdentifier);
 
             foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)

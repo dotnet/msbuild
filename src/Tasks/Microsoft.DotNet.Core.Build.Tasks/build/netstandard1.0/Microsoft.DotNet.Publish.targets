@@ -108,32 +108,29 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_ComputeNetCorePublishAssets"
-          DependsOnTargets="RunResolveNetCorePublishAssemblies">
-    <ItemGroup>
+          DependsOnTargets="RunResolvePublishAssemblies">
       <!-- TODO get the content files -->
       <!-- TODO perform any preprocess transforms on the files -->
-
-    </ItemGroup>
   </Target>
 
   <!--
     ============================================================
-                     RunResolveNetCorePublishAssemblies
+                     RunResolvePublishAssemblies
 
     Gets the assemblies to be copied to the publish directory
     ============================================================
     -->
-  <UsingTask TaskName="ResolveNetCorePublishAssemblies" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
-  <Target Name="RunResolveNetCorePublishAssemblies">
-    
-    <ResolveNetCorePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
-                                     LockFilePath="$(ProjectLockFile)"
-                                     TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
-                                     RuntimeIdentifier="$(RuntimeIdentifier)">
+  <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <Target Name="RunResolvePublishAssemblies">
+
+    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
+                              LockFilePath="$(ProjectLockFile)"
+                              TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                              RuntimeIdentifier="$(RuntimeIdentifier)">
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
 
-    </ResolveNetCorePublishAssemblies>
+    </ResolvePublishAssemblies>
 
   </Target>
 

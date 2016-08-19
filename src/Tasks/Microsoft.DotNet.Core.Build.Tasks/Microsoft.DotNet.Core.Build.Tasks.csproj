@@ -18,6 +18,8 @@
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="NuGetPackageResolver.cs" />
+    <Compile Include="IPackageResolver.cs" />
     <Compile Include="ResolvedFile.cs" />
     <Compile Include="PublishAssembliesResolver.cs" />
     <Compile Include="LockFileTargetExtensions.cs" />

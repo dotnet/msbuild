@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="Mocks\MockTaskItem.cs" />
     <Compile Include="GivenThatWeWantToGetDependenciesViaDesignTimeBuild.cs" />
+    <Compile Include="GivenAPublishAssembliesResolver.cs" />
     <Compile Include="GivenADependencyContextBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

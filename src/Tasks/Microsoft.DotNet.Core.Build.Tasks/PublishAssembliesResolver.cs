@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NuGet.Common;
 using NuGet.Frameworks;
-using NuGet.Packaging;
 using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Core.Build.Tasks
@@ -14,12 +12,12 @@ namespace Microsoft.DotNet.Core.Build.Tasks
     public class PublishAssembliesResolver
     {
         private readonly LockFile _lockFile;
-        private readonly FallbackPackagePathResolver _packagePathResolver;
+        private readonly IPackageResolver _packageResolver;
 
-        public PublishAssembliesResolver(LockFile lockFile, INuGetPathContext nugetPathContext)
+        public PublishAssembliesResolver(LockFile lockFile, IPackageResolver packageResolver)
         {
             _lockFile = lockFile;
-            _packagePathResolver = new FallbackPackagePathResolver(nugetPathContext);
+            _packageResolver = packageResolver;
         }
 
         public IEnumerable<ResolvedFile> Resolve(NuGetFramework framework, string runtime)
@@ -33,7 +31,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
             foreach (LockFileTargetLibrary targetLibrary in runtimeLibraries)
             {
-                string libraryPath = _packagePathResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
+                string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
 
                 results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, libraryPath));
                 results.AddRange(GetResolvedFiles(targetLibrary.NativeLibraries, libraryPath));

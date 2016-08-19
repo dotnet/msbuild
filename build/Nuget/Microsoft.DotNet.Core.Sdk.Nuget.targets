@@ -16,7 +16,9 @@
       <NuGetCopyLocalAssembly Include="NuGet.Repositories" />
       <NuGetCopyLocalAssembly Include="NuGet.RuntimeModel" />
       <NuGetCopyLocalAssembly Include="NuGet.Common" />
+      <NuGetCopyLocalAssembly Include="NuGet.Configuration" />
       <NuGetCopyLocalAssembly Include="NuGet.Packaging" />
+      <NuGetCopyLocalAssembly Include="NuGet.Packaging.Core" />
       <NuGetCopyLocalAssembly Include="NuGet.Protocol.Core.Types" />
       <NuGetCopyLocalAssembly Include="NuGet.Packaging.Core.Types" />
       <CopyLocalAssembly Include="@(NuGetCopyLocalAssembly)">

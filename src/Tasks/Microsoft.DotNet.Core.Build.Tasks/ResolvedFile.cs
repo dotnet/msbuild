@@ -31,5 +31,21 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             SourcePath = sourcePath;
             DestinationSubDirectory = destinationSubDirectory;
         }
+
+        public override bool Equals(object obj)
+        {
+            ResolvedFile other = obj as ResolvedFile;
+            return other != null &&
+                other.SourcePath == SourcePath &&
+                other.DestinationSubDirectory == DestinationSubDirectory;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return SourcePath.GetHashCode() + DestinationSubDirectory.GetHashCode();
+            }
+        }
     }
 }
