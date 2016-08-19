@@ -22,6 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <FileAlignment>512</FileAlignment>
     <GlobalExclude>bin\**;obj\**;</GlobalExclude>
+    <DocumentationFile Condition=" '$(GenerateDocumentationFile)' == 'true' and '$(DocumentationFile)' == '' ">$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
   <!-- User-facing configuration-specific defaults -->
