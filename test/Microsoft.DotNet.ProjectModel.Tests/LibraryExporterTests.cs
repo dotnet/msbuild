@@ -7,24 +7,18 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 {
     public class LibraryExporterTests : TestBase
     {
-        private readonly string _testProjectsRoot;
-
-        public LibraryExporterTests()
-        {
-            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
-        }
-
         [Fact]
         public void GetLibraryExportsWithoutLockFile()
         {
-            var root = Temp.CreateDirectory().CopyDirectory(Path.Combine(_testProjectsRoot, "TestAppWithLibrary"));
 
-            foreach (var lockfile in Directory.GetFiles(root.Path, "project.lock.json"))
+            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary");
+
+            foreach (var lockfile in Directory.GetFiles(testInstance.Path, "project.lock.json"))
             {
                 File.Delete(lockfile);
             }
 
-            var builder = new ProjectContextBuilder().WithProjectDirectory(Path.Combine(root.Path, "TestApp"));
+            var builder = new ProjectContextBuilder().WithProjectDirectory(Path.Combine(testInstance.Path, "TestApp"));
 
             foreach (var context in builder.BuildAllTargets())
             {

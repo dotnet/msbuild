@@ -71,10 +71,10 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 if ($NoBuild)
 {
     Write-Host "Not building due to --nobuild"
-    Write-Host "Command that would be run: 'dotnet build3 build.proj /p:Architecture=$Architecture $ExtraParameters'"
+    Write-Host "Command that would be run: 'dotnet build3 build.proj /m /p:Architecture=$Architecture $ExtraParameters'"
 }
 else
 {
-    dotnet build3 build.proj /p:Architecture=$Architecture $ExtraParameters
+    dotnet build3 build.proj /m /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }

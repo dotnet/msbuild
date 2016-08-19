@@ -31,14 +31,15 @@ namespace Microsoft.DotNet.Tests
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new");
-
             _nugetCacheFolder = new DirectoryInfo(testNugetCache);
         }        
 
         [Fact]
         public void Using_dotnet_for_the_first_time_succeeds()
         {
-            _firstDotnetVerbUseCommandResult.Should().Pass();
+            _firstDotnetVerbUseCommandResult
+                .Should()
+                .Pass();
         }
 
         [Fact]
@@ -46,7 +47,9 @@ namespace Microsoft.DotNet.Tests
         {
             const string firstTimeNonVerbUseMessage = @".NET Command Line Tools";
 
-            _firstDotnetNonVerbUseCommandResult.StdOut.Should().StartWith(firstTimeNonVerbUseMessage);
+            _firstDotnetNonVerbUseCommandResult.StdOut
+                .Should()
+                .StartWith(firstTimeNonVerbUseMessage);
         }
 
         [Fact]
@@ -64,19 +67,25 @@ Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.";
 
-            _firstDotnetVerbUseCommandResult.StdOut.Should().StartWith(firstTimeUseWelcomeMessage);
+            _firstDotnetVerbUseCommandResult.StdOut
+                .Should()
+                .StartWith(firstTimeUseWelcomeMessage);
         }
 
     	[Fact]
     	public void It_restores_the_nuget_packages_to_the_nuget_cache_folder()
     	{
-            _nugetCacheFolder.Should().HaveFile($"{GetDotnetVersion()}.dotnetSentinel");            
+            _nugetCacheFolder
+                .Should()
+                .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");            
     	}
 
         [Fact]
         public void It_creates_a_sentinel_file_under_the_nuget_cache_folder()
         {
-            _nugetCacheFolder.Should().HaveDirectory("microsoft.netcore.app");
+            _nugetCacheFolder
+                .Should()
+                .HaveDirectory("microsoft.netcore.app");
         }
 
     	private string GetDotnetVersion()

@@ -117,8 +117,8 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 echo "${args[@]}"
 
 if [ $BUILD -eq 1 ]; then
-    dotnet build3 build.proj /p:Architecture=$ARCHITECTURE "${args[@]}"
+    dotnet build3 build.proj /m /p:Architecture=$ARCHITECTURE "${args[@]}"
 else
     echo "Not building due to --nobuild"
-    echo "Command that would be run is: 'dotnet build3 build.proj /p:Architecture=$ARCHITECTURE ${args[@]}'"
+    echo "Command that would be run is: 'dotnet build3 build.proj /m /p:Architecture=$ARCHITECTURE ${args[@]}'"
 fi
