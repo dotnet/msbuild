@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.TestFramework.Assertions;
 using Microsoft.DotNet.TestFramework.Commands;
@@ -20,7 +21,7 @@ namespace Microsoft.DotNet.Publish.Tests
         }
 
         [Fact]
-        public void It_publishes_the_project_binary_to_the_publish_folder()
+        public void It_publishes_the_project_to_the_publish_folder()
         {
             var packagesDirectory =
                 Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");
@@ -37,10 +38,20 @@ namespace Microsoft.DotNet.Publish.Tests
 
             var publishDirectory = publishCommand.GetOutputDirectory();
 
-            publishDirectory.Should().HaveFiles(new [] {
+            publishDirectory.Should().OnlyHaveFiles(new [] {
                 "HelloWorld.dll",
-                "HelloWorld.pdb"
+                "HelloWorld.pdb",
+                "HelloWorld.deps.json",
+                "HelloWorld.runtimeconfig.json"
             });
+
+            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "HelloWorld.dll") })
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
         }
     }
 }
