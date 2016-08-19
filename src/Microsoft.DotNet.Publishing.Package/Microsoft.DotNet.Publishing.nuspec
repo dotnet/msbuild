@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.DotNet.Publishing</id>
+    <version>1.0.0</version>
+    <title>Microsoft DotNet Publishing</title>
+    <authors>Microsoft Corporation</authors>
+    <owners>Microsoft</owners>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>http://github.com/dotnet</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Package supporting publishing DotNet Projects</description>
+    <summary></summary>
+    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
+    <tags></tags>
+  </metadata>
+</package>

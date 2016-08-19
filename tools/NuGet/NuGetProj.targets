@@ -1,0 +1,340 @@
+<!--
+****************************************************************************************************
+Project global nuget targets.
+
+Relevant parameters: 
+* NuSpecFile property:
+  The name of the project's nuspec file, relative to the project or with full path.
+* NuSpecCreateOnMissing property:
+  When true and the NuSpecFile does not exists, one can be created from params defined by the project.
+* NuGetConent, NuSpecMeatadata, NuSpecDependency and NuSpecFrameworkAssembly item groups: 
+  Represent the nuspec schema.  See item definitions.
+* NuSpecProperties property:
+  NuGet supports property replacement in the nuspec file using the '$value$' notation.
+* Note: If NuSpecFile is provided and the project defines some nuspec parameters, values from both are 
+  merged, with precedense taken by the provided parameters. This allows for parameterization of the file.
+* NuGetPackOptions property:
+  Represents the options passed to the NuGet.exe tool in the command line.
+* NuGetPackSymbols property:
+  Determines whether symbols package is built. Ignored if NuGetPackOptions is defined.
+* NuGetOutputPath property:
+  Represents the directory where the package is to be created.
+****************************************************************************************************-->
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(CustomBeforeNuGetProjTargets)" Condition="Exists('$(CustomBeforeNuGetProjTargets)')"/>
+
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <OutputPath Condition="'$(OutputPath)' == ''">bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">obj\$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(NuGetPackageLanguage)' != ''">$(IntermediateOutputPath)$(NuGetPackageLanguage)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NuGetPackageId Condition="'$(NuGetPackageId)' == ''">$(MSBuildProjectName)</NuGetPackageId>
+    <NuGetPackSymbols Condition="'$(NuGetPackOptions.ToLower().Contains(symbols))'">true</NuGetPackSymbols>
+    <NuGetPackSymbols Condition="'$(NuGetPackSymbols)' == ''">true</NuGetPackSymbols>
+    <NuSpecFile Condition="'$(NuSpecFile)' == ''">$(MSBuildProjectDirectory)\$(NuGetPackageId).nuspec</NuSpecFile>
+    <NuSpecFileName>$([System.IO.Path]::GetFileName('$(NuSpecFile)'))</NuSpecFileName>
+    <NuSpecCreateOnMissing Condition="'$(NuSpecCreateOnMissing)' == ''">true</NuSpecCreateOnMissing>
+    <NuGetProjectOutputsFile>$(IntermediateOutputPath)$(NuGetPackageId).outputs</NuGetProjectOutputsFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet.targets inputs">
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(MSBuildThisFileDirectory)..\</SolutionDir>
+    <PackageOutputDir Condition="'$(NuGetOutputPath)' != ''">$(NuGetOutputPath)</PackageOutputDir>
+    <PackageOutputDir Condition="'$(PackageOutputDir)' == ''">$(OutputPath)NuGet</PackageOutputDir>
+    <PackageOutputDir>$(PackageOutputDir.TrimEnd('\'))</PackageOutputDir>
+    <NuGetOutputPath Condition="'$(NuGetOutputPath)' == ''">$(PackageOutputDir)</NuGetOutputPath>
+    <ProjectPath>$(IntermediateOutputPath)$(NuSpecFileName)</ProjectPath>
+  </PropertyGroup>
+
+  <!-- 
+  NuGet package layout conventions http://docs.nuget.org/docs/creating-packages/creating-and-publishing-a-package#Package_Conventions 
+  NuSpec metadata schema https://nuget.codeplex.com/wikipage?title=.nuspec%20v1.2%20Format
+  -->
+  <ItemDefinitionGroup>
+    <!-- NuGetContent represents the files to be packed (dll, exe, pdb, .cs, content, etc). -->
+    <NuGetContent>
+      <Source>$(NuGetContentSource)</Source>
+      <Destination>$(NuGetContentDestination)</Destination>
+    </NuGetContent>
+    <!-- NuSpecMetadata represents the simple items under the 'metadata' schema element (title, version, etc.) -->
+    <NuSpecMetadata>
+      <Value/>
+    </NuSpecMetadata>
+    <!-- NuSpecDependency represents the child element of the complex 'metadata/dependencies' schema element. -->
+    <NuSpecDependency>
+      <Version/>
+    </NuSpecDependency>
+    <!-- NuSpecFrameworkAssembly represents the child element of the complex 'metadata/frameworkAssemblies' schema element. -->
+    <NuSpecFrameworkAssembly>
+      <TargetFramework/>
+    </NuSpecFrameworkAssembly>
+  </ItemDefinitionGroup>
+    
+  <ItemGroup>
+    <NuGetContent Include="$(ProjectPath)" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <Clean Include="$(NuGetProjectOutputsFile)" />
+  </ItemGroup>
+
+  <!--
+****************************************************************************************************
+Common build targets overwrites.  
+**************************************************************************************************** -->
+  <PropertyGroup>
+    <BuildDependsOn>BeforeBuild;ValidateNuGetParams;ReadNuGetCleanOutputs;GetNuGetProjectInputs;GetNuGetProjectOutputs;ValidateOutputs;NuGetPack;WriteNuGetProjectOutputs;AfterBuild</BuildDependsOn>
+    <CleanDependsOn>BeforeClean;ReadNuGetCleanOutputs;CoreClean;AfterClean</CleanDependsOn>
+    <RebuildDependsOn>Clean;Build</RebuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="BeforeBuild" />
+  <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
+  <Target Name="AfterBuild" />
+
+  <Target Name="BeforeClean" />
+  <Target Name="Clean" DependsOnTargets="$(CleanDependsOn)"/>
+  <Target Name="AfterClean" />
+
+  <Target Name="CoreClean">
+    <Delete Files="@(Clean)" />
+    <ItemGroup>
+      <Clean Remove="@(Clean)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="Rebuild" DependsOnTargets="$(RebuildDependsOn)" />
+
+  <!--
+****************************************************************************************************
+ValidateNuGetParams: validate input params.  
+****************************************************************************************************-->
+  <Target Name="ValidateNuGetParams">
+    <Warning Text="No content was specified " Condition="'@(NuGetContent)' == '' AND '$(DisableNoNuGetContentWarning)' != 'true'" />
+    <Error Text="Could not find nuspec file: $(NuSpecFile)" Condition="!Exists('$(NuSpecFile)') AND '$(NuSpecCreateOnMissing)' == 'false'" />
+  </Target>
+
+  <!--
+****************************************************************************************************
+ValidateOutputs: checks whether outputs are up-to-date with respect to the inputs to avoid rebuilding
+if not needed and play nicely when building incrementally.
+**************************************************************************************************** -->
+  <Target Name="ValidateOutputs" Inputs="@(NuGetProjectInput)" Outputs="@(NuGetProjectOutput)">
+    <CreateProperty Value="true">
+      <Output TaskParameter="ValueSetByTask" PropertyName="OutputsOutdated"/>
+    </CreateProperty>
+  </Target>
+
+  <!--
+****************************************************************************************************
+NuGetPack: Creates a nuget package.  
+**************************************************************************************************** -->
+  <Target Name="NuGetPack" DependsOnTargets="GenerateNuSpecFile" Condition="'$(OutputsOutdated)' == 'true'">
+    <PropertyGroup>
+      <NuSpecProperties>$(NuSpecProperties.Trim(';'))</NuSpecProperties>
+      <NuGetPackOptions Condition="'$(NuGetPackOptions)' == '' AND '$(NuGetPackSymbols)' != 'true'">-NoPackageAnalysis</NuGetPackOptions>
+      <NuGetPackOptions Condition="'$(NuGetPackOptions)' == '' AND '$(NuGetPackSymbols)' == 'true'">-NoPackageAnalysis -symbols</NuGetPackOptions>
+      <!-- BuildCommand is defined in nuget.targets file -->
+        <BuildCommand>$(BuildCommand.Replace('-symbols', ''))</BuildCommand>
+        <BuildCommand>$(BuildCommand.Replace('/symbols', ''))</BuildCommand>
+      <BuildCommand Condition="'$(NuSpecProperties)' != ''">$(BuildCommand) -Properties $(NuSpecProperties) $(NuGetPackOptions)</BuildCommand>
+    </PropertyGroup>
+    <!-- Invalidate outputs to force a full build in case of failure -->
+    <Delete Files="$(NuGetPackTargetFile)" />
+    <MakeDir Directories="$(PackageOutputDir)" />
+    <Exec Command="$(BuildCommand)" StandardOutputImportance="high" StandardErrorImportance="high" WorkingDirectory="$(MSBuildProjectDirectory)" CustomErrorRegularExpression="(invalid|not a valid)"/>
+    <ItemGroup>
+      <Clean Include="$(PackageOutputDir)\$(NuGetPackageId).$(NuGetPackageVersion)*.nupkg" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+****************************************************************************************************
+GetNuGetProjectInputs: get the project inputs.  
+**************************************************************************************************** -->
+  <Target Name="GetNuGetProjectInputs">
+    <NormalizeNuGetContent NuGetContent="@(NuGetContent)">
+      <Output TaskParameter="NuGetContentNormalized" ItemName="NuGetProjectInput" />
+    </NormalizeNuGetContent>
+  </Target>
+
+  <!--
+****************************************************************************************************
+GetNuGetProjectOutputs: Reads build-generated files from outputs file.
+**************************************************************************************************** -->
+  <Target Name="GetNuGetProjectOutputs">
+    <PropertyGroup>
+      <NuGetPackTargetFile>$(PackageOutputDir)\$(NuGetPackageId).$(NuGetPackageVersion).nupkg</NuGetPackTargetFile>
+      <NuGetPackTargetFile Condition="'$(NuGetPackSymbols)' == 'true'">$(PackageOutputDir)\$(NuGetPackageId).$(NuGetPackageVersion).symbols.nupkg</NuGetPackTargetFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <NuGetProjectOutput Include="$(NuGetPackTargetFile)" />
+      <NuGetProjectOutput Include="$(NuGetProjectOutputsFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+****************************************************************************************************
+ReadNuGetCleanOutputs: Reads build-generated files from outputs file into Clean item collection to
+get them re-written into outputs file so they can be cleaned up later.
+**************************************************************************************************** -->
+  <Target Name="ReadNuGetCleanOutputs">
+    <ReadLinesFromFile File="$(NuGetProjectOutputsFile)">
+      <Output TaskParameter="Lines"  ItemName="Clean" />
+    </ReadLinesFromFile>
+  </Target>
+
+  <!--
+****************************************************************************************************
+WriteNuGetProjectOutputs: write the list of build-generated files into outputs file which is used for
+cleaning and incremental build.
+**************************************************************************************************** -->
+  <Target Name="WriteNuGetProjectOutputs" Condition="'$(OutputsOutdated)' == 'true'">
+    <ItemGroup>
+      <NuGetProjectOutput Include="@(Clean->Distinct())" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(NuGetProjectOutputsFile)" Lines="@(NuGetProjectOutput->Distinct())" Overwrite="true" Condition="'@(NuGetProjectOutput)' != ''" />
+  </Target>
+
+  <!--
+****************************************************************************************************
+GenerateNuSpecFile: generates the final nuspec file for the package.
+**************************************************************************************************** -->
+  <Target Name="GenerateNuSpecFile" DependsOnTargets="GetNuGetProjectInputs" Condition="'$(OutputsOutdated)' == 'true'">
+    <GenerateNuSpecFile NuSpecFile="$(NuSpecFile)" OutputDir="$(IntermediateOutputPath)" CreateNuSpec="$(NuSpecCreateOnMissing)" MetadataItems="@(NuSpecMetadata)" 
+                        Files="@(NuGetProjectInput);@(NuGetContentFromPdb)" FrameworkAssemblies="@(NuSpecFrameworkAssembly)" Dependencies="@(NuSpecDependency)">
+      <Output TaskParameter="GeneratedNuSpec" PropertyName="GeneratedNuSpec" />
+    </GenerateNuSpecFile>
+    <ItemGroup>
+      <Clean Include="$(GeneratedNuSpec)" />
+    </ItemGroup>
+    <Message Text="Generated NuSpec file: $(GeneratedNuSpec)" />
+  </Target>
+
+  <!--
+ ==================================================================================================
+  Generates final nuspec file combining/replacing values from project nuspec file if provided.
+ ==================================================================================================-->
+    <UsingTask TaskName="GenerateNuSpecFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <NuSpecFile Required="true" ParameterType="System.String" />
+      <MetadataItems Required="false" ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+      <Files Required="true" ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+      <FrameworkAssemblies Required="false" ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+      <Dependencies Required="false" ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+      <OutputDir Required="true" ParameterType="System.String" />
+      <CreateNuSpec Required="false" ParameterType="System.Boolean" />
+      <GeneratedNuSpec Output="true" ParameterType="System.String" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System.Xml" />
+      <Reference Include="System.Xml.Linq" />
+      <Using Namespace="System.Linq" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Xml.Linq"  />
+      <Code Type="Fragment" Language="cs"> <![CDATA[
+            XElement packageNode = null;
+            if (File.Exists(NuSpecFile)) {
+                packageNode = XElement.Load(NuSpecFile);
+            } else {
+                if (!CreateNuSpec) { Log.LogError("NuSpec file does not exist: {0}", NuSpecFile); return false; }
+                packageNode = new XElement("package", new XElement("metadata"));
+            }
+            GeneratedNuSpec = Path.Combine(OutputDir, Path.GetFileName(NuSpecFile));
+            if (File.Exists(GeneratedNuSpec)) File.Delete(GeneratedNuSpec);
+            XNamespace ns = packageNode.Name.Namespace;
+      
+            if(packageNode.Name.LocalName != "package") { Log.LogError("NuSpec file missing 'package' schema element. Found:'{0}'", packageNode.Name.LocalName); return false; };
+            if (Files == null) Files = new TaskItem[] { };
+            if (Dependencies == null) Dependencies = new TaskItem[] { };
+            if (MetadataItems == null) MetadataItems = new TaskItem[] { };
+            if (FrameworkAssemblies == null) FrameworkAssemblies = new TaskItem[] { };
+
+            // replace/add simple metadata.
+            XElement metadataNode = packageNode.FirstNode as XElement;
+            if(metadataNode == null) { Log.LogError("NuSpec file missing 'metadata' schema element"); return false; };
+            foreach (var metaItem in MetadataItems) {
+                string name = metaItem.GetMetadata("Identity");
+                string value = metaItem.GetMetadata("Value");
+                XElement xnode = metadataNode.Descendants(ns + name).FirstOrDefault<XElement>();
+                if (xnode == null) { xnode = new XElement(name); metadataNode.Add(xnode); }
+                xnode.Value = value;
+            }
+
+            // replaceable values for dependencies and frameworkassemblies - just replace the whole node.
+            var removeQ1 = from dependencyNode in packageNode.Descendants(ns + "dependency").Attributes("id")
+                           from dependencyItem in Dependencies
+                           where dependencyItem.GetMetadata("Identity").ToLower().Equals(dependencyNode.Value.ToLower())
+                           select dependencyNode.Parent;
+
+            var removeQ2 = from assemblyNode in packageNode.Descendants(ns + "frameworkAssembly").Attributes("assemblyName")
+                           from assemblyItem in FrameworkAssemblies
+                           where assemblyItem.GetMetadata("Identity").ToLower().Equals(assemblyNode.Value.ToLower())
+                           select assemblyNode.Parent;
+
+            foreach (var node in removeQ1.ToArray<XElement>()) node.Remove();
+            foreach (var node in removeQ2.ToArray<XElement>()) node.Remove();
+
+            XElement filesNode = packageNode.Descendants(ns + "files").FirstOrDefault<XElement>();
+            if (filesNode == null) {
+                filesNode = new XElement("files");
+                packageNode.Add(filesNode);
+            }
+            filesNode.Add(from fi in Files select new XElement("file", new XAttribute("src", fi.GetMetadata("FullPath")), new XAttribute("target", fi.GetMetadata("Destination"))));
+
+            XElement frameworkAssembliesNode = packageNode.Descendants(ns + "frameworkAssemblies").FirstOrDefault<XElement>();
+            if (frameworkAssembliesNode == null) {
+                frameworkAssembliesNode = new XElement("frameworkAssemblies");
+                metadataNode.Add(frameworkAssembliesNode);
+            }
+            frameworkAssembliesNode.Add(from assembly in FrameworkAssemblies select new XElement("frameworkAssembly",
+                                        new XAttribute("assemblyName", assembly.GetMetadata("Identity")), new XAttribute("targetFramework", assembly.GetMetadata("TargetFramework"))));
+
+            XElement dependenciesNode = packageNode.Descendants(ns + "dependencies").FirstOrDefault<XElement>();
+            if (dependenciesNode == null) {
+                dependenciesNode = new XElement("dependencies");
+                metadataNode.Add(dependenciesNode);
+            }
+            dependenciesNode.Add(from dp in Dependencies select new XElement("dependency", new XAttribute("id", dp.GetMetadata("Identity")), new XAttribute("version", dp.GetMetadata("Version"))));
+
+            if (!Directory.Exists(OutputDir)) Directory.CreateDirectory(OutputDir);
+            packageNode.Save(GeneratedNuSpec);
+    ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!--
+****************************************************************************************************
+NormalizeNuGetContent: Normalize NuGetContent items full path and destination for packing.
+****************************************************************************************************-->
+  <UsingTask TaskName="NormalizeNuGetContent" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <NuGetContent Required="true" ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+      <NuGetContentNormalized Output="true" ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"> <![CDATA[
+          NuGetContentNormalized = new TaskItem[NuGetContent.Length];
+          for (int idx = 0; idx < NuGetContent.Length; idx++) {
+              string src = NuGetContent[idx].GetMetadata("Source");
+              string id = NuGetContent[idx].GetMetadata("Identity");
+              if (!string.IsNullOrEmpty(src) && !Path.IsPathRooted(id)) {
+                  NuGetContentNormalized[idx] = new TaskItem(Path.Combine(src, id));
+              }
+              else {
+                  NuGetContentNormalized[idx] = new TaskItem(NuGetContent[idx].GetMetadata("FullPath"));
+              }
+              NuGetContentNormalized[idx].SetMetadata("Destination", NuGetContent[idx].GetMetadata("Destination"));
+          }
+  ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Import Project="$(MsBuildThisFileDirectory)nuget.targets" />
+  <Import Project="$(CustomAfterNuGetProjTargets)" Condition="Exists('$(CustomAfterNuGetProjTargets)')"/>
+</Project>

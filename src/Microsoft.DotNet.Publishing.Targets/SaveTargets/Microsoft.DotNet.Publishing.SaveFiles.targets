@@ -1,0 +1,84 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.DotNet.Publishing.SaveFiles.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <DotNetPublishSaveFiles>
+      $(DotNetPublishSaveFiles);
+      RemoveExcludeFiles;
+      SaveFilesToPublishIntermediateOutputPath;
+    </DotNetPublishSaveFiles>
+  </PropertyGroup>
+
+
+  <!--********************************************************************-->
+  <!-- Task RemoveExcludeFiles -->
+  <!--********************************************************************-->
+
+  <PropertyGroup>
+    <RemoveExcludeFilesDependsOn>
+      $(RemoveExcludeFilesDependsOn);
+    </RemoveExcludeFilesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="RemoveExcludeFiles"
+          DependsOnTargets="$(RemoveExcludeFilesDependsOn)" >
+    
+    <ItemGroup>
+      <DotNetPublishFiles Remove="@(DotNetPublishFiles)"  Condition="'%(Exclude)' == 'true'" />
+    </ItemGroup>
+    
+  </Target>
+         
+  
+  <!--********************************************************************-->
+  <!-- Task CopyAllFilesToPublishIntermediateOutputPath -->
+  <!--********************************************************************-->
+  <PropertyGroup>
+    <SaveFilesToPublishIntermediateOutputPathDependsOn>
+      $(SaveFilesToPublishIntermediateOutputPathDependsOn);
+      </SaveFilesToPublishIntermediateOutputPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="SaveFilesToPublishIntermediateOutputPath"
+        DependsOnTargets="$(SaveFilesToPublishIntermediateOutputPathDependsOn)"
+        Inputs="@(DotNetPublishFiles)"
+        Outputs="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)$(DotNetPublishFilesRelativePath)')">
+
+    <!-- Remove all the files from the temp directory first-->
+    <ItemGroup>
+      <_PublishTempFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
+    </ItemGroup>
+
+    <!-- Remove the temporary files & directory-->
+    <Delete Files="@(_PublishTempFiles)" ContinueOnError="true" />
+    <MakeDir Directories="$(PublishIntermediateOutputPath)" Condition="!Exists('$(PublishIntermediateOutputPath)')"/>
+    
+    <Copy
+    SourceFiles="@(DotNetPublishFiles)"
+    DestinationFiles="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)%(DestinationRelativePath)')"
+    />
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- This will ensure that all values have the required metadata -->
+  <!--********************************************************************-->
+  <ItemDefinitionGroup>
+    <DotNetPublishFiles>
+      <DestinationRelativePath></DestinationRelativePath>
+      <Exclude>False</Exclude>
+    </DotNetPublishFiles>
+  </ItemDefinitionGroup>
+
+</Project>
