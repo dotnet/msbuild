@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
     public sealed class ResolvePackageDependencies : Task
     {
         private readonly List<string> _packageFolders = new List<string>();
+        private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>();
 
         #region Output Items
 
@@ -89,24 +90,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             get; set;
         }
 
-        /// <summary>
-        /// Filter processed items to those that match specified frameworks.
-        /// If this is not provided, all frameworks are returned.
-        /// </summary>
-        public string[] TargetFrameworks
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Filter processed items to those that match specified runtime identifiers.
-        /// If this is not provided, all RIDs are used.
-        /// </summary>
-        public string[] RuntimeIdentifiers
-        {
-            get; set;
-        }
-
         #endregion
 
         /// <summary>
@@ -131,8 +114,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             var lockFile = GetLockFile();
 
             PopulatePackageFolders(lockFile);
-            GetPackageAndFileDefinitions(lockFile);
             RaiseLockFileTargets(lockFile);
+            GetPackageAndFileDefinitions(lockFile);
         }
 
         private void PopulatePackageFolders(LockFile lockFile)
@@ -180,7 +163,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
                 foreach (var file in package.Files)
                 {
-                    var fileItem = new TaskItem($"{packageId}/{file}");
+                    var fileKey = $"{packageId}/{file}";
+                    var fileItem = new TaskItem(fileKey);
                     fileItem.SetMetadata(MetadataKeys.Path, file);
 
                     string resolvedPath = ResolveFilePath(file, resolvedPackagePath);
@@ -190,6 +174,14 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     {
                         fileItem.SetMetadata(MetadataKeys.Analyzer, "true");
                     }
+
+                    // get a type for the file if one is available
+                    string fileType;
+                    if (!_fileTypes.TryGetValue(fileKey, out fileType))
+                    {
+                        fileType = "unknown";
+                    }
+                    fileItem.SetMetadata(MetadataKeys.Type, fileType);
 
                     _fileDefinitions.Add(fileItem);
                 }
@@ -213,6 +205,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 item.SetMetadata(MetadataKeys.TargetFrameworkMoniker, target.TargetFramework.DotNetFrameworkName);
                 item.SetMetadata(MetadataKeys.FrameworkName, target.TargetFramework.Framework);
                 item.SetMetadata(MetadataKeys.FrameworkVersion, target.TargetFramework.Version.ToString());
+                item.SetMetadata(MetadataKeys.Type, "target");
 
                 _targetDefinitions.Add(item);
 
@@ -265,51 +258,40 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
             {
-                var filePathList = GetFilePathListFor(package, fileGroup);
+                var filePathList = fileGroup.GetFilePathListFor(package);
                 foreach (var filePath in filePathList)
                 {
-                    item = new TaskItem($"{packageId}/{filePath}");
+                    var fileKey = $"{packageId}/{filePath}";
+                    item = new TaskItem(fileKey);
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
 
                     _fileDependencies.Add(item);
+
+                    // map each file key to a Type metadata value
+                    SaveFileKeyType(fileKey, fileGroup);
                 }
             }
         }
 
-        private IEnumerable<string> GetFilePathListFor(LockFileTargetLibrary package, FileGroup fileGroup)
+        // save file type metadata based on the group the file appears in
+        private void SaveFileKeyType(string fileKey, FileGroup fileGroup)
         {
-            switch (fileGroup)
+            string fileType = fileGroup.GetTypeMetadata();
+            if (fileType != null)
             {
-                case FileGroup.CompileTimeAssembly:
-                    return SelectPath(package.CompileTimeAssemblies);
-
-                case FileGroup.RuntimeAssembly:
-                    return SelectPath(package.RuntimeAssemblies);
-
-                case FileGroup.ContentFile:
-                    return package.ContentFiles.Select(c => c.Path);
-
-                case FileGroup.NativeLibrary:
-                    return SelectPath(package.NativeLibraries);
-
-                case FileGroup.ResourceAssembly:
-                    return SelectPath(package.ResourceAssemblies);
-
-                case FileGroup.RuntimeTarget:
-                    return package.RuntimeTargets.Select(c => c.Path);
-
-                case FileGroup.FrameworkAssembly:
-                    return package.FrameworkAssemblies;
-
-                default:
-                    throw new Exception($"Unexpected file group in project.lock.json target library {package.Name}");
+                string currentFileType;
+                if (!_fileTypes.TryGetValue(fileKey, out currentFileType))
+                {
+                    _fileTypes.Add(fileKey, fileType);
+                }
+                else if (currentFileType != fileType)
+                {
+                    throw new Exception($"Unexpected file type for {fileKey}. Type is both {fileType} and {currentFileType}");
+                }
             }
         }
-
-        private IEnumerable<string> SelectPath(IList<LockFileItem> fileItemList)
-            => fileItemList.Select(c => c.Path);
 
         private LockFile GetLockFile()
         {
