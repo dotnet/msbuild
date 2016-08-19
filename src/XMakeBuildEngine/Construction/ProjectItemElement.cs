@@ -40,6 +40,11 @@ namespace Microsoft.Build.Construction
         private string _remove;
 
         /// <summary>
+        /// Update value cached for performance
+        /// </summary>
+        private string _update;
+
+        /// <summary>
         /// Whether the include value has wildcards, 
         /// cached for performance.
         /// </summary>
@@ -94,7 +99,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Remove.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0) , "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.include, value);
                 _include = value;
                 _includeHasWildcards = null;
@@ -124,6 +129,7 @@ namespace Microsoft.Build.Construction
             set
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Remove.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.exclude, XMakeAttributes.remove);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Update.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.exclude, XMakeAttributes.update);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.exclude, value);
                 _exclude = value;
                 MarkDirty("Set item Exclude {0}", value);
@@ -151,11 +157,33 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement, "OM_NoRemoveOutsideTargets");
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Include.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Include.Length == 0 && Update.Length == 0), "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.remove, value);
                 _remove = value;
                 MarkDirty("Set item Remove {0}", value);
+            }
+        }
+
+        public string Update
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                // No thread-safety lock required here because many reader threads would set the same value to the field.
+                if (_update == null)
+                {
+                    _update = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.update);
+                }
+
+                return _update;
+            }
+
+            set
+            {
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Include.Length == 0), "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
+                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.update, value);
+                _update = value;
+                MarkDirty("Set item Update {0}", value);
             }
         }
 
@@ -227,72 +255,50 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Whether there are any child metadata elements
         /// </summary>
-        public bool HasMetadata
-        {
-            get { return FirstChild != null; }
-        }
+        public bool HasMetadata => FirstChild != null;
 
         /// <summary>
         /// Get any child metadata.
         /// </summary>
-        public ICollection<ProjectMetadataElement> Metadata
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectMetadataElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectMetadataElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectMetadataElement> Metadata => new ReadOnlyCollection<ProjectMetadataElement>
+            (
+            new FilteringEnumerable<ProjectElement, ProjectMetadataElement>(Children)
+            );
 
         /// <summary>
         /// Location of the include attribute
         /// </summary>
-        public ElementLocation IncludeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.include); }
-        }
+        public ElementLocation IncludeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.include);
 
         /// <summary>
         /// Location of the exclude attribute
         /// </summary>
-        public ElementLocation ExcludeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.exclude); }
-        }
+        public ElementLocation ExcludeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.exclude);
 
         /// <summary>
         /// Location of the remove attribute
         /// </summary>
-        public ElementLocation RemoveLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.remove); }
-        }
+        public ElementLocation RemoveLocation => XmlElement.GetAttributeLocation(XMakeAttributes.remove);
+
+        /// <summary>
+        /// Location of the update attribute
+        /// </summary>
+        public ElementLocation UpdateLocation => XmlElement.GetAttributeLocation(XMakeAttributes.update);
 
         /// <summary>
         /// Location of the keepMetadata attribute
         /// </summary>
-        public ElementLocation KeepMetadataLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.keepMetadata); }
-        }
+        public ElementLocation KeepMetadataLocation => XmlElement.GetAttributeLocation(XMakeAttributes.keepMetadata);
 
         /// <summary>
         /// Location of the removeMetadata attribute
         /// </summary>
-        public ElementLocation RemoveMetadataLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.removeMetadata); }
-        }
+        public ElementLocation RemoveMetadataLocation => XmlElement.GetAttributeLocation(XMakeAttributes.removeMetadata);
 
         /// <summary>
         /// Location of the keepDuplicates attribute
         /// </summary>
-        public ElementLocation KeepDuplicatesLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.keepDuplicates); }
-        }
+        public ElementLocation KeepDuplicatesLocation => XmlElement.GetAttributeLocation(XMakeAttributes.keepDuplicates);
 
         /// <summary>
         /// Whether the include value has wildcards, 
@@ -403,7 +409,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer parent, ProjectElement previousSibling, ProjectElement nextSibling)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectTargetElement || (Include.Length > 0 && Remove.Length == 0), "OM_ItemsOutsideTargetMustHaveIncludeNoRemove");
+            ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectTargetElement || (Include.Length > 0 || Update.Length > 0 || Remove.Length > 0), "OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove");
             ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectRootElement || parent.Parent is ProjectTargetElement || parent.Parent is ProjectWhenElement || parent.Parent is ProjectOtherwiseElement, "OM_CannotAcceptParent");
         }
 

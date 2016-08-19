@@ -58,14 +58,22 @@
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>EnvironmentUtilities.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
+      <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
+      <Link>AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
+      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
+      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFoldersEx.cs">
-      <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameComparer.cs">
@@ -231,6 +239,8 @@
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
+    <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -686,6 +696,7 @@
     <!-- Shim targets only work when the destination targets are installed. -->
     <Content Include="Microsoft.Data.Entity.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Microsoft.ServiceModel.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -756,20 +767,16 @@
     <Content Include="Microsoft.VisualStudioVersion.v14.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-
     <!-- Resource Files -->
-
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-
     <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="ManifestUtil\Resources\Strings.ManifestUtilities.resx">
       <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
       <SubType>Designer</SubType>
@@ -927,6 +934,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reflection" />
+    <Reference Include="System.Runtime.Serialization" />
     <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Security" />

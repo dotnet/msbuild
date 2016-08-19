@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             uniqueGetAssemblyName = null;
         }
 
-        private static List<string> s_existentFiles = new List<string>
+        protected static List<string> s_existentFiles = new List<string>
         {
             Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"),
             Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"),
@@ -1687,6 +1687,26 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("C, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
+            }
+
+            if (string.Compare(path, @"c:\assemblyfromconfig\folder_x64\assemblyfromconfig_common.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("assemblyfromconfig_common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=AMD64");
+            }
+
+            if (string.Compare(path, @"c:\assemblyfromconfig\folder_x86\assemblyfromconfig_common.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("assemblyfromconfig_common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
+            }
+
+            if (string.Compare(path, @"c:\assemblyfromconfig\folder5010x64\v5assembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=AMD64");
+            }
+
+            if (string.Compare(path, @"c:\assemblyfromconfig\folder501000x86\v5assembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
 
             string defaultName = String.Format("{0}, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral", Path.GetFileNameWithoutExtension(path));

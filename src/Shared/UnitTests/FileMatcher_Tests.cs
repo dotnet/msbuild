@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Collections;
 using System.Text.RegularExpressions;
 
@@ -589,6 +591,13 @@ namespace Microsoft.Build.UnitTests
             ValidateSplitFileSpec("f:\\dir?\\foo.cs", "f:\\", "dir?\\", "foo.cs");
             ValidateSplitFileSpec("dir?\\foo.cs", "", "dir?\\", "foo.cs");
             ValidateSplitFileSpec(@"**\test\**", "", @"**\test\**\", "*.*");
+            ValidateSplitFileSpec("bin\\**\\*.cs", "bin\\", "**\\", "*.cs");
+            ValidateSplitFileSpec("bin\\**\\*.*", "bin\\", "**\\", "*.*");
+            ValidateSplitFileSpec("bin\\**", "bin\\", "**\\", "*.*");
+            ValidateSplitFileSpec("bin\\**\\", "bin\\", "**\\", "");
+            ValidateSplitFileSpec("bin\\**\\*", "bin\\", "**\\", "*");
+            ValidateSplitFileSpec("**", "", "**\\", "*.*");
+
         }
 
         [Fact]
@@ -721,6 +730,132 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(strings[0], "\\Machine\\directorymorechars\\1.file");
             }
         }
+
+        [Fact]
+        public void ExcludePattern()
+        {
+            MatchDriver(
+                @"**\*.cs",     //  Include Pattern
+                new string[]    //  Exclude patterns
+                {
+                    @"bin\**"
+                },
+                new string[]    //  Matching files
+                {
+                    @"foo.cs",
+                    @"Properties\AssemblyInfo.cs",
+                    @"Foo\Bar\Baz\Buzz.cs"
+                },
+                new string[]    //  Non matching files
+                {
+                    @"foo.txt",
+                    @"Foo\foo.txt",
+                },
+                new string[]    //  Non matching files that shouldn't be touched
+                {
+                    @"bin\foo.cs",
+                    @"bin\bar\foo.cs",
+                    @"bin\bar\"
+                }
+            );
+        }
+
+        [Fact]
+        public void ExcludeSpecificFiles()
+        {
+            MatchDriver(
+                @"**\*.cs",     //  Include Pattern
+                new string[]    //  Exclude patterns
+                {
+                    @"Program_old.cs",
+                    @"Properties\AssemblyInfo_old.cs"
+                },
+                new string[]    //  Matching files
+                {
+                    @"foo.cs",
+                    @"Properties\AssemblyInfo.cs",
+                    @"Foo\Bar\Baz\Buzz.cs"
+                },
+                new string[]    //  Non matching files
+                {
+                    @"Program_old.cs",
+                    @"Properties\AssemblyInfo_old.cs"
+                },
+                new string[]    //  Non matching files that shouldn't be touched
+                {
+                }
+            );
+        }
+
+        [Fact]
+        public void ExcludePatternAndSpecificFiles()
+        {
+            MatchDriver(
+                @"**\*.cs",     //  Include Pattern
+                new string[]    //  Exclude patterns
+                {
+                    @"bin\**",
+                    @"Program_old.cs",
+                    @"Properties\AssemblyInfo_old.cs"
+
+                },
+                new string[]    //  Matching files
+                {
+                    @"foo.cs",
+                    @"Properties\AssemblyInfo.cs",
+                    @"Foo\Bar\Baz\Buzz.cs"
+                },
+                new string[]    //  Non matching files
+                {
+                    @"foo.txt",
+                    @"Foo\foo.txt",
+                    @"Program_old.cs",
+                    @"Properties\AssemblyInfo_old.cs"
+                },
+                new string[]    //  Non matching files that shouldn't be touched
+                {
+                    @"bin\foo.cs",
+                    @"bin\bar\foo.cs",
+                    @"bin\bar\"
+                }
+            );
+        }
+
+        [Fact]
+        public void ExcludeComplexPattern()
+        {
+            MatchDriver(
+                @"**\*.cs",     //  Include Pattern
+                new string[]    //  Exclude patterns
+                {
+                    @"**\bin\**\*.cs",
+                    @"src\Common\**",
+                },
+                new string[]    //  Matching files
+                {
+                    @"foo.cs",
+                    @"src\Framework\Properties\AssemblyInfo.cs",
+                    @"src\Framework\Foo\Bar\Baz\Buzz.cs"
+                },
+                new string[]    //  Non matching files
+                {
+                    @"foo.txt",
+                    @"src\Framework\Readme.md",
+                    @"src\Common\foo.cs",
+
+                    //  Ideally these would be in the files that aren't touched at all, but the exclude pattern is too complex for that to work with the current logic
+                    @"src\Framework\bin\foo.cs",
+                    @"src\Framework\bin\Debug",
+                    @"src\Framework\bin\Debug\foo.cs",
+                },
+                new string[]    //  Non matching files that shouldn't be touched
+                {
+                    @"src\Common\Properties\",
+                    @"src\Common\Properties\AssemblyInfo.cs",
+                }
+            );
+        }
+
 
         #region Support functions.
 
@@ -864,6 +999,14 @@ namespace Microsoft.Build.UnitTests
                                         ++hits;
                                         files[normalizedCandidate] = String.Empty;
                                     }
+                                }
+                            }
+                            else if (!FileMatcher.HasWildcards(pattern))
+                            {
+                                if (normalizedCandidate == Path.Combine(path, pattern))
+                                {
+                                    ++hits;
+                                    files[normalizedCandidate] = String.Empty;
                                 }
                             }
                             else
@@ -1114,11 +1257,24 @@ namespace Microsoft.Build.UnitTests
             string[] untouchableFiles
         )
         {
+            MatchDriver(filespec, null, matchingFiles, nonmatchingFiles, untouchableFiles);
+        }
+
+        private static void MatchDriver
+        (
+            string filespec,
+            string[] excludeFilespecs,
+            string[] matchingFiles,
+            string[] nonmatchingFiles,
+            string[] untouchableFiles
+        )
+        {
             MockFileSystem mockFileSystem = new MockFileSystem(matchingFiles, nonmatchingFiles, untouchableFiles);
             string[] files = FileMatcher.GetFiles
             (
                 String.Empty, /* we don't need project directory as we use mock filesystem */
                 filespec,
+                excludeFilespecs?.ToList(),
                 new FileMatcher.GetFileSystemEntries(mockFileSystem.GetAccessibleFileSystemEntries),
                 new DirectoryExists(mockFileSystem.DirectoryExists)
             );
