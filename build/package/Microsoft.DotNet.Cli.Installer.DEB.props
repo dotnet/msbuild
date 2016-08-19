@@ -12,4 +12,14 @@
     <DebLayoutDocsDirName>docs</DebLayoutDocsDirName>
     <DebLayoutDebianFilesDirName>debian</DebLayoutDebianFilesDirName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <DotnetDebToolProjectJsonLines Remove="*" />
+    <DotnetDebToolProjectJsonLines Include="{" />
+    <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;version&quot;: &quot;1.0.0-*&quot;," />
+    <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;name&quot;: &quot;$(DotnetDebToolConsumerProjectName)&quot;," />
+    <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;frameworks&quot;: { &quot;netcoreapp1.0&quot;: {} }," />
+    <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;tools&quot;: {&quot;$(DotnetDebToolPackageId)&quot;: &quot;$(DotnetDebToolVersion)&quot; }" />
+    <DotnetDebToolProjectJsonLines Include="}" />
+  </ItemGroup>
 </Project>

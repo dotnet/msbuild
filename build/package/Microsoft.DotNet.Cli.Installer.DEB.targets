@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Microsoft.DotNet.Cli.Installer.DEB.props" />
+
+  <Target Name="GenerateDebs"
+          DependsOnTargets="Init;
+                            GenerateSdkDeb;
+                            TestSdkDeb;"
+      Condition=" '$(OSName)' == 'ubuntu' " />
+
   <Target Name="SetupGenerateDebInputsOutputs">
       <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
           <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
@@ -12,64 +19,70 @@
                Importance="High" />
 
       <PropertyGroup>
-          <DebuildPresent>false</DebuildPresent>
-          <DebuildPresent Condition=" '$(DebuildExitCode)' == '0' ">true</DebuildPresent>
+        <DebuildPresent>false</DebuildPresent>
+        <DebuildPresent Condition=" '$(DebuildExitCode)' == '0' ">true</DebuildPresent>
 
-          <DotnetDebToolVersion></DotnetDebToolVersion>
-          <DotnetDebToolPackageSource></DotnetDebToolPackageSource>
+        <DotnetDebToolDir></DotnetDebToolDir>
+        <DotnetDebToolVersion></DotnetDebToolVersion>
+        <DotnetDebToolPackageSource></DotnetDebToolPackageSource>
 
-          <DebianPackagingScript>$(RepoRoot)/scripts/package/package-debian.sh</DebianPackagingScript>
-          <ManpagesDirectory>$(RepoRoot)/Documentation/manpages</ManpagesDirectory>
+        <DebianPackagingScript>$(RepoRoot)/scripts/package/package-debian.sh</DebianPackagingScript>
+        <ManpagesDirectory>$(RepoRoot)/Documentation/manpages</ManpagesDirectory>
 
-          <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
-          <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
+        <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
+        <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
 
-          <SdkDebianPackageName>dotnet-dev-$(SdkVersion)</SdkDebianPackageName>
-          <SharedFrameworkDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkVersion)</SharedFrameworkDebianPackageName>
-          <SharedFrameworkDebianPackageName>$(SharedFrameworkDebianPackageName.ToLower())</SharedFrameworkDebianPackageName>
-          <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrVersion)</HostFxrDebianPackageName>
-          <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
-          <SharedHostDebianPackageName>dotnet-host</SharedHostDebianPackageName>
+        <SdkDebianPackageName>dotnet-dev-$(SdkVersion)</SdkDebianPackageName>
+        <SharedFrameworkDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkVersion)</SharedFrameworkDebianPackageName>
+        <SharedFrameworkDebianPackageName>$(SharedFrameworkDebianPackageName.ToLower())</SharedFrameworkDebianPackageName>
+        <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrVersion)</HostFxrDebianPackageName>
+        <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
+        <SharedHostDebianPackageName>dotnet-host</SharedHostDebianPackageName>
 
-          <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
+        <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
 
-          <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
-          <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
-          <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
+        <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
+        <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
+        <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
       </PropertyGroup>
 
       <ItemGroup>
         <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
-      </ItemGroup>
 
-      <!-- Consumed By Publish -->
-      <ItemGroup>
+        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME">
+          <ReplacementString>$(SharedFrameworkDebianPackageName)</ReplacementString>
+        </SdkDebianPackageTemplateReplacement>
+        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_NUGET_NAME">
+          <ReplacementString>$(SharedFrameworkName)</ReplacementString>
+        </SdkDebianPackageTemplateReplacement>
+        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_NUGET_VERSION">
+          <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
+        </SdkDebianPackageTemplateReplacement>
+        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_BRAND_NAME">
+          <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
+        </SdkDebianPackageTemplateReplacement>
+        <SdkDebianPackageTemplateReplacement Include="SDK_NUGET_VERSION">
+          <ReplacementString>$(SdkVersion)</ReplacementString>
+        </SdkDebianPackageTemplateReplacement>
+        <SdkDebianPackageTemplateReplacement Include="CLI_SDK_BRAND_NAME">
+          <ReplacementString>$(SdkBrandName)</ReplacementString>
+        </SdkDebianPackageTemplateReplacement>
+
+        <!-- Consumed By Publish -->
         <GeneratedInstallers Include="$(SdkInstallerFile)" />
-      </ItemGroup>
 
-      <ItemGroup>
-          <SdkDebInputFiles Include="$(SdkLayoutOutputDirectory)/**/*" />
+        <SdkDebInputFiles Include="$(SdkLayoutOutputDirectory)/**/*" />
+        <SdkDebManPageFiles Include="$(ManpagesDirectory)/**/*" />
       </ItemGroup>
   </Target>
 
   <Target Name="GenerateSdkDeb"
       Condition=" '$(OSName)' == 'ubuntu' and '$(DebuildPresent)'  == 'true' "
-      Inputs="@(SdkDebInputFiles);"
+      DependsOnTargets="SetupGenerateDebInputsOutputs;
+                        PrepareDotnetDebDirectories;
+                        PrepareDotnetDebTool;"
+      Inputs="@(SdkDebInputFiles)"
       Outputs="$(SdkInstallerFile)" >
-
-      <!-- Clean the workspace -->
-      <ItemGroup>
-        <SdkDebianFilesToClean Remove="*" />
-        <SdkDebianFilesToClean Include="$(SdkInstallerFile)" />
-
-        <SdkDebianDirectoriesToClean Remove="*" />
-        <SdkDebianDirectoriesToClean Include="$(SdkDebianIntermediateDirectory)" />
-        <SdkDebianDirectoriesToClean Include="$(SdkDebianLayoutOutputDirectory)" />
-      </ItemGroup>
-
-      <Delete Condition=" 'Exists(%(SdkDebianFilesToClean))' " Files="%(SdkDebianFilesToClean)" />
-      <RemoveDir Condition=" 'Exists(%(SdkDebianDirectoriesToClean))' " Directories="%(SdkDebianDirectoriesToClean)" />
-      <MakeDir Directories="@(SdkDebianDirectoriesToClean)" />
 
       <!-- Install Packages -->
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
@@ -77,19 +90,36 @@
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
 
       <!-- Create layout -->
+      <Copy
+        DestinationFiles="@(SourceFile->'$(DebLayoutPackageRootDirName)/%(RecursiveDir)%(Filename)%(Extension)')"
+        OverwriteReadOnlyFiles="True"
+        SkipUnchangedFiles="False"
+        SourceFiles="@(SdkLayoutOutputDirectory)"
+        UseHardlinksIfPossible="False">
+      </Copy>
 
+      <Copy
+        DestinationFiles="@(SourceFile->'$(DebLayoutDocsDir)/%(RecursiveDir)%(Filename)-$(SdkVersion)%(Extension)')"
+        OverwriteReadOnlyFiles="True"
+        SkipUnchangedFiles="False"
+        SourceFiles="@(SdkDebManPageFiles)"
+        UseHardlinksIfPossible="False">
+      </Copy>
+      
+      <Copy
+        DestinationFiles="@(SourceFile->'$(DebLayoutDocsDir)/%(RecursiveDir)%(Filename)-$(SdkVersion)%(Extension)')"
+        OverwriteReadOnlyFiles="True"
+        SkipUnchangedFiles="False"
+        SourceFiles="@(SdkDebManPageFiles)"
+        UseHardlinksIfPossible="False">
+      </Copy>
 
-      <Exec Command="'$(DebianPackagingScript)'
-                     -v '$(SdkVersion)'
-                     -i '$(SdkLayoutOutputDirectory)'
-                     -o '$(SdkInstallerFile)'
-                     -p '$(SdkDebianPackageName)'
-                     -b '$(SdkBrandName)'
-                     -m '$(ManpagesDirectory)'
-                     --framework-debian-package-name '$(SharedFrameworkDebianPackageName)'
-                     --framework-nuget-name '$(SharedFrameworkName)'
-                     --framework-nuget-version '$(SharedFrameworkVersion)'
-                     --obj-root '$(SdkDebianIntermediateDirectory)'" />
+      <DotNetDebTool ToolPath="$(Stage2Directory)"
+                     InputDir="$(SdkLayoutDirectory)"
+                     OutputFile="$(SdkInstallerFile)"
+                     PackageName="$(SdkDebianPackageName)"
+                     PackageVersion="$(SdkVersion)"
+                     WorkingDirectory="$(DotnetDebToolDir)" />
 
       <!-- Remove Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
@@ -106,7 +136,7 @@
               $(SdkInstallerFile);"
       Outputs="$(DebianTestResultsXmlFile)" >
 
-      <!-- Install Packages -->
+      <!-- Install v(N-1) Packages -->
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
@@ -125,27 +155,50 @@
       <Exec Command="sudo dpkg -r $(SharedHostDebianPackageName)" />
   </Target>
 
-  <Target Name="GenerateDebs"
-      DependsOnTargets="Init;
-                        Layout;
-                        SetupGenerateDebInputsOutputs;
-                        GenerateSdkDeb;
-                        TestSdkDeb;"
-      Condition=" '$(OSName)' == 'ubuntu' " />
+  <Target Name="PrepareDotnetDebDirectories">
+    <PropertyGroup>
+      <DebLayoutPackageRootDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutPackageRootDirName)</DebLayoutPackageRootDirName>
+      <DebLayoutAbsolutePlacementDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutAbsolutePlacementDirName)</DebLayoutAbsolutePlacementDir>
+      <DebLayoutSamplesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutSamplesDirName)</DebLayoutSamplesDir>
+      <DebLayoutDocsDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDocsDirName)</DebLayoutDocsDir>
+      <DebLayoutDebianFilesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDebianFilesDirName)</DebLayoutDebianFilesDir>
+    </PropertyGroup>
+
+    <!-- Clean the workspace -->
+    <ItemGroup>
+      <SdkDebianFilesToClean Remove="*" />
+      <SdkDebianFilesToClean Include="$(SdkInstallerFile)" />
+
+      <SdkDebianDirectoriesToClean Remove="*" />
+      <SdkDebianDirectoriesToClean Include="$(SdkDebianIntermediateDirectory);
+                                            $(SdkDebianLayoutOutputDirectory)" />
+
+      <SdkDebianLayoutSubDirectories Remove="*" />
+      <SdkDebianLayoutSubDirectories Include="$(DebLayoutPackageRootDir);
+                                              $(DebLayoutAbsolutePlacementDir);
+                                              $(DebLayoutSamplesDir);
+                                              $(DebLayoutDocsDir);
+                                              $(DebLayoutDebianFilesDir)" />
+    </ItemGroup>
+
+    <Delete Condition=" 'Exists(%(SdkDebianFilesToClean))' " Files="@(SdkDebianFilesToClean)" />
+    <RemoveDir Condition=" 'Exists(%(SdkDebianDirectoriesToClean))' " Directories="@(SdkDebianDirectoriesToClean)" />
+    <MakeDir Directories="@(SdkDebianDirectoriesToClean)" />
+    <MakeDir Directories="@(SdkDebianLayoutSubDirectories)" />
+  </Target>
 
   <Target Name="PrepareDotnetDebTool"
           DependsOnTargets="WriteDotnetDebToolProjectJson;">
 
+    <DotNetRestore  FallbackSource="$(DotnetDebToolPackageSource)"
+                    ToolPath="$(Stage2Directory)"
+                    WorkingDirectory="$(DotnetDebToolDir)" />
   </Target>
 
-  <Target Name="WriteDotnetDebToolProjectJson" >
-    <ItemGroup>
-      <AssemblyInfoLines Include="{" />
-      <AssemblyInfoLines Include="%20%20%20%20&quot;version&quot;: &quot;1.0.0-*&quot;," />
-      <AssemblyInfoLines Include="%20%20%20%20&quot;name&quot;: &quot;$(DotnetDebToolConsumerProjectName)&quot;," />
-      <AssemblyInfoLines Include="%20%20%20%20&quot;frameworks&quot;: { &quot;netcoreapp1.0&quot;: {} }," />
-      <AssemblyInfoLines Include="%20%20%20%20&quot;tools&quot;: {{&quot;$(DotnetDebToolPackageId)&quot;: &quot;$(DotnetDebToolVersion)&quot; }}" />
-      <AssemblyInfoLines Include="}" />
-    </ItemGroup>
+  <Target Name="WriteDotnetDebToolProjectJson"
+          Inputs="$(MSBuildThisFile);$(MSBuildThisFileDirectory)/Microsoft.DotNet.Cli.Installer.DEB.props"
+          Outputs="$(DotnetDebToolDir)/project.json">
+
+    <WriteLinesToFile File="$(DotnetDebToolDir)/project.json" Lines="@(DotnetDebToolProjectJsonLines)" />
   </Target>
 </Project>
