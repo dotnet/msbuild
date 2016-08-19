@@ -18,6 +18,11 @@
     <NonShipping>true</NonShipping>
     <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(DotNetTool).exe</StartProgram>
+    <StartArguments>"$(OutDir)xunit.console.netcore.exe" "$(OutDir)Microsoft.DotNet.Core.Build.Tasks.UnitTests.dll" -xml "$(OutDir)TestResults.xml" -wait</StartArguments>
+    <StartWorkingDirectory>$(OutDir)</StartWorkingDirectory>
+    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GivenADependencyContextBuilder.cs" />
