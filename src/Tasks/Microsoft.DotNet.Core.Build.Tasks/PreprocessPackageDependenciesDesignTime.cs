@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         }
 
         /// <summary>
-        /// Adds targets from TargetDefinitions to dependencies world collection
+        /// Adds targets from TargetDefinitions to dependencies world dictionary
         /// </summary>
         private void PopulateTargets()
         {
@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         }
 
         /// <summary>
-        /// Adds assemblies and framework assemblies form FileDefinitons to dependencies world dictionary.
+        /// Adds assemblies and framework assemblies from FileDefinitons to dependencies world dictionary.
         /// </summary>
         private void PopulateAssemblies()
         {
@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                     { MetadataKeys.Version, Version },
                     { MetadataKeys.Path, Path },
                     { MetadataKeys.Type, Type.ToString() },
-                    { ResolvedMetadata, ResolvedMetadata.ToString() },
+                    { ResolvedMetadata, Resolved.ToString() },
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
             }
