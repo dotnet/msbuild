@@ -2196,20 +2196,14 @@ namespace Microsoft.Build.UnitTests
         public extern static bool LookupPrivilegeValue(string lpSystemName, string
         lpName, IntPtr pLuid);
 
-        public CopySymbolicLink_Tests()
+        public bool CheckPrivilege(string privilege)
         {
-            useSymbolicLinks = true;
-        }
+            if (String.IsNullOrEmpty(privilege))
+                return false;
 
-        /// <summary>
-        /// DestinationFolder should work.
-        /// </summary>
-        [Fact]
-        public void CopyToDestinationFolderWithSymbolicLinkCheck()
-        {
+            var isPrivileged = false;
             int result = 0;
             IntPtr hToken;
-            string privilege = "SeCreateSymbolicLinkPrivilege";
             _PRIVILEGE_SET ps = new _PRIVILEGE_SET();
 
             ps.PrivilegeCount = 1;
@@ -2218,9 +2212,9 @@ namespace Microsoft.Build.UnitTests
 
             IntPtr ptr = IntPtr.Zero;
             ptr = Marshal.AllocHGlobal(privSize * (int)ps.PrivilegeCount);
-
             Marshal.StructureToPtr(ps.Privilege_1[0], ptr, false);
-            if (!LookupPrivilegeValue(null, privilege, ptr))
+
+            if (LookupPrivilegeValue(null, privilege, ptr))
             {
                 ps.Privilege_1[0] = (LUID_AND_ATTRIBUTES)Marshal.PtrToStructure(ptr, typeof(LUID_AND_ATTRIBUTES));
 
@@ -2233,84 +2227,98 @@ namespace Microsoft.Build.UnitTests
                 WindowsIdentity.Impersonate(WindowsIdentity.GetCurrent().Token);
                 hToken = WindowsIdentity.GetCurrent().Token;
 
-                if (!PrivilegeCheck(hToken, ptrPs, ref result))
+                PrivilegeCheck(hToken, ptrPs, ref result);
+
+                isPrivileged = Convert.ToBoolean(result);
+
+                Marshal.FreeHGlobal(ptrPs); // Free allocated mem   
+            }
+            Marshal.FreeHGlobal(ptr); // Free alocated mem
+
+            return isPrivileged;
+        }
+
+        public CopySymbolicLink_Tests()
+        {
+            useSymbolicLinks = true;
+        }
+
+        /// <summary>
+        /// DestinationFolder should work.
+        /// </summary>
+        [Fact]
+        public void CopyToDestinationFolderWithSymbolicLinkCheck()
+        {
+            if (CheckPrivilege("SeCreateSymbolicLinkPrivilege"))
+            {
+                string sourceFile = FileUtilities.GetTemporaryFile();
+                string temp = Path.GetTempPath();
+                string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+                string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+                try
                 {
-                    string sourceFile = FileUtilities.GetTemporaryFile();
-                    string temp = Path.GetTempPath();
-                    string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-                    string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-                    try
-                    {
-                        using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                            sw.Write("This is a source temp file.");
+                    using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                        sw.Write("This is a source temp file.");
 
-                        // Don't create the dest folder, let task do that
+                    // Don't create the dest folder, let task do that
 
-                        ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+                    ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
 
-                        Copy t = new Copy();
-                        t.RetryDelayMilliseconds = 1; // speed up tests!
+                    Copy t = new Copy();
+                    t.RetryDelayMilliseconds = 1; // speed up tests!
 
-                        // Allow the task's default (false) to have a chance
-                        t.UseSymboliclinksIfPossible = true;
+                    // Allow the task's default (false) to have a chance
+                    t.UseSymboliclinksIfPossible = true;
 
-                        MockEngine me = new MockEngine(true);
-                        t.BuildEngine = me;
-                        t.SourceFiles = sourceFiles;
-                        t.DestinationFolder = new TaskItem(destFolder);
-                        t.SkipUnchangedFiles = true;
+                    MockEngine me = new MockEngine(true);
+                    t.BuildEngine = me;
+                    t.SourceFiles = sourceFiles;
+                    t.DestinationFolder = new TaskItem(destFolder);
+                    t.SkipUnchangedFiles = true;
 
-                        bool success = t.Execute();
+                    bool success = t.Execute();
 
-                        Assert.True(success); // "success"
-                        Assert.True(File.Exists(destFile)); // "destination exists"
-                        Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+                    Assert.True(success); // "success"
+                    Assert.True(File.Exists(destFile)); // "destination exists"
+                    Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
 
-                        me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+                    me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
 
-                        string destinationFileContents;
-                        using (StreamReader sr = new StreamReader(destFile))
-                            destinationFileContents = sr.ReadToEnd();
+                    string destinationFileContents;
+                    using (StreamReader sr = new StreamReader(destFile))
+                        destinationFileContents = sr.ReadToEnd();
 
-                        Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
+                    Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
 
-                        Assert.Equal(1, t.DestinationFiles.Length);
-                        Assert.Equal(1, t.CopiedFiles.Length);
-                        Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                        Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
+                    Assert.Equal(1, t.DestinationFiles.Length);
+                    Assert.Equal(1, t.CopiedFiles.Length);
+                    Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
+                    Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
 
-                        // Now we will write new content to the source file
-                        // we'll then check that the destination file automatically
-                        // has the same content (i.e. it's been hard linked)
-                        using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                            sw.Write("This is another source temp file.");
+                    // Now we will write new content to the source file
+                    // we'll then check that the destination file automatically
+                    // has the same content (i.e. it's been hard linked)
+                    using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                        sw.Write("This is another source temp file.");
 
-                        // Read the destination file (it should have the same modified content as the source)
-                        using (StreamReader sr = new StreamReader(destFile))
-                            destinationFileContents = sr.ReadToEnd();
+                    // Read the destination file (it should have the same modified content as the source)
+                    using (StreamReader sr = new StreamReader(destFile))
+                        destinationFileContents = sr.ReadToEnd();
 
-                        Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+                    Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
-                        ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
 
-                    }
-                    finally
-                    {
-                        Helpers.DeleteFiles(sourceFile, destFile);
-                    }
                 }
-                else
+                finally
                 {
-                    Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
+                    Helpers.DeleteFiles(sourceFile, destFile);
                 }
-                Marshal.FreeHGlobal(ptrPs); // Free allocated mem              
             }
             else
             {
                 Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
             }
-            Marshal.FreeHGlobal(ptr); // Free alocated mem
         }
-
     }
 }
