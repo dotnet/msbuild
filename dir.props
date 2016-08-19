@@ -33,7 +33,7 @@
     <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
 
     <!-- Package version / directories -->
-    <BuildToolsVersion>1.0.25-prerelease-00199</BuildToolsVersion>
+    <BuildToolsVersion>1.0.26-prerelease-00627-02</BuildToolsVersion>
     <CompilerToolsVersion>2.0.0-beta3</CompilerToolsVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
@@ -41,6 +41,7 @@
 
     <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
     <BuildToolsTaskDir>$(ToolsDir)net45\</BuildToolsTaskDir>
+    <PackagingTaskDir>$(ToolsDir)net45\</PackagingTaskDir>
     <CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>    
     <MicroBuildDir>$(PackagesDir)\MicroBuild.Core.$(MicroBuildVersion)\build\</MicroBuildDir>
     <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning.$(GitVersioningVersion)\build\</GitVersioningDir>
