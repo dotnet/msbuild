@@ -5,14 +5,14 @@
 
   <PropertyGroup>
     <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
-    <CoreSDKDir>$(RepoRoot)/resources/MSBuildImports</CoreSDKDir>
+    <MSBuildImportsDir>$(RepoRoot)/resources/MSBuildImports</MSBuildImportsDir>
   </PropertyGroup>
 
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
     <FilesToMove Include="$(BinaryToCorehostifyRelDir)/csc.exe;$(BinaryToCorehostifyRelDir)/MSBuild.exe;" />
     <BundledTools Include="csc;MSBuild;NuGet.CommandLine.XPlat;dotnet" />
-    <CoreSDKContent Include="$(CoreSDKDir)/**/*" />
+    <MSBuildImportsContent Include="$(MSBuildImportsDir)/**/*" />
   </ItemGroup>
 
   <Target Name="Compile" DependsOnTargets="Prepare;
@@ -165,7 +165,7 @@
             DestinationFiles="$(SdkOutputDirectory)/$(HostPolicyBaseName)" />
 
       <!-- copy core sdk -->
-      <Copy SourceFiles="@(CoreSDKContent)"
+      <Copy SourceFiles="@(MSBuildImportsContent)"
             DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
 
       <!-- Crossgen the Shared Framework -->
