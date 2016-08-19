@@ -21,7 +21,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Mocks\MockTaskItem.cs" />
-    <Compile Include="PreprocessPackageDependenciesDesignTimeTests.cs" />
+    <Compile Include="GivenThatWeWantToGetDependenciesViaDesignTimeBuild.cs" />
     <Compile Include="GivenADependencyContextBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -46,7 +46,7 @@
       <Name>Microsoft.DotNet.Core.Build.Tasks</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\..\..\build\Targets\Signing.Imports.targets"/>
+  <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
   <Target Name="AfterBuild">

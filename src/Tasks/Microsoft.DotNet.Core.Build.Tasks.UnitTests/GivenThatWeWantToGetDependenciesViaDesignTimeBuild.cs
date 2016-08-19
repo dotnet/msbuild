@@ -3,15 +3,16 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using Microsoft.Build.Framework;
 using Xunit;
 
 namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
 {
-    public class PreprocessPackageDependenciesDesignTimeTests
+    public class GivenThatWeWantToGetDependenciesViaDesignTimeBuild
     {
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Targets()
+        public void ItShouldReturnOnlyValidTargetsWithoutRIDs()
         {
             // Arrange 
             // target definitions 
@@ -73,18 +74,17 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             var result = task.Execute();
 
             // Assert
-            Assert.True(result);
-            Assert.Equal(1, task.DependenciesDesignTime.Count());
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(1);
 
-            // Target with type
             var resultTargetsWithType = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            Assert.Equal(1, resultTargetsWithType.Length);
+            resultTargetsWithType.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Target, mockTargetWithType, resultTargetsWithType[0]);
         }
 
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Packages_Unknown()
+        public void ItShouldNotReturnPackagesWithUnknownTypes()
         {
             // Arrange 
             // target definitions 
@@ -149,18 +149,17 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             var result = task.Execute();
 
             // Assert
-            Assert.True(result);
-            Assert.Equal(1, task.DependenciesDesignTime.Count());
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(1);
 
-            // Target with type
             var resultTargets = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            Assert.Equal(1, resultTargets.Length);
+            resultTargets.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
         }
 
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Packages_Unresolved()
+        public void ItShouldReturnUnresolvedPackageDependenciesWithTypePackage()
         {
             // Arrange 
             // target definitions 
@@ -207,24 +206,22 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             var result = task.Execute();
 
             // Assert
-            Assert.True(result);
-            Assert.Equal(2, task.DependenciesDesignTime.Count());
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(2);
 
-            // Target with type
             var resultTargets = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            Assert.Equal(1, resultTargets.Length);
+            resultTargets.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
 
-            // Package unknown Resolved = false
             var resultPackageUnresolved = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/mockPackageUnresolved/1.0.0")).ToArray();
-            Assert.Equal(1, resultPackageUnresolved.Length);
+            resultPackageUnresolved.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Package, mockPackageUnresolved, resultPackageUnresolved[0]);
         }
 
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Packages_WhenTypeIsNotPackageOrUnresolved()
+        public void ItShouldIgnoreAllDependenciesWithTypeNotEqualToPackageOrUnresolved()
         {
             // Arrange 
             // target definitions 
@@ -393,7 +390,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
                     { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
                 });
 
-
             var task = new PreprocessPackageDependenciesDesignTime();
             task.TargetDefinitions = new[] { mockTarget };
             task.PackageDefinitions = new ITaskItem[] {
@@ -421,18 +417,18 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             var result = task.Execute();
 
             // Assert
-            Assert.True(result);
-            Assert.Equal(1, task.DependenciesDesignTime.Count());
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(1);
 
             // Target with type
             var resultTargets = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            Assert.Equal(1, resultTargets.Length);
+            resultTargets.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
         }
 
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Packages_ChildPackages()
+        public void ItReturnsCorrectHierarchyOfDependenciesThatHaveChildren()
         {
             // Arrange 
             // target definitions 
@@ -447,6 +443,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
                     { MetadataKeys.Type, "Target" }
                 });
 
+            // package definitions
             var mockPackage = new MockTaskItem(
                 itemSpec: "Package3/1.0.0",
                 metadata: new Dictionary<string, string>
@@ -497,6 +494,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
                 });
 
+            // package dependencies
             var mockPackageDep = new MockTaskItem(
                             itemSpec: "Package3/1.0.0",
                             metadata: new Dictionary<string, string>
@@ -548,46 +546,41 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             var result = task.Execute();
 
             // Assert
-            Assert.True(result);
-            Assert.Equal(5, task.DependenciesDesignTime.Count());
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(5);
 
-            // Target with type
             var resultTargets = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            Assert.Equal(1, resultTargets.Length);
+            resultTargets.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
 
-            // Package3/1.0.0
             mockPackage.SetMetadata(MetadataKeys.Path, mockPackage.GetMetadata(MetadataKeys.ResolvedPath));
             var resultPackage = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/Package3/1.0.0")).ToArray();
-            Assert.Equal(1, resultPackage.Length);
+            resultPackage.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Package, mockPackage, resultPackage[0]);
 
-            // ChildPackage1/1.0.0
             mockChildPackage1.SetMetadata(MetadataKeys.Path, mockChildPackage1.GetMetadata(MetadataKeys.ResolvedPath));
             var resultChildPackage1 = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/ChildPackage1/1.0.0")).ToArray();
-            Assert.Equal(1, resultChildPackage1.Length);
+            resultChildPackage1.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Package, mockChildPackage1, resultChildPackage1[0]);
 
-            // ChildPackage11/1.0.0
             mockChildPackage11.SetMetadata(MetadataKeys.Path, mockChildPackage11.GetMetadata(MetadataKeys.ResolvedPath));
             var resultChildPackage11 = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/ChildPackage11/1.0.0")).ToArray();
-            Assert.Equal(1, resultChildPackage11.Length);
+            resultChildPackage11.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Package, mockChildPackage11, resultChildPackage11[0]);
 
-            // ChildPackage2/3.0.0
             mockChildPackage2.SetMetadata(MetadataKeys.Path, mockChildPackage2.GetMetadata(MetadataKeys.ResolvedPath));
             var resultChildPackage2 = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/ChildPackage2/2.0.0")).ToArray();
-            Assert.Equal(1, resultChildPackage2.Length);
+            resultChildPackage2.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Package, mockChildPackage2, resultChildPackage2[0]);
         }
 
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Assemblies_WhenTypeIsNotAssembly()
+        public void ItShouldIgnoreFileDependenciesThatAre_NotAssemblies_And_DontBelongToCompileTimeAssemblyGroup()
         {
             // Arrange 
             // target definitions 
@@ -762,18 +755,18 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             var result = task.Execute();
 
             // Assert
-            Assert.True(result);
-            Assert.Equal(1, task.DependenciesDesignTime.Count());
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(1);
 
             // Target with type
             var resultTargets = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            Assert.Equal(1, resultTargets.Length);
+            resultTargets.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
         }
 
         [Fact]
-        public void PreprocessPackageDependenciesDesignTime_Assemblies_ChildAssemblies()
+        public void ItShouldReturnCorrectHierarchyWhenPackageHasChildAssemblyDependencies()
         {
             // Arrange 
             // target definitions 
@@ -788,6 +781,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
                     { MetadataKeys.Type, "Target" }
                 });
 
+            // package definitions
             var mockPackage = new MockTaskItem(
                 itemSpec: "Package3/1.0.0",
                 metadata: new Dictionary<string, string>
@@ -835,6 +829,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
                 });
 
+            // package dependencies
             var mockPackageDep = new MockTaskItem(
                 itemSpec: "Package3/1.0.0",
                 metadata: new Dictionary<string, string>
@@ -891,41 +886,36 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             var result = task.Execute();
 
             // Assert
-            Assert.True(result);
-            Assert.Equal(4, task.DependenciesDesignTime.Count());
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(4);
 
-            // Target with type
             var resultTargets = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            Assert.Equal(1, resultTargets.Length);
+            resultTargets.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
 
-            // Package3/1.0.0
             mockPackage.SetMetadata(MetadataKeys.Path, mockPackage.GetMetadata(MetadataKeys.ResolvedPath));
             var resultPackage = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/Package3/1.0.0")).ToArray();
-            Assert.Equal(1, resultPackage.Length);
+            resultPackage.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Package, mockPackage, resultPackage[0]);
 
-            // ChildAssembly1/1.0.0
             mockChildAssembly1.SetMetadata(MetadataKeys.Path, mockChildAssembly1.GetMetadata(MetadataKeys.ResolvedPath));
             var resultChildAssembly1 = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/mockChildAssembly1")).ToArray();
-            Assert.Equal(1, resultChildAssembly1.Length);
+            resultChildAssembly1.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.Assembly, mockChildAssembly1, resultChildAssembly1[0]);
 
-            // ChildAssembly2/1.0.0
             mockChildAssembly2.SetMetadata(MetadataKeys.Path, mockChildAssembly2.GetMetadata(MetadataKeys.ResolvedPath));
             var resultChildAssembly2 = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/somepath/mockChildAssembly2")).ToArray();
-            Assert.Equal(1, resultChildAssembly2.Length);
+            resultChildAssembly2.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.FrameworkAssembly, mockChildAssembly2, resultChildAssembly2[0]);
         }
 
         private void VerifyTargetTaskItem(DependencyType type, ITaskItem input, ITaskItem output)
         {
-            Assert.Equal(type.ToString(),
-                         output.GetMetadata(MetadataKeys.Type));
+            type.ToString().Should().Be(output.GetMetadata(MetadataKeys.Type));
 
             // remove unnecessary metadata to keep only ones that would be in result task items
             var removeMetadata = new[] { MetadataKeys.Type, MetadataKeys.ResolvedPath };
@@ -938,7 +928,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
 
             foreach (var metadata in input.MetadataNames)
             {
-                Assert.Equal(input.GetMetadata(metadata.ToString()), output.GetMetadata(metadata.ToString()));
+                input.GetMetadata(metadata.ToString()).Should().Be(output.GetMetadata(metadata.ToString()));
             }
         }
     }
