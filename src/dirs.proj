@@ -58,7 +58,12 @@
     </TraversalBuildDependsOn>
   </PropertyGroup>
 
-
-
+  <!-- Workaround to remove items from PackagesNuSpecFiles (defined in packages.targets). This ItemGroup
+       is defined with a wildcard Include and no way to override. -->
+  <Target Name="RemovePackages" BeforeTargets="BuildPackages" Condition="$(FullFrameworkBuild) != 'true'" >
+    <ItemGroup>
+        <PackagesNuSpecFiles Remove="$(SourceDir)nuget\Microsoft.Build.Engine.nuspec;$(SourceDir)nuget\Microsoft.Build.Conversion.Core.nuspec" />
+    </ItemGroup>
+  </Target>
 
 </Project>

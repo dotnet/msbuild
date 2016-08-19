@@ -46,10 +46,6 @@
       <Project>{D21C4Bf9-E131-4ACB-8960-794797f19A39}</Project>
       <Name>OrcasEngine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
