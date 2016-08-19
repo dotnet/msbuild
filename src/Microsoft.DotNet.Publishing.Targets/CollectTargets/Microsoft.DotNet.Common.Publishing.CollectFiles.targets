@@ -1,0 +1,82 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.DotNet.Common.Publishing.CollectFiles.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--***************************************************************-->
+  <!-- Task CollectFilesFromOutDir                     -->
+  <!--***************************************************************-->
+  <PropertyGroup>
+    <CollectFilesFromOutDirDependsOn>
+      $(CollectFilesFromOutDirDependsOn);
+    </CollectFilesFromOutDirDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CollectFilesFromOutDir"
+          DependsOnTargets="$(CollectFilesFromOutDirDependsOn)"
+          Condition="'$(OutDir)' != ''">
+
+    <ItemGroup>
+      <_OutDirFiles
+        Include="$(OutDir)**\*.*"
+        Exclude="$(OutDir)PublishOutput\**\*.*">
+      </_OutDirFiles>
+    </ItemGroup>
+
+    <CreateItem
+      Include="@(_OutDirFiles)"
+      AdditionalMetadata="DestinationRelativePath=$(CollectFilesFromOutDirPrefix)%(RecursiveDir)%(Filename)%(Extension)">
+      <Output TaskParameter="Include" ItemName="_OutDirFilesWithMetadata"/>
+    </CreateItem>
+
+    <ItemGroup>
+      <DotNetPublishFiles Include="@(_OutDirFilesWithMetadata)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!--***************************************************************-->
+  <!-- Task CollectFilesFromContent                     -->
+  <!--***************************************************************-->
+  <PropertyGroup>
+    <CollectFilesFromContentDependsOn>
+      $(CollectFilesFromContentDependsOn);
+    </CollectFilesFromContentDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CollectFilesFromContent"
+          DependsOnTargets="$(CollectFilesFromContentDependsOn)"
+          Condition="'@(Content)' != ''">
+
+    <CreateItem
+      Include="@(Content)"
+      AdditionalMetadata="DestinationRelativePath=$(CollectFilesFromContentPrefix)%(Identity)">
+      <Output TaskParameter="Include" ItemName="_ContentFilesWithMetadata"/>
+    </CreateItem>
+
+    <ItemGroup>
+      <DotNetPublishFiles Include="@(_ContentFilesWithMetadata)" />
+    </ItemGroup>
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- This will ensure that all values have the required metadata -->
+  <!--********************************************************************-->
+  <ItemDefinitionGroup>
+    <DotNetPublishFiles>
+      <DestinationRelativePath></DestinationRelativePath>
+      <Exclude>False</Exclude>
+    </DotNetPublishFiles>
+  </ItemDefinitionGroup>
+
+</Project>

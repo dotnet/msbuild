@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <NuGetToolsPath>$(MsBuildThisFileDirectory)</NuGetToolsPath>
+        
+        <!-- Property that enables building a package from a project -->
+        <BuildPackage Condition=" '$(BuildPackage)' == '' ">false</BuildPackage>
+
+        <!-- Determines if package restore consent is required to restore packages -->
+        <RequireRestoreConsent Condition=" '$(RequireRestoreConsent)' != 'false' ">true</RequireRestoreConsent>
+        
+    </PropertyGroup>
+    
+    <ItemGroup Condition=" '$(PackageSources)' == '' ">
+        <PackageSource Include="https://nuget.org/api/v2/" />
+        <PackageSource Include="https://www.myget.org/F/30de4ee06dd54956a82013fa17a3accb/" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <!-- NuGet command -->
+        <NuGetExePath Condition=" '$(NuGetExePath)' == '' ">$(NuGetToolsPath)\nuget.exe</NuGetExePath>
+        <PackageSources Condition=" $(PackageSources) == '' ">@(PackageSource)</PackageSources>
+        
+        <NuGetCommand>"$(NuGetExePath)"</NuGetCommand>
+
+        <PackageOutputDir Condition="$(PackageOutputDir) == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>
+        
+        <!-- Commands -->
+        <RestoreCommand>$(NuGetCommand) restore "$(SolutionPath)" -source "$(PackageSources)"  -NonInteractive -Verbosity Quiet</RestoreCommand>
+        <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -p Configuration=$(Configuration) -o "$(PackageOutputDir)" -symbols</BuildCommand>
+
+        <!-- Make the build depend on restore packages -->
+        <BuildDependsOn Condition="$(BuildPackage) == 'true'">
+            $(BuildDependsOn);
+            BuildPackage;
+        </BuildDependsOn>
+    </PropertyGroup>
+        
+    <Target Name="RestoreBinaryDependencies">
+        <Message Importance="high" Text="Restoring binary dependencies '$(PackagesDir)'" />
+        <Exec
+            Command="$(RestoreCommand)"
+            LogStandardErrorAsError="true" />
+    </Target>
+
+    <Target Name="BuildPackage">
+        <Exec Command="$(BuildCommand)" />
+              
+        <Exec Command="$(BuildCommand)"
+              LogStandardErrorAsError="true" />
+    </Target>
+</Project>

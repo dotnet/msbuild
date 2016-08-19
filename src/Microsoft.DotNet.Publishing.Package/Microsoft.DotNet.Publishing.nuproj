@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <AspNetTargetRoot>..\..\</AspNetTargetRoot>
+    <AspNetTargetSource>$(AspNetTargetRoot)src\</AspNetTargetSource>
+    <NuSpecFile>$(MSBuildProjectName).nuspec</NuSpecFile>
+    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>..\..\obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <NuGetContent Include="$(AspNetTargetRoot)\bin\$(Configuration)\Microsoft.DotNet.Publishing.Tasks.dll" />
+
+    <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\CollectTargets\*.*">
+      <Destination>CollectTargets</Destination>
+    </NuGetContent>
+
+    <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\DeployTargets\*.*">
+      <Destination>DeployTargets</Destination>
+    </NuGetContent>
+
+    <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\SaveTargets\*.*">
+      <Destination>SaveTargets</Destination>
+    </NuGetContent>
+
+    <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\PublishProfiles\*.*">
+      <Destination>Content\Properties\PublishProfiles</Destination>
+    </NuGetContent>
+    
+    <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\Microsoft.DotNet.Publishing.props" />
+    <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\Microsoft.DotNet.Publishing.targets">
+      <Destination>build</Destination>
+    </NuGetContent>
+  </ItemGroup>
+  <Import Project="$(AspNetTargetRoot)tools\NuGet\NuGetProj.targets"/>
+</Project>

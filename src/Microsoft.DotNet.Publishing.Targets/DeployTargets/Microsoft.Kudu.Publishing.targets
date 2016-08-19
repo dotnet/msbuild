@@ -1,0 +1,67 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.Kudu.Publishing.targets 
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process to deploy web application projects.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+
+  <!--
+  ***********************************************************************************************
+  Including the tasks
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <DotNetTasksDir Condition=" '$(DotNetTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\</DotNetTasksDir>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(DotNetTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="KuduDeploy" AssemblyFile="$(DotNetTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+
+
+  <PropertyGroup>
+    <DotNetPublishFiles>
+      $(DotNetPublishFiles);
+      KuduPublish;
+      </DotNetPublishFiles>
+  </PropertyGroup>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : KuduPublish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <KuduPublishDependsOn>
+      $(KuduPublishDependsOn);
+    </KuduPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="KuduPublish" DependsOnTargets="$(KuduPublishDependsOn)">
+    <ValidateParameter
+    ParameterName="PublishSiteName"
+    ParameterValue="$(PublishSiteName)"/>
+
+    <PropertyGroup>
+      <PublishUrl Condition=" '$(PublishUrl)'=='' ">https://{0}.scm.azurewebsites.net/api/{1}</PublishUrl>
+      <DeployIndividualFiles Condition=" '$(DeployIndividualFiles)' != 'true'">false</DeployIndividualFiles>
+    </PropertyGroup>
+
+    <KuduDeploy
+      PublishIntermediateOutputPath="$(PublishIntermediateOutputPath)"
+      PublishUrl = "$(PublishUrl)"
+      UserName = "$(UserName)"
+      Password ="$(Password)"
+      PublishSiteName ="$(PublishSiteName)">
+    </KuduDeploy>
+  </Target>
+</Project>
