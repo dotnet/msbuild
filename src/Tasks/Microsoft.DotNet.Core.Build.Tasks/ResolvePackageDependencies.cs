@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
             {
-                var filePathList = GetFilePathListFor(package, fileGroup);
+                var filePathList = fileGroup.GetFilePathListFor(package);
                 foreach (var filePath in filePathList)
                 {
                     var fileKey = $"{packageId}/{filePath}";
@@ -275,40 +275,10 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             }
         }
 
-        private IEnumerable<string> GetFilePathListFor(LockFileTargetLibrary package, FileGroup fileGroup)
-        {
-            switch (fileGroup)
-            {
-                case FileGroup.CompileTimeAssembly:
-                    return SelectPath(package.CompileTimeAssemblies);
-
-                case FileGroup.RuntimeAssembly:
-                    return SelectPath(package.RuntimeAssemblies);
-
-                case FileGroup.ContentFile:
-                    return package.ContentFiles.Select(c => c.Path);
-
-                case FileGroup.NativeLibrary:
-                    return SelectPath(package.NativeLibraries);
-
-                case FileGroup.ResourceAssembly:
-                    return SelectPath(package.ResourceAssemblies);
-
-                case FileGroup.RuntimeTarget:
-                    return package.RuntimeTargets.Select(c => c.Path);
-
-                case FileGroup.FrameworkAssembly:
-                    return package.FrameworkAssemblies;
-
-                default:
-                    throw new Exception($"Unexpected file group in project.lock.json target library {package.Name}");
-            }
-        }
-
         // save file type metadata based on the group the file appears in
         private void SaveFileKeyType(string fileKey, FileGroup fileGroup)
         {
-            string fileType = GetFileType(fileGroup);
+            string fileType = fileGroup.GetTypeMetadata();
             if (fileType != null)
             {
                 string currentFileType;
@@ -322,31 +292,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 }
             }
         }
-
-        private string GetFileType(FileGroup fileGroup)
-        {
-            switch (fileGroup)
-            {
-                case FileGroup.CompileTimeAssembly:
-                case FileGroup.RuntimeAssembly:
-                case FileGroup.NativeLibrary:
-                case FileGroup.ResourceAssembly:
-                    return "assembly";
-
-                case FileGroup.FrameworkAssembly:
-                    return "frameworkAssembly";
-
-                case FileGroup.ContentFile:
-                    return "content";
-
-                case FileGroup.RuntimeTarget:
-                default:
-                    return null;
-            }
-        }
-
-        private IEnumerable<string> SelectPath(IList<LockFileItem> fileItemList)
-            => fileItemList.Select(c => c.Path);
 
         private LockFile GetLockFile()
         {
