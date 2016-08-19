@@ -2891,7 +2891,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// A whole bunch error check tests
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/916")]
         public void Medley()
         {
             // Make absolutely sure that the static method cache hasn't been polluted by the other tests.  
