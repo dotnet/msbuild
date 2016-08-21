@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
+
+  <!-- Workaround: See: #https://github.com/dotnet/roslyn-project-system/issues/292 -->
+  <Target Name="_CopySharedTemplateFiles" BeforeTargets="GetZipFilesFromVSTemplates" Inputs="@(SharedTemplateFiles)" Outputs="%(SharedTemplateFiles.TargetPath)">
+    <Copy SourceFiles="@(SharedTemplateFiles)" DestinationFiles="%(SharedTemplateFiles.TargetPath)" OverwriteReadOnlyFiles="true">
+      <Output TaskParameter="CopiedFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+  
+  <!-- Returns the current build version. Used in .vsixmanifests to substitute our build version into them -->
+  <Target Name="GetBuildVersion" Outputs="$(Version)" />
+
+  <PropertyGroup>
+    <DeployExtension>false</DeployExtension>
+    <NoWarn>$(NoWarn);2008</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="$(VsSDKInstall)\Microsoft.VsSDK.targets" Condition="'$(VsSDKInstall)' != ''" />
+  <Import Project="Signing.Imports.targets"/>
+
+</Project>
