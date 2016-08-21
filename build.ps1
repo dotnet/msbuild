@@ -54,14 +54,23 @@ if (!(Test-Path -Path $logPath)) {
     New-Item -Path $logPath -Force -ItemType 'Directory' | Out-Null
 }
 
-$msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
-$msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
-$msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
-
 $signType = 'public'
 if ($RealSign) {
     $signType = 'real'
 }
+
+# Template Build
+$msbuildSummaryLog = Join-Path -path $logPath -childPath "templates.log"
+$msbuildWarningLog = Join-Path -path $logPath -childPath "templates.wrn"
+$msbuildFailureLog = Join-Path -path $logPath -childPath "templates.err"
+
+msbuild $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+if($LASTEXITCODE -ne 0) { throw "Failed to build" }
+
+# NET Core Build 
+$msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
+$msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
+$msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
 
 dotnet build3 $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }

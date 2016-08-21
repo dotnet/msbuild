@@ -13,7 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk.sln" />
+    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
+    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
+
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.DotNet.Core.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.DotNet.Core.Nuget.proj" />
   </ItemGroup>
@@ -49,7 +51,7 @@
              />
   </Target>
 
-  <Target Name="SignPackages">
+  <Target Name="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
 
     <MSBuild BuildInParallel="true"
              Projects="@(SigningProjectFile)"
@@ -58,7 +60,7 @@
              />
   </Target>
 
-  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages">
+  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
@@ -67,7 +69,7 @@
              />
   </Target>
 
-  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages">
+  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
@@ -76,7 +78,7 @@
              />
   </Target>
 
-  <Target Name="Test">
+  <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
 
     <ItemGroup>
       <TestAssembly Include="$(TestsDirectory)*Tests.dll" />
