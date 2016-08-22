@@ -1,0 +1,32 @@
+﻿{
+  "version": "1.0.0-featmsbuild-*",
+  "buildOptions": {
+    "warningsAsErrors": true
+  },
+  "dependencies": {
+    "Microsoft.DotNet.Compiler.Common": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
+    },
+    "Microsoft.Win32.Registry": {
+      "version": "4.0.0",
+      "exclude": "compile"
+    },
+    "MSBuild": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Framework": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Tasks.Core": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Targets": "0.1.0-preview-00029-160805",
+    "Microsoft.Build": "0.1.0-preview-00029-160805",
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": ["dnxcore50","netstandardapp1.5","portable-net45+win8", "portable-net45+wp80+win8+wpa81+dnxcore50"]
+    }
+  }
+}
