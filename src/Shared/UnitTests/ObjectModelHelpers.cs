@@ -1193,22 +1193,44 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Write the given <see cref="projectContents"/> in a new temp directory and create the given <see cref="files"/> relative to the project
+        /// </summary>
+        /// <returns>the path to the temp root directory that contains the project and files</returns>
+        internal static string CreateProjectInTempDirectoryWithFiles(string projectContents, string[] files, out string createdProjectFile, out string[] createdFiles)
+        {
+            var root = GetTempDirectoryWithGuid();
+            Directory.CreateDirectory(root);
+
+            createdProjectFile = Path.Combine(root, "build.proj");
+            File.WriteAllText(createdProjectFile, ObjectModelHelpers.CleanupFileContents(projectContents));
+
+            createdFiles = CreateFilesInDirectory(root, files);
+
+            return root;
+        }
+
+        private static string GetTempDirectoryWithGuid()
+        {
+            return Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        }
+
+        /// <summary>
         /// Creates a bunch of temporary files with the specified names and returns
         /// their full paths (so they can ultimately be cleaned up)
         /// </summary>
         internal static string[] CreateFiles(params string[] files)
         {
-            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string directory = GetTempDirectoryWithGuid();
             Directory.CreateDirectory(directory);
 
-            return CreateFilesInDirectory(ref directory, files);
+            return CreateFilesInDirectory(directory, files);
         }
 
         /// <summary>
         /// Creates a bunch of temporary files in the given directory with the specified names and returns
         /// their full paths (so they can ultimately be cleaned up)
         /// </summary>
-        internal static string[] CreateFilesInDirectory(ref string rootDirectory, params string[] files)
+        internal static string[] CreateFilesInDirectory(string rootDirectory, params string[] files)
         {
             Assert.True(Directory.Exists(rootDirectory), $"Directory {rootDirectory} does not exist");
 
@@ -1217,6 +1239,9 @@ namespace Microsoft.Build.UnitTests
             for (var i = 0; i < files.Length; i++)
             {
                 var fullPath = Path.Combine(rootDirectory, files[i]);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+
                 File.WriteAllText(fullPath, string.Empty);
                 result[i] = fullPath;
             }
