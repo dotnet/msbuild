@@ -1,0 +1,110 @@
+<!--
+***********************************************************************************************
+Microsoft.NETCore.GenerateAssemblyInfo.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    ============================================================
+                                     GenerateAssemblyInfo
+
+    Generates assembly info source to intermediate directory
+    ============================================================
+    -->
+  <PropertyGroup>
+    <GeneratedAssemblyInfoFile  Condition="'$(GeneratedAssemblyInfoFile)' ==''">$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfo$(DefaultLanguageSourceExtension)</GeneratedAssemblyInfoFile>
+    <GenerateAssemblyInfo Condition="'$(GenerateAssemblyInfo)' == ''">true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <!-- 
+    Note that this must run before every invocation of CoreCompile to ensure that all compiler
+    runs see the generated assembly info. There is at least one scenario involving Xaml 
+    where CoreCompile is invoked without other potential hooks such as Compile or CoreBuild,
+    etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after* 
+    PrepareForBuild to ensure that the intermediate directory has been created.
+   -->
+  <Target Name="GenerateAssemblyInfo"
+          BeforeTargets="CoreCompile"
+          DependsOnTargets="PrepareForBuild;GetAssemblyVersion;CoreGenerateAssemblyInfo"
+          Condition="'$(GenerateAssemblyInfo)' == 'true'"
+          Inputs="$(MSBuildAllProjects)"
+          Outputs="$(GeneratedAssemblyInfoFile)" />
+
+  <Target Name="CoreGenerateAssemblyInfo"
+          Condition="'$(Language)'=='VB' or '$(Language)'=='C#'">
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Authors)' != ''">
+        <_Parameter1>$(Authors)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyConfigurationAttribute" Condition="'$(Configuration)' != ''">
+        <_Parameter1>$(Configuration)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyCopyrightAttribute" Condition="'$(Copyright)' != ''">
+        <_Parameter1>$(Copyright)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyDescriptionAttribute" Condition="'$(Description)' != ''">
+        <_Parameter1>$(Description)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyFileVersionAttribute" Condition="'$(FileVersion)' != ''">
+        <_Parameter1>$(FileVersion)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute" Condition="'$(Version)' != ''">
+        <_Parameter1>$(Version)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyProductAttribute" Condition="'$(Product)' != ''">
+        <_Parameter1>$(Product)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyTitleAttribute" Condition="'$(AssemblyName)' != ''">
+        <_Parameter1>$(AssemblyName)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(AssemblyVersion)' != ''">
+        <_Parameter1>$(AssemblyVersion)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguage" Condition="'$(NeutralLanguage)' != ''">
+        <_Parameter1>$(NeutralLanguage)</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment AssemblyAttributes="@(AssemblyAttribute)" Language="$(Language)" OutputFile="$(GeneratedAssemblyInfoFile)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
+  </Target>
+
+
+  <!--
+    ==================================================================
+                                            GetAssemblyVersion
+
+    Parses the semantic package version set in $(Version) and returns
+    the implied $(AssemblyVersion) and $(FileVersion).
+
+    e.g.:
+        <Version>1.2.3-beta.4</Version>
+
+    implies:
+        <AssemblyVersion>1.2.3</AssemblyVersion>
+        <FileVersion>1.2.3</FileVersion>
+
+    Note that if $(AssemblyVersion) or $(FileVersion) are are already set, it
+    is considered an override of the default inference from $(Version) and they
+    are left unchanged by this target.
+    ==================================================================
+  -->
+  <Target Name="GetAssemblyVersion">
+    <GetAssemblyVersion Condition="'$(AssemblyVersion)' == ''" SemanticVersion="$(Version)">
+      <Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion" />
+    </GetAssemblyVersion>
+    
+    <PropertyGroup>
+      <FileVersion Condition="'$(FileVersion)' == ''">$(AssemblyVersion)</FileVersion>
+    </PropertyGroup>
+  </Target>
+
+</Project>

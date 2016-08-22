@@ -15,6 +15,7 @@
     <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <NonShipping>true</NonShipping>
     <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
