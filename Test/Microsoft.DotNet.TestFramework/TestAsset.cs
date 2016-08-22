@@ -60,17 +60,6 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
-        // This is temporary, we won't need it once the rest of the targets are updated to use
-        // project.assets.json
-        public TestAsset WithLockFile()
-        {
-            var sourceProjectLockJson = System.IO.Path.Combine(_testAssetRoot, "project.lock.json");
-            var targetProjectLockJson = sourceProjectLockJson.Replace(_testAssetRoot, Path);
-            File.Copy(sourceProjectLockJson, targetProjectLockJson);
-
-            return this;
-        }
-
         public TestAsset Restore(params string[] args)
         {
             var restoreCommand = new RestoreCommand(Stage0MSBuild, TestRoot);

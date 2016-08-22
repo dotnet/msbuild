@@ -6,7 +6,6 @@ using FluentAssertions.Json;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using Xunit;
@@ -23,7 +22,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
         [InlineData("simple.dependencies", "1.0.0")]
         public void ItBuildsDependencyContextsFromProjectLockFiles(string mainProjectName, string mainProjectVersion)
         {
-            LockFile lockFile = LockFileUtilities.GetLockFile($"{mainProjectName}.project.lock.json", NullLogger.Instance);
+            LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
 
             DependencyContext dependencyContext = new DependencyContextBuilder().Build(
                 mainProjectName,

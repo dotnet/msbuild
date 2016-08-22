@@ -11,18 +11,46 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 {
     internal static class LockFileTargetExtensions
     {
-        public static LockFileTargetLibrary GetPlatformLibrary(this LockFileTarget lockFileTarget)
+        public static ProjectContext CreateProjectContext(this LockFileTarget lockFileTarget)
+        {
+            bool isPortable = string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier);
+
+            IEnumerable<LockFileTargetLibrary> runtimeLibraries = lockFileTarget.Libraries;
+            Dictionary<string, LockFileTargetLibrary> libraryLookup = 
+                runtimeLibraries.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
+
+            HashSet<string> allExclusionList = new HashSet<string>();
+
+            if (isPortable)
+            {
+                var platformLibrary = lockFileTarget.GetPlatformLibrary();
+
+                isPortable = platformLibrary != null;
+                if (isPortable)
+                {
+                    allExclusionList.UnionWith(GetPlatformExclusionList(platformLibrary, libraryLookup));
+                }
+            }
+
+            // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
+
+            return new ProjectContext(
+                isPortable,
+                runtimeLibraries.Filter(allExclusionList).ToArray());
+        }
+
+        private static LockFileTargetLibrary GetPlatformLibrary(this LockFileTarget lockFileTarget)
         {
             // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
             var platformPackageName = "Microsoft.NETCore.App";
-            var platformExport = lockFileTarget
+            var platformLibrary = lockFileTarget
                 .Libraries
                 .FirstOrDefault(e => e.Name.Equals(platformPackageName, StringComparison.OrdinalIgnoreCase));
 
-            return platformExport;
+            return platformLibrary;
         }
 
-        public static HashSet<string> GetPlatformExclusionList(
+        private static HashSet<string> GetPlatformExclusionList(
             LockFileTargetLibrary platformLibrary,
             IDictionary<string, LockFileTargetLibrary> libraryLookup)
         {
@@ -41,20 +69,22 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         {
             foreach (PackageDependency dependency in dependencies)
             {
-                LockFileTargetLibrary export = libraryLookup[dependency.Id];
-                if (export.Version.Equals(dependency.VersionRange.MinVersion))
+                LockFileTargetLibrary library = libraryLookup[dependency.Id];
+                if (library.Version.Equals(dependency.VersionRange.MinVersion))
                 {
-                    if (exclusionList.Add(export.Name))
+                    if (exclusionList.Add(library.Name))
                     {
-                        CollectDependencies(libraryLookup, export.Dependencies, exclusionList);
+                        CollectDependencies(libraryLookup, library.Dependencies, exclusionList);
                     }
                 }
             }
         }
 
-        public static IEnumerable<LockFileTargetLibrary> FilterExports(this IEnumerable<LockFileTargetLibrary> exports, HashSet<string> exclusionList)
+        private static IEnumerable<LockFileTargetLibrary> Filter(
+            this IEnumerable<LockFileTargetLibrary> libraries, 
+            HashSet<string> exclusionList)
         {
-            return exports.Where(e => !exclusionList.Contains(e.Name));
+            return libraries.Where(e => !exclusionList.Contains(e.Name));
         }
     }
 }

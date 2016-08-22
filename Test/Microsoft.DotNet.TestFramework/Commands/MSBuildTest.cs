@@ -10,13 +10,13 @@ namespace Microsoft.DotNet.TestFramework.Commands
 {
     public class MSBuildTest
     {
-        public static readonly MSBuildTest Stage0MSBuild = new MSBuildTest(GetStage0Path());
+        public static readonly MSBuildTest Stage0MSBuild = new MSBuildTest(RepoInfo.DotNetHostPath);
 
-        private string BinPath { get; }
+        private string DotNetHostPath { get; }
 
-        public MSBuildTest(string binPath)
+        public MSBuildTest(string dotNetHostPath)
         {
-            BinPath = binPath;
+            DotNetHostPath = dotNetHostPath;
         }
 
         public Command CreateCommandForTarget(string target, params string[] args)
@@ -32,12 +32,7 @@ namespace Microsoft.DotNet.TestFramework.Commands
             var newArgs = args.ToList();
             newArgs.Insert(0, $"build3");
 
-            return Command.Create(Path.Combine(BinPath, $"dotnet{Constants.ExeSuffix}"), newArgs);
-        }
-
-        private static string GetStage0Path()
-        {
-            return Path.Combine(RepoInfo.RepoRoot, ".dotnet_cli");
+            return Command.Create(DotNetHostPath, newArgs);
         }
     }
 }

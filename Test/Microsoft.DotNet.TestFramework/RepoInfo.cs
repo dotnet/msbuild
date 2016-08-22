@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -56,6 +57,14 @@ namespace Microsoft.DotNet.TestFramework
             get
             {
                 return Path.Combine(RepoRoot, "bin");
+            }
+        }
+
+        public static string DotNetHostPath
+        {
+            get
+            {
+                return Path.Combine(RepoRoot, ".dotnet_cli", $"dotnet{Constants.ExeSuffix}");
             }
         }
 

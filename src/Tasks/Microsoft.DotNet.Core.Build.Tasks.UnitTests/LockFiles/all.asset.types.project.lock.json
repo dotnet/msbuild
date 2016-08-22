@@ -1,0 +1,186 @@
+{
+  "version": 2,
+  "targets": {
+    ".NETCoreApp,Version=v1.0": {
+      "Libuv/1.9.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.0.1"
+        },
+        "runtimeTargets": {
+          "runtimes/osx/native/libuv.dylib": {
+            "assetType": "native",
+            "rid": "osx"
+          },
+          "runtimes/win7-x64/native/libuv.dll": {
+            "assetType": "native",
+            "rid": "win7-x64"
+          }
+        }
+      },
+      "SharedContentA/1.0.0": {
+        "type": "package",
+        "contentFiles": {
+          "contentFiles/any/any/images/dnf_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          },
+          "contentFiles/any/any/images/ui_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          }
+        }
+      },
+      "System.Runtime.Analyzers/1.1.0": {
+        "type": "package"
+      },
+      "System.Spatial/5.7.0": {
+        "type": "package",
+        "compile": {
+          "lib/portable-net45+wp8+win8+wpa/System.Spatial.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+wp8+win8+wpa/System.Spatial.dll": {}
+        },
+        "resource": {
+          "lib/portable-net45+wp8+win8+wpa/de/System.Spatial.resources.dll": {
+            "locale": "de"
+          },
+          "lib/portable-net45+wp8+win8+wpa/zh-Hant/System.Spatial.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      }
+    },
+    ".NETCoreApp,Version=v1.0/osx.10.11-x64": {
+      "Libuv/1.9.0": {
+        "type": "package",
+        "dependencies": {},
+        "native": {
+          "runtimes/osx/native/libuv.dylib": {}
+        }
+      },
+      "SharedContentA/1.0.0": {
+        "type": "package",
+        "contentFiles": {
+          "contentFiles/any/any/images/dnf_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          },
+          "contentFiles/any/any/images/ui_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          }
+        }
+      },
+      "System.Runtime.Analyzers/1.1.0": {
+        "type": "package"
+      },
+      "System.Spatial/5.7.0": {
+        "type": "package",
+        "compile": {
+          "lib/portable-net45+wp8+win8+wpa/System.Spatial.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+wp8+win8+wpa/System.Spatial.dll": {}
+        },
+        "resource": {
+          "lib/portable-net45+wp8+win8+wpa/de/System.Spatial.resources.dll": {
+            "locale": "de"
+          },
+          "lib/portable-net45+wp8+win8+wpa/zh-Hant/System.Spatial.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Libuv/1.9.0": {
+      "sha512": "9Q7AaqtQhS8JDSIvRBt6ODSLWDBI4c8YxNxyCQemWebBFUtBbc6M5Vi5Gz1ZyIUlTW3rZK9bIr5gnVyv0z7a2Q==",
+      "type": "package",
+      "path": "libuv/1.9.0",
+      "files": [
+        "Libuv.1.9.0.nupkg.sha512",
+        "Libuv.nuspec",
+        "License.txt",
+        "runtimes/debian-x64/native/libuv.so",
+        "runtimes/fedora-x64/native/libuv.so",
+        "runtimes/opensuse-x64/native/libuv.so",
+        "runtimes/osx/native/libuv.dylib",
+        "runtimes/rhel-x64/native/libuv.so",
+        "runtimes/win7-arm/native/libuv.dll",
+        "runtimes/win7-x64/native/libuv.dll",
+        "runtimes/win7-x86/native/libuv.dll"
+      ]
+    },
+    "SharedContentA/1.0.0": {
+      "sha512": "N/xIU1u1s/O5f2352Ucuw2IdEYTrzvy+BrRIZJVHlRrccSCZesRktT1FDXU1alPulgHVXcAlga7BTVlaaReM7Q==",
+      "type": "package",
+      "path": "sharedcontenta/1.0.0",
+      "files": [
+        "contentFiles/any/any/images/dnf_any.png",
+        "contentFiles/any/any/images/ui_any.png",
+        "contentFiles/cs/dnxcore50/code/Foo.cs.pp",
+        "contentFiles/cs/dnxcore50/code/util.cs",
+        "contentFiles/cs/dnxcore50/config/config.xml",
+        "contentFiles/cs/dnxcore50/images/dnf.png",
+        "contentFiles/cs/dnxcore50/images/ui.png",
+        "contentFiles/cs/dnxcore50/scripts/run.cmd",
+        "contentFiles/fs/dnxcore50/File2.fs",
+        "sharedcontenta.1.0.0.nupkg.sha512",
+        "sharedcontenta.nuspec"
+      ]
+    },
+    "System.Runtime.Analyzers/1.1.0": {
+      "sha512": "7XAHfxh0/c2WFS7s8zB2U9Imlhhbe9slaY/0Fo8b+tymQHWkE2oIEEn9E9Cf1HjwRs7NlsYlo4vFd+88lDVOPw==",
+      "type": "package",
+      "path": "system.runtime.analyzers/1.1.0",
+      "files": [
+        "ThirdPartyNotices.rtf",
+        "analyzers/dotnet/cs/System.Runtime.Analyzers.dll",
+        "analyzers/dotnet/cs/System.Runtime.CSharp.Analyzers.dll",
+        "analyzers/dotnet/vb/System.Runtime.Analyzers.dll",
+        "analyzers/dotnet/vb/System.Runtime.VisualBasic.Analyzers.dll",
+        "build/System.Runtime.Analyzers.Common.props",
+        "build/System.Runtime.CSharp.Analyzers.props",
+        "build/System.Runtime.VisualBasic.Analyzers.props",
+        "system.runtime.analyzers.1.1.0.nupkg.sha512",
+        "system.runtime.analyzers.nuspec",
+        "tools/install.ps1",
+        "tools/uninstall.ps1"
+      ]
+    },
+    "System.Spatial/5.7.0": {
+      "sha512": "JHcy5NeYHzX6+AiUZcu+yB0Wc+foNk/37YmeMJTXOQ+fVbipfBKLz2y8njpjhi//1gJS/fAQhcS6KHNLDtwjcQ==",
+      "type": "package",
+      "path": "system.spatial/5.7.0",
+      "files": [
+        "lib/portable-net45+wp8+win8+wpa/System.Spatial.dll",
+        "lib/portable-net45+wp8+win8+wpa/System.Spatial.xml",
+        "lib/portable-net45+wp8+win8+wpa/de/System.Spatial.resources.dll",
+        "lib/portable-net45+wp8+win8+wpa/zh-Hant/System.Spatial.resources.dll",
+        "system.spatial.5.7.0.nupkg.sha512",
+        "system.spatial.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [],
+    ".NETCoreApp,Version=v1.0": [
+      "Libuv >= 1.9.0",
+      "SharedContentA >= 1.0.0",
+      "System.Runtime.Analyzers >= 1.1.0",
+      "System.Spatial >= 5.7.0"
+    ]
+  },
+  "tools": {},
+  "projectFileToolGroups": {},
+  "packageFolders": {
+    "C:\\.nuget\\packages\\": {}
+  }
+}

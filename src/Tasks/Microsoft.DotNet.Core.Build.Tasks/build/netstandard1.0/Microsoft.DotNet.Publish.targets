@@ -78,6 +78,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeFilesToPublish"
+          DependsOnTargets="_ComputeNetCorePublishAssets"
           Returns="ResolvedFilesToPublish">
 
     <PropertyGroup>
@@ -97,7 +98,39 @@ Copyright (c) .NET Foundation. All rights reserved.
                               Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
       </ResolvedFilesToPublish>
+
+      <!-- Copy all the assemblies -->
+      <ResolvedFilesToPublish Include="@(ResolvedAssembliesToPublish)">
+        <RelativePath>%(ResolvedAssembliesToPublish.DestinationSubPath)</RelativePath>
+      </ResolvedFilesToPublish>
     </ItemGroup>
+
+  </Target>
+
+  <Target Name="_ComputeNetCorePublishAssets"
+          DependsOnTargets="RunResolvePublishAssemblies">
+      <!-- TODO get the content files -->
+      <!-- TODO perform any preprocess transforms on the files -->
+  </Target>
+
+  <!--
+    ============================================================
+                     RunResolvePublishAssemblies
+
+    Gets the assemblies to be copied to the publish directory
+    ============================================================
+    -->
+  <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <Target Name="RunResolvePublishAssemblies">
+
+    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
+                              LockFilePath="$(ProjectLockFile)"
+                              TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                              RuntimeIdentifier="$(RuntimeIdentifier)">
+
+      <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
+
+    </ResolvePublishAssemblies>
 
   </Target>
 
@@ -121,7 +154,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
                       RuntimeIdentifier="$(RuntimeIdentifier)" />
-    
+
   </Target>
 
   <!--
@@ -143,7 +176,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(_PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
-    
+
   </Target>
-  
+
 </Project>
