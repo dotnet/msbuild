@@ -3,29 +3,29 @@
 
 namespace Microsoft.DotNet.Core.Build.Tasks
 {
-    internal static class MetadataKeys
+    public static class MetadataKeys
     {
         // General Metadata
-        internal const string Name = "Name";
-        internal const string Type = "Type";
-        internal const string Version = "Version";
-        internal const string FileGroup = "FileGroup";
-        internal const string Path = "Path";
-        internal const string ResolvedPath = "ResolvedPath";
+        public const string Name = "Name";
+        public const string Type = "Type";
+        public const string Version = "Version";
+        public const string FileGroup = "FileGroup";
+        public const string Path = "Path";
+        public const string ResolvedPath = "ResolvedPath";
 
         // Target Metadata
-        internal const string RuntimeIdentifier = "RuntimeIdentifier";
-        internal const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
-        internal const string FrameworkName = "FrameworkName";
-        internal const string FrameworkVersion = "FrameworkVersion";
+        public const string RuntimeIdentifier = "RuntimeIdentifier";
+        public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
+        public const string FrameworkName = "FrameworkName";
+        public const string FrameworkVersion = "FrameworkVersion";
 
         // Foreign Keys
-        internal const string ParentTarget = "ParentTarget";
-        internal const string ParentTargetLibrary = "ParentTargetLibrary";
-        internal const string ParentPackage = "ParentPackage";
+        public const string ParentTarget = "ParentTarget";
+        public const string ParentTargetLibrary = "ParentTargetLibrary";
+        public const string ParentPackage = "ParentPackage";
 
         // Tags
-        internal const string Analyzer = "Analyzer";
-        internal const string AnalyzerLanguage = "AnalyzerLanguage";
+        public const string Analyzer = "Analyzer";
+        public const string AnalyzerLanguage = "AnalyzerLanguage";
     }
 }

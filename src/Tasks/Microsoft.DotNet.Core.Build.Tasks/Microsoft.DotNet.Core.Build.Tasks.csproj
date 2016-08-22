@@ -19,6 +19,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LockFileTargetExtensions.cs" />
+    <Compile Include="DependencyType.cs" />
+    <Compile Include="PreprocessPackageDependenciesDesignTime.cs" />
     <Compile Include="RuntimeConfig.cs" />
     <Compile Include="RuntimeConfigFramework.cs" />
     <Compile Include="RuntimeOptions.cs" />
