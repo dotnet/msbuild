@@ -45,6 +45,9 @@
     "Microsoft.DotNet.Configurer": {
       "target": "project"
     },
+    "dotnet-test-console": {
+      "target": "project"
+    },
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0"

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test
@@ -59,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Test
                 strings.Add(projectContext.RuntimeIdentifier);
             }
 
-            var result = Build.BuildCommand.Run(strings.ToArray(), workspace);
+            var result = Command.CreateDotNet("build", strings).Execute().ExitCode;
 
             return result;
         }

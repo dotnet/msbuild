@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Tools.Test
 
         static TestHostTracing()
         {
-            Source = Environment.GetEnvironmentVariable(TracingEnvironmentVariable) == "1" 
-                   ? new TraceSource("dotnet-test", SourceLevels.Verbose) 
+            Source = Environment.GetEnvironmentVariable(TracingEnvironmentVariable) == "1"
+                   ? new TraceSource("dotnet-test", SourceLevels.Verbose)
                    : new TraceSource("dotnet-test", SourceLevels.Warning);
 
             Source.Listeners.Add(new TextWriterTraceListener(Console.Error));

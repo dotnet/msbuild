@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static string GetCommandName(string testRunner)
         {
-            return $"test-{testRunner}";
+            return $"dotnet-test-{testRunner}";
         }
     }
 }
