@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.TestFramework.Commands
             //newArgs.Insert(0, FullPathProjectFile);
             //var command = MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
 
-            newArgs.Insert(0, "--legacy-packages-directory");
             newArgs.Insert(0, ProjectRootPath);
             newArgs.Insert(0, "restore");
             var command = Command.Create(RepoInfo.DotNetHostPath, newArgs);
