@@ -53,6 +53,9 @@ project.lock.json
 *.log
 *.scc
 
+# Template Manifests generated as part of VSIX build
+*.vstman
+
 # Visual Studio cache files
 *.sln.ide/
 
@@ -165,3 +168,6 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+
+# Workaround: See https://github.com/dotnet/roslyn-project-system/issues/292
+/src/Templates/ProjectTemplates/CSharp/.NETCore/ConsoleApplication/AssemblyInfo.cs
