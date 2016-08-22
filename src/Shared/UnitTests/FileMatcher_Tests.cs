@@ -415,7 +415,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Unc()
         {
-            // Check UNC functionality
+            //Check UNC functionality
             ValidateFileMatch
                 (
                 "\\\\server\\c$\\**\\*.cs",
@@ -915,7 +915,7 @@ namespace Microsoft.Build.UnitTests
                         string candidateDirectoryName = "";
                         if (normalizedCandidate.IndexOfAny(FileMatcher.directorySeparatorCharacters) != -1)
                         {
-                            candidateDirectoryName = Path.GetDirectoryName(normalizedCandidate) + @"\";
+                            candidateDirectoryName = Path.GetDirectoryName(normalizedCandidate);
                         }
 
                         // Does the candidate directory match the requested path?
@@ -995,8 +995,15 @@ namespace Microsoft.Build.UnitTests
                             int nextSlash = normalizedCandidate.IndexOfAny(FileMatcher.directorySeparatorCharacters, path.Length + 1);
                             if (nextSlash != -1)
                             {
-                                string match = normalizedCandidate.Substring(0, nextSlash + 1);
+                                string match;
+
+                                //UNC paths start with a \\ fragment. Match against \\ when path is empty (i.e., inside the current working directory)
+                                match = normalizedCandidate.StartsWith(@"\\") && string.IsNullOrEmpty(path)
+                                    ? @"\\"
+                                    : normalizedCandidate.Substring(0, nextSlash);
+
                                 string baseMatch = Path.GetFileName(normalizedCandidate.Substring(0, nextSlash));
+
                                 if
                                 (
                                     String.Compare(pattern, "*.*", StringComparison.OrdinalIgnoreCase) == 0
