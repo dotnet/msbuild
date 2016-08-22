@@ -24,12 +24,11 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         {
             LockFileTarget lockFileTarget = _lockFile.GetTarget(framework, runtime);
 
-            bool isPortable;
-            IEnumerable<LockFileTargetLibrary> runtimeLibraries = lockFileTarget.GetRuntimeLibraries(out isPortable);
+            ProjectContext projectContext = lockFileTarget.CreateProjectContext();
 
             List<ResolvedFile> results = new List<ResolvedFile>();
 
-            foreach (LockFileTargetLibrary targetLibrary in runtimeLibraries)
+            foreach (LockFileTargetLibrary targetLibrary in projectContext.RuntimeLibraries)
             {
                 string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
 
@@ -65,7 +64,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
             return results;
         }
-
 
         private static IEnumerable<ResolvedFile> GetResolvedFiles(IEnumerable<LockFileItem> items, string libraryPath)
         {

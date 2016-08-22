@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Publish.Tests
                 "System.Collections.NonGeneric.dll",
             });
 
-            string appPath = Path.Combine(publishDirectory.FullName, "SimpleDependencies.dll");
+            string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies");
 
             Command runAppCommand = Command.Create(
                 RepoInfo.DotNetHostPath,

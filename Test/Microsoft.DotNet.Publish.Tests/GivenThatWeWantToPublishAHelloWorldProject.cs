@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Publish.Tests
         }
 
         [Fact]
-        public void It_publishes_the_project_to_the_publish_folder()
+        public void It_publishes_the_project_to_the_publish_folder_and_the_app_should_run()
         {
             var packagesDirectory =
                 Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");

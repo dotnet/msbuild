@@ -11,11 +11,9 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 {
     internal static class LockFileTargetExtensions
     {
-        public static IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries(
-            this LockFileTarget lockFileTarget,
-            out bool isPortable)
+        public static ProjectContext CreateProjectContext(this LockFileTarget lockFileTarget)
         {
-            isPortable = string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier);
+            bool isPortable = string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier);
 
             IEnumerable<LockFileTargetLibrary> runtimeLibraries = lockFileTarget.Libraries;
             Dictionary<string, LockFileTargetLibrary> libraryLookup = 
@@ -36,7 +34,9 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
             // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
 
-            return runtimeLibraries.Filter(allExclusionList).ToArray();
+            return new ProjectContext(
+                isPortable,
+                runtimeLibraries.Filter(allExclusionList).ToArray());
         }
 
         private static LockFileTargetLibrary GetPlatformLibrary(this LockFileTarget lockFileTarget)

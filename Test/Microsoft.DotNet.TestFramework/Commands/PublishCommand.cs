@@ -34,6 +34,11 @@ namespace Microsoft.DotNet.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
+        public string GetPublishedAppPath(string appName)
+        {
+            return Path.Combine(GetOutputDirectory().FullName, $"{appName}.dll");
+        }
+
         private string BuildRelativeOutputPath()
         {
             return Path.Combine("Debug", "", PublishSubfolderName);

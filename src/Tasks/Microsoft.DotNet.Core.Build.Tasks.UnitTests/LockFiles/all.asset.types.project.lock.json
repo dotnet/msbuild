@@ -18,6 +18,24 @@
           }
         }
       },
+      "SharedContentA/1.0.0": {
+        "type": "package",
+        "contentFiles": {
+          "contentFiles/any/any/images/dnf_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          },
+          "contentFiles/any/any/images/ui_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          }
+        }
+      },
+      "System.Runtime.Analyzers/1.1.0": {
+        "type": "package"
+      },
       "System.Spatial/5.7.0": {
         "type": "package",
         "compile": {
@@ -43,6 +61,24 @@
         "native": {
           "runtimes/osx/native/libuv.dylib": {}
         }
+      },
+      "SharedContentA/1.0.0": {
+        "type": "package",
+        "contentFiles": {
+          "contentFiles/any/any/images/dnf_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          },
+          "contentFiles/any/any/images/ui_any.png": {
+            "buildAction": "EmbeddedResource",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          }
+        }
+      },
+      "System.Runtime.Analyzers/1.1.0": {
+        "type": "package"
       },
       "System.Spatial/5.7.0": {
         "type": "package",
@@ -82,6 +118,43 @@
         "runtimes/win7-x86/native/libuv.dll"
       ]
     },
+    "SharedContentA/1.0.0": {
+      "sha512": "N/xIU1u1s/O5f2352Ucuw2IdEYTrzvy+BrRIZJVHlRrccSCZesRktT1FDXU1alPulgHVXcAlga7BTVlaaReM7Q==",
+      "type": "package",
+      "path": "sharedcontenta/1.0.0",
+      "files": [
+        "contentFiles/any/any/images/dnf_any.png",
+        "contentFiles/any/any/images/ui_any.png",
+        "contentFiles/cs/dnxcore50/code/Foo.cs.pp",
+        "contentFiles/cs/dnxcore50/code/util.cs",
+        "contentFiles/cs/dnxcore50/config/config.xml",
+        "contentFiles/cs/dnxcore50/images/dnf.png",
+        "contentFiles/cs/dnxcore50/images/ui.png",
+        "contentFiles/cs/dnxcore50/scripts/run.cmd",
+        "contentFiles/fs/dnxcore50/File2.fs",
+        "sharedcontenta.1.0.0.nupkg.sha512",
+        "sharedcontenta.nuspec"
+      ]
+    },
+    "System.Runtime.Analyzers/1.1.0": {
+      "sha512": "7XAHfxh0/c2WFS7s8zB2U9Imlhhbe9slaY/0Fo8b+tymQHWkE2oIEEn9E9Cf1HjwRs7NlsYlo4vFd+88lDVOPw==",
+      "type": "package",
+      "path": "system.runtime.analyzers/1.1.0",
+      "files": [
+        "ThirdPartyNotices.rtf",
+        "analyzers/dotnet/cs/System.Runtime.Analyzers.dll",
+        "analyzers/dotnet/cs/System.Runtime.CSharp.Analyzers.dll",
+        "analyzers/dotnet/vb/System.Runtime.Analyzers.dll",
+        "analyzers/dotnet/vb/System.Runtime.VisualBasic.Analyzers.dll",
+        "build/System.Runtime.Analyzers.Common.props",
+        "build/System.Runtime.CSharp.Analyzers.props",
+        "build/System.Runtime.VisualBasic.Analyzers.props",
+        "system.runtime.analyzers.1.1.0.nupkg.sha512",
+        "system.runtime.analyzers.nuspec",
+        "tools/install.ps1",
+        "tools/uninstall.ps1"
+      ]
+    },
     "System.Spatial/5.7.0": {
       "sha512": "JHcy5NeYHzX6+AiUZcu+yB0Wc+foNk/37YmeMJTXOQ+fVbipfBKLz2y8njpjhi//1gJS/fAQhcS6KHNLDtwjcQ==",
       "type": "package",
@@ -100,6 +173,8 @@
     "": [],
     ".NETCoreApp,Version=v1.0": [
       "Libuv >= 1.9.0",
+      "SharedContentA >= 1.0.0",
+      "System.Runtime.Analyzers >= 1.1.0",
       "System.Spatial >= 5.7.0"
     ]
   },

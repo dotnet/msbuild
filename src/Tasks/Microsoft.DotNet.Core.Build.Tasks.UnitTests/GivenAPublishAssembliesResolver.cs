@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
-using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
@@ -21,7 +20,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
         [MemberData("ProjectData")]
         public void ItResolvesAssembliesFromProjectLockFiles(string projectName, string runtime, object[] expectedResolvedFiles)
         {
-            LockFile lockFile = LockFileUtilities.GetLockFile($"{projectName}.project.lock.json", NullLogger.Instance);
+            LockFile lockFile = TestLockFiles.GetLockFile(projectName);
 
             IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(lockFile, new MockPackageResolver())
                 .Resolve(
@@ -93,14 +92,23 @@ namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
             return CreateNativeResolvedFile(packageId, version, filePath, Path.GetDirectoryName(filePath));
         }
 
-        private static ResolvedFile CreateNativeResolvedFile(string packageId, string version, string filePath, string destinationSubDirectory)
+        private static ResolvedFile CreateNativeResolvedFile(
+            string packageId,
+            string version,
+            string filePath,
+            string destinationSubDirectory)
         {
             return CreateResolvedFile(packageId, version, filePath, destinationSubDirectory);
         }
 
-        private static ResolvedFile CreateResolvedFile(string packageId, string version, string filePath, string destinationSubDirectory)
+        private static ResolvedFile CreateResolvedFile(
+            string packageId,
+            string version,
+            string filePath,
+            string destinationSubDirectory)
         {
-            string packageDirectory = new MockPackageResolver().GetPackageDirectory(packageId, NuGetVersion.Parse(version));
+            string packageDirectory = new MockPackageResolver()
+                .GetPackageDirectory(packageId, NuGetVersion.Parse(version));
 
             return new ResolvedFile(
                 Path.Combine(packageDirectory, filePath),

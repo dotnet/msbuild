@@ -29,8 +29,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         {
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
 
-            bool isPortable;
-            IEnumerable<LockFileTargetLibrary> runtimeExports = lockFileTarget.GetRuntimeLibraries(out isPortable);
+            ProjectContext projectContext = lockFileTarget.CreateProjectContext();
+            IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.RuntimeLibraries;
 
             var dependencyLookup = runtimeExports
                .Select(identity => new Dependency(identity.Name, identity.Version.ToString()))
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>());
 
             return new DependencyContext(
-                new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, isPortable),
+                new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, projectContext.IsPortable),
                 compilerOptions ?? CompilationOptions.Default,
                 Enumerable.Empty<CompilationLibrary>(), //GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(), - https://github.com/dotnet/sdk/issues/11
                 runtimeLibraries,
