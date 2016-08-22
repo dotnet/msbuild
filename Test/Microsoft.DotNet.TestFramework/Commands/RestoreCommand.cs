@@ -15,9 +15,15 @@ namespace Microsoft.DotNet.TestFramework.Commands
         public override CommandResult Execute(params string[] args)
         {
             var newArgs = args.ToList();
-            newArgs.Insert(0, FullPathProjectFile);
 
-            var command = MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
+            // TODO: use MSBuild when https://github.com/dotnet/sdk/issues/75 is fixed
+            //newArgs.Insert(0, FullPathProjectFile);
+            //var command = MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
+
+            newArgs.Insert(0, "--legacy-packages-directory");
+            newArgs.Insert(0, ProjectRootPath);
+            newArgs.Insert(0, "restore");
+            var command = Command.Create(RepoInfo.DotNetHostPath, newArgs);
 
             return command.Execute();
         }

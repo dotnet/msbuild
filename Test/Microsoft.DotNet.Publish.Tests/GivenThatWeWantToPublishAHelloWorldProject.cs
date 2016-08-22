@@ -28,8 +28,7 @@ namespace Microsoft.DotNet.Publish.Tests
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithLockFile()
-                .Restore($"/p:RestoreSources={packagesDirectory}");
+                .Restore("--fallbacksource", $"{packagesDirectory}");
 
             var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();

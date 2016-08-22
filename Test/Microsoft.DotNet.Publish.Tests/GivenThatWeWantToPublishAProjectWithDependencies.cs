@@ -28,8 +28,7 @@ namespace Microsoft.DotNet.Publish.Tests
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset("SimpleDependencies")
                 .WithSource()
-                .WithLockFile()
-                .Restore($"/p:RestoreSources={packagesDirectory}");
+                .Restore("--fallbacksource", $"{packagesDirectory}");
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
