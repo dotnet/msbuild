@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "copyToOutput": ["MSBuild.exe", "msbuild.exe.config"]
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    },
+    "Microsoft.DotNet.ProjectJsonMigration": {
+      "target": "project"
+    },
+    "xunit": "2.2.0-beta3-build3330",
+    "dotnet-test-xunit": "1.0.0-rc2-318883-21",
+    "FluentAssertions": "4.0.0",
+    "moq.netcore": "4.4.0-beta8",
+    "Microsoft.DotNet.Tools.Tests.Utilities": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+    "dotnet": {
+      "target":"project"
+    }
+  },
+  
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "netstandardapp1.5",
+        "dotnet5.4",
+        "portable-net451+win8"
+      ]
+    }
+  },
+  "testRunner": "xunit"
+}
