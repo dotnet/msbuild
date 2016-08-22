@@ -642,6 +642,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <param name="getFileSystemEntries">Delegate.</param>
         /// <param name="searchesToExclude">Patterns to exclude from the results</param>
+        /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Assumes no trailing slashes</param>
         private static void GetFilesRecursive
         (
             System.Collections.IList listOfFiles,
@@ -1442,7 +1443,11 @@ namespace Microsoft.Build.Shared
                 needsRecursion);
 
             result.SearchData = searchData;
-            result.BaseDirectory = fixedDirectoryPart;
+
+            // The double trim fixes https://github.com/Microsoft/msbuild/issues/917
+            // System.IO does not leave trailing slashes in directory enumerations.
+            // Since this string will be matched against System.IO directory enumerations, both need to agree on trailing slashes
+            result.BaseDirectory = fixedDirectoryPart.TrimEnd(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
             result.RemainingWildcardDirectory = wildcardDirectoryPart;
 
             return GetSearchDataResult.RunSearch;
