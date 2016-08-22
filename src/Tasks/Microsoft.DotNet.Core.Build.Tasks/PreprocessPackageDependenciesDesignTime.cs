@@ -209,7 +209,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 ItemMetadata parentDependency = null;
                 if (DependenciesWorld.TryGetValue(parentDependencyId, out parentDependency))
                 {
-
                     parentDependency.Dependencies.Add(currentItemId);
                 }
                 else
