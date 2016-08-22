@@ -1,15 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using NuGet.Common;
-using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+using NuGet.Configuration;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Core.Build.Tasks
 {
@@ -21,6 +19,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
     {
         private readonly List<string> _packageFolders = new List<string>();
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>();
+        private IPackageResolver _packageResolver;
 
         #region Output Items
 
@@ -82,6 +81,15 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         #region Inputs
 
         /// <summary>
+        /// The path to the current project.
+        /// </summary>
+        [Required]
+        public string ProjectPath
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// The lock file to process
         /// </summary>
         [Required]
@@ -91,6 +99,20 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         }
 
         #endregion
+
+        private IPackageResolver PackageResolver
+        {
+            get
+            {
+                if (_packageResolver == null)
+                {
+                    NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
+                    _packageResolver = new NuGetPackageResolver(nugetPathContext);
+                }
+
+                return _packageResolver;
+            }
+        }
 
         /// <summary>
         /// Raise Nuget LockFile representation to MSBuild items
@@ -113,33 +135,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         {
             var lockFile = GetLockFile();
 
-            PopulatePackageFolders(lockFile);
             RaiseLockFileTargets(lockFile);
             GetPackageAndFileDefinitions(lockFile);
-        }
-
-        private void PopulatePackageFolders(LockFile lockFile)
-        {
-            // If we didn't have any folders, let's fall back to the environment variable or user profile
-            if (_packageFolders.Count == 0)
-            {
-                string packagesFolder = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
-
-                if (!string.IsNullOrEmpty(packagesFolder))
-                {
-                    _packageFolders.Add(packagesFolder);
-                }
-                else
-                {
-                    var userHome = Environment.GetEnvironmentVariable("USERPROFILE") ?? Environment.GetEnvironmentVariable("HOME");
-                    if (userHome == null)
-                    {
-                        throw new Exception("Unable to determine user home directory.");
-                    }
-                    
-                    _packageFolders.Add(Path.Combine(userHome, ".nuget", "packages"));
-                }
-            }
         }
 
         // get library and file definitions
@@ -318,25 +315,8 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             }
             else
             {
-                return GetNuGetPackagePath(package.Name, package.Version.ToString());
+                return PackageResolver.GetPackageDirectory(package.Name, package.Version);
             }
-        }
-
-        private string GetNuGetPackagePath(string packageId, string packageVersion)
-        {
-            foreach (var packagesFolder in _packageFolders)
-            {
-                string packagePath = Path.Combine(packagesFolder, packageId, packageVersion);
-
-                // The proper way to check if a package is available is to look for the hash file, since that's the last
-                // file written as a part of the restore process. If it's not there, it means something failed part way through.
-                if (File.Exists(Path.Combine(packagePath, $"{packageId}.{packageVersion}.nupkg.sha512")))
-                {
-                    return packagePath;
-                }
-            }
-
-            throw new Exception($"The package {packageId} with version {packageVersion} could not be found. Run a NuGet package restore to download the package.");
         }
 
         private string ResolveFilePath(string relativePath, string resolvedPackagePath)
