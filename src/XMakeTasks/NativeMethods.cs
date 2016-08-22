@@ -495,6 +495,12 @@ namespace Microsoft.Build.Tasks
         public int dwThreadId;
     }
 
+    internal enum SymbolicLink
+    {
+        File = 0,
+        Directory = 1
+    }
+
     /// <summary>
     /// Interop methods.
     /// </summary>
@@ -769,6 +775,12 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool CreateHardLink(string newFileName, string exitingFileName, IntPtr securityAttributes);
+
+        //------------------------------------------------------------------------------
+        // CreateSymbolicLink
+        //------------------------------------------------------------------------------
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
         //------------------------------------------------------------------------------
         // MoveFileEx
