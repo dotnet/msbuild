@@ -21,6 +21,7 @@ using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.Restore3;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
+using Microsoft.DotNet.Tools.Migrate;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
@@ -42,6 +43,7 @@ namespace Microsoft.DotNet.Cli
             ["run3"] = Run3Command.Run,
             ["restore3"] = Restore3Command.Run,
             ["pack3"] = Pack3Command.Run,
+            ["migrate"] = MigrateCommand.Run
         };
 
         public static int Main(string[] args)

@@ -15,6 +15,5 @@ namespace Microsoft.DotNet.Cli
         {
             return new MSBuildForwardingApp(args).Execute();
         }
-        
     }
 }
