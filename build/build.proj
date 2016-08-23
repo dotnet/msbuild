@@ -104,7 +104,7 @@
       <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
     </Exec>
 
-    <Error Text="There were test failures, for full log see %(XmlTestFile.FullPath)" Condition="$(ExitCode) == 1" />
+    <Error Text="There were test failures, for full log see %(XmlTestFile.FullPath)" Condition="$(ExitCode) != 0" />
 
   </Target>
 
