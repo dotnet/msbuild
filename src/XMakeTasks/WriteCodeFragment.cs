@@ -306,7 +306,7 @@ namespace Microsoft.Build.Tasks
                         string args = GetAttributeArguments(attributeItem, "=");
                         if (args == null) return null;
 
-                        code.AppendLine(string.Format($"[assembly: {attributeItem.ItemSpec}({args})];"));
+                        code.AppendLine(string.Format($"[assembly: {attributeItem.ItemSpec}({args})]"));
                         haveGeneratedContent = true;
                     }
 
