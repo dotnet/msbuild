@@ -213,6 +213,9 @@
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <!--
+      This property is re-created after importing Microsoft.Portable.CSharp.targets.  If you change the value here, also
+      update it in Before.Microsoft.Common.targets -->
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
 
@@ -228,6 +231,7 @@
     <CSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</CSharpTargets>
     <CSharpPortableTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargets>
     <CSharpPortableTargetsFallback>$(ToolsDir)Extensions\Microsoft\Portable\v5.0\Microsoft.Portable.CSharp.targets</CSharpPortableTargetsFallback>
+    <CustomBeforeMicrosoftCommonTargets>$(RepoRoot)\Before.Microsoft.Common.targets</CustomBeforeMicrosoftCommonTargets>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
