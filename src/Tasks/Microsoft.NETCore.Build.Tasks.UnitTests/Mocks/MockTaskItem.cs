@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
+namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     public class MockTaskItem : ITaskItem
     {

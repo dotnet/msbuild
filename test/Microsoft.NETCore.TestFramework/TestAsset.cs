@@ -5,22 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.TestFramework.Assertions;
-using Microsoft.DotNet.TestFramework.Commands;
-using static Microsoft.DotNet.TestFramework.Commands.MSBuildTest;
+using Microsoft.NETCore.TestFramework.Assertions;
+using Microsoft.NETCore.TestFramework.Commands;
+using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
-namespace Microsoft.DotNet.TestFramework
+namespace Microsoft.NETCore.TestFramework
 {
     public class TestAsset : TestDirectory
     {
-        // made tolower because the rest of the class works with normalized tolower strings
-        private static readonly IEnumerable<string> BuildArtifactBlackList = new List<string>()
-        {
-          ".IncrementalCache",
-          ".SDKVersion"
-        }.Select(s => s.ToLower()).ToArray();
-
         private string _testAssetRoot;
 
         public string TestRoot => Path;

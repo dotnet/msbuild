@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 using NuGet.Common;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     internal class LockFileCache
     {

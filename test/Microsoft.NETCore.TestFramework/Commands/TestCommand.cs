@@ -5,7 +5,7 @@ using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.IO;
 
-namespace Microsoft.DotNet.TestFramework.Commands
+namespace Microsoft.NETCore.TestFramework.Commands
 {
     public abstract class TestCommand
     {

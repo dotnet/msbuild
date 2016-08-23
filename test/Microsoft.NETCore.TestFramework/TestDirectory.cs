@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.DotNet.TestFramework
+namespace Microsoft.NETCore.TestFramework
 {
     public class TestDirectory
     {

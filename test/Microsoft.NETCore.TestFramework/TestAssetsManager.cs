@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.TestFramework
+namespace Microsoft.NETCore.TestFramework
 {
     public class TestAssetsManager
     {

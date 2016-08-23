@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.TestFramework
+namespace Microsoft.NETCore.TestFramework
 {
     public class RepoInfo
     {

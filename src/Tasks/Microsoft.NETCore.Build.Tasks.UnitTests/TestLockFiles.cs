@@ -5,7 +5,7 @@ using System.IO;
 using NuGet.Common;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
+namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     internal static class TestLockFiles
     {

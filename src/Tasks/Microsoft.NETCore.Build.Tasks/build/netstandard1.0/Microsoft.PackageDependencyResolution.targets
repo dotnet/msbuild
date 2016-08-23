@@ -118,7 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     *************************************
     -->
 
-  <UsingTask TaskName="Microsoft.DotNet.Core.Build.Tasks.ResolvePackageDependencies" 
+  <UsingTask TaskName="Microsoft.NETCore.Build.Tasks.ResolvePackageDependencies" 
              AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <!--

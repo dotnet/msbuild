@@ -3,13 +3,13 @@
 
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
-using Microsoft.DotNet.TestFramework.Assertions;
-using Microsoft.DotNet.TestFramework.Commands;
+using Microsoft.NETCore.TestFramework;
+using Microsoft.NETCore.TestFramework.Assertions;
+using Microsoft.NETCore.TestFramework.Commands;
 using Xunit;
-using static Microsoft.DotNet.TestFramework.Commands.MSBuildTest;
+using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
-namespace Microsoft.DotNet.Publish.Tests
+namespace Microsoft.NETCore.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithDependencies
     {

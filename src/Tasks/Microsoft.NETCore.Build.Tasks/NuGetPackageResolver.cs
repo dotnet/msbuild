@@ -5,7 +5,7 @@ using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.Versioning;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     internal class NuGetPackageResolver : IPackageResolver
     {

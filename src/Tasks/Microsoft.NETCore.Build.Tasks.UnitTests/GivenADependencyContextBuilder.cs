@@ -10,7 +10,7 @@ using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using Xunit;
 
-namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
+namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     public class GivenADependencyContextBuilder
     {

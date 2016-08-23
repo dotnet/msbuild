@@ -9,7 +9,7 @@ using Microsoft.Build.Utilities;
 using NuGet.Configuration;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     /// <summary>
     /// Raises Nuget LockFile representation to MSBuild items and resolves

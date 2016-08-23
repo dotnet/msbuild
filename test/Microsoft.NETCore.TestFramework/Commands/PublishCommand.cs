@@ -7,7 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.TestFramework.Commands
+namespace Microsoft.NETCore.TestFramework.Commands
 {
     public sealed class PublishCommand : TestCommand
     {

@@ -7,7 +7,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.TestFramework.Assertions
+namespace Microsoft.NETCore.TestFramework.Assertions
 {
     public class CommandResultAssertions
     {

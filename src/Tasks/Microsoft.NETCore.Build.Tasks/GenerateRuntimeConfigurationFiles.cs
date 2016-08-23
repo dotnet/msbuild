@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     /// <summary>
     /// Generates the $(project).runtimeconfig.json and optionally $(project).runtimeconfig.dev.json files

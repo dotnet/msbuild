@@ -11,7 +11,7 @@ using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     public class DependencyContextBuilder
     {

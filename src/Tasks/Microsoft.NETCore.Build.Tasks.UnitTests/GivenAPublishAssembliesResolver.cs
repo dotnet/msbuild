@@ -9,7 +9,7 @@ using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Xunit;
 
-namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
+namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     /// <summary>
     /// Tests that PublishAssembliesResolver resolves assemblies correctly.

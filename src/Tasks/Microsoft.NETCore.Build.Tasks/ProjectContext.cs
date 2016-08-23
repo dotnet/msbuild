@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     internal class ProjectContext
     {

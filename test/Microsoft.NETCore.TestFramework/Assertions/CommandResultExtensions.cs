@@ -3,7 +3,7 @@
 
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.TestFramework.Assertions
+namespace Microsoft.NETCore.TestFramework.Assertions
 {
     public static class CommandResultExtensions
     {

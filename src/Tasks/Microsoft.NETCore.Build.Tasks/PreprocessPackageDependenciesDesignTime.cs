@@ -8,7 +8,7 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     /// <summary>
     /// Task combines data returned from ResolvePackageDependencies into single items collection

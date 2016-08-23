@@ -24,7 +24,7 @@
     <Compile Include="ResolvedFile.cs" />
     <Compile Include="PublishAssembliesResolver.cs" />
     <Compile Include="LockFileTargetExtensions.cs" />
-    <Compile Include="ResolveNetCorePublishAssemblies.cs" />
+    <Compile Include="ResolvePublishAssemblies.cs" />
     <Compile Include="DependencyType.cs" />
     <Compile Include="PreprocessPackageDependenciesDesignTime.cs" />
     <Compile Include="RuntimeConfig.cs" />

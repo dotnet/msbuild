@@ -4,7 +4,7 @@
 using Microsoft.DotNet.Cli.Utils;
 using System.Linq;
 
-namespace Microsoft.DotNet.TestFramework.Commands
+namespace Microsoft.NETCore.TestFramework.Commands
 {
     public sealed class RestoreCommand : TestCommand
     {

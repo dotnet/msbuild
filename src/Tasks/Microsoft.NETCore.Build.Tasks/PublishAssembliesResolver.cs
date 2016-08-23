@@ -7,7 +7,7 @@ using System.IO;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     public class PublishAssembliesResolver
     {

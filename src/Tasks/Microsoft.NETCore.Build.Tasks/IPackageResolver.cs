@@ -3,7 +3,7 @@
 
 using NuGet.Versioning;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     public interface IPackageResolver
     {

@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.Build.Framework;
 using Xunit;
 
-namespace Microsoft.DotNet.Core.Build.Tasks.UnitTests
+namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     public class GivenThatWeWantToGetDependenciesViaDesignTimeBuild
     {

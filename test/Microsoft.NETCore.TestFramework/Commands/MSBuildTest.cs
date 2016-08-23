@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.TestFramework.Commands
+namespace Microsoft.NETCore.TestFramework.Commands
 {
     public class MSBuildTest
     {

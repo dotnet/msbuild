@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NETCore.Build.Tasks
 {
     public class ResolvedFile
     {
