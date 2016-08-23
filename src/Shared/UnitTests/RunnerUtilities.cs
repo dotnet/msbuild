@@ -56,7 +56,11 @@ namespace Microsoft.Build.SharedUtilities
         /// </summary>
         private static string ResolveRuntimeExecutableName()
         {
-            return NativeMethodsShared.IsMono ? "mono" : Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "CoreRun");
+            // Run the child process with the same host as the currently-running process.
+            using (Process currentProcess = Process.GetCurrentProcess())
+            {
+                return currentProcess.MainModule.FileName;
+            }
         }
 #endif
 
