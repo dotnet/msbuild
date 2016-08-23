@@ -295,7 +295,7 @@ namespace Microsoft.Build.Tasks
                     if (AssemblyAttributes == null) return string.Empty; 
 
                     extension = "cs";
-                    code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment", DateTime.Now));
+                    code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment"));
                     code.AppendLine();
                     code.AppendLine("using System;");
                     code.AppendLine("using System.Reflection;");
