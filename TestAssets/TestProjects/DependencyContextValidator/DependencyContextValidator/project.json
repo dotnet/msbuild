@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000919"
+    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000933"
   },
   "frameworks": {
     "netstandard1.6": {

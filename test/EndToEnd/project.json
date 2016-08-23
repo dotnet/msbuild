@@ -20,8 +20,8 @@
     },
     "xunit": "2.2.0-beta3-build3330",
     "xunit.netcore.extensions": "1.0.0-prerelease-00206",
-    "dotnet-test-xunit": "1.0.0-rc2-330423-54",
-    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
+    "dotnet-test-xunit": "1.0.0-rc2-350904-49",
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
   },
   "frameworks": {
     "netcoreapp1.0": {

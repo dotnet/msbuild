@@ -45,6 +45,36 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         }
 
         [Fact]
+        public void GetDescriptionShouldGenerateHashFileName()
+        {
+            // Arrange
+            var provider = new PackageDependencyProvider(
+                NuGetPathContext.Create("/foo/packages"),
+                new FrameworkReferenceResolver("/foo/references"));
+            var package = new LockFilePackageLibrary();
+            package.Name = "Something";
+            package.Version = NuGetVersion.Parse("1.0.0-Beta");
+            package.Files.Add("lib/dotnet/_._");
+            package.Files.Add("runtimes/any/native/Microsoft.CSharp.CurrentVersion.targets");
+            package.Path = "SomePath";
+
+            var target = new LockFileTargetLibrary();
+            target.Name = "Something";
+            target.Version = package.Version;
+
+            target.RuntimeAssemblies.Add("lib/dotnet/_._");
+            target.CompileTimeAssemblies.Add("lib/dotnet/_._");
+            target.NativeLibraries.Add("runtimes/any/native/Microsoft.CSharp.CurrentVersion.targets");
+
+            // Act
+            var p = provider.GetDescription(NuGetFramework.Parse("netcoreapp1.0"), package, target);
+
+            // Assert
+            p.PackageLibrary.Path.Should().Be("SomePath");
+            p.HashPath.Should().Be("something.1.0.0-beta.nupkg.sha512");
+        }
+
+        [Fact]
         public void GetDescriptionShouldNotModifyTarget()
         {
             var provider = new PackageDependencyProvider(

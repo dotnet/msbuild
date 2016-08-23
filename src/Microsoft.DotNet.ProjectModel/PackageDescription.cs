@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.ProjectModel
     {
         public PackageDescription(
             string path,
+            string hashPath,
             LockFilePackageLibrary package,
             LockFileTargetLibrary lockFileLibrary,
             IEnumerable<LibraryRange> dependencies,
@@ -27,8 +28,11 @@ namespace Microsoft.DotNet.ProjectModel
                   compatible: compatible,
                   framework: null)
         {
+            HashPath = hashPath;
             PackageLibrary = package;
         }
+
+        public string HashPath { get; }
 
         public LockFilePackageLibrary PackageLibrary { get; }
 

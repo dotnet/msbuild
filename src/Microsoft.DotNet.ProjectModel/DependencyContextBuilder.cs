@@ -147,7 +147,8 @@ namespace Microsoft.Extensions.DependencyModel
                     export.ResourceAssemblies.Select(CreateResourceAssembly),
                     libraryDependencies,
                     serviceable,
-                    GetLibraryPath(export.Library));
+                    GetLibraryPath(export.Library),
+                    GetLibraryHashPath(export.Library));
             }
             else
             {
@@ -169,7 +170,8 @@ namespace Microsoft.Extensions.DependencyModel
                     assemblies,
                     libraryDependencies,
                     serviceable,
-                    GetLibraryPath(export.Library));
+                    GetLibraryPath(export.Library),
+                    GetLibraryHashPath(export.Library));
             }
         }
 
@@ -180,11 +182,22 @@ namespace Microsoft.Extensions.DependencyModel
             if (packageDescription != null)
             {
                 // This is the relative path appended to a NuGet packages directory to find the directory containing
-                // the package assets. This string should mastered only byNuGet, but has the format:
-                // {lowercase-package-ID}/{lowercase-package-version}
-                // 
-                // For example: newtonsoft.json/9.0.1
+                // the package assets. This string should only be mastered by NuGet.
                 return packageDescription.PackageLibrary?.Path;
+            }
+
+            return null;
+        }
+
+        private string GetLibraryHashPath(LibraryDescription description)
+        {
+            var packageDescription = description as PackageDescription;
+
+            if (packageDescription != null)
+            {
+                // This hash path appended to the package path (much like package assets). This string should only be
+                // mastered by NuGet.
+                return packageDescription.HashPath;
             }
 
             return null;
