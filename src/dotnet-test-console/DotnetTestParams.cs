@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using static System.Int32;
@@ -105,6 +106,16 @@ namespace Microsoft.DotNet.Tools.Test
                     Port = port;
                 }
 
+                if (_testRunner.HasValue())
+                {
+                    if (!IsAssembly(ProjectOrAssemblyPath))
+                    {
+                        throw new InvalidOperationException("You can only specify a test runner with a dll.");
+                    }
+
+                    TestRunner = _testRunner.Value();
+                }
+
                 UnparsedFramework = _frameworkOption.Value();
                 if (_frameworkOption.HasValue())
                 {
@@ -125,6 +136,11 @@ namespace Microsoft.DotNet.Tools.Test
             });
 
             _app.Execute(args);
+        }
+
+        private bool IsAssembly(string projectOrAssemblyPath)
+        {
+            return projectOrAssemblyPath.EndsWith(".dll");
         }
 
         private void AddDotnetTestParameters()
