@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.DotNet.Core.Sdk.props
+Microsoft.NETCore.Sdk.props
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it

@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.DotNet.Publish.targets
+Microsoft.NETCore.Publish.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -120,7 +120,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Gets the assemblies to be copied to the publish directory
     ============================================================
     -->
-  <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <Target Name="RunResolvePublishAssemblies">
 
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"

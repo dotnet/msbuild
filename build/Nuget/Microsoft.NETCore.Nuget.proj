@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <NuSpec Include="Microsoft.DotNet.Core.Sdk.nuspec">
+    <NuSpec Include="Microsoft.NETCore.Sdk.nuspec">
       <NuPkgOutput>$(NuGetOutDir)%(FileName).$(Version).nupkg</NuPkgOutput>
       <NuGetArguments>--version "$(Version)"</NuGetArguments>
       <LayoutTargetName>LayoutSdkPackage</LayoutTargetName>
@@ -50,6 +50,6 @@
     <Message Importance="High" Text="%(NuSpec.Identity) -> %(NuSpec.NuPkgOutput)'" />
   </Target>
 
-  <Import Project="Microsoft.DotNet.Core.Sdk.Nuget.targets" />
+  <Import Project="Microsoft.NETCore.Sdk.Nuget.targets" />
 
 </Project>

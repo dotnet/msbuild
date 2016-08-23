@@ -81,8 +81,8 @@
       </CopyLocalAssembly>
 
       <!-- Add our tasks assembly -->
-      <CopyLocalAssembly Include="Microsoft.DotNet.Core.Build.Tasks">
-        <FullFilePath>$(OutDir)\Microsoft.DotNet.Core.Build.Tasks.dll</FullFilePath>
+      <CopyLocalAssembly Include="Microsoft.NETCore.Build.Tasks">
+        <FullFilePath>$(OutDir)\Microsoft.NETCore.Build.Tasks.dll</FullFilePath>
         <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
 

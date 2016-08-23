@@ -119,7 +119,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <UsingTask TaskName="Microsoft.DotNet.Core.Build.Tasks.ResolvePackageDependencies" 
-             AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+             AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <!--
     ============================================================

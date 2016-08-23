@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <id>Microsoft.DotNet.Core.Sdk</id>
+    <id>Microsoft.NETCore.Sdk</id>
     <summary>The MSBuild targets and properties for building .NET Core projects.</summary>
     <description>
       The MSBuild targets and properties for building .NET Core projects.

@@ -1,15 +1,15 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\src\Tasks\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.props" />
+  <Import Project="..\..\src\Tasks\Microsoft.NETCore.Build.Tasks\build\netstandard1.0\Microsoft.NETCore.Sdk.props" />
 
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{a33548a0-f3b0-40c3-8c4d-ad2f00596cd6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.DotNet.TestFramework</RootNamespace>
-    <AssemblyName>Microsoft.DotNet.TestFramework</AssemblyName>
+    <RootNamespace>Microsoft.NETCore.TestFramework</RootNamespace>
+    <AssemblyName>Microsoft.NETCore.TestFramework</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
@@ -28,5 +28,5 @@
 
   <Import Project="..\..\build\Targets\Signing.Imports.targets"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\src\Tasks\Microsoft.DotNet.Core.Build.Tasks\build\netstandard1.0\Microsoft.DotNet.Core.Sdk.targets" />
+  <Import Project="..\..\src\Tasks\Microsoft.NETCore.Build.Tasks\build\netstandard1.0\Microsoft.NETCore.Sdk.targets" />
 </Project>

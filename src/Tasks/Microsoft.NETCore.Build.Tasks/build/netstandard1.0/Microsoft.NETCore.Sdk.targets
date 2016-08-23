@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.DotNet.Core.Sdk.targets
+Microsoft.NETCore.Sdk.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -11,19 +11,19 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftDotNetCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../tools/</MicrosoftDotNetCoreBuildTasksDirectoryRoot>
-    <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</MicrosoftDotNetCoreBuildTasksTFM>
-    <MicrosoftDotNetCoreBuildTasksTFM Condition=" '$(MicrosoftDotNetCoreBuildTasksTFM)' == ''">net46</MicrosoftDotNetCoreBuildTasksTFM>
-    <MicrosoftDotNetCoreBuildTasksDirectory>$(MicrosoftDotNetCoreBuildTasksDirectoryRoot)$(MicrosoftDotNetCoreBuildTasksTFM)/</MicrosoftDotNetCoreBuildTasksDirectory>
-    <MicrosoftDotNetCoreBuildTasksAssembly>$(MicrosoftDotNetCoreBuildTasksDirectory)Microsoft.DotNet.Core.Build.Tasks.dll</MicrosoftDotNetCoreBuildTasksAssembly>
+    <MicrosoftNETCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../tools/</MicrosoftNETCoreBuildTasksDirectoryRoot>
+    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</MicrosoftNETCoreBuildTasksTFM>
+    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MicrosoftNETCoreBuildTasksTFM)' == ''">net46</MicrosoftNETCoreBuildTasksTFM>
+    <MicrosoftNETCoreBuildTasksDirectory>$(MicrosoftNETCoreBuildTasksDirectoryRoot)$(MicrosoftNETCoreBuildTasksTFM)/</MicrosoftNETCoreBuildTasksDirectory>
+    <MicrosoftNETCoreBuildTasksAssembly>$(MicrosoftNETCoreBuildTasksDirectory)Microsoft.NETCore.Build.Tasks.dll</MicrosoftNETCoreBuildTasksAssembly>
   </PropertyGroup>
 
   <ImportGroup>
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
   </ImportGroup>
 
-  <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
-  <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <PropertyGroup>
     <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
@@ -130,6 +130,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.DotNet.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.DotNet.Publish.targets')" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />
 
 </Project>
