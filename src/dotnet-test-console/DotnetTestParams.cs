@@ -23,8 +23,9 @@ namespace Microsoft.DotNet.Tools.Test
         private CommandOption _configurationOption;
         private CommandOption _portOption;
         private CommandOption _parentProcessIdOption;
-        private CommandArgument _projectPath;
+        private CommandArgument _projectOrAssemblyPath;
         private CommandOption _noBuildOption;
+        private CommandOption _testRunner;
 
         public int? Port { get; set; }
 
@@ -38,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public string Output { get; set; }
 
-        public string ProjectPath { get; set; }
+        public string ProjectOrAssemblyPath { get; set; }
 
         public NuGetFramework Framework { get; set; }
 
@@ -49,6 +50,10 @@ namespace Microsoft.DotNet.Tools.Test
         public bool NoBuild { get; set; }
 
         public bool Help { get; set; }
+
+        public string TestRunner { get; set; }
+
+        public bool HasTestRunner => !string.IsNullOrWhiteSpace(TestRunner);
 
         public DotnetTestParams()
         {
@@ -69,10 +74,10 @@ namespace Microsoft.DotNet.Tools.Test
             _app.OnExecute(() =>
             {
                 // Locate the project and get the name and full path
-                ProjectPath = _projectPath.Value;
-                if (string.IsNullOrEmpty(ProjectPath))
+                ProjectOrAssemblyPath = _projectOrAssemblyPath.Value;
+                if (string.IsNullOrEmpty(ProjectOrAssemblyPath))
                 {
-                    ProjectPath = Directory.GetCurrentDirectory();
+                    ProjectOrAssemblyPath = Directory.GetCurrentDirectory();
                 }
 
                 if (_parentProcessIdOption.HasValue())
@@ -156,9 +161,16 @@ namespace Microsoft.DotNet.Tools.Test
                 CommandOptionType.SingleValue);
             _noBuildOption =
                 _app.Option("--no-build", "Do not build project before testing", CommandOptionType.NoValue);
-            _projectPath = _app.Argument(
-                "<PROJECT>",
-                "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");
+            _testRunner =
+                _app.Option(
+                    "-t|--test-runner <TEST_RUNNER>",
+                    "Test runner to be used to run the test when an assembly to test is specified. If this option " +
+                    "is not provided, we will try to find a suitable runner collocated with the assembly",
+                    CommandOptionType.SingleValue);
+            _projectOrAssemblyPath = _app.Argument(
+                "<PROJECT OR ASSEMBLY TO TEST>",
+                "The project or assembly to test, defaults to the current directory. Can be a path to a " +
+                "project.json, to a dll or a project directory.");
         }
     }
 }

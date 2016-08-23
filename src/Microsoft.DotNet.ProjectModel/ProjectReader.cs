@@ -15,7 +15,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel
 {
-    public class ProjectReader
+    public class ProjectReader : IProjectReader
     {
         public static bool TryGetProject(string path, out Project project, ProjectReaderSettings settings = null)
         {
@@ -64,13 +64,18 @@ namespace Microsoft.DotNet.ProjectModel
 
         public static Project GetProject(string projectPath, ProjectReaderSettings settings = null)
         {
+            return new ProjectReader().ReadProject(projectPath, settings);
+        }
+
+        public Project ReadProject(string projectPath, ProjectReaderSettings settings)
+        {
             projectPath = ProjectPathHelper.NormalizeProjectFilePath(projectPath);
 
             var name = Path.GetFileName(Path.GetDirectoryName(projectPath));
 
             using (var stream = new FileStream(projectPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return new ProjectReader().ReadProject(stream, name, projectPath, settings);
+                return ReadProject(stream, name, projectPath, settings);
             }
         }
 

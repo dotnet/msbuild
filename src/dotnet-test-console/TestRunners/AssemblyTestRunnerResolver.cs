@@ -9,24 +9,24 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public class AssemblyTestRunnerResolver : ITestRunnerResolver
     {
-        private readonly string _assemblyUnderTestPath;
+        private readonly string _directoryOfAssemblyUnderTest;
 
         private readonly IDirectory _directory;
 
-        public AssemblyTestRunnerResolver(string assemblyUnderTestPath) :
-            this(assemblyUnderTestPath, FileSystemWrapper.Default.Directory)
+        public AssemblyTestRunnerResolver(string directoryOfAssemblyUnderTest) :
+            this(directoryOfAssemblyUnderTest, FileSystemWrapper.Default.Directory)
         {
         }
 
-        internal AssemblyTestRunnerResolver(string assemblyUnderTestPath, IDirectory directory)
+        internal AssemblyTestRunnerResolver(string directoryOfAssemblyUnderTest, IDirectory directory)
         {
-            _assemblyUnderTestPath = assemblyUnderTestPath;
+            _directoryOfAssemblyUnderTest = Path.GetDirectoryName(directoryOfAssemblyUnderTest);
             _directory = directory;
         }
 
         public string ResolveTestRunner()
         {
-            var testRunnerPath = _directory.GetFiles(_assemblyUnderTestPath, "dotnet-test-*").FirstOrDefault();
+            var testRunnerPath = _directory.GetFiles(_directoryOfAssemblyUnderTest, "dotnet-test-*").FirstOrDefault();
 
             return Path.GetFileNameWithoutExtension(testRunnerPath);
         }

@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 $"--configuration",
                 dotnetTestParams.Config,
-                $"{dotnetTestParams.ProjectPath}"
+                $"{dotnetTestParams.ProjectOrAssemblyPath}"
             };
 
             // Build the test specifically for the target framework \ rid of the ProjectContext. This avoids building the project

@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Test
                     RegisterForParentProcessExit(dotnetTestParams.ParentProcessId.Value);
                 }
 
-                var projectPath = GetProjectPath(dotnetTestParams.ProjectPath);
+                var projectPath = GetProjectPath(dotnetTestParams.ProjectOrAssemblyPath);
                 var runtimeIdentifiers = !string.IsNullOrEmpty(dotnetTestParams.Runtime) ?
                     new[] { dotnetTestParams.Runtime } :
                     RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();

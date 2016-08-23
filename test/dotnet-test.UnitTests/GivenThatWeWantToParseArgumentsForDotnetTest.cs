@@ -48,13 +48,13 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_the_project_path_current_folder_if_one_is_not_passed_in()
         {
-            _emptyDotnetTestParams.ProjectPath.Should().Be(Directory.GetCurrentDirectory());
+            _emptyDotnetTestParams.ProjectOrAssemblyPath.Should().Be(Directory.GetCurrentDirectory());
         }
 
         [Fact]
         public void It_sets_the_project_path_to_the_passed_value()
         {
-            _dotnetTestFullParams.ProjectPath.Should().Be(ProjectJson);
+            _dotnetTestFullParams.ProjectOrAssemblyPath.Should().Be(ProjectJson);
         }
 
         [Fact]
