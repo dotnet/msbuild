@@ -1,5 +1,6 @@
 namespace Microsoft.Build.Tasks
 {
+#if !NETSTANDARD
     public partial class AL : Microsoft.Build.Tasks.ToolTaskExtension
     {
         public AL() { }
@@ -46,7 +47,6 @@ namespace Microsoft.Build.Tasks
     public abstract partial class AppDomainIsolatedTaskExtension : Microsoft.Build.Utilities.AppDomainIsolatedTask
     {
         internal AppDomainIsolatedTaskExtension() { }
-        public new Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
     }
     public partial class AspNetCompiler : Microsoft.Build.Tasks.ToolTaskExtension
     {
@@ -71,6 +71,7 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool() { throw null; }
         protected override bool ValidateParameters() { throw null; }
     }
+#endif
     public partial class AssignCulture : Microsoft.Build.Tasks.TaskExtension
     {
         public AssignCulture() { }
@@ -135,6 +136,7 @@ namespace Microsoft.Build.Tasks
         public bool UseResultsCache { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class CodeTaskFactory : Microsoft.Build.Framework.ITaskFactory
     {
         public CodeTaskFactory() { }
@@ -145,6 +147,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
         public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> taskParameters, string taskElementContents, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
     }
+#endif
     public partial class CombinePath : Microsoft.Build.Tasks.TaskExtension
     {
         public CombinePath() { }
@@ -334,6 +337,7 @@ namespace Microsoft.Build.Tasks
         public bool MatchFileNameOnly { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class FindInvalidProjectReferences : Microsoft.Build.Tasks.TaskExtension
     {
         public FindInvalidProjectReferences() { }
@@ -346,6 +350,7 @@ namespace Microsoft.Build.Tasks
         public string TargetPlatformVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public partial class FindUnderPath : Microsoft.Build.Tasks.TaskExtension
     {
         public FindUnderPath() { }
@@ -359,6 +364,7 @@ namespace Microsoft.Build.Tasks
         public bool UpdateToAbsolutePaths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public sealed partial class FormatUrl : Microsoft.Build.Tasks.TaskExtension
     {
         public FormatUrl() { }
@@ -367,6 +373,7 @@ namespace Microsoft.Build.Tasks
         public string OutputUrl { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public sealed partial class FormatVersion : Microsoft.Build.Tasks.TaskExtension
     {
         public FormatVersion() { }
@@ -377,6 +384,7 @@ namespace Microsoft.Build.Tasks
         public string Version { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public sealed partial class GenerateApplicationManifest : Microsoft.Build.Tasks.GenerateManifestBase
     {
         public GenerateApplicationManifest() { }
@@ -405,6 +413,7 @@ namespace Microsoft.Build.Tasks
         protected override bool OnManifestResolved(Microsoft.Build.Tasks.Deployment.ManifestUtilities.Manifest manifest) { throw null; }
         protected internal override bool ValidateInputs() { throw null; }
     }
+#endif
     public partial class GenerateBindingRedirects : Microsoft.Build.Tasks.TaskExtension
     {
         public GenerateBindingRedirects() { }
@@ -415,6 +424,7 @@ namespace Microsoft.Build.Tasks
         public string TargetName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public sealed partial class GenerateBootstrapper : Microsoft.Build.Tasks.TaskExtension
     {
         public GenerateBootstrapper() { }
@@ -490,6 +500,7 @@ namespace Microsoft.Build.Tasks
         protected internal virtual bool ValidateInputs() { throw null; }
         protected internal virtual bool ValidateOutput() { throw null; }
     }
+#endif
     [Microsoft.Build.Framework.RequiredRuntimeAttribute("v2.0")]
     public sealed partial class GenerateResource : Microsoft.Build.Tasks.TaskExtension
     {
@@ -530,6 +541,7 @@ namespace Microsoft.Build.Tasks
         public bool UseSourcePath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public sealed partial class GenerateTrustInfo : Microsoft.Build.Tasks.TaskExtension
     {
         public GenerateTrustInfo() { }
@@ -552,6 +564,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public partial class GetFrameworkPath : Microsoft.Build.Tasks.TaskExtension
     {
         public GetFrameworkPath() { }
@@ -579,6 +592,7 @@ namespace Microsoft.Build.Tasks
         public string Path { get { throw null; } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class GetFrameworkSdkPath : Microsoft.Build.Tasks.TaskExtension
     {
         public GetFrameworkSdkPath() { }
@@ -614,6 +628,7 @@ namespace Microsoft.Build.Tasks
         public string TargetPlatformVersion { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public partial class GetReferenceAssemblyPaths : Microsoft.Build.Tasks.TaskExtension
     {
         public GetReferenceAssemblyPaths() { }
@@ -628,6 +643,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkMonikerDisplayName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class GetSDKReferenceFiles : Microsoft.Build.Tasks.TaskExtension
     {
         public GetSDKReferenceFiles() { }
@@ -696,6 +712,7 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool() { throw null; }
         protected override bool ValidateParameters() { throw null; }
     }
+#endif
     public partial class MakeDir : Microsoft.Build.Tasks.TaskExtension
     {
         public MakeDir() { }
@@ -761,6 +778,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] Lines { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class RegisterAssembly : Microsoft.Build.Tasks.AppDomainIsolatedTaskExtension, System.Runtime.InteropServices.ITypeLibExporterNotifySink
     {
         public RegisterAssembly() { }
@@ -774,6 +792,7 @@ namespace Microsoft.Build.Tasks
         public void ReportEvent(System.Runtime.InteropServices.ExporterEventKind kind, int code, string msg) { }
         public object ResolveRef(System.Reflection.Assembly assemblyToResolve) { throw null; }
     }
+#endif
     public partial class RemoveDir : Microsoft.Build.Tasks.TaskExtension
     {
         public RemoveDir() { }
@@ -791,6 +810,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] Inputs { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public sealed partial class RequiresFramework35SP1Assembly : Microsoft.Build.Tasks.TaskExtension
     {
         public RequiresFramework35SP1Assembly() { }
@@ -808,6 +828,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public partial class ResolveAssemblyReference : Microsoft.Build.Tasks.TaskExtension
     {
         public ResolveAssemblyReference() { }
@@ -882,6 +903,7 @@ namespace Microsoft.Build.Tasks
         public string ResolvedCodeAnalysisRuleSet { get { throw null; } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public sealed partial class ResolveComReference : Microsoft.Build.Tasks.AppDomainIsolatedTaskExtension
     {
         public ResolveComReference() { }
@@ -907,6 +929,7 @@ namespace Microsoft.Build.Tasks
         public string WrapperOutputDirectory { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public partial class ResolveKeySource : Microsoft.Build.Tasks.TaskExtension
     {
         public ResolveKeySource() { }
@@ -925,6 +948,7 @@ namespace Microsoft.Build.Tasks
         public bool SuppressAutoClosePasswordPrompt { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public sealed partial class ResolveManifestFiles : Microsoft.Build.Tasks.TaskExtension
     {
         public ResolveManifestFiles() { }
@@ -980,6 +1004,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] UnresolvedProjectReferences { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public abstract partial class ResolveProjectBase : Microsoft.Build.Tasks.TaskExtension
     {
         protected ResolveProjectBase() { }
@@ -989,6 +1014,7 @@ namespace Microsoft.Build.Tasks
         protected System.Xml.XmlElement GetProjectElement(Microsoft.Build.Framework.ITaskItem projectRef) { throw null; }
         protected string GetProjectItem(Microsoft.Build.Framework.ITaskItem projectRef) { throw null; }
     }
+#if !NETSTANDARD
     public partial class ResolveSDKReference : Microsoft.Build.Tasks.TaskExtension
     {
         public ResolveSDKReference() { }
@@ -1053,23 +1079,21 @@ namespace Microsoft.Build.Tasks
         public string TimestampUrl { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
     {
         internal TaskExtension() { }
-        public new Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
     }
     public partial class TaskLoggingHelperExtension : Microsoft.Build.Utilities.TaskLoggingHelper
     {
-        public TaskLoggingHelperExtension(Microsoft.Build.Framework.ITask taskInstance, System.Resources.ResourceManager primaryResources, System.Resources.ResourceManager sharedResources, string helpKeywordPrefix) : base (default(Microsoft.Build.Framework.ITask)) { }
+        public TaskLoggingHelperExtension(Microsoft.Build.Framework.ITask taskInstance, System.Resources.ResourceManager primaryResources, System.Resources.ResourceManager sharedResources, string helpKeywordPrefix) :base(taskInstance) { }
         public System.Resources.ResourceManager TaskSharedResources { get { throw null; } set { } }
         public override string FormatResourceString(string resourceName, params object[] args) { throw null; }
     }
     public abstract partial class ToolTaskExtension : Microsoft.Build.Utilities.ToolTask
     {
         internal ToolTaskExtension() { }
-        protected internal System.Collections.Hashtable Bag { get { throw null; } }
         protected override bool HasLoggedErrors { get { throw null; } }
-        public new Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
         protected internal virtual void AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         protected internal virtual void AddResponseFileCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         protected override string GenerateCommandLineCommands() { throw null; }
@@ -1089,6 +1113,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] TouchedFiles { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class UnregisterAssembly : Microsoft.Build.Tasks.AppDomainIsolatedTaskExtension
     {
         public UnregisterAssembly() { }
@@ -1111,6 +1136,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public sealed partial class Warning : Microsoft.Build.Tasks.TaskExtension
     {
         public Warning() { }
@@ -1120,6 +1146,7 @@ namespace Microsoft.Build.Tasks
         public string Text { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class WinMDExp : Microsoft.Build.Tasks.ToolTaskExtension
     {
         public WinMDExp() { }
@@ -1146,6 +1173,7 @@ namespace Microsoft.Build.Tasks
         protected override bool SkipTaskExecution() { throw null; }
         protected override bool ValidateParameters() { throw null; }
     }
+#endif
     public partial class WriteCodeFragment : Microsoft.Build.Tasks.TaskExtension
     {
         public WriteCodeFragment() { }
@@ -1167,6 +1195,7 @@ namespace Microsoft.Build.Tasks
         public bool Overwrite { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#if !NETSTANDARD
     public partial class XamlTaskFactory : Microsoft.Build.Framework.ITaskFactory
     {
         public XamlTaskFactory() { }
@@ -1215,7 +1244,9 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem XslInputPath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
 }
+#if !NETSTANDARD
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     [System.Runtime.InteropServices.ClassInterfaceAttribute((System.Runtime.InteropServices.ClassInterfaceType)(0))]
@@ -2237,6 +2268,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public string XmlVersioned { get { throw null; } set { } }
     }
 }
+#endif
 namespace Microsoft.Build.Tasks.Hosting
 {
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -2415,6 +2447,7 @@ namespace Microsoft.Build.Tasks.Hosting
         bool Compile();
     }
 }
+#if !NETSTANDARD
 namespace Microsoft.Build.Tasks.Xaml
 {
     public partial class CommandLineArgumentRelation : Microsoft.Build.Tasks.Xaml.PropertyRelation
@@ -2508,3 +2541,4 @@ namespace System.Deployment.Internal.CodeSigning
         public override System.Security.Cryptography.AsymmetricSignatureFormatter CreateFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { throw null; }
     }
 }
+#endif

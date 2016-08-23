@@ -761,12 +761,16 @@ namespace Microsoft.Build.Exceptions
     public partial class BuildAbortedException : System.Exception
     {
         public BuildAbortedException() { }
+#if !NETSTANDARD
         protected BuildAbortedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
         public BuildAbortedException(string message) { }
         public BuildAbortedException(string message, System.Exception innerException) { }
         public string ErrorCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+#if !NETSTANDARD
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
     }
     public sealed partial class InternalLoggerException : System.Exception
     {
@@ -777,8 +781,10 @@ namespace Microsoft.Build.Exceptions
         public string ErrorCode { get { throw null; } }
         public string HelpKeyword { get { throw null; } }
         public bool InitializationException { get { throw null; } }
+#if !NETSTANDARD
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
     }
     public sealed partial class InvalidProjectFileException : System.Exception
     {
@@ -797,20 +803,26 @@ namespace Microsoft.Build.Exceptions
         public int LineNumber { get { throw null; } }
         public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
+#if !NETSTANDARD
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
     }
     public partial class InvalidToolsetDefinitionException : System.Exception
     {
         public InvalidToolsetDefinitionException() { }
+#if !NETSTANDARD
         protected InvalidToolsetDefinitionException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
         public InvalidToolsetDefinitionException(string message) { }
         public InvalidToolsetDefinitionException(string message, System.Exception innerException) { }
         public InvalidToolsetDefinitionException(string message, string errorCode) { }
         public InvalidToolsetDefinitionException(string message, string errorCode, System.Exception innerException) { }
         public string ErrorCode { get { throw null; } }
+#if !NETSTANDARD
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
     }
 }
 namespace Microsoft.Build.Execution
@@ -837,7 +849,9 @@ namespace Microsoft.Build.Execution
         public BuildParameters() { }
         public BuildParameters(Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IDictionary<string, string> BuildProcessEnvironment { get { throw null; } }
+#if !NETSTANDARD
         public System.Threading.ThreadPriority BuildThreadPriority { get { throw null; } set { } }
+#endif
         public System.Globalization.CultureInfo Culture { get { throw null; } set { } }
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }

@@ -295,14 +295,18 @@ namespace Microsoft.Build.Framework
     public partial class LoggerException : System.Exception
     {
         public LoggerException() { }
+#if !NETSTANDARD
         protected LoggerException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
         public LoggerException(string message) { }
         public LoggerException(string message, System.Exception innerException) { }
         public LoggerException(string message, System.Exception innerException, string errorCode, string helpKeyword) { }
         public string ErrorCode { get { throw null; } }
         public string HelpKeyword { get { throw null; } }
+#if !NETSTANDARD
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#endif
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public enum LoggerVerbosity
@@ -440,6 +444,7 @@ namespace Microsoft.Build.Framework
     }
     public delegate void TaskStartedEventHandler(object sender, Microsoft.Build.Framework.TaskStartedEventArgs e);
 }
+#if !NETSTANDARD
 namespace Microsoft.Build.Framework.XamlTypes
 {
     public sealed partial class Argument : System.ComponentModel.ISupportInitialize
@@ -707,3 +712,4 @@ namespace Microsoft.Build.Framework.XamlTypes
         public void EndInit() { }
     }
 }
+#endif

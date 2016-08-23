@@ -1,5 +1,6 @@
 namespace Microsoft.Build.Utilities
 {
+#if !NETSTANDARD
     [Microsoft.Build.Framework.LoadInSeparateAppDomainAttribute]
     public abstract partial class AppDomainIsolatedTask : System.MarshalByRefObject, Microsoft.Build.Framework.ITask
     {
@@ -74,6 +75,7 @@ namespace Microsoft.Build.Utilities
         public void SaveTlog() { }
         public void SaveTlog(Microsoft.Build.Utilities.DependencyFilter includeInTLog) { }
     }
+#endif
     public partial class CommandLineBuilder
     {
         public CommandLineBuilder() { }
@@ -102,13 +104,16 @@ namespace Microsoft.Build.Utilities
         public override string ToString() { throw null; }
         protected virtual void VerifyThrowNoEmbeddedDoubleQuotes(string switchName, string parameter) { }
     }
+#if !NETSTANDARD
     public delegate bool DependencyFilter(string fullPath);
+#endif
     public enum DotNetFrameworkArchitecture
     {
         Bitness32 = 1,
         Bitness64 = 2,
         Current = 0,
     }
+#if !NETSTANDARD
     public enum ExecutableType
     {
         Managed32Bit = 3,
@@ -188,6 +193,7 @@ namespace Microsoft.Build.Utilities
         public void SaveTlog(Microsoft.Build.Utilities.DependencyFilter includeInTLog) { }
         public void UpdateFileEntryDetails() { }
     }
+#endif
     public enum HostObjectInitializationStatus
     {
         NoActionReturnFailure = 3,
@@ -336,7 +342,11 @@ namespace Microsoft.Build.Utilities
         protected System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
         public abstract bool Execute();
     }
-    public sealed partial class TaskItem : System.MarshalByRefObject, Microsoft.Build.Framework.ITaskItem, Microsoft.Build.Framework.ITaskItem2
+    public sealed partial class TaskItem :
+#if !NETSTANDARD
+        System.MarshalByRefObject,
+#endif
+        Microsoft.Build.Framework.ITaskItem, Microsoft.Build.Framework.ITaskItem2
     {
         public TaskItem() { }
         public TaskItem(Microsoft.Build.Framework.ITaskItem sourceItem) { }
@@ -349,8 +359,10 @@ namespace Microsoft.Build.Utilities
         public System.Collections.IDictionary CloneCustomMetadata() { throw null; }
         public void CopyMetadataTo(Microsoft.Build.Framework.ITaskItem destinationItem) { }
         public string GetMetadata(string metadataName) { throw null; }
+#if !NETSTANDARD
         [System.Security.SecurityCriticalAttribute]
         public override object InitializeLifetimeService() { throw null; }
+#endif
         System.Collections.IDictionary Microsoft.Build.Framework.ITaskItem2.CloneCustomMetadataEscaped() { throw null; }
         string Microsoft.Build.Framework.ITaskItem2.GetMetadataValueEscaped(string metadataName) { throw null; }
         void Microsoft.Build.Framework.ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue) { }
@@ -359,7 +371,10 @@ namespace Microsoft.Build.Utilities
         public void SetMetadata(string metadataName, string metadataValue) { }
         public override string ToString() { throw null; }
     }
-    public partial class TaskLoggingHelper : System.MarshalByRefObject
+    public partial class TaskLoggingHelper
+#if !NETSTANDARD
+        : System.MarshalByRefObject
+#endif
     {
         public TaskLoggingHelper(Microsoft.Build.Framework.IBuildEngine buildEngine, string taskName) { }
         public TaskLoggingHelper(Microsoft.Build.Framework.ITask taskInstance) { }
@@ -372,7 +387,9 @@ namespace Microsoft.Build.Utilities
         public virtual string FormatResourceString(string resourceName, params object[] args) { throw null; }
         public virtual string FormatString(string unformatted, params object[] args) { throw null; }
         public virtual string GetResourceMessage(string resourceName) { throw null; }
+#if !NETSTANDARD
         public override object InitializeLifetimeService() { throw null; }
+#endif
         public void LogCommandLine(Microsoft.Build.Framework.MessageImportance importance, string commandLine) { }
         public void LogCommandLine(string commandLine) { }
         public void LogCriticalMessage(string subcategory, string code, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
@@ -404,7 +421,9 @@ namespace Microsoft.Build.Utilities
         public void LogWarningFromResources(string subcategoryResourceName, string warningCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string messageResourceName, params object[] messageArgs) { }
         public void LogWarningWithCodeFromResources(string messageResourceName, params object[] messageArgs) { }
         public void LogWarningWithCodeFromResources(string subcategoryResourceName, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string messageResourceName, params object[] messageArgs) { }
+#if !NETSTANDARD
         public void MarkAsInactive() { }
+#endif
     }
     public static partial class ToolLocationHelper
     {
@@ -413,7 +432,9 @@ namespace Microsoft.Build.Utilities
         public static void ClearSDKStaticCache() { }
         public static System.Collections.Generic.IDictionary<string, string> FilterPlatformExtensionSDKs(System.Version targetPlatformVersion, System.Collections.Generic.IDictionary<string, string> extensionSdks) { throw null; }
         public static System.Collections.Generic.IList<Microsoft.Build.Utilities.TargetPlatformSDK> FilterTargetPlatformSdks(System.Collections.Generic.IList<Microsoft.Build.Utilities.TargetPlatformSDK> targetPlatformSdkList, System.Version osVersion, System.Version vsVersion) { throw null; }
+#if !NETSTANDARD
         public static System.Collections.Generic.IList<Microsoft.Build.Utilities.AssemblyFoldersExInfo> GetAssemblyFoldersExInfo(string registryRoot, string targetFrameworkVersion, string registryKeySuffix, string osVersion, string platform, System.Reflection.ProcessorArchitecture targetProcessorArchitecture) { throw null; }
+#endif
         public static string GetDisplayNameForTargetFrameworkDirectory(string targetFrameworkDirectory, System.Runtime.Versioning.FrameworkName frameworkName) { throw null; }
         public static string GetDotNetFrameworkRootRegistryKey(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version) { throw null; }
         public static string GetDotNetFrameworkSdkInstallKeyValue(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version) { throw null; }
@@ -542,12 +563,14 @@ namespace Microsoft.Build.Utilities
     {
         public static Microsoft.Build.Framework.ITaskItem[] ExpandWildcards(Microsoft.Build.Framework.ITaskItem[] expand) { throw null; }
     }
+#if !NETSTANDARD
     public enum UpToDateCheckType
     {
         InputNewerThanOutput = 0,
         InputNewerThanTracking = 2,
         InputOrOutputNewerThanTracking = 1,
     }
+#endif
     public enum VisualStudioVersion
     {
         Version100 = 0,

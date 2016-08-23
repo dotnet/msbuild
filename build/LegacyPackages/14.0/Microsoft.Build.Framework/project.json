@@ -1,0 +1,26 @@
+﻿{
+  "version":  "14.0.0.0",
+  "buildOptions": {
+    "keyFile": "../../../../Tools/MSFT.snk",
+    "publicSign": true
+  },
+  "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Xaml": {
+          "type": "build"
+        }
+      }
+    },
+    "netstandard1.3": {
+      "buildOptions": {
+        "define": [ "NETSTANDARD" ]
+      },
+      "dependencies": {
+        "System.Collections": "4.0.11",
+        "System.Runtime": "4.1.0",
+        "System.Runtime.InteropServices": "4.1.0"
+      }
+    }
+  }
+}
