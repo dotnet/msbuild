@@ -6,8 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectJsonMigration.Models;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
     public class IncludeContextTransform : ConditionalTransform<IncludeContext, IEnumerable<ProjectItemElement>>
     {
@@ -15,9 +16,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         //     - Partially solved, what if the resolved glob is a directory?
         // TODO: Support mappings
 
-        private string _itemName;
+        private readonly string _itemName;
         private bool _transformMappings;
-        private List<ItemMetadataValue<IncludeContext>> _metadata = new List<ItemMetadataValue<IncludeContext>>();
+        private readonly List<ItemMetadataValue<IncludeContext>> _metadata = new List<ItemMetadataValue<IncludeContext>>();
         private AddItemTransform<IncludeContext>[] _transformSet;
 
         public IncludeContextTransform(
@@ -27,8 +28,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             _itemName = itemName;
             _transformMappings = transformMappings;
-
-            CreateTransformSet();
         }
 
         public IncludeContextTransform WithMetadata(string metadataName, string metadataValue)
@@ -84,7 +83,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 includeExcludeTransformation.WithMetadata(metadata);
             }
 
-            _transformSet = new AddItemTransform<IncludeContext>[]
+            _transformSet = new []
             {
                 includeFilesExcludeFilesTransformation,
                 includeExcludeTransformation
@@ -138,6 +137,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public override IEnumerable<ProjectItemElement> ConditionallyTransform(IncludeContext source)
         {
+            CreateTransformSet();
+
             return _transformSet.Select(t => t.Transform(source));
         }
     }

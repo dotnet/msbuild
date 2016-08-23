@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
@@ -19,7 +20,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
-                .FromDefaultBase()
+                .FromTestAssetBase("TestAppWithRuntimeOptions")
                 .WithCustomProperty("buildOptions", new Dictionary<string, string>
                 {
                     { "emitEntryPoint", "false" }

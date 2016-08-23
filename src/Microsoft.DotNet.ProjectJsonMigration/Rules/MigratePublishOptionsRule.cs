@@ -1,25 +1,16 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli;
 using System.Linq;
-using System.IO;
-using Newtonsoft.Json;
-using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     public class MigratePublishOptionsRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
 
-        public MigratePublishOptionsRule(TransformApplicator transformApplicator = null)
+        public MigratePublishOptionsRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
         }
@@ -29,16 +20,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var csproj = migrationRuleInputs.OutputMSBuildProject;
             var projectContext = migrationRuleInputs.DefaultProjectContext;
 
-            var transformResults = new[]
-            {
-                CopyToOutputFilesTransform.Transform(projectContext.ProjectFile.PublishOptions)
-            };
+            var transformResult = CopyToOutputFilesTransform.Transform(projectContext.ProjectFile.PublishOptions);
 
-            if (transformResults.Any(t => t != null && t.Any()))
+            if (transformResult != null && transformResult.Any())
             {
                 var itemGroup = migrationRuleInputs.CommonItemGroup;
                 _transformApplicator.Execute(
-                    CopyToOutputFilesTransform.Transform(projectContext.ProjectFile.PublishOptions),
+                    transformResult,
                     itemGroup,
                     mergeExisting: true);
             }
@@ -46,7 +34,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
             new IncludeContextTransform("Content", transformMappings: true)
-            .WithMetadata("CopyToOutputDirectory", "None")
-            .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
+                .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
     }
 }

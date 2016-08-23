@@ -3,16 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli;
 using System.Linq;
-using System.IO;
-using Newtonsoft.Json;
+using Microsoft.Build.Construction;
+using NuGet.Frameworks;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     public class MigrateConfigurationsRule : IMigrationRule
     {
@@ -21,19 +16,29 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var projectContext = migrationRuleInputs.DefaultProjectContext;
             var configurations = projectContext.ProjectFile.GetConfigurations().ToList();
 
+            var frameworks = new List<NuGetFramework>();
+            frameworks.Add(null);
+            frameworks.AddRange(projectContext.ProjectFile.GetTargetFrameworks().Select(t => t.FrameworkName));
+
             if (!configurations.Any())
             {
                 return;
             }
 
-            foreach (var configuration in configurations)
+            var frameworkConfigurationCombinations = frameworks.SelectMany(f => configurations, Tuple.Create);
+
+            foreach (var entry in frameworkConfigurationCombinations)
             {
-                MigrateConfiguration(configuration, migrationSettings, migrationRuleInputs);
+                var framework = entry.Item1;
+                var configuration = entry.Item2;
+
+                MigrateConfiguration(configuration, framework, migrationSettings, migrationRuleInputs);
             }
         }
 
         private void MigrateConfiguration(
-            string configuration, 
+            string configuration,
+            NuGetFramework framework,
             MigrationSettings migrationSettings, 
             MigrationRuleInputs migrationRuleInputs)
         {
@@ -43,10 +48,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var itemGroup = CreateItemGroupAtEndOfProject(csproj);
 
             var configurationCondition = $" '$(Configuration)' == '{configuration}' ";
+            if (framework != null)
+            {
+                configurationCondition +=
+                    $" and '$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '{framework.DotNetFrameworkName}' ";
+            }
             propertyGroup.Condition = configurationCondition;
             itemGroup.Condition = configurationCondition;
 
-            new MigrateBuildOptionsRule(configuration, propertyGroup, itemGroup)
+            new MigrateBuildOptionsRule(configuration, framework, propertyGroup, itemGroup)
                 .Apply(migrationSettings, migrationRuleInputs);
 
             propertyGroup.RemoveIfEmpty();

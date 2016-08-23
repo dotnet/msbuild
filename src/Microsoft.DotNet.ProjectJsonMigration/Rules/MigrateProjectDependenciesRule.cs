@@ -1,29 +1,24 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli;
-using System.Linq;
 using System.IO;
-using Newtonsoft.Json;
+using System.Linq;
+using Microsoft.Build.Construction;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Common;
-using Project = Microsoft.DotNet.ProjectModel.Project;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     public class MigrateProjectDependenciesRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
         private string _projectDirectory;
 
-        public MigrateProjectDependenciesRule(TransformApplicator transformApplicator = null)
+        public MigrateProjectDependenciesRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
         }
@@ -38,29 +33,34 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var projectDependencyTransformResults =
                 projectExports.Select(projectExport => ProjectDependencyTransform.Transform(projectExport));
-            var propertyTransformResults = new []
+
+            if (projectDependencyTransformResults.Any())
+            {
+                AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
+                AddProjectDependenciesToNewItemGroup(csproj.AddItemGroup(), projectDependencyTransformResults);
+            }
+        }
+
+        private void AddProjectDependenciesToNewItemGroup(ProjectItemGroupElement itemGroup, IEnumerable<ProjectItemElement> projectDependencyTransformResults)
+        {
+            foreach (var projectDependencyTransformResult in projectDependencyTransformResults)
+            {
+                _transformApplicator.Execute(projectDependencyTransformResult, itemGroup);
+            }
+        }
+
+        private void AddPropertyTransformsToCommonPropertyGroup(ProjectPropertyGroupElement commonPropertyGroup)
+        {
+            var propertyTransformResults = new[]
             {
                 AutoUnifyTransform.Transform(true),
                 DesignTimeAutoUnifyTransform.Transform(true)
             };
 
-            if (projectDependencyTransformResults.Any())
+            foreach (var propertyTransformResult in propertyTransformResults)
             {
-                // Use a new item group for the project references, but the common for properties
-                var propertyGroup = migrationRuleInputs.CommonPropertyGroup;
-                var itemGroup = csproj.AddItemGroup();
-
-                foreach (var projectDependencyTransformResult in projectDependencyTransformResults)
-                {
-                    _transformApplicator.Execute(projectDependencyTransformResult, itemGroup);
-                }
-
-                foreach (var propertyTransformResult in propertyTransformResults)
-                {
-                    _transformApplicator.Execute(propertyTransformResult, propertyGroup);
-                }
+                _transformApplicator.Execute(propertyTransformResult, commonPropertyGroup);
             }
-
         }
 
         private AddPropertyTransform<bool> AutoUnifyTransform => new AddPropertyTransform<bool>(
@@ -79,7 +79,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             {
                 if (!export.Library.Resolved)
                 {
-                    throw new Exception("Cannot migrate unresolved project dependency, please ensure restore has been run.");
+                    MigrationErrorCodes.MIGRATE1014(
+                        $"Unresolved project dependency ({export.Library.Identity.Name})").Throw();
                 }
 
                 var projectFile = ((ProjectDescription)export.Library).Project.ProjectFilePath;

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ED2FE3E2-F7E7-4389-8231-B65123F2076F}"
 EndProject
@@ -104,8 +104,6 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "update-dependencies", "buil
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.ProjectModel.Loader", "src\Microsoft.DotNet.ProjectModel.Loader\Microsoft.DotNet.ProjectModel.Loader.xproj", "{1C599FFD-FB52-4279-A8E5-465D3EC499E1}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.ProjectModel.Loader.Tests", "test\Microsoft.DotNet.ProjectModel.Loader.Tests\Microsoft.DotNet.ProjectModel.Loader.Tests.xproj", "{5DF6C9DA-6909-4EC0-909E-6913580BB4A4}"
-EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Configurer", "src\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.xproj", "{E5ED47EF-BF25-4DA9-A7FE-290C642CBF0F}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Configurer.UnitTests", "test\Microsoft.DotNet.Configurer.UnitTests\Microsoft.DotNet.Configurer.UnitTests.xproj", "{4C3B06D5-B6D5-4E5B-A44F-3EBE52A1C759}"
@@ -155,6 +153,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "publish", "publish", "{27B1
 		build\publish\Microsoft.DotNet.Cli.Badge.targets = build\publish\Microsoft.DotNet.Cli.Badge.targets
 		build\publish\PublishContent.targets = build\publish\PublishContent.targets
 	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.ProjectJsonMigration", "src\Microsoft.DotNet.ProjectJsonMigration\Microsoft.DotNet.ProjectJsonMigration.xproj", "{0E083818-2320-4388-8007-4F720FD5C634}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.ProjectJsonMigration.Tests", "test\Microsoft.DotNet.ProjectJsonMigration.Tests\Microsoft.DotNet.ProjectJsonMigration.Tests.xproj", "{1F2EF070-AC5F-4078-AFB0-65745AC691B9}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "dotnet-migrate.Tests", "test\dotnet-migrate.Tests\dotnet-migrate.Tests.xproj", "{1F2EF070-AC5F-4078-AFB0-65745AC691B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -931,6 +935,7 @@ Global
 		{A16958E1-24C7-4F1E-B317-204AD91625DD} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{BD7833F8-3209-4682-BF75-B4BCA883E279} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{DCDFE282-03DE-4DBC-B90C-CC3CE3EC8162} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
+		{688870C8-9843-4F9E-8576-D39290AD0F25} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{65741CB1-8AEE-4C66-8198-10A7EA0E4258} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{713CBFBB-5392-438D-B766-A9A585EF1BB8} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{60CF7E6C-D6C8-439D-B7B7-D8A27E29BE2C} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}

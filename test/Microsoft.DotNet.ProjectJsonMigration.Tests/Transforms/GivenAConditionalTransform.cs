@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {

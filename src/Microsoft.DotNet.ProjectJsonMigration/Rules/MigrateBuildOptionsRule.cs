@@ -3,38 +3,31 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli;
 using System.Linq;
-using System.IO;
-using Newtonsoft.Json;
+using Microsoft.Build.Construction;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
-using Microsoft.DotNet.Cli.Utils;
 using Newtonsoft.Json.Linq;
+using NuGet.Frameworks;
 
-using Project = Microsoft.DotNet.ProjectModel.Project;
-
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     // TODO: Should All build options be protected by a configuration condition?
     //       This will prevent the entire merge issue altogether and sidesteps the problem of having a duplicate include with different excludes...
     public class MigrateBuildOptionsRule : IMigrationRule
     {
         private AddPropertyTransform<CommonCompilerOptions>[] EmitEntryPointTransforms
-            => new AddPropertyTransform<CommonCompilerOptions>[]
+            => new []
             {
                 new AddPropertyTransform<CommonCompilerOptions>("OutputType", "Exe",
-                    compilerOptions => compilerOptions.EmitEntryPoint != null && compilerOptions.EmitEntryPoint.Value),
-                new AddPropertyTransform<CommonCompilerOptions>("TargetExt", ".dll",
                     compilerOptions => compilerOptions.EmitEntryPoint != null && compilerOptions.EmitEntryPoint.Value),
                 new AddPropertyTransform<CommonCompilerOptions>("OutputType", "Library",
                     compilerOptions => compilerOptions.EmitEntryPoint == null || !compilerOptions.EmitEntryPoint.Value)
             };
 
         private AddPropertyTransform<CommonCompilerOptions>[] KeyFileTransforms
-            => new AddPropertyTransform<CommonCompilerOptions>[]
+            => new []
             {
                 new AddPropertyTransform<CommonCompilerOptions>("AssemblyOriginatorKeyFile",
                     compilerOptions => compilerOptions.KeyFile,
@@ -123,7 +116,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
             new IncludeContextTransform("Content", transformMappings: true)
-            .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
+                .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
         private Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>> CompileFilesTransformExecute =>
             (compilerOptions, projectDirectory) =>
@@ -137,14 +130,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             (compilerOptions, projectDirectory) =>
                     CopyToOutputFilesTransform.Transform(GetCopyToOutputIncludeContext(compilerOptions, projectDirectory));
 
-        private string _configuration;
-        private ProjectPropertyGroupElement _configurationPropertyGroup;
-        private ProjectItemGroupElement _configurationItemGroup;
+        private readonly string _configuration;
+        private readonly NuGetFramework _framework;
+        private readonly ProjectPropertyGroupElement _configurationPropertyGroup;
+        private readonly ProjectItemGroupElement _configurationItemGroup;
 
         private List<AddPropertyTransform<CommonCompilerOptions>> _propertyTransforms;
         private List<Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>>> _includeContextTransformExecutes;
 
-        private ITransformApplicator _transformApplicator;
+        private readonly ITransformApplicator _transformApplicator;
 
         public MigrateBuildOptionsRule(ITransformApplicator transformApplicator = null)
         {
@@ -154,11 +148,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public MigrateBuildOptionsRule(
             string configuration,
+            NuGetFramework framework,
             ProjectPropertyGroupElement configurationPropertyGroup,
             ProjectItemGroupElement configurationItemGroup,
             ITransformApplicator transformApplicator = null)
         {
             _configuration = configuration;
+            _framework = framework;
             _configurationPropertyGroup = configurationPropertyGroup;
             _configurationItemGroup = configurationItemGroup;
             _transformApplicator = transformApplicator ?? new TransformApplicator();
@@ -207,7 +203,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(projectContext.TargetFramework, null);
             var configurationCompilerOptions =
-                projectContext.ProjectFile.GetCompilerOptions(projectContext.TargetFramework, _configuration);
+                projectContext.ProjectFile.GetCompilerOptions(_framework, _configuration);
 
             // If we're in a configuration, we need to be careful not to overwrite values from BuildOptions
             // without a configuration
@@ -293,10 +289,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
                 if (configurationHasAdditionalExclude)
                 {
-                    Console.WriteLine("EXCLUDE");
-                    Console.WriteLine(item1.Exclude);
-                    Console.WriteLine(item2Excludes.ToString());
-                    throw new Exception("Unable to migrate projects with excluded files in configurations.");
+                    MigrationTrace.Instance.WriteLine(item1.Exclude);
+                    MigrationTrace.Instance.WriteLine(item2Excludes.ToString());
+
+                    MigrationErrorCodes.MIGRATE20012("Unable to migrate projects with excluded files in configurations.")
+                        .Throw();
                 }
             }
         }

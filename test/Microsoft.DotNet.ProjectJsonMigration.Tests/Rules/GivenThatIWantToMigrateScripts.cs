@@ -9,23 +9,25 @@ using Microsoft.DotNet.ProjectJsonMigration;
 using System;
 using System.IO;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenThatIWantToMigrateScripts : TestBase
     {
         [Theory]
-        [InlineData("compile:FullTargetFramework", "$(TargetFrameworkIdentifier)=$(TargetFrameworkVersion)")]
+        [InlineData("compile:FullTargetFramework", "$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)")]
         [InlineData("compile:Configuration", "$(Configuration)")]
         [InlineData("compile:OutputFile", "$(TargetPath)")]
         [InlineData("compile:OutputDir", "$(TargetDir)")]
         [InlineData("publish:ProjectPath", "$(MSBuildThisFileDirectory)")]
         [InlineData("publish:Configuration", "$(Configuration)")]
         [InlineData("publish:OutputPath", "$(TargetDir)")]
-        [InlineData("publish:FullTargetFramework", "$(TargetFrameworkIdentifier)=$(TargetFrameworkVersion)")]
+        [InlineData("publish:FullTargetFramework", "$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)")]
         [InlineData("project:Version", "$(Version)")]
-        [InlineData("project:Name", "$(MSBuildThisFileName)")]
+        [InlineData("project:Name", "$(AssemblyName)")]
         [InlineData("project:Directory", "$(MSBuildProjectDirectory)")]
+        [InlineData("publish:Runtime", "$(RuntimeIdentifier)")]
         public void Formatting_script_commands_replaces_variables_with_the_right_msbuild_properties(
             string variable, 
             string msbuildReplacement)
@@ -41,7 +43,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("compile:RuntimeOutputDir")]
         [InlineData("compile:RuntimeIdentifier")]
         [InlineData("publish:TargetFramework")]
-        [InlineData("publish:Runtime")]
         public void Formatting_script_commands_throws_when_variable_is_unsupported(string unsupportedVariable)
         {
             var scriptMigrationRule = new MigrateScriptsRule();
@@ -158,7 +159,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             {
                 count += 1;
                 var scriptExtensionProperties =
-                    propertyGroup.Properties.Where(p => p.Name.Contains($"MigratedScriptExtension_{count}")).ToArray();
+                    propertyGroup.Properties.Where(p => p.Name.Contains($"MigratedScriptExtension_{scriptName}_{count}")).ToArray();
 
                 scriptExtensionProperties.All(p => p.Value == ".sh" || p.Value == ".cmd").Should().BeTrue();
                 scriptExtensionProperties.Count().Should().Be(2);

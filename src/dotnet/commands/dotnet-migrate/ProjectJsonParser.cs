@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.ProjectJsonMigration;
 
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Tools.Migrate
 {
     /// <summary>
     /// Parses select data from a project.json without relying on ProjectModel.
@@ -13,18 +14,16 @@ namespace Microsoft.DotNet.Cli
     /// </summary>
     internal class ProjectJsonParser
     {
-        public static string SdkPackageName => "Microsoft.DotNet.Core.Sdk";
-
         public string SdkPackageVersion { get; }
 
         public ProjectJsonParser(JObject projectJson)
         {
-            SdkPackageVersion = GetSdkPackageVersion(projectJson);
+            SdkPackageVersion = GetPackageVersion(projectJson, ConstantPackageNames.CSdkPackageName);
         }
 
-        private string GetSdkPackageVersion(JObject projectJson)
+        private string GetPackageVersion(JObject projectJson, string packageName)
         {
-            var sdkPackageNode = SelectJsonNodes(projectJson, property => property.Name == SdkPackageName).First();
+            var sdkPackageNode = SelectJsonNodes(projectJson, property => property.Name == packageName).First();
 
             if (sdkPackageNode.Value.Type == JTokenType.String)
             {
@@ -34,10 +33,10 @@ namespace Microsoft.DotNet.Cli
             {
                 var sdkPackageNodeValue = (JObject)sdkPackageNode.Value;
 
-                JToken sdkVersionNode;
-                if (sdkPackageNodeValue.TryGetValue("version", out sdkVersionNode))
+                JToken versionNode;
+                if (sdkPackageNodeValue.TryGetValue("version", out versionNode))
                 {
-                    return sdkVersionNode.Value<string>();
+                    return versionNode.Value<string>();
                 }
                 else
                 {

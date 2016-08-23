@@ -6,17 +6,18 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.ProjectJsonMigration;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Migrate
 {
     public partial class MigrateCommand
     {
-        private string _templateFile; 
-        private string _outputDirectory;
-        private string _projectJson;
-        private string _sdkVersion;
+        private readonly string _templateFile;
+        private readonly string _outputDirectory;
+        private readonly string _projectJson;
+        private readonly string _sdkVersion;
 
-        private TemporaryDotnetNewTemplateProject _temporaryDotnetNewProject;
+        private readonly TemporaryDotnetNewTemplateProject _temporaryDotnetNewProject;
 
         public MigrateCommand(string templateFile, string outputDirectory, string projectJson, string sdkVersion)
         {
@@ -28,23 +29,24 @@ namespace Microsoft.DotNet.Tools.Migrate
             _temporaryDotnetNewProject = new TemporaryDotnetNewTemplateProject();
         }
 
-        public int Start()
+        public int Execute()
         {
-            var project = GetProjectJsonPath(_projectJson) ?? _temporaryDotnetNewProject.ProjectJsonPath;
+            var project = GetProjectJsonPath(_projectJson) ?? GetProjectJsonPath(Directory.GetCurrentDirectory());
             EnsureNotNull(project, "Unable to find project.json");
             var projectDirectory = Path.GetDirectoryName(project);
 
-            var templateFile = _templateFile ?? _temporaryDotnetNewProject.MSBuildProjectPath;
-            EnsureNotNull(templateFile, "Unable to find default msbuild template");
+            var msBuildTemplate = _templateFile != null ?
+                ProjectRootElement.TryOpen(_templateFile) : _temporaryDotnetNewProject.MSBuildProject;
 
-            var outputDirectory = _outputDirectory ?? Path.GetDirectoryName(project);
+            var outputDirectory = _outputDirectory ?? projectDirectory;
             EnsureNotNull(outputDirectory, "Null output directory");
 
             var sdkVersion = _sdkVersion ?? new ProjectJsonParser(_temporaryDotnetNewProject.ProjectJson).SdkPackageVersion;
             EnsureNotNull(sdkVersion, "Null Sdk Version");
 
-            var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, templateFile);
+            var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate);
             new ProjectMigrator().Migrate(migrationSettings);
+
             return 0;
         }
 
@@ -63,19 +65,11 @@ namespace Microsoft.DotNet.Tools.Migrate
                 return null;
             }
 
+            projectJson = ProjectPathHelper.NormalizeProjectFilePath(projectJson);
+
             if (File.Exists(projectJson))
             {
                 return projectJson;
-            }
-
-            if (Directory.Exists(projectJson))
-            {
-                var projectCandidate = Path.Combine(projectJson, "project.json");
-
-                if (File.Exists(projectCandidate))
-                {
-                    return projectCandidate;
-                }
             }
 
             throw new Exception($"Unable to find project file at {projectJson}");

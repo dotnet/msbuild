@@ -10,32 +10,30 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using System.Linq;
 using System.IO;
+using Microsoft.DotNet.ProjectJsonMigration.Models;
 using Newtonsoft.Json;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
     public class AddItemTransform<T> : ConditionalTransform<T, ProjectItemElement>
     {
-        private ProjectRootElement _itemObjectGenerator = ProjectRootElement.Create();
+        private readonly ProjectRootElement _itemObjectGenerator = ProjectRootElement.Create();
 
-        private string _itemName;
-        private string _includeValue;
-        private string _excludeValue;
+        private readonly string _itemName;
+        private readonly string _includeValue;
+        private readonly string _excludeValue;
 
-        private Func<T, string> _includeValueFunc;
-        private Func<T, string> _excludeValueFunc;
-        
-        private bool _mergeExisting;
+        private readonly Func<T, string> _includeValueFunc;
+        private readonly Func<T, string> _excludeValueFunc;
 
-        private List<ItemMetadataValue<T>> _metadata = new List<ItemMetadataValue<T>>();
+        private readonly List<ItemMetadataValue<T>> _metadata = new List<ItemMetadataValue<T>>();
 
         public AddItemTransform(
             string itemName,
             IEnumerable<string> includeValues,
             IEnumerable<string> excludeValues,
-            Func<T, bool> condition,
-            bool mergeExisting = false)
-            : this(itemName, string.Join(";", includeValues), string.Join(";", excludeValues), condition, mergeExisting) { }
+            Func<T, bool> condition)
+            : this(itemName, string.Join(";", includeValues), string.Join(";", excludeValues), condition) { }
 
         public AddItemTransform(
             string itemName,
@@ -77,14 +75,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             string itemName,
             string includeValue,
             string excludeValue,
-            Func<T, bool> condition,
-            bool mergeExisting=false)
+            Func<T, bool> condition)
             : base(condition)
         {
             _itemName = itemName;
             _includeValue = includeValue;
             _excludeValue = excludeValue;
-            _mergeExisting = mergeExisting;
         }
 
         public AddItemTransform<T> WithMetadata(string metadataName, string metadataValue)

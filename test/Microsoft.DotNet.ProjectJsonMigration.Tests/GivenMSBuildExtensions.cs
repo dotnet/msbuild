@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             item.Include = "include1;include2;aaa";
 
             var includes = item.Includes().ToArray();
+
+            includes.Should().HaveCount(3);
             includes[0].Should().Be("include1");
             includes[1].Should().Be("include2");
             includes[2].Should().Be("aaa");
@@ -28,6 +30,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             item.Exclude = "include1;include2;aaa";
 
             var excludes = item.Excludes().ToArray();
+
+            excludes.Should().HaveCount(3);
             excludes[0].Should().Be("include1");
             excludes[1].Should().Be("include2");
             excludes[2].Should().Be("aaa");
@@ -74,7 +78,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var project = ProjectRootElement.Create();
             var item1 = project.AddItem("test", "include1;include2");
-            item1.AddIncludes(new string[] {"include2", "include3"});
+            item1.UnionIncludes(new string[] {"include2", "include3"});
 
             item1.Include.Should().Be("include1;include2;include3");
         }
@@ -85,7 +89,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var project = ProjectRootElement.Create();
             var item1 = project.AddItem("test", "include1");
             item1.Exclude = "exclude1;exclude2";
-            item1.AddExcludes(new string[] {"exclude2", "exclude3"});
+            item1.UnionExcludes(new string[] {"exclude2", "exclude3"});
 
             item1.Exclude.Should().Be("exclude1;exclude2;exclude3");
         }
@@ -98,7 +102,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             item1.AddMetadata("name", "value");
             item1.HasMetadata.Should().BeTrue();
 
-            var item2 = project.AddItem("test1", "hey");
+            var item2 = project.AddItem("test1", "include1");
+            item2.AddMetadata(item1.Metadata);
+
+            item2.HasMetadata.Should().BeTrue();
+            item2.Metadata.First().Name.Should().Be("name");
+            item2.Metadata.First().Value.Should().Be("value");
+        }
+
+        [Fact]
+        public void AddMetadata_adds_metadata_from_an_item_generated_from_another_project()
+        {
+            var project = ProjectRootElement.Create();
+            var item1 = project.AddItem("test", "include1");
+            item1.AddMetadata("name", "value");
+            item1.HasMetadata.Should().BeTrue();
+
+            var project2 = ProjectRootElement.Create();
+            var item2 = project2.AddItem("test1", "include1");
             item2.AddMetadata(item1.Metadata);
 
             item2.HasMetadata.Should().BeTrue();

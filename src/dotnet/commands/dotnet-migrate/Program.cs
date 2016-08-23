@@ -13,12 +13,11 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
+            CommandLineApplication app = new CommandLineApplication();
             app.Name = "dotnet migrate";
             app.FullName = ".NET Migrate Command";
             app.Description = "Command used to migrate project.json projects to msbuild";
             app.HandleResponseFiles = true;
-            app.AllowArgumentSeparator = true;
             app.HelpOption("-h|--help");
 
             CommandOption template = app.Option("-t|--template-file", "Base MSBuild template to use for migrated app. The default is the project included in dotnet new -t msbuild", CommandOptionType.SingleValue);
@@ -34,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                     project.Value(), 
                     sdkVersion.Value());
 
-                return migrateCommand.Start();
+                return migrateCommand.Execute();
             });
 
             try

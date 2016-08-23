@@ -10,6 +10,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
@@ -34,12 +35,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(2);
 
-            // From ProjectReader #L725 (Both are empty)
-            var defaultIncludePatterns = Enumerable.Empty<string>();
-            var defaultExcludePatterns = ProjectFilesCollection.DefaultPublishExcludePatterns;
-
             foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
             {
+                item.Metadata.Count(m => m.Name == "CopyToPublishDirectory").Should().Be(1);
+
                 if (item.Include.Contains(@"src\file1.cs"))
                 {
                     item.Include.Should().Be(@"src\file1.cs;src\file2.cs");

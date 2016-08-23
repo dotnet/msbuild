@@ -12,7 +12,7 @@ using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
     public class TransformApplicator : ITransformApplicator
     {
@@ -126,19 +126,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 throw new InvalidOperationException("Cannot merge items of different types.");
             }
 
-            if (!item.CommonIncludes(existingItem).Any())
+            if (!item.IntersectIncludes(existingItem).Any())
             {
                 throw new InvalidOperationException("Cannot merge items without a common include.");
             }
 
-            var commonIncludes = item.CommonIncludes(existingItem).ToList();
+            var commonIncludes = item.IntersectIncludes(existingItem).ToList();
             item.RemoveIncludes(commonIncludes);
             existingItem.RemoveIncludes(commonIncludes);
 
             var mergedItem = _projectElementGenerator.AddItem(item.ItemType, string.Join(";", commonIncludes));
 
-            mergedItem.AddExcludes(existingItem.Excludes());
-            mergedItem.AddExcludes(item.Excludes());
+            mergedItem.UnionExcludes(existingItem.Excludes());
+            mergedItem.UnionExcludes(item.Excludes());
 
             mergedItem.AddMetadata(existingItem.Metadata);
             mergedItem.AddMetadata(item.Metadata);
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
                 return project.ItemsWithoutConditions()
                     .Where(i => string.Equals(i.ItemType, item.ItemType, StringComparison.Ordinal))
-                    .Where(i => i.CommonIncludes(item).Any());
+                    .Where(i => i.IntersectIncludes(item).Any());
         }
 
         private class MergeResult

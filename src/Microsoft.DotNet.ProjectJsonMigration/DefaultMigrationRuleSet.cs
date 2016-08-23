@@ -9,6 +9,7 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Cli;
 using System.Linq;
 using System.IO;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             foreach (var rule in Rules)
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(DefaultMigrationRuleSet)}: Executing migration rule {nameof(rule)}");
+                MigrationTrace.Instance.WriteLine($"{nameof(DefaultMigrationRuleSet)}: Executing migration rule {rule.GetType().Name}");
                 rule.Apply(migrationSettings, migrationRuleInputs);
             }
         }

@@ -33,12 +33,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public MigrationRuleInputs(
             IEnumerable<ProjectContext> projectContexts, 
-            ProjectRootElement outputProject,
+            ProjectRootElement outputMSBuildProject,
             ProjectItemGroupElement commonItemGroup,
             ProjectPropertyGroupElement commonPropertyGroup)
         {
             ProjectContexts = projectContexts;
-            OutputMSBuildProject = outputProject;
+            OutputMSBuildProject = outputMSBuildProject;
             CommonItemGroup = commonItemGroup;
             CommonPropertyGroup = commonPropertyGroup;
         }

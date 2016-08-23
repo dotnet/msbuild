@@ -1,11 +1,15 @@
-﻿using System;
-using System.Text;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Globalization;
-using Microsoft.Build.Construction;
 using System.Linq;
+using System.Text;
+using Microsoft.Build.Construction;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using NuGet.Frameworks;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     // TODO: Support Multi-TFM
     public class MigrateTFMRule : IMigrationRule
@@ -13,7 +17,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private readonly ITransformApplicator _transformApplicator;
         private readonly AddPropertyTransform<NuGetFramework>[] _transforms;
 
-        public MigrateTFMRule(TransformApplicator transformApplicator = null)
+        public MigrateTFMRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
 
@@ -43,14 +47,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private void CleanExistingProperties(ProjectRootElement csproj)
         {
             var existingPropertiesToRemove = new string[] { "TargetFrameworkIdentifier", "TargetFrameworkVersion" };
-            foreach (var propertyName in existingPropertiesToRemove)
-            {
-                var properties = csproj.Properties.Where(p => p.Name == propertyName);
+            var properties = csproj.Properties.Where(p => existingPropertiesToRemove.Contains(p.Name));
 
-                foreach (var property in properties)
-                {
-                    property.Parent.RemoveChild(property);
-                }
+            foreach (var property in properties)
+            {
+                property.Parent.RemoveChild(property);
             }
         }
 

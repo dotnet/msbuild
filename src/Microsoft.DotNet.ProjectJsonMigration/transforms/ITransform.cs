@@ -1,6 +1,6 @@
 ﻿using Microsoft.Build.Construction;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
     public interface ITransform<T, U>
     {

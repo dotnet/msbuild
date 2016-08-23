@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Build.Construction;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
     public interface ITransformApplicator
     {

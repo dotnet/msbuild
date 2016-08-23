@@ -13,9 +13,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     /// </summary>
     public class ProjectJsonBuilder
     {
-        private static readonly string s_defaultProjectJsonTestAsset = "TestAppWithRuntimeOptions";
-
-        private TestAssetsManager _testAssetsManager;
+        private readonly TestAssetsManager _testAssetsManager;
         private JObject _projectJson;
 
         private bool _baseDefined = false;
@@ -39,11 +37,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             EnsureBaseIsSet();
             return _projectJson;
-        }
-
-        public ProjectJsonBuilder FromDefaultBase()
-        {
-            return FromTestAssetBase(s_defaultProjectJsonTestAsset);
         }
 
         public ProjectJsonBuilder FromTestAssetBase(string testAssetName)

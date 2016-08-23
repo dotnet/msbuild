@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 

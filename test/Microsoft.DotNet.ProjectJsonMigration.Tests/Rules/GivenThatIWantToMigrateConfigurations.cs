@@ -10,6 +10,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.ProjectJsonMigration.Tests;
 
 namespace Microsoft.DotNet.ProjectJsonMigrationMigration.Tests
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.ProjectJsonMigrationMigration.Tests
                 }");
 
             mockProj.Properties.Count(
-                prop => prop.Name == "OutputType" || prop.Name == "TargetExt" || prop.Name == "DebugType").Should().Be(3);
+                prop => prop.Name == "OutputType" || prop.Name == "DebugType").Should().Be(2);
 
             mockProj.Properties.First(p => p.Name == "OutputType")
                 .Parent.Condition.Should()
@@ -59,11 +60,11 @@ namespace Microsoft.DotNet.ProjectJsonMigrationMigration.Tests
                 }");
 
             mockProj.Properties.Count(property =>
-                    property.Name == "OutputType" || property.Name == "TargetExt" || property.Name == "DebugType")
-                .Should().Be(3);
+                    property.Name == "OutputType" || property.Name == "DebugType")
+                .Should().Be(2);
 
             foreach (var property in mockProj.Properties.Where(property =>
-                    property.Name == "OutputType" || property.Name == "TargetExt" || property.Name == "DebugType"))
+                    property.Name == "OutputType" || property.Name == "DebugType"))
             {
                 property.Parent.Condition.Should().Be(string.Empty);
             }
@@ -141,7 +142,7 @@ namespace Microsoft.DotNet.ProjectJsonMigrationMigration.Tests
 
             action.ShouldThrow<Exception>()
                 .WithMessage(
-                    "Unable to migrate projects with excluded files in configurations.");
+                    "MIGRATE20012::Configuration Exclude: Unable to migrate projects with excluded files in configurations.");
         }
         private ProjectRootElement RunConfigurationsRuleOnPj(string s, string testDirectory = null)
         {

@@ -1,20 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli;
 using System.Linq;
-using System.IO;
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Utils.CommandParsing;
-using Newtonsoft.Json;
-using Microsoft.DotNet.ProjectModel.Files;
-using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     public class MigrateScriptsRule : IMigrationRule
     {
@@ -23,7 +16,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         private readonly ITransformApplicator _transformApplicator;
 
-        public MigrateScriptsRule(TransformApplicator transformApplicator = null)
+        public MigrateScriptsRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
         }
@@ -49,7 +42,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var count = 0;
             foreach (var scriptCommand in scriptCommands)
             {
-                var scriptExtensionPropertyName = AddScriptExtension(propertyGroup, scriptCommand, (++count).ToString());
+                var scriptExtensionPropertyName = AddScriptExtension(propertyGroup, scriptCommand, $"{scriptSetName}_{++count}");
                 AddExec(target, FormatScriptCommand(scriptCommand, scriptExtensionPropertyName));
             }
 
@@ -131,8 +124,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 {
                     if (msbuildMapping == null)
                     {
-                        throw new Exception(
-                            $"{scriptVariableName} is currently an unsupported script variable for project migration");
+                        MigrationErrorCodes.MIGRATE1016(
+                                $"{scriptVariableName} is currently an unsupported script variable for project migration")
+                            .Throw();
                     }
 
                     command = command.Replace($"%{scriptVariableName}%", msbuildMapping);
@@ -152,7 +146,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var targetName = $"{scriptSetName[0].ToString().ToUpper()}{string.Concat(scriptSetName.Skip(1))}Script";
             var targetHookInfo = ScriptSetToMSBuildHookTargetMap[scriptSetName];
 
-            var target = csproj.AddTarget(targetName);
+            var target = csproj.CreateTargetElement(targetName);
+            csproj.InsertBeforeChild(target, csproj.LastChild);
             if (targetHookInfo.IsRunBefore)
             {
                 target.BeforeTargets = targetHookInfo.TargetName;
@@ -186,12 +181,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             { "compile:ResponseFile", null },     // Not migrated
             { "compile:CompilerExitCode", null }, // Not migrated
             { "compile:RuntimeOutputDir", null }, // Not migrated
-            { "compile:RuntimeIdentifier", null },// TODO: Need Rid in CSProj
+            { "compile:RuntimeIdentifier", null },// Not Migrated
             
             { "publish:TargetFramework", null },  // TODO: Need Short framework name in CSProj
-            { "publish:Runtime", null },          // TODO: Need Rid in CSProj
+            { "publish:Runtime", "$(RuntimeIdentifier)" },
 
-            { "compile:FullTargetFramework", "$(TargetFrameworkIdentifier)=$(TargetFrameworkVersion)" },
+            { "compile:FullTargetFramework", "$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)" },
             { "compile:Configuration", "$(Configuration)" },
             { "compile:OutputFile", "$(TargetPath)" },
             { "compile:OutputDir", "$(TargetDir)" },
@@ -199,10 +194,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             { "publish:ProjectPath", "$(MSBuildThisFileDirectory)" },
             { "publish:Configuration", "$(Configuration)" },
             { "publish:OutputPath", "$(TargetDir)" },
-            { "publish:FullTargetFramework", "$(TargetFrameworkIdentifier)=$(TargetFrameworkVersion)" },
+            { "publish:FullTargetFramework", "$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)" },
 
             { "project:Directory", "$(MSBuildProjectDirectory)" },
-            { "project:Name", "$(MSBuildThisFileName)" },
+            { "project:Name", "$(AssemblyName)" },
             { "project:Version", "$(Version)" }
         };
 
@@ -210,14 +205,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             public bool IsRunBefore { get; }
             public string TargetName { get; }
-
-            public string BeforeAfterTarget
-            {
-                get
-                {
-                    return IsRunBefore ? "BeforeTargets" : "AfterTargets";
-                }
-            }
 
             public TargetHookInfo(bool isRunBefore, string targetName)
             {

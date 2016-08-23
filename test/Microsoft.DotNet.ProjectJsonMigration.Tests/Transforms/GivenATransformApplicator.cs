@@ -4,6 +4,8 @@ using Xunit;
 using Xunit.Runner.DotNet;
 using FluentAssertions;
 using System.Linq;
+using Microsoft.DotNet.ProjectJsonMigration.Models;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests.Transforms
 {
@@ -23,15 +25,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests.Transforms
             var transform1 = new AddItemTransform<string>("item",
                     fullItemTransformSetIncludeValue,
                     "exclude1",
-                    t => true,
-                    mergeExisting: true)
+                    t => true)
                 .WithMetadata(metadata[0]);
 
             var transform2 = new AddItemTransform<string>("item",
                     fullItemTransformSetIncludeValue,
                     "exclude2",
-                    t => true,
-                    mergeExisting: true)
+                    t => true)
                 .WithMetadata(metadata[1]);
 
             var mockProj = ProjectRootElement.Create();
@@ -64,26 +64,5 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests.Transforms
 
             foundMetadata.All(kv => kv.Value).Should().BeTrue();
         }
-
-//        [Fact]
-//        public void It_adds_duplicate_properties_to_the_project_with_specified_value_when_the_property_exists()
-//        {
-//            var mockProj = ProjectRootElement.Create();
-//            var propertyGroup = mockProj.AddPropertyGroup();
-//            var propertyName = "Property1";
-//            var propertyValue = "Value1";
-//
-//            var propertyTransform = new AddPropertyTransform<string>(propertyName, propertyValue, t => true);
-//            propertyTransform.Transform("_");
-//            propertyTransform.Transform("_", mockProj, propertyGroup);
-//
-//            propertyGroup.Properties.Count.Should().Be(2);
-//
-//            foreach (var property in propertyGroup.Properties)
-//            {
-//                property.Name.Should().Be(propertyName);
-//                property.Value.Should().Be(propertyValue);
-//            }
-//        }
     }
 }

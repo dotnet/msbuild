@@ -21,17 +21,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public ProjectRootElement MSBuildProjectTemplate { get; }
 
         public MigrationSettings(
-            string projectDirectory, 
-            string outputDirectory,
-            string sdkPackageVersion)
-        {
-            ProjectDirectory = projectDirectory;
-            OutputDirectory = outputDirectory;
-            SdkPackageVersion = sdkPackageVersion;
-            MSBuildProjectTemplate = null;
-        }
-
-        public MigrationSettings(
             string projectDirectory,
             string outputDirectory,
             string sdkPackageVersion,
@@ -41,18 +30,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             OutputDirectory = outputDirectory;
             SdkPackageVersion = sdkPackageVersion;
             MSBuildProjectTemplate = msBuildProjectTemplate;
-        }
-
-        public MigrationSettings(
-            string projectDirectory,
-            string outputDirectory,
-            string sdkPackageVersion,
-            string msbuildProjectTemplateFilePath)
-        {
-            ProjectDirectory = projectDirectory;
-            OutputDirectory = outputDirectory;
-            SdkPackageVersion = sdkPackageVersion;
-            MSBuildProjectTemplate = ProjectRootElement.Open(msbuildProjectTemplateFilePath);
         }
     }
 }

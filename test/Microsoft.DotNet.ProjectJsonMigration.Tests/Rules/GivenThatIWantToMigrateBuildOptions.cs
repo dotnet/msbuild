@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.ProjectModel.Files;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
@@ -68,7 +69,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_EmitEntryPoint_true_populates_OutputType_and_TargetExt_fields()
+        public void Migrating_EmitEntryPoint_true_populates_OutputType_field()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -78,10 +79,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Properties.Count(p => p.Name == "OutputType").Should().Be(1);
-            mockProj.Properties.Count(p => p.Name == "TargetExt").Should().Be(1);
-
             mockProj.Properties.First(p => p.Name == "OutputType").Value.Should().Be("Exe");
-            mockProj.Properties.First(p => p.Name == "TargetExt").Value.Should().Be(".dll");
         }
 
         [Fact]
@@ -362,7 +360,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("compile", "Compile")]
         [InlineData("embed", "EmbeddedResource")]
         [InlineData("copyToOutput", "Content")]
-        private void Migrating_compile_include_exclude_Populates_compile_item(
+        private void Migrating_group_include_exclude_Populates_appropriate_ProjectItemElement(
             string group,
             string itemName)
         {
@@ -404,6 +402,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals(itemName, StringComparison.Ordinal)))
             {
+                if (item.ItemType == "Content")
+                {
+                    item.Metadata.Count(m => m.Name == "CopyToOutputDirectory").Should().Be(1);
+                }
+
                 if (item.Include.Contains(@"src\file1.cs"))
                 {
                     item.Include.Should().Be(@"src\file1.cs;src\file2.cs");

@@ -3,43 +3,35 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-  public class MigrationTrace
-  {
-    public static MigrationTrace Instance { get; set; }
-
-    static MigrationTrace ()
+    public class MigrationTrace
     {
-      Instance = new MigrationTrace();
-    }
+        public static MigrationTrace Instance { get; set; }
 
-    public string EnableEnvironmentVariable => "DOTNET_MIGRATION_TRACE";
+        static MigrationTrace ()
+        {
+            Instance = new MigrationTrace();
+        }
 
-    public bool IsEnabled
-    {
-      get
-      {
+        public string EnableEnvironmentVariable => "DOTNET_MIGRATION_TRACE";
+
+        public bool IsEnabled
+        {
+            get
+            {
 #if DEBUG
-        return true;
+                return true;
 #else
-        return Environment.GetEnvironmentVariable(EnableEnvironmentVariable) != null;
+                return Environment.GetEnvironmentVariable(EnableEnvironmentVariable) != null;
 #endif
-      }
-    }
+            }
+        }
 
-    public void Write(string message)
-    {
-      if (IsEnabled)
-      {
-        Console.Write(message);
-      }
+        public void WriteLine(string message)
+        {
+            if (IsEnabled)
+            {
+                Console.WriteLine(message);
+            }
+        }
     }
-
-    public void WriteLine(string message)
-    {
-      if (IsEnabled)
-      {
-        Console.WriteLine(message);
-      }
-    }
-  }
 }

@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    // TODO: XProj ProjectToProject references
     public class MigrateXprojProjectReferencesRule : IMigrationRule
     {
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("TODO: XProj ProjectToProject references");
         }
     }
 }

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectJsonMigration.Rules;
 
 namespace Microsoft.DotNet.Migration.Tests
 {
@@ -60,7 +61,7 @@ namespace Microsoft.DotNet.Migration.Tests
             var projectReferences = mockProj.Items.Where(item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
             projectReferences.Count().Should().Be(1);
 
-            projectReferences.First().Include.Should().Be("../TestLibrary/TestLibrary.csproj");
+            projectReferences.First().Include.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
         }
 
         [Fact]
@@ -79,7 +80,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             Action action = () => new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
             action.ShouldThrow<Exception>()
-                .WithMessage("Cannot migrate unresolved project dependency, please ensure restore has been run.");
+                .Where(e => e.Message.Contains("MIGRATE1014::Unresolved Dependency: Unresolved project dependency (TestLibrary)"));
         }
     }
 }

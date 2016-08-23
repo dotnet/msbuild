@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using System.IO;
-using Newtonsoft.Json.Linq;
-using System.Text;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+using System;
+using System.IO;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     /// <summary>
     /// This rule is temporary while project.json still exists in the new project system.
@@ -21,9 +19,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     /// </summary>
     public class TemporaryMutateProjectJsonRule : IMigrationRule
     {
-        private static string s_sdkPackageName => "Microsoft.DotNet.Core.Sdk";
-
-
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
             bool shouldRenameOldProject = PathsAreEqual(migrationSettings.OutputDirectory, migrationSettings.ProjectDirectory);
@@ -44,7 +39,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
 
             var json = CreateDestinationProjectFile(sourceProjectFile, destinationProjectFile);
-            InjectSdkReference(json, s_sdkPackageName, migrationSettings.SdkPackageVersion);
+            InjectSdkReference(json, ConstantPackageNames.CSdkPackageName, migrationSettings.SdkPackageVersion);
             RemoveRuntimesNode(json);
 
             File.WriteAllText(destinationProjectFile, json.ToString());

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+using System;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Models
 {
     public class ItemMetadataValue<T>
     {
         public string MetadataName { get; }
 
-        private string _metadataValue;
-        private Func<T, string> _metadataValueFunc;
+        private readonly string _metadataValue;
+        private readonly Func<T, string> _metadataValueFunc;
 
         public ItemMetadataValue(string metadataName, string metadataValue)
         {

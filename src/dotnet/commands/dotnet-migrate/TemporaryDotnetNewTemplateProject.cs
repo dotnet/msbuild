@@ -6,40 +6,40 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.ProjectJsonMigration;
 
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Tools.Migrate
 {
     internal class TemporaryDotnetNewTemplateProject
     {
-        private static string s_temporaryDotnetNewMSBuildProjectName = "p";
+        private const string c_temporaryDotnetNewMSBuildProjectName = "p";
 
-        public TemporaryDotnetNewTemplateProject()
-        {
-            ProjectDirectory = CreateDotnetNewMSBuild(s_temporaryDotnetNewMSBuildProjectName);
-            MSBuildProject = GetMSBuildProject(ProjectDirectory);
-            ProjectJson = GetProjectJson(ProjectDirectory);
-        }
+        private readonly string _projectDirectory;
 
         public ProjectRootElement MSBuildProject { get; }
         public JObject ProjectJson { get; }
-        public string ProjectDirectory { get; }
 
-        public string ProjectJsonPath => Path.Combine(ProjectDirectory, "project.json");
-        public string MSBuildProjectPath => Path.Combine(ProjectDirectory, s_temporaryDotnetNewMSBuildProjectName);
+        public TemporaryDotnetNewTemplateProject()
+        {
+            _projectDirectory = CreateDotnetNewMSBuild(c_temporaryDotnetNewMSBuildProjectName);
+            MSBuildProject = GetMSBuildProject(_projectDirectory);
+            ProjectJson = GetProjectJson(_projectDirectory);
+
+            Clean();
+        }
 
         public void Clean()
         {
-            Directory.Delete(ProjectDirectory, true);
+            Directory.Delete(Path.Combine(_projectDirectory, ".."), true);
         }
 
         private string CreateDotnetNewMSBuild(string projectName)
         {
-            var guid = Guid.NewGuid().ToString();
             var tempDir = Path.Combine(
                 Path.GetTempPath(),
                 this.GetType().Namespace,
-                guid,
-                s_temporaryDotnetNewMSBuildProjectName);
+                Path.GetRandomFileName(),
+                c_temporaryDotnetNewMSBuildProjectName);
 
             if (Directory.Exists(tempDir))
             {
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli
         private ProjectRootElement GetMSBuildProject(string temporaryDotnetNewMSBuildDirectory)
         {
             var templateProjPath = Path.Combine(temporaryDotnetNewMSBuildDirectory,
-                s_temporaryDotnetNewMSBuildProjectName + ".csproj");
+                c_temporaryDotnetNewMSBuildProjectName + ".csproj");
 
             return ProjectRootElement.Open(templateProjPath);
         }
@@ -78,6 +78,9 @@ namespace Microsoft.DotNet.Cli
 
             if (commandResult.ExitCode != 0)
             {
+                MigrationTrace.Instance.WriteLine(commandResult.StdOut);
+                MigrationTrace.Instance.WriteLine(commandResult.StdErr);
+                
                 throw new Exception($"Failed to run {commandToExecute} in directory: {workingDirectory}");
             }
         }

@@ -1,27 +1,18 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli;
 using System.Linq;
-using System.IO;
-using Newtonsoft.Json;
-using Microsoft.DotNet.ProjectModel.Files;
-using NuGet.Versioning;
+using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Project = Microsoft.DotNet.ProjectModel.Project;
 
-namespace Microsoft.DotNet.ProjectJsonMigration
+namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     public class MigrateRootOptionsRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
         private readonly AddPropertyTransform<Project>[] _transforms;
 
-        public MigrateRootOptionsRule(TransformApplicator transformApplicator = null)
+        public MigrateRootOptionsRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
 
