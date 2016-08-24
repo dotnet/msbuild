@@ -55,12 +55,22 @@
         <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
 
+      <CopyLocalAssembly Include="System.Runtime.InteropServices.RuntimeInformation">
+        <Version>4.0.0</Version>
+        <TFM>net45</TFM>
+        <DestinationTFM>net46</DestinationTFM>
+      </CopyLocalAssembly>
       <CopyLocalAssembly Include="System.Security.Cryptography.Algorithms">
         <Version>4.2.0</Version>
         <TFM>net46</TFM>
         <DestinationTFM>net46</DestinationTFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly Include="System.Security.Cryptography.Primitives">
+        <Version>4.0.0</Version>
+        <TFM>net46</TFM>
+        <DestinationTFM>net46</DestinationTFM>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly Include="System.Threading.Thread">
         <Version>4.0.0</Version>
         <TFM>net46</TFM>
         <DestinationTFM>net46</DestinationTFM>
