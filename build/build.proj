@@ -16,15 +16,15 @@
     <SolutionFile Include="$(RepositoryRootDirectory)core-sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
     <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
 
-    <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.DotNet.Core.Signing.proj"/>
-    <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.DotNet.Core.Nuget.proj" />
+    <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
+    <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
   </ItemGroup>
 
   <Target Name="RestorePackages">
 
     <Message Text="Restoring packages for %(SolutionFile.Filename)" Importance="high" />
 
-    <Exec Command="$(DotNetTool) restore src Test --legacy-packages-directory --verbosity Minimal"
+    <Exec Command="$(DotNetTool) restore src test --legacy-packages-directory --verbosity Minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
   </Target>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+
+  <PropertyGroup>
+    <NuGetOutDir>$(OutDir)Packages\</NuGetOutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <NuSpec Include="Microsoft.NETCore.Sdk.nuspec">
+      <NuPkgOutput>$(NuGetOutDir)%(FileName).$(Version).nupkg</NuPkgOutput>
+      <NuGetArguments>--version "$(Version)"</NuGetArguments>
+      <LayoutTargetName>LayoutSdkPackage</LayoutTargetName>
+    </NuSpec>
+
+    <!-- Make note, without actually knowing what's included in the NuSpec, 
+         we just assume that everything in the output dir is, and treat them
+         as inputs so that we rerun packaging if they change. 
+         Long term we'll want to use a packaging project, such as NuProj where 
+         the NuSpec is auto-generated based on the inputs. -->
+    <PackageAssets Include="$(OutDir)**\*.*" Exclude="*.log" />
+  </ItemGroup>
+
+  <Target Name="Build"
+          DependsOnTargets="LogOutput;@(NuSpec->'%(LayoutTargetName)')"
+          Inputs="@(NuSpec);@(PackageAssets)"
+          Outputs="@(NuSpec->'%(NuPkgOutput)')">
+
+    <ReadLinesFromFile File="$(RepositoryRootDirectory)DotnetCLIVersion.txt">
+      <Output TaskParameter="Lines" ItemName="CLIVersion" />
+    </ReadLinesFromFile>
+
+    <PropertyGroup>
+      <DotNetSdkPath>$(DotNet_Install_Dir)\sdk\@(CLIVersion)\</DotNetSdkPath>
+      <NuGetTool>$(DotNetTool) exec --runtimeconfig $(DotNetSdkPath)\dotnet.runtimeconfig.json --depsfile $(DotNetSdkPath)\dotnet.deps.json $(DotNetSdkPath)\NuGet.CommandLine.XPlat.dll</NuGetTool>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(NuGetOutDir)" />
+
+    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; --verbosity quiet --base-path &quot;$(OutDir.TrimEnd('\'))&quot; --output-directory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" />
+  </Target>
+
+  <Target Name="Clean">
+    <Delete Files="%(NuSpec.NuPkgOutput)" />
+  </Target>
+
+  <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
+
+  <Target Name="LogOutput">
+    <Message Importance="High" Text="%(NuSpec.Identity) -> %(NuSpec.NuPkgOutput)'" />
+  </Target>
+
+  <Import Project="Microsoft.NETCore.Sdk.Nuget.targets" />
+
+</Project>

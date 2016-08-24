@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signing", "Signing", "{385C3C61-B7FC-4447-A88D-6D018B7CE5E4}"
 	ProjectSection(SolutionItems) = preProject
-		build\Signing\Microsoft.DotNet.Core.Signing.proj = build\Signing\Microsoft.DotNet.Core.Signing.proj
+		build\Signing\Microsoft.NETCore.Signing.proj = build\Signing\Microsoft.NETCore.Signing.proj
 		build\Signing\SignToolConfig.json = build\Signing\SignToolConfig.json
 	EndProjectSection
 EndProject

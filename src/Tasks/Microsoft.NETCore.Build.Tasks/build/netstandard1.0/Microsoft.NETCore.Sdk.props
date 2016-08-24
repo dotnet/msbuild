@@ -1,0 +1,81 @@
+<!--
+***********************************************************************************************
+Microsoft.NETCore.Sdk.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <!-- User-facing configuration-agnostic defaults -->
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform>AnyCPU</Platform>
+
+    <FileAlignment>512</FileAlignment>
+    <GlobalExclude>bin\**;obj\**;</GlobalExclude>
+  </PropertyGroup>
+
+  <!-- User-facing configuration-specific defaults -->
+  <PropertyGroup>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>$(NoWarn);1701</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Default settings for .NET Core build logic -->
+  <PropertyGroup>
+    <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
+
+    <!-- force the compiler to always emit .dll for .NET Core projects, even if $(OutputType) == 'exe' -->
+    <TargetExt>.dll</TargetExt>
+
+    <!-- This will turn off the base 'ResolveNuGetPackages' target since it is UWP specific, and .NET Core needs it to be split up -->
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <NoStdLib>true</NoStdLib>
+    <!-- TODO: Need to figure out runtimes -->
+
+    <!-- TODO: Below are hacks eerhardt made on top of davkean's .props file -->
+    
+    <!-- Temp Hack: davkean had this, but that casues all references not to be copied to output dir: 
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
+         This will be set to false during "build", but set to true during "publish"
+    -->
+
+    <!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
+    <NoLogo>true</NoLogo>
+
+    <!-- Need to revisit this and see if this is the correct default for both Debug and Release -->
+    <DebugType>portable</DebugType>
+
+    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
+    <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
+  </PropertyGroup>
+
+</Project>
