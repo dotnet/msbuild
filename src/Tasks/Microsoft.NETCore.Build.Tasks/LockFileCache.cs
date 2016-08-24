@@ -23,7 +23,7 @@ namespace Microsoft.NETCore.Build.Tasks
             if (!Path.IsPathRooted(path))
             {
                 throw new ArgumentException(
-                    "The path specified to LockFileCache.GetLockFile is not rooted. Only full paths are supported.", 
+                    $"The path '{path}' specified to LockFileCache.GetLockFile is not rooted. Only full paths are supported.", 
                     nameof(path));
             }
 
