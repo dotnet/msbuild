@@ -143,25 +143,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>
                 ";
 
-            // Importing should stop at the first extension path where a project file is found
+            // Importing a wildcard will union all matching results from all fallback locations.
             string extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"),
-                                String.Format(extnTargetsFileContent, "FromExtn1"));
+                string.Format(extnTargetsFileContent, "FromExtn1"));
             string extnDir2 = GetNewExtensionsPathAndCreateFile("extensions2", Path.Combine("foo", "extn.proj"),
-                                String.Format(extnTargetsFileContent, "FromExtn2"));
+                string.Format(extnTargetsFileContent, "FromExtn2"));
 
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
 
-            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {extnDir1, Path.Combine("tmp", "nonexistant"), extnDir2},
-                                                    null,
-                                                    (p, l) => {
-                                                    Console.WriteLine (l.FullLog);
-                                                    Console.WriteLine ("checking FromExtn1");
-                                                        Assert.True(p.Build("FromExtn1"));
-                                                    Console.WriteLine ("checking FromExtn2");
-                                                        Assert.False(p.Build("FromExtn2"));
-                                                    Console.WriteLine ("checking logcontains");
-                                                        l.AssertLogContains(String.Format(MockLogger.GetString("TargetDoesNotExist"), "FromExtn2"));
-                                                    });
+            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath",
+                new[] {extnDir1, Path.Combine("tmp", "nonexistant"), extnDir2},
+                null,
+                (project, logger) =>
+                {
+                    Console.WriteLine(logger.FullLog);
+                    Console.WriteLine("checking FromExtn1");
+                    Assert.True(project.Build("FromExtn1"));
+                    Console.WriteLine("checking FromExtn2");
+                    Assert.True(project.Build("FromExtn2"));
+                    Console.WriteLine("checking logcontains");
+                    logger.AssertLogDoesntContain("MSB4057"); // Should not contain TargetDoesNotExist
+                });
         }
 
         [Fact]
