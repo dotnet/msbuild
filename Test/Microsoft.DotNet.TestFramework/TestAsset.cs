@@ -57,13 +57,21 @@ namespace Microsoft.DotNet.TestFramework
             {
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
                 // For project.json, we need to replace the version of the Microsoft.DotNet.Core.Sdk with the actual build version
-                if (srcFile.EndsWith("project.json"))
+                if (System.IO.Path.GetFileName(srcFile).Equals("project.json"))
                 {
                     var projectJson = JObject.Parse(File.ReadAllText(srcFile));
-                    var dependencies = projectJson.Property("dependencies")?.Value as JObject;
-                    var coreSdkDependency = dependencies?.Property("Microsoft.DotNet.Core.Sdk");
-                    if (coreSdkDependency != null)
-                        coreSdkDependency.Value = _buildVersion;
+                    var depNodes = projectJson
+                        .Descendants()
+                        .OfType<JProperty>()
+                        .Where(p => p.Name.Equals("dependencies"))
+                        .Descendants()
+                        .OfType<JProperty>()
+                        .Where(p => p.Name.Equals("Microsoft.DotNet.Core.Sdk"));
+                    foreach (var dep in depNodes)
+                    {
+                        dep.Value = _buildVersion;
+                    }
+
                     File.WriteAllText(destFile, projectJson.ToString());
                 }
                 else

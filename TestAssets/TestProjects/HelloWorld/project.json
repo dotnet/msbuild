@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.DotNet.Core.Sdk": "1.0.0-alpha-00000001-01"
+    "Microsoft.DotNet.Core.Sdk": "0.0"
   },
   "frameworks": {
     "netcoreapp1.0": {
