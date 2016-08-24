@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="..\..\src\Tasks\Microsoft.NETCore.Build.Tasks\build\netstandard1.0\Microsoft.NETCore.Sdk.props" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+    <ProjectGuid>{A33548A0-F3B0-40C3-8C4D-AD2F00596CD6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.NETCore.TestFramework</RootNamespace>
+    <AssemblyName>Microsoft.NETCore.TestFramework</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
+    <OutDir>$(OutDir)Tests\</OutDir>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <NonShipping>true</NonShipping>
+    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
+    <ResolveNuGetPackages>true</ResolveNuGetPackages>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
+    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
+    <None Include="project.json" />
+  </ItemGroup>
+
+  <Target Name="GenerateVersionFile"
+          BeforeTargets="Build">
+    <WriteLinesToFile File="$(RepositoryRootDirectory)\TestAssets\buildVersion.txt"
+                      Lines="$(Version)"
+                      Overwrite="true" />
+  </Target>
+
+  <Import Project="..\..\build\Targets\Signing.Imports.targets"/>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\..\src\Tasks\Microsoft.NETCore.Build.Tasks\build\netstandard1.0\Microsoft.NETCore.Sdk.targets" />
+</Project>

@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-003121",
+    "FluentAssertions": "4.0.0",
+    "Newtonsoft.Json": "9.0.1"
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": [
+        "dotnet5.4",
+        "portable-net451+win8"
+      ]
+    }
+  }
+}

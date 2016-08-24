@@ -4,7 +4,7 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "Microsoft.DotNet.Core.Sdk": {
+    "Microsoft.NETCore.Sdk": {
       "version": "$$buildversion$$"
     }    
   },
