@@ -82,7 +82,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ==================================================================
                                             GetAssemblyVersion
 
-    Parses the semantic package version set in $(Version) and returns
+    Parses the nuget package version set in $(Version) and returns
     the implied $(AssemblyVersion) and $(FileVersion).
 
     e.g.:
@@ -98,7 +98,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ==================================================================
   -->
   <Target Name="GetAssemblyVersion">
-    <GetAssemblyVersion Condition="'$(AssemblyVersion)' == ''" SemanticVersion="$(Version)">
+    <GetAssemblyVersion Condition="'$(AssemblyVersion)' == ''" NuGetVersion="$(Version)">
       <Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion" />
     </GetAssemblyVersion>
     

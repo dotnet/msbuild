@@ -2,16 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
-using NuGet.ProjectModel;
 using NuGet.Versioning;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Core.Build.Tasks
 {
@@ -21,29 +16,30 @@ namespace Microsoft.DotNet.Core.Build.Tasks
     public class GetAssemblyVersion : Task
     {
         /// <summary>
-        /// The semantic version from which to get an assembly version portion.
+        /// The nuget version from which to get an assembly version portion.
         /// </summary>
         [Required]
-        public string SemanticVersion { get; set; }
+        public string NuGetVersion { get; set; }
 
         /// <summary>
-        /// The assembly version (major.minor.patch) portion of the semantic version.
+        /// The assembly version (major.minor.patch.revision) portion of the nuget version.
         /// </summary>
         [Output]
         public string AssemblyVersion { get; set; }
 
         public override bool Execute()
         {
-            NuGetVersion version;
-            if (string.IsNullOrEmpty(SemanticVersion) || !NuGetVersion.TryParseStrict(SemanticVersion, out version))
+            // Using try/catch instead of TryParse so that we don't need to maintain our own error message here.
+            try
             {
-                // TODO: Localize. Blocked by https://github.com/dotnet/sdk/issues/33
-                Log.LogError($"Invalid semantic version: '{SemanticVersion}'");
+                AssemblyVersion = NuGet.Versioning.NuGetVersion.Parse(NuGetVersion).Version.ToString();
+                return true;
+            }
+            catch (ArgumentException ex)
+            {
+                Log.LogError(ex.Message);
                 return false;
             }
-
-            AssemblyVersion = new Version(version.Major, version.Minor, version.Patch).ToString();
-            return true;
         }
     }
 }
