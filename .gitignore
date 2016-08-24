@@ -151,6 +151,7 @@ _ReSharper*/
 *.DotSettings.user
 .idea/
 *.iml
+*.DotSettings
 
 # JustCode is a .NET coding add-in
 .JustCode

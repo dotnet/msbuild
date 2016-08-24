@@ -56,6 +56,8 @@ namespace Microsoft.DotNet.Tools.Test
 
         public bool HasTestRunner => !string.IsNullOrWhiteSpace(TestRunner);
 
+        public bool IsTestingAssembly => ProjectOrAssemblyPath.EndsWith(".dll");
+
         public DotnetTestParams()
         {
             _app = new CommandLineApplication(false)
@@ -108,7 +110,7 @@ namespace Microsoft.DotNet.Tools.Test
 
                 if (_testRunner.HasValue())
                 {
-                    if (!IsAssembly(ProjectOrAssemblyPath))
+                    if (!IsTestingAssembly)
                     {
                         throw new InvalidOperationException("You can only specify a test runner with a dll.");
                     }
@@ -136,11 +138,6 @@ namespace Microsoft.DotNet.Tools.Test
             });
 
             _app.Execute(args);
-        }
-
-        private bool IsAssembly(string projectOrAssemblyPath)
-        {
-            return projectOrAssemblyPath.EndsWith(".dll");
         }
 
         private void AddDotnetTestParameters()

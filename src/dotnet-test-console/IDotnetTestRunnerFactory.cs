@@ -5,6 +5,6 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public interface IDotnetTestRunnerFactory
     {
-        IDotnetTestRunner Create(int? port);
+        IDotnetTestRunner Create(DotnetTestParams dotnetTestParams);
     }
 }

@@ -13,14 +13,14 @@ namespace Microsoft.DotNet.Tools.Test
 
         private readonly IDirectory _directory;
 
-        public AssemblyTestRunnerResolver(string directoryOfAssemblyUnderTest) :
-            this(directoryOfAssemblyUnderTest, FileSystemWrapper.Default.Directory)
+        public AssemblyTestRunnerResolver(string assemblyUnderTest) :
+            this(assemblyUnderTest, FileSystemWrapper.Default.Directory)
         {
         }
 
-        internal AssemblyTestRunnerResolver(string directoryOfAssemblyUnderTest, IDirectory directory)
+        internal AssemblyTestRunnerResolver(string assemblyUnderTest, IDirectory directory)
         {
-            _directoryOfAssemblyUnderTest = Path.GetDirectoryName(directoryOfAssemblyUnderTest);
+            _directoryOfAssemblyUnderTest = new FileInfo(assemblyUnderTest).Directory.FullName;
             _directory = directory;
         }
 

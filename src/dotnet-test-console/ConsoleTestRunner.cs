@@ -3,46 +3,53 @@
 
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ConsoleTestRunner : BaseDotnetTestRunner
+    public class ConsoleTestRunner : IDotnetTestRunner
     {
-        internal override int DoRunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
-        {
-            var commandFactory =
-                new ProjectDependenciesCommandFactory(
-                    projectContext.TargetFramework,
-                    dotnetTestParams.Config,
-                    dotnetTestParams.Output,
-                    dotnetTestParams.BuildBasePath,
-                    projectContext.ProjectDirectory);
+        private readonly ITestRunnerResolver _testRunnerResolver;
 
-            return commandFactory.Create(
-                    GetCommandName(projectContext.ProjectFile.TestRunner),
-                    GetCommandArgs(projectContext, dotnetTestParams),
-                    projectContext.TargetFramework,
+        private readonly ICommandFactory _commandFactory;
+
+        private readonly string _assemblyUnderTest;
+
+        private readonly NuGetFramework _framework;
+
+        public ConsoleTestRunner(
+            ITestRunnerResolver testRunnerResolver,
+            ICommandFactory commandFactory,
+            string assemblyUnderTest,
+            NuGetFramework framework = null)
+        {
+            _testRunnerResolver = testRunnerResolver;
+            _commandFactory = commandFactory;
+            _assemblyUnderTest = assemblyUnderTest;
+            _framework = framework;
+        }
+
+        public int RunTests(DotnetTestParams dotnetTestParams)
+        {
+            return _commandFactory.Create(
+                    _testRunnerResolver.ResolveTestRunner(),
+                    GetCommandArgs(dotnetTestParams),
+                    _framework,
                     dotnetTestParams.Config)
                 .Execute()
                 .ExitCode;
         }
 
-        private IEnumerable<string> GetCommandArgs(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        private IEnumerable<string> GetCommandArgs(DotnetTestParams dotnetTestParams)
         {
             var commandArgs = new List<string>
             {
-                new AssemblyUnderTest(projectContext, dotnetTestParams).Path
+                _assemblyUnderTest
             };
 
             commandArgs.AddRange(dotnetTestParams.RemainingArguments);
 
             return commandArgs;
-        }
-
-        private static string GetCommandName(string testRunner)
-        {
-            return $"dotnet-test-{testRunner}";
         }
     }
 }

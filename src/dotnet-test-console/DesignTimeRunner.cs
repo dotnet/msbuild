@@ -3,44 +3,49 @@
 
 using System;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class DesignTimeRunner : BaseDotnetTestRunner
+    public class DesignTimeRunner : IDotnetTestRunner
     {
-        internal override int DoRunTests(ProjectContext projectContext, DotnetTestParams dotnetTestParams)
+        private readonly ITestRunnerResolver _testRunnerResolver;
+
+        private readonly ICommandFactory _commandFactory;
+
+        private readonly string _assemblyUnderTest;
+
+        public DesignTimeRunner(
+            ITestRunnerResolver testRunnerResolver,
+            ICommandFactory commandFactory,
+            string assemblyUnderTest)
+        {
+            _testRunnerResolver = testRunnerResolver;
+            _commandFactory = commandFactory;
+            _assemblyUnderTest = assemblyUnderTest;
+        }
+
+        public int RunTests(DotnetTestParams dotnetTestParams)
         {
             Console.WriteLine("Listening on port {0}", dotnetTestParams.Port.Value);
 
-            HandleDesignTimeMessages(projectContext, dotnetTestParams);
+            HandleDesignTimeMessages(dotnetTestParams);
 
             return 0;
         }
 
-        private static void HandleDesignTimeMessages(
-            ProjectContext projectContext,
-            DotnetTestParams dotnetTestParams)
+        private void HandleDesignTimeMessages(DotnetTestParams dotnetTestParams)
         {
             var reportingChannelFactory = new ReportingChannelFactory();
             var adapterChannel = reportingChannelFactory.CreateAdapterChannel(dotnetTestParams.Port.Value);
 
             try
             {
-                var pathToAssemblyUnderTest = new AssemblyUnderTest(projectContext, dotnetTestParams).Path;
+                var pathToAssemblyUnderTest = _assemblyUnderTest;
                 var messages = new TestMessagesCollection();
                 using (var dotnetTest = new DotnetTest(messages, pathToAssemblyUnderTest))
                 {
-                    var commandFactory =
-                        new ProjectDependenciesCommandFactory(
-                            projectContext.TargetFramework,
-                            dotnetTestParams.Config,
-                            dotnetTestParams.Output,
-                            dotnetTestParams.BuildBasePath,
-                            projectContext.ProjectDirectory);
-
                     var testRunnerFactory =
-                        new TestRunnerFactory(GetCommandName(projectContext.ProjectFile.TestRunner), commandFactory);
+                        new TestRunnerFactory(_testRunnerResolver.ResolveTestRunner(), _commandFactory);
 
                     dotnetTest
                         .AddNonSpecificMessageHandlers(messages, adapterChannel)
@@ -59,11 +64,6 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 adapterChannel.SendError(ex);
             }
-        }
-
-        private static string GetCommandName(string testRunner)
-        {
-            return $"dotnet-test-{testRunner}";
         }
     }
 }

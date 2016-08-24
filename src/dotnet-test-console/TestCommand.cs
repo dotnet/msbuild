@@ -15,6 +15,14 @@ namespace Microsoft.DotNet.Tools.Test
     {
         private readonly IDotnetTestRunnerFactory _dotnetTestRunnerFactory;
 
+        public static int Run(string[] args)
+        {
+            var dotnetTestRunnerResolverFactory = new DotnetTestRunnerResolverFactory(new ProjectReader());
+            var testCommand = new TestCommand(new DotnetTestRunnerFactory(dotnetTestRunnerResolverFactory));
+
+            return testCommand.DoRun(args);
+        }
+
         public TestCommand(IDotnetTestRunnerFactory testRunnerFactory)
         {
             _dotnetTestRunnerFactory = testRunnerFactory;
@@ -41,60 +49,7 @@ namespace Microsoft.DotNet.Tools.Test
                     RegisterForParentProcessExit(dotnetTestParams.ParentProcessId.Value);
                 }
 
-                var projectPath = GetProjectPath(dotnetTestParams.ProjectOrAssemblyPath);
-                var runtimeIdentifiers = !string.IsNullOrEmpty(dotnetTestParams.Runtime) ?
-                    new[] { dotnetTestParams.Runtime } :
-                    RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();
-                var exitCode = 0;
-
-                // Create a workspace
-                var workspace = new BuildWorkspace(ProjectReaderSettings.ReadFromEnvironment());
-
-                if (dotnetTestParams.Framework != null)
-                {
-                    var projectContext = workspace.GetProjectContext(projectPath, dotnetTestParams.Framework);
-                    if (projectContext == null)
-                    {
-                        Reporter.Error.WriteLine($"Project '{projectPath}' does not support framework: {dotnetTestParams.UnparsedFramework}");
-                        return 1;
-                    }
-                    projectContext = workspace.GetRuntimeContext(projectContext, runtimeIdentifiers);
-
-                    exitCode = RunTest(projectContext, dotnetTestParams, workspace);
-                }
-                else
-                {
-                    var summary = new Summary();
-                    var projectContexts = workspace.GetProjectContextCollection(projectPath)
-                        .EnsureValid(projectPath)
-                        .FrameworkOnlyContexts
-                        .Select(c => workspace.GetRuntimeContext(c, runtimeIdentifiers))
-                        .ToList();
-
-                    // Execute for all TFMs the project targets.
-                    foreach (var projectContext in projectContexts)
-                    {
-                        var result = RunTest(projectContext, dotnetTestParams, workspace);
-                        if (result == 0)
-                        {
-                            summary.Passed++;
-                        }
-                        else
-                        {
-                            summary.Failed++;
-                            if (exitCode == 0)
-                            {
-                                // If tests fail in more than one TFM, we'll have it use the result of the first one
-                                // as the exit code.
-                                exitCode = result;
-                            }
-                        }
-                    }
-
-                    summary.Print();
-                }
-
-                return exitCode;
+                return RunTest(dotnetTestParams);
             }
             catch (InvalidOperationException ex)
             {
@@ -106,13 +61,6 @@ namespace Microsoft.DotNet.Tools.Test
                 TestHostTracing.Source.TraceEvent(TraceEventType.Error, 0, ex.ToString());
                 return -2;
             }
-        }
-
-        public static int Run(string[] args)
-        {
-            var testCommand = new TestCommand(new DotnetTestRunnerFactory());
-
-            return testCommand.DoRun(args);
         }
 
         private static void RegisterForParentProcessExit(int id)
@@ -142,50 +90,10 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
-        private int RunTest(ProjectContext projectContext, DotnetTestParams dotnetTestParams, BuildWorkspace workspace)
+        private int RunTest(DotnetTestParams dotnetTestParams)
         {
-            var testRunner = projectContext.ProjectFile.TestRunner;
-            var dotnetTestRunner = _dotnetTestRunnerFactory.Create(dotnetTestParams.Port);
-            return dotnetTestRunner.RunTests(projectContext, dotnetTestParams, workspace);
-        }
-
-        private static string GetProjectPath(string projectPath)
-        {
-            projectPath = projectPath ?? Directory.GetCurrentDirectory();
-
-            if (!projectPath.EndsWith(Project.FileName))
-            {
-                projectPath = Path.Combine(projectPath, Project.FileName);
-            }
-
-            if (!File.Exists(projectPath))
-            {
-                throw new InvalidOperationException($"{projectPath} does not exist.");
-            }
-
-            return projectPath;
-        }
-
-        private class Summary
-        {
-            public int Passed { get; set; }
-
-            public int Failed { get; set; }
-
-            public int Total => Passed + Failed;
-
-            public void Print()
-            {
-                var summaryMessage = $"SUMMARY: Total: {Total} targets, Passed: {Passed}, Failed: {Failed}.";
-                if (Failed > 0)
-                {
-                    Reporter.Error.WriteLine(summaryMessage.Red());
-                }
-                else
-                {
-                    Reporter.Output.WriteLine(summaryMessage);
-                }
-            }
+            var dotnetTestRunner = _dotnetTestRunnerFactory.Create(dotnetTestParams);
+            return dotnetTestRunner.RunTests(dotnetTestParams);
         }
     }
 }
