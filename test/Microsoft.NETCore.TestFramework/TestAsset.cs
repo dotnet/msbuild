@@ -58,7 +58,7 @@ namespace Microsoft.NETCore.TestFramework
                         .Where(p => p.Name.Equals("dependencies"))
                         .Descendants()
                         .OfType<JProperty>()
-                        .Where(p => p.Name.Equals("Microsoft.DotNet.Core.Sdk"));
+                        .Where(p => p.Name.Equals("Microsoft.NETCore.Sdk"));
                     foreach (var dep in depNodes)
                     {
                         dep.Value = _buildVersion;
