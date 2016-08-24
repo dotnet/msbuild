@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+<<<<<<< HEAD
+    "Microsoft.DotNet.Core.Sdk": "0.0"
+=======
+    "Microsoft.NETCore.Sdk": "1.0.0-alpha-00000001-01"
+>>>>>>> dotnet/master
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{1FEED16D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{580D1AE7-AA8F-4912-8B76-105594E00B3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Core.Build.Tasks", "src\Tasks\Microsoft.DotNet.Core.Build.Tasks\Microsoft.DotNet.Core.Build.Tasks.csproj", "{DF7D2697-B3B4-45C2-8297-27245F528A99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NETCore.Build.Tasks", "src\Tasks\Microsoft.NETCore.Build.Tasks\Microsoft.NETCore.Build.Tasks.csproj", "{DF7D2697-B3B4-45C2-8297-27245F528A99}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CAEE03D-60F1-4E77-B25B-9CD8757E1F09}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,22 +23,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{13EE1E3C-D7F4-48D3-87AE-94CBCCF574E9}"
 	ProjectSection(SolutionItems) = preProject
-		build\Nuget\Microsoft.DotNet.Core.Nuget.proj = build\Nuget\Microsoft.DotNet.Core.Nuget.proj
-		build\Nuget\Microsoft.DotNet.Core.Sdk.Nuget.targets = build\Nuget\Microsoft.DotNet.Core.Sdk.Nuget.targets
-		build\Nuget\Microsoft.DotNet.Core.Sdk.nuspec = build\Nuget\Microsoft.DotNet.Core.Sdk.nuspec
+		build\Nuget\Microsoft.NETCore.Nuget.proj = build\Nuget\Microsoft.NETCore.Nuget.proj
+		build\Nuget\Microsoft.NETCore.Sdk.Nuget.targets = build\Nuget\Microsoft.NETCore.Sdk.Nuget.targets
+		build\Nuget\Microsoft.NETCore.Sdk.nuspec = build\Nuget\Microsoft.NETCore.Sdk.nuspec
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signing", "Signing", "{385C3C61-B7FC-4447-A88D-6D018B7CE5E4}"
 	ProjectSection(SolutionItems) = preProject
-		build\Signing\Microsoft.DotNet.Core.Signing.proj = build\Signing\Microsoft.DotNet.Core.Signing.proj
+		build\Signing\Microsoft.NETCore.Signing.proj = build\Signing\Microsoft.NETCore.Signing.proj
 		build\Signing\SignToolConfig.json = build\Signing\SignToolConfig.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Core.Build.Tasks.UnitTests", "src\Tasks\Microsoft.DotNet.Core.Build.Tasks.UnitTests\Microsoft.DotNet.Core.Build.Tasks.UnitTests.csproj", "{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NETCore.Build.Tasks.UnitTests", "src\Tasks\Microsoft.NETCore.Build.Tasks.UnitTests\Microsoft.NETCore.Build.Tasks.UnitTests.csproj", "{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.TestFramework", "Test\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj", "{A33548A0-F3B0-40C3-8C4D-AD2F00596CD6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NETCore.TestFramework", "test\Microsoft.NETCore.TestFramework\Microsoft.NETCore.TestFramework.csproj", "{A33548A0-F3B0-40C3-8C4D-AD2F00596CD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Publish.Tests", "Test\Microsoft.DotNet.Publish.Tests\Microsoft.DotNet.Publish.Tests.csproj", "{7F31F2C6-6395-400C-ABE3-5A1CEF208096}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NETCore.Publish.Tests", "test\Microsoft.NETCore.Publish.Tests\Microsoft.NETCore.Publish.Tests.csproj", "{7F31F2C6-6395-400C-ABE3-5A1CEF208096}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{3B295650-6CBF-486F-9E25-F96EE03B7CAE}"
 EndProject
