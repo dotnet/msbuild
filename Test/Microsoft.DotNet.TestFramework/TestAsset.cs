@@ -60,9 +60,10 @@ namespace Microsoft.DotNet.TestFramework
                 if (srcFile.EndsWith("project.json"))
                 {
                     var projectJson = JObject.Parse(File.ReadAllText(srcFile));
-                    var dependencies = (JObject)projectJson.Property("dependencies").Value;
-                    var coreSdkDependency = dependencies.Property("Microsoft.DotNet.Core.Sdk");
-                    coreSdkDependency.Value = _buildVersion;
+                    var dependencies = projectJson.Property("dependencies")?.Value as JObject;
+                    var coreSdkDependency = dependencies?.Property("Microsoft.DotNet.Core.Sdk");
+                    if (coreSdkDependency != null)
+                        coreSdkDependency.Value = _buildVersion;
                     File.WriteAllText(destFile, projectJson.ToString());
                 }
                 else
