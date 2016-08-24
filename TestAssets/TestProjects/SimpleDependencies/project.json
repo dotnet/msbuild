@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Sdk": "1.0.0-alpha-00000001-01",
+    "Microsoft.NETCore.Sdk": "0.0",
     "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {

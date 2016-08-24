@@ -2,22 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.NETCore.TestFramework.Assertions;
 using Microsoft.NETCore.TestFramework.Commands;
 using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.NETCore.TestFramework
 {
     public class TestAsset : TestDirectory
     {
-        private string _testAssetRoot;
+        private readonly string _testAssetRoot;
+        private readonly string _buildVersion;
 
         public string TestRoot => Path;
 
-        internal TestAsset(string testAssetRoot, string testDestination) : base(testDestination)
+        internal TestAsset(string testAssetRoot, string testDestination, string buildVersion) : base(testDestination)
         {
             if (string.IsNullOrEmpty(testAssetRoot))
             {
@@ -25,6 +26,7 @@ namespace Microsoft.NETCore.TestFramework
             }
 
             _testAssetRoot = testAssetRoot;
+            _buildVersion = buildVersion;
         }
 
         public TestAsset WithSource()
@@ -46,7 +48,28 @@ namespace Microsoft.NETCore.TestFramework
             foreach (string srcFile in sourceFiles)
             {
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
-                File.Copy(srcFile, destFile, true);
+                // For project.json, we need to replace the version of the Microsoft.DotNet.Core.Sdk with the actual build version
+                if (System.IO.Path.GetFileName(srcFile).Equals("project.json"))
+                {
+                    var projectJson = JObject.Parse(File.ReadAllText(srcFile));
+                    var depNodes = projectJson
+                        .Descendants()
+                        .OfType<JProperty>()
+                        .Where(p => p.Name.Equals("dependencies"))
+                        .Descendants()
+                        .OfType<JProperty>()
+                        .Where(p => p.Name.Equals("Microsoft.NETCore.Sdk"));
+                    foreach (var dep in depNodes)
+                    {
+                        dep.Value = _buildVersion;
+                    }
+
+                    File.WriteAllText(destFile, projectJson.ToString());
+                }
+                else
+                {
+                    File.Copy(srcFile, destFile, true);
+                }
             }
 
             return this;

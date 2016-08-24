@@ -26,6 +26,13 @@
     <None Include="project.json" />
   </ItemGroup>
 
+  <Target Name="GenerateVersionFile"
+          BeforeTargets="Build">
+    <WriteLinesToFile File="$(RepositoryRootDirectory)\TestAssets\buildVersion.txt"
+                      Lines="$(Version)"
+                      Overwrite="true" />
+  </Target>
+
   <Import Project="..\..\build\Targets\Signing.Imports.targets"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\src\Tasks\Microsoft.NETCore.Build.Tasks\build\netstandard1.0\Microsoft.NETCore.Sdk.targets" />
