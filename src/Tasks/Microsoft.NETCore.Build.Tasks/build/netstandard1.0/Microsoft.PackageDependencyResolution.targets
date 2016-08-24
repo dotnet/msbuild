@@ -10,18 +10,18 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <!--
     *************************************
     1. INPUT PROPERTIES
     - That configure the PackageDependency targets
     *************************************
     -->
-  
+
   <!-- General Properties -->
   <PropertyGroup>
     <!-- Flag PackageDependency Tasks -->
-    <EnableResolvePackageDependencies 
+    <EnableResolvePackageDependencies
       Condition="'$(EnableResolvePackageDependencies)' == ''">true</EnableResolvePackageDependencies>
   </PropertyGroup>
 
@@ -30,6 +30,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_ProjectSpecificProjectJsonFile>$(MSBuildProjectName).project.json</_ProjectSpecificProjectJsonFile>
     <ProjectLockFile Condition="Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/$(MSBuildProjectName).project.lock.json</ProjectLockFile>
     <ProjectLockFile Condition="!Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/project.lock.json</ProjectLockFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Ensure $(ProjectLockFile) is a full path -->
+    <ProjectLockFile Condition="'$([System.IO.Path]::IsPathRooted($(ProjectLockFile)))' != 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/$(ProjectLockFile)'))</ProjectLockFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -110,7 +115,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(ResolvePackageDependenciesForPublish)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectLockFile)')"
           DependsOnTargets="$(ResolvePackageDependenciesForPublishDependsOn)" />
 
-  
+
   <!--
     *************************************
     4. Package Dependency TASK and TARGETS
@@ -118,7 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     *************************************
     -->
 
-  <UsingTask TaskName="Microsoft.NETCore.Build.Tasks.ResolvePackageDependencies" 
+  <UsingTask TaskName="Microsoft.NETCore.Build.Tasks.ResolvePackageDependencies"
              AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <!--
@@ -177,13 +182,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
 
-  <Target Name="_ComputeLockFileReferences" 
-          DependsOnTargets="RunResolvePackageDependencies" 
+  <Target Name="_ComputeLockFileReferences"
+          DependsOnTargets="RunResolvePackageDependencies"
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
       <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
       <_CompileFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
-      
+
       <!-- Get corresponding file definitions -->
       <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
       <_CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(__CompileFileDefinitions)" />
@@ -193,7 +198,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
         <NuGetSourceType>Package</NuGetSourceType>
       </ResolvedCompileFileDefinitions>
-      
+
     </ItemGroup>
   </Target>
 
@@ -223,12 +228,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ResolveLockFileAnalyzers"
-          DependsOnTargets="_ComputeLockFileAnalyzers">    
+          DependsOnTargets="_ComputeLockFileAnalyzers">
     <ItemGroup>
-      
+
       <!-- Add the analyzers we computed -->
       <Analyzer Include="@(ResolvedAnalyzers)" />
-      
+
     </ItemGroup>
   </Target>
 
@@ -295,5 +300,5 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
   </Target>
-  
+
 </Project>
