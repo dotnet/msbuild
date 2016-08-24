@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.TestFramework.Assertions;
 using Microsoft.DotNet.TestFramework.Commands;
 using static Microsoft.DotNet.TestFramework.Commands.MSBuildTest;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -21,11 +21,12 @@ namespace Microsoft.DotNet.TestFramework
           ".SDKVersion"
         }.Select(s => s.ToLower()).ToArray();
 
-        private string _testAssetRoot;
+        private readonly string _testAssetRoot;
+        private readonly string _buildVersion;
 
         public string TestRoot => Path;
 
-        internal TestAsset(string testAssetRoot, string testDestination) : base(testDestination)
+        internal TestAsset(string testAssetRoot, string testDestination, string buildVersion) : base(testDestination)
         {
             if (string.IsNullOrEmpty(testAssetRoot))
             {
@@ -33,6 +34,7 @@ namespace Microsoft.DotNet.TestFramework
             }
 
             _testAssetRoot = testAssetRoot;
+            _buildVersion = buildVersion;
         }
 
         public TestAsset WithSource()
@@ -54,7 +56,19 @@ namespace Microsoft.DotNet.TestFramework
             foreach (string srcFile in sourceFiles)
             {
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
-                File.Copy(srcFile, destFile, true);
+                // For project.json, we need to replace the version of the Microsoft.DotNet.Core.Sdk with the actual build version
+                if (srcFile.EndsWith("project.json"))
+                {
+                    var projectJson = JObject.Parse(File.ReadAllText(srcFile));
+                    var dependencies = (JObject)projectJson.Property("dependencies").Value;
+                    var coreSdkDependency = dependencies.Property("Microsoft.DotNet.Core.Sdk");
+                    coreSdkDependency.Value = _buildVersion;
+                    File.WriteAllText(destFile, projectJson.ToString());
+                }
+                else
+                {
+                    File.Copy(srcFile, destFile, true);
+                }
             }
 
             return this;

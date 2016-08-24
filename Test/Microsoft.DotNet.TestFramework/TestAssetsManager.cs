@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -18,29 +15,42 @@ namespace Microsoft.DotNet.TestFramework
         {
             get
             {
-                if(_testProjectsAssetsManager == null)
+                if (_testProjectsAssetsManager == null)
                 {
-                    var testProjectsDirectory = Path.Combine(RepoInfo.RepoRoot, "TestAssets", "TestProjects");
-                    _testProjectsAssetsManager = new TestAssetsManager(testProjectsDirectory);
+                    var testAssetsDirectory = Path.Combine(RepoInfo.RepoRoot, "TestAssets");
+                    var testProjectsDirectory = Path.Combine(testAssetsDirectory, "TestProjects");
+                    _testProjectsAssetsManager = new TestAssetsManager(testAssetsDirectory, testProjectsDirectory);
                 }
 
                 return _testProjectsAssetsManager;
             }
         }
 
-        public string AssetsRoot
-        {
-            get; private set;
-        }
+        public string ProjectsRoot { get; private set; }
 
-        public TestAssetsManager(string assetsRoot)
+
+        private string BuildVersion { get; set; }
+
+        public TestAssetsManager(string assetsRoot, string projectRoot)
         {
             if (!Directory.Exists(assetsRoot))
             {
                 throw new DirectoryNotFoundException($"Directory not found: '{assetsRoot}'");
             }
 
-            AssetsRoot = assetsRoot;
+            if (!Directory.Exists(projectRoot))
+            {
+                throw new DirectoryNotFoundException($"Directory not found: '{projectRoot}'");
+            }
+
+            var buildVersion = Path.Combine(assetsRoot, "buildVersion.txt");
+            if (!File.Exists(buildVersion))
+            {
+                throw new FileNotFoundException($"File not found: {buildVersion}");
+            }
+
+            ProjectsRoot = projectRoot;
+            BuildVersion = File.ReadAllText(buildVersion);
         }
 
         public TestAsset CopyTestAsset(
@@ -52,17 +62,17 @@ namespace Microsoft.DotNet.TestFramework
             var testDestinationDirectory =
                 GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
 
-            var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory);
+            var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, BuildVersion);
             return testAsset;
         }
 
         private string GetAndValidateTestProjectDirectory(string testProjectName)
         {
-            string testProjectDirectory = Path.Combine(AssetsRoot, testProjectName);
+            string testProjectDirectory = Path.Combine(ProjectsRoot, testProjectName);
 
             if (!Directory.Exists(testProjectDirectory))
             {
-                throw new Exception($"Cannot find '{testProjectName}' at '{AssetsRoot}'");
+                throw new Exception($"Cannot find '{testProjectName}' at '{ProjectsRoot}'");
             }
 
             return testProjectDirectory;
