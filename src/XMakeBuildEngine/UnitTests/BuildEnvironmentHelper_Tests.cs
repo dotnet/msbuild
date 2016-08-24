@@ -135,7 +135,11 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+#if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/669")]
+#else
+        [Fact]
+#endif
         public void BuildEnvironmentDetectsRunningTests()
         {
             Assert.True(BuildEnvironmentHelper.Instance.RunningTests);
