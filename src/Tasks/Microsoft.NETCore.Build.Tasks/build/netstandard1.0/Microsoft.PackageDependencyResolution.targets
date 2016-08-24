@@ -151,19 +151,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
 
-  <UsingTask TaskName="Microsoft.DotNet.Core.Build.Tasks.PreprocessPackageDependenciesDesignTime"
-             AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NETCore.Build.Tasks.PreprocessPackageDependenciesDesignTime"
+             AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   
   <Target Name="ResolvePackageDependenciesDesignTime"
           Returns="@(_DependenciesDesignTime)"
           DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies">
 
-    <PreprocessPackageDependenciesDesignTime  
-                               TargetDefinitions="@(TargetDefinitions)"
-                               PackageDefinitions="@(PackageDefinitions)"
-                               FileDefinitions="@(FileDefinitions)"
-                               PackageDependencies="@(PackageDependencies)"
-                               FileDependencies="@(FileDependencies)">
+    <PreprocessPackageDependenciesDesignTime
+          TargetDefinitions="@(TargetDefinitions)"
+          PackageDefinitions="@(PackageDefinitions)"
+          FileDefinitions="@(FileDefinitions)"
+          PackageDependencies="@(PackageDependencies)"
+          FileDependencies="@(FileDependencies)">
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
