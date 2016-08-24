@@ -6,6 +6,13 @@
             "values": [
                 "Microsoft.DotNet.Core.Build.Tasks.dll"
             ]
-        }
+        },
+        {
+            "certificate": "VsixSHA2",
+            "strongName": null,
+            "values": [
+                "Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsix"
+            ]
+        }        
     ]
 }
