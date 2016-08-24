@@ -10,7 +10,7 @@
   </Target>
   
   <!-- Returns the current build version. Used in .vsixmanifests to substitute our build version into them -->
-  <Target Name="GetBuildVersion" Outputs="$(Version)" />
+  <Target Name="GetBuildVersion" Outputs="$(VersionPrefix)" />
 
   <PropertyGroup>
     <DeployExtension>false</DeployExtension>
