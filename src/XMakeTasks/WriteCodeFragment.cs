@@ -295,7 +295,7 @@ namespace Microsoft.Build.Tasks
                     if (AssemblyAttributes == null) return string.Empty; 
 
                     extension = "cs";
-                    code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment", DateTime.Now));
+                    code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment"));
                     code.AppendLine();
                     code.AppendLine("using System;");
                     code.AppendLine("using System.Reflection;");
@@ -306,7 +306,7 @@ namespace Microsoft.Build.Tasks
                         string args = GetAttributeArguments(attributeItem, "=");
                         if (args == null) return null;
 
-                        code.AppendLine(string.Format($"[assembly: {attributeItem.ItemSpec}({args})];"));
+                        code.AppendLine(string.Format($"[assembly: {attributeItem.ItemSpec}({args})]"));
                         haveGeneratedContent = true;
                     }
 
