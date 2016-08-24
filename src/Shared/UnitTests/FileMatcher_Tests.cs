@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests
             ValidateNoFileMatch(Path.Combine(".", "File.txt"), Path.Combine(".", "File.bin"), false);
         }
 
-        [Fact(Skip="https://github.com/dotnet/corefx/issues/4274")]
+        [Fact]
         public void DotDotForParentDirectory()
         {
             ValidateFileMatch(Path.Combine("..", "..", "*.*"), Path.Combine("..", "..", "File.txt"), false);
