@@ -144,6 +144,33 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+                     ResolvePackageDependenciesDesignTime
+
+    Aggregate the dependencies produced by ResolvePackageDependencies to a form
+    that's consumable by an IDE to display package dependencies.
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.DotNet.Core.Build.Tasks.PreprocessPackageDependenciesDesignTime"
+             AssemblyFile="$(MicrosoftDotNetCoreBuildTasksAssembly)" />
+  
+  <Target Name="ResolvePackageDependenciesDesignTime"
+          Returns="@(_DependenciesDesignTime)"
+          DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies">
+
+    <PreprocessPackageDependenciesDesignTime  
+                               TargetDefinitions="@(TargetDefinitions)"
+                               PackageDefinitions="@(PackageDefinitions)"
+                               FileDefinitions="@(FileDefinitions)"
+                               PackageDependencies="@(PackageDependencies)"
+                               FileDependencies="@(FileDependencies)">
+
+      <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
+    </PreprocessPackageDependenciesDesignTime>
+  </Target>
+
+  <!--
+    ============================================================
     Reference Targets: For populating References based on lock file
     - _ComputeLockFileReferences
     - ResolveLockFileReferences
