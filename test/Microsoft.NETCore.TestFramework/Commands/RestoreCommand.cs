@@ -8,7 +8,8 @@ namespace Microsoft.NETCore.TestFramework.Commands
 {
     public sealed class RestoreCommand : TestCommand
     {
-        public RestoreCommand(MSBuildTest msbuild, string projectPath) : base(msbuild, projectPath)
+        public RestoreCommand(MSBuildTest msbuild, string projectPath)
+            : base(msbuild, projectPath, skipResolvingProjectFile: true)
         {
         }
 

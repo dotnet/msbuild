@@ -17,12 +17,15 @@ namespace Microsoft.NETCore.TestFramework.Commands
 
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
-        public TestCommand(MSBuildTest msBuild, string projectRootPath)
+        protected TestCommand(MSBuildTest msBuild, string projectRootPath, bool skipResolvingProjectFile = false)
         {
             MSBuild = msBuild;
             ProjectRootPath = projectRootPath;
 
-            ProjectFile = FindProjectFile();
+            if (!skipResolvingProjectFile)
+            {
+                ProjectFile = FindProjectFile();
+            }
         }
 
         public abstract CommandResult Execute(params string[] args);
