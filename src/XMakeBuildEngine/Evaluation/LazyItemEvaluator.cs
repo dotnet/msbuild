@@ -1,17 +1,16 @@
-﻿using Microsoft.Build.BackEnd.Logging;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Debugging;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -185,9 +184,9 @@ namespace Microsoft.Build.Evaluation
         {
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
-            public ItemSpec ItemSpec { get; set; }
+            public ItemSpec<P,I> ItemSpec { get; set; }
 
-            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; set; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
+            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
 
             public OperationBuilder(ProjectItemElement itemElement)
             {
@@ -308,8 +307,9 @@ namespace Microsoft.Build.Evaluation
 
         private void ProcessItemSpec(string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
         {
-            builder.ItemSpec = ItemSpec.BuildItemSpec(itemSpec, _outerExpander, itemSpecLocation);
-            AddReferencedItemLists(builder, builder.ItemSpec.Fragments.OfType<ItemExpressionFragment>().Select(i => i.Capture));
+            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation);
+
+            AddReferencedItemLists(builder, builder.ItemSpec.Fragments.OfType<ItemExpressionFragment<P, I>>().Select(i => i.Capture));
         }
 
         private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)

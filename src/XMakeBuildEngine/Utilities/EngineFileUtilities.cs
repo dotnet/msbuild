@@ -221,5 +221,10 @@ namespace Microsoft.Build.Internal
                 return false;
             };
         }
+
+        internal static Func<string, bool> GetMatchTester(string filespec)
+        {
+            return GetMatchTester(new List<string>() {filespec});
+        }
     }
 }

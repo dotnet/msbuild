@@ -1,14 +1,11 @@
-﻿using Microsoft.Build.Collections;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using System.Collections.Immutable;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
@@ -63,12 +60,12 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
-                    if (fragment is ItemExpressionFragment)
+                    if (fragment is ItemExpressionFragment<P, I>)
                     {
                         // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                         bool throwaway;
                         var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            ((ItemExpressionFragment)fragment).Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
+                            ((ItemExpressionFragment<P, I>)fragment).Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
                             false /* do not include null expansion results */, out throwaway, _itemElement.IncludeLocation);
 
                         if (excludeTester != null)
