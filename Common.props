@@ -26,6 +26,11 @@
     <VersionSuffix Condition="'$(VersionSuffix)' == ''">$(VersionPrereleasePrefix)-$(BuildNumber)</VersionSuffix>
     <Version Condition="'$(Version)' == ''">$(VersionPrefix)-$(VersionSuffix)</Version>
 
+    <!-- Prepare Version number used in template builds -->
+    <BuildNumberPart1>$(BuildNumber.Split('-')[0])</BuildNumberPart1>
+    <BuildNumberPart2>$(BuildNumber.Split('-')[1].PadLeft(2,'0'))</BuildNumberPart2>
+    <VsixVersion Condition="'$(VsixVersion)' == ''">$(VersionPrefix).$(BuildNumberPart1)$(BuildNumberPart2)</VsixVersion>
+
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
 
