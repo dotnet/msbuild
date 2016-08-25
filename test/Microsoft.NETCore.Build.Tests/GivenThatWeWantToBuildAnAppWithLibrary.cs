@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NETCore.TestFramework;
 using Microsoft.NETCore.TestFramework.Assertions;
@@ -37,7 +38,7 @@ namespace Microsoft.NETCore.Publish.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory();
 
-            outputDirectory.Should().OnlyHaveFiles(new [] {
+            outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",
                 "TestApp.pdb",
                 "TestApp.deps.json",
@@ -61,7 +62,12 @@ namespace Microsoft.NETCore.Publish.Tests
             appInfo.FileDescription.Should().Be("Test AssemblyTitle");
             appInfo.LegalCopyright.Should().Be("Copyright (c) Test Authors");
             appInfo.ProductName.Should().Be("Test Product");
-            appInfo.ProductVersion.Should().Be("1.2.3-beta");
+
+            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                appInfo.ProductVersion.Should().Be("1.2.3-beta");
+            }
 
             var libInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestLibrary.dll"));
             libInfo.CompanyName.Trim().Should().BeEmpty();
@@ -69,7 +75,12 @@ namespace Microsoft.NETCore.Publish.Tests
             libInfo.FileDescription.Should().Be("TestLibrary");
             libInfo.LegalCopyright.Trim().Should().BeEmpty();
             libInfo.ProductName.Should().Be("TestLibrary");
-            libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
+
+            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
+            }
         }
     }
 }
