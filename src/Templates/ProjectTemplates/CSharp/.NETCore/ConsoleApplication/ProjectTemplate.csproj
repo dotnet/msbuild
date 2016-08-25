@@ -2,11 +2,6 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   
   <PropertyGroup>
-    <Authors>$registeredorganization$</Authors>
-    <Copyright>Copyright © $registeredorganization$</Copyright>
-    <Product>$projectname$</Product>
-    <NeutralLanguage>en</NeutralLanguage>
-    <Version>1.0.0</Version>
     <OutputType>Exe</OutputType>
     <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>

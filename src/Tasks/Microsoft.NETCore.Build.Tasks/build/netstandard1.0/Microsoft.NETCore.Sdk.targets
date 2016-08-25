@@ -43,6 +43,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <VersionSuffix Condition=" '$(VersionSuffix)' == '' "></VersionSuffix>
     <Version Condition=" '$(Version)' == '' and '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
     <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
+
+    <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
+    <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
+    <NeutralLanguage Condition="'$(NeutralLanguage)' == ''">en</NeutralLanguage>
   </PropertyGroup>
 
   <PropertyGroup>
