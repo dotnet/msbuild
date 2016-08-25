@@ -1,86 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
+         DefaultTarget="GenerateDebs">
+
   <Import Project="Microsoft.DotNet.Cli.Installer.DEB.props" />
 
   <Target Name="GenerateDebs"
-          DependsOnTargets="Init;
-                            GenerateSdkDeb;
+          DependsOnTargets="GenerateSdkDeb;
                             TestSdkDeb;"
-      Condition=" '$(OSName)' == 'ubuntu' " />
-
-  <Target Name="SetupGenerateDebInputsOutputs">
-      <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
-          <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
-      </Exec>
-
-      <!-- Workaround for Ubuntu16 Jenkins https://github.com/dotnet/core-setup/issues/167 -->
-      <Message Condition=" '$(DebuildPresent)'  != 'true' "
-               Text="Debuild Not found, Debian packages will not be built."
-               Importance="High" />
-
-      <PropertyGroup>
-        <DebuildPresent>false</DebuildPresent>
-        <DebuildPresent Condition=" '$(DebuildExitCode)' == '0' ">true</DebuildPresent>
-
-        <DotnetDebToolDir></DotnetDebToolDir>
-        <DotnetDebToolVersion></DotnetDebToolVersion>
-        <DotnetDebToolPackageSource></DotnetDebToolPackageSource>
-
-        <DebianPackagingScript>$(RepoRoot)/scripts/package/package-debian.sh</DebianPackagingScript>
-        <ManpagesDirectory>$(RepoRoot)/Documentation/manpages</ManpagesDirectory>
-
-        <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
-        <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
-
-        <SdkDebianPackageName>dotnet-dev-$(SdkVersion)</SdkDebianPackageName>
-        <SharedFrameworkDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkVersion)</SharedFrameworkDebianPackageName>
-        <SharedFrameworkDebianPackageName>$(SharedFrameworkDebianPackageName.ToLower())</SharedFrameworkDebianPackageName>
-        <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrVersion)</HostFxrDebianPackageName>
-        <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
-        <SharedHostDebianPackageName>dotnet-host</SharedHostDebianPackageName>
-
-        <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
-
-        <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
-        <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
-        <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
-
-        <DotnetDebToolConfigJsonFilePath>$(SdkDebianLayoutOutputDirectory)/$(DotnetDebToolConfigJsonFileName)</DotnetDebToolConfigJsonFilePath>
-      </PropertyGroup>
-
-      <ItemGroup>
-        <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
-
-        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME">
-          <ReplacementString>$(SharedFrameworkDebianPackageName)</ReplacementString>
-        </SdkDebianPackageTemplateReplacement>
-        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_NUGET_NAME">
-          <ReplacementString>$(SharedFrameworkName)</ReplacementString>
-        </SdkDebianPackageTemplateReplacement>
-        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_NUGET_VERSION">
-          <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
-        </SdkDebianPackageTemplateReplacement>
-        <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_BRAND_NAME">
-          <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
-        </SdkDebianPackageTemplateReplacement>
-        <SdkDebianPackageTemplateReplacement Include="SDK_NUGET_VERSION">
-          <ReplacementString>$(SdkVersion)</ReplacementString>
-        </SdkDebianPackageTemplateReplacement>
-        <SdkDebianPackageTemplateReplacement Include="CLI_SDK_BRAND_NAME">
-          <ReplacementString>$(SdkBrandName)</ReplacementString>
-        </SdkDebianPackageTemplateReplacement>
-
-        <!-- Consumed By Publish -->
-        <GeneratedInstallers Include="$(SdkInstallerFile)" />
-
-        <SdkDebInputFiles Include="$(SdkLayoutOutputDirectory)/**/*" />
-        <SdkDebManPageFiles Include="$(ManpagesDirectory)/**/*" />
-      </ItemGroup>
-  </Target>
+          Condition=" '$(OSName)' == 'ubuntu' " />
 
   <Target Name="GenerateSdkDeb"
       Condition=" '$(OSName)' == 'ubuntu' and '$(DebuildPresent)'  == 'true' "
-      DependsOnTargets="SetupGenerateDebInputsOutputs;
+      DependsOnTargets="EnsureDebuild;
                         PrepareDotnetDebDirectories;
                         PrepareDotnetDebTool;"
       Inputs="@(SdkDebInputFiles)"
@@ -93,7 +24,7 @@
 
       <!-- Create layout -->
       <Copy
-        DestinationFiles="@(SourceFile->'$(DebLayoutPackageRootDirName)/%(RecursiveDir)%(Filename)%(Extension)')"
+        DestinationFiles="@(SourceFile->'$(DebLayoutPackageRootDir)/%(RecursiveDir)%(Filename)%(Extension)')"
         OverwriteReadOnlyFiles="True"
         SkipUnchangedFiles="False"
         SourceFiles="@(SdkLayoutOutputDirectory)"
@@ -159,7 +90,7 @@
 
   <Target Name="PrepareDotnetDebDirectories">
     <PropertyGroup>
-      <DebLayoutPackageRootDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutPackageRootDirName)</DebLayoutPackageRootDirName>
+      <DebLayoutPackageRootDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutPackageRootDirName)</DebLayoutPackageRootDir>
       <DebLayoutAbsolutePlacementDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutAbsolutePlacementDirName)</DebLayoutAbsolutePlacementDir>
       <DebLayoutSamplesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutSamplesDirName)</DebLayoutSamplesDir>
       <DebLayoutDocsDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDocsDirName)</DebLayoutDocsDir>
@@ -210,7 +141,22 @@
       DestinationFile="$(DotnetDebToolConfigJsonFilePath)"
       ReplacementPatterns="@(SdkDebianPackageTemplateReplacement -> '%(Identity)')"
       ReplacementStrings="@(SdkDebianPackageTemplateReplacement -> '%(ReplacementString)')" />
+  </Target>
 
+  <Target Name="EnsureDebuild">
+      <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
+          <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
+      </Exec>  
 
+      <!-- Debuild -->
+      <PropertyGroup>
+        <DebuildPresent>false</DebuildPresent>
+        <DebuildPresent Condition=" '$(DebuildExitCode)' == '0' ">true</DebuildPresent>
+      </PropertyGroup>
+
+      <!-- Workaround for Ubuntu16 Jenkins https://github.com/dotnet/core-setup/issues/167 -->
+      <Message Condition=" '$(DebuildPresent)'  != 'true' "
+               Text="Debuild Not found, Debian packages will not be built."
+               Importance="High" />
   </Target>
 </Project>

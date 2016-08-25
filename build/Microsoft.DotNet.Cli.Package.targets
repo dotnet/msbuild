@@ -3,12 +3,33 @@
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Layout.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Archive.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Nupkg.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Installer.DEB.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Installer.MSI.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Installer.PKG.targets" />
 
   <Target Name="GenerateInstallers" 
           DependsOnTargets="Init;Layout;GeneratePkgs;GenerateDebs;GenerateMsis" />
+
+  <Target Name="GenerateDebs"
+          DependsOnTargets="Init;"
+          Condition=" '$(OSName)' == 'ubuntu' ">
+    <MSBuild
+      BuildInParallel="False"
+      Projects="$(RepoRoot)/build/package/Microsoft.DotNet.Cli.Installer.DEB.proj"
+      Properties="CliSdkRoot=$(Stage2Directory)/sdk;
+                  RepoRoot=$(RepoRoot);
+                  PackagesDirectory=$(PackagesDirectory);
+                  IntermediateDirectory=$(IntermediateDirectory);
+                  HostFxrVersion=$(HostFxrVersion);
+                  SdkVersion=$(SdkVersion);
+                  SharedFrameworkName=$(SharedFrameworkName);
+                  SharedFrameworkVersion=$(SharedFrameworkVersion);
+                  SharedFrameworkBrandName=$(SharedFrameworkBrandName);
+                  SdkBrandName=$(SdkBrandName);"
+      ToolsVersion="4.0"
+      UnloadProjectsOnCompletion="False"
+      UseResultsCache="True">
+    </MSBuild>
+  </Target>
 
   <Target Name="Package"
           DependsOnTargets="BuildDotnetCliBuildFramework;
