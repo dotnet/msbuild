@@ -206,9 +206,11 @@ namespace Microsoft.Build.Evaluation
             if (_itemValueFragments == null || _expander != _containingItemSpec.Expander)
             {
                 _expander = _containingItemSpec.Expander;
-                _itemValueFragments =_expander.ExpandExpressionCaptureIntoItems(Capture, false, _containingItemSpec.ItemSpecLocation)
-                    .Select(i => new ValueFragment(i.EvaluatedInclude))
-                    .ToList();
+
+                IList<Tuple<string, I>> itemsFromCapture;
+                bool throwaway;
+                _expander.ExpandExpressionCapture(Capture, _containingItemSpec.ItemSpecLocation, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, out itemsFromCapture);
+                _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1)).ToList();
             }
 
             return _itemValueFragments.Any(v => v.MatchesItem(itemToMatch));
