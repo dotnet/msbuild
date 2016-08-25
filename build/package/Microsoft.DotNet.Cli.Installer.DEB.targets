@@ -44,6 +44,8 @@
         <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
         <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
         <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
+
+        <DotnetDebToolConfigJsonFilePath>$(SdkDebianLayoutOutputDirectory)/$(DotnetDebToolConfigJsonFileName)</DotnetDebToolConfigJsonFilePath>
       </PropertyGroup>
 
       <ItemGroup>
@@ -105,12 +107,12 @@
         SourceFiles="@(SdkDebManPageFiles)"
         UseHardlinksIfPossible="False">
       </Copy>
-      
+
       <Copy
-        DestinationFiles="@(SourceFile->'$(DebLayoutDocsDir)/%(RecursiveDir)%(Filename)-$(SdkVersion)%(Extension)')"
+        DestinationFiles="$(DotnetDebToolConfigJsonFilePath)"
         OverwriteReadOnlyFiles="True"
         SkipUnchangedFiles="False"
-        SourceFiles="@(SdkDebManPageFiles)"
+        SourceFiles="$(DotnetDebToolConfigJsonFilePath)"
         UseHardlinksIfPossible="False">
       </Copy>
 
@@ -200,5 +202,15 @@
           Outputs="$(DotnetDebToolDir)/project.json">
 
     <WriteLinesToFile File="$(DotnetDebToolDir)/project.json" Lines="@(DotnetDebToolProjectJsonLines)" />
+  </Target>
+
+  <Target Name="UpdateDotnetDebConfigFile">
+    <ReplaceFileContents
+      InputFile="$(DotnetDebToolConfigJsonFilePath)"
+      DestinationFile="$(DotnetDebToolConfigJsonFilePath)"
+      ReplacementPatterns="@(SdkDebianPackageTemplateReplacement -> '%(Identity)')"
+      ReplacementStrings="@(SdkDebianPackageTemplateReplacement -> '%(ReplacementString)')" />
+
+
   </Target>
 </Project>
