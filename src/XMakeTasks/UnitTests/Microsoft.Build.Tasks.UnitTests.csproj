@@ -41,12 +41,14 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\..\Shared\QuotingUtilities.cs" />
+    <Compile Include="Al_Tests.cs" />
     <Compile Include="AssemblyIdentity_Tests.cs" />
     <Compile Include="AssemblyRefs.cs" />
     <Compile Include="AssignCulture_Tests.cs" />
     <Compile Include="AssignLinkMetadata_Tests.cs" />
     <Compile Include="AssignTargetPath_Tests.cs" />
     <Compile Include="CallTarget_Tests.cs" />
+    <Compile Include="CommandLine_Support.cs" />
     <Compile Include="CombinePath_Tests.cs" />
     <Compile Include="CommandLineBuilderExtension_Tests.cs" />
     <Compile Include="Copy_Tests.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="RemoveDir_Tests.cs" />
     <Compile Include="RemoveDuplicates_Tests.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet_Tests.cs" />
+    <Compile Include="SdkToolsPathUtility_Tests.cs" />
     <Compile Include="StreamHelpers.cs" />
     <Compile Include="StreamMappedString_Tests.cs" />
     <Compile Include="ToolTaskExtension_Tests.cs" />
@@ -100,7 +103,6 @@
     <Compile Include="XamlTestHelpers.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
-    <Compile Include="Al_Tests.cs" />
     <Compile Include="AppConfig_Tests.cs" />
     <Compile Include="AspNetCompiler_Tests.cs" />
     <Compile Include="AssemblyRegistrationCache_Tests.cs" />
@@ -108,7 +110,6 @@
     <Compile Include="AxImp_Tests.cs" />
     <Compile Include="AxTlbBaseTask_Tests.cs" />
     <Compile Include="CodeTaskFactoryTests.cs" />
-    <Compile Include="CommandLine_Support.cs" />
     <Compile Include="ComReferenceWalker_Tests.cs" />
     <Compile Include="ComReference_Tests.cs" />
     <Compile Include="CreateVisualBasicManifestResourceName_Tests.cs" />
@@ -145,7 +146,6 @@
     <Compile Include="ResolveComReference_Tests.cs" />
     <Compile Include="ResolveNonMSBuildProjectOutput_Tests.cs" />
     <Compile Include="ResolveSDKReference_Tests.cs" />
-    <Compile Include="SdkToolsPathUtility_Tests.cs" />
     <Compile Include="SGen_Tests.cs" />
     <Compile Include="TlbImp_Tests.cs" />
     <Compile Include="VisualBasicParserUtilitites_Tests.cs" />
