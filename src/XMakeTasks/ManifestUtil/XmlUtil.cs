@@ -72,14 +72,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             int t2 = Environment.TickCount;
             XPathDocument d = new XPathDocument(s);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XPathDocument(1) t={1}", resource, Environment.TickCount - t2));
+            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XPathDocument(1) t={0}", Environment.TickCount - t2));
 
             int t3 = Environment.TickCount;
             XslCompiledTransform xslc = new XslCompiledTransform();
             // Using the Trusted Xslt is fine as the style sheet comes from our own assemblies.
             // This is similar to the prior this.GetType().Assembly/Evidence method that was used in the now depricated XslTransform.
             xslc.Load(d, XsltSettings.TrustedXslt, s_resolver);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Load t={1}", resource, Environment.TickCount - t3));
+            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Load t={0}", Environment.TickCount - t3));
 
             // Need to copy input stream because XmlReader will close it,
             // causing errors for later callers that access the same stream
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             int t4 = Environment.TickCount;
             XmlReader xml = XmlReader.Create(clonedInput);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XmlReader(2) t={1}", resource, Environment.TickCount - t4));
+            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XmlReader(2) t={0}", Environment.TickCount - t4));
 
             XsltArgumentList args = null;
             if (entries.Length > 0)
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             int t5 = Environment.TickCount;
             xslc.Transform(xml, args, w, s_resolver);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Transform t={1}", resource, Environment.TickCount - t4));
+            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Transform t={0}", Environment.TickCount - t4));
 
             w.WriteEndDocument();
             w.Flush();
