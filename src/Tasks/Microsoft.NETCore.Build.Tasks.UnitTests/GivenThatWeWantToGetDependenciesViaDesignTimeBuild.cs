@@ -766,7 +766,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void ItShouldReturnCorrectHierarchyWhenPackageHasChildAssemblyDependencies()
+        public void ItShouldReturnCorrectHierarchyWhenPackageHasChildAssemblyOrAnalyzerDependencies()
         {
             // Arrange 
             // target definitions 
@@ -793,7 +793,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                     { MetadataKeys.Type, "Package" },
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
                     { PreprocessPackageDependenciesDesignTime.DependenciesMetadata,
-                      @"mockChildAssembly1;somepath/mockChildAssembly2" }
+                      @"mockChildAssembly1;somepath/mockChildAssembly2;somepath/mockChildAnalyzerAssembly" }
                 });
 
             var mockChildAssembly1 = new MockTaskItem(
@@ -829,6 +829,18 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
                 });
 
+            var mockChildAnalyzerAssembly = new MockTaskItem(
+                itemSpec: @"somepath/mockChildAnalyzerAssembly",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, "mockChildAnalyzerAssembly" },
+                    { MetadataKeys.Path, "some path" },
+                    { MetadataKeys.ResolvedPath, "some resolved path" },
+                    { MetadataKeys.Type, "Unknown" },
+                    { MetadataKeys.Analyzer, "true" },
+                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
+                });
+
             // package dependencies
             var mockPackageDep = new MockTaskItem(
                 itemSpec: "Package3/1.0.0",
@@ -856,7 +868,15 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 });
 
             var mockChildAssemblyNoCompileMetadataDep = new MockTaskItem(
-                itemSpec: "mockChildAssemblyNoCompileMetadata/2.0.0",
+                itemSpec: "somepath/mockChildAssemblyNoCompileMetadata",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
+                    { MetadataKeys.ParentPackage, "Package3/1.0.0" }
+                });
+
+            var mockChildAnalyzerAssemblyDep = new MockTaskItem(
+                itemSpec: "somepath/mockChildAnalyzerAssembly",
                 metadata: new Dictionary<string, string>
                 {
                     { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
@@ -871,7 +891,8 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] {
                 mockChildAssembly1,
                 mockChildAssembly2,
-                mockChildAssemblyNoCompileMetadata
+                mockChildAssemblyNoCompileMetadata,
+                mockChildAnalyzerAssembly
             };
             task.PackageDependencies = new ITaskItem[] {
                 mockPackageDep
@@ -879,7 +900,8 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             task.FileDependencies = new ITaskItem[] {
                 mockChildAssemblyDep1,
                 mockChildAssemblyDep2,
-                mockChildAssemblyNoCompileMetadataDep
+                mockChildAssemblyNoCompileMetadataDep,
+                mockChildAnalyzerAssemblyDep
             };
 
             // Act
@@ -887,7 +909,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
             // Assert
             result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(4);
+            task.DependenciesDesignTime.Count().Should().Be(5);
 
             var resultTargets = task.DependenciesDesignTime
                                                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
@@ -911,6 +933,13 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/somepath/mockChildAssembly2")).ToArray();
             resultChildAssembly2.Length.Should().Be(1);
             VerifyTargetTaskItem(DependencyType.FrameworkAssembly, mockChildAssembly2, resultChildAssembly2[0]);
+
+            mockChildAnalyzerAssembly.SetMetadata(MetadataKeys.Path, mockChildAnalyzerAssembly.GetMetadata(MetadataKeys.ResolvedPath));
+            mockChildAnalyzerAssembly.SetMetadata(MetadataKeys.Analyzer, string.Empty);
+            var resultChildAnalyzerAssembly = task.DependenciesDesignTime
+                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/somepath/mockChildAnalyzerAssembly")).ToArray();
+            resultChildAnalyzerAssembly.Length.Should().Be(1);
+            VerifyTargetTaskItem(DependencyType.AnalyzerAssembly, mockChildAnalyzerAssembly, resultChildAnalyzerAssembly[0]);
         }
 
         private void VerifyTargetTaskItem(DependencyType type, ITaskItem input, ITaskItem output)

@@ -67,6 +67,15 @@ namespace Microsoft.NETCore.Build.Tasks
 
             AddDependenciesToTheWorld(Assemblies, FileDependencies, (item) =>
             {
+                // We keep analyzers and assemblies with CompileTimeAssembly metadata; skip everything else.
+
+                ItemMetadata itemMetadata = null;                
+                if (Assemblies.TryGetValue(item.ItemSpec, out itemMetadata) && 
+                    itemMetadata.Type == DependencyType.AnalyzerAssembly)
+                {
+                    return false;
+                }
+
                 var fileGroup = item.GetMetadata(MetadataKeys.FileGroup);
                 return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
             });
@@ -138,15 +147,19 @@ namespace Microsoft.NETCore.Build.Tasks
         }
 
         /// <summary>
-        /// Adds assemblies and framework assemblies from FileDefinitons to dependencies world dictionary.
+        /// Adds assemblies, analyzers and framework assemblies from FileDefinitons to dependencies world dictionary.
         /// </summary>
         private void PopulateAssemblies()
         {
             foreach (var fileDef in FileDefinitions)
             {
-                var dependencyType = GetDependencyType(fileDef.GetMetadata(MetadataKeys.Type));
+                var dependencyType = fileDef.IsAnalyzer()
+                    ? DependencyType.AnalyzerAssembly
+                    : GetDependencyType(fileDef.GetMetadata(MetadataKeys.Type));
+
                 if (dependencyType != DependencyType.Assembly &&
-                    dependencyType != DependencyType.FrameworkAssembly)
+                    dependencyType != DependencyType.FrameworkAssembly &&
+                    dependencyType != DependencyType.AnalyzerAssembly)
                 {
                     continue;
                 }
