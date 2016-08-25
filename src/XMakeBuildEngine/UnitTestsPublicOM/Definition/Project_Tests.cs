@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,7 +21,7 @@ using Microsoft.Build.Shared;
 
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock. 
 using ProvenanceResultTupleList = System.Collections.Generic.List<System.Tuple<string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int>>;
-using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Generic.HashSet<string>>>;
+using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Immutable.ImmutableHashSet<string>>>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -2399,6 +2400,35 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
+        [Fact]
+        public void GetItemProvenanceShouldReturnNothingWhenCalledWithEmptyOrNullArgs()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1;2;3`/>
+                    <B Include=`1;2;3` Exclude=`1;4`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            // by item value as empty string
+            AssertProvenanceResult(expected, project, "");
+            // by item value as null
+            AssertProvenanceResult(expected, project, null);
+
+            // by item value and type as empty string
+            AssertProvenanceResult(expected, project, "", "");
+            // by item value and type as null
+            AssertProvenanceResult(expected, project, null, null);
+
+            // by projectitem as null
+            AssertProvenanceResult(expected, project, null, -1);
+        }
+
         /// <summary>
         /// Import of string that evaluates to invalid path should cause InvalidProjectFileException
         /// </summary>
@@ -2890,7 +2920,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
-            var expectedExcludes = new HashSet<string> { "1", "*", "3" };
+            var expectedExcludes = new HashSet<string> { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
                 Tuple.Create("A", "*.a", expectedExcludes),
@@ -2917,7 +2947,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*", new HashSet<string> {"*"}),
+                Tuple.Create("A", "*", new HashSet<string> {"*"}.ToImmutableHashSet()),
             };
 
             AssertGlobResult(expected, project);
@@ -2926,6 +2956,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GetAllGlobsShouldNotFindIndirectlyReferencedGlobsFromItems()
         {
+            Debugger.Launch();
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
@@ -2938,8 +2969,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*", new HashSet<string>()),
-                Tuple.Create("C", "**", new HashSet<string>()),
+                Tuple.Create("A", "*", ImmutableHashSet<string>.Empty),
+                Tuple.Create("C", "**", ImmutableHashSet<string>.Empty),
             };
 
             AssertGlobResult(expected, project);
@@ -2979,7 +3010,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private static void AssertProvenanceResult(ProvenanceResultTupleList expected, string project, string itemValue, int position)
         {
             var p = ObjectModelHelpers.CreateInMemoryProject(project);
-            var item = p.Items.Where(i => i.EvaluatedInclude.Equals(itemValue)).ElementAt(position);
+
+            ProjectItem item = null;
+
+            if (!string.IsNullOrEmpty(itemValue))
+            {
+                item = p.Items.Where(i => i.EvaluatedInclude.Equals(itemValue)).ElementAt(position);
+            }
 
             var provenanceResult = p.GetItemProvenance(item);
             AssertProvenanceResult(expected, provenanceResult);

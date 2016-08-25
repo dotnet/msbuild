@@ -39,29 +39,39 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpec">The string containing item syntax</param>
         /// <param name="expander">Expects the expander to have a default item factory set</param>
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
-        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation)
+        /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
+        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation, bool expandProperties = true)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation);
+            Fragments = BuildItemFragments(itemSpecLocation, expandProperties);
         }
 
-        private IEnumerable<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation)
+        private IEnumerable<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, bool expandProperties)
         {
             var builder = ImmutableList.CreateBuilder<ItemFragment>();
 
             //  Code corresponds to Evaluator.CreateItemsFromInclude
+            var evaluatedItemspecEscaped = ItemSpecString;
+
+            if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
+            {
+                return builder.ToImmutable();
+            }
 
             // STEP 1: Expand properties in Include
-            var evaluatedIncludeEscaped = Expander.ExpandIntoStringLeaveEscaped(ItemSpecString, ExpanderOptions.ExpandProperties, itemSpecLocation);
+            if (expandProperties)
+            {
+                evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(ItemSpecString, ExpanderOptions.ExpandProperties, itemSpecLocation);
+            }
 
             // STEP 2: Split Include on any semicolons, and take each split in turn
-            if (evaluatedIncludeEscaped.Length > 0)
+            if (evaluatedItemspecEscaped.Length > 0)
             {
                 var includeSplitsEscaped =
-                    ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
+                    ExpressionShredder.SplitSemiColonSeparatedList(evaluatedItemspecEscaped);
 
                 foreach (var includeSplitEscaped in includeSplitsEscaped)
                 {
@@ -130,56 +140,76 @@ namespace Microsoft.Build.Evaluation
 
             isItemListExpression = true;
 
-            return new ItemExpressionFragment<P, I>(capture, this);
+            return new ItemExpressionFragment<P, I>(capture, expression, this);
         }
 
         public IEnumerable<I> FilterItems(IEnumerable<I> items)
         {
-            return items.Where(i => Fragments.Any(f => f.MatchesItem(i.EvaluatedInclude)));
+            return items.Where(i => Fragments.Any(f => f.ItemMatches(i.EvaluatedInclude) > 0));
         }
 
-        public IEnumerable<string> FilterItems(IEnumerable<string> items)
+        public IEnumerable<ItemFragment> FragmentsMatchingItem(string itemToMatch, out int matches)
         {
-            return items.Where(s => Fragments.Any(f => f.MatchesItem(s)));
+            var result = new List<ItemFragment>(Fragments.Count());
+            matches = 0;
+
+            foreach (var fragment in Fragments)
+            {
+                var itemMatches = fragment.ItemMatches(itemToMatch);
+
+                if (itemMatches > 0)
+                {
+                    result.Add(fragment);
+                    matches += itemMatches;
+                }
+            }
+
+            return result;
         }
     }
 
     internal interface ItemFragment
     {
-        bool MatchesItem(string itemToMatch);
+        /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
+        int ItemMatches(string itemToMatch);
+
+        /// <summary>
+        /// The substring from the original itemspec representing this fragment
+        /// </summary>
+        string ItemSpecFragment { get; }
     }
 
     internal class ValueFragment : ItemFragment
     {
-        public string Value { get; }
+        public string ItemSpecFragment { get; private set; }
 
         public ValueFragment(string value)
         {
-            Value = value;
+            ItemSpecFragment = value;
         }
 
-        public bool MatchesItem(string itemToMatch)
+        public int ItemMatches(string itemToMatch)
         {
             // todo file-system assumption on case sensitivity https://github.com/Microsoft/msbuild/issues/781
-            return Value.Equals(itemToMatch, StringComparison.OrdinalIgnoreCase);
+            return ItemSpecFragment.Equals(itemToMatch, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
         }
     }
 
     internal class GlobFragment : ItemFragment
     {
-        public string Glob { get; }
+        public string ItemSpecFragment { get; }
 
         private readonly Lazy<Func<string, bool>> _globMatcher;
 
-        public GlobFragment(string glob)
+        public GlobFragment(string itemSpecFragment)
         {
-            Glob = glob;
-            _globMatcher = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(Glob));
+            ItemSpecFragment = itemSpecFragment;
+            _globMatcher = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(ItemSpecFragment));
         }
 
-        public bool MatchesItem(string itemToMatch)
+        public int ItemMatches(string itemToMatch)
         {
-            return _globMatcher.Value(itemToMatch);
+            return _globMatcher.Value(itemToMatch) ? 1 : 0;
         }
     }
 
@@ -188,18 +218,22 @@ namespace Microsoft.Build.Evaluation
         where I : class, IItem
     {
         public ExpressionShredder.ItemExpressionCapture Capture { get; }
+        public string ItemSpecFragment { get; private set; }
+
         private readonly ItemSpec<P, I> _containingItemSpec;
-        private List<ValueFragment> _itemValueFragments;
+        private IList<ValueFragment> _itemValueFragments;
         private Expander<P, I> _expander;
 
-        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, ItemSpec<P, I> containingItemSpec)
+        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec)
         {
             Capture = capture;
+            ItemSpecFragment = itemSpecFragment;
+
             _containingItemSpec = containingItemSpec;
             _expander = _containingItemSpec.Expander;
         }
 
-        public bool MatchesItem(string itemToMatch)
+        public int ItemMatches(string itemToMatch)
         {
             // cache referenced items as long as the expander does not change
             // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
@@ -213,7 +247,7 @@ namespace Microsoft.Build.Evaluation
                 _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1)).ToList();
             }
 
-            return _itemValueFragments.Any(v => v.MatchesItem(itemToMatch));
+            return _itemValueFragments.Count(v => v.ItemMatches(itemToMatch) > 0);
         }
     }
 }

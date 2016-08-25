@@ -238,7 +238,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                throw new NotImplementedException();
+                ErrorUtilities.ThrowInternalErrorUnreachable();
             }
 
             LazyItemList previousItemList = GetItemList(itemElement.ItemType);

@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is ValueFragment)
                     {
-                        string value = ((ValueFragment)fragment).Value;
+                        string value = ((ValueFragment)fragment).ItemSpecFragment;
 
                         if (excludeTester == null ||
                             !excludeTester.Value(value))
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is GlobFragment)
                     {
-                        string glob = ((GlobFragment)fragment).Glob;
+                        string glob = ((GlobFragment)fragment).ItemSpecFragment;
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob,
                             excludePatterns.Count > 0 ? (IEnumerable<string>) excludePatterns.Concat(globsToIgnore) : globsToIgnore);
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
