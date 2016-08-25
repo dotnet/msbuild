@@ -852,18 +852,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                             }
                             catch (XmlException ex)
                             {
-                                if (validate)
-                                {
-                                    Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
-                                }
+                                Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
                                 validate = false;
                             }
                             catch (System.Xml.Schema.XmlSchemaException ex)
                             {
-                                if (validate)
-                                {
-                                    Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
-                                }
+                                Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
                                 validate = false;
                             }
                         }
