@@ -2213,7 +2213,7 @@ namespace Microsoft.Build.BackEnd
                     using (StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), true))
                     {
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
-                        file.WriteLine("------------------------------------------------", _schedulingData.EventTime.Ticks);
+                        file.WriteLine("------------------------------------------------");
 
                         foreach (int nodeId in _availableNodes.Keys)
                         {
