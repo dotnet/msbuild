@@ -10,17 +10,17 @@ using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NETCore.Publish.Tests
 {
-    public class GivenThatWeWantToPublishAProjectWithCopyToPublish
+    public class GivenThatWeWantToPublishAProjectWithAllFeatures
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
         [Fact]
-        public void It_publishes_projects_and_copies_items_correctly()
+        public void It_publishes_the_project_correctly()
         {
             string packagesDirectory =
                 Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");
             TestAsset testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithCopyToPublish")
+                .CopyTestAsset("KitchenSink")
                 .WithSource()
                 .Restore("--fallbacksource", $"{packagesDirectory}");
 
@@ -39,6 +39,8 @@ namespace Microsoft.NETCore.Publish.Tests
                 "TestApp.pdb",
                 "TestApp.deps.json",
                 "TestApp.runtimeconfig.json",
+                "TestLibrary.dll",
+                "TestLibrary.pdb",
                 "CompileCopyToOutput.cs",
                 "Resource1.resx",
                 "ContentAlways.txt",
