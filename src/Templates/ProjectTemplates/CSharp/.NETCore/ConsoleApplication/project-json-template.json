@@ -5,8 +5,8 @@
       "version": "1.0.0"
     },
     "Microsoft.NETCore.Sdk": {
-      "version": "1.0.0-alpha-20160811-5"
-    }
+      "version": "$$buildversion$$"
+    }    
   },
   "frameworks": {
     "netcoreapp1.0": {

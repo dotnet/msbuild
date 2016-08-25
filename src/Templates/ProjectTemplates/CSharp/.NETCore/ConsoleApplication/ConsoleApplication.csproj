@@ -50,7 +50,9 @@
       <Type>Project</Type>
       <TargetPath>AssemblyInfo.cs</TargetPath>
     </SharedTemplateFiles>
-    <None Include="project.json.template" />
+    <ProjectJsonTemplate Include="project-json-template.json">
+      <TargetPath>project.json.template</TargetPath>    
+    </ProjectJsonTemplate>
     <None Include="ProjectTemplate.csproj" />
   </ItemGroup>
   <ItemGroup>

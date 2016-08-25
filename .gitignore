@@ -175,3 +175,6 @@ $RECYCLE.BIN/
 
 # Workaround: See https://github.com/dotnet/roslyn-project-system/issues/292
 /src/Templates/ProjectTemplates/CSharp/.NETCore/ConsoleApplication/AssemblyInfo.cs
+
+# Ignore Generated project json template file 
+project.json.template

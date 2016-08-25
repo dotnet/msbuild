@@ -9,8 +9,46 @@
     </Copy>
   </Target>
   
+  <!-- Project templates reference the Microsoft.NETCore.Sdk package produced in this project.
+       The following Custom Inline Task and Target write version number associated with this build
+       into the project json template associated with the project template.
+    -->
+
+  <!-- RewriteToken Task: Reads a template and writes to a rewrite path with token replaced  -->
+  <UsingTask TaskName="RewriteToken" 
+    TaskFactory="CodeTaskFactory" 
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll">
+    
+    <ParameterGroup>
+      <TemplatePath ParameterType="System.String" Required="true" />
+      <RewritePath  ParameterType="System.String" Required="true" />
+      <Token        ParameterType="System.String" Required="true" />
+      <Replacement  ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+
+    <Task>
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        string content = File.ReadAllText(TemplatePath);
+        content = content.Replace(Token, Replacement);
+        File.WriteAllText(RewritePath, content);
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!-- _UpdateNETCoreSdkVersion Target: produce project json template with current build version -->
+  <Target Name="_UpdateNETCoreSdkVersion" BeforeTargets="GetZipFilesFromVSTemplates" 
+    Inputs="@(ProjectJsonTemplate)" Outputs="%(ProjectJsonTemplate.TargetPath)">
+
+    <RewriteToken 
+      TemplatePath="@(ProjectJsonTemplate)" 
+      RewritePath="%(ProjectJsonTemplate.TargetPath)"
+      Token="$$buildversion$$" 
+      Replacement="$(Version)"/>
+
+  </Target>
+
   <!-- Returns the current build version. Used in .vsixmanifests to substitute our build version into them -->
-  <Target Name="GetBuildVersion" Outputs="$(Version)" />
+  <Target Name="GetBuildVersion" Outputs="$(VsixVersion)" />
 
   <PropertyGroup>
     <DeployExtension>false</DeployExtension>
