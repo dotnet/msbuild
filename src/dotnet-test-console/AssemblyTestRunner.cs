@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test
@@ -17,8 +18,11 @@ namespace Microsoft.DotNet.Tools.Test
 
         public int RunTests(DotnetTestParams dotnetTestParams)
         {
-            var commandFactory =
-                new CommandFactory();
+            var assembly = new FileInfo(dotnetTestParams.ProjectOrAssemblyPath);
+            var publishDirectory = assembly.Directory.FullName;
+            var applicationName = Path.GetFileNameWithoutExtension(dotnetTestParams.ProjectOrAssemblyPath);
+
+            var commandFactory = new PublishedPathCommandFactory(publishDirectory, applicationName);
 
             var assemblyUnderTest = dotnetTestParams.ProjectOrAssemblyPath;
 

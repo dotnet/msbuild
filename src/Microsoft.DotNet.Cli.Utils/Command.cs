@@ -56,22 +56,20 @@ namespace Microsoft.DotNet.Cli.Utils
         /// array will be present in the corresponding argument array
         /// in the command's process.
         /// </summary>
-        /// <param name="commandName"></param>
-        /// <param name="args"></param>
-        /// <param name="framework"></param>
-        /// <returns></returns>
         public static Command Create(
             string commandName, 
             IEnumerable<string> args, 
             NuGetFramework framework = null, 
             string configuration = Constants.DefaultConfiguration,
-            string outputPath = null)
+            string outputPath = null,
+            string applicationName  = null)
         {
             var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, 
                 args, 
                 framework, 
                 configuration: configuration,
-                outputPath: outputPath);
+                outputPath: outputPath,
+                applicationName: applicationName);
 
             if (commandSpec == null)
             {
