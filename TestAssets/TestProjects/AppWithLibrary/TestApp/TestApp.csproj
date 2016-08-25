@@ -2,6 +2,11 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <PropertyGroup>
+    <Version>1.2.3-beta</Version>
+    <Authors>Test Authors</Authors>
+    <Product>Test Product</Product>
+    <AssemblyTitle>Test AssemblyTitle</AssemblyTitle>
+    <Copyright>Copyright (c) Test Authors</Copyright>
     <OutputType>Exe</OutputType>
     <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
