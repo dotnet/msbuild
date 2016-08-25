@@ -22,7 +22,9 @@
   </ItemGroup>
 
   <Target Name="Build"
-          DependsOnTargets="LogOutput;@(NuSpec->'%(LayoutTargetName)')"
+          DependsOnTargets="LogOutput;
+                            CleanNuGetCache;
+                            @(NuSpec->'%(LayoutTargetName)')"
           Inputs="@(NuSpec);@(PackageAssets)"
           Outputs="@(NuSpec->'%(NuPkgOutput)')">
 
@@ -38,6 +40,13 @@
     <MakeDir Directories="$(NuGetOutDir)" />
 
     <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; --verbosity quiet --base-path &quot;$(OutDir.TrimEnd('\'))&quot; --output-directory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" />
+  </Target>
+
+  <!-- Clean the packages that we are building from the cache everytime we build a new one.
+       This ensures we are always testing/restoring against the newly built version. 
+       -->
+  <Target Name="CleanNuGetCache">
+    <RemoveDir Directories="$(NuGet_Packages)\%(NuSpec.FileName)" />
   </Target>
 
   <Target Name="Clean">
