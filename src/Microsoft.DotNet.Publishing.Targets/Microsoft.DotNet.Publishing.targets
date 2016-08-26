@@ -18,10 +18,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <DotNetPublishingTasksDir Condition=" '$(DotNetPublishingTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\</DotNetPublishingTasksDir>
-    <DotNetPublishingSaveFilesDirectory Condition=" '$(DotNetPublishingSaveFilesDirectory)' == ''">$(MSBuildThisFileDirectory)..\SaveTargets</DotNetPublishingSaveFilesDirectory>
-    <DotNetPublishingCollectFilesDirectory Condition=" '$(DotNetPublishingCollectFilesTargetsDir)'=='' ">$(MSBuildThisFileDirectory)..\CollectTargets</DotNetPublishingCollectFilesDirectory>
-    <DotNetPublishingTransformFilesDirectory Condition=" '$(DotNetPublishingCollectFilesTargetsDir)'=='' ">$(MSBuildThisFileDirectory)..\TransformTargets</DotNetPublishingTransformFilesDirectory>
-    <DotNetPublishingDeployFilesDirectory Condition=" '$(DotNetPublishingDeployTargetsDir)'=='' ">$(MSBuildThisFileDirectory)..\DeployTargets</DotNetPublishingDeployFilesDirectory>
+    <DotNetPublishingSaveFilesDirectory Condition=" '$(DotNetPublishingSaveFilesDirectory)' == ''">$(MSBuildThisFileDirectory)..\SaveTargets\</DotNetPublishingSaveFilesDirectory>
+    <DotNetPublishingCollectFilesDirectory Condition=" '$(DotNetPublishingCollectFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\CollectTargets\</DotNetPublishingCollectFilesDirectory>
+    <DotNetPublishingTransformFilesDirectory Condition=" '$(DotNetPublishingTransformFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\TransformTargets\</DotNetPublishingTransformFilesDirectory>
+    <DotNetPublishingDeployFilesDirectory Condition=" '$(DotNetPublishingDeployFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\DeployTargets\</DotNetPublishingDeployFilesDirectory>
+    <DotNetPublishingProfilesDirectory Condition=" '$(DotNetPublishingProfilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\Content\Properties\PublishProfiles\</DotNetPublishingProfilesDirectory>
   </PropertyGroup>
 
   <!-- 
@@ -38,7 +39,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Import the Saving target
   ***********************************************************************************************
  -->
-  <Import Project="$(DotNetPublishingSaveFilesDirectory)\Microsoft.DotNet.Publishing.SaveFiles.targets"/>
+  <Import Project="$(DotNetPublishingSaveFilesDirectory)Microsoft.DotNet.Publishing.SaveFiles.targets"/>
   
   <!--
   ***********************************************************************************************
@@ -48,7 +49,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <PublishProtocol Condition="'$(PublishProtocol)' == ''">FileSystem</PublishProtocol>
   </PropertyGroup>
-  <Import Project="$(DotNetPublishingDeployFilesDirectory)\Microsoft.$(PublishProtocol).Publishing.targets"/>
+  <Import Project="$(DotNetPublishingDeployFilesDirectory)Microsoft.$(PublishProtocol).Publishing.targets"/>
 
   <!--
     ***********************************************************************************************
@@ -61,7 +62,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishProjectType Condition="'$(PublishProjectType)' == '' ">WebSite</PublishProjectType>
   </PropertyGroup>
 
-  <Import Project="$(DotNetPublishingCollectFilesDirectory)\Microsoft.DotNet.$(PublishProjectType).Publishing.CollectFiles.targets"/>
+  <Import Project="$(DotNetPublishingCollectFilesDirectory)Microsoft.DotNet.$(PublishProjectType).Publishing.CollectFiles.targets"/>
 
     <!-- Extension points for pre-publish and post-publish events-->
   <Target Name="BeforePublish" />
@@ -78,11 +79,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
 
   <PropertyGroup>
-    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles</PublishProfileRootFolder>
-    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles</PublishProfileRootFolder>
+    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</PublishProfileRootFolder>
+    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</PublishProfileRootFolder>
     <PublishProfile Condition="'$(PublishProfile)' ==''">$(PublishProtocol)Profile</PublishProfile>
     <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
-    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(PublishProfileRootFolder)\$(PublishProfileName).pubxml</PublishProfileFullPath>
+    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
+    <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(DotNetPublishingProfilesDirectory)$(PublishProfileName).pubxml</PublishProfileFullPath>
   </PropertyGroup>
   
   <Import Project="$(PublishProfileFullPath)" Condition="Exists('$(PublishProfileFullPath)')" />
