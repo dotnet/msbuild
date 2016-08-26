@@ -52,12 +52,27 @@
     <Compile Include="Kudu\KuduMetadata.cs" />
     <Compile Include="Kudu\KuduVfsDeploy.cs" />
     <Compile Include="Kudu\KuduZipDeploy.cs" />
+    <Compile Include="MsDeploy\CommonUtility.cs" />
+    <Compile Include="MsDeploy\DynamicAssembly.cs" />
+    <Compile Include="MsDeploy\IVSMSDeployTask.cs" />
+    <Compile Include="MsDeploy\MSDeploy.cs" />
+    <Compile Include="MsDeploy\NormalizeServiceUrl.cs" />
+    <Compile Include="MsDeploy\VsMsdeploy.cs" />
+    <Compile Include="MsDeploy\VsMSDeployObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SR.Designer.cs" />
     <Compile Include="ValidateParameter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SR.resx" />
+    <Compile Include="SR.Designer.cs">
+      <DependentUpon>SR.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="SR.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SR.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

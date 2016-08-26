@@ -51,6 +51,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ParameterName="MsDeployServiceUrl"
         ParameterValue="$(MsDeployServiceUrl)"/>
 
+      <ValidateParameter
+      ParameterName="DeployIisAppPath"
+      ParameterValue="$(DeployIisAppPath)"/>
+
+      <ValidateParameter
+      ParameterName="UserName"
+      ParameterValue="$(UserName)"/>
+
+      <ValidateParameter
+      ParameterName="Password"
+      ParameterValue="$(Password)"/>
+
     <!-- Normalize service url such as convert a server name to format like https://<server>:8172/msdeploy.axd-->
     <NormalizeServiceUrl ServiceUrl="$(MsDeployServiceUrl)" UseWMSVC="true" UseRemoteAgent="false">
       <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />

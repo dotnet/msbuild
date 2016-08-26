@@ -51,6 +51,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ParameterName="PublishSiteName"
     ParameterValue="$(PublishSiteName)"/>
 
+    <ValidateParameter
+    ParameterName="UserName"
+    ParameterValue="$(UserName)"/>
+
+    <ValidateParameter
+    ParameterName="Password"
+    ParameterValue="$(Password)"/>
+    
+
     <PropertyGroup>
       <PublishUrl Condition=" '$(PublishUrl)'=='' ">https://{0}.scm.azurewebsites.net/api/{1}</PublishUrl>
       <DeployIndividualFiles Condition=" '$(DeployIndividualFiles)' != 'true'">false</DeployIndividualFiles>
