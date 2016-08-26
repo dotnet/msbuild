@@ -52,8 +52,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             var buildOutputPath =
-                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).CompilationOutputPath +
-                "publish";
+                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.BasePath;
 
             if (! Directory.Exists(buildOutputPath))
             {

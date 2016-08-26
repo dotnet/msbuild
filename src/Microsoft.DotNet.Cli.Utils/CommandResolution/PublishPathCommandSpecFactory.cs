@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.Utils.CommandResolution
+namespace Microsoft.DotNet.Cli.Utils
 {
     public class PublishPathCommandSpecFactory : IPublishedPathCommandSpecFactory
     {

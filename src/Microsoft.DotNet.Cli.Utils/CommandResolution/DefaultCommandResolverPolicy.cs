@@ -1,4 +1,3 @@
-using Microsoft.DotNet.Cli.Utils.CommandResolution;
 using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils

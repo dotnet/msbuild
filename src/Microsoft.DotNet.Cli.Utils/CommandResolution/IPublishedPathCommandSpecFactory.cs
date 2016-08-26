@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.Cli.Utils.CommandResolution
+namespace Microsoft.DotNet.Cli.Utils
 {
     public interface IPublishedPathCommandSpecFactory
     {

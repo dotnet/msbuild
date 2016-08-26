@@ -3,7 +3,6 @@
 
 using System.Reflection;
 using System.Resources;
-using System.Runtime.CompilerServices;
 
 [assembly: AssemblyMetadata("Serviceable", "True")]
 [assembly: NeutralResourcesLanguage("en-us")]
