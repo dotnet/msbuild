@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
@@ -260,7 +259,21 @@ namespace dotnet_new3
 
         private static void InstallPackage(IReadOnlyList<string> packages, bool quiet = false)
         {
-            NuGetUtil.InstallPackage(packages, quiet);
+            List<string> toInstall = new List<string>();
+
+            foreach (string package in packages)
+            {
+                if (package.Exists())
+                {
+                    TemplateCache.Scan(package);
+                }
+                else
+                {
+                    toInstall.Add(package);
+                }
+            }
+
+            NuGetUtil.InstallPackage(toInstall, quiet);
 
             if (!quiet)
             {
