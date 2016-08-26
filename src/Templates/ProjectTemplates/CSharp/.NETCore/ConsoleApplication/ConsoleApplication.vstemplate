@@ -6,7 +6,7 @@
     <Icon>ConsoleApplication.png</Icon>
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
-    <SortOrder>1</SortOrder>
+    <SortOrder>12</SortOrder>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <TemplateID>Microsoft.CSharp.NETCore.ConsoleApplication</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
