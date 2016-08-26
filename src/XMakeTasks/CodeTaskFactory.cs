@@ -529,7 +529,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool ValidateTaskNode()
         {
-            bool foundInvalidNode = false;
             if (_taskNode.HasChildNodes)
             {
                 foreach (XmlNode childNode in _taskNode.ChildNodes)
@@ -546,22 +545,14 @@ namespace Microsoft.Build.Tasks
                             {
                                 continue;
                             }
-                            else
-                            {
-                                foundInvalidNode = true;
-                            }
 
                             break;
                         default:
-                            foundInvalidNode = true;
                             break;
                     }
 
-                    if (foundInvalidNode)
-                    {
-                        _log.LogErrorWithCodeFromResources("CodeTaskFactory.InvalidElementLocation", childNode.Name, _taskNode.Name);
-                        return false;
-                    }
+                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.InvalidElementLocation", childNode.Name, _taskNode.Name);
+                    return false;
                 }
             }
 
