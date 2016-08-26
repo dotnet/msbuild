@@ -13,7 +13,7 @@
     },
     "Microsoft.DiaSymReader": "1.0.8",
     "Microsoft.DiaSymReader.Native": "1.4.0-rc2",
-    "System.Reflection.Metadata": "1.4.1-beta-24410-02"
+    "System.Reflection.Metadata": "1.4.1-beta-24426-02"
   },
   "frameworks": {
     "net451": {},

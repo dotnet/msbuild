@@ -10,23 +10,44 @@ namespace Microsoft.Extensions.Testing.Abstractions
 {
     public class SourceInformationProvider : ISourceInformationProvider
     {
-        private readonly string _pdbPath;
+        private readonly string _filePath;
         private readonly IPdbReader _pdbReader;
 
+        /// <summary>
+        /// Creates a source info provide from a specified file path.
+        /// </summary>
+        /// <param name="pdbPath">
+        /// Path to the .pdb file or a PE file that refers to the .pdb file in its Debug Directory Table.
+        /// </param>
         public SourceInformationProvider(string pdbPath) :
             this(pdbPath, new PdbReaderFactory())
         {
         }
 
+        /// <summary>
+        /// Creates a source info provide from a specified file path.
+        /// </summary>
+        /// <param name="pdbPath">
+        /// Path to the .pdb file or a PE file that refers to the .pdb file in its Debug Directory Table.
+        /// </param>
+        /// <param name="pdbReaderFactory">
+        /// Factory that creates <see cref="IPdbReader"/> instance used to read the PDB.
+        /// </param>
+        /// <exception cref="IOException">File <paramref name="pdbPath"/> does not exist or can't be read.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="pdbPath"/> or <paramref name="pdbReaderFactory"/> is null.</exception>
         public SourceInformationProvider(string pdbPath, IPdbReaderFactory pdbReaderFactory)
         {
-            if (string.IsNullOrWhiteSpace(pdbPath) || !File.Exists(pdbPath))
+            if (pdbPath == null)
             {
-                throw new ArgumentException($"The file '{pdbPath}' does not exist.", nameof(pdbPath));
+                throw new ArgumentNullException(nameof(pdbPath));
             }
 
-            _pdbPath = pdbPath;
+            if (pdbReaderFactory == null)
+            {
+                throw new ArgumentNullException(nameof(pdbReaderFactory));
+            }
 
+            _filePath = pdbPath;
             _pdbReader = pdbReaderFactory.Create(pdbPath);
         }
 

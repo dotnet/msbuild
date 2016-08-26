@@ -6,27 +6,23 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Extensions.Testing.Abstractions
 {
     public class PortablePdbReader : IPdbReader
     {
         private MetadataReader _reader;
-        private GCHandle _gcHandle;
+        private MetadataReaderProvider _provider;
 
-        public PortablePdbReader(Stream pdbStream)
+        public PortablePdbReader(Stream stream)
+            : this(MetadataReaderProvider.FromPortablePdbStream(stream))
         {
-            pdbStream.Position = 0;
-            var buffer = new byte[pdbStream.Length];
-            pdbStream.Read(buffer, 0, buffer.Length);
-
-            _gcHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            unsafe
-            {
-                var address = _gcHandle.AddrOfPinnedObject();
-                _reader = new MetadataReader((byte*)address.ToPointer(), buffer.Length);
-            }
+        }
+        
+        internal PortablePdbReader(MetadataReaderProvider provider)
+        {
+            _provider = provider;
+            _reader = provider.GetMetadataReader();
         }
 
         public SourceInformation GetSourceInformation(MethodInfo methodInfo)
@@ -43,6 +39,11 @@ namespace Microsoft.Extensions.Testing.Abstractions
 
         private SourceInformation GetSourceInformation(MethodDebugInformationHandle handle)
         {
+            if (_reader == null)
+            {
+                throw new ObjectDisposedException(nameof(PortablePdbReader));
+            }
+
             SourceInformation sourceInformation = null;
             try
             {
@@ -81,7 +82,9 @@ namespace Microsoft.Extensions.Testing.Abstractions
 
         public void Dispose()
         {
-            _gcHandle.Free();
+            _provider?.Dispose();
+            _provider = null;
+            _reader = null;
         }
     }
 }
