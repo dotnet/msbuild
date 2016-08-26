@@ -45,11 +45,6 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <SharedTemplateFiles Include="..\Common\AssemblyInfo.cs">
-      <Link>AssemblyInfo.cs</Link>
-      <Type>Project</Type>
-      <TargetPath>AssemblyInfo.cs</TargetPath>
-    </SharedTemplateFiles>
     <ProjectJsonTemplate Include="project-json-template.json">
       <TargetPath>project.json.template</TargetPath>    
     </ProjectJsonTemplate>
@@ -69,7 +64,6 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectRootDir)build\Targets\Templates.Imports.targets" />
 </Project>

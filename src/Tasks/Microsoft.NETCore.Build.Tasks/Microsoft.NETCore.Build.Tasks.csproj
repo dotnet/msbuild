@@ -14,10 +14,12 @@
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GetAssemblyVersion.cs" />
     <Compile Include="ITaskItemExtensions.cs" />
     <Compile Include="ProjectContext.cs" />
     <Compile Include="NuGetPackageResolver.cs" />
@@ -31,6 +33,9 @@
     <Compile Include="RuntimeConfig.cs" />
     <Compile Include="RuntimeConfigFramework.cs" />
     <Compile Include="RuntimeOptions.cs" />
+    <None Include="build\netstandard1.0\Microsoft.NETCore.GenerateAssemblyInfo.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
