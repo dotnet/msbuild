@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NETCore.TestFramework;
 using Microsoft.NETCore.TestFramework.Assertions;
 using Microsoft.NETCore.TestFramework.Commands;
@@ -11,21 +10,21 @@ using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NETCore.Build.Tests
 {
-    public class GivenThatWeWantToBuildAnAppWithLibrary
+    public class GivenThatWeWantToBuildALibrary
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
         [Fact]
-        public void It_builds_the_project_successfully()
+        public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
                 .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
             buildCommand
                 .Execute()
                 .Should()
@@ -34,22 +33,10 @@ namespace Microsoft.NETCore.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory();
 
             outputDirectory.Should().OnlyHaveFiles(new [] {
-                "TestApp.dll",
-                "TestApp.pdb",
-                "TestApp.deps.json",
-                "TestApp.runtimeconfig.json",
-                "TestApp.runtimeconfig.dev.json",
                 "TestLibrary.dll",
                 "TestLibrary.pdb",
+                "TestLibrary.deps.json"
             });
-
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
-                .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("This string came from the test library!");
         }
     }
 }

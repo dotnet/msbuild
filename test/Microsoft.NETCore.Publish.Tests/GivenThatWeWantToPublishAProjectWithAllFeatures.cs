@@ -17,12 +17,10 @@ namespace Microsoft.NETCore.Publish.Tests
         [Fact]
         public void It_publishes_the_project_correctly()
         {
-            string packagesDirectory =
-                Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");
             TestAsset testAsset = _testAssetsManager
                 .CopyTestAsset("KitchenSink")
                 .WithSource()
-                .Restore("--fallbacksource", $"{packagesDirectory}");
+                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
