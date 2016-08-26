@@ -199,10 +199,7 @@ namespace Microsoft.Build.Tasks
                                     Log.LogErrorWithCodeFromResources("ResolveKeySource.KeyFileForSignAssemblyNotImported", KeyFile, hashedContainerName);
                                 }
 
-                                if (!pfxSuccess)
-                                {
-                                    Log.LogErrorWithCodeFromResources("ResolveKeySource.KeyImportError", KeyFile);
-                                }
+                                Log.LogErrorWithCodeFromResources("ResolveKeySource.KeyImportError", KeyFile);
                             }
                             if (pfxSuccess)
                             {
