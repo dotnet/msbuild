@@ -65,8 +65,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(DotNetPublishingCollectFilesDirectory)Microsoft.DotNet.$(PublishProjectType).Publishing.CollectFiles.targets"/>
 
     <!-- Extension points for pre-publish and post-publish events-->
-  <Target Name="BeforePublish" />
-  <Target Name="AfterPublish" />
+  <Target Name="PrePublish" />
+  <Target Name="PostPublish" />
   <Target Name="BeforeCollectFiles" />
   <Target Name="AfterCollectFiles" />
   <Target Name="BeforePublishFiles" />
@@ -96,9 +96,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
   <PropertyGroup>
     <DotNetPublishDependsOn>
-      BeforePublish;
+      PrePublish;
       CorePublish;
-      AfterPublish;
+      PostPublish;
     </DotNetPublishDependsOn>
   </PropertyGroup>
 
