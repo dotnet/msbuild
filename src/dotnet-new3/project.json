@@ -9,7 +9,7 @@
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-003121",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
-    "Microsoft.TemplateEngine.Core": "1.0.0-*",
+    "Microsoft.TemplateEngine.Utils": "1.0.0-*",
     "Microsoft.TemplateEngine.Abstractions": "1.0.0-*",
     "Newtonsoft.Json": "9.0.1",
     "Microsoft.TemplateEngine.Edge": "1.0.0-*",
