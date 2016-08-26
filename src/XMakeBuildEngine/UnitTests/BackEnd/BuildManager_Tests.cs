@@ -203,7 +203,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// The final number of nodes has to be less or equal the number of nodes already in 
         /// the system before this method was called.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void ShutdownNodesAfterParallelBuild()
         {
             ProjectCollection projectCollection = new ProjectCollection();
@@ -261,7 +265,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void SimpleBuildOutOfProcess()
         {
             RunOutOfProcBuild(_ => Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1"));
@@ -270,7 +278,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only. Triggered by setting build parameters' DisableInProcNode to true.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void DisableInProcNode()
         {
             RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
@@ -442,7 +454,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when we launch a child node and set MsBuildForwardAllPropertiesFromChild that we get all of our properties. This needs to happen 
         /// even if the msbuildforwardpropertiesfromchild is set to something.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void MsBuildForwardAllPropertiesFromChildLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -506,7 +522,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to a value and
         /// we launch a child node that we get only that value.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void OutOfProcNodeForwardCertainproperties()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -563,7 +583,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value. Also, make sure that when a project is pulled from the results cache
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -648,7 +672,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to empty and
         /// we launch a child node that we get no properties
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void ForwardNoPropertiesLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -700,7 +728,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// defined on the parent are also available on the child nodes for tasks which use the global project
         /// collection
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void VerifyCustomToolSetsPropagated()
         {
             string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
@@ -773,7 +805,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a child node is launched by default we should not send any properties.
         /// we launch a child node that we get no properties
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void ForwardNoPropertiesLaunchChildNodeDefault()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1632,7 +1668,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that the out-of-proc node won't lock the directory containing the target project.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void OutOfProcNodeDoesntLockWorkingDirectory()
         {
             string tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -1975,7 +2015,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void Regress239661()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2013,7 +2057,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node when a project requires it will cause the build to fail, but not crash.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void Regress239661_NodeUnavailable()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2042,7 +2090,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void ProjectInstanceTransfersToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2113,7 +2165,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void ProjectInstanceLimitedTransferToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2493,7 +2549,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// targets, one of which depends on "A;B", the other of which depends on "B", which has a dependency of 
         /// its own on "A", that we still properly build.  
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void Regress473114()
         {
             string projA = null;
@@ -2618,7 +2678,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// second request will bail out where the first request did, as though it had 
         /// executed the target, rather than skipping and continuing. 
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
         {
             string projA = null;
@@ -2723,7 +2787,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// expected in the first request, but be skipped by the second (since if it's "skipping 
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
         {
             string projA = null;
@@ -2858,7 +2926,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but 
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
         {
             string projA = null;
@@ -2965,7 +3037,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that if the errors are in AfterTargets, we still 
         /// exit as though the target that those targets run after has already run. 
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_AfterTargets()
         {
             string projA = null;
@@ -3320,7 +3396,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// submissions aren't restricted to running strictly serially by the single in-proc 
         /// node.
         /// </summary>
-        [Fact(Skip = "Ignored in NUnit")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P_MP()
         {
             string projectPath1 = null;
@@ -3420,7 +3500,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This differs from transferring a project instance to an out-of-proc node because in this case the project
         /// was loaded by MSBuild, not supplied directly by the user.
         /// </remarks>
-        [Fact(Skip = "Ignored in NUnit")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#else
+        [Fact]
+#endif
         public void Regress265010()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
