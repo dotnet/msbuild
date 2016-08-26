@@ -20,6 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GetAssemblyVersion.cs" />
+    <Compile Include="ITaskItemExtensions.cs" />
     <Compile Include="ProjectContext.cs" />
     <Compile Include="NuGetPackageResolver.cs" />
     <Compile Include="IPackageResolver.cs" />

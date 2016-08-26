@@ -11,6 +11,7 @@ namespace Microsoft.NETCore.Build.Tasks
         Package,
         Assembly,
         FrameworkAssembly,
+        AnalyzerAssembly,
         Content,
         Project,
         ExternalProject,
