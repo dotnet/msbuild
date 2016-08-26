@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <ProjectGuid>{C91F7F4C-47ED-4D1C-8990-B2E886B0FAD9}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="CompileCopyToOutput.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+
+    <EmbeddedResource Include="Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+
+    <Content Include="ContentAlways.txt">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+    <Content Include="ContentPreserveNewest.txt">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="CopyOutputNotPublish.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+    
+    <None Include="NoneCopyOutputAlways.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="NoneCopyOutputNever.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Include="NoneCopyOutputPreserveNewest.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
