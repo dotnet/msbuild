@@ -1375,14 +1375,14 @@ namespace TestTask
             Assert.Null(inlineTaskRecord.InlineTaskXmlBody);
             Assert.Equal(2, inlineTaskRecord.UsingTaskParameters.Count);
 
-            TaskPropertyInfo parameterInfo = inlineTaskRecord.UsingTaskParameters[defaultParameter.Name] as TaskPropertyInfo;
+            TaskPropertyInfo parameterInfo = inlineTaskRecord.UsingTaskParameters[defaultParameter.Name];
             Assert.NotNull(parameterInfo);
             Assert.Equal(parameterInfo.Name, defaultParameter.Name);
             Assert.Equal(parameterInfo.Output, false);
             Assert.Equal(parameterInfo.Required, false);
             Assert.Equal(parameterInfo.PropertyType, typeof(System.String));
 
-            parameterInfo = inlineTaskRecord.UsingTaskParameters[filledOutAttributesParameter.Name] as TaskPropertyInfo;
+            parameterInfo = inlineTaskRecord.UsingTaskParameters[filledOutAttributesParameter.Name];
             Assert.NotNull(parameterInfo);
             Assert.Equal(parameterInfo.Name, filledOutAttributesParameter.Name);
             Assert.Equal(parameterInfo.Output, true);
@@ -1747,7 +1747,7 @@ namespace TestTask
             string expandedRequired = RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.Required, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.RequiredLocation);
             string expandedType = RegistryExpander.ExpandIntoStringAndUnescape(filledOutAttributesParameter.ParameterType, ExpanderOptions.ExpandPropertiesAndItems, filledOutAttributesParameter.ParameterTypeLocation);
 
-            TaskPropertyInfo parameterInfo = inlineTaskRecord.UsingTaskParameters[filledOutAttributesParameter.Name] as TaskPropertyInfo;
+            TaskPropertyInfo parameterInfo = inlineTaskRecord.UsingTaskParameters[filledOutAttributesParameter.Name];
             Assert.NotNull(parameterInfo);
             Assert.Equal(parameterInfo.Name, filledOutAttributesParameter.Name);
             Assert.Equal(parameterInfo.Output, bool.Parse(expandedOutput));
