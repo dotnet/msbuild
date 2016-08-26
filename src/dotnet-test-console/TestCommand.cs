@@ -58,6 +58,7 @@ namespace Microsoft.DotNet.Tools.Test
             }
             catch (Exception ex) when (!(ex is GracefulException))
             {
+                Console.WriteLine(ex.ToString());
                 TestHostTracing.Source.TraceEvent(TraceEventType.Error, 0, ex.ToString());
                 return -2;
             }

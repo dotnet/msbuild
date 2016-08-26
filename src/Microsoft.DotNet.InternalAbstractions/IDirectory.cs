@@ -12,5 +12,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
         ITemporaryDirectory CreateTemporaryDirectory();
 
         IEnumerable<string> GetFiles(string path, string searchPattern);
+
+        string GetDirectoryFullName(string path);
     }
 }

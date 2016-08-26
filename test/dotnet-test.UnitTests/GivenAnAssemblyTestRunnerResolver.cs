@@ -84,6 +84,11 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 return _files.Where(f => f.StartsWith(path) && searchPatternRegex.IsMatch(f));
             }
 
+            public string GetDirectoryFullName(string path)
+            {
+                return Path.GetDirectoryName(path);
+            }
+
             public void AddFile(string path, string fileName)
             {
                 _files.Add($"{path}/{fileName}");

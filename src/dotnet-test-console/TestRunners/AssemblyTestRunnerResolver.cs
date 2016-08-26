@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         internal AssemblyTestRunnerResolver(string assemblyUnderTest, IDirectory directory)
         {
-            _directoryOfAssemblyUnderTest = new FileInfo(assemblyUnderTest).Directory.FullName;
+            _directoryOfAssemblyUnderTest = directory.GetDirectoryFullName(assemblyUnderTest);
             _directory = directory;
         }
 
