@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -27,5 +27,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Microsoft.Build.Conversion.Core.dll")]
 [assembly: AssemblyDescription("Microsoft.Build.Conversion.Core.dll")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("MSBuild")]
-[assembly: AssemblyCopyright("Microsoft Corporation. All rights reserved.")]
+[assembly: AssemblyProduct("Microsoft® Build Tools®")]
+[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]

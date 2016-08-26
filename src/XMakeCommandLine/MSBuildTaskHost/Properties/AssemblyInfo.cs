@@ -11,5 +11,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MSBuildTaskHost.exe")]
 [assembly: AssemblyDescription("MSBuildTaskHost.exe")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("MSBuild")]
-[assembly: AssemblyCopyright("Microsoft Corporation. All rights reserved.")]
+[assembly: AssemblyProduct("Microsoft® Build Tools®")]
+[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]
