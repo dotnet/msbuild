@@ -114,7 +114,7 @@ namespace Microsoft.Build.BuildEngine
                                     yield return nestedGroup;
                                 }
                             }
-                            else if (this.type == ListType.PropertyGroupsAll)
+                            else
                             {
                                 foreach (IItemPropertyGrouping nestedGroup in when.PropertyAndItemLists.PropertyGroupsAll)
                                 {
@@ -132,7 +132,7 @@ namespace Microsoft.Build.BuildEngine
                                     yield return nestedGroup;
                                 }
                             }
-                            else if (this.type == ListType.PropertyGroupsAll)
+                            else
                             {
                                 foreach (IItemPropertyGrouping nestedGroup in choose.Otherwise.PropertyAndItemLists.PropertyGroupsAll)
                                 {
