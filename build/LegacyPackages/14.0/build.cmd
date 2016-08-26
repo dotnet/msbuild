@@ -13,7 +13,7 @@ SET VERSIONMAJOR=14
 :: The minor version here should align with the Visual Studio Update of MSBuild being packaged
 SET VERSIONMINOR=3
 :: The build number here should be incremented when servicing the NuGet package.  The tag should be prereleaseNN when trying out something new
-SET VERSIONBUILD=0-prerelease01
+SET VERSIONBUILD=0-prerelease02
 :: This is the path to where this file is located
 SET ROOT=%~dp0
 :: The path to where packages will be outputed to
