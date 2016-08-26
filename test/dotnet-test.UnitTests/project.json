@@ -6,7 +6,7 @@
       "version": "1.0.0"
     },
     "Newtonsoft.Json": "9.0.1",
-    "dotnet-test-console": {
+    "Microsoft.DotNet.Tools.Test": {
       "target": "project"
     },
     "Microsoft.DotNet.InternalAbstractions": {

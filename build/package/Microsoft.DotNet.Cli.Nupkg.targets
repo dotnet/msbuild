@@ -43,8 +43,8 @@
         <ProjectName>Microsoft.Extensions.Testing.Abstractions</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/dotnet-test-console">
-        <ProjectName>dotnet-test-console</ProjectName>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Tools.Test">
+        <ProjectName>Microsoft.DotNet.Tools.Test</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
     </ItemGroup>

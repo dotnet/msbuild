@@ -45,7 +45,7 @@
     "Microsoft.DotNet.Configurer": {
       "target": "project"
     },
-    "dotnet-test-console": {
+    "Microsoft.DotNet.Tools.Test": {
       "target": "project"
     },
     "Microsoft.NETCore.App": {
