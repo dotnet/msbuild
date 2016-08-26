@@ -97,7 +97,7 @@ namespace Microsoft.Build.Evaluation
                         {
 
                             // Just return the original string.
-                            builder.Add(new ValueFragment(includeSplitEscaped));
+                            builder.Add(new ValueFragment(includeSplitEscaped, itemSpecLocation.File));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
@@ -112,7 +112,7 @@ namespace Microsoft.Build.Evaluation
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
 
-                            builder.Add(new ValueFragment(includeSplitEscaped));
+                            builder.Add(new ValueFragment(includeSplitEscaped, itemSpecLocation.File));
                         }
                     }
                 }
@@ -182,16 +182,24 @@ namespace Microsoft.Build.Evaluation
     internal class ValueFragment : ItemFragment
     {
         public string ItemSpecFragment { get; private set; }
+        private readonly string _projectPath;
 
-        public ValueFragment(string value)
+        public ValueFragment(string value, string projectPath)
         {
+            _projectPath = projectPath;
             ItemSpecFragment = value;
         }
 
         public int ItemMatches(string itemToMatch)
         {
+            return IsMatch(itemToMatch) ? 1 : 0;
+        }
+
+        private bool IsMatch(string itemToMatch)
+        {
             // todo file-system assumption on case sensitivity https://github.com/Microsoft/msbuild/issues/781
-            return ItemSpecFragment.Equals(itemToMatch, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+            return ItemSpecFragment.Equals(itemToMatch, StringComparison.OrdinalIgnoreCase) ||
+                FileUtilities.ComparePathsNoThrow(itemToMatch, ItemSpecFragment, _projectPath);
         }
     }
 
@@ -244,7 +252,7 @@ namespace Microsoft.Build.Evaluation
                 IList<Tuple<string, I>> itemsFromCapture;
                 bool throwaway;
                 _expander.ExpandExpressionCapture(Capture, _containingItemSpec.ItemSpecLocation, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, out itemsFromCapture);
-                _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1)).ToList();
+                _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1, _containingItemSpec.ItemSpecLocation.File)).ToList();
             }
 
             return _itemValueFragments.Count(v => v.ItemMatches(itemToMatch) > 0);
