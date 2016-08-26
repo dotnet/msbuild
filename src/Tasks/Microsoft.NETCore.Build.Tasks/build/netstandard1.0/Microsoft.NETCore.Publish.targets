@@ -20,6 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <PropertyGroup>
     <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
+    <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
   </PropertyGroup>
 
@@ -263,12 +264,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         DefaultCopyToPublishDirectoryMetadata
 
-    Defaults the CopyToPublishDirectory metadata using CopyToOutputDirectory's value.
+    If CopyToPublishDirectory isn't set on these items, the value should be taken from CopyToOutputDirectory.
+    This way, projects can just set "CopyToOutputDirectory = Always/PreserveNewest" and by default the item will be copied
+    to both the build output and publish directories.
     ============================================================
     -->
   <Target Name="DefaultCopyToPublishDirectoryMetadata"
           DependsOnTargets="AssignTargetPaths"
-          Condition=" '$(DisableDefaultCopyToPublishDirectoryMetadata)' == '' ">
+          Condition=" '$(DefaultCopyToPublishDirectoryMetadata)' == 'true' ">
 
     <ItemGroup>
       <ContentWithTargetPath Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always' and '%(ContentWithTargetPath.CopyToPublishDirectory)' == ''">
