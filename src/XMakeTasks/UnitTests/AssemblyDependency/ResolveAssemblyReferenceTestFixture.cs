@@ -1043,12 +1043,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("D, Version=2.0.0.0, Culture=en, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\Regress442570\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                // Simulate a strongly named assembly.
-                return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
-            }
-
             if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
@@ -1806,14 +1800,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension[]
                 {
                     new AssemblyNameExtension("D, Version=2.0.0.0,  PublicKeyToken=b77a5c561934e089, Culture=en")
-                };
-            }
-
-            if (String.Compare(path, @"C:\Regress454863\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                return new AssemblyNameExtension[]
-                {
-                    new AssemblyNameExtension("B, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral")
                 };
             }
 
@@ -2754,10 +2740,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     return @"C:\Regress714052\MSIL";
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    return @"C:\Regress714052\X86";
-                }
                 if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return @"C:\Regress714052\MSIL";
