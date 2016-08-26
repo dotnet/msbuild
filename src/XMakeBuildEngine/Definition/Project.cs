@@ -1078,6 +1078,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">Confine search to item elements of this type</param>
         public List<GlobResult> GetAllGlobs(string itemType)
         {
+            if (string.IsNullOrEmpty(itemType))
+            {
+                return new List<GlobResult>();
+            }
             return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
@@ -1087,6 +1091,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="item">Confine search to item elements appearing above this item, inclusively.</param>
         public List<GlobResult> GetAllGlobs(ProjectItem item)
         {
+            if (item == null)
+            {
+                return new List<GlobResult>();
+            }
+
             return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
         }
 
@@ -1212,6 +1221,11 @@ namespace Microsoft.Build.Evaluation
 
         private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
         {
+            if (string.IsNullOrEmpty(itemToMatch))
+            {
+                return new List<ProvenanceResult>();
+            }
+
             return
                 projectItemElements.Select(i => ComputeProvenanceResult(itemToMatch, i))
                     .Where(r => r != null)
