@@ -3042,10 +3042,7 @@ namespace Microsoft.Build.Evaluation
                 if (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1")
                 {
                     // We didn't find the type, so go probing. First in System
-                    if (objectType == null)
-                    {
-                        objectType = GetTypeFromAssembly(typeName, "System");
-                    }
+                    objectType = GetTypeFromAssembly(typeName, "System");
 
                     // Next in System.Core
                     if (objectType == null)
