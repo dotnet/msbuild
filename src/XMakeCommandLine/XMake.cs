@@ -2835,10 +2835,7 @@ namespace Microsoft.Build.CommandLine
             {
                 logger = loggerDescription.CreateLogger();
 
-                if (logger == null)
-                {
-                    InitializationException.VerifyThrow(logger != null, "LoggerNotFoundError", unquotedParameter);
-                }
+                InitializationException.VerifyThrow(logger != null, "LoggerNotFoundError", unquotedParameter);
             }
             catch (IOException e)
             {
