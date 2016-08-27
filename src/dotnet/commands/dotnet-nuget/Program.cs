@@ -9,7 +9,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.Tools;
 
-namespace Microsoft.DotNet.Tools.Restore
+namespace Microsoft.DotNet.Tools.NuGet
 {
     public class NuGetCommand
     {

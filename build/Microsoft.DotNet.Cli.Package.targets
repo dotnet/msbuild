@@ -15,20 +15,24 @@
     <MSBuild
       BuildInParallel="False"
       Projects="$(RepoRoot)/build/package/Microsoft.DotNet.Cli.Installer.DEB.proj"
-      Properties="CliSdkRoot=$(Stage2Directory)/sdk;
+      Properties="ArtifactNameWithVersionSdk=$(ArtifactNameWithVersionSdk);
+                  OSName=$(OSName);
+                  CLIBuildDll=$(CLIBuildDll);
+                  CliSdkRoot=$(Stage2Directory)/sdk;
+                  DownloadedSharedHostInstallerFile=$(DownloadedSharedHostInstallerFile);
+                  DownloadedHostFxrInstallerFile=$(DownloadedHostFxrInstallerFile);
+                  DownloadedSharedFrameworkInstallerFile=$(DownloadedSharedFrameworkInstallerFile);
                   RepoRoot=$(RepoRoot);
                   PackagesDirectory=$(PackagesDirectory);
                   IntermediateDirectory=$(IntermediateDirectory);
+                  InstallerExtension=$(InstallerExtension);
                   HostFxrVersion=$(HostFxrVersion);
                   SdkVersion=$(SdkVersion);
                   SharedFrameworkName=$(SharedFrameworkName);
                   SharedFrameworkVersion=$(SharedFrameworkVersion);
                   SharedFrameworkBrandName=$(SharedFrameworkBrandName);
-                  SdkBrandName=$(SdkBrandName);"
-      ToolsVersion="4.0"
-      UnloadProjectsOnCompletion="False"
-      UseResultsCache="True">
-    </MSBuild>
+                  SdkBrandName=$(SdkBrandName);
+                  ToolPath=$(Stage2Directory);"/>
   </Target>
 
   <Target Name="Package"

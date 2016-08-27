@@ -2,17 +2,26 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
          DefaultTarget="GenerateDebs">
 
+  <PropertyGroup>
+    <CLIBuildDll Condition=" '!Exists($(CLIBuildDll))' ">$([MSBuild]::Unescape($(CLIBuildDll)))</CLIBuildDll>
+  </PropertyGroup>
+
+  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetDebTool" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
+
   <Import Project="Microsoft.DotNet.Cli.Installer.DEB.props" />
 
   <Target Name="GenerateDebs"
-          DependsOnTargets="GenerateSdkDeb;
+          DependsOnTargets="TestDebuild;
+                            GenerateSdkDeb;
                             TestSdkDeb;"
           Condition=" '$(OSName)' == 'ubuntu' " />
 
   <Target Name="GenerateSdkDeb"
       Condition=" '$(OSName)' == 'ubuntu' and '$(DebuildPresent)'  == 'true' "
-      DependsOnTargets="EnsureDebuild;
-                        PrepareDotnetDebDirectories;
+      DependsOnTargets="PrepareDotnetDebDirectories;
                         PrepareDotnetDebTool;"
       Inputs="@(SdkDebInputFiles)"
       Outputs="$(SdkInstallerFile)" >
@@ -24,35 +33,49 @@
 
       <!-- Create layout -->
       <Copy
-        DestinationFiles="@(SourceFile->'$(DebLayoutPackageRootDir)/%(RecursiveDir)%(Filename)%(Extension)')"
+        DestinationFiles="@(SdkDebInputFiles->'$(DebLayoutPackageRootDir)/sdk/%(RecursiveDir)%(Filename)%(Extension)')"
+        SourceFiles="@(SdkDebInputFiles)"       
         OverwriteReadOnlyFiles="True"
         SkipUnchangedFiles="False"
-        SourceFiles="@(SdkLayoutOutputDirectory)"
         UseHardlinksIfPossible="False">
       </Copy>
 
       <Copy
-        DestinationFiles="@(SourceFile->'$(DebLayoutDocsDir)/%(RecursiveDir)%(Filename)-$(SdkVersion)%(Extension)')"
-        OverwriteReadOnlyFiles="True"
-        SkipUnchangedFiles="False"
+        DestinationFiles="@(SdkDebManPageFiles->'$(DebLayoutDocsDir)/%(RecursiveDir)%(Filename)-$(SdkVersion)%(Extension)')"
         SourceFiles="@(SdkDebManPageFiles)"
-        UseHardlinksIfPossible="False">
-      </Copy>
-
-      <Copy
-        DestinationFiles="$(DotnetDebToolConfigJsonFilePath)"
         OverwriteReadOnlyFiles="True"
         SkipUnchangedFiles="False"
-        SourceFiles="$(DotnetDebToolConfigJsonFilePath)"
         UseHardlinksIfPossible="False">
       </Copy>
 
-      <DotNetDebTool ToolPath="$(Stage2Directory)"
-                     InputDir="$(SdkLayoutDirectory)"
-                     OutputFile="$(SdkInstallerFile)"
+      <ReplaceFileContents
+        InputFile="$(DebianConfigTemplateFile)"
+        DestinationFile="$(DebianConfigJsonFile)"
+        ReplacementPatterns="@(SdkDebianPackageTemplateReplacement -> '%(Identity)')"
+        ReplacementStrings="@(SdkDebianPackageTemplateReplacement -> '%(ReplacementString)')" />
+
+      <MakeDir Directories="$(DotNetDebToolOutputDirectory)" />
+
+      <DotNetDebTool ToolPath="$(ToolPath)"
+                     InputDir="$(SdkDebianLayoutOutputDirectory)"
+                     OutputFile="$(DotNetDebToolOutputDirectory)"
                      PackageName="$(SdkDebianPackageName)"
                      PackageVersion="$(SdkVersion)"
                      WorkingDirectory="$(DotnetDebToolDir)" />
+      
+      <!-- Copy package to output -->
+      <ItemGroup>
+        <GeneratedDebFiles Include="$(DotNetDebToolOutputDirectory)/*.deb" />
+      </ItemGroup>
+  
+      <Error Text="@(GeneratedDebFiles->Count()) .deb files generated." Condition="'@(GeneratedDebFiles->Count())' != 1" />
+
+      <Copy
+        DestinationFiles="$(SdkInstallerFile)"
+        SourceFiles="@(GeneratedDebFiles)"
+        OverwriteReadOnlyFiles="True"
+        SkipUnchangedFiles="False"
+        UseHardlinksIfPossible="False" />
 
       <!-- Remove Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
@@ -89,13 +112,6 @@
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
-    <PropertyGroup>
-      <DebLayoutPackageRootDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutPackageRootDirName)</DebLayoutPackageRootDir>
-      <DebLayoutAbsolutePlacementDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutAbsolutePlacementDirName)</DebLayoutAbsolutePlacementDir>
-      <DebLayoutSamplesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutSamplesDirName)</DebLayoutSamplesDir>
-      <DebLayoutDocsDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDocsDirName)</DebLayoutDocsDir>
-      <DebLayoutDebianFilesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDebianFilesDirName)</DebLayoutDebianFilesDir>
-    </PropertyGroup>
 
     <!-- Clean the workspace -->
     <ItemGroup>
@@ -114,8 +130,8 @@
                                               $(DebLayoutDebianFilesDir)" />
     </ItemGroup>
 
-    <Delete Condition=" 'Exists(%(SdkDebianFilesToClean))' " Files="@(SdkDebianFilesToClean)" />
-    <RemoveDir Condition=" 'Exists(%(SdkDebianDirectoriesToClean))' " Directories="@(SdkDebianDirectoriesToClean)" />
+    <Delete Files="@(SdkDebianFilesToClean)" />
+    <RemoveDir Directories="@(SdkDebianDirectoriesToClean)" />
     <MakeDir Directories="@(SdkDebianDirectoriesToClean)" />
     <MakeDir Directories="@(SdkDebianLayoutSubDirectories)" />
   </Target>
@@ -124,26 +140,21 @@
           DependsOnTargets="WriteDotnetDebToolProjectJson;">
 
     <DotNetRestore  FallbackSource="$(DotnetDebToolPackageSource)"
-                    ToolPath="$(Stage2Directory)"
+                    ToolPath="$(ToolPath)"
                     WorkingDirectory="$(DotnetDebToolDir)" />
   </Target>
 
   <Target Name="WriteDotnetDebToolProjectJson"
           Inputs="$(MSBuildThisFile);$(MSBuildThisFileDirectory)/Microsoft.DotNet.Cli.Installer.DEB.props"
           Outputs="$(DotnetDebToolDir)/project.json">
+    <MakeDir Condition=" !Exists($(DotnetDebToolDir)) " Directories="$(DotnetDebToolDir)" />
 
-    <WriteLinesToFile File="$(DotnetDebToolDir)/project.json" Lines="@(DotnetDebToolProjectJsonLines)" />
+    <WriteLinesToFile File="$(DotnetDebToolDir)/project.json" 
+                      Lines="@(DotnetDebToolProjectJsonLines)"
+                      Overwrite="True" />
   </Target>
 
-  <Target Name="UpdateDotnetDebConfigFile">
-    <ReplaceFileContents
-      InputFile="$(DotnetDebToolConfigJsonFilePath)"
-      DestinationFile="$(DotnetDebToolConfigJsonFilePath)"
-      ReplacementPatterns="@(SdkDebianPackageTemplateReplacement -> '%(Identity)')"
-      ReplacementStrings="@(SdkDebianPackageTemplateReplacement -> '%(ReplacementString)')" />
-  </Target>
-
-  <Target Name="EnsureDebuild">
+  <Target Name="TestDebuild">
       <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
           <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
       </Exec>  

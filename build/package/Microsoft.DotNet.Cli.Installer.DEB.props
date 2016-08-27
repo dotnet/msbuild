@@ -49,7 +49,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SdkDebInputFiles Include="$(SdkLayoutOutputDirectory)/**/*" />
+    <SdkDebInputFiles Include="$(CliSdkRoot)/**/*" />
     <SdkDebManPageFiles Include="$(ManpagesDirectory)/**/*" />
   </ItemGroup>
 
@@ -59,7 +59,18 @@
     <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
 
     <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
+    <DotNetDebToolOutputDirectory>$(SdkDebianIntermediateDirectory)/deb-tool-output</DotNetDebToolOutputDirectory>
     <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
+  </PropertyGroup>
+
+  <!-- Layout Directories -->
+  <PropertyGroup>
+    <SdkDebianLayoutOutputDirectory>$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</SdkDebianLayoutOutputDirectory>
+    <DebLayoutPackageRootDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutPackageRootDirName)</DebLayoutPackageRootDir>
+    <DebLayoutAbsolutePlacementDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutAbsolutePlacementDirName)</DebLayoutAbsolutePlacementDir>
+    <DebLayoutSamplesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutSamplesDirName)</DebLayoutSamplesDir>
+    <DebLayoutDocsDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDocsDirName)</DebLayoutDocsDir>
+    <DebLayoutDebianFilesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDebianFilesDirName)</DebLayoutDebianFilesDir>
   </PropertyGroup>
 
   <!-- debian_config.json -->
@@ -71,22 +82,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME">
+    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
       <ReplacementString>$(SharedFrameworkDebianPackageName)</ReplacementString>
     </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_NUGET_NAME">
+    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_NUGET_NAME%">
       <ReplacementString>$(SharedFrameworkName)</ReplacementString>
     </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_NUGET_VERSION">
+    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_NUGET_VERSION%">
       <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
     </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="SHARED_FRAMEWORK_BRAND_NAME">
+    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_BRAND_NAME%">
       <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
     </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="SDK_NUGET_VERSION">
+    <SdkDebianPackageTemplateReplacement Include="%SDK_NUGET_VERSION%">
       <ReplacementString>$(SdkVersion)</ReplacementString>
     </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="CLI_SDK_BRAND_NAME">
+    <SdkDebianPackageTemplateReplacement Include="%CLI_SDK_BRAND_NAME%">
       <ReplacementString>$(SdkBrandName)</ReplacementString>
     </SdkDebianPackageTemplateReplacement>
   </ItemGroup>
