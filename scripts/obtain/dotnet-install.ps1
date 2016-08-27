@@ -126,6 +126,36 @@ function Load-Assembly([string] $Assembly) {
     }
 }
 
+function GetHTTPResponse([Uri] $Uri)
+{
+    $HttpClient = $null
+
+    try {
+        # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
+        Load-Assembly -Assembly System.Net.Http
+        $HttpClient = New-Object System.Net.Http.HttpClient
+        $Response = $HttpClient.GetAsync($Uri).Result
+        if (($Response -eq $null) -or (-not ($Response.IsSuccessStatusCode)))
+        {
+            $ErrorMsg = "Failed to download $Uri."
+            if ($Response -ne $null)
+            {
+                $ErrorMsg += "  $Response"
+            }
+
+            throw $ErrorMsg
+        }
+
+        return $Response
+    }
+    finally {
+        if ($HttpClient -ne $null) {
+            $HttpClient.Dispose()
+        }
+    }
+}
+
+
 function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [string]$CLIArchitecture) {
     Say-Invocation $MyInvocation
 
@@ -137,25 +167,14 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [str
         $VersionFileUrl = "$UncachedFeed/Sdk/$AzureChannel/latest.version"
     }
     
-    try {
-        # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
-        Load-Assembly -Assembly System.Net.Http
-        $HttpClient = New-Object System.Net.Http.HttpClient
-        $Response = $HttpClient.GetAsync($VersionFileUrl).Result
-        $StringContent = $Response.Content.ReadAsStringAsync().Result
+    $Response = GetHTTPResponse -Uri $VersionFileUrl
+    $StringContent = $Response.Content.ReadAsStringAsync().Result
 
-        switch ($Response.Content.Headers.ContentType) {
-            { ($_ -eq "application/octet-stream") } { $VersionText = [Text.Encoding]::UTF8.GetString($StringContent) }
-            { ($_ -eq "text/plain") } { $VersionText = $StringContent }
-            default { throw "``$Response.Content.Headers.ContentType`` is an unknown .version file content type." }
-        }
+    switch ($Response.Content.Headers.ContentType) {
+        { ($_ -eq "application/octet-stream") } { $VersionText = [Text.Encoding]::UTF8.GetString($StringContent) }
+        { ($_ -eq "text/plain") } { $VersionText = $StringContent }
+        default { throw "``$Response.Content.Headers.ContentType`` is an unknown .version file content type." }
     }
-    finally {
-        if ($HttpClient -ne $null) {
-            $HttpClient.Dispose()
-        }
-    }
-    
 
     $VersionInfo = Get-Version-Info-From-Version-Text $VersionText
 
@@ -331,19 +350,16 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
 }
 
 function DownloadFile([Uri]$Uri, [string]$OutPath) {
+    $Stream = $null
+
     try {
-        # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
-        Load-Assembly -Assembly System.Net.Http
-        $HttpClient = New-Object System.Net.Http.HttpClient
-        $Stream = $HttpClient.GetAsync($Uri).Result.Content.ReadAsStreamAsync().Result
+        $Response = GetHTTPResponse -Uri $Uri
+        $Stream = $Response.Content.ReadAsStreamAsync().Result
         $File = [System.IO.File]::Create($OutPath)
         $Stream.CopyTo($File)
         $File.Close()
     }
     finally {
-        if ($HttpClient -ne $null) {
-            $HttpClient.Dispose()
-        }
         if ($Stream -ne $null) {
             $Stream.Dispose()
         }
