@@ -18,8 +18,8 @@ using NuGet.Legacy;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using PackageBuilder = NuGet.PackageBuilder;
-using NuGetConstants = NuGet.Constants;
+using PackageBuilder = NuGet.Legacy.PackageBuilder;
+using NuGetConstants = NuGet.Legacy.Constants;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
