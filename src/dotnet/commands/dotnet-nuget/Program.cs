@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
@@ -10,15 +11,33 @@ using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Tools.Restore
 {
-    public partial class NuGetCommand
+    public class NuGetCommand
     {
         public static int Run(string[] args)
         {
+            return Run(args, new NuGetCommandRunner());
+        }
+
+        public static int Run(string[] args, ICommandRunner nugetCommandRunner)
+        {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var nugetApp = new NuGetForwardingApp(args);
+            if (nugetCommandRunner == null)
+            {
+                throw new ArgumentNullException(nameof(nugetCommandRunner));
+            }
 
-            return nugetApp.Execute();
+            return nugetCommandRunner.Run(args);
+        }
+
+        private class NuGetCommandRunner : ICommandRunner
+        {
+            public int Run(string [] args)
+            {
+                var nugetApp = new NuGetForwardingApp(args);
+
+                return nugetApp.Execute();
+            }
         }
     }
 }

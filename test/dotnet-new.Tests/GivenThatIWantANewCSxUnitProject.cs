@@ -4,6 +4,7 @@
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
+using System.IO;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -18,8 +19,7 @@ namespace Microsoft.DotNet.Tests
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute("new --type xunittest")
-                .Should()
-                .Pass();
+                .Should().Pass();
             
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute("restore")

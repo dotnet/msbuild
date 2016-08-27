@@ -42,14 +42,14 @@ namespace Microsoft.DotNet.Tools.Run.Tests
         {
             // Arrange
             string[] receivedArgs = null;
-            var testCommandRunner = new Mock<INuGetCommandRunner>();
+            var testCommandRunner = new Mock<ICommandRunner>();
             testCommandRunner
                 .Setup(x => x.Run(It.IsAny<string[]>()))
                 .Callback<string[]>(s => receivedArgs = s)
                 .Returns(0);
 
             // Act
-            var returned = NuGetCommand.RunCommand(inputArgs, testCommandRunner.Object);
+            var returned = NuGetCommand.Run(inputArgs, testCommandRunner.Object);
 
             // Assert
             receivedArgs.Should().BeEquivalentTo(inputArgs);
