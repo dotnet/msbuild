@@ -16,23 +16,26 @@
       BuildInParallel="False"
       Projects="$(RepoRoot)/build/package/Microsoft.DotNet.Cli.Installer.DEB.proj"
       Properties="ArtifactNameWithVersionSdk=$(ArtifactNameWithVersionSdk);
-                  OSName=$(OSName);
                   CLIBuildDll=$(CLIBuildDll);
-                  CliSdkRoot=$(Stage2Directory)/sdk;
-                  DownloadedSharedHostInstallerFile=$(DownloadedSharedHostInstallerFile);
+                  CLISdkRoot=$(Stage2Directory)/sdk;
                   DownloadedHostFxrInstallerFile=$(DownloadedHostFxrInstallerFile);
                   DownloadedSharedFrameworkInstallerFile=$(DownloadedSharedFrameworkInstallerFile);
-                  RepoRoot=$(RepoRoot);
-                  PackagesDirectory=$(PackagesDirectory);
-                  IntermediateDirectory=$(IntermediateDirectory);
-                  InstallerExtension=$(InstallerExtension);
+                  DownloadedSharedHostInstallerFile=$(DownloadedSharedHostInstallerFile);
                   HostFxrVersion=$(HostFxrVersion);
+                  InstallerExtension=$(InstallerExtension);
+                  IntermediateDirectory=$(IntermediateDirectory);
+                  OSName=$(OSName);
+                  PackagesDirectory=$(PackagesDirectory);
+                  RepoRoot=$(RepoRoot);
+                  SdkBrandName=$(SdkBrandName);
                   SdkVersion=$(SdkVersion);
+                  SharedFrameworkBrandName=$(SharedFrameworkBrandName);
                   SharedFrameworkName=$(SharedFrameworkName);
                   SharedFrameworkVersion=$(SharedFrameworkVersion);
-                  SharedFrameworkBrandName=$(SharedFrameworkBrandName);
-                  SdkBrandName=$(SdkBrandName);
-                  ToolPath=$(Stage2Directory);"/>
+                  ToolPath=$(Stage2Directory);">
+      <Output TaskParameter="GeneratedInstallers"
+              ItemName="GeneratedInstallers" />
+    </MSBuild>
   </Target>
 
   <Target Name="Package"

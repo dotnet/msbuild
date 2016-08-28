@@ -19,10 +19,10 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Required]
-        public string InputDir { get; set; }
+        public string InputDirectory { get; set; }
 
         [Required]
-        public string OutputFile { get; set; }
+        public string OutputDirectory { get; set; }
 
         [Required]
         public string PackageName { get; set; }
@@ -32,12 +32,12 @@ namespace Microsoft.DotNet.Cli.Build
 
         private string GetInputDir()
         {
-            return $"-i {InputDir}";
+            return $"-i {InputDirectory}";
         }
 
         private string GetOutputFile()
         {
-            return $"-o {OutputFile}";
+            return $"-o {OutputDirectory}";
         }
 
         private string GetPackageName()

@@ -22,24 +22,24 @@
   <PropertyGroup>
     <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
 
-    <DebLayoutPackageRootDirName>package_root</DebLayoutPackageRootDirName>
-    <DebLayoutAbsolutePlacementDirName>$</DebLayoutAbsolutePlacementDirName>
-    <DebLayoutSamplesDirName>samples</DebLayoutSamplesDirName>
-    <DebLayoutDocsDirName>docs</DebLayoutDocsDirName>
-    <DebLayoutDebianFilesDirName>debian</DebLayoutDebianFilesDirName>
+    <LayoutPackageRootDirName>package_root</LayoutPackageRootDirName>
+    <LayoutAbsolutePlacementDirName>$</LayoutAbsolutePlacementDirName>
+    <LayoutSamplesDirName>samples</LayoutSamplesDirName>
+    <LayoutDocsDirName>docs</LayoutDocsDirName>
+    <LayoutDebianFilesDirName>debian</LayoutDebianFilesDirName>
   </PropertyGroup>
 
   <!-- Package Identities -->
   <PropertyGroup>
     <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
     <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
-    <SharedFrameworkDebianPackageVersion>$(SharedFrameworkVersion)</SharedFrameworkDebianPackageVersion>
-    <SharedFrameworkDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkDebianPackageVersion)</SharedFrameworkDebianPackageName>
-    <SharedFrameworkDebianPackageName>$(SharedFrameworkDebianPackageName.ToLower())</SharedFrameworkDebianPackageName>
+    <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
+    <SharedFxDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
+    <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
     <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>
     <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
     <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
-    <SharedHostDebianPackageName>dotnet-host</SharedHostDebianPackageName>
+    <HostDebianPackageName>dotnet-host</HostDebianPackageName>
   </PropertyGroup>
 
   <!-- Inputs -->
@@ -49,7 +49,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SdkDebInputFiles Include="$(CliSdkRoot)/**/*" />
+    <CLISdkFiles Include="$(CLISdkRoot)/**/*" />
     <SdkDebManPageFiles Include="$(ManpagesDirectory)/**/*" />
   </ItemGroup>
 
@@ -65,41 +65,39 @@
 
   <!-- Layout Directories -->
   <PropertyGroup>
-    <SdkDebianLayoutOutputDirectory>$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</SdkDebianLayoutOutputDirectory>
-    <DebLayoutPackageRootDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutPackageRootDirName)</DebLayoutPackageRootDir>
-    <DebLayoutAbsolutePlacementDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutAbsolutePlacementDirName)</DebLayoutAbsolutePlacementDir>
-    <DebLayoutSamplesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutSamplesDirName)</DebLayoutSamplesDir>
-    <DebLayoutDocsDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDocsDirName)</DebLayoutDocsDir>
-    <DebLayoutDebianFilesDir>$(SdkDebianLayoutOutputDirectory)/$(DebLayoutDebianFilesDirName)</DebLayoutDebianFilesDir>
+    <LayoutDirectory>$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</LayoutDirectory>
+    <LayoutPackageRootDir>$(LayoutDirectory)/$(LayoutPackageRootDirName)</LayoutPackageRootDir>
+    <LayoutAbsolutePlacementDir>$(LayoutDirectory)/$(LayoutAbsolutePlacementDirName)</LayoutAbsolutePlacementDir>
+    <LayoutSamplesDir>$(LayoutDirectory)/$(LayoutSamplesDirName)</LayoutSamplesDir>
+    <LayoutDocsDir>$(LayoutDirectory)/$(LayoutDocsDirName)</LayoutDocsDir>
+    <LayoutDebianFilesDir>$(LayoutDirectory)/$(LayoutDebianFilesDirName)</LayoutDebianFilesDir>
   </PropertyGroup>
 
   <!-- debian_config.json -->
   <PropertyGroup>
-    <DebianConfigTemplateFileName>dotnet-debian_config.json</DebianConfigTemplateFileName>
-    <DebianConfigTemplateFile>$(RepoRoot)/packaging/deb/$(DebianConfigTemplateFileName)</DebianConfigTemplateFile>
-    <DebianConfigJsonFileName>debian_config.json</DebianConfigJsonFileName>
-    <DebianConfigJsonFile>$(SdkDebianLayoutOutputDirectory)/$(DebianConfigJsonFileName)</DebianConfigJsonFile>
+    <DebianConfigTemplateFile>$(RepoRoot)/packaging/deb/dotnet-debian_config.json</DebianConfigTemplateFile>
+    <DebianConfigJsonFile>$(LayoutDirectory)/debian_config.json</DebianConfigJsonFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
-      <ReplacementString>$(SharedFrameworkDebianPackageName)</ReplacementString>
-    </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_NUGET_NAME%">
+    <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
+      <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>
+    </DebianConfigTokenValues>
+    <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_NUGET_NAME%">
       <ReplacementString>$(SharedFrameworkName)</ReplacementString>
-    </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_NUGET_VERSION%">
+    </DebianConfigTokenValues>
+    <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_NUGET_VERSION%">
       <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
-    </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="%SHARED_FRAMEWORK_BRAND_NAME%">
+    </DebianConfigTokenValues>
+    <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_BRAND_NAME%">
       <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
-    </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="%SDK_NUGET_VERSION%">
+    </DebianConfigTokenValues>
+    <DebianConfigTokenValues Include="%SDK_NUGET_VERSION%">
       <ReplacementString>$(SdkVersion)</ReplacementString>
-    </SdkDebianPackageTemplateReplacement>
-    <SdkDebianPackageTemplateReplacement Include="%CLI_SDK_BRAND_NAME%">
+    </DebianConfigTokenValues>
+    <DebianConfigTokenValues Include="%CLI_SDK_BRAND_NAME%">
       <ReplacementString>$(SdkBrandName)</ReplacementString>
-    </SdkDebianPackageTemplateReplacement>
+    </DebianConfigTokenValues>
   </ItemGroup>
 
   <ItemGroup>
