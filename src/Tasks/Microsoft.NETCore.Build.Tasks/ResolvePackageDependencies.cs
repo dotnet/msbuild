@@ -19,7 +19,9 @@ namespace Microsoft.NETCore.Build.Tasks
     {
         private readonly List<string> _packageFolders = new List<string>();
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>();
+        private readonly HashSet<string> _projectFileDependencies = new HashSet<string>();
         private IPackageResolver _packageResolver;
+        private LockFile _lockFile;
 
         #region Output Items
 
@@ -114,6 +116,24 @@ namespace Microsoft.NETCore.Build.Tasks
             }
         }
 
+        private LockFile LockFile
+        {
+            get
+            {
+                if (_lockFile == null)
+                {
+                    if (!File.Exists(ProjectLockFile))
+                    {
+                        ReportException($"Lock file {ProjectLockFile} couldn't be found. Run a NuGet package restore to generate this file.");
+                    }
+
+                    _lockFile = new LockFileCache(BuildEngine4).GetLockFile(ProjectLockFile);
+                }
+
+                return _lockFile;
+            }
+        }
+
         /// <summary>
         /// Raise Nuget LockFile representation to MSBuild items
         /// </summary>
@@ -133,17 +153,28 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private void ExecuteCore()
         {
-            var lockFile = GetLockFile();
+            ReadProjectFileDependencies();
+            RaiseLockFileTargets();
+            GetPackageAndFileDefinitions();
+        }
 
-            RaiseLockFileTargets(lockFile);
-            GetPackageAndFileDefinitions(lockFile);
+        private void ReadProjectFileDependencies()
+        {
+            foreach (var group in LockFile.ProjectFileDependencyGroups)
+            {
+                foreach (var dep in group.Dependencies)
+                {
+                    // Get package name from e.g. Microsoft.VSSDK.BuildTools >= 15.0.25604-Preview4
+                    _projectFileDependencies.Add(dep.Split()[0].Trim());
+                }
+            }
         }
 
         // get library and file definitions
-        private void GetPackageAndFileDefinitions(LockFile lockFile)
+        private void GetPackageAndFileDefinitions()
         {
             TaskItem item;
-            foreach (var package in lockFile.Libraries)
+            foreach (var package in LockFile.Libraries)
             {
                 string packageId = $"{package.Name}/{package.Version.ToString()}";
                 item = new TaskItem(packageId);
@@ -153,13 +184,15 @@ namespace Microsoft.NETCore.Build.Tasks
 
                 item.SetMetadata(MetadataKeys.Path, package.Path ?? string.Empty);
 
-                string resolvedPackagePath = ResolvePackagePath(package, lockFile);
+                string resolvedPackagePath = ResolvePackagePath(package);
                 item.SetMetadata(MetadataKeys.ResolvedPath, resolvedPackagePath ?? string.Empty);
 
                 _packageDefinitions.Add(item);
 
                 foreach (var file in package.Files)
                 {
+                    if (Path.GetFileName(file) == "_._") continue;
+
                     var fileKey = $"{packageId}/{file}";
                     var fileItem = new TaskItem(fileKey);
                     fileItem.SetMetadata(MetadataKeys.Path, file);
@@ -192,10 +225,10 @@ namespace Microsoft.NETCore.Build.Tasks
         }
 
         // get target definitions and package and file dependencies
-        private void RaiseLockFileTargets(LockFile lockFile)
+        private void RaiseLockFileTargets()
         {
             TaskItem item;
-            foreach (var target in lockFile.Targets)
+            foreach (var target in LockFile.Targets)
             {
                 item = new TaskItem(target.Name);
                 item.SetMetadata(MetadataKeys.RuntimeIdentifier, target.RuntimeIdentifier ?? string.Empty);
@@ -217,11 +250,15 @@ namespace Microsoft.NETCore.Build.Tasks
             foreach (var package in target.Libraries)
             {
                 string packageId = $"{package.Name}/{package.Version.ToString()}";
-                item = new TaskItem(packageId);
-                item.SetMetadata(MetadataKeys.ParentTarget, target.Name); // Foreign Key
-                item.SetMetadata(MetadataKeys.ParentPackage, string.Empty); // Foreign Key
 
-                _packageDependencies.Add(item);
+                if (_projectFileDependencies.Contains(package.Name))
+                {
+                    item = new TaskItem(packageId);
+                    item.SetMetadata(MetadataKeys.ParentTarget, target.Name); // Foreign Key
+                    item.SetMetadata(MetadataKeys.ParentPackage, string.Empty); // Foreign Key
+
+                    _packageDependencies.Add(item);
+                }
 
                 // get sub package dependencies
                 GetPackageDependencies(package, target.Name);
@@ -258,6 +295,8 @@ namespace Microsoft.NETCore.Build.Tasks
                 var filePathList = fileGroup.GetFilePathListFor(package);
                 foreach (var filePath in filePathList)
                 {
+                    if (Path.GetFileName(filePath) == "_._") continue;
+
                     var fileKey = $"{packageId}/{filePath}";
                     item = new TaskItem(fileKey);
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
@@ -290,17 +329,8 @@ namespace Microsoft.NETCore.Build.Tasks
             }
         }
 
-        private LockFile GetLockFile()
-        {
-            if (!File.Exists(ProjectLockFile))
-            {
-                ReportException($"Lock file {ProjectLockFile} couldn't be found. Run a NuGet package restore to generate this file.");
-            }
 
-            return new LockFileCache(BuildEngine4).GetLockFile(ProjectLockFile);
-        }
-
-        private string ResolvePackagePath(LockFileLibrary package, LockFile lockFile)
+        private string ResolvePackagePath(LockFileLibrary package)
         {
             if (package.Type == "project")
             {
