@@ -1094,7 +1094,7 @@ namespace Microsoft.Build.UnitTests
                 listTwo.Add(item);
             }
 
-            AssertCollectionsValueEqual<T>(listOne, listTwo);
+            AssertCollectionsValueEqual(listOne, listTwo);
         }
 
         /// <summary>
@@ -1240,7 +1240,7 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                File.WriteAllText(fullPath, string.Empty);
+                File.WriteAllText(fullPath, String.Empty);
                 result[i] = fullPath;
             }
 
@@ -1413,6 +1413,33 @@ namespace Microsoft.Build.UnitTests
             string[] result = content.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             return result;
+        }
+
+        internal const string ItemWithIncludeAndExclude = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='{0}' Exclude='{1}'/>
+                        </ItemGroup>
+                    </Project>
+                ";
+
+        internal static void AssertItemEvaluation(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        {
+            string root = "";
+            try
+            {
+                string[] createdFiles;
+                string projectFile;
+                var formattedProjectContents = String.Format(projectContents, includeString, excludeString);
+                root = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, inputFiles, out projectFile, out createdFiles);
+
+                ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteDirectory(root);
+                Directory.Delete(root);
+            }
         }
     }
 }
