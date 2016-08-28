@@ -8,6 +8,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Configuration;
 using NuGet.ProjectModel;
+using System.Linq;
 
 namespace Microsoft.NETCore.Build.Tasks
 {
@@ -203,15 +204,31 @@ namespace Microsoft.NETCore.Build.Tasks
                     if (IsAnalyzer(file))
                     {
                         fileItem.SetMetadata(MetadataKeys.Analyzer, "true");
-                    }
+                        fileItem.SetMetadata(MetadataKeys.Type, "AnalyzerAssembly");
 
-                    // get a type for the file if one is available
-                    string fileType;
-                    if (!_fileTypes.TryGetValue(fileKey, out fileType))
-                    {
-                        fileType = "unknown";
+                        // get targets that contain this package
+                        var parentTargets = LockFile.Targets
+                            .Where(t => t.Libraries.Any(lib => lib.Name == package.Name));
+
+                        foreach (var target in parentTargets)
+                        {
+                            var fileDepsItem = new TaskItem(fileKey);
+                            fileDepsItem.SetMetadata(MetadataKeys.ParentTarget, target.Name); // Foreign Key
+                            fileDepsItem.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
+
+                            _fileDependencies.Add(fileDepsItem);
+                        }
                     }
-                    fileItem.SetMetadata(MetadataKeys.Type, fileType);
+                    else
+                    {
+                        // get a type for the file if one is available
+                        string fileType;
+                        if (!_fileTypes.TryGetValue(fileKey, out fileType))
+                        {
+                            fileType = "unknown";
+                        }
+                        fileItem.SetMetadata(MetadataKeys.Type, fileType);
+                    }
 
                     _fileDefinitions.Add(fileItem);
                 }
