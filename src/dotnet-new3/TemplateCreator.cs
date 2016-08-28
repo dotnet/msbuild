@@ -35,9 +35,22 @@ namespace dotnet_new3
                 }
             }
 
-            using(Timing.Over("Alias search"))
-            matchingTemplates.UnionWith(AliasRegistry.GetTemplatesForAlias(searchString, allTemplates));
-            return matchingTemplates;
+            using (Timing.Over("Alias search"))
+            {
+#if !NET451
+                IReadOnlyCollection<ITemplateInfo> allTemplatesCollection = allTemplates;
+#else
+                IReadOnlyCollection<ITemplateInfo> allTemplatesCollection = allTemplates.ToList();
+#endif
+                matchingTemplates.UnionWith(AliasRegistry.GetTemplatesForAlias(searchString, allTemplatesCollection));
+            }
+
+#if !NET451
+            IReadOnlyCollection<ITemplateInfo> matchingTemplatesCollection = matchingTemplates;
+#else
+            IReadOnlyCollection<ITemplateInfo> matchingTemplatesCollection = matchingTemplates.ToList();
+#endif
+            return matchingTemplatesCollection;
         }
 
         private static bool TryGetTemplate(string templateName, out ITemplateInfo tmplt)

@@ -88,16 +88,16 @@ namespace dotnet_new3
 
                 IReadOnlyDictionary<string, string> parameters;
 
-                    try
-                    {
-                        parameters = app.ParseExtraArgs(parametersFiles);
-                    }
-                    catch (Exception ex)
-                    {
-                        Reporter.Error.WriteLine(ex.Message.Red().Bold());
-                        app.ShowHelp();
-                        return -1;
-                    }
+                try
+                {
+                    parameters = app.ParseExtraArgs(parametersFiles);
+                }
+                catch (Exception ex)
+                {
+                    Reporter.Error.WriteLine(ex.Message.Red().Bold());
+                    app.ShowHelp();
+                    return -1;
+                }
 
                 if (await TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue()) == -1)
                 {
