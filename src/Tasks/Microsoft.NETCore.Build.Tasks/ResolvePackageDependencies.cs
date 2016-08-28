@@ -274,7 +274,7 @@ namespace Microsoft.NETCore.Build.Tasks
             TaskItem item;
             foreach (var deps in package.Dependencies)
             {
-                string depsName = $"{deps.Id}/{deps.VersionRange.OriginalString}";
+                string depsName = $"{deps.Id}/{deps.VersionRange.MinVersion.ToString()}";
 
                 item = new TaskItem(depsName);
                 item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
