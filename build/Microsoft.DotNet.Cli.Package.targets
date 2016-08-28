@@ -32,8 +32,9 @@
                   SharedFrameworkBrandName=$(SharedFrameworkBrandName);
                   SharedFrameworkName=$(SharedFrameworkName);
                   SharedFrameworkVersion=$(SharedFrameworkVersion);
-                  ToolPath=$(Stage2Directory);">
-      <Output TaskParameter="GeneratedInstallers"
+                  ToolPath=$(Stage2Directory);"
+      Targets="GenerateDebs">
+      <Output TaskParameter="TargetOutputs"
               ItemName="GeneratedInstallers" />
     </MSBuild>
   </Target>
