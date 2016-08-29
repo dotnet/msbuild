@@ -1749,7 +1749,7 @@ namespace Microsoft.Build.Execution
 
             // If the user didn't pass in a ToolsVersion, still try to make a best-effort guess as to whether
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
-            else if (toolsVersion == null)
+            else
             {
                 int solutionVersion;
                 int visualStudioVersion;

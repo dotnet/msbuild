@@ -2013,7 +2013,7 @@ namespace Microsoft.Build.Tasks
                             referenceAssemblyDirectories = new List<string>(_latestTargetFrameworkDirectories);
                             otherFrameworkName = String.Join(";", _latestTargetFrameworkDirectories);
                         }
-                        else if (targetFrameworkMoniker != null)
+                        else
                         {
                             FrameworkNameVersioning highestFrameworkName = null;
                             referenceAssemblyDirectories = GetHighestVersionReferenceAssemblyDirectories(targetFrameworkMoniker, out highestFrameworkName);
