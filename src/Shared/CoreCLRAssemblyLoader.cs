@@ -7,20 +7,27 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
-
-//using Roslyn.Utilities;
-
-//using static Microsoft.CodeAnalysis.AnalyzerAssemblyLoadUtils;
-
 namespace Microsoft.Build.Shared
 {
-    /// Core CLR compatible wrapper for loading analyzers.
+    /// <summary>
+    /// CoreCLR-compatible wrapper for loading task assemblies.
+    /// </summary>
+    /// <remarks>
+    /// This type defines a new <see cref="AssemblyLoadContext"/>. This isn't really what we want to
+    /// do, as we aren't trying to isolate our assembly loads from the default context. All we want
+    /// to do is add support for loading task assemblies and their dependencies, which we assume are
+    /// located immediately next to them in the file system. Ideally we wouldn't derive from
+    /// <see cref="AssemblyLoadContext"/> at all, but simply hook the <see cref="AssemblyLoadContext.Resolving"/>
+    /// event to handle finding the dependencies. For the moment, however, that approach is blocked
+    /// by https://github.com/dotnet/coreclr/issues/5837.
+    /// </remarks>
     internal sealed class CoreClrAssemblyLoader : AssemblyLoadContext
     {
         private readonly Dictionary<string, Assembly> _pathsToAssemblies = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Assembly> _namesToAssemblies = new Dictionary<string, Assembly>();
         private readonly List<string> _dependencyPaths = new List<string>();
         private readonly object _guard = new object();
+
         private static readonly string[] _extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
 
         /// <summary>
@@ -97,8 +104,26 @@ namespace Microsoft.Build.Shared
         {
             lock (_guard)
             {
+                // First try to satisfy the load from the default context.
+                Assembly assembly;
+                try
+                {
+                    assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+                    if (assembly != null)
+                    {
+                        return assembly;
+                    }
+                }
+                catch
+                {
+                    // LoadFromAssemblyName indicates failure by throwing exceptions; we need to
+                    // catch them, ignore them, and try to load the assembly ourselves.
+                    // This may mask underlying issues where DefaultContext.LoadFromAssemblyName
+                    // should have succeeded, but there isn't much we can do about that.
+                }
+
                 // Try and grab assembly using standard load
-                Assembly assembly = AppContextLoad(assemblyName);
+                assembly = AppContextLoad(assemblyName);
                 if (assembly != null)
                 {
                     return assembly;
