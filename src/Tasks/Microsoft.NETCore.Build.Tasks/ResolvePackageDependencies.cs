@@ -103,6 +103,21 @@ namespace Microsoft.NETCore.Build.Tasks
 
         #endregion
 
+        #region Test Support
+
+        public ResolvePackageDependencies()
+        {
+        }
+
+        public ResolvePackageDependencies(LockFile lockFile, IPackageResolver packageResolver)
+            : this()
+        {
+            _lockFile = lockFile;
+            _packageResolver = packageResolver;
+        }
+
+        #endregion
+
         private IPackageResolver PackageResolver
         {
             get

@@ -114,13 +114,5 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 Path.Combine(packageDirectory, filePath),
                 destinationSubDirectory);
         }
-
-        private class MockPackageResolver : IPackageResolver
-        {
-            public string GetPackageDirectory(string packageId, NuGetVersion version)
-            {
-                return Path.Combine("/root", packageId, version.ToNormalizedString(), "path");
-            }
-        }
     }
 }
