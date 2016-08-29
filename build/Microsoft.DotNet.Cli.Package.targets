@@ -13,7 +13,7 @@
           DependsOnTargets="Init;"
           Condition=" '$(OSName)' == 'ubuntu' ">
     <MSBuild
-      BuildInParallel="False"
+      BuildInParallel="True"
       Projects="$(RepoRoot)/build/package/Microsoft.DotNet.Cli.Installer.DEB.proj"
       Properties="ArtifactNameWithVersionSdk=$(ArtifactNameWithVersionSdk);
                   CLIBuildDll=$(CLIBuildDll);

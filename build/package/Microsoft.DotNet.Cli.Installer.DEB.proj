@@ -159,7 +159,8 @@
   </Target>
 
   <Target Name="TestDebuild">
-
+      <Message Text="Don't remove this" />
+      
       <!-- run Debuild -->
       <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
           <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
