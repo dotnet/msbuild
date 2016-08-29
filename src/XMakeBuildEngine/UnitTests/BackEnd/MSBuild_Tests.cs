@@ -687,8 +687,8 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
-                    h1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetH
-                    ", projectFile1, projectFile2);
+                    h1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetH
+                    ", projectFile2);
 
                 Assert.True(targetOutputs.ContainsKey("Build"));
                 Assert.Equal(1, targetOutputs["Build"].Items.Length);

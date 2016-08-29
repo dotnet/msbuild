@@ -215,6 +215,7 @@
     <value>MSB3884: Could not find rule set file "{0}".</value>
   <comment>{StrBegin="MSB3884: "}</comment>
   </data>
+
   <!--
         The Copy message bucket is: MSB3021 - MSB3030
 
@@ -247,7 +248,7 @@
     <comment>LOCALIZATION: {0} and {1} are paths.</comment>      
   </data>
   <data name="Copy.RetryingAsFileCopy">
-    <value>Could not use a hard link to copy "{0}" to "{1}". Copying the file instead. {2}</value>
+    <value>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</value>
     <comment>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</comment>
   </data>
   <data name="Copy.NeedsDestination">
@@ -260,6 +261,10 @@
   <data name="Copy.SourceIsDirectory">
     <value>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</value>
     <comment>{StrBegin="MSB3025: "}</comment>
+  </data>
+  <data name="Copy.SymbolicLinkComment">
+    <value>Creating symbolic link to copy "{0}" to "{1}".</value>
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>      
   </data>
   <data name="Copy.Retrying">
     <value>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4}</value>
@@ -291,6 +296,7 @@
     <value>MSB3031: Could not set additional metadata. "{0}" is a reserved metadata name and cannot be modified.</value>
     <comment>{StrBegin="MSB3031: "} UE: Tasks and OM users are not allowed to remove or change the value of the built-in meta-data on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
   </data>
+  
   <!--
         The CreateManifestResourceName message bucket is: MSB3041 - MSB3050
 
@@ -2594,6 +2600,14 @@
   </data>
   
   <!--
+        MSB3891 - MSB3900   Targets: Copy Overflow
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Copy.ExactlyOneTypeOfLink">
+    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
+  </data>
+  
+  <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
         See the comments above each task's messages for individual task message buckets.
@@ -2669,6 +2683,7 @@
             MSB3861 - MSB3870   Task: ErrorFromResources
             MSB3871 - MSB3880   Targets: Code sharing
             MSB3881 - MSB3890   Task: Compiler
+            MSB3891 - MSB3900   Overflow: Copy
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

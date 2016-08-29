@@ -1141,7 +1141,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="throwOnExecute">Should the task throw when executed</param>
         private void InitializeHost(bool throwOnExecute)
         {
-            _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1) as ILoggingService;
+            _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             _logger = new MockLogger();
             _loggingService.RegisterLogger(_logger);
             _host = new TaskExecutionHost();

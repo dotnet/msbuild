@@ -451,35 +451,35 @@ namespace Microsoft.Build.UnitTests
         public void VerifyWarningForOrder()
         {
             // Create a project file that has an expression
-            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name=`Build`>
                             <Message Text=`expression 1 is true ` Condition=`$(a) == 1 and $(b) == 2 or $(c) == 3`/>
                         </Target>
                     </Project>
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ");
 
             // Make sure the log contains the correct strings.
             Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3."
 
-            ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
+            ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name=`Build`>
                             <Message Text=`expression 1 is true ` Condition=`$(a) == 1 or $(b) == 2 and $(c) == 3`/>
                         </Target>
                     </Project>
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ");
 
             // Make sure the log contains the correct strings.
             Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - (a) == 1 or $(b) == 2 and $(c) == 3."
 
-            ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
+            ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name=`Build`>
                             <Message Text=`expression 1 is true ` Condition=`($(a) == 1 or $(b) == 2 and $(c) == 3) or $(d) == 4`/>
                         </Target>
                     </Project>
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ");
 
             // Make sure the log contains the correct strings.
             Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - ($(a) == 1 or $(b) == 2 and $(c) == 3) or $(d) == 4."
@@ -493,46 +493,46 @@ namespace Microsoft.Build.UnitTests
         public void VerifyNoWarningForOrder()
         {
             // Create a project file that has an expression
-            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name=`Build`>
                             <Message Text=`expression 1 is true ` Condition=`$(a) == 1 and $(b) == 2 and $(c) == 3`/>
                         </Target>
                     </Project>
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ");
 
             // Make sure the log contains the correct strings.
             Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - (a) == 1 and $(b) == 2 and $(c) == 3."
 
-            ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
+            ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name=`Build`>
                             <Message Text=`expression 1 is true ` Condition=`$(a) == 1 or $(b) == 2 or $(c) == 3`/>
                         </Target>
                     </Project>
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ");
 
             // Make sure the log contains the correct strings.
             Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - (a) == 1 or $(b) == 2 or $(c) == 3."
 
-            ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
+            ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name=`Build`>
                             <Message Text=`expression 1 is true ` Condition=`($(a) == 1 and $(b) == 2) or $(c) == 3`/>
                         </Target>
                     </Project>
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ");
 
             // Make sure the log contains the correct strings.
             Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - ($(a) == 1 and $(b) == 2) or $(c) == 3."
 
-            ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
+            ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name=`Build`>
                             <Message Text=`expression 1 is true ` Condition=`($(a) == 1 or $(b) == 2) and $(c) == 3`/>
                         </Target>
                     </Project>
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ");
 
             // Make sure the log contains the correct strings.
             Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."

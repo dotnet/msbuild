@@ -614,7 +614,7 @@ namespace Microsoft.Build.Shared
             public bool NeedsRecursion { get; }
         }
 
-        struct GetFilesRecursionState
+        struct RecursionState
         {
             /// <summary>
             /// The directory to search in
@@ -639,15 +639,16 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <param name="getFileSystemEntries">Delegate.</param>
         /// <param name="searchesToExclude">Patterns to exclude from the results</param>
+        /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Assumes no trailing slashes</param>
         private static void GetFilesRecursive
         (
             System.Collections.IList listOfFiles,
-            GetFilesRecursionState recursionState,
+            RecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
             GetFileSystemEntries getFileSystemEntries,
-            IList<GetFilesRecursionState> searchesToExclude,
-            Dictionary<string, List<GetFilesRecursionState>> searchesToExcludeInSubdirs
+            IList<RecursionState> searchesToExclude,
+            Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs
         )
         {
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec== null) || (recursionState.SearchData.RegexFileMatch == null),
@@ -739,18 +740,18 @@ namespace Microsoft.Build.Shared
                     newRecursionState.BaseDirectory = subdir;
                     newRecursionState.RemainingWildcardDirectory = nextStep.RemainingWildcardDirectory;
 
-                    List<GetFilesRecursionState> newSearchesToExclude = null;
+                    List<RecursionState> newSearchesToExclude = null;
 
                     if (excludeNextSteps != null)
                     {
-                        newSearchesToExclude = new List<GetFilesRecursionState>();
+                        newSearchesToExclude = new List<RecursionState>();
 
                         for (int i = 0; i < excludeNextSteps.Length; i++)
                         {
                             if (excludeNextSteps[i].Subdirs != null &&
                                 excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir.Equals(subdir, StringComparison.Ordinal)))
                             {
-                                GetFilesRecursionState thisExcludeStep = searchesToExclude[i];
+                                RecursionState thisExcludeStep = searchesToExclude[i];
                                 thisExcludeStep.BaseDirectory = subdir;
                                 thisExcludeStep.RemainingWildcardDirectory = excludeNextSteps[i].RemainingWildcardDirectory;
                                 newSearchesToExclude.Add(thisExcludeStep);
@@ -760,13 +761,14 @@ namespace Microsoft.Build.Shared
 
                     if (searchesToExcludeInSubdirs != null)
                     {
-                        List<GetFilesRecursionState> searchesForSubdir;
+                        List<RecursionState> searchesForSubdir;
+
                         if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
                         {
                             //  We've found the base directory that these exclusions apply to.  So now add them as normal searches
                             if (newSearchesToExclude == null)
                             {
-                                newSearchesToExclude = new List<GetFilesRecursionState>();
+                                newSearchesToExclude = new List<RecursionState>();
                             }
                             newSearchesToExclude.AddRange(searchesForSubdir);
                         }
@@ -781,7 +783,7 @@ namespace Microsoft.Build.Shared
 
         private static FileSearchRecursionResult GetFilesRecursiveStep
         (
-            GetFilesRecursionState recursionState,
+            RecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
             GetFileSystemEntries getFileSystemEntries
@@ -1336,10 +1338,10 @@ namespace Microsoft.Build.Shared
 
         static GetSearchDataResult GetFileSearchData(string projectDirectoryUnescaped, string filespecUnescaped,
             GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists, out bool stripProjectDirectory,
-            out GetFilesRecursionState result)
+            out RecursionState result)
         {
             stripProjectDirectory = false;
-            result = new GetFilesRecursionState();
+            result = new RecursionState();
 
             string fixedDirectoryPart;
             string wildcardDirectoryPart;
@@ -1438,7 +1440,11 @@ namespace Microsoft.Build.Shared
                 needsRecursion);
 
             result.SearchData = searchData;
-            result.BaseDirectory = fixedDirectoryPart;
+
+            // The double trim fixes https://github.com/Microsoft/msbuild/issues/917
+            // System.IO does not leave trailing slashes in directory enumerations.
+            // Since this string will be matched against System.IO directory enumerations, both need to agree on trailing slashes
+            result.BaseDirectory = fixedDirectoryPart.TrimEnd(Path.AltDirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
             result.RemainingWildcardDirectory = wildcardDirectoryPart;
 
             return GetSearchDataResult.RunSearch;
@@ -1507,7 +1513,7 @@ namespace Microsoft.Build.Shared
              * Analyze the file spec and get the information we need to do the matching.
              */
             bool stripProjectDirectory;
-            GetFilesRecursionState state;
+            RecursionState state;
             var result = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped, getFileSystemEntries, directoryExists,
                 out stripProjectDirectory, out state);
 
@@ -1525,22 +1531,22 @@ namespace Microsoft.Build.Shared
                 throw new NotSupportedException(result.ToString());
             }
 
-            List<GetFilesRecursionState> searchesToExclude = null;
+            List<RecursionState> searchesToExclude = null;
 
             //  Exclude searches which will become active when the recursive search reaches their BaseDirectory.
             //  The BaseDirectory of the exclude search is the key for this dictionary.
-            Dictionary<string, List<GetFilesRecursionState>> searchesToExcludeInSubdirs = null;
+            Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs = null;
 
             HashSet<string> resultsToExclude = null;
             if (excludeSpecsUnescaped != null)
             {
-                searchesToExclude = new List<GetFilesRecursionState>();
+                searchesToExclude = new List<RecursionState>();
                 foreach (string excludeSpec in excludeSpecsUnescaped)
                 {
                     //  This is ignored, we always use the include pattern's value for stripProjectDirectory
                     bool excludeStripProjectDirectory;
 
-                    GetFilesRecursionState excludeState;
+                    RecursionState excludeState;
                     var excludeResult = GetFileSearchData(projectDirectoryUnescaped, excludeSpec, getFileSystemEntries, directoryExists,
                         out excludeStripProjectDirectory, out excludeState);
 
@@ -1592,12 +1598,13 @@ namespace Microsoft.Build.Shared
 
                             if (searchesToExcludeInSubdirs == null)
                             {
-                                searchesToExcludeInSubdirs = new Dictionary<string, List<GetFilesRecursionState>>();
+                                searchesToExcludeInSubdirs = new Dictionary<string, List<RecursionState>>();
                             }
-                            List<GetFilesRecursionState> listForSubdir;
+                            List<RecursionState> listForSubdir;
                             if (!searchesToExcludeInSubdirs.TryGetValue(excludeState.BaseDirectory, out listForSubdir))
                             {
-                                listForSubdir = new List<GetFilesRecursionState>();
+                                listForSubdir = new List<RecursionState>();
+
                                 searchesToExcludeInSubdirs[excludeState.BaseDirectory] = listForSubdir;
                             }
                             listForSubdir.Add(excludeState);
