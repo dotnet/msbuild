@@ -8,18 +8,18 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public class DesignTimeRunner : IDotnetTestRunner
     {
-        private readonly ITestRunnerResolver _testRunnerResolver;
+        private readonly ITestRunnerNameResolver _testRunnerNameResolver;
 
         private readonly ICommandFactory _commandFactory;
 
         private readonly string _assemblyUnderTest;
 
         public DesignTimeRunner(
-            ITestRunnerResolver testRunnerResolver,
+            ITestRunnerNameResolver testRunnerNameResolver,
             ICommandFactory commandFactory,
             string assemblyUnderTest)
         {
-            _testRunnerResolver = testRunnerResolver;
+            _testRunnerNameResolver = testRunnerNameResolver;
             _commandFactory = commandFactory;
             _assemblyUnderTest = assemblyUnderTest;
         }
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Test
                 using (var dotnetTest = new DotnetTest(messages, pathToAssemblyUnderTest))
                 {
                     var testRunnerFactory =
-                        new TestRunnerFactory(_testRunnerResolver.ResolveTestRunner(), _commandFactory);
+                        new TestRunnerFactory(_testRunnerNameResolver.ResolveTestRunner(), _commandFactory);
 
                     dotnetTest
                         .AddNonSpecificMessageHandlers(messages, adapterChannel)

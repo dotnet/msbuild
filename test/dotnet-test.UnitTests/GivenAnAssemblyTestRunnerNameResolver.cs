@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.Dotnet.Tools.Test.Tests
 {
-    public class GivenAnAssemblyTestRunnerResolver
+    public class GivenAnAssemblyTestRunnerNameResolver
     {
         private readonly string _directoryOfAssemblyUnderTest = Path.Combine("c:", "some", "path");
 
@@ -28,7 +28,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             directoryMock.AddFile(_directoryOfAssemblyUnderTest, TestRunnerFileName);
 
             var pathToAssemblyUnderTest = Path.Combine(_directoryOfAssemblyUnderTest, TestRunnerFileName);
-            var assemblyTestRunnerResolver = new AssemblyTestRunnerResolver(pathToAssemblyUnderTest, directoryMock);
+            var assemblyTestRunnerResolver =
+                new AssemblyTestRunnerNameResolver(pathToAssemblyUnderTest, directoryMock);
 
             var testRunner = assemblyTestRunnerResolver.ResolveTestRunner();
 
@@ -44,7 +45,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             directoryMock.AddFile(_directoryOfAssemblyUnderTest, "dotnet-test-someOtherTestRunner.dll");
             directoryMock.AddFile(_directoryOfAssemblyUnderTest, "dotnet-test-AndYetAnotherTestRunner.dll");
 
-            var assemblyTestRunnerResolver = new AssemblyTestRunnerResolver(_directoryOfAssemblyUnderTest, directoryMock);
+            var assemblyTestRunnerResolver =
+                new AssemblyTestRunnerNameResolver(_directoryOfAssemblyUnderTest, directoryMock);
 
             var bestEffortTestRunner = assemblyTestRunnerResolver.ResolveTestRunner();
 
@@ -56,7 +58,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var directoryMock = new DirectoryMock();
 
-            var assemblyTestRunnerResolver = new AssemblyTestRunnerResolver(_directoryOfAssemblyUnderTest, directoryMock);
+            var assemblyTestRunnerResolver =
+                new AssemblyTestRunnerNameResolver(_directoryOfAssemblyUnderTest, directoryMock);
 
             var testRunner = assemblyTestRunnerResolver.ResolveTestRunner();
 

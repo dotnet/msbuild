@@ -44,13 +44,13 @@ namespace Microsoft.DotNet.Tools.Test
             Func<ICommandFactory, string, IDotnetTestRunner> nextAssemblyTestRunner =
                 (commandFactory, assemblyUnderTest) => nextTestRunner(commandFactory, assemblyUnderTest, null);
 
-            return new AssemblyTestRunner(nextAssemblyTestRunner);
+            return new AssemblyTestRunnerDecorator(nextAssemblyTestRunner);
         }
 
         private static IDotnetTestRunner CreateTestRunnerForProjectJson(
             Func<ICommandFactory, string, NuGetFramework, IDotnetTestRunner> nextTestRunner)
         {
-            return new ProjectJsonTestRunner(nextTestRunner);
+            return new ProjectJsonTestRunnerDecorator(nextTestRunner);
         }
     }
 }

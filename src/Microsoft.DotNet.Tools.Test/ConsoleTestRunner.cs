@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public class ConsoleTestRunner : IDotnetTestRunner
     {
-        private readonly ITestRunnerResolver _testRunnerResolver;
+        private readonly ITestRunnerNameResolver _testRunnerNameResolver;
 
         private readonly ICommandFactory _commandFactory;
 
@@ -18,12 +18,12 @@ namespace Microsoft.DotNet.Tools.Test
         private readonly NuGetFramework _framework;
 
         public ConsoleTestRunner(
-            ITestRunnerResolver testRunnerResolver,
+            ITestRunnerNameResolver testRunnerNameResolver,
             ICommandFactory commandFactory,
             string assemblyUnderTest,
             NuGetFramework framework = null)
         {
-            _testRunnerResolver = testRunnerResolver;
+            _testRunnerNameResolver = testRunnerNameResolver;
             _commandFactory = commandFactory;
             _assemblyUnderTest = assemblyUnderTest;
             _framework = framework;
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Test
         public int RunTests(DotnetTestParams dotnetTestParams)
         {
             return _commandFactory.Create(
-                    _testRunnerResolver.ResolveTestRunner(),
+                    _testRunnerNameResolver.ResolveTestRunner(),
                     GetCommandArgs(dotnetTestParams),
                     _framework,
                     dotnetTestParams.Config)

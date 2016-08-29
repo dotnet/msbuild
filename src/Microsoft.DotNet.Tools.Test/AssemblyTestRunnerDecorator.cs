@@ -7,11 +7,11 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class AssemblyTestRunner : IDotnetTestRunner
+    public class AssemblyTestRunnerDecorator : IDotnetTestRunner
     {
         private readonly Func<ICommandFactory, string, IDotnetTestRunner> _nextRunner;
 
-        public AssemblyTestRunner(Func<ICommandFactory, string, IDotnetTestRunner> nextRunner)
+        public AssemblyTestRunnerDecorator(Func<ICommandFactory, string, IDotnetTestRunner> nextRunner)
         {
             _nextRunner = nextRunner;
         }

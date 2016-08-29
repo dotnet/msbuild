@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.Dotnet.Tools.Test.Tests
 {
-    public class GivenAProjectJsonTestRunnerResolver
+    public class GivenAProjectJsonTestRunnerNameResolver
     {
         private const string SomeTestRunner = "runner";
 
@@ -21,7 +21,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 TestRunner = SomeTestRunner
             };
 
-            var projectJsonTestRunnerResolver = new ProjectJsonTestRunnerResolver(project);
+            var projectJsonTestRunnerResolver = new ProjectJsonTestRunnerNameResolver(project);
 
             var testRunner = projectJsonTestRunnerResolver.ResolveTestRunner();
 
@@ -33,7 +33,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         {
             var project = new Project();
 
-            var projectJsonTestRunnerResolver = new ProjectJsonTestRunnerResolver(project);
+            var projectJsonTestRunnerResolver = new ProjectJsonTestRunnerNameResolver(project);
 
             var testRunner = projectJsonTestRunnerResolver.ResolveTestRunner();
 

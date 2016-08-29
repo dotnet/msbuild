@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Test
             _projectReader = projectReader;
         }
 
-        public ITestRunnerResolver Create(DotnetTestParams dotnetTestParams)
+        public ITestRunnerNameResolver Create(DotnetTestParams dotnetTestParams)
         {
             var testRunnerResolver = dotnetTestParams.IsTestingAssembly ?
                 GetAssemblyTestRunnerResolver(dotnetTestParams) :
@@ -24,25 +24,25 @@ namespace Microsoft.DotNet.Tools.Test
             return testRunnerResolver;
         }
 
-        private ITestRunnerResolver GetAssemblyTestRunnerResolver(DotnetTestParams dotnetTestParams)
+        private ITestRunnerNameResolver GetAssemblyTestRunnerResolver(DotnetTestParams dotnetTestParams)
         {
-            ITestRunnerResolver testRunnerResolver = null;
+            ITestRunnerNameResolver testRunnerNameResolver = null;
             if (dotnetTestParams.HasTestRunner)
             {
-                testRunnerResolver = new ParameterTestRunnerResolver(dotnetTestParams.TestRunner);
+                testRunnerNameResolver = new ParameterTestRunnerNameResolver(dotnetTestParams.TestRunner);
             }
             else
             {
-                testRunnerResolver = new AssemblyTestRunnerResolver(dotnetTestParams.ProjectOrAssemblyPath);
+                testRunnerNameResolver = new AssemblyTestRunnerNameResolver(dotnetTestParams.ProjectOrAssemblyPath);
             }
 
-            return testRunnerResolver;
+            return testRunnerNameResolver;
         }
 
-        private ITestRunnerResolver GetProjectJsonTestRunnerResolver(DotnetTestParams dotnetTestParams)
+        private ITestRunnerNameResolver GetProjectJsonTestRunnerResolver(DotnetTestParams dotnetTestParams)
         {
             var project = _projectReader.ReadProject(dotnetTestParams.ProjectOrAssemblyPath);
-            return new ProjectJsonTestRunnerResolver(project);
+            return new ProjectJsonTestRunnerNameResolver(project);
         }
     }
 }

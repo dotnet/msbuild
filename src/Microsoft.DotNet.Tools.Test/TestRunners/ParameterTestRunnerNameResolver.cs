@@ -3,11 +3,11 @@
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ParameterTestRunnerResolver : ITestRunnerResolver
+    public class ParameterTestRunnerNameResolver : ITestRunnerNameResolver
     {
         private readonly string _testRunner;
 
-        public ParameterTestRunnerResolver(string testRunner)
+        public ParameterTestRunnerNameResolver(string testRunner)
         {
             _testRunner = testRunner;
         }

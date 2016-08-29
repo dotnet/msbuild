@@ -7,14 +7,14 @@ using Xunit;
 
 namespace Microsoft.Dotnet.Tools.Test.Tests
 {
-    public class GivenAParameterTestRunnerResolver
+    public class GivenAParameterTestRunnerNameResolver
     {
         private const string SomeTestRunner = "Some test runner";
 
         [Fact]
         public void It_returns_the_runner_based_on_the_parameter()
         {
-            var parameterTestRunnerResolver = new ParameterTestRunnerResolver(SomeTestRunner);
+            var parameterTestRunnerResolver = new ParameterTestRunnerNameResolver(SomeTestRunner);
 
             var testRunner = parameterTestRunnerResolver.ResolveTestRunner();
 

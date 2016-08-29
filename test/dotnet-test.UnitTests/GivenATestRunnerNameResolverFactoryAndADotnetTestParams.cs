@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.Dotnet.Tools.Test.Tests
 {
-    public class GivenATestRunnerResolverFactoryAndADotnetTestParams
+    public class GivenATestRunnerNameResolverFactoryAndADotnetTestParams
     {
         private const string PathToAFolder = "c:/some/path";
         private const string PathToAnAssembly = "c:/some/path/to/assembly.dll";
@@ -35,7 +35,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             var testRunnerResolver = dotnetTestRunnerResolverFactory.Create(dotnetTestParams);
 
-            testRunnerResolver.Should().BeOfType<ProjectJsonTestRunnerResolver>();
+            testRunnerResolver.Should().BeOfType<ProjectJsonTestRunnerNameResolver>();
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             var testRunnerResolver = dotnetTestRunnerResolverFactory.Create(dotnetTestParams);
 
-            testRunnerResolver.Should().BeOfType<ProjectJsonTestRunnerResolver>();
+            testRunnerResolver.Should().BeOfType<ProjectJsonTestRunnerNameResolver>();
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             var testRunnerResolver = dotnetTestRunnerResolverFactory.Create(dotnetTestParams);
 
-            testRunnerResolver.Should().BeOfType<ParameterTestRunnerResolver>();
+            testRunnerResolver.Should().BeOfType<ParameterTestRunnerNameResolver>();
         }
     }
 }

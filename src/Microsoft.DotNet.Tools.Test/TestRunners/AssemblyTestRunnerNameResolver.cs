@@ -7,18 +7,18 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class AssemblyTestRunnerResolver : ITestRunnerResolver
+    public class AssemblyTestRunnerNameResolver : ITestRunnerNameResolver
     {
         private readonly string _directoryOfAssemblyUnderTest;
 
         private readonly IDirectory _directory;
 
-        public AssemblyTestRunnerResolver(string assemblyUnderTest) :
+        public AssemblyTestRunnerNameResolver(string assemblyUnderTest) :
             this(assemblyUnderTest, FileSystemWrapper.Default.Directory)
         {
         }
 
-        internal AssemblyTestRunnerResolver(string assemblyUnderTest, IDirectory directory)
+        internal AssemblyTestRunnerNameResolver(string assemblyUnderTest, IDirectory directory)
         {
             _directoryOfAssemblyUnderTest = directory.GetDirectoryFullName(assemblyUnderTest);
             _directory = directory;

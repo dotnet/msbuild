@@ -11,12 +11,12 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ProjectJsonTestRunner : IDotnetTestRunner
+    public class ProjectJsonTestRunnerDecorator : IDotnetTestRunner
     {
         private readonly Func<ICommandFactory, string, NuGetFramework, IDotnetTestRunner> _nextRunner;
         private readonly TestProjectBuilder _testProjectBuilder;
 
-        public ProjectJsonTestRunner(
+        public ProjectJsonTestRunnerDecorator(
             Func<ICommandFactory, string, NuGetFramework, IDotnetTestRunner> nextRunner)
         {
             _nextRunner = nextRunner;

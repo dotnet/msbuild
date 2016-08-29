@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public interface ITestRunnerResolver
+    public interface ITestRunnerNameResolver
     {
         string ResolveTestRunner();
     }

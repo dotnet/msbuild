@@ -5,11 +5,11 @@ using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class ProjectJsonTestRunnerResolver : ITestRunnerResolver
+    public class ProjectJsonTestRunnerNameResolver : ITestRunnerNameResolver
     {
         private Project _project;
 
-        public ProjectJsonTestRunnerResolver(Project project)
+        public ProjectJsonTestRunnerNameResolver(Project project)
         {
             _project = project;
         }
