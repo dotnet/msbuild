@@ -47,6 +47,7 @@
   <ItemGroup>
     <!-- Used by packages.targets:BuildPackages to inject properties into the nuspec-->
     <NuspecProperties Include="version=$(PackageVersion)"/>
+    <NuspecProperties Include="targetmsbuildtoolsversion=$(TargetMSBuildToolsVersion)"/>
   </ItemGroup>
 
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />

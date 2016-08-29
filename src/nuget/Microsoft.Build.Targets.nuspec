@@ -39,7 +39,7 @@
     <file src="Microsoft.VisualBasic.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.VisualBasic.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.overridetasks" target="runtimes\any\native" />
-    <file src="Extensions\14.1\Microsoft.Common.props" target="contentFiles\any\any\14.1" />
+    <file src="Microsoft.Common.props" target="contentFiles\any\any\Extensions\$targetmsbuildtoolsversion$\" />
     <file src="Microsoft.Common.tasks" target="runtimes\any\native" />
     <file src="Microsoft.NETFramework.CurrentVersion.props" target="runtimes\any\native" />
     <file src="Microsoft.NETFramework.props" target="runtimes\any\native" />

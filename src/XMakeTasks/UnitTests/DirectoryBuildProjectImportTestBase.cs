@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
                     </PropertyGroup>
                 </Project>";
 
-        private const string ProjectRelativePath = @"src\foo\foo.csproj";
+        private readonly string _projectRelativePath = Path.Combine("src", "foo", "foo.csproj");
 
         protected DirectoryBuildProjectImportTestBase()
         {
@@ -65,14 +65,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ensures that if a directory build project does not exist, it won't be imported and the project can be successfully evaluated.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/806")]
+        [Fact]
         public void DoesNotImportDirectoryBuildProjectIfNotExist()
         {
             // ---------------------
             // src\Foo\Foo.csproj
             // ---------------------
 
-            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(ProjectRelativePath, @"
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ensures that when the user disables the import by setting the corresponding property to "false", then all of the functionality is disabled.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/806")]
+        [Fact]
         public void DoesNotImportDirectoryBuildProjectWhenDisabled()
         {
             // ---------------------
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
             // src\Foo\Foo.csproj
             // ---------------------
 
-            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(ProjectRelativePath, $@"
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, $@"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                     <PropertyGroup>
                         <{ImportDirectoryBuildProjectPropertyName}>false</{ImportDirectoryBuildProjectPropertyName}>
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ensures that when the user specifies a custom directory build props file that it is imported correctly.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/806")]
+        [Fact]
         public void ImportsDirectoryBuildProjectCustomFile()
         {
             string customFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(CustomBuildProjectFile, BasicDirectoryBuildProjectContents);
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
             // src\Foo\Foo.csproj
             // ---------------------
 
-            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(ProjectRelativePath, $@"
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, $@"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                     <PropertyGroup>
                         <{DirectoryBuildProjectPathPropertyName}>{customFilePath}</{DirectoryBuildProjectPathPropertyName}>
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ensures that if a directory build project exists, it will be imported.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/806")]
+        [Fact]
         public void ImportsDirectoryBuildProjectIfExists()
         {
             ObjectModelHelpers.CreateFileInTempProjectDirectory(DirectoryBuildProjectFile, BasicDirectoryBuildProjectContents);
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
             // src\Foo\Foo.csproj
             // ---------------------
 
-            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(ProjectRelativePath, @"
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
