@@ -12,7 +12,7 @@ using Xunit;
 using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 using FluentAssertions;
 
-namespace Microsoft.NETCore.Publish.Tests
+namespace Microsoft.NETCore.Build.Tests
 {
     public class GivenThatWeWantToBuildAnAppWithLibrary
     {
@@ -21,12 +21,10 @@ namespace Microsoft.NETCore.Publish.Tests
         [Fact]
         public void It_builds_the_project_successfully()
         {
-            var packagesDirectory =
-                Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .Restore("--fallbacksource", $"{packagesDirectory}");
+                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 

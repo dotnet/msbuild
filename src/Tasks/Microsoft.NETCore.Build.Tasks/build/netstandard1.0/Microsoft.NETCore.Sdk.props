@@ -53,8 +53,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- force the compiler to always emit .dll for .NET Core projects, even if $(OutputType) == 'exe' -->
     <TargetExt>.dll</TargetExt>
 
-    <!-- This will turn off the base 'ResolveNuGetPackages' target since it is UWP specific, and .NET Core needs it to be split up -->
+    <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
+
+    <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core projects -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   
   <PropertyGroup>

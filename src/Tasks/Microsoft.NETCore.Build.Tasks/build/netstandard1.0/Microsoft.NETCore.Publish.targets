@@ -102,6 +102,11 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
       </ResolvedFilesToPublish>
 
+      <!-- Copy satellite assemblies. -->
+      <ResolvedFilesToPublish Include="@(IntermediateSatelliteAssembliesWithTargetPath)">
+        <RelativePath>%(IntermediateSatelliteAssembliesWithTargetPath.Culture)\%(Filename)%(Extension)</RelativePath>
+      </ResolvedFilesToPublish>
+
       <!-- Copy all the assemblies -->
       <ResolvedFilesToPublish Include="@(ResolvedAssembliesToPublish)">
         <RelativePath>%(ResolvedAssembliesToPublish.DestinationSubPath)</RelativePath>
@@ -114,6 +119,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="RunResolvePublishAssemblies">
     <!-- TODO get the content files -->
     <!-- TODO perform any preprocess transforms on the files -->
+
+    <ItemGroup>
+      <ResolvedAssembliesToPublish Include="@(ReferenceCopyLocalPaths)">
+        <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(Filename)%(Extension)</DestinationSubPath>
+      </ResolvedAssembliesToPublish>
+    </ItemGroup>
   </Target>
 
   <!--

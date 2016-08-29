@@ -23,12 +23,10 @@ namespace Microsoft.NETCore.Publish.Tests
         [Fact]
         public void It_publishes_the_project_to_the_publish_folder_and_the_app_should_run()
         {
-            var packagesDirectory =
-                Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .Restore("--fallbacksource", $"{packagesDirectory}");
+                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
 
             var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
