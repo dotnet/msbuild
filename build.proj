@@ -3,9 +3,15 @@
   <Import Project="dir.props" />
 
   <ItemGroup>
+    <ProjectWithoutConfiguration Include="build\dirs.proj" />
     <ProjectWithoutConfiguration Include="src\dirs.proj" />
     <ProjectWithoutConfiguration Include="Samples\dirs.proj" Condition="'$(BuildSamples)'!='false'" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <!-- build\dirs.proj must be built before src\dirs.proj because the latter depends on task dlls produced by the former -->
+    <BuildInParallel>false</BuildInParallel>
+  </PropertyGroup>
 
   <Import Project="dir.targets" />
   <Import Project="dir.traversal.targets" />

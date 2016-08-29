@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private readonly ComClass[] _comClasses;
         private readonly OutputMessageCollection _outputMessages;
         private readonly string _outputDisplayName;
-        private readonly ResourceManager _resources = new ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", System.Reflection.Assembly.GetExecutingAssembly());
+        private readonly ResourceManager _resources = new ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", System.Reflection.Assembly.GetExecutingAssembly());
         private bool _success = true;
 
         private readonly static string[] s_emptyArray = new string[] { };

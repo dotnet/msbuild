@@ -20,11 +20,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
+      <Link>AssemblyFolders\AssemblyFoldersEx.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyFoldersEx.cs">
-      <Link>AssemblyFoldersEx.cs</Link>
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
+      <Link>AssemblyFolders\AssemblyFoldersFromConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
+      <Link>AssemblyFolders\Serialization\AssemblyFolderCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
+      <Link>AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
@@ -145,7 +156,8 @@
     <Compile Include="AppDomainIsolatedTask.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AssemblyFoldersExInfo.cs" />
+    <Compile Include="AssemblyFolders\AssemblyFoldersExInfo.cs" />
+    <Compile Include="AssemblyFolders\AssemblyFoldersFromConfigInfo.cs" />
     <Compile Include="AssemblyInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -192,9 +204,6 @@
     <Compile Include="TrackedDependencies\FlatTrackingData.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="TrackedDependencies\NativeMethods.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="TrackedDependencies\FileTracker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -210,17 +219,19 @@
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
     <!-- Resource Files -->
-    <EmbeddedResource Include="Strings.resx">
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
-      <Link>Strings.shared.resx</Link>
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>Microsoft.Build.Utilities.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
     <!-- Assemblies Files we depend on -->
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
     <Reference Include="System.Configuration" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">

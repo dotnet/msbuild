@@ -8,6 +8,9 @@
   <Import Project="$(MicroBuildDir)\MicroBuild.Core.targets" Condition="Exists('$(MicroBuildDir)\MicroBuild.Core.targets')" />
   <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
 
+  <!-- Update localized resources from the default English ones-->
+  <Import Project="UpdateLocalizedResources.targets" Condition="'$(LocalizedBuild)' == 'true' and '$(IsTestProject)' != 'true' and '$(DoNotLocalizeProject)' != 'true'"/>
+
   <!-- Restore packages -->
   <PropertyGroup>
     <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$(MSBuildProjectDirectory)\packages.config</PackagesConfig>
@@ -23,4 +26,5 @@
     <Exec Command="$(NugetRestoreCommand) &quot;$(PackagesConfig)&quot;" StandardOutputImportance="Low" />
     <Touch Files="$(RestorePackagesSemaphore)" AlwaysCreate="true" />
   </Target>
+
 </Project>

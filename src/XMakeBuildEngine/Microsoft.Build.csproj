@@ -31,6 +31,9 @@
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -163,6 +166,11 @@
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
     <Compile Include="Evaluation\ProjectChangedEventArgs.cs" />
     <Compile Include="Evaluation\ProjectXmlChangedEventArgs.cs" />
@@ -459,6 +467,7 @@
     <Compile Include="Instance\TaskFactoryWrapper.cs" />
     <Compile Include="Instance\TaskRegistry.cs" />
     <!-- ######################## -->
+    <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -636,14 +645,20 @@
     </Compile>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
+
+    <!-- Resource Files -->
+
     <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
+
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Resources.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+
     <!-- Assemblies Files we depend on -->
     <!-- Be conservative when adding references... adding System.Xml.Linq can add .47 sec cold start time to our launch time, or 80 ms to warm start time -->
     <Reference Include="System" />
@@ -657,6 +672,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

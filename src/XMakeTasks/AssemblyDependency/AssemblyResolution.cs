@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
 namespace Microsoft.Build.Tasks
 {
@@ -133,7 +134,8 @@ namespace Microsoft.Build.Tasks
             InstalledAssemblies installedAssemblies,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion,
-            GetAssemblyPathInGac getAssemblyPathInGac
+            GetAssemblyPathInGac getAssemblyPathInGac,
+            TaskLoggingHelper log
         )
         {
             Resolver[] resolvers = new Resolver[searchPaths.Length];
@@ -172,6 +174,10 @@ namespace Microsoft.Build.Tasks
                 else if (0 == String.Compare(basePath, 0, AssemblyResolutionConstants.assemblyFoldersExSentinel, 0, AssemblyResolutionConstants.assemblyFoldersExSentinel.Length, StringComparison.OrdinalIgnoreCase))
                 {
                     resolvers[p] = new AssemblyFoldersExResolver(searchPaths[p], getAssemblyName, fileExists, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getRuntimeVersion, openBaseKey, targetedRuntimeVersion, targetProcessorArchitecture, true, buildEngine);
+                }
+                else if (0 == String.Compare(basePath, 0, AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel, 0, AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel.Length, StringComparison.OrdinalIgnoreCase))
+                {
+                    resolvers[p] = new AssemblyFoldersFromConfigResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, targetProcessorArchitecture, true, buildEngine, log);
                 }
                 else
                 {

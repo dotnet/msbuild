@@ -15,6 +15,7 @@ using Microsoft.Build.Construction;
 using System.IO;
 using System.Xml;
 using System.Linq;
+using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -516,6 +517,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [Fact]
         public void Build()
         {
+            // Setting the current directory to the MSBuild running location. It *should* be this
+            // already, but if it's not some other test changed it and didn't change it back. If
+            // the directory does not include the reference dlls the compilation will fail.
+            Directory.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+
             string projectFileContent = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <UsingTask TaskName='Microsoft.Build.Tasks.Message' AssemblyFile='Microsoft.Build.Tasks.Core.dll'/>

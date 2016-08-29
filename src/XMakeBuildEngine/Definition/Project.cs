@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -1030,6 +1031,354 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(item, "item");
 
             return ((IItem)item).EvaluatedIncludeEscaped;
+        }
+
+        /// <summary>
+        /// Finds all the globs specified in item includes.
+        /// </summary>
+        /// <example>
+        /// 
+        /// <code>
+        ///<P>*.txt</P>
+        /// 
+        ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
+        ///<Foo Include="*.a" Exclude="3.a"/>
+        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b";**\bar\*.b"/>
+        ///<Foo Include="$(P)"/> 
+        ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
+        ///<Foo Include="*.cs"/ Exclude="@(Bar)"/> (out of project cone glob)
+        ///</code>
+        /// 
+        ///Example result: 
+        ///[
+        ///GlobResult(glob: "C:\**\*.foo", exclude: []),
+        ///GlobResult(glob: "*.a", exclude=["3.a"]),
+        ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
+        ///GlobResult(glob: "*.txt", exclude=[]),
+        ///GlobResult(glob: "*.a", exclude=[]),
+        ///GlobResult(glob: "*.cs", exclude=[])
+        ///]
+        /// </example>
+        /// <remarks>
+        /// Sources of innacuracies: 
+        /// - <code>GlobResult.Excludes</code> does not contain information from item references (e.g. Exclude="@(Item)")
+        /// (it sees items as they are at the end of evaluation)
+        /// </remarks>
+        /// <returns>
+        /// List of <see cref="GlobResult"/>. Sorted in project evaluation order.
+        /// </returns>
+        public List<GlobResult> GetAllGlobs()
+        {
+            return GetAllGlobs(_data.EvaluatedItemElements);
+        }
+
+        /// <summary>
+        /// Overload of <see cref="Project.GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="itemType">Confine search to item elements of this type</param>
+        public List<GlobResult> GetAllGlobs(string itemType)
+        {
+            return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
+        }
+
+        /// <summary>
+        /// Overload of <see cref="Project.GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="item">Confine search to item elements appearing above this item, inclusively.</param>
+        public List<GlobResult> GetAllGlobs(ProjectItem item)
+        {
+            return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
+        }
+
+        private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
+        {
+            return projectItemElements.SelectMany(GetAllGlobs).ToList();
+        }
+
+        private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
+        {
+            Func<string, IElementLocation, HashSet<string>> expandItemSpecIntoFragments = (s, l) =>
+                {
+                    var expandedItemSpec = _data.Expander.ExpandIntoStringListLeaveEscaped(s, ExpanderOptions.ExpandProperties, l);
+
+                    // don't care about duplicates
+                    var set = new HashSet<string>(expandedItemSpec);
+
+                    // take out item references, we can't reason about them
+                    set.RemoveWhere(IsItemReferenceFragment);
+
+                    return set;
+                };
+
+            var includeFragments = expandItemSpecIntoFragments(itemElement.Include, itemElement.IncludeLocation);
+            var excludeFragments = expandItemSpecIntoFragments(itemElement.Exclude, itemElement.ExcludeLocation);
+
+            foreach (var itemFragment in includeFragments)
+            {
+                if (IsGlobFragment(itemFragment))
+                {
+                    yield return new GlobResult(itemElement, itemFragment, excludeFragments);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds all the item elements in the logical project with itemspecs that match the given string:
+        /// - elements that would include (or exclude) the string
+        /// - elements that would update the string (not yet implemented)
+        /// - elements that would remove the string (not yet implemented)
+        /// </summary>
+        /// 
+        /// <example>
+        /// The following snippet shows what <c>GetItemProvenance("a.cs")</c> returns for various item elements
+        /// <code>
+        /// <A Include="a.cs;*.cs"/> // Occurences:2; Operation: Include; Provenance: StringLiteral | Glob
+        /// <B Include="*.cs" Exclude="a.cs"/> // Occurences: 1; Operation: Exclude; Provenance: StringLiteral
+        /// <C Include="b.cs"/> // NA
+        /// <D Include="@(A)"/> // Occurences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurence from a referenced item)
+        /// <E Include="$(P)"/> // Occurences: 4; Operation: Include; Provenance: FromLiteral (direct reference in $P) | Glob (direct reference in $P) | Inconclusive (it is an indirect occurence from referenced properties and items)
+        /// <PropertyGroup>
+        ///     <P>a.cs;*.cs;@(A)</P>
+        /// </PropertyGroup>
+        /// </code>
+        /// 
+        /// </example>
+        /// 
+        /// <remarks>
+        /// This method and its overloads are useful for clients that need to inspect all the item elements
+        /// that might refer to a specific item instance. For example, Visual Studio uses it to inspect
+        /// projects with globs. Upon a file system or IDE file artifact change, VS calls this method to find all the items
+        /// that might refer to the detected file change (e.g. 'which item elements refer to "Program.cs"?').
+        /// It uses such information to know which elements it should edit to reflect the user or file system changes.
+        /// 
+        /// Literal string matching tries to first match the strings. If the check fails, it then tries to match
+        /// the strings as if they represented files: it normalizes both strings as files relative to the current project directory
+        ///
+        /// GetItemProvenance suffers from some sources of innacuracy:
+        /// - it is performed after evaluation, thus is insensitive to item data flow when item references are present
+        /// (it sees items as they are at the end of evaluation)
+        /// 
+        /// This API and its return types are prone to change.
+        /// </remarks>
+        /// 
+        /// <param name="itemToMatch">The string to perform matching against</param>
+        /// 
+        /// <returns>
+        /// A list of <see cref="ProvenanceResult"/>, sorted in project evaluation order.
+        /// </returns>
+        public List<ProvenanceResult> GetItemProvenance(string itemToMatch)
+        {
+            return GetItemProvenance(itemToMatch, _data.EvaluatedItemElements);
+        }
+
+        /// <summary>
+        /// Overload of <see cref="GetItemProvenance(string)"/>
+        /// </summary>
+        /// <param name="itemToMatch">The string to perform matching against</param>
+        /// <param name="itemType">The item type to constrain the search in</param>
+        public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType)
+        {
+            return GetItemProvenance(itemToMatch, GetItemElementsByType(_data.EvaluatedItemElements, itemType));
+        }
+
+        /// <summary>
+        /// Overload of <see cref="GetItemProvenance(string)"/>
+        /// </summary>
+        /// <param name="item"> 
+        /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
+        /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
+        /// The element that produced this <paramref name="item"/> is included in the results.
+        /// </param>
+        public List<ProvenanceResult> GetItemProvenance(ProjectItem item)
+        {
+            var itemElementsAbove = GetItemElementsAboveItem(_data.EvaluatedItemElements, item);
+
+            return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
+        }
+
+        private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
+        {
+            return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
+        }
+
+        private static List<ProjectItemElement> GetItemElementsAboveItem(IEnumerable<ProjectItemElement> itemElements, ProjectItem item)
+        {
+            var itemElementsAbove = itemElements
+                .Where(i => i.ItemType.Equals(item.ItemType))
+                .TakeWhile(i => i != item.Xml)
+                .ToList();
+
+            itemElementsAbove.Add(item.Xml);
+            return itemElementsAbove;
+        }
+
+        private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
+        {
+            return
+                projectItemElements.Select(i => ComputeProvenanceResult(itemToMatch, i))
+                    .Where(r => r != null)
+                    .ToList();
+        }
+
+        private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
+        {
+            Func<IElementLocation, Func<string, ExpanderOptions, string>> expandForXmlLocation = (l) => (s, o) => _data.Expander.ExpandIntoStringLeaveEscaped(s, o, l);
+
+            Func<string, IElementLocation, Operation, ProvenanceResult> singleItemSpecProvenance = (itemSpec, elementLocation, operation) =>
+            {
+                if (elementLocation == null)
+                {
+                    return null;
+                }
+
+                var result = ComputeProvenanceResult(itemToMatch, itemSpec, expandForXmlLocation(elementLocation));
+
+                return result?.Item2 > 0
+                    ? new ProvenanceResult(itemElement, operation, result.Item1, result.Item2)
+                    : null;
+            };
+
+            Func<ProvenanceResult>[] provenanceProviders =
+            {
+                // provenance provider for include item elements
+                () =>
+                {
+                    var includeResult = singleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
+
+                    if (includeResult == null)
+                    {
+                        return null;
+                    }
+
+                    var excludeResult = singleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude);
+
+                    return excludeResult ?? includeResult;
+                },
+
+                // provenance provider for update item elements
+                () => singleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update),
+                
+                // provenance provider for remove item elements
+                () => singleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove)
+            };
+
+            return provenanceProviders.Select(provider => provider()).FirstOrDefault(provenanceResult => provenanceResult != null);
+        }
+
+        private Tuple<Provenance, int> ComputeProvenanceResult(string itemToMatch, string itemSpecToLookIn, Func<string, ExpanderOptions, string> expand)
+        {
+            Provenance provenance;
+            var matchOccurrences = ItemMatchesInSpecCompareViaExpander(itemToMatch, itemSpecToLookIn, expand, out provenance);
+
+            return matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
+        }
+
+        /// <summary>
+        /// Since:
+        ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
+        ///     - GetItemProvenance needs to have correct counts for exclude strings (as correct as it can get while doing it after evaluation)
+        /// 
+        /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
+        /// </summary>
+        private int ItemMatchesInSpecCompareViaExpander(string itemToMatch, string itemSpec, Func<string, ExpanderOptions, string> expand, out Provenance provenance)
+        {
+            if (string.IsNullOrEmpty(itemSpec))
+            {
+                provenance = Provenance.Undefined;
+                return 0;
+            }
+
+            // look into the itemspec as if it were expanded by the Expander
+            Provenance provenanceFromExpandedPropertiesAndItems;
+            var expandedMatches = ItemMatchesInSpec(itemToMatch, expand(itemSpec, ExpanderOptions.ExpandPropertiesAndItems), out provenanceFromExpandedPropertiesAndItems);
+
+            // look into the raw itemspec
+            Provenance provenanceFromNonExpandedString;
+            var nonExpandedMatches = ItemMatchesInSpec(itemToMatch, itemSpec, out provenanceFromNonExpandedString);
+
+            if (expandedMatches > nonExpandedMatches)
+            {
+                // return the number of occurences when properties AND items are expanded to get the correct occurence count
+
+                // return the provenance WITHOUT item expansion. Otherwise the items coming from a referenced item get interpreted as StringLiteral
+                // include="*.cs;@(Compile)" needs to return Inconclusive|Glob and not Inconclusive|Glob|StringLiteral
+                Provenance provenanceFromExpandedProperties;
+                ItemMatchesInSpec(itemToMatch, expand(itemSpec, ExpanderOptions.ExpandProperties), out provenanceFromExpandedProperties);
+
+                provenance = Provenance.Inconclusive | provenanceFromExpandedProperties;
+                return expandedMatches;
+            }
+            else
+            {
+                provenance = provenanceFromNonExpandedString;
+                return nonExpandedMatches;
+            }
+        }
+
+        private int ItemMatchesInSpec(string itemToMatch, string itemSpec, out Provenance provenance)
+        {
+            provenance = Provenance.Undefined;
+
+            var occurrences = 0;
+
+            if (string.IsNullOrEmpty(itemSpec))
+            {
+                return occurrences;
+            }
+
+            foreach (var itemFragment in ExpressionShredder.SplitSemiColonSeparatedList(itemSpec))
+            {
+                if (IsPropertyReferenceFragment(itemFragment) || IsItemReferenceFragment(itemFragment))
+                {
+                    continue;
+                }
+
+                if (IsGlobFragment(itemFragment) && ItemMatchesGlob(itemFragment, itemToMatch))
+                {
+                    provenance |= Provenance.Glob;
+                    occurrences++;
+                }
+
+                if (ItemMatchesStringLiteral(itemToMatch, itemFragment))
+                {
+                    provenance |= Provenance.StringLiteral;
+                    occurrences++;
+                }
+            }
+
+            return occurrences;
+        }
+
+        private bool ItemMatchesStringLiteral(string itemToMatch, string itemFragment)
+        {
+            var thisProjectPath = _data.Directory;
+
+            // It is either a direct string match or the two strings refer to the same file, relative to the project directory
+            return itemToMatch.Equals(itemFragment) || FileUtilities.ComparePathsNoThrow(itemToMatch, itemFragment, thisProjectPath);
+        }
+
+        private static bool ItemMatchesGlob(string globPattern, string file)
+        {
+            var match = FileMatcher.FileMatch(globPattern, file);
+            return match.isLegalFileSpec && match.isMatch;
+        }
+
+        private static bool IsGlobFragment(string itemFragment)
+        {
+            var containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(itemFragment);
+            var containsRealWildcards = FileMatcher.HasWildcards(itemFragment);
+
+            return !containsEscapedWildcards && containsRealWildcards;
+        }
+
+        private static bool IsItemReferenceFragment(string itemFragment)
+        {
+            return itemFragment.Contains("@(");
+        }
+
+        private static bool IsPropertyReferenceFragment(string itemFragment)
+        {
+            return itemFragment.Contains("$(");
         }
 
         /// <summary>
@@ -2310,6 +2659,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+
         /// <summary>
         /// Encapsulates the backing data of a Project, so that it can be passed to the Evaluator to
         /// fill in on a re-evaluation without having to expose property setters.
@@ -2527,6 +2877,12 @@ namespace Microsoft.Build.Evaluation
             public ItemDictionary<ProjectItem> Items
             {
                 get { return _items; }
+            }
+
+            public List<ProjectItemElement> EvaluatedItemElements
+            {
+                get;
+                private set;
             }
 
             /// <summary>
@@ -2758,6 +3114,7 @@ namespace Microsoft.Build.Evaluation
                 this.AllEvaluatedProperties = new List<ProjectProperty>();
                 this.AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 this.AllEvaluatedItems = new List<ProjectItem>();
+                this.EvaluatedItemElements = new List<ProjectItemElement>();
 
                 if (_globalPropertiesToTreatAsLocal != null)
                 {
@@ -3140,6 +3497,79 @@ namespace Microsoft.Build.Evaluation
                 string value = (property == null) ? String.Empty : property.EvaluatedValue;
                 return value;
             }
+        }
+    }
+    /// <summary>
+    /// Data class representing a result from <see cref="Project.GetAllGlobs()"/> and its overloads.
+    /// </summary>
+    public class GlobResult
+    {
+        public string Glob { get; private set; }
+        public ISet<string> Excludes{ get; private set; }
+        public ProjectItemElement ItemElement { get; private set; }
+
+        public GlobResult(ProjectItemElement itemElement, string glob, ISet<string> excludes)
+        {
+            ItemElement = itemElement;
+            Glob = glob;
+            Excludes = excludes;
+        }
+    }
+
+    /// <summary>
+    /// Bit flag enum that specifies how a string representing an item matched against an itemspec.
+    /// </summary>
+    [Flags]
+    public enum Provenance
+    {
+        /// <summary>
+        /// Undefined is the bottom element and should not appear in actual results 
+        /// </summary>
+        Undefined = 0,
+
+        /// <summary>
+        /// A string matched against a string literal from an itemspec
+        /// </summary>
+        StringLiteral = 1,
+
+        /// <summary>
+        /// A string matched against a glob pattern from an itemspec
+        /// </summary>
+        Glob = 2,
+
+        /// <summary>
+        /// Inconclusive means that the match is indirect, coming from either property or item references.
+        /// </summary>
+        Inconclusive = 4
+    }
+
+    /// <summary>
+    /// Enum that specifies how an item element references an item
+    /// </summary>
+    public enum Operation
+    {
+        Include, 
+        Exclude,
+        Update,
+        Remove
+    }
+
+    /// <summary>
+    /// Data class representing a result from <see cref="Project.GetItemProvenance(string)"/> and its overloads.
+    /// </summary>
+    public class ProvenanceResult
+    {
+        public Operation Operation { get; private set; }
+        public ProjectItemElement ItemElement { get; private set; }
+        public Provenance Provenance { get; private set; }
+        public int Occurrences { get; private set; }
+
+        public ProvenanceResult(ProjectItemElement itemElement, Operation operation, Provenance provenance, int occurrences)
+        {
+            ItemElement = itemElement;
+            Operation = operation;
+            Provenance = provenance;
+            Occurrences = occurrences;
         }
     }
 }

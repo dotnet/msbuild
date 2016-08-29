@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <!-- 
+        Microsoft ResX Schema
+
+        Version 1.3
+
+        The primary goals of this format is to allow a simple XML format 
+        that is mostly human readable. The generation and parsing of the 
+        various data types are done through the TypeConverter classes 
+        associated with the data types.
+
+        Example:
+
+        ... ado.net/XML headers & schema ...
+        <resheader name="resmimetype">text/microsoft-resx</resheader>
+        <resheader name="version">1.3</resheader>
+        <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+        <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+        <data name="Name1">this is my long string</data>
+        <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+        <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+            [base64 mime encoded serialized .NET Framework object]
+        </data>
+        <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+            [base64 mime encoded string representing a byte array form of the .NET Framework object]
+        </data>
+
+        There are any number of "resheader" rows that contain simple 
+        name/value pairs.
+
+        Each data row contains a name, and value. The row also contains a 
+        type or mimetype. Type corresponds to a .NET class that support 
+        text/value conversion through the TypeConverter architecture. 
+        Classes that don't support this are serialized and stored with the 
+        mimetype set.
+
+        The mimetype is used for serialized objects, and tells the 
+        ResXResourceReader how to depersist the object. This is currently not 
+        extensible. For a given mimetype the value must be set accordingly:
+
+        Note - application/x-microsoft.net.object.binary.base64 is the format 
+        that the ResXResourceWriter will generate, however the reader can 
+        read any of the formats listed below.
+
+        mimetype: application/x-microsoft.net.object.binary.base64
+        value   : The object must be serialized with 
+            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+        mimetype: application/x-microsoft.net.object.soap.base64
+        value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+        mimetype: application/x-microsoft.net.object.bytearray.base64
+        value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+    
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+                            <xsd:attribute name="UESanitized" type="xsd:boolean" msdata:Ordinal="3" />
+                            <xsd:attribute name="Visibility" type="Visibility_Type" msdata:Ordinal="4" />
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="5" />
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="6" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+        <xsd:simpleType name="Visibility_Type">
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="Public" />
+                <xsd:enumeration value="Obsolete" />
+                <xsd:enumeration value="Private_OM" />
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="General.InvalidToolSwitch" UESanitized="false" Visibility="Public">
+        <value>MSB6001: Invalid command line switch for "{0}". {1}</value>
+        <comment>{StrBegin="MSB6001: "}UE: This message is shown when a tool-based task (i.e. the task is a wrapper for an .exe) is given a parameter value that converts into an invalid command line switch for the tool. "{0}" is the name of the tool e.g. "csc.exe", and "{1}" is a message explaining the problem. LOCALIZATION: "{1}" is a localized message.</comment>
+    </data>
+    <data name="General.QuotesNotAllowedInThisKindOfTaskParameter">
+        <value>Illegal quote passed to the command line switch named "{0}". The value was [{1}].</value>
+    </data>
+    <data name="General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName">
+        <value>Illegal quote in the command line value [{0}].</value>
+    </data>
+    <data name="General.ToolCommandFailedNoErrorCode">
+        <value>The command exited with code {0}.</value>
+    </data>
+    <data name="LoggingBeforeTaskInitialization" UESanitized="false" Visibility="Public">
+        <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
+        <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
+    </data>
+    <data name="PlatformManifest.MissingPlatformXml" UESanitized="false" Visibility="Private_OM">
+        <value>MSB6010: Could not find platform manifest file at "{0}".</value>
+        <comment>{StrBegin="MSB6010: "}</comment>
+    </data>
+    <data name="ToolLocationHelper.UnsupportedFrameworkVersion" UESanitized="false" Visibility="Private_OM">
+        <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
+    </data>
+    <data name="ToolLocationHelper.UnsupportedFrameworkVersionForWindowsSdk" UESanitized="false" Visibility="Private_OM">
+        <value>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</value>
+    </data>
+    <data name="ToolLocationHelper.UnsupportedVisualStudioVersion" UESanitized="false" Visibility="Private_OM">
+        <value>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</value>
+    </data>
+    <data name="ToolTask.CommandTooLong">
+        <value>MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</value>
+        <comment>{StrBegin="MSB6002: "}</comment>
+    </data>
+    <data name="ToolTask.CouldNotStartToolExecutable" UESanitized="false">
+        <value>MSB6003: The specified task executable "{0}" could not be run. {1}</value>
+      <comment>{StrBegin="MSB6003: "}</comment>
+  </data>
+    <data name="ToolTask.ToolCommandFailed">
+        <value>MSB6006: "{0}" exited with code {1}.</value>
+      <comment>{StrBegin="MSB6006: "}</comment>
+  </data>
+    <data name="ToolTask.ToolExecutableNotFound">
+        <value>MSB6004: The specified task executable location "{0}" is invalid.</value>
+      <comment>{StrBegin="MSB6004: "}</comment>
+  </data>
+  <data name="ToolsLocationHelper.InvalidRedistFile">
+        <value>There was an error reading the redist list file "{0}". {1}</value>
+        <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
+  </data>  
+  <data name="ToolsLocationHelper.CouldNotCreateChain">
+        <value>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</value>
+        <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
+  </data>   
+  <data name="ToolsLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
+    <value>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</value>
+    <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
+  </data>
+  <data name="ToolTask.InvalidEnvironmentParameter">
+    <value>MSB6007: The "{0}" value passed to the Environment property is not in the format "name=value", where the value part may be empty.</value>
+    <comment>{StrBegin="MSB6007: "}</comment>
+  </data>
+  <data name="ToolTask.EnvironmentVariableHeader">
+    <value>Environment Variables passed to tool:</value>
+  </data>
+  <!-- FileTracker strings -->
+  <data name="Tracking_LogFilesNotAvailable">
+    <value xml:space="preserve">Tracking logs are not available, minimal rebuild will be disabled.</value>
+  </data>
+  <data name="Tracking_MissingInputs">
+    <value xml:space="preserve">Missing input files detected, minimal rebuild will be disabled.</value>
+  </data>
+  <data name="Tracking_MissingOutputs">
+    <value xml:space="preserve">Missing output files detected, minimal rebuild will be disabled.</value>
+  </data>
+  <data name="Tracking_UpToDate">
+    <value xml:space="preserve">Skipping task because it is up-to-date.</value>
+  </data>
+  <data name="Tracking_TrackingLogNotAvailable">
+    <value xml:space="preserve">Write Tracking log not available, minimal rebuild will be disabled.</value>
+  </data>
+  <data name="Tracking_WriteTrackingLogs">
+    <value xml:space="preserve">Write Tracking Logs:</value>
+  </data>
+  <data name="Tracking_WriteTrackingCached">
+    <value xml:space="preserve">Using cached output dependency table built from:</value>
+  </data>
+  <data name="Tracking_TrackingLogs">
+    <value xml:space="preserve">Tracking Logs:</value>
+  </data>
+  <data name="Tracking_TrackingCached">
+    <value xml:space="preserve">Using cached dependency table built from:</value>
+  </data>
+  <data name="Tracking_OutputsFor">
+    <value xml:space="preserve">Outputs for {0}:</value>
+  </data>
+  <data name="Tracking_InputsFor">
+    <value xml:space="preserve">Inputs for {0}:</value>
+  </data>
+  <data name="Tracking_OutputsNotShown">
+    <value xml:space="preserve">Output details ({0} of them) were not logged for performance reasons.</value>
+  </data>
+  <data name="Tracking_InputsNotShown">
+    <value xml:space="preserve">Input details ({0} of them) were not logged for performance reasons.</value>
+  </data>
+  <data name="Tracking_SingleLogFileNotAvailable">
+    <value xml:space="preserve">Tracking log {0} is not available.</value>
+  </data>
+  <data name="Tracking_SourceWillBeCompiledAsNoTrackingLog">
+    <value xml:space="preserve">{0} will be compiled as the tracking log is not available.</value>
+  </data>
+  <data name="Tracking_SourceNotInTrackingLog">
+    <value xml:space="preserve">{0} will be compiled as it was not found in the tracking log.</value>
+  </data>
+  <data name="Tracking_SourceOutputsNotAvailable">
+    <value xml:space="preserve">{0} will be compiled as not all outputs are available.</value>
+  </data>
+  <data name="Tracking_SourceWillBeCompiledMissingDependency">
+    <value xml:space="preserve">{0} will be compiled as dependency {1} was missing.</value>
+  </data>
+  <data name="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
+    <value xml:space="preserve">{0} will be compiled as {1} was modified at {2}.</value>
+  </data>
+  <data name="Tracking_SourceWillBeCompiled">
+    <value xml:space="preserve">{0} will be compiled.</value>
+  </data>
+  <data name="Tracking_AllOutputsAreUpToDate">
+    <value xml:space="preserve">All outputs are up-to-date.</value>
+  </data>
+  <data name="Tracking_DependencyWasModifiedAt">
+    <value xml:space="preserve">File {0} was modified at {1} which is newer than {2} modified at {3}.</value>
+  </data>
+  <data name="Tracking_OutputDoesNotExist">
+    <value xml:space="preserve">{0} does not exist; source compilation required.</value>
+  </data>
+  <data name="Tracking_SourceWillBeCompiledOutputDoesNotExist">
+    <value xml:space="preserve">{0} will be compiled as output {1} does not exist.</value>
+  </data>
+  <data name="Tracking_ReadTrackingLogs">
+    <value xml:space="preserve">Read Tracking Logs:</value>
+  </data>
+  <data name="Tracking_ReadTrackingCached">
+    <value xml:space="preserve">Using cached input dependency table built from:</value>
+  </data>
+  <data name="Tracking_OutputForRootNotFound">
+    <value xml:space="preserve">No output for {0} was found in the tracking log; source compilation required.</value>
+  </data>
+  <data name="Tracking_DependenciesForRootNotFound">
+    <value xml:space="preserve">No dependencies for output {0} were found in the tracking log; source compilation required.</value>
+  </data>
+  <data name="Tracking_WriteLogEntryNotFound">
+    <value xml:space="preserve">Could not find {0} in the write tracking log.</value>
+  </data>
+  <data name="Tracking_ReadLogEntryNotFound">
+    <value xml:space="preserve">Could not find {0} in the read tracking log.</value>
+  </data>
+  <data name="Tracking_SourcesAndCorrespondingOutputMismatch">
+    <value xml:space="preserve">The number of source files and corresponding outputs must match.</value>
+  </data>
+  <data name="Tracking_InputNewerThanOutput">
+    <value xml:space="preserve">Source compilation required: input {0} is newer than output {1}.</value>
+  </data>
+  <data name="Tracking_RebuildingDueToInvalidTLog">
+    <value>MSB6008: Forcing a rebuild of all sources due to an error with the tracking logs. {0}</value>
+    <comment>{StrBegin="MSB6008: "}</comment>
+  </data>
+  <data name="Tracking_RebuildingDueToInvalidTLogContents">
+    <value>MSB6009: Forcing a rebuild of all source files due to the contents of "{0}" being invalid.</value>
+    <comment>{StrBegin="MSB6009: "}</comment>
+  </data>
+  <data name="MuxLogger_BuildFinishedFailure">
+    <value xml:space="preserve">Build FAILED.</value>
+  </data>
+  <data name="MuxLogger_BuildFinishedSuccess">
+    <value xml:space="preserve">Build succeeded.</value>
+  </data>
+
+  <!--
+        The Utilities message bucket is: MSB6001 - MSB6200
+
+        Next message code should be MSB6011
+
+        Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
+            <none>
+
+        Don't forget to update this comment after using a new code.
+  -->
+</root>

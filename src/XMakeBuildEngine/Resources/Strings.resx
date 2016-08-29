@@ -436,6 +436,9 @@
     <comment>{StrBegin="MSB4020: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
     attributes e.g. &lt;Import Project=""&gt; -- the value of Project should not be an empty string.</comment>
   </data>
+  <data name="InvalidAttributeExclusive" UESanitized="false" Visibility="Public">
+    <value>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</value>
+  </data>
   <data name="InvalidAttributeValueWithException" UESanitized="false" Visibility="Public">
     <value>MSB4102: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid. {3}</value>
     <comment>{StrBegin="MSB4102: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
@@ -1193,10 +1196,6 @@
     <value>MSB4207: Only an in-process affinity may be specified for projects which have registered host objects.</value>
     <comment>{StrBegin="MSB4207: "}</comment>
   </data>
-  <data name="InvalidAffinityForProjectWithHostObject" UESanitized="false" Visibility="Public">
-    <value>MSB4208: Only an in-process affinity may be specified for projects which have registered host objects.</value>
-    <comment>{StrBegin="MSB4208: "}</comment>
-  </data>
   <data name="ProjectInstanceConflictsWithAffinity" UESanitized="false" Visibility="Public">
     <value>MSB4209: The specified project instance conflicts with the affinity specified in the HostServices.</value>
     <comment>{StrBegin="MSB4209: "}</comment>
@@ -1342,6 +1341,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_EitherAttributeButNotBoth">
     <value>The &lt;{0}&gt; element must have either the "{1}" attribute or the "{2}" attribute but not both.</value>
   </data>
+  <data name="OM_OneOfAttributeButNotMore">
+    <value>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</value>
+  </data>
   <data name="OM_NoRemoveOutsideTargets">
     <value>The "Remove" attribute is not permitted on an item outside of a &lt;Target&gt;.</value>
   </data>
@@ -1379,9 +1381,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_CannotAcceptParent">
     <value>This parent is not a valid parent for the item.</value>
   </data>
-  <data name="OM_ItemsOutsideTargetMustHaveIncludeNoRemove">
-    <value>An item not parented under a Target must have a value for Include and no value for Remove.</value>
-    <comment>LOCALIZATION: Please do not localize "Target", "Include", and "Remove".</comment>
+  <data name="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
+    <value>An item not parented under a Target must have a value for Include or Update or Remove.</value>
+    <comment>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</comment>
   </data>
   <data name="OM_NameInvalid">
     <value>The name "{0}" contains an invalid character "{1}".</value>
@@ -1448,7 +1450,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!-- #################################################################################################-->
   <!-- ######################################## Shared strings #########################################-->
   <!-- ###### These belong in Strings.shared.resx, but have been copied here for performance ###########-->
-  <!-- ##### If you change the string here, please also change it in Shared\Strings.shared.resx ########-->
+  <!-- ##### If you change the string here, please also change it in Shared\Resources\Strings.shared.resx ########-->
   <!-- ############################ and in XMakeCommandLine\Strings.resx ###############################-->
   <!-- ############## Remove this block once ResourceManager bug 627270 has been fixed. ################-->
   <!-- #################################################################################################-->

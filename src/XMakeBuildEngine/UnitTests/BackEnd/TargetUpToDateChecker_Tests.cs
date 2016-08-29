@@ -7,10 +7,11 @@ using System.Resources;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Xml;
 using System.Text;
 using System.Globalization;
-
+using System.Runtime.InteropServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -18,17 +19,22 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using System.Threading;
+using Microsoft.Win32.SafeHandles;
 using Xunit;
+using Xunit.Abstractions;
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class TargetUpToDateChecker_Tests : IDisposable
     {
         private MockHost _mockHost;
+        private readonly ITestOutputHelper _testOutputHelper;
 
-        public TargetUpToDateChecker_Tests()
+        public TargetUpToDateChecker_Tests(ITestOutputHelper testOutputHelper)
         {
             _mockHost = new MockHost();
+            _testOutputHelper = testOutputHelper;
         }
 
         public void Dispose()
@@ -91,7 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.True(success);
 
-            // It should have actually skipped the "Build" target since some output metadata was missing
+            // It should not have skipped the "Build" target since some output metadata was missing
             ml.AssertLogContains("Running Build target");
 
             ml = new MockLogger();
@@ -901,6 +907,122 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 if (File.Exists(input2)) File.Delete(input2);
                 if (File.Exists(output1)) File.Delete(output1);
                 if (File.Exists(output2)) File.Delete(output2);
+            }
+        }
+
+        private static readonly DateTime Old = new DateTime(2000, 1, 1);
+        private static readonly DateTime Middle = new DateTime(2001, 1, 1);
+        private static readonly DateTime New = new DateTime(2002, 1, 1);
+
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        public void NewSymlinkOldDestinationIsUpToDate()
+        {
+            SimpleSymlinkInputCheck(symlinkWriteTime: New,
+                targetWriteTime: Old, 
+                outputWriteTime: Middle,
+                expectedOutOfDate: false);
+        }
+
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        public void OldSymlinkOldDestinationIsUpToDate()
+        {
+            SimpleSymlinkInputCheck(symlinkWriteTime: Old,
+                targetWriteTime: Middle,
+                outputWriteTime: New,
+                expectedOutOfDate: false);
+        }
+
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        public void OldSymlinkNewDestinationIsNotUpToDate()
+        {
+            SimpleSymlinkInputCheck(symlinkWriteTime: Old,
+                targetWriteTime: New,
+                outputWriteTime: Middle,
+                expectedOutOfDate: true);
+        }
+
+        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        public void NewSymlinkNewDestinationIsNotUpToDate()
+        {
+            SimpleSymlinkInputCheck(symlinkWriteTime: Middle,
+                targetWriteTime: Middle,
+                outputWriteTime: Old,
+                expectedOutOfDate: true);
+        }
+
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, UInt32 dwFlags);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetFileTime(SafeFileHandle hFile, ref long creationTime,
+            ref long lastAccessTime, ref long lastWriteTime);
+
+        private void SimpleSymlinkInputCheck(DateTime symlinkWriteTime, DateTime targetWriteTime,
+            DateTime outputWriteTime, bool expectedOutOfDate)
+        {
+            var inputs = new List<string>();
+            var outputs = new List<string>();
+
+            string inputTarget = "NONEXISTENT_FILE";
+            string inputSymlink = "NONEXISTENT_FILE";
+            string outputTarget = "NONEXISTENT_FILE";
+
+            try
+            {
+                inputTarget = FileUtilities.GetTemporaryFile();
+                _testOutputHelper.WriteLine($"Created input file {inputTarget}");
+                File.SetLastWriteTime(inputTarget, targetWriteTime);
+
+                inputSymlink = FileUtilities.GetTemporaryFile(null, ".linkin", createFile: false);
+
+                if (!CreateSymbolicLink(inputSymlink, inputTarget, 0))
+                {
+                    Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                }
+
+                // File.SetLastWriteTime on the symlink sets the target write time,
+                // so set the symlink's write time the hard way
+                using (SafeFileHandle handle =
+                    NativeMethodsShared.CreateFile(
+                        inputSymlink, NativeMethodsShared.GENERIC_READ | 0x100 /* FILE_WRITE_ATTRIBUTES */,
+                        NativeMethodsShared.FILE_SHARE_READ, IntPtr.Zero, NativeMethodsShared.OPEN_EXISTING,
+                        NativeMethodsShared.FILE_ATTRIBUTE_NORMAL | NativeMethodsShared.FILE_FLAG_OPEN_REPARSE_POINT,
+                        IntPtr.Zero))
+                {
+                    if (handle.IsInvalid)
+                    {
+                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                    }
+
+                    long symlinkWriteTimeTicks = symlinkWriteTime.ToFileTimeUtc();
+
+                    if (SetFileTime(handle, ref symlinkWriteTimeTicks, ref symlinkWriteTimeTicks,
+                            ref symlinkWriteTimeTicks) != true)
+                    {
+                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                    }
+                }
+
+                _testOutputHelper.WriteLine($"Created input link {inputSymlink}");
+
+                outputTarget = FileUtilities.GetTemporaryFile();
+                _testOutputHelper.WriteLine($"Created output file {outputTarget}");
+                File.SetLastWriteTime(outputTarget, outputWriteTime);
+
+                inputs.Add(inputSymlink);
+                outputs.Add(outputTarget);
+
+
+                DependencyAnalysisLogDetail detail;
+                Assert.Equal(expectedOutOfDate,
+                    TargetUpToDateChecker.IsAnyOutOfDate(out detail, Directory.GetCurrentDirectory(), inputs, outputs));
+            }
+            finally
+            {
+                if (File.Exists(inputTarget)) File.Delete(inputTarget);
+                if (File.Exists(inputSymlink)) File.Delete(inputSymlink);
+                if (File.Exists(outputTarget)) File.Delete(outputTarget);
             }
         }
     }

@@ -885,7 +885,7 @@ class X
             string localApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string localLowApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow");
             // The default path to temp, used to create explicitly short and long paths
-            string tempPath = Path.GetDirectoryName(Path.GetTempPath());
+            string tempPath = Path.GetTempPath();
             // The short path to temp
             string tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(tempPath).ToUpperInvariant());
             // The long path to temp
