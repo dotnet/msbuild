@@ -2216,7 +2216,7 @@ namespace Microsoft.Build.UnitTests
 
             if (LookupPrivilegeValue(null, privilege, ptr))
             {
-                ps.Privilege_1[0] = (LUID_AND_ATTRIBUTES)Marshal.PtrToStructure(ptr, typeof(LUID_AND_ATTRIBUTES));
+                ps.Privilege_1[0] = (LUID_AND_ATTRIBUTES)Marshal.PtrToStructure< LUID_AND_ATTRIBUTES>(ptr);
 
                 IntPtr ptrPs = IntPtr.Zero;
                 ptrPs = Marshal.AllocHGlobal(64); // 64 byte buffer
