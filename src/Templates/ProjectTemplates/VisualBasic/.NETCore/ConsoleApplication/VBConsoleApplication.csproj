@@ -11,9 +11,9 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{0C52951F-4EEF-4F2F-B587-0BCF6004C459}</ProjectGuid>
+    <ProjectGuid>{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>ConsoleApplication</AssemblyName>
+    <AssemblyName>VBConsoleApplication</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
@@ -46,9 +46,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectJsonTemplate Include="project-json-template.json">
-      <TargetPath>project.json.template</TargetPath>    
+      <TargetPath>project.json.template</TargetPath>
     </ProjectJsonTemplate>
-    <None Include="ProjectTemplate.csproj" />
+    <None Include="ProjectTemplate.vbproj" />
   </ItemGroup>
   <ItemGroup>
     <VSTemplate Include="ConsoleApplication.vstemplate">
@@ -56,7 +56,7 @@
     </VSTemplate>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Program.cs" />
+    <None Include="Program.vb" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ConsoleApplication.png" />
