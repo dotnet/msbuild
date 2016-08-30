@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli;
 
-namespace Microsoft.DotNet.Tools.Restore
+namespace Microsoft.DotNet.Tools
 {
     public class NuGetForwardingApp
     {

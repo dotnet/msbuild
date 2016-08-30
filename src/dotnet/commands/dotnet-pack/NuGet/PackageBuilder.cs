@@ -13,7 +13,7 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public class PackageBuilder
     {

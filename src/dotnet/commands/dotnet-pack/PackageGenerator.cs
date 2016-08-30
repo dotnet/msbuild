@@ -14,12 +14,12 @@ using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resources;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Pack;
-using NuGet;
+using NuGet.Legacy;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using PackageBuilder = NuGet.PackageBuilder;
-using NuGetConstants = NuGet.Constants;
+using PackageBuilder = NuGet.Legacy.PackageBuilder;
+using NuGetConstants = NuGet.Legacy.Constants;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {

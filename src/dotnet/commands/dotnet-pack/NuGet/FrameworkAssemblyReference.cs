@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using NuGet.Frameworks;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public class FrameworkAssemblyReference
     {

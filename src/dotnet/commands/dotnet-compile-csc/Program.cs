@@ -198,19 +198,17 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 commonArgs.Add("-t:library");
             }
 
+            string debugType;
             if (string.IsNullOrEmpty(options.DebugType))
             {
-                commonArgs.Add(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? "-debug:full"
-                    : "-debug:portable");
+                debugType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "full" : "portable";
             }
             else
             {
-                commonArgs.Add(options.DebugType == "portable"
-                    ? "-debug:portable"
-                    : "-debug:full");
+                debugType = options.DebugType;
             }
 
+            commonArgs.Add("-debug:" + debugType);
             return commonArgs;
         }
 

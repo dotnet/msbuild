@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Layout.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Archive.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Nupkg.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Installer.DEB.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Installer.DEB.proj" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Installer.MSI.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Microsoft.DotNet.Cli.Installer.PKG.targets" />
 

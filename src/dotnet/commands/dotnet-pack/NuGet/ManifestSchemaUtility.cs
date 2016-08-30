@@ -5,7 +5,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     internal static class ManifestSchemaUtility
     {

@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     internal static class PathUtility
     {

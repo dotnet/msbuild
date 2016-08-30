@@ -5,7 +5,7 @@ using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public static class PackageIdValidator
     {

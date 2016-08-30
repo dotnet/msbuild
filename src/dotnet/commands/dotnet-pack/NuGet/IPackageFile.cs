@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public interface IPackageFile
     {

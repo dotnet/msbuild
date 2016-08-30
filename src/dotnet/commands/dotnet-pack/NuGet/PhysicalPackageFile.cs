@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public class PhysicalPackageFile : IPackageFile
     {

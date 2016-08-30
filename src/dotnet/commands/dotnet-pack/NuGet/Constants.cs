@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NuGet
+namespace NuGet.Legacy
 {
     public static class Constants
     {

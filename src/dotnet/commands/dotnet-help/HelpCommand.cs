@@ -25,7 +25,7 @@ Host options (passed before the command):
   --version             Display .NET CLI Version Number
   --info                Display .NET CLI Info
 
-Common Commands:
+Commands:
   new           Initialize a basic .NET project
   restore       Restore dependencies specified in the .NET project
   build         Builds a .NET project
