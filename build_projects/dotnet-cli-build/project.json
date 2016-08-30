@@ -21,8 +21,8 @@
     "System.Xml.XmlSerializer": "4.0.11",
     "WindowsAzure.Storage": "6.2.2-preview",
     "NuGet.CommandLine.XPlat": "3.6.0-beta.1.msbuild.1",
-    "Microsoft.Build.Framework": "0.1.0-preview-00032-160824",
-    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00032-160824",
+    "Microsoft.Build.Framework": "0.1.0-preview-00033-160829",
+    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00033-160829",
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
   },
   "frameworks": {
