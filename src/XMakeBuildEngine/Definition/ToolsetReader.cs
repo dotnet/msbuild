@@ -591,13 +591,13 @@ namespace Microsoft.Build.Evaluation
                 if (globalProperties["MSBuildFrameworkToolsPath"] == null
                     && properties["MSBuildFrameworkToolsPath"] == null)
                 {
-                    properties.Set(ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath", toolsPath, true, false));
+                    properties.Set(ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath", string.IsNullOrEmpty(v4Dir) ? v35Dir : v4Dir, true, false));
                 }
                 if (globalProperties["MSBuildFrameworkToolsPath32"] == null
                     && properties["MSBuildFrameworkToolsPath32"] == null)
                 {
                     properties.Set(
-                        ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath32", toolsPath, true, false));
+                        ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath32", string.IsNullOrEmpty(v4Dir) ? v35Dir : v4Dir, true, false));
                 }
                 if (globalProperties["MSBuildRuntimeVersion"] == null && properties["MSBuildRuntimeVersion"] == null)
                 {
