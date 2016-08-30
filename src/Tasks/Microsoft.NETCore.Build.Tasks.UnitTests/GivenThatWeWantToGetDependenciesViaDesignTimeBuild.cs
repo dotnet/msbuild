@@ -836,7 +836,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                     { MetadataKeys.Name, "mockChildAnalyzerAssembly" },
                     { MetadataKeys.Path, "some path" },
                     { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Unknown" },
+                    { MetadataKeys.Type, "AnalyzerAssembly" },
                     { MetadataKeys.Analyzer, "true" },
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
                 });
