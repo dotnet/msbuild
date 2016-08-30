@@ -118,6 +118,16 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 return _temporaryDirectory;
             }
 
+            public IEnumerable<string> GetFiles(string path, string searchPattern)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetDirectoryFullName(string path)
+            {
+                throw new NotImplementedException();
+            }
+
             public bool Exists(string path)
             {
                 return _files.Keys.Any(k => k.StartsWith(path));

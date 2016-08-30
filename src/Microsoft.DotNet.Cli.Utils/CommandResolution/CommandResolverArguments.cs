@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
+﻿using System.Collections.Generic;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -26,5 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public string BuildBasePath { get; set; }
 
         public string DepsJsonFile { get; set; }
+
+        public string ApplicationName { get; set; }
     }
 }

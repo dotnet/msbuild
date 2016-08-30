@@ -20,7 +20,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         private Mock<ICommand> _commandMock;
         private Mock<ICommandFactory> _commandFactoryMock;
         private Mock<ITestRunnerArgumentsBuilder> _argumentsBuilderMock;
-        private string _runner = "runner";
+        private string _runner = "dotnet-test-runner";
         private string[] _testRunnerArguments;
 
         public GivenATestRunner()
@@ -38,7 +38,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
             _commandFactoryMock = new Mock<ICommandFactory>();
             _commandFactoryMock.Setup(c => c.Create(
-                $"dotnet-{_runner}",
+                $"{_runner}",
                 _testRunnerArguments,
                 null,
                 null)).Returns(_commandMock.Object).Verifiable();
