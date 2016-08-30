@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,73 +8,12 @@ using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Runner;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
 
 namespace dotnet_new3
 {
     public static class TemplateCreator
     {
-        public static IReadOnlyCollection<ITemplateInfo> List(string searchString)
-        {
-            HashSet<ITemplateInfo> matchingTemplates = new HashSet<ITemplateInfo>(TemplateEqualityComparer.Default);
-            HashSet<ITemplateInfo> allTemplates = new HashSet<ITemplateInfo>(TemplateEqualityComparer.Default);
-
-            using (Timing.Over("load"))
-            SettingsLoader.GetTemplates(allTemplates);
-
-            using(Timing.Over("Search in loaded"))
-            foreach (ITemplateInfo template in allTemplates)
-            {
-                if (string.IsNullOrEmpty(searchString)
-                    || template.Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) > -1
-                    || template.ShortName.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) > -1)
-                {
-                    matchingTemplates.Add(template);
-                }
-            }
-
-            using (Timing.Over("Alias search"))
-            {
-#if !NET451
-                IReadOnlyCollection<ITemplateInfo> allTemplatesCollection = allTemplates;
-#else
-                IReadOnlyCollection<ITemplateInfo> allTemplatesCollection = allTemplates.ToList();
-#endif
-                matchingTemplates.UnionWith(AliasRegistry.GetTemplatesForAlias(searchString, allTemplatesCollection));
-            }
-
-#if !NET451
-            IReadOnlyCollection<ITemplateInfo> matchingTemplatesCollection = matchingTemplates;
-#else
-            IReadOnlyCollection<ITemplateInfo> matchingTemplatesCollection = matchingTemplates.ToList();
-#endif
-            return matchingTemplatesCollection;
-        }
-
-        private static bool TryGetTemplate(string templateName, out ITemplateInfo tmplt)
-        {
-            try
-            {
-                using (Timing.Over("List"))
-                {
-                    IReadOnlyCollection<ITemplateInfo> result = List(templateName);
-
-                    if (result.Count == 1)
-                    {
-                        tmplt = result.First();
-                        return true;
-                    }
-                }
-            }
-            catch
-            {
-            }
-
-            tmplt = null;
-            return false;
-        }
-
         public static async Task<int> Instantiate(CommandLineApplication app, string templateName, CommandOption name, CommandOption dir, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> inputParameters, bool quiet, bool skipUpdateCheck)
         {
             if(string.IsNullOrWhiteSpace(templateName) && help.HasValue())
@@ -88,7 +26,7 @@ namespace dotnet_new3
 
             using (Timing.Over("Get single"))
             {
-                if (!TryGetTemplate(templateName, out tmpltInfo))
+                if (!Microsoft.TemplateEngine.Edge.Template.TemplateCreator.TryGetTemplate(templateName, out tmpltInfo))
                 {
                     return -1;
                 }
