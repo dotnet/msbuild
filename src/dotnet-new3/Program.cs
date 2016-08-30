@@ -283,7 +283,7 @@ namespace dotnet_new3
 
         private static void ListTemplates(CommandArgument template)
         {
-            IEnumerable<ITemplateInfo> results = TemplateCreator.List(template.Value);
+            IEnumerable<ITemplateInfo> results = Microsoft.TemplateEngine.Edge.Template.TemplateCreator.List(template.Value);
             TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplateInfo, object>>
             {
                 {"Templates", x => x.Name},
