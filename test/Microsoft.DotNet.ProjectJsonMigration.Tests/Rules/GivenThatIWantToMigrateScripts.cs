@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
-            var commands = new string[] { "fakecommand" };
+            var commands = new[] { "fakecommand" };
 
             var target = scriptMigrationRule.MigrateScriptSet(mockProj, mockProj.AddPropertyGroup(), commands, scriptName);
 
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
 
-            var commands = new string[] { "fakecommand1", "fakecommand2", "mockcommand3" };
+            var commands = new[] { "fakecommand1", "fakecommand2", "mockcommand3" };
             var commandsInTask = commands.ToDictionary(c => c, c => false);
 
             var target = scriptMigrationRule.MigrateScriptSet(mockProj, mockProj.AddPropertyGroup(), commands, scriptName);
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
 
-            var commands = new string[] { "compile:FullTargetFramework", "compile:Configuration"};
+            var commands = new[] { "compile:FullTargetFramework", "compile:Configuration"};
 
             var target = scriptMigrationRule.MigrateScriptSet(mockProj, mockProj.AddPropertyGroup(), commands, scriptName);
             target.Tasks.Count().Should().Be(commands.Length);
@@ -176,7 +176,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void Migrated_ScriptSet_has_ScriptExtension_added_to_script_command(string scriptCommandline, string expectedOutputCommand)
         {
             var scriptMigrationRule = new MigrateScriptsRule();
-            ProjectRootElement mockProj = ProjectRootElement.Create();
 
             var formattedCommand = scriptMigrationRule.AddScriptExtensionPropertyToCommandLine(scriptCommandline,
                 "MigratedScriptExtension_1");
@@ -195,12 +194,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             string expectedOutputCommandPrefix)
         {
             var scriptMigrationRule = new MigrateScriptsRule();
-            ProjectRootElement mockProj = ProjectRootElement.Create();
 
             var formattedCommand = scriptMigrationRule.FormatScriptCommand(scriptCommandline,
                 "MigratedScriptExtension_1");
 
             formattedCommand.Should().StartWith(expectedOutputCommandPrefix);
+        }
+
+        [Fact]
+        public void Formatting_script_commands_replaces_unknown_variables_with_MSBuild_Property_for_environment_variable_support()
+        {
+            var scriptMigrationRule = new MigrateScriptsRule();
+            scriptMigrationRule.ReplaceScriptVariables($"%UnknownVariable%").Should().Be("$(UnknownVariable)");
         }
     }
 }
