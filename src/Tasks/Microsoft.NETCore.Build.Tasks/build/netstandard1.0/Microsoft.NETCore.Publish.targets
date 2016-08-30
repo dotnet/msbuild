@@ -57,7 +57,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="CopyFilesToPublishDirectory"
-          DependsOnTargets="_ComputeFilesToPublish;
+          DependsOnTargets="ComputeFilesToPublish;
                             _CopySourceItemsToPublishDirectory">
 
     <Copy SourceFiles="@(ResolvedFilesToPublish)"
@@ -75,12 +75,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        _ComputeFilesToPublish
+                                        ComputeFilesToPublish
 
     Gathers all the files that need to be copied to the publish directory.
     ============================================================
     -->
-  <Target Name="_ComputeFilesToPublish"
+  <Target Name="ComputeFilesToPublish"
           DependsOnTargets="_ComputeNetCorePublishAssets"
           Returns="ResolvedFilesToPublish">
 

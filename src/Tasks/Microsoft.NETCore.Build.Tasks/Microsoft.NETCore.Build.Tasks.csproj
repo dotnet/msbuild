@@ -32,6 +32,9 @@
     <Compile Include="RuntimeConfig.cs" />
     <Compile Include="RuntimeConfigFramework.cs" />
     <Compile Include="RuntimeOptions.cs" />
+    <None Include="build\netstandard1.0\Microsoft.NETCore.PreserveCompilationContext.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.GenerateAssemblyInfo.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

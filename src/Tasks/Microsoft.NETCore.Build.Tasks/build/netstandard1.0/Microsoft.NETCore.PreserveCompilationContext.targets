@@ -1,0 +1,35 @@
+<!--
+***********************************************************************************************
+Microsoft.NETCore.PreserveCompilationContext.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <RefAssembliesFolderName Condition="'$(RefAssembliesFolderName)' == ''">refs</RefAssembliesFolderName>
+  </PropertyGroup>
+
+  <Target Name="ComputeRefAssembliesToPublish"
+          Condition="'$(PreserveCompilationContext)' == 'true'"
+          BeforeTargets="CopyFilesToPublishDirectory"
+          AfterTargets="ComputeFilesToPublish">
+
+    <ItemGroup>
+      <!--
+      Don't copy a compilation assembly if it's also a runtime assembly. There is no need to copy the same
+      assembly to the 'refs' folder, if it is already in the publish directory.
+      -->
+      <ResolvedFilesToPublish Include="@(ReferencePath)" Exclude="@(ResolvedAssembliesToPublish->'%(FullPath)')">
+        <RelativePath>$(RefAssembliesFolderName)\%(Filename)%(Extension)</RelativePath>
+      </ResolvedFilesToPublish>
+    </ItemGroup>
+
+  </Target>
+
+</Project>
