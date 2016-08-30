@@ -83,7 +83,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
-                      RuntimeIdentifier="$(RuntimeIdentifier)" />
+                      RuntimeIdentifier="$(RuntimeIdentifier)"
+                      CompilerOptions="@(DependencyFileCompilerOptions)" />
 
     <!--
     TODO: https://github.com/dotnet/sdk/issues/21

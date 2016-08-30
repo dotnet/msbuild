@@ -12,5 +12,19 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         {
             return Path.Combine("/root", packageId, version.ToNormalizedString(), "path");
         }
+
+        public static bool? GetBooleanMetadata(this ITaskItem item, string metadataName)
+        {
+            bool? result = null;
+
+            string value = item.GetMetadata(metadataName);
+            bool parseResult;
+            if (bool.TryParse(value, out parseResult))
+            {
+                result = parseResult;
+            }
+
+            return result;
+        }
     }
 }

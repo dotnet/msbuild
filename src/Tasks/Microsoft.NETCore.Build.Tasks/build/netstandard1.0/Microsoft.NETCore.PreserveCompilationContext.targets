@@ -15,10 +15,34 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RefAssembliesFolderName Condition="'$(RefAssembliesFolderName)' == ''">refs</RefAssembliesFolderName>
   </PropertyGroup>
 
+  <Target Name="ComputeDependencyFileCompilerOptions"
+        Condition="'$(PreserveCompilationContext)' == 'true'"
+        BeforeTargets="GenerateBuildDependencyFile;
+                       GeneratePublishDependencyFile">
+
+    <ItemGroup>
+      <DependencyFileCompilerOptions Include="CompilerOptions">
+        <DefineConstants>$(DefineConstants)</DefineConstants>
+        <LangVersion>$(LangVersion)</LangVersion>
+        <PlatformTarget>$(PlatformTarget)</PlatformTarget>
+        <AllowUnsafeBlocks>$(AllowUnsafeBlocks)</AllowUnsafeBlocks>
+        <WarningsAsErrors>$(WarningsAsErrors)</WarningsAsErrors>
+        <Optimize>$(Optimize)</Optimize>
+        <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
+        <DelaySign>$(DelaySign)</DelaySign>
+        <PublicSign>$(DelaySign)</PublicSign>
+        <DebugType>$(DebugType)</DebugType>
+        <OutputType>$(OutputType)</OutputType>
+        <GenerateDocumentationFile>$(GenerateDocumentationFile)</GenerateDocumentationFile>
+      </DependencyFileCompilerOptions>
+    </ItemGroup>
+
+  </Target>
+
   <Target Name="ComputeRefAssembliesToPublish"
           Condition="'$(PreserveCompilationContext)' == 'true'"
-          BeforeTargets="CopyFilesToPublishDirectory"
-          AfterTargets="ComputeFilesToPublish">
+          AfterTargets="ComputeFilesToPublish"
+          BeforeTargets="CopyFilesToPublishDirectory">
 
     <ItemGroup>
       <!--

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Build.Framework;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
@@ -22,7 +23,7 @@ namespace Microsoft.NETCore.Build.Tasks
         public DependencyContext Build(
             string projectName,
             string projectVersion,
-            CompilationOptions compilerOptions,
+            ITaskItem compilerOptionsItem,
             LockFile lockFile,
             NuGetFramework framework,
             string runtime)
@@ -46,7 +47,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
             return new DependencyContext(
                 new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, projectContext.IsPortable),
-                compilerOptions ?? CompilationOptions.Default,
+                GetCompilationOptions(compilerOptionsItem),
                 Enumerable.Empty<CompilationLibrary>(), //GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(), - https://github.com/dotnet/sdk/issues/11
                 runtimeLibraries,
                 new RuntimeFallbacks[] { });
@@ -118,6 +119,28 @@ namespace Microsoft.NETCore.Build.Tasks
                 resourceAssemblies: new ResourceAssembly[] { },
                 dependencies: dependencies.ToArray(),
                 serviceable: false);
+        }
+
+        private static CompilationOptions GetCompilationOptions(ITaskItem compilerOptionsItem)
+        {
+            if (compilerOptionsItem == null)
+            {
+                return CompilationOptions.Default;
+            }
+
+            return new CompilationOptions(
+                compilerOptionsItem.GetMetadata("DefineConstants")?.Split(';'),
+                compilerOptionsItem.GetMetadata("LangVersion"),
+                compilerOptionsItem.GetMetadata("PlatformTarget"),
+                compilerOptionsItem.GetBooleanMetadata("AllowUnsafeBlocks"),
+                compilerOptionsItem.GetBooleanMetadata("WarningsAsErrors"),
+                compilerOptionsItem.GetBooleanMetadata("Optimize"),
+                compilerOptionsItem.GetMetadata("AssemblyOriginatorKeyFile"),
+                compilerOptionsItem.GetBooleanMetadata("DelaySign"),
+                compilerOptionsItem.GetBooleanMetadata("PublicSign"),
+                compilerOptionsItem.GetMetadata("DebugType"),
+                "exe".Equals(compilerOptionsItem.GetMetadata("OutputType"), StringComparison.OrdinalIgnoreCase),
+                compilerOptionsItem.GetBooleanMetadata("GenerateDocumentationFile"));
         }
 
         private IEnumerable<Library> GetLibraries(

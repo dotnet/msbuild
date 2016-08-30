@@ -392,7 +392,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
-                      RuntimeIdentifier="$(RuntimeIdentifier)" />
+                      RuntimeIdentifier="$(RuntimeIdentifier)"
+                      CompilerOptions="@(DependencyFileCompilerOptions)" />
 
   </Target>
 
