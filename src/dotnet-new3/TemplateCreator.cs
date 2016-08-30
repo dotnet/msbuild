@@ -76,7 +76,7 @@ namespace dotnet_new3
             return false;
         }
 
-        public static async Task<int> Instantiate(CommandLineApplication app, string templateName, CommandOption name, CommandOption dir, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> parameters, bool quiet, bool skipUpdateCheck)
+        public static async Task<int> Instantiate(CommandLineApplication app, string templateName, CommandOption name, CommandOption dir, CommandOption help, CommandOption alias, IReadOnlyDictionary<string, string> inputParameters, bool quiet, bool skipUpdateCheck)
         {
             if(string.IsNullOrWhiteSpace(templateName) && help.HasValue())
             {
@@ -152,15 +152,16 @@ namespace dotnet_new3
 
             IParameterSet templateParams = tmplt.Generator.GetParametersForTemplate(tmplt);
 
-            foreach (ITemplateParameter param in templateParams.Parameters)
+            // Setup the default parameter values provided by the template.
+            foreach (ITemplateParameter param in templateParams.ParameterDefinitions)
             {
                 if (param.IsName)
                 {
-                    templateParams.ParameterValues[param] = realName;
+                    templateParams.ResolvedValues[param] = realName;
                 }
                 else if (param.Priority != TemplateParameterPriority.Required && param.DefaultValue != null)
                 {
-                    templateParams.ParameterValues[param] = param.DefaultValue;
+                    templateParams.ResolvedValues[param] = param.DefaultValue;
                 }
             }
 
@@ -172,18 +173,36 @@ namespace dotnet_new3
                 return 0;
             }
 
-            foreach (KeyValuePair<string, string> pair in parameters)
+            // Override the template defaults with user input parameter values.
+            foreach (KeyValuePair<string, string> inputParam in inputParameters)
             {
-                ITemplateParameter param;
-                if (templateParams.TryGetParameter(pair.Key, out param))
+                ITemplateParameter paramFromTemplate;
+                if (templateParams.TryGetParameterDefinition(inputParam.Key, out paramFromTemplate))
                 {
-                    templateParams.ParameterValues[param] = pair.Value;
+                    // The user provided params included the name of a bool flag without a value.
+                    // We assume that means the value "true" is desired for the bool.
+                    // This must happen here, as opposed to GlobalRunSpec.ProduceUserVariablesCollection()
+                    if (inputParam.Value == null)
+                    {
+                        if (paramFromTemplate.DataType == "bool")
+                        {
+                            templateParams.ResolvedValues[paramFromTemplate] = "true";
+                        }
+                        else
+                        {
+                            throw new TemplateParamException(inputParam.Key, null, paramFromTemplate.DataType);
+                        }
+                    }
+                    else
+                    {
+                        templateParams.ResolvedValues[paramFromTemplate] = inputParam.Value;
+                    }
                 }
             }
 
-            foreach (ITemplateParameter parameter in templateParams.Parameters)
+            foreach (ITemplateParameter parameter in templateParams.ParameterDefinitions)
             {
-                if (!help.HasValue() && parameter.Priority == TemplateParameterPriority.Required && !templateParams.ParameterValues.ContainsKey(parameter))
+                if (!help.HasValue() && parameter.Priority == TemplateParameterPriority.Required && !templateParams.ResolvedValues.ContainsKey(parameter))
                 {
                     Reporter.Error.WriteLine($"Missing required parameter {parameter.Name}".Bold().Red());
                     missingProps = true;
@@ -209,7 +228,7 @@ namespace dotnet_new3
                 }
 
                 Reporter.Output.WriteLine("Parameters:");
-                foreach (ITemplateParameter parameter in tmplt.Generator.GetParametersForTemplate(tmplt).Parameters.OrderBy(x => x.Priority).ThenBy(x => x.Name))
+                foreach (ITemplateParameter parameter in tmplt.Generator.GetParametersForTemplate(tmplt).ParameterDefinitions.OrderBy(x => x.Priority).ThenBy(x => x.Name))
                 {
                     Reporter.Output.WriteLine(
                         $@"    {parameter.Name} ({parameter.Priority})
