@@ -11,7 +11,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{F535071D-F755-403A-AB63-468A0F547702}</ProjectGuid>
+    <ProjectGuid>{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.VisualStudio</RootNamespace>
     <AssemblyName>Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates</AssemblyName>
@@ -44,17 +44,17 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETCore\ConsoleApplication\VisualBasicConsoleApplication.csproj">
-      <Project>{0c52951f-4eef-4f2f-b587-0bcf6004c459}</Project>
-      <Name>VisualBasicConsoleApplication</Name>
+    <None Include="project.json" />
+    <None Include="source.extension.vsixmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETCore\ConsoleApplication\VBConsoleApplication.csproj">
+      <Project>{622c1d9e-a9e1-422d-83df-ce5ce0aaaf51}</Project>
+      <Name>VBConsoleApplication</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
-    <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectRootDir)build\Targets\Templates.Imports.targets" />
