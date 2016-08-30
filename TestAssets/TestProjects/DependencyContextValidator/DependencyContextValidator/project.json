@@ -1,9 +1,7 @@
 {
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.Extensions.DependencyModel": {
-      "target": "project"
-    }
+    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000919"
   },
   "frameworks": {
     "netstandard1.6": {

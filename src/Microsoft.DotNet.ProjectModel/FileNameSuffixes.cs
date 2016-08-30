@@ -1,5 +1,5 @@
 using System;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.ProjectModel
 {

@@ -3,7 +3,7 @@
 
 using System;
 using System.Text;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Graph

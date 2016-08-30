@@ -57,5 +57,9 @@
       "ClassLibrary2",
       "ClassLibrary3"
     ]
+  },
+  "packageFolders": {
+    "/foo/packages": {},
+    "/foo/packages2": {}
   }
 }

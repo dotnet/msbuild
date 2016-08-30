@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public static readonly bool Verbose = GetBool("DOTNET_BUILD_VERBOSE");
 
-        private static bool GetBool(string name, bool defaultValue = false)
+        public static bool GetBool(string name, bool defaultValue = false)
         {
             var str = Environment.GetEnvironmentVariable(name);
             if (string.IsNullOrEmpty(str))

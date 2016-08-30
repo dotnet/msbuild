@@ -6,15 +6,18 @@
       "version": "1.0.0"
     },
     "Newtonsoft.Json": "9.0.1",
-    "dotnet": {
+    "Microsoft.DotNet.Tools.Test": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.InternalAbstractions": {
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
       "version": "4.0.0",
       "exclude": "Compile"
     },
-    "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-rc2-192208-24",
+    "xunit": "2.2.0-beta3-build3330",
+    "dotnet-test-xunit": "1.0.0-rc2-330423-54",
     "moq.netcore": "4.4.0-beta8",
     "FluentAssertions": "4.2.2"
   },
@@ -34,6 +37,7 @@
     ]
   },
   "buildOptions": {
+    "keyFile": "../../tools/test_key.snk",
     "copyToOutput": {
       "include": [
         "../../TestAssets/TestProjects/ProjectsWithTests/NetCoreAppOnlyProject/project.json"

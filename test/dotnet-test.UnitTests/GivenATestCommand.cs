@@ -21,19 +21,21 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 "NetCoreAppOnlyProject",
                 "project.json");
 
-        private TestCommand _testCommand;
-        private Mock<IDotnetTestRunnerFactory> _dotnetTestRunnerFactoryMock;
-        private Mock<IDotnetTestRunner> _dotnetTestRunnerMock;
+        private readonly TestCommand _testCommand;
+        private readonly Mock<IDotnetTestRunnerFactory> _dotnetTestRunnerFactoryMock;
+        private readonly Mock<IDotnetTestRunner> _dotnetTestRunnerMock;
 
         public GivenATestCommand()
         {
             _dotnetTestRunnerMock = new Mock<IDotnetTestRunner>();
             _dotnetTestRunnerMock
-                .Setup(d => d.RunTests(It.IsAny<ProjectContext>(), It.IsAny<DotnetTestParams>(), It.IsAny<BuildWorkspace>()))
+                .Setup(d => d.RunTests(It.IsAny<DotnetTestParams>()))
                 .Returns(0);
 
             _dotnetTestRunnerFactoryMock = new Mock<IDotnetTestRunnerFactory>();
-            _dotnetTestRunnerFactoryMock.Setup(d => d.Create(null)).Returns(_dotnetTestRunnerMock.Object);
+            _dotnetTestRunnerFactoryMock
+                .Setup(d => d.Create(It.IsAny<DotnetTestParams>()))
+                .Returns(_dotnetTestRunnerMock.Object);
 
             _testCommand = new TestCommand(_dotnetTestRunnerFactoryMock.Object);
         }
@@ -44,7 +46,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var result = _testCommand.DoRun(new[] {"--help"});
 
             result.Should().Be(0);
-            _dotnetTestRunnerFactoryMock.Verify(d => d.Create(It.IsAny<int?>()), Times.Never);
+            _dotnetTestRunnerFactoryMock
+                .Verify(d => d.Create(It.IsAny<DotnetTestParams>()), Times.Never);
         }
 
         [Fact]
@@ -53,7 +56,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var result = _testCommand.DoRun(new[] { ProjectJsonPath, "-f", "netcoreapp1.0" });
 
             result.Should().Be(0);
-            _dotnetTestRunnerFactoryMock.Verify(d => d.Create(It.IsAny<int?>()), Times.Once);
+            _dotnetTestRunnerFactoryMock
+                .Verify(d => d.Create(It.IsAny<DotnetTestParams>()), Times.Once);
         }
 
         [Fact]
@@ -62,7 +66,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var result = _testCommand.DoRun(new[] { ProjectJsonPath, "-f", "netcoreapp1.0" });
 
             _dotnetTestRunnerMock.Verify(
-                d => d.RunTests(It.IsAny<ProjectContext>(), It.IsAny<DotnetTestParams>(), It.IsAny<BuildWorkspace>()),
+                d => d.RunTests(It.IsAny<DotnetTestParams>()),
                 Times.Once);
         }
     }

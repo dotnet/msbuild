@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils

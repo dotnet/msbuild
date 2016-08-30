@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel.Utilities;
 
 namespace Microsoft.DotNet.ProjectModel.Compilation

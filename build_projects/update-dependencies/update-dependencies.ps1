@@ -23,7 +23,7 @@ $AppPath = "$PSScriptRoot"
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 if (!$env:DOTNET_INSTALL_DIR)
 {
-    $env:DOTNET_INSTALL_DIR="$RepoRoot\.dotnet_stage0\Windows\$Architecture"
+    $env:DOTNET_INSTALL_DIR="$RepoRoot\.dotnet_stage0\$Architecture"
 }
 
 # Install a stage 0

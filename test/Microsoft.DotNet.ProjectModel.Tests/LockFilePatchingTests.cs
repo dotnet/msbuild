@@ -120,6 +120,17 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             Assert.NotNull(LockFileReader.Read(lockFilePath, designTime: true));
         }
 
+        [Fact]
+        public void TestPackageFoldersLoadCorrectly()
+        {
+            var lockFilePath = GetLockFilePath("valid");
+            var lockFile = LockFileReader.Read(lockFilePath, designTime: false);
+
+            Assert.Equal(2, lockFile.PackageFolders.Count);
+            Assert.Equal("/foo/packages", lockFile.PackageFolders[0].Path);
+            Assert.Equal("/foo/packages2", lockFile.PackageFolders[1].Path);
+        }
+
         private static int LibraryNumberFromName(Microsoft.DotNet.ProjectModel.Graph.LockFileTargetLibrary library)
         {
             var libraryName = library.Name;

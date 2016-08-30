@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="SetupDebProps"
+          DependsOnTargets="Init">
+    <!-- dotnet deb-tool -->
+    <PropertyGroup>
+      <DotnetDebToolPackageId>dotnet-deb-tool</DotnetDebToolPackageId>  
+      <DotnetDebToolVersion Condition=" '$(DotnetDebToolVersion)' == '' ">1.0.0-*</DotnetDebToolVersion>
+      <DotnetDebToolConsumerProjectName>dotnet-deb-tool-consumer</DotnetDebToolConsumerProjectName>
+      <DotnetDebToolDir>$(IntermediateDirectory)/$(DotnetDebToolConsumerProjectName)</DotnetDebToolDir>
+      <DotnetDebToolPackageSource Condition=" '$(DotnetDebToolPackageSource)' == '' "></DotnetDebToolPackageSource>
+    </PropertyGroup>  
+
+    <ItemGroup>
+      <DotnetDebToolProjectJsonLines Include="{" />
+      <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;version&quot;: &quot;1.0.0-*&quot;," />
+      <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;name&quot;: &quot;$(DotnetDebToolConsumerProjectName)&quot;," />
+      <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;frameworks&quot;: { &quot;netcoreapp1.0&quot;: {} }," />
+      <DotnetDebToolProjectJsonLines Include="%20%20%20%20&quot;tools&quot;: {&quot;$(DotnetDebToolPackageId)&quot;: &quot;$(DotnetDebToolVersion)&quot; }" />
+      <DotnetDebToolProjectJsonLines Include="}" />
+    </ItemGroup>
+
+    <!-- constants -->
+    <PropertyGroup>
+      <DebianInstalledDirectory>/usr/share/dotnet</DebianInstalledDirectory>
+
+      <LayoutPackageRootDirName>package_root</LayoutPackageRootDirName>
+      <LayoutAbsolutePlacementDirName>$</LayoutAbsolutePlacementDirName>
+      <LayoutSamplesDirName>samples</LayoutSamplesDirName>
+      <LayoutDocsDirName>docs</LayoutDocsDirName>
+      <LayoutDebianFilesDirName>debian</LayoutDebianFilesDirName>
+    </PropertyGroup>
+
+    <!-- Package Identities -->
+    <PropertyGroup>
+      <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
+      <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
+      <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
+      <SharedFxDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
+      <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
+      <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>
+      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
+      <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
+      <HostDebianPackageName>dotnet-host</HostDebianPackageName>
+    </PropertyGroup>
+
+    <!-- Inputs -->
+    <PropertyGroup>
+      <ManpagesDirectory>$(RepoRoot)/Documentation/manpages</ManpagesDirectory>
+      <EndToEndTestDirectory>$(RepoRoot)/test/EndToEnd</EndToEndTestDirectory>
+      <CLISdkRoot>$(Stage2Directory)/sdk</CLISdkRoot>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <CLISdkFiles Include="$(CLISdkRoot)/**/*" />
+      <SdkDebManPageFiles Include="$(ManpagesDirectory)/**/*" />
+    </ItemGroup>
+
+    <!-- Output Directories -->
+    <PropertyGroup>
+      <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
+      <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
+
+      <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
+      <DotNetDebToolOutputDirectory>$(SdkDebianIntermediateDirectory)/deb-tool-output</DotNetDebToolOutputDirectory>
+      <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
+    </PropertyGroup>
+
+    <!-- Layout Directories -->
+    <PropertyGroup>
+      <LayoutDirectory>$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</LayoutDirectory>
+      <LayoutPackageRootDir>$(LayoutDirectory)/$(LayoutPackageRootDirName)</LayoutPackageRootDir>
+      <LayoutAbsolutePlacementDir>$(LayoutDirectory)/$(LayoutAbsolutePlacementDirName)</LayoutAbsolutePlacementDir>
+      <LayoutSamplesDir>$(LayoutDirectory)/$(LayoutSamplesDirName)</LayoutSamplesDir>
+      <LayoutDocsDir>$(LayoutDirectory)/$(LayoutDocsDirName)</LayoutDocsDir>
+      <LayoutDebianFilesDir>$(LayoutDirectory)/$(LayoutDebianFilesDirName)</LayoutDebianFilesDir>
+    </PropertyGroup>
+
+    <!-- debian_config.json -->
+    <PropertyGroup>
+      <DebianConfigTemplateFile>$(RepoRoot)/packaging/deb/dotnet-debian_config.json</DebianConfigTemplateFile>
+      <DebianConfigJsonFile>$(LayoutDirectory)/debian_config.json</DebianConfigJsonFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
+        <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_NUGET_NAME%">
+        <ReplacementString>$(SharedFrameworkName)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_NUGET_VERSION%">
+        <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_BRAND_NAME%">
+        <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%SDK_NUGET_VERSION%">
+        <ReplacementString>$(SdkVersion)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%CLI_SDK_BRAND_NAME%">
+        <ReplacementString>$(SdkBrandName)</ReplacementString>
+      </DebianConfigTokenValues>
+    </ItemGroup>
+
+    <ItemGroup>
+      <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
+
+      <!-- Consumed By Publish -->
+      <GeneratedInstallers Include="$(SdkInstallerFile)" />
+    </ItemGroup>
+  </Target>
+</Project>

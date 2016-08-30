@@ -1,11 +1,15 @@
-﻿using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Cli.Utils;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.IO.Compression;
+using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.New
 {
@@ -61,11 +65,12 @@ namespace Microsoft.DotNet.Tools.New
                             }
                         }
 
-                        archive.ExtractToDirectory(Directory.GetCurrentDirectory());
+                        string projectDirectory = Directory.GetCurrentDirectory();
 
-                        File.Move(
-                            Path.Combine(Directory.GetCurrentDirectory(), "project.json.template"),
-                            Path.Combine(Directory.GetCurrentDirectory(), "project.json"));
+                        archive.ExtractToDirectory(projectDirectory);
+
+                        ReplaceProjectJsonTemplateValues(projectDirectory);
+                        ReplaceFileTemplateNames(projectDirectory);
                     }
                     catch (IOException ex)
                     {
@@ -86,6 +91,31 @@ namespace Microsoft.DotNet.Tools.New
             return 0;
         }
 
+        private static void ReplaceProjectJsonTemplateValues(string projectDirectory)
+        {
+            string projectJsonFile = Path.Combine(projectDirectory, "project.json");
+
+            File.Move(
+                Path.Combine(projectDirectory, "project.json.template"),
+                projectJsonFile);
+        }
+
+        private static void ReplaceFileTemplateNames(string projectDirectory)
+        {
+            string projectName = new DirectoryInfo(projectDirectory).Name;
+            foreach (string file in Directory.GetFiles(projectDirectory, "*", SearchOption.AllDirectories))
+            {
+                if (Path.GetFileNameWithoutExtension(file) == "$projectName$")
+                {
+                    string extension = Path.GetExtension(file);
+
+                    File.Move(
+                        file,
+                        Path.Combine(Path.GetDirectoryName(file), $"{projectName}{extension}"));
+                }
+            }
+        }
+
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -96,7 +126,7 @@ namespace Microsoft.DotNet.Tools.New
             app.Description = "Initializes empty project for .NET Platform";
             app.HelpOption("-h|--help");
 
-            var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", Templates = new[] { "Console", "Web", "Lib", "xunittest", "nunittest" } };
+            var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", Templates = new[] { "Console", "Web", "Lib", "xunittest", "nunittest", "MSBuild" } };
             var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", Templates = new[] { "Console", "Lib" } };
 
             var languages = new[] { csharp, fsharp };

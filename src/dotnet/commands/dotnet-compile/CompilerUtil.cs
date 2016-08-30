@@ -96,10 +96,13 @@ namespace Microsoft.DotNet.Tools.Compiler
         public static List<CultureResgenIO> GetCultureResources(Project project, string outputPath)
         {
             return
-                (from resourceFileGroup in project.Files.ResourceFiles.GroupBy(resourceFile => ResourceUtility.GetResourceCultureName(resourceFile.Key))
+                (from resourceFileGroup in project.Files.ResourceFiles.GroupBy(
+                    resourceFile => ResourceUtility.GetResourceCultureName(resourceFile.Key))
                  let culture = resourceFileGroup.Key
                  where !string.IsNullOrEmpty(culture)
-                 let inputFileToMetadata = resourceFileGroup.ToDictionary(r => r.Key, r => GetResourceFileMetadataName(project, r.Key, r.Value))
+                 let inputFileToMetadata = resourceFileGroup.ToDictionary(
+                     r => r.Key,
+                     r => GetResourceFileMetadataName(project, r.Key, r.Value))
                  let resourceOutputPath = Path.Combine(outputPath, culture)
                  let outputFile = Path.Combine(resourceOutputPath, project.Name + ".resources.dll")
                  select new CultureResgenIO(culture, inputFileToMetadata, outputFile)

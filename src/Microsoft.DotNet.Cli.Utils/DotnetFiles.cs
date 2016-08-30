@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

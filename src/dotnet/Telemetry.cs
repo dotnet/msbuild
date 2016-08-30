@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli
 {

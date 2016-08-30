@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 .Any();
 
             // coreclr should be present for standalone apps
-            if (! isCoreClrPresent)
+            if (!isCoreClrPresent)
             {
                 throw new InvalidOperationException("Expected coreclr library not found in package graph. Please try running dotnet restore again.");
             }
@@ -94,12 +94,12 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         }
 
         private void MakeCompilationOutputRunnableForCoreCLR()
-        {   
+        {
             WriteDepsFileAndCopyProjectDependencies(_exporter);
 
-            var emitEntryPoint = _compilerOptions.EmitEntryPoint ?? false;
+            var isRunnable = _compilerOptions.EmitEntryPoint ?? false;
 
-            if (emitEntryPoint && !_context.IsPortable)
+            if (isRunnable && !_context.IsPortable)
             {
                 // TODO: Pick a host based on the RID
                 VerifyCoreClrPresenceInPackageGraph();
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         private void WriteDepsFileAndCopyProjectDependencies(LibraryExporter exporter)
         {
             var exports = exporter.GetAllExports().ToList();
-            var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name);
+            var exportsLookup = exports.ToDictionary(e => e.Library.Identity.Name, StringComparer.OrdinalIgnoreCase);
             var platformExclusionList = _context.GetPlatformExclusionList(exportsLookup);
             var filteredExports = exports.FilterExports(platformExclusionList);
 
@@ -275,11 +275,20 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         private void AddAdditionalProbingPaths(JObject runtimeOptions)
         {
-            var additionalProbingPaths = new JArray(_context.PackagesDirectory);
-            runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
+            if (_context.LockFile != null)
+            {
+                var additionalProbingPaths = new JArray();
+                foreach (var packageFolder in _context.LockFile.PackageFolders)
+                {
+                    // DotNetHost doesn't handle additional probing paths with a trailing slash
+                    additionalProbingPaths.Add(PathUtility.EnsureNoTrailingDirectorySeparator(packageFolder.Path));
+                }
+
+                runtimeOptions.Add("additionalProbingPaths", additionalProbingPaths);
+            }
         }
 
-        public void WriteDeps(IEnumerable<LibraryExport> runtimeExports, IEnumerable<LibraryExport> compilationExports)
+        private void WriteDeps(IEnumerable<LibraryExport> runtimeExports, IEnumerable<LibraryExport> compilationExports)
         {
             Directory.CreateDirectory(_runtimeOutputPath);
 
@@ -301,7 +310,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }
         }
 
-        public void GenerateBindingRedirects(LibraryExporter exporter)
+        private void GenerateBindingRedirects(LibraryExporter exporter)
         {
             var outputName = _outputPaths.RuntimeFiles.Assembly;
             var configFile = outputName + Constants.ConfigSuffix;

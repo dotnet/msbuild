@@ -13,6 +13,7 @@ using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Resolution;
+using NuGet.Configuration;
 
 namespace Microsoft.DotNet.Tools.Compiler.Fsc
 {
@@ -296,7 +297,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
 
         private static FscCommandSpec ResolveFsc(List<string> fscArgs, string temp)
         {
-            var nugetPackagesRoot = PackageDependencyProvider.ResolvePackagesPath(null, null);
+            var nugetPackagesRoot = NuGetPathContext.Create(Directory.GetCurrentDirectory())?.UserPackageFolder;
             var depsFile = Path.Combine(AppContext.BaseDirectory, "dotnet-compile-fsc" + FileNameSuffixes.DepsJson);
 
             var depsJsonCommandResolver = new DepsJsonCommandResolver(nugetPackagesRoot);

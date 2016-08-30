@@ -51,7 +51,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var buildOutputPath = projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.BasePath;
+            var buildOutputPath =
+                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.BasePath;
 
             if (! Directory.Exists(buildOutputPath))
             {

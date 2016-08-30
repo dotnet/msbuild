@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.DependencyModel
                 .Select(export => export.Library.Identity)
                 .Distinct()
                 .Select(identity => new Dependency(identity.Name, identity.Version.ToString()))
-                .ToDictionary(dependency => dependency.Name);
+                .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
 
             var compilationOptions = compilerOptions != null
                 ? GetCompilationOptions(compilerOptions)
@@ -146,8 +146,8 @@ namespace Microsoft.Extensions.DependencyModel
                     export.NativeLibraryGroups.Select(CreateRuntimeAssetGroup).ToArray(),
                     export.ResourceAssemblies.Select(CreateResourceAssembly),
                     libraryDependencies,
-                    serviceable
-                    );
+                    serviceable,
+                    GetLibraryPath(export.Library));
             }
             else
             {
@@ -168,8 +168,26 @@ namespace Microsoft.Extensions.DependencyModel
                     export.Library.Hash,
                     assemblies,
                     libraryDependencies,
-                    serviceable);
+                    serviceable,
+                    GetLibraryPath(export.Library));
             }
+        }
+
+        private string GetLibraryPath(LibraryDescription description)
+        {
+            var packageDescription = description as PackageDescription;
+
+            if (packageDescription != null)
+            {
+                // This is the relative path appended to a NuGet packages directory to find the directory containing
+                // the package assets. This string should mastered only byNuGet, but has the format:
+                // {lowercase-package-ID}/{lowercase-package-version}
+                // 
+                // For example: newtonsoft.json/9.0.1
+                return packageDescription.PackageLibrary?.Path;
+            }
+
+            return null;
         }
 
         private RuntimeAssetGroup CreateRuntimeAssetGroup(LibraryAssetGroup libraryAssetGroup)

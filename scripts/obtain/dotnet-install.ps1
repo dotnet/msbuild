@@ -45,7 +45,7 @@
 .PARAMETER Verbose
     Displays diagnostics information.
 .PARAMETER AzureFeed
-    Default: https://dotnetcli.blob.core.windows.net/dotnet
+    Default: https://dotnetcli.azureedge.net/dotnet
     This parameter should not be usually changed by user. It allows to change URL for the Azure feed used by this installer.
 #>
 [cmdletbinding()]
@@ -58,7 +58,8 @@ param(
    [switch]$DebugSymbols, # TODO: Switch does not work yet. Symbols zip is not being uploaded yet.
    [switch]$DryRun,
    [switch]$NoPath,
-   [string]$AzureFeed="https://dotnetcli.blob.core.windows.net/dotnet"
+   [string]$AzureFeed="https://dotnetcli.azureedge.net/dotnet",
+   [string]$UncachedFeed="https://dotnetcli.blob.core.windows.net/dotnet"
 )
 
 Set-StrictMode -Version Latest
@@ -160,10 +161,10 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$AzureChannel, [str
 
     $VersionFileUrl = $null
     if ($SharedRuntime) {
-        $VersionFileUrl = "$AzureFeed/$AzureChannel/dnvm/latest.sharedfx.win.$CLIArchitecture.version"
+        $VersionFileUrl = "$UncachedFeed/$AzureChannel/dnvm/latest.sharedfx.win.$CLIArchitecture.version"
     }
     else {
-        $VersionFileUrl = "$AzureFeed/Sdk/$AzureChannel/latest.version"
+        $VersionFileUrl = "$UncachedFeed/Sdk/$AzureChannel/latest.version"
     }
     
     $Response = GetHTTPResponse -Uri $VersionFileUrl

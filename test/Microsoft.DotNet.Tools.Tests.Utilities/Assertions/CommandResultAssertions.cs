@@ -60,6 +60,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> HaveStdOutContainingIgnoreCase(string pattern)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StdOut.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) >= 0)
+                .FailWith(AppendDiagnosticsTo($"The command output did not contain expected result (ignoring case): {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> HaveStdOutMatching(string pattern, RegexOptions options = RegexOptions.None)
         {
             Execute.Assertion.ForCondition(Regex.Match(_commandResult.StdOut, pattern, options).Success)
