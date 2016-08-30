@@ -63,8 +63,8 @@
       "exclude": "compile"
     },
 
-    "Microsoft.Build": "0.1.0-preview-00032-160824",
-    "Microsoft.Build.Framework": "0.1.0-preview-00032-160824",
+    "Microsoft.Build": "0.1.0-preview-00033-160829",
+    "Microsoft.Build.Framework": "0.1.0-preview-00033-160829",
 
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
   },
