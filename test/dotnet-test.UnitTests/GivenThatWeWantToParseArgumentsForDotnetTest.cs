@@ -19,16 +19,20 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         private const string Runtime = "some runtime";
         private const int ParentProcessId = 1010;
         private const int Port = 2314;
+        private const string TestRunner = "someTestRunner";
+        private const string PathToAssemblyUnderTest = "c:/some/path/assemblyUnderTest.dll";
 
-        private DotnetTestParams _dotnetTestFullParams;
-        private DotnetTestParams _emptyDotnetTestParams;
+        private readonly DotnetTestParams _dotnetTestFullParamsWithProjectJson;
+        private readonly DotnetTestParams _emptyDotnetTestParams;
+        private readonly DotnetTestParams _dotnetTestParamsWithAssembly;
 
         public GivenThatWeWantToParseArgumentsForDotnetTest()
         {
-            _dotnetTestFullParams = new DotnetTestParams();
+            _dotnetTestFullParamsWithProjectJson = new DotnetTestParams();
+            _dotnetTestParamsWithAssembly = new DotnetTestParams();
             _emptyDotnetTestParams = new DotnetTestParams();
 
-            _dotnetTestFullParams.Parse(new[]
+            _dotnetTestFullParamsWithProjectJson.Parse(new[]
             {
                 ProjectJson,
                 "--parentProcessId", ParentProcessId.ToString(),
@@ -42,19 +46,25 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 "--additional-parameters", "additional-parameter-value"
             });
 
+            _dotnetTestParamsWithAssembly.Parse(new[]
+            {
+                PathToAssemblyUnderTest,
+                "--test-runner", TestRunner
+            });
+
             _emptyDotnetTestParams.Parse(new string[] { });
         }
 
         [Fact]
         public void It_sets_the_project_path_current_folder_if_one_is_not_passed_in()
         {
-            _emptyDotnetTestParams.ProjectPath.Should().Be(Directory.GetCurrentDirectory());
+            _emptyDotnetTestParams.ProjectOrAssemblyPath.Should().Be(Directory.GetCurrentDirectory());
         }
 
         [Fact]
         public void It_sets_the_project_path_to_the_passed_value()
         {
-            _dotnetTestFullParams.ProjectPath.Should().Be(ProjectJson);
+            _dotnetTestFullParamsWithProjectJson.ProjectOrAssemblyPath.Should().Be(ProjectJson);
         }
 
         [Fact]
@@ -72,7 +82,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_converts_the_parent_process_id_to_int_when_a_valid_one_is_passed()
         {
-            _dotnetTestFullParams.ParentProcessId.Should().Be(ParentProcessId);
+            _dotnetTestFullParamsWithProjectJson.ParentProcessId.Should().Be(ParentProcessId);
         }
 
         [Fact]
@@ -96,7 +106,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_converts_the_port_to_int_when_a_valid_one_is_passed()
         {
-            _dotnetTestFullParams.Port.Should().Be(Port);
+            _dotnetTestFullParamsWithProjectJson.Port.Should().Be(Port);
         }
 
         [Fact]
@@ -108,7 +118,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_converts_the_framework_to_NugetFramework()
         {
-            _dotnetTestFullParams.Framework.DotNetFrameworkName.Should().Be(".NETCoreApp,Version=v1.0");
+            _dotnetTestFullParamsWithProjectJson.Framework.DotNetFrameworkName.Should().Be(".NETCoreApp,Version=v1.0");
         }
 
         [Fact]
@@ -129,7 +139,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_Output_when_one_is_passed_in()
         {
-            _dotnetTestFullParams.Output.Should().Be(Output);
+            _dotnetTestFullParamsWithProjectJson.Output.Should().Be(Output);
         }
 
         [Fact]
@@ -141,7 +151,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_BuildBasePath_when_one_is_passed_in()
         {
-            _dotnetTestFullParams.BuildBasePath.Should().Be(Path.GetFullPath(BuildBasePath));
+            _dotnetTestFullParamsWithProjectJson.BuildBasePath.Should().Be(Path.GetFullPath(BuildBasePath));
         }
 
         [Fact]
@@ -153,7 +163,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_Config_to_passed_in_value()
         {
-            _dotnetTestFullParams.Config.Should().Be(Config);
+            _dotnetTestFullParamsWithProjectJson.Config.Should().Be(Config);
         }
 
         [Fact]
@@ -165,7 +175,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_Runtime_when_one_is_passed_in()
         {
-            _dotnetTestFullParams.Runtime.Should().Be(Runtime);
+            _dotnetTestFullParamsWithProjectJson.Runtime.Should().Be(Runtime);
         }
 
         [Fact]
@@ -177,14 +187,14 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_any_remaining_params_to_RemainingArguments()
         {
-            _dotnetTestFullParams.RemainingArguments.ShouldBeEquivalentTo(
+            _dotnetTestFullParamsWithProjectJson.RemainingArguments.ShouldBeEquivalentTo(
                 new [] { "--additional-parameters", "additional-parameter-value" });
         }
 
         [Fact]
         public void It_sets_no_build_to_true_when_it_is_passed()
         {
-            _dotnetTestFullParams.NoBuild.Should().BeTrue();
+            _dotnetTestFullParamsWithProjectJson.NoBuild.Should().BeTrue();
         }
 
         [Fact]
@@ -196,7 +206,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         [Fact]
         public void It_sets_Help_to_false_when_help_is_not_passed_in()
         {
-            _dotnetTestFullParams.Help.Should().BeFalse();
+            _dotnetTestFullParamsWithProjectJson.Help.Should().BeFalse();
         }
 
         [Fact]
@@ -206,6 +216,66 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             dotnetTestParams.Parse(new[] { "--help" });
 
             dotnetTestParams.Help.Should().BeTrue();
+        }
+
+        [Fact]
+        public void It_has_the_testRunner_null_by_default()
+        {
+            _emptyDotnetTestParams.TestRunner.Should().BeNull();
+        }
+
+        [Fact]
+        public void It_throws_when_you_specify_a_testRunner_along_with_a_folder()
+        {
+            var dotnetTestParams = new DotnetTestParams();
+            Action action = () => dotnetTestParams.Parse(new[]
+            {
+                "c:/some/path",
+                "--test-runner", "someTestRunner"
+            });
+
+            action
+                .ShouldThrow<InvalidOperationException>()
+                .WithMessage("You can only specify a test runner with a dll.");
+        }
+
+        [Fact]
+        public void It_throws_when_you_specify_a_testRunner_along_with_a_project_json()
+        {
+            var dotnetTestParams = new DotnetTestParams();
+            Action action = () => dotnetTestParams.Parse(new[]
+            {
+                ProjectJson,
+                "--test-runner", "someTestRunner"
+            });
+
+            action
+                .ShouldThrow<InvalidOperationException>()
+                .WithMessage("You can only specify a test runner with a dll.");
+        }
+
+        [Fact]
+        public void It_succeeds_when_specifying_an_assembly()
+        {
+            _dotnetTestParamsWithAssembly.ProjectOrAssemblyPath.Should().Be(PathToAssemblyUnderTest);
+        }
+
+        [Fact]
+        public void It_succeeds_when_specifying_a_test_runner_along_with_an_assembly()
+        {
+            _dotnetTestParamsWithAssembly.TestRunner.Should().Be(TestRunner);
+        }
+
+        [Fact]
+        public void When_a_testRunner_is_successfully_specified_then_HasTestRunner_returns_true()
+        {
+            _dotnetTestParamsWithAssembly.HasTestRunner.Should().BeTrue();
+        }
+
+        [Fact]
+        public void When_a_testRunner_is_noy_specified_then_HasTestRunner_returns_false()
+        {
+            _dotnetTestFullParamsWithProjectJson.HasTestRunner.Should().BeFalse();
         }
     }
 }

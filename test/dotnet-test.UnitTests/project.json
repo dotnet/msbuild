@@ -6,7 +6,10 @@
       "version": "1.0.0"
     },
     "Newtonsoft.Json": "9.0.1",
-    "dotnet": {
+    "Microsoft.DotNet.Tools.Test": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.InternalAbstractions": {
       "target": "project"
     },
     "Microsoft.Win32.Registry": {
@@ -34,6 +37,7 @@
     ]
   },
   "buildOptions": {
+    "keyFile": "../../tools/test_key.snk",
     "copyToOutput": {
       "include": [
         "../../TestAssets/TestProjects/ProjectsWithTests/NetCoreAppOnlyProject/project.json"

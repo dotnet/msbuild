@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Tools.Test
             var commandArgs = _argumentsBuilder.BuildArguments();
 
             return _commandFactory.Create(
-                $"dotnet-{_testRunner}",
+                $"{_testRunner}",
                 commandArgs,
                 null,
                 null);

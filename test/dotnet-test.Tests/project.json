@@ -15,6 +15,9 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
+    "Microsoft.DotNet.InternalAbstractions": {
+      "target": "project"
+    },
     "System.Net.NameResolution": "4.0.0",
     "System.Net.Sockets": "4.1.0",
     "System.Runtime.Serialization.Primitives": "4.1.1",
