@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Cli.Build
                 .Replace("{HostFxrComponentId}", HostFxrComponentId)
                 .Replace("{CLISdkComponentId}", CLISdkComponentId)
                 .Replace("{CLISdkNugetVersion}", CLISdkNugetVersion)
-                .Replace("{CLISdkBrandName}", Monikers.CLISdkBrandName)
+                .Replace("{CLISdkBrandName}", Monikers.GetCLISdkBrandName(c))
                 .Replace("{SharedFxBrandName}", Monikers.SharedFxBrandName)
                 .Replace("{SharedHostBrandName}", Monikers.SharedHostBrandName)
                 .Replace("{HostFxrBrandName}", Monikers.HostFxrBrandName);

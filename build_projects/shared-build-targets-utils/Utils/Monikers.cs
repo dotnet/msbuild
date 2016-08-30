@@ -10,10 +10,17 @@ namespace Microsoft.DotNet.Cli.Build
     public class Monikers
     {
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
-        public const string CLISdkBrandName = "Microsoft .NET Core 1.0.0 - SDK Preview 2";
-        public const string SharedFxBrandName = "Microsoft .NET Core 1.0.0 - Runtime";
+        public const string SharedFxBrandName = "Microsoft .NET Core 1.0.1 - Runtime";
         public const string SharedHostBrandName = "Microsoft .NET Core 1.0.0 - Host";
         public const string HostFxrBrandName = "Microsoft .NET Core 1.0.0 - Host FX Resolver";
+
+        private const string CLISdkBrandName = "Microsoft .NET Core 1.0.1 - SDK 1.0.0 Preview 2-{COMMIT_COUNT_STRING}";
+
+        public static string GetCLISdkBrandName(BuildTargetContext c)
+        {
+            string commitCountString = c.BuildContext.Get<BuildVersion>("BuildVersion").CommitCountString;
+            return CLISdkBrandName.Replace("{COMMIT_COUNT_STRING}", commitCountString);
+        }
 
         public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix, string version)
         {

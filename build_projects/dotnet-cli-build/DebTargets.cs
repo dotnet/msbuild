@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Build
                 "-i", sdkPublishRoot, 
                 "-o", debFile, 
                 "-p", packageName,
-                "-b", Monikers.CLISdkBrandName,
+                "-b", Monikers.GetCLISdkBrandName(c),
                 "-m", manPagesDir, 
                 "--framework-debian-package-name", sharedFxDebianPackageName,
                 "--framework-nuget-name", Monikers.SharedFrameworkName,
