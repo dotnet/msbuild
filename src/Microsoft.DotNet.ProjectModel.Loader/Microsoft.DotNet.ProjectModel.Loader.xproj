@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>1c599ffd-fb52-4279-a8e5-465d3ec499e1</ProjectGuid>
+    <ProjectGuid>651DDD55-4819-4F20-B619-4F8A5BC2DF6D</ProjectGuid>
     <RootNamespace>Microsoft.DotNet.ProjectModel.Loader</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin</OutputPath>

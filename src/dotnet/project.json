@@ -47,6 +47,9 @@
     "Microsoft.DotNet.Configurer": {
       "target": "project"
     },
+    "Microsoft.DotNet.ProjectJsonMigration": {
+      "target": "project"
+    },
     "Microsoft.DotNet.Tools.Test": {
       "target": "project"
     },
