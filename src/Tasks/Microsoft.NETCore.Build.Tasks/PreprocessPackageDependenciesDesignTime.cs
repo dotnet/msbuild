@@ -153,9 +153,7 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             foreach (var fileDef in FileDefinitions)
             {
-                var dependencyType = fileDef.IsAnalyzer()
-                    ? DependencyType.AnalyzerAssembly
-                    : GetDependencyType(fileDef.GetMetadata(MetadataKeys.Type));
+                var dependencyType = GetDependencyType(fileDef.GetMetadata(MetadataKeys.Type));
 
                 if (dependencyType != DependencyType.Assembly &&
                     dependencyType != DependencyType.FrameworkAssembly &&
