@@ -2197,6 +2197,8 @@ namespace Microsoft.Build.Evaluation
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
+            // If there are wildcards in the Import, a list of all the matches from all import search
+            // paths will be returned (union of all files that match).
             var allProjects = new List<ProjectRootElement>();
             bool containsWildcards = FileMatcher.HasWildcards(importElement.Project);
 
