@@ -19,7 +19,7 @@
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.1",
     "Microsoft.AspNetCore.StaticFiles": "1.0.0",
-    "Microsoft.EntityFrameworkCore.Sqlite": "1.0.0",
+    "Microsoft.EntityFrameworkCore.Sqlite": "1.0.1",
     "Microsoft.EntityFrameworkCore.Tools": {
       "version": "1.0.0-preview2-final",
       "type": "build"
@@ -32,11 +32,11 @@
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
     "Microsoft.VisualStudio.Web.CodeGeneration.Tools": {
-      "version": "1.0.0-preview2-final",
+      "version": "1.0.0-preview2-update1",
       "type": "build"
     },
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": {
-      "version": "1.0.0-preview2-final",
+      "version": "1.0.0-preview2-update1",
       "type": "build"
     }
   },
