@@ -11,7 +11,7 @@ $RepoRoot = "$PSScriptRoot"
 # Install a stage 0
 Write-Host "Installing .NET Core CLI Stage 0 from branchinfo channel"
     
-& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Channel $env:CHANNEL -Architecture $Architecture -Verbose
+& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Channel feature-msbuild -Architecture $Architecture -Verbose
 if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 
 # Put the stage0 on the path

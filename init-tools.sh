@@ -14,7 +14,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-$DIR/scripts/obtain/dotnet-install.sh --channel $CHANNEL --verbose
+$DIR/scripts/obtain/dotnet-install.sh --channel feature-msbuild --verbose
 
 __init_tools_log=$DIR/init-tools.log
 __BUILD_TOOLS_CLI_VERSION=$(cat "$DIR/BuildToolsCliVersion.txt")
