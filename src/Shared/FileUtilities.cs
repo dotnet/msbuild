@@ -470,13 +470,23 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool ComparePathsNoThrow(string first, string second, string currentDirectory)
         {
-            // todo: on xplat, figure out if file system is case sensitive or not
+            // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
             var stringComparison = StringComparison.OrdinalIgnoreCase;
 
             var firstFullPath = GetFullPathNoThrow(first, currentDirectory);
             var secondFullPath = GetFullPathNoThrow(second, currentDirectory);
 
             return string.Equals(firstFullPath, secondFullPath, stringComparison);
+        }
+
+        /// <summary>
+        /// Normalizes a path for path comparison
+        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string, string)"/>
+        /// 
+        /// </summary>
+        internal static string NormalizePathForComparisonNoThrow(string path, string currentDirectory)
+        {
+            return GetFullPathNoThrow(path, currentDirectory).TrimEnd('/', '\\');
         }
 
         /// <summary>

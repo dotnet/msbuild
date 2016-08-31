@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 
@@ -149,23 +150,29 @@ namespace Microsoft.Build.Internal
             return fileList;
         }
 
-        //  Returns a Func that will return true IFF its argument matches any of the specified filespecs
-        internal static Func<string, bool> GetMatchTester(IList<string> filespecs)
+        /// Returns a Func that will return true IFF its argument matches any of the specified filespecs
+        /// Assumes inputs may be escaped, so it unescapes them
+        internal static Func<string, bool> GetMatchTester(IList<string> filespecsEscaped, string currentDirectory)
         {
             List<Regex> regexes = null;
-            HashSet<string> exactmatches = null;
 
-            foreach (var spec in filespecs)
+            // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+            var exactmatches = new Lazy<HashSet<string>>(() => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            var pathMatches = new Lazy<HashSet<string>>(() => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+            foreach (var spec in filespecsEscaped)
             {
                 if (FilespecHasWildcards(spec))
                 {
+                    var unescapedSpec = EscapingUtilities.UnescapeAll(spec);
+
                     Regex regexFileMatch;
                     bool isRecursive;
                     bool isLegal;
                     //  TODO: If creating Regex's here ends up being expensive perf-wise, consider how to avoid it in common cases
                     FileMatcher.GetFileSpecInfo
                     (
-                        spec,
+                        unescapedSpec,
                         out regexFileMatch,
                         out isRecursive,
                         out isLegal,
@@ -187,44 +194,41 @@ namespace Microsoft.Build.Internal
                 }
                 else
                 {
-                    if (exactmatches == null)
-                    {
-                        //  TODO: How to handle case sensitivity here?  Existing behavior is to be case-insensitive,
-                        //  which works for Windows but probably isn't the right thing on other OS's
-                        exactmatches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    }
-                    exactmatches.Add(spec);
+                    exactmatches.Value.Add(EscapingUtilities.UnescapeAll(spec));
+                    pathMatches.Value.Add(FileUtilities.NormalizePathForComparisonNoThrow(spec, currentDirectory));
                 }
             }
 
             return file =>
             {
-                if (exactmatches != null)
+                var unescapedFile = EscapingUtilities.UnescapeAll(file);
+
+                // compare as if items are plain strings
+                if (exactmatches.IsValueCreated && exactmatches.Value.Contains(unescapedFile))
                 {
-                    if (exactmatches.Contains(file))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
 
+                // compare as if items are files
+                var normalizedFile = FileUtilities.NormalizePathForComparisonNoThrow(file, currentDirectory);
+                if (pathMatches.IsValueCreated && pathMatches.Value.Contains(normalizedFile))
+                {
+                    return true;
+                }
+
+                // check if there is a regex matching the file
                 if (regexes != null)
                 {
-                    foreach (Regex regex in regexes)
-                    {
-                        if (regex.IsMatch(file))
-                        {
-                            return true;
-                        }
-                    }
+                    return regexes.Any(regex => regex.IsMatch(unescapedFile));
                 }
 
                 return false;
             };
         }
 
-        internal static Func<string, bool> GetMatchTester(string filespec)
+        internal static Func<string, bool> GetMatchTester(string filespec, string currentDirectory)
         {
-            return GetMatchTester(new List<string>() {filespec});
+            return GetMatchTester(new List<string>() {filespec}, currentDirectory);
         }
     }
 }

@@ -54,7 +54,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (excludePatterns.Any())
                     {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(excludePatterns));
+                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(excludePatterns, _rootDirectory));
                     }
                 }
 
