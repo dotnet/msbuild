@@ -15,6 +15,12 @@
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
     <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <!-- Disable the import of the dynamically generated NuGet files because they generate warnings anyway:
+         Packages containing MSBuild targets and props files cannot be fully installed in projects targeting multiple frameworks. The MSBuild targets and props files have been ignored. -->
+    <IncludeNuGetImports Condition="'$(IncludeNuGetImports)' == ''">false</IncludeNuGetImports>
+  </PropertyGroup>
 
   <PropertyGroup>
     <SerializeProjects>false</SerializeProjects>
