@@ -389,7 +389,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private string ResolveFilePath(string relativePath, string resolvedPackagePath)
         {
-            if (Path.GetFileName(relativePath) == "_._")
+            if (NuGetUtils.IsPlaceholderFile(relativePath))
             {
                 return null;
             }

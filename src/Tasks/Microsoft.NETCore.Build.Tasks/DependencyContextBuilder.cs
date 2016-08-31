@@ -28,27 +28,61 @@ namespace Microsoft.NETCore.Build.Tasks
             NuGetFramework framework,
             string runtime)
         {
+            bool includeCompilationLibraries = compilerOptionsItem != null;
+
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
 
             ProjectContext projectContext = lockFileTarget.CreateProjectContext();
-            IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.RuntimeLibraries;
+            IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.GetRuntimeLibraries();
+            IEnumerable<LockFileTargetLibrary> compilationExports =
+                includeCompilationLibraries ?
+                    projectContext.GetCompileLibraries() :
+                    Enumerable.Empty<LockFileTargetLibrary>();
 
-            var dependencyLookup = runtimeExports
-               .Select(identity => new Dependency(identity.Name, identity.Version.ToString()))
-               .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
+            var dependencyLookup = compilationExports
+                .Concat(runtimeExports)
+                .Distinct()
+                .Select(library => new Dependency(library.Name, library.Version.ToString()))
+                .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
 
             var libraryLookup = lockFile.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
 
             var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
 
+            var projectRuntimeLibrary = (RuntimeLibrary)GetProjectLibrary(
+                projectName,
+                projectVersion,
+                lockFile,
+                lockFileTarget,
+                dependencyLookup,
+                runtime: true);
             IEnumerable<RuntimeLibrary> runtimeLibraries =
-                new[] { GetProjectLibrary(projectName, projectVersion, lockFile, lockFileTarget, dependencyLookup) }
+                new[] { projectRuntimeLibrary }
                 .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>());
+
+            IEnumerable<CompilationLibrary> compilationLibraries;
+            if (includeCompilationLibraries)
+            {
+                var projectCompilationLibrary = (CompilationLibrary)GetProjectLibrary(
+                    projectName,
+                    projectVersion,
+                    lockFile,
+                    lockFileTarget,
+                    dependencyLookup,
+                    runtime: false);
+                compilationLibraries =
+                    new[] { projectCompilationLibrary }
+                    .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>());
+            }
+            else
+            {
+                compilationLibraries = Enumerable.Empty<CompilationLibrary>();
+            }
 
             return new DependencyContext(
                 new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, projectContext.IsPortable),
                 GetCompilationOptions(compilerOptionsItem),
-                Enumerable.Empty<CompilationLibrary>(), //GetLibraries(compilationExports, dependencyLookup, runtime: false).Cast<CompilationLibrary>(), - https://github.com/dotnet/sdk/issues/11
+                compilationLibraries,
                 runtimeLibraries,
                 new RuntimeFallbacks[] { });
         }
@@ -77,16 +111,15 @@ namespace Microsoft.NETCore.Build.Tasks
             return builder.ToString();
         }
 
-        private RuntimeLibrary GetProjectLibrary(
+        private Library GetProjectLibrary(
             string projectName,
             string projectVersion,
             LockFile lockFile,
             LockFileTarget lockFileTarget,
-            Dictionary<string, Dependency> dependencyLookup)
+            Dictionary<string, Dependency> dependencyLookup,
+            bool runtime)
         {
             // TODO: What other information about the current project needs to be included here? - https://github.com/dotnet/sdk/issues/12
-
-            RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, $"{projectName}.dll") };
 
             List<Dependency> dependencies = new List<Dependency>();
 
@@ -109,16 +142,35 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
             }
 
-            return new RuntimeLibrary(
-                type: "project",
-                name: projectName,
-                version: projectVersion,
-                hash: string.Empty,
-                runtimeAssemblyGroups: runtimeAssemblyGroups,
-                nativeLibraryGroups: new RuntimeAssetGroup[] { },
-                resourceAssemblies: new ResourceAssembly[] { },
-                dependencies: dependencies.ToArray(),
-                serviceable: false);
+            string type = "project";
+            string projectAssemblyName = $"{projectName}.dll";
+
+            if (runtime)
+            {
+                RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectAssemblyName) };
+
+                return new RuntimeLibrary(
+                    type: type,
+                    name: projectName,
+                    version: projectVersion,
+                    hash: string.Empty,
+                    runtimeAssemblyGroups: runtimeAssemblyGroups,
+                    nativeLibraryGroups: new RuntimeAssetGroup[] { },
+                    resourceAssemblies: new ResourceAssembly[] { },
+                    dependencies: dependencies.ToArray(),
+                    serviceable: false);
+            }
+            else
+            {
+                return new CompilationLibrary(
+                    type: type,
+                    name: projectName,
+                    version: projectVersion,
+                    hash: string.Empty,
+                    assemblies: new[] { projectAssemblyName },
+                    dependencies: dependencies.ToArray(),
+                    serviceable: false);
+            }
         }
 
         private static CompilationOptions GetCompilationOptions(ITaskItem compilerOptionsItem)
@@ -179,7 +231,11 @@ namespace Microsoft.NETCore.Build.Tasks
             LockFileLibrary library;
             if (libraryLookup.TryGetValue(export.Name, out library))
             {
-                hash = "sha512-" + library.Sha512;
+                if (!string.IsNullOrEmpty(library.Sha512))
+                {
+                    hash = "sha512-" + library.Sha512;
+                }
+
                 path = library.Path;
             }
 
@@ -197,23 +253,23 @@ namespace Microsoft.NETCore.Build.Tasks
                     serviceable,
                     path);
             }
-            // TODO: PreserveCompilationContext - https://github.com/dotnet/sdk/issues/11
-            //else
-            //{
-            //    IEnumerable<string> assemblies = export
-            //        .CompilationAssemblies
-            //        .Select(libraryAsset => libraryAsset.RelativePath);
+            else
+            {
+                IEnumerable<string> assemblies = export
+                    .CompileTimeAssemblies
+                    .Select(libraryAsset => libraryAsset.Path)
+                    .FilterPlaceHolderFiles();
 
-            //    return new CompilationLibrary(
-            //        type.ToString().ToLowerInvariant(),
-            //        export.Library.Identity.Name,
-            //        export.Library.Identity.Version.ToString(),
-            //        export.Library.Hash,
-            //        assemblies,
-            //        libraryDependencies,
-            //        serviceable);
-            //}
-            return null;
+                return new CompilationLibrary(
+                    type.ToString().ToLowerInvariant(),
+                    export.Name,
+                    export.Version.ToString(),
+                    hash,
+                    assemblies,
+                    libraryDependencies,
+                    serviceable,
+                    path);
+            }
         }
 
         private IReadOnlyList<RuntimeAssetGroup> CreateRuntimeAssemblyGroups(LockFileTargetLibrary export)
@@ -221,7 +277,9 @@ namespace Microsoft.NETCore.Build.Tasks
             List<RuntimeAssetGroup> assemblyGroups = new List<RuntimeAssetGroup>();
 
             assemblyGroups.Add(
-                new RuntimeAssetGroup(string.Empty, export.RuntimeAssemblies.Select(a => a.Path)));
+                new RuntimeAssetGroup(
+                    string.Empty,
+                    export.RuntimeAssemblies.Select(a => a.Path).FilterPlaceHolderFiles()));
 
             // TODO RuntimeTargets - https://github.com/dotnet/sdk/issues/12
             //export.RuntimeTargets.GroupBy(l => l.)
@@ -231,7 +289,12 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private IReadOnlyList<RuntimeAssetGroup> CreateNativeLibraryGroups(LockFileTargetLibrary export)
         {
-            return new[] { new RuntimeAssetGroup(string.Empty, export.NativeLibraries.Select(a => a.Path)) };
+            return new[] {
+                new RuntimeAssetGroup(
+                    string.Empty, 
+                    export.NativeLibraries.Select(a => a.Path).FilterPlaceHolderFiles()
+                    )
+            };
         }
 
         private ResourceAssembly CreateResourceAssembly(LockFileItem resourceAssembly)

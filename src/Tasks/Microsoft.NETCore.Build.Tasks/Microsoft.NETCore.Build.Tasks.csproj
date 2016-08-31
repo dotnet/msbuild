@@ -19,6 +19,8 @@
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ITaskItemExtensions.cs" />
+    <Compile Include="NuGetUtils.cs" />
     <Compile Include="GetAssemblyVersion.cs" />
     <Compile Include="ProjectContext.cs" />
     <Compile Include="NuGetPackageResolver.cs" />

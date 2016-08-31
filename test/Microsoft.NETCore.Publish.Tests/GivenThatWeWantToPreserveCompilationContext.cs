@@ -3,12 +3,10 @@
 
 using System.IO;
 using FluentAssertions;
-using FluentAssertions.Json;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.NETCore.TestFramework;
 using Microsoft.NETCore.TestFramework.Assertions;
 using Microsoft.NETCore.TestFramework.Commands;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
@@ -48,28 +46,19 @@ namespace Microsoft.NETCore.Publish.Tests
             refsDirectory.Should().NotHaveFile("TestLibrary.dll");
             refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
 
-            JObject depsJson = ReadJson(Path.Combine(publishDirectory.FullName, "TestApp.deps.json"));
-
-            JObject baselineCompilationOptions = new JObject(
-                new JProperty("defines", new JArray("DEBUG", "TRACE")),
-                new JProperty("languageVersion", ""),
-                new JProperty("platform", "AnyCPU"),
-                new JProperty("optimize", false),
-                new JProperty("keyFile", ""),
-                new JProperty("emitEntryPoint", true),
-                new JProperty("debugType", "portable"));
-
-            baselineCompilationOptions
-                .Should()
-                .BeEquivalentTo(depsJson["compilationOptions"]);
-        }
-
-        private static JObject ReadJson(string path)
-        {
-            using (JsonTextReader jsonReader = new JsonTextReader(File.OpenText(path)))
+            using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
             {
-                JsonSerializer serializer = new JsonSerializer();
-                return serializer.Deserialize<JObject>(jsonReader);
+                var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+
+                dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" });
+                dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
+                dependencyContext.CompilationOptions.Platform.Should().Be("AnyCPU");
+                dependencyContext.CompilationOptions.Optimize.Should().Be(false);
+                dependencyContext.CompilationOptions.KeyFile.Should().Be("");
+                dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
+                dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
+
+                dependencyContext.CompileLibraries.Count.Should().Be(114);
             }
         }
     }
