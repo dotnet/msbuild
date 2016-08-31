@@ -70,14 +70,13 @@ namespace Microsoft.Build.Evaluation
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedItemspecEscaped.Length > 0)
             {
-                var includeSplitsEscaped =
-                    ExpressionShredder.SplitSemiColonSeparatedList(evaluatedItemspecEscaped);
+                var splitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedItemspecEscaped);
 
-                foreach (var includeSplitEscaped in includeSplitsEscaped)
+                foreach (var splitEscaped in splitsEscaped)
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     bool isItemListExpression;
-                    var itemReferenceFragment = ProcessItemExpression(includeSplitEscaped, itemSpecLocation, out isItemListExpression);
+                    var itemReferenceFragment = ProcessItemExpression(splitEscaped, itemSpecLocation, out isItemListExpression);
 
                     if (isItemListExpression)
                     {
@@ -88,8 +87,8 @@ namespace Microsoft.Build.Evaluation
                         // The expression is not of the form "@(X)". Treat as string
 
                         //  Code corresponds to EngineFileUtilities.GetFileList
-                        var containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(includeSplitEscaped);
-                        var containsRealWildcards = FileMatcher.HasWildcards(includeSplitEscaped);
+                        var containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(splitEscaped);
+                        var containsRealWildcards = FileMatcher.HasWildcards(splitEscaped);
 
                         // '*' is an illegal character to have in a filename.
                         // todo file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
@@ -97,14 +96,14 @@ namespace Microsoft.Build.Evaluation
                         {
 
                             // Just return the original string.
-                            builder.Add(new ValueFragment(includeSplitEscaped, itemSpecLocation.File));
+                            builder.Add(new ValueFragment(splitEscaped, itemSpecLocation.File));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
                             // Unescape before handing it to the filesystem.
-                            var filespecUnescaped = EscapingUtilities.UnescapeAll(includeSplitEscaped);
+                            var filespecUnescaped = EscapingUtilities.UnescapeAll(splitEscaped);
 
-                            builder.Add(new GlobFragment(filespecUnescaped));
+                            builder.Add(new GlobFragment(filespecUnescaped, itemSpecLocation.File));
                         }
                         else
                         {
@@ -112,7 +111,7 @@ namespace Microsoft.Build.Evaluation
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
 
-                            builder.Add(new ValueFragment(includeSplitEscaped, itemSpecLocation.File));
+                            builder.Add(new ValueFragment(splitEscaped, itemSpecLocation.File));
                         }
                     }
                 }
@@ -143,11 +142,20 @@ namespace Microsoft.Build.Evaluation
             return new ItemExpressionFragment<P, I>(capture, expression, this);
         }
 
+        /// <summary>
+        /// Return the items in <param name="items"/> that match this itemspec
+        /// </summary>
         public IEnumerable<I> FilterItems(IEnumerable<I> items)
         {
             return items.Where(i => Fragments.Any(f => f.ItemMatches(i.EvaluatedInclude) > 0));
         }
 
+        /// <summary>
+        /// Return the fragments that match against the given <param name="itemToMatch"/>
+        /// </summary>
+        /// <param name="matches">
+        /// Total number of matches. Some fragments match more than once (item expression may contain multiple instances of <param name="itemToMatch"/>)
+        /// </param>
         public IEnumerable<ItemFragment> FragmentsMatchingItem(string itemToMatch, out int matches)
         {
             var result = new List<ItemFragment>(Fragments.Count());
@@ -168,56 +176,58 @@ namespace Microsoft.Build.Evaluation
         }
     }
 
-    internal interface ItemFragment
+    internal abstract class ItemFragment
     {
-        /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
-        int ItemMatches(string itemToMatch);
-
         /// <summary>
         /// The substring from the original itemspec representing this fragment
         /// </summary>
-        string ItemSpecFragment { get; }
+        public string ItemSpecFragment { get; }
+
+        /// <summary>
+        /// Path of the projet the itemspec is coming from
+        /// </summary>
+        protected string ProjectPath { get; }
+
+        /// <summary>
+        /// Function that checks if a given string matches the <see cref="ItemSpecFragment"/>
+        /// </summary>
+        protected Lazy<Func<string, bool>> FileMatcher { get; }
+
+        protected ItemFragment(string itemSpecFragment, string projectPath)
+            : this(
+                itemSpecFragment,
+                projectPath,
+                new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(itemSpecFragment, projectPath)))
+        {
+        }
+
+        protected ItemFragment(string itemSpecFragment, string projectPath, Lazy<Func<string, bool>> fileMatcher)
+        {
+            ItemSpecFragment = itemSpecFragment;
+            ProjectPath = projectPath;
+            FileMatcher = fileMatcher;
+        }
+
+        /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
+        public virtual int ItemMatches(string itemToMatch)
+        {
+            return FileMatcher.Value(itemToMatch) ? 1 : 0;
+        }
     }
 
     internal class ValueFragment : ItemFragment
     {
-        public string ItemSpecFragment { get; private set; }
-        private readonly string _projectPath;
-
-        public ValueFragment(string value, string projectPath)
+        public ValueFragment(string itemSpecFragment, string projectPath)
+            : base(itemSpecFragment, projectPath)
         {
-            _projectPath = projectPath;
-            ItemSpecFragment = value;
-        }
-
-        public int ItemMatches(string itemToMatch)
-        {
-            return IsMatch(itemToMatch) ? 1 : 0;
-        }
-
-        private bool IsMatch(string itemToMatch)
-        {
-            // todo file-system assumption on case sensitivity https://github.com/Microsoft/msbuild/issues/781
-            return ItemSpecFragment.Equals(itemToMatch, StringComparison.OrdinalIgnoreCase) ||
-                FileUtilities.ComparePathsNoThrow(itemToMatch, ItemSpecFragment, _projectPath);
         }
     }
 
     internal class GlobFragment : ItemFragment
     {
-        public string ItemSpecFragment { get; }
-
-        private readonly Lazy<Func<string, bool>> _globMatcher;
-
-        public GlobFragment(string itemSpecFragment)
+        public GlobFragment(string itemSpecFragment, string projectPath)
+            : base(itemSpecFragment, projectPath)
         {
-            ItemSpecFragment = itemSpecFragment;
-            _globMatcher = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(ItemSpecFragment));
-        }
-
-        public int ItemMatches(string itemToMatch)
-        {
-            return _globMatcher.Value(itemToMatch) ? 1 : 0;
         }
     }
 
@@ -226,22 +236,21 @@ namespace Microsoft.Build.Evaluation
         where I : class, IItem
     {
         public ExpressionShredder.ItemExpressionCapture Capture { get; }
-        public string ItemSpecFragment { get; private set; }
 
         private readonly ItemSpec<P, I> _containingItemSpec;
         private IList<ValueFragment> _itemValueFragments;
         private Expander<P, I> _expander;
 
-        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec)
+        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec) 
+            : base(itemSpecFragment, containingItemSpec.ItemSpecLocation.File)
         {
             Capture = capture;
-            ItemSpecFragment = itemSpecFragment;
 
             _containingItemSpec = containingItemSpec;
             _expander = _containingItemSpec.Expander;
         }
 
-        public int ItemMatches(string itemToMatch)
+        public override int ItemMatches(string itemToMatch)
         {
             // cache referenced items as long as the expander does not change
             // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
@@ -252,7 +261,7 @@ namespace Microsoft.Build.Evaluation
                 IList<Tuple<string, I>> itemsFromCapture;
                 bool throwaway;
                 _expander.ExpandExpressionCapture(Capture, _containingItemSpec.ItemSpecLocation, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, out itemsFromCapture);
-                _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1, _containingItemSpec.ItemSpecLocation.File)).ToList();
+                _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
             }
 
             return _itemValueFragments.Count(v => v.ItemMatches(itemToMatch) > 0);
