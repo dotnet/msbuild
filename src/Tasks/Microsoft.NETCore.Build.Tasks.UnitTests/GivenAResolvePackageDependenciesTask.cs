@@ -1,11 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using FluentAssertions;
-using Xunit;
-using System.IO;
-using NuGet.ProjectModel;
 using Microsoft.Build.Framework;
+using NuGet.ProjectModel;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 
 namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
@@ -60,7 +62,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         [Theory]
         [InlineData("dotnet.new")]
         [InlineData("simple.dependencies")]
-        public void ItsAssignsValidParentTargetsAndPackages(string projectName)
+        public void ItAssignsValidParentTargetsAndPackages(string projectName)
         {
             LockFile lockFile;
             var task = GetExecutedTask(projectName, out lockFile);
@@ -87,7 +89,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         [Theory]
         [InlineData("dotnet.new")]
         [InlineData("simple.dependencies")]
-        public void ItsAssignsValidTopLevelDependencies(string projectName)
+        public void ItAssignsValidTopLevelDependencies(string projectName)
         {
             LockFile lockFile;
             var task = GetExecutedTask(projectName, out lockFile);
@@ -128,6 +130,5 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
             return task;
         }
-
     }
 }

@@ -1,13 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Configuration;
 using NuGet.ProjectModel;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Microsoft.NETCore.Build.Tasks
@@ -207,7 +207,10 @@ namespace Microsoft.NETCore.Build.Tasks
 
                 foreach (var file in package.Files)
                 {
-                    if (Path.GetFileName(file) == "_._") continue;
+                    if (Path.GetFileName(file) == "_._")
+                    {
+                        continue;
+                    }
 
                     var fileKey = $"{packageId}/{file}";
                     var fileItem = new TaskItem(fileKey);
@@ -327,7 +330,10 @@ namespace Microsoft.NETCore.Build.Tasks
                 var filePathList = fileGroup.GetFilePathListFor(package);
                 foreach (var filePath in filePathList)
                 {
-                    if (Path.GetFileName(filePath) == "_._") continue;
+                    if (Path.GetFileName(filePath) == "_._")
+                    {
+                        continue;
+                    }
 
                     var fileKey = $"{packageId}/{filePath}";
                     item = new TaskItem(fileKey);
