@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Edge.Runner;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
@@ -189,7 +188,8 @@ namespace dotnet_new3
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                await tmplt.Generator.Create(new Orchestrator(), tmplt, templateParams);
+                //TODO: Pass an implementation of ITemplateEngineHost
+                await tmplt.Generator.Create(null, tmplt, templateParams);
                 sw.Stop();
 
                 if (!quiet)
