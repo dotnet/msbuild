@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/publish/Microsoft.DotNet.Cli.Badge.targets" />
+
+  <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
+  <Target Name="Publish"
+          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
+          DependsOnTargets="Init;
+                            Package;
+                            PublishArtifacts;
+                            FinishBuild" />
+
+  <!-- UploadToAzure target comes from Build Tools -->
+  <Target Name="PublishArtifacts"
+          DependsOnTargets="SetupAzureBlobInformation;
+                            GenerateVersionBadge;
+                            GatherItemsForPattern;
+                            UploadToAzure;
+                            PublishDebFilesToDebianRepo;
+                            PublishCliVersionBadge" />
+
+  <Target Name="FinishBuild">
+    <FinalizeBuild AccountName="$(CloudDropAccountName)"
+                   AccountKey="$(CloudDropAccessToken)"
+                   NugetVersion="$(NugetVersion)"
+                   Channel="$(Channel)"
+                   CommitHash="$(CommitHash)"
+                   BranchName="$(BranchName)" />
+  </Target>
+
+  <Target Name="SetupAzureBlobInformation">
+    <PropertyGroup>
+      <Product>Sdk</Product>
+      <ContainerName>$(STORAGE_CONTAINER)</ContainerName>
+      <CloudDropAccessToken>$(STORAGE_KEY)</CloudDropAccessToken>
+      <CloudDropAccountName>$(STORAGE_ACCOUNT)</CloudDropAccountName>
+      <DotnetBlobRootUrl>https://$(CloudDropAccountName).blob.core.windows.net/$(ContainerName)</DotnetBlobRootUrl>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GatherItemsForPattern">
+    <ItemGroup>
+      <ForPublishing Include="@(GeneratedInstallers)" />
+      <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ForPublishing>
+        <RelativeBlobPath>$(Product)/$(NugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+      </ForPublishing>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PublishDebFilesToDebianRepo" Condition=" '$(OSName)' == 'ubuntu' ">
+    <Error Condition="'$(REPO_ID)' == ''" Text="REPO_ID must be set as an environment variable for debian publishing." />
+    <Error Condition="'$(REPO_USER)' == ''" Text="REPO_USER must be set as an environment variable for debian publishing." />
+    <Error Condition="'$(REPO_PASS)' == ''" Text="REPO_PASS must be set as an environment variable for debian publishing." />
+    <Error Condition="'$(REPO_SERVER)' == ''" Text="REPO_SERVER must be set as an environment variable for debian publishing." />
+
+    <ItemGroup>
+      <SdkInstallerFileItemGroup Include="$(SdkInstallerFile)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(NugetVersion)/%(SdkInstallerFileItemGroup.Filename)%(SdkInstallerFileItemGroup.Extension)</SdkDebianUploadUrl>
+      <DebianUploadJsonFile>$(SdkDebianIntermediateDirectory)/package_upload.json</DebianUploadJsonFile>
+      <DebianRevisionNumber>1</DebianRevisionNumber>
+
+      <DebianUploadJsonContent>
+        {
+          "name":"$(SdkDebianPackageName)",
+          "version":"$(NugetVersion)-$(DebianRevisionNumber)",
+          "repositoryId":"$(REPO_ID)",
+          "sourceUrl": "$(SdkDebianUploadUrl)"
+        }
+      </DebianUploadJsonContent>
+    </PropertyGroup>
+
+    <Delete Files="$(DebianUploadJsonFile)" />
+    <WriteLinesToFile File="$(DebianUploadJsonFile)" Lines="$(DebianUploadJsonContent)" />
+
+    <Exec Command="$(RepoRoot)/scripts/publish/repoapi_client.sh -addpkg $(DebianUploadJsonFile)" />
+  </Target>
+
+  <Target Name="PublishCliVersionBadge">
+    <ItemGroup>
+      <CliVersionBadgeToUpload Include="$(VersionBadge)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <CliVersionBadgeToUpload>
+        <RelativeBlobPath>$(Product)/$(NugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+      </CliVersionBadgeToUpload>
+    </ItemGroup>
+
+    <UploadToAzure
+      AccountKey="$(CloudDropAccessToken)"
+      AccountName="$(CloudDropAccountName)"
+      ContainerName="$(ContainerName)"
+      Items="@(CliVersionBadgeToUpload)" />
+
+    <SetBlobPropertiesBasedOnFileType
+      AccountKey="$(CloudDropAccessToken)"
+      AccountName="$(CloudDropAccountName)"
+      Items="@(CliVersionBadgeToUpload)" />
+  </Target>
+</Project>

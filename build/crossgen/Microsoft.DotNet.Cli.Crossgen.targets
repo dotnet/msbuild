@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="InitCrossgenProps"
+          DependsOnTargets="Init">
+    <PropertyGroup>
+      <CoreCLRRid>$(Rid)</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
+
+      <CrossGenPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CrossGenPackageName>
+      <LibCLRJitPackageName>runtime.$(CoreCLRRid).microsoft.netcore.jit</LibCLRJitPackageName>
+      <CoreCLRPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CoreCLRPackageName>
+
+      <CoreCLRLibsDir>$(NuGetPackagesDir)/$(CoreCLRPackageName)/$(CoreCLRVersion)/runtimes/$(CoreCLRRid)/lib/netstandard1.0</CoreCLRLibsDir>
+      <CrossgenPath>$(NuGetPackagesDir)/$(CrossGenPackageName)/$(CoreCLRVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
+      <LibCLRJitPath>$(NuGetPackagesDir)/$(LibCLRJitPackageName)/$(CoreCLRVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PlatformAssemblies Include="$(CoreCLRLibsDir)" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0-preview3-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    },
+    "tool_csc": "1.0.0-preview3-*",
+    "dotnet": "1.0.0-preview3-*",
+    "tool_nuget": "1.0.0-preview3-*",
+    "tool_msbuild": "1.0.0-preview3-*",
+
+    "MSBuild": "0.1.0-preview-00033-160829",
+    "Microsoft.Build.Framework": "0.1.0-preview-00033-160829",
+    "Microsoft.Build.Tasks.Core": "0.1.0-preview-00033-160829",
+    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00033-160829",
+    "Microsoft.Build.Targets": "0.1.0-preview-00033-160829",
+    "Microsoft.Build": "0.1.0-preview-00033-160829",
+    "System.Runtime.Serialization.Xml": "4.1.0",
+    "NuGet.Build.Tasks": "3.6.0-beta.1.msbuild.1"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dnxcore50",
+        "netstandardapp1.5",
+        "portable-net45+win8",
+        "portable-net45+wp80+win8+wpa81+dnxcore50"
+      ]
+    }
+  }
+}

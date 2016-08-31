@@ -1,0 +1,24 @@
+﻿{
+  "version": "1.0.0-preview3-*",
+  "buildOptions": {
+    "warningsAsErrors": true
+  },
+  "dependencies": {
+    "Microsoft.DotNet.Compiler.Common": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
+    },
+    "Microsoft.Build.Framework": "0.1.0-preview-00029-160805",
+    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00029-160805",
+    "Microsoft.Build": "0.1.0-preview-00029-160805",
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+    }
+  }
+}

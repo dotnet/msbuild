@@ -38,7 +38,15 @@ namespace Microsoft.DotNet.ProjectModel.Files
             SourceBasePath = sourceBasePath;
             Option = option;
             var token = rawObject.Value<JToken>(option);
-            if (token.Type != JTokenType.Object)
+
+            if (token == null)
+            {
+                IncludePatterns = new List<string>();
+                ExcludePatterns = new List<string>();
+                IncludeFiles = new List<string>();
+                ExcludeFiles = new List<string>();
+            }
+            else if (token.Type != JTokenType.Object)
             {
                 IncludePatterns = CreateCollection(
                     sourceBasePath, option, ExtractValues(token), literalPath: false);

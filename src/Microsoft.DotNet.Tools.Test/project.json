@@ -1,0 +1,38 @@
+﻿{
+  "version": "1.0.0-preview3-*",
+  "buildOptions": {
+  	"keyFile": "../../tools/Key.snk",
+    "compile": {
+      "include": [
+        "**/*.cs",
+        "../dotnet/CommandLine/*.cs"
+      ]
+    }
+  },
+
+  "dependencies": {
+    "System.Diagnostics.TraceSource": "4.0.0",
+    "System.Diagnostics.TextWriterTraceListener": "4.0.0",
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.ProjectModel": {
+      "target": "project"
+    },
+    "Microsoft.Extensions.Testing.Abstractions": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.InternalAbstractions": {
+  	  "target": "project"
+  	},
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": [
+        "portable-net45+wp80+win8+wpa81+dnxcore50"
+      ]
+    }
+  }
+}

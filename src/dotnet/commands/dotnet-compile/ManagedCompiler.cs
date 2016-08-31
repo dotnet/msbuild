@@ -126,7 +126,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             if (compilationOptions.PreserveCompilationContext == true)
             {
                 var allExports = exporter.GetAllExports().ToList();
-                var exportsLookup = allExports.ToDictionary(e => e.Library.Identity.Name);
+                var exportsLookup = allExports.ToDictionary(
+                    e => e.Library.Identity.Name,
+                    StringComparer.OrdinalIgnoreCase);
                 var buildExclusionList = context.GetTypeBuildExclusionList(exportsLookup);
                 var filteredExports = allExports
                     .Where(e => e.Library.Identity.Type.Equals(LibraryType.ReferenceAssembly) ||

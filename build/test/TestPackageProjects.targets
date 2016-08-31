@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="SetupTestPackageProjectData"
+          DependsOnTargets="AssociateSourceFilesWithProjects;
+                            AssociateOutputsWithProjects;">
+    <ItemGroup>
+      <TestPackageProject>
+        <NuPkgName Condition=" '%(NuPkgName)' == '' ">%(Name)</NuPkgName>
+      </TestPackageProject>
+
+      <TestPackageProject>
+        <PackInputs>%(BuildOutputs)</PackInputs>
+        <PackOutputs>$(TestPackagesDir)%(NuPkgName).%(VersionPrefix)%(VersionSuffix).nupkg</PackOutputs>
+      </TestPackageProject>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="AssociateOutputsWithProjects"
+          DependsOnTargets="SetupTestPackageProjectFrameworks"
+          Outputs="%(TestPackageProject.ProjectPath)">
+    <ItemGroup>
+      <TestPackageProject>
+        <BuildOutputs>%(TestPackageProject.OutputPath)%(TestPackageProject.Name).dll</BuildOutputs>
+      </TestPackageProject>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SetupTestPackageProjectFrameworks"
+          DependsOnTargets="SetupTestPackageProjectBaseData;
+                            AssociateSourceFilesWithProjects;"
+          Outputs="%(TestPackageProjectFrameworks.Identity)">
+    <PropertyGroup>
+      <CurrentBuildFramework>%(TestPackageProjectFrameworks.Identity)</CurrentBuildFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <TestPackageProject Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Frameworks)', '(^|;)$(CurrentBuildFramework)($|;)'))"
+                          Include="@(BaseTestPackageProject)">
+        <Framework>$(CurrentBuildFramework)</Framework>
+        <OutputPath>%(OutputPath)$(CurrentBuildFramework)/</OutputPath>
+      </TestPackageProject>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="AssociateSourceFilesWithProjects"
+          DependsOnTargets="FindSourceFiles"
+          Outputs="%(BaseTestPackageProject.ProjectPath)">
+    <PropertyGroup>
+      <CurrentProject>%(BaseTestPackageProject.ProjectPath)</CurrentProject>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <BaseTestPackageProject Condition=" '%(ProjectPath)' == '$(CurrentProject)' ">
+        <BuildInputs>@(__TestPackageProjectInputs)</BuildInputs>
+      </BaseTestPackageProject>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="FindSourceFiles"
+          DependsOnTargets="SetupTestPackageProjectBaseData;"
+          Outputs="%(BaseTestPackageProject.Identity)">
+    <ItemGroup>
+      <__TestPackageProjectInputs Include="%(BaseTestPackageProject.BuildInputIncludeFilter)"
+                                  Exclude="%(BaseTestPackageProject.BuildInputExcludeFilter)">
+        <ProjectPath>%(BaseTestPackageProject.ProjectPath)</ProjectPath>
+      </__TestPackageProjectInputs>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SetupTestPackageProjectBaseData">
+    <ItemGroup>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep">
+        <Name>PackageWithFakeNativeDep</Name>
+        <IsTool>False</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>net45</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-context-test">
+        <Name>dotnet-dependency-context-test</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-rc-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-tool-invoker">
+        <Name>dotnet-dependency-tool-invoker</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-rc-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable">
+        <Name>dotnet-desktop-and-portable</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-rc-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>net451;netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
+                          Condition=" '$(IsDesktopAvailable)' == 'True' ">
+        <Name>dotnet-desktop-binding-redirects</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>$(DesktopAvailable)</IsApplicable>
+        <VersionPrefix>1.0.0-rc-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>net451</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello">
+        <Name>dotnet-hello</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello">
+        <Name>dotnet-hello</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>2.0.0</VersionPrefix>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable">
+        <Name>dotnet-portable</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/ToolWithOutputName">
+        <Name>dotnet-tool-with-output-name</Name>
+        <NuPkgName>ToolWithOutputName</NuPkgName>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <VersionSuffix></VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils">
+        <Name>Microsoft.DotNet.Cli.Utils</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.6</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.ProjectModel">
+        <Name>Microsoft.DotNet.ProjectModel</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-rc4-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.6</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.ProjectModel.Loader">
+        <Name>Microsoft.DotNet.ProjectModel.Loader</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.ProjectModel.Workspaces">
+        <Name>Microsoft.DotNet.ProjectModel.Workspaces</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
+        <Name>Microsoft.DotNet.InternalAbstractions</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.1-beta-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.3</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.Extensions.Testing.Abstractions">
+        <Name>Microsoft.Extensions.Testing.Abstractions</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>net451;netstandard1.6</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.Compiler.Common">
+        <Name>Microsoft.DotNet.Compiler.Common</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.Files">
+        <Name>Microsoft.DotNet.Files</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.6</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/dotnet-compile-fsc">
+        <Name>dotnet-compile-fsc</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
+
+      <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />
+      <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net451" />
+      <TestPackageProjectFrameworks Include="%(BaseTestPackageProject.Frameworks)" Exclude="@(TestPackageProjectFrameworksExcludes)" />
+
+      <BaseTestPackageProject>
+        <ProjectDir>$(RepoRoot)%(Identity)/</ProjectDir>
+        <OutputPath>$(TestPackagesBuildDir)%(Identity)/bin/$(Configuration)/</OutputPath>
+      </BaseTestPackageProject>
+
+      <BaseTestPackageProject>
+        <ProjectPath>%(ProjectDir)project.json</ProjectPath>
+        <BuildInputIncludeFilter>%(ProjectDir)**/*.*</BuildInputIncludeFilter>
+        <BuildInputExcludeFilter>%(ProjectDir)bin/**/*.*;%(ProjectDir)obj/**/*.*</BuildInputExcludeFilter>
+      </BaseTestPackageProject>
+    </ItemGroup>
+  </Target>
+
+  <ItemDefinitionGroup>
+    <BaseTestPackageProject>
+      <NuPkgName>%(Name)</NuPkgName>
+    </BaseTestPackageProject>
+  </ItemDefinitionGroup>  
+</Project>

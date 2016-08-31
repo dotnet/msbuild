@@ -2,17 +2,13 @@
   "version": "1.0.0-*",
   "buildOptions": {
     "warningsAsErrors": true,
-    "allowUnsafe": true,
-    "compile": [
-      "../../src/Microsoft.DotNet.InternalAbstractions/RuntimeEnvironment.cs",
-      "../../src/Microsoft.DotNet.InternalAbstractions/Platform.cs",
-      "../../src/Microsoft.DotNet.InternalAbstractions/Native/*.cs"
-    ]
+    "allowUnsafe": true
   },
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "System.Diagnostics.Process": "4.1.0",
-    "System.Reflection.TypeExtensions": "4.1.0"
+    "System.Reflection.TypeExtensions": "4.1.0",
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
   },
   "frameworks": {
     "netstandard1.5": {

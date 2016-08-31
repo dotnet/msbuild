@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -68,7 +69,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             }
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip="https://github.com/xunit/xunit/issues/934")]
         public void It_discovers_tests_for_the_ProjectWithTestsWithNet451()
         {
             Setup();
@@ -109,7 +110,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             }
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip="https://github.com/xunit/xunit/issues/934")]
         public void It_runs_tests_for_net451()
         {
             Setup();

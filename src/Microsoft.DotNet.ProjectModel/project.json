@@ -5,13 +5,13 @@
   },
   "description": "Types to model a .NET Project",
   "dependencies": {
-    "Microsoft.Extensions.DependencyModel": {
-      "target": "project"
-    },
+    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000919",
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919",
     "Newtonsoft.Json": "9.0.1",
-    "NuGet.Packaging": "3.5.0-beta2-1484",
-    "NuGet.RuntimeModel": "3.5.0-beta2-1484",
-    "System.Reflection.Metadata": "1.3.0"
+    "NuGet.Configuration": "3.6.0-beta.1.msbuild.1",
+    "NuGet.Packaging": "3.6.0-beta.1.msbuild.1",
+    "NuGet.RuntimeModel": "3.6.0-beta.1.msbuild.1",
+    "System.Reflection.Metadata": "1.4.1-beta-24410-02"
   },
   "frameworks": {
     "net451": {

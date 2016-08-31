@@ -18,5 +18,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             args = $"new {args}";
             return base.Execute(args);
         }
+
+        public override CommandResult ExecuteWithCapturedOutput(string args = "")
+        {
+            args = $"new {args}";
+            return base.ExecuteWithCapturedOutput(args);
+        }
     }
 }

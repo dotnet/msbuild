@@ -21,7 +21,10 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             _reader = reader;
 
             var msbuildProjectLibraries = lockFile.ProjectLibraries.Where(MSBuildDependencyProvider.IsMSBuildProjectLibrary);
-            _msbuildTargetLibraries = msbuildProjectLibraries.ToDictionary(GetProjectLibraryKey, l => GetTargetsForLibrary(_lockFile, l));
+            _msbuildTargetLibraries = msbuildProjectLibraries.ToDictionary(
+                GetProjectLibraryKey,
+                l => GetTargetsForLibrary(_lockFile, l),
+                StringComparer.OrdinalIgnoreCase);
         }
 
         public void Patch()
@@ -53,7 +56,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 throw new LockFilePatchingException($"Export file {exportFile.ExportFilePath} has a different version than the lock file {_lockFile.LockFilePath}");
             }
 
-            var exportDict = exportFile.Exports.ToDictionary(GetTargetLibraryKey);
+            var exportDict = exportFile.Exports.ToDictionary(GetTargetLibraryKey, StringComparer.OrdinalIgnoreCase);
 
             var uncoveredLibraries = _msbuildTargetLibraries.Keys.Except(exportDict.Keys);
             if (uncoveredLibraries.Any())

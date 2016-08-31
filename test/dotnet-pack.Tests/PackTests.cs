@@ -17,49 +17,41 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
     {
         private readonly string _testProjectsRoot;
 
-        public PackTests()
-        {
-            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
-        }
-
         [Fact]
         public void OutputsPackagesToConfigurationSubdirWhenOutputParameterIsNotPassed()
         {
-            var root = Temp.CreateDirectory();
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestLibraryWithConfiguration")
+                .WithBuildArtifacts()
+                .WithLockFiles();
 
-            var testLibDir = root.CreateDirectory("TestLibrary");
-            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibraryWithConfiguration");
-
-            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
-
-            var testProject = GetProjectPath(testLibDir);
+            var testProject = Path.Combine(testInstance.Path, "project.json");
             var packCommand = new PackCommand(testProject, configuration: "Test");
             var result = packCommand.Execute();
             result.Should().Pass();
 
-            var outputDir = new DirectoryInfo(Path.Combine(testLibDir.Path, "bin", "Test"));
+            var outputDir = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", "Test"));
             outputDir.Should().Exist();
-            outputDir.Should().HaveFiles(new [] { "TestLibrary.1.0.0.nupkg" , "TestLibrary.1.0.0.symbols.nupkg" });
+            outputDir.Should().HaveFiles(new [] { "TestLibraryWithConfiguration.1.0.0.nupkg" , "TestLibraryWithConfiguration.1.0.0.symbols.nupkg" });
         }
 
         [Fact]
         public void OutputsPackagesFlatIntoOutputDirWhenOutputParameterIsPassed()
         {
-            var root = Temp.CreateDirectory();
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestLibraryWithConfiguration")
+                .WithBuildArtifacts()
+                .WithLockFiles();
 
-            var testLibDir = root.CreateDirectory("TestLibrary");
-            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibraryWithConfiguration");
+            var testProject = Path.Combine(testInstance.Path, "project.json");
 
-            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
-
-            var outputDir = new DirectoryInfo(Path.Combine(testLibDir.Path, "bin2"));
-            var testProject = GetProjectPath(testLibDir);
+            var outputDir = new DirectoryInfo(Path.Combine(testInstance.Path, "bin2"));
             var packCommand = new PackCommand(testProject, output: outputDir.FullName);
             var result = packCommand.Execute();
             result.Should().Pass();
 
             outputDir.Should().Exist();
-            outputDir.Should().HaveFiles(new[] { "TestLibrary.1.0.0.nupkg", "TestLibrary.1.0.0.symbols.nupkg" });
+            outputDir.Should().HaveFiles(new[] { "TestLibraryWithConfiguration.1.0.0.nupkg", "TestLibraryWithConfiguration.1.0.0.symbols.nupkg" });
         }
 
         [Fact]
@@ -100,9 +92,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void HasIncludedFiles()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("EndToEndTestApp")
-                                                   .WithLockFiles()
-                                                   .WithBuildArtifacts();
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("EndToEndTestApp")
+                .WithLockFiles()
+                .WithBuildArtifacts();
 
             var cmd = new PackCommand(Path.Combine(testInstance.TestRoot, Project.FileName));
             cmd.Execute().Should().Pass();
@@ -156,27 +149,25 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void HasServiceableFlagWhenArgumentPassed()
         {
-            var root = Temp.CreateDirectory();
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("TestLibraryWithConfiguration")
+                .WithBuildArtifacts()
+                .WithLockFiles();
 
-            var testLibDir = root.CreateDirectory("TestLibrary");
-            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibraryWithConfiguration");
-
-            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
-
-            var testProject = GetProjectPath(testLibDir);
+            var testProject = Path.Combine(testInstance.Path, "project.json");
             var packCommand = new PackCommand(testProject, configuration: "Debug", serviceable: true);
             var result = packCommand.Execute();
             result.Should().Pass();
 
-            var outputDir = new DirectoryInfo(Path.Combine(testLibDir.Path, "bin", "Debug"));
+            var outputDir = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", "Debug"));
             outputDir.Should().Exist();
-            outputDir.Should().HaveFiles(new[] { "TestLibrary.1.0.0.nupkg", "TestLibrary.1.0.0.symbols.nupkg" });
+            outputDir.Should().HaveFiles(new[] { "TestLibraryWithConfiguration.1.0.0.nupkg", "TestLibraryWithConfiguration.1.0.0.symbols.nupkg" });
 
-            var outputPackage = Path.Combine(outputDir.FullName, "TestLibrary.1.0.0.nupkg");
+            var outputPackage = Path.Combine(outputDir.FullName, "TestLibraryWithConfiguration.1.0.0.nupkg");
             var zip = ZipFile.Open(outputPackage, ZipArchiveMode.Read);
-            zip.Entries.Should().Contain(e => e.FullName == "TestLibrary.nuspec");
+            zip.Entries.Should().Contain(e => e.FullName == "TestLibraryWithConfiguration.nuspec");
 
-            var manifestReader = new StreamReader(zip.Entries.First(e => e.FullName == "TestLibrary.nuspec").Open());
+            var manifestReader = new StreamReader(zip.Entries.First(e => e.FullName == "TestLibraryWithConfiguration.nuspec").Open());
             var nuspecXml = XDocument.Parse(manifestReader.ReadToEnd());
             var node = nuspecXml.Descendants().Single(e => e.Name.LocalName == "serviceable");
             Assert.Equal("true", node.Value);

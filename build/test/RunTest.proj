@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTarget="RunTest" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- workaround for https://github.com/Microsoft/msbuild/issues/885 -->
+  <PropertyGroup>
+    <CLIBuildDll Condition=" '!Exists($(CLIBuildDll))' ">$([MSBuild]::Unescape($(CLIBuildDll)))</CLIBuildDll>
+  </PropertyGroup>
+
+
+  <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
+
+  <Target Name="RunTest">
+    <DotNetTest WorkingDirectory="$(WorkingDirectory)"
+                EnvironmentVariables="$(EnvironmentVariables)"
+                ToolPath="$(ToolPath)"
+                Configuration="$(Configuration)"
+                NoBuild="True"
+                NoTrait="category=failing"
+                Xml="$(TestResultXmlDir)/$(TestProjectName)-testResults.xml" />
+  </Target>
+</Project>

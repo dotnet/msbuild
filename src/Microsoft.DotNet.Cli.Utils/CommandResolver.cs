@@ -12,7 +12,8 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             NuGetFramework framework = null,
             string configuration = Constants.DefaultConfiguration,
-            string outputPath = null)
+            string outputPath = null,
+            string applicationName = null)
         {
             var commandResolverArgs = new CommandResolverArguments
             {
@@ -21,7 +22,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 Framework = framework,
                 ProjectDirectory = Directory.GetCurrentDirectory(),
                 Configuration = configuration,
-                OutputPath = outputPath
+                OutputPath = outputPath,
+                ApplicationName = applicationName
             };
 
             var defaultCommandResolver = DefaultCommandResolverPolicy.Create();

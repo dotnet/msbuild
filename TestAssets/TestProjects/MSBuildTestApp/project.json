@@ -1,0 +1,13 @@
+{
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.DotNet.Core.Sdk": "1.0.0-alpha-20160822-4",
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0",
+          "type": "platform"
+        }
+      }
+    }
+  }
+}

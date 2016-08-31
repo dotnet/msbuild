@@ -10,11 +10,13 @@ using FluentAssertions;
 
 namespace Microsoft.Dotnet.Tools.Test.Tests
 {
-    public class GivenAUnknownMessageHandler
+    public class GivenAnUnknownMessageHandler
     {
         [Fact]
         public void It_throws_InvalidOperationException_and_sends_an_error_when_the_message_is_not_handled()
         {
+            TestHostTracing.ClearListeners();
+
             const string expectedError = "No handler for message 'Test Message' when at state 'InitialState'";
 
             var dotnetTestMock = new Mock<IDotnetTest>();

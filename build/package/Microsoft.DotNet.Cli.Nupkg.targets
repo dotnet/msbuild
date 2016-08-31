@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Target Name="SetupProjectsToPack"
+          DependsOnTargets="Init">
+    <PropertyGroup>
+      <NupkgVersionSuffix>$(CommitCount)</NupkgVersionSuffix>
+      <ProjectsSrcDirectory>$(RepoRoot)/src</ProjectsSrcDirectory>
+      <PackagingBuildBasePath>$(Stage2CompilationDirectory)/forPackaging</PackagingBuildBasePath>
+      <NupkgOutputDirectory>$(PackagesDirectory)</NupkgOutputDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Cli.Utils" >
+        <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common">
+        <ProjectName>Microsoft.DotNet.Compiler.Common</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Files">
+        <ProjectName>Microsoft.DotNet.Files</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions">
+        <ProjectName>Microsoft.DotNet.InternalAbstractions</ProjectName>
+        <Version>$(DependencyModelAndInternalAbstractionsNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel">
+        <ProjectName>Microsoft.DotNet.ProjectModel</ProjectName>
+        <Version>$(ProjectModelNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader">
+        <ProjectName>Microsoft.DotNet.ProjectModel.Loader</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces">
+        <ProjectName>Microsoft.DotNet.ProjectModel.Workspaces</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions">
+        <ProjectName>Microsoft.Extensions.Testing.Abstractions</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Tools.Test">
+        <ProjectName>Microsoft.DotNet.Tools.Test</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SetupGenerateNugetPackagesInputsOutputs"
+          DependsOnTargets="SetupProjectsToPack">
+    <ItemGroup>
+      <ProjectPackTargetInputs Include="$(PackagingBuildBasePath)/src/%(ProjectsToPack.ProjectName)/**/netstandard*/%(ProjectsToPack.ProjectName).dll" />
+      <ProjectPackTargetOutputs Include="$(NupkgOutputDirectory)/%(ProjectsToPack.ProjectName).%(ProjectsToPack.Version).nupkg" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GenerateNugetPackages"
+          DependsOnTargets="SetupGenerateNugetPackagesInputsOutputs"
+          Inputs="@(ProjectPackTargetInputs -> '%(Identity)')"
+          Outputs="@(ProjectPackTargetOutputs -> '%(Identity)')">
+
+    <DotNetPack BuildBasePath="$(PackagingBuildBasePath)"
+                NoBuild="True"
+                Output="$(NupkgOutputDirectory)"
+                ProjectPath="%(ProjectsToPack.Identity)"
+                ToolPath="$(Stage2Directory)"
+                VersionSuffix="$(NupkgVersionSuffix)"
+                Configuration="$(Configuration)" />
+  </Target>
+
+  <Target Name="BuildProjectsForNuGetPackages"
+            DependsOnTargets="Init;
+                              SetupProjectsToPack"
+            Condition=" '$(OS)' == 'Windows_NT' ">
+        <MakeDir Directories="$(PackagingBuildBasePath)" />
+
+        <DotNetBuild ToolPath="$(Stage2Directory)"
+                     BuildBasePath="$(PackagingBuildBasePath)"
+                     Configuration="$(Configuration)"
+                     ProjectPath="%(ProjectsToPack.Identity)" />
+  </Target>
+</Project>

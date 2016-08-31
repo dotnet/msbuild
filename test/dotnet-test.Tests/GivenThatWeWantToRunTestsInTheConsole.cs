@@ -42,7 +42,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         public void It_returns_a_failure_when_it_fails_to_run_the_tests()
         {
             var testCommand = new DotnetTestCommand();
-            var result = testCommand.Execute(
+            var result = testCommand.ExecuteWithCapturedOutput(
                 $"{_projectFilePath} -o {Path.Combine(AppContext.BaseDirectory, "nonExistingFolder")} --no-build");
             result.Should().Fail();
         }
@@ -97,6 +97,20 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             result.Should().Pass();
         }
         
+        [Fact]
+        public void It_runs_tests_for_an_assembly_passed_as_param()
+        {
+            var publishCommand = new PublishCommand(_projectFilePath);
+            var result = publishCommand.Execute();
+            result.Should().Pass();
+
+            var assemblyUnderTestPath = Path.Combine(publishCommand.GetOutputDirectory(true).FullName, publishCommand.GetPortableOutputName());
+
+            var testCommand = new DotnetTestCommand();
+            result = testCommand.Execute($"{assemblyUnderTestPath}");
+            result.Should().Pass();
+        }
+
         [Theory]
         [MemberData("ArgumentNames")]
         public void It_fails_correctly_with_unspecified_arguments_with_long_form(string argument)
