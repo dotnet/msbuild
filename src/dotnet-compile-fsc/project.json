@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-featmsbuild-*",
+  "version": "1.0.0-preview3-*",
   "buildOptions": {
     "emitEntryPoint": true,
     "compile": {

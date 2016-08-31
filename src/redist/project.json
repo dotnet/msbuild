@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-featmsbuild-*",
+  "version": "1.0.0-preview3-*",
   "buildOptions": {
     "emitEntryPoint": true
   },
@@ -8,10 +8,10 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "tool_csc": "1.0.0-featmsbuild-*",
-    "dotnet": "1.0.0-featmsbuild-*",
-    "tool_nuget": "1.0.0-featmsbuild-*",
-    "tool_msbuild": "1.0.0-featmsbuild-*",
+    "tool_csc": "1.0.0-preview3-*",
+    "dotnet": "1.0.0-preview3-*",
+    "tool_nuget": "1.0.0-preview3-*",
+    "tool_msbuild": "1.0.0-preview3-*",
 
     "MSBuild": "0.1.0-preview-00033-160829",
     "Microsoft.Build.Framework": "0.1.0-preview-00033-160829",
