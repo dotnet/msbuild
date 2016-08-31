@@ -175,10 +175,12 @@ namespace Microsoft.NETCore.Build.Tasks
             }
 
             string hash = string.Empty;
+            string path = null;
             LockFileLibrary library;
             if (libraryLookup.TryGetValue(export.Name, out library))
             {
                 hash = "sha512-" + library.Sha512;
+                path = library.Path;
             }
 
             if (runtime)
@@ -192,8 +194,8 @@ namespace Microsoft.NETCore.Build.Tasks
                     CreateNativeLibraryGroups(export),
                     export.ResourceAssemblies.Select(CreateResourceAssembly),
                     libraryDependencies,
-                    serviceable
-                    );
+                    serviceable,
+                    path);
             }
             // TODO: PreserveCompilationContext - https://github.com/dotnet/sdk/issues/11
             //else
