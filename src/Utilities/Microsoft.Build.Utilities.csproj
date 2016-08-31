@@ -11,6 +11,7 @@
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDocumentationFile>true</EnableDocumentationFile>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

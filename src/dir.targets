@@ -73,5 +73,7 @@
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <NuGetTargetMoniker>.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
+  
+  <Import Project="$(RepoRoot)\targets\GenApi.targets" Condition="'$(OS)' == 'Windows_NT'" />
 
 </Project>

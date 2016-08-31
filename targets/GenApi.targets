@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <GenerateReferenceAssemblySources Condition="'$(GenerateReferenceAssemblySources)' == ''">false</GenerateReferenceAssemblySources>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true'">
+    <GenApiVersion Condition="'$(GenApiVersion)' == ''">1.0.0-beta2-00731-01</GenApiVersion>
+    <GenApiDir Condition="'$(GenApiDir)' == ''">$(ToolPackagesDir)\Microsoft.DotNet.BuildTools.GenApi\$(GenApiVersion)\</GenApiDir>
+    <GenApiTFM Condition="'$(GenApiTFM)' == '' And '$(NetCoreBuild)' != 'true'">net46</GenApiTFM>
+    <GenApiTFM Condition="'$(GenApiTFM)' == '' And '$(NetCoreBuild)' == 'true'">netstandard1.3</GenApiTFM>
+    <GenAPITargetDir Condition="'$(GenAPITargetDir)' == ''">$(RepoRoot)ref\$(GenApiTFM)\$(TargetName)\</GenAPITargetDir>
+    <GenAPITargetPath Condition="'$(GenAPITargetPath)' == ''">$(GenAPITargetDir)$(TargetName).cs</GenAPITargetPath>
+  </PropertyGroup>
+
+  <Import Project="$(GenApiDir)build\Microsoft.DotNet.BuildTools.GenAPI.targets" Condition="'$(GenerateReferenceAssemblySources)' == 'true'" />
+
+  <Target Name="CreateReferenceAssemblyDirectory"
+          BeforeTargets="GenerateReferenceAssemblySource"
+          Condition="'$(GenerateReferenceAssemblySources)' == 'true' And !Exists('$(GenAPITargetDir)')">
+
+    <MakeDir Directories="$(GenAPITargetDir)" />
+  </Target>
+
+</Project>
