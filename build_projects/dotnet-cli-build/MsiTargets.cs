@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var cliSdkRoot = c.BuildContext.Get<string>("CLISDKRoot");
             var upgradeCode = Utils.GenerateGuidFromName(SdkMsi).ToString().ToUpper();
-            var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
+            var cliSdkBrandName = $"'{Monikers.GetCLISdkBrandName(c)}'";
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatemsi.ps1"),
@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static BuildTargetResult GenerateCliSdkBundle(BuildTargetContext c)
         {
             var upgradeCode = Utils.GenerateGuidFromName(SdkBundle).ToString().ToUpper();
-            var cliSdkBrandName = $"'{Monikers.CLISdkBrandName}'";
+            var cliSdkBrandName = $"'{Monikers.GetCLISdkBrandName(c)}'";
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "clisdk", "generatebundle.ps1"),

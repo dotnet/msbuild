@@ -7,7 +7,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0"
+    "Microsoft.NETCore.App": "1.0.1"
   },
   "frameworks": {
     "netcoreapp1.0": {}

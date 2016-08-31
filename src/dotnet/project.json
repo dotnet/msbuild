@@ -7,8 +7,9 @@
         "commands/dotnet-new/CSharp_Console.zip",
         "commands/dotnet-new/CSharp_Lib.zip",
         "commands/dotnet-new/CSharp_xunittest.zip",
+        "commands/dotnet-new/CSharp_Web.zip",
         "commands/dotnet-new/FSharp_Console.zip",
-        "commands/dotnet-new/CSharp_Web.zip"
+        "commands/dotnet-new/FSharp_Lib.zip"
       ]
     },
     "compile": {
@@ -17,6 +18,7 @@
         "commands/dotnet-new/FSharp_Console/**",
         "commands/dotnet-new/CSharp_Web/**",
         "commands/dotnet-new/CSharp_Lib/**",
+        "commands/dotnet-new/FSharp_Lib/**",
         "commands/dotnet-new/CSharp_xunittest/**"
       ]
     }
@@ -48,7 +50,7 @@
     },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "System.Diagnostics.TraceSource": "4.0.0",
     "System.Diagnostics.TextWriterTraceListener": "4.0.0",

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.App": "1.0.0",
+    "Microsoft.NETCore.App": "1.0.1",
     "EmptyLibrary": "1.0.0-*"
   },
   "frameworks": {
