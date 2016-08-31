@@ -39,7 +39,7 @@ namespace Microsoft.NETCore.TestFramework
             }
         }
 
-        public static string Configuration
+        private static string Configuration
         {
             get
             {
@@ -52,12 +52,17 @@ namespace Microsoft.NETCore.TestFramework
             }
         }
 
-        public static string Bin
+        public static string BinPath
         {
             get
             {
                 return Path.Combine(RepoRoot, "bin");
             }
+        }
+
+        public static string PackagesPath
+        {
+            get { return Path.Combine(BinPath, Configuration, "Packages"); }
         }
 
         public static string DotNetHostPath
@@ -70,6 +75,7 @@ namespace Microsoft.NETCore.TestFramework
 
         private static string FindConfigurationInBasePath()
         {
+            // assumes tests are always executed from the "bin/$Configuration/Tests" directory
             return new DirectoryInfo(GetBaseDirectory()).Parent.Name;
         }
 

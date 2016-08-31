@@ -2,6 +2,7 @@
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-003121",
     "FluentAssertions": "4.0.0",
+    "System.Diagnostics.FileVersionInfo":  "4.0.0",
     "xunit": "2.1.0"
   },
   "frameworks": {

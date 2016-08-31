@@ -50,7 +50,7 @@ namespace Microsoft.NETCore.TestFramework
             }
 
             ProjectsRoot = projectRoot;
-            BuildVersion = File.ReadAllText(buildVersion);
+            BuildVersion = File.ReadAllText(buildVersion).Trim();
         }
 
         public TestAsset CopyTestAsset(
