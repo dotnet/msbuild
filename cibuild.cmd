@@ -13,11 +13,11 @@ goto :usage
 
 :doneParsingArguments
 
-if "%SCOPE%"=="Compile" (
-    set TARGET_ARG=Build
-) else (
-    set TARGET_ARG=BuildAndTest
-)
+:: Default target
+set TARGET_ARG=RebuildAndTest
+
+if /i "%SCOPE%"=="Compile" set TARGET_ARG=Build
+if /i "%SCOPE%"=="Build" set TARGET_ARG=Build
 
 :: Assign target configuration
 
@@ -113,7 +113,7 @@ if /i "%TARGET%"=="CoreCLR" (
 echo.
 echo ** Rebuilding MSBuild with locally built binaries
 
-call "%~dp0build.cmd" /t:RebuildAndTest /p:Configuration=%BUILD_CONFIGURATION%
+call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
