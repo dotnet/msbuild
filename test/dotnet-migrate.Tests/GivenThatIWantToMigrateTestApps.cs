@@ -56,19 +56,18 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        // Outputs Not Identical: https://github.com/dotnet/sdk/issues/97
         public void It_migrates_dotnet_new_web_with_outputs_containing_project_json_outputs()
         {
             var projectDirectory = Temp.CreateDirectory().Path;
             var outputComparisonData = GetDotnetNewComparisonData(projectDirectory, "web");
 
-            var projectJsonOutputIsSubsetOfMSBuildOutput =
-                outputComparisonData.ProjectJsonBuildOutputs.IsProperSubsetOf(outputComparisonData.MSBuildBuildOutputs);
-            if (!projectJsonOutputIsSubsetOfMSBuildOutput)
+            var outputsIdentical =
+                outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
+            if (!outputsIdentical)
             {
                 OutputDiagnostics(outputComparisonData);
             }
-            projectJsonOutputIsSubsetOfMSBuildOutput.Should().BeTrue();
+            outputsIdentical.Should().BeTrue();
         }
 
         [Theory]
@@ -81,15 +80,15 @@ namespace Microsoft.DotNet.Migration.Tests
                 TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
 
-            var msBuildHasAdditionalOutputsButIncludesProjectJsonOutputs =
-                outputComparisonData.ProjectJsonBuildOutputs.IsProperSubsetOf(outputComparisonData.MSBuildBuildOutputs);
+            var outputsIdentical =
+                outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
 
-            if (!msBuildHasAdditionalOutputsButIncludesProjectJsonOutputs)
+            if (!outputsIdentical)
             {
                 OutputDiagnostics(outputComparisonData);
             }
-            
-            msBuildHasAdditionalOutputsButIncludesProjectJsonOutputs.Should().BeTrue();
+
+            outputsIdentical.Should().BeTrue();
         }
 
         [Fact]
