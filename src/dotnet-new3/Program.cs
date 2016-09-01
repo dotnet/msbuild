@@ -109,7 +109,8 @@ namespace dotnet_new3
                 }
 
                 string aliasName = alias.HasValue() ? alias.Value() : null;
-                if (await TemplateCreator.Instantiate(template.Value ?? "", name.Value(), dir.HasValue(), help.HasValue(), aliasName, parameters, quiet.HasValue(), skipUpdateCheck.HasValue()) == -1)
+                ITemplateEngineHost host = new DotNetNew3TemplateEngineHost();
+                if (await TemplateCreator.Instantiate(host, template.Value ?? "", name.Value(), dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
                 {
                     ListTemplates(template);
                     return -1;
