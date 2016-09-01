@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$id$</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>This package contains the $id$ assembly which implements the commonly used tasks of MSBuild.</description>
+    <tags>MSBuild</tags>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <dependencies>
+      <group targetFramework="netstandard1.3">
+        <dependency id="Microsoft.Build.Framework" version="[$version$]" />
+        <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
+        <dependency id="System.Collections" version="4.0.11" />
+        <dependency id="System.Collections.NonGeneric" version="4.0.1" />
+        <dependency id="System.Resources.Reader" version="4.0.1" />
+        <dependency id="System.Runtime.InteropServices" version="4.1.0" />
+        <dependency id="System.Runtime.Serialization.Xml" version="4.1.0" />
+        <dependency id="System.Xml.XmlDocument" version="4.0.1" />
+      </group>
+      <group targetFramework="net46">
+        <dependency id="Microsoft.Build.Framework" version="[$version$]" />
+        <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="$configuration$\Output\$id$.dll" target="lib\net46\$id$.dll" />
+    <file src="$configuration$-NetCore\Output\$id$.dll" target="lib\netstandard1.3\$id$.dll" />
+    <file src="$configuration$\Output\ref\$id$.dll" target="ref\net46\$id$.dll" />
+    <file src="$configuration$-NetCore\Output\ref\$id$.dll" target="ref\netstandard1.3\$id$.dll" />
+  </files>
+</package>

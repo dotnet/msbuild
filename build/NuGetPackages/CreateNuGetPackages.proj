@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
+  <Import Project="$(SourceDir)BuildValues.props" />
+  
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <NuGetPackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</NuGetPackageLicenseUrl>
+    <NuGetPackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</NuGetPackageIconUrl>
+    <NuGetPackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</NuGetPackageProjectUrl>
+    <PackagesBasePath>$([System.IO.Path]::GetFullPath('$(BaseOutputPathWithConfig)..'))</PackagesBasePath>
+    <PackagesOutDir>$([System.IO.Path]::Combine($(PackagesBasePath), 'Packages'))</PackagesOutDir>
+
+    <SkipVersionGeneration>true</SkipVersionGeneration>
+    <BaseVersion>15.1.0-preview</BaseVersion>
+    <BuildNumberMajor>$(RevisionNumber)</BuildNumberMajor>
+    <BuildNumberMinor>$([System.DateTime]::Now.ToString(`yMMdd`))</BuildNumberMinor>
+
+    <!-- The version for msbuild nuget packages. Used by packages.targets:AddNuGetPackageVersionMetadataToNuspecs -->
+    <PackageVersion>$(BaseVersion)-$(BuildNumberMajor)-$(BuildNumberMinor)</PackageVersion>
+
+    <!-- Turn off the automated package generation in packages.targets:AddNuGetPackageVersionMetadataToNuspecs and use the above PackageVersion-->
+    <DoNotGeneratePackageVersion>true</DoNotGeneratePackageVersion>
+  </PropertyGroup>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
+
+  <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
+  <Import Project="$(ToolsDir)versioning.targets" Condition="Exists('$(ToolsDir)versioning.targets')" />
+  
+  <ItemGroup>
+    <Project Include="$(RepoRoot)\ref\net46\**\*.csproj">
+      <Properties>Configuration=$(Configuration)</Properties>
+    </Project>
+    <Project Include="$(RepoRoot)\ref\netstandard1.3\**\*.csproj">
+      <Properties>Configuration=$(Configuration)-NetCore</Properties>
+    </Project>
+
+    <NuSpecs Include="*.nuspec" />
+
+  </ItemGroup>
+
+  <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
+    <TraversalBuildDependsOn>
+      $(TraversalBuildDependsOn);
+      BuildPackagesEx;
+    </TraversalBuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="BuildPackagesEx" Inputs="%(NuSpecs.Identity);$(MSBuildThisFileFullPath)" Outputs="$(PackagesOutDir)\%(NuSpecs.Filename).$(PackageVersion).nupkg">
+    
+    <ItemGroup>
+      <NuspecProperties Include="version=$(PackageVersion)"/>
+      <NuspecProperties Include="@(NuSpecs->'id=%(Filename)')"/>
+      <NuspecProperties Include="configuration=$(Configuration)"/>
+      <NuspecProperties Include="licenseUrl=$(NuGetPackageLicenseUrl)"/>
+      <NuspecProperties Include="projectUrl=$(NuGetPackageProjectUrl))"/>
+      <NuspecProperties Include="iconUrl=$(NuGetPackageIconUrl)"/>
+    </ItemGroup>
+
+    <MakeDir Directories="$(PackagesOutDir)" />
+
+    <NugetPack
+      Nuspecs="@(NuSpecs->'%(FullPath)')"
+      OutputDirectory="$(PackagesOutDir)"
+      BaseDirectory="$(PackagesBasePath)"
+      PackageVersion="$(PackageVersion)"
+      ExcludeEmptyDirectories="true"
+      NuspecProperties="@(NuspecProperties)"/>
+
+    <Message Importance="High" Text="@(NuSpecs->'%(Filename)') NuGet Package -> $(PackagesOutDir)\@(NuSpecs->'%(Filename)').$(PackageVersion).nupkg" />
+  </Target>
+  
+</Project>
