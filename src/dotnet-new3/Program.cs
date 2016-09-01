@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
@@ -108,7 +109,10 @@ namespace dotnet_new3
 
                 string aliasName = alias.HasValue() ? alias.Value() : null;
                 ITemplateEngineHost host = new DotNetNew3TemplateEngineHost();
-                if (await TemplateCreator.Instantiate(host, template.Value ?? "", name.Value(), dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
+
+                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+
+                if (await TemplateCreator.Instantiate(host, template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
                 {
                     ListTemplates(template);
                     return -1;
