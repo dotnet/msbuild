@@ -1,0 +1,10 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug-NetCore</Configuration>
+    <Configuration Condition="'$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Release'">$(Configuration)-NetCore</Configuration>
+  </PropertyGroup>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory).., dir.props))\dir.props" />
+
+</Project>
