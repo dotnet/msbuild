@@ -1502,14 +1502,6 @@ namespace Microsoft.Build.Shared
             // UNDONE (perf): Short circuit the complex processing when we only have a path and a wildcarded filename
 
             /*
-             * Even though we return a string[] we work internally with an IList.
-             * This is because it's cheaper to add items to an IList and this code
-             * might potentially do a lot of that.
-             */
-            System.Collections.ArrayList arrayListOfFiles = new System.Collections.ArrayList();
-            System.Collections.IList listOfFiles = (System.Collections.IList)arrayListOfFiles;
-
-            /*
              * Analyze the file spec and get the information we need to do the matching.
              */
             bool stripProjectDirectory;
@@ -1660,6 +1652,14 @@ namespace Microsoft.Build.Shared
             {
                 searchesToExclude = null;
             }
+
+            /*
+             * Even though we return a string[] we work internally with an IList.
+             * This is because it's cheaper to add items to an IList and this code
+             * might potentially do a lot of that.
+             */
+            System.Collections.ArrayList arrayListOfFiles = new System.Collections.ArrayList();
+            System.Collections.IList listOfFiles = (System.Collections.IList)arrayListOfFiles;
 
             /*
              * Now get the files that match, starting at the lowest fixed directory.

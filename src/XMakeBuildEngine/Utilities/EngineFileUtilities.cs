@@ -53,10 +53,10 @@ namespace Microsoft.Build.Internal
             (
             string directoryEscaped,
             string filespecEscaped,
-            IEnumerable<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsEscaped = null
             )
         {
-            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, excludeSpecsUnescaped);
+            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, excludeSpecsEscaped);
         }
 
         private static bool FilespecHasWildcards(string filespecEscaped)
@@ -101,18 +101,24 @@ namespace Microsoft.Build.Internal
             string directoryEscaped,
             string filespecEscaped,
             bool returnEscaped,
-            IEnumerable<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsEscaped = null
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, "filespecEscaped");
+
+            if (excludeSpecsEscaped == null)
+            {
+                excludeSpecsEscaped = Enumerable.Empty<string>();
+            }
 
             string[] fileList;
 
             if (FilespecHasWildcards(filespecEscaped))
             {
                 // Unescape before handing it to the filesystem.
-                string directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
-                string filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
+                var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
+                var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
+                var excludeSpecsUnescaped = excludeSpecsEscaped.Where(IsValidExclude).Select(EscapingUtilities.UnescapeAll);
 
                 // Get the list of actual files which match the filespec.  Put
                 // the list into a string array.  If the filespec started out
@@ -148,6 +154,18 @@ namespace Microsoft.Build.Internal
             }
 
             return fileList;
+        }
+
+        private static bool IsValidExclude(string exclude)
+        {
+            // TODO: assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
+            // Excludes that have both wildcards and non escaped wildcards will never be matched on Windows, because
+            // wildcard characters are invalid in Windows paths.
+            // Filtering these excludes early keeps the glob expander simpler. Otherwise unescaping logic would reach all the way down to
+            // filespec parsing (parse escaped string (to correctly ignore escaped wildcards) and then
+            // unescape the path fragments to unfold potentially escaped wildcard chars)
+            var hasBothWildcardsAndEscapedWildcards = FileMatcher.HasWildcards(exclude) && EscapingUtilities.ContainsEscapedWildcards(exclude);
+            return !hasBothWildcardsAndEscapedWildcards;
         }
 
         /// Returns a Func that will return true IFF its argument matches any of the specified filespecs
