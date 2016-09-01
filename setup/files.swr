@@ -5,6 +5,9 @@ package name=Microsoft.Build
         vs.package.chip=neutral
         vs.package.language=neutral
 
+folder InstallDir:\MSBuild\15.0
+  file source=$(X86BinPath)Microsoft.Common.props
+
 folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngen=yes
