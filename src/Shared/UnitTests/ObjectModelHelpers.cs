@@ -1415,25 +1415,24 @@ namespace Microsoft.Build.UnitTests
             return result;
         }
 
-        internal const string ItemWithIncludeAndExclude = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <ItemGroup>
-                            <i Include='{0}' Exclude='{1}'/>
-                        </ItemGroup>
-                    </Project>
-                ";
-
-        internal static void AssertItemEvaluation(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null)
         {
             string root = "";
             try
             {
                 string[] createdFiles;
                 string projectFile;
-                var formattedProjectContents = String.Format(projectContents, includeString, excludeString);
-                root = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, inputFiles, out projectFile, out createdFiles);
+                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
 
-                ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
+                if (expectedMetadataPerItem == null)
+                {
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
+                }
+                else
+                {
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem);
+                }
+                
             }
             finally
             {
