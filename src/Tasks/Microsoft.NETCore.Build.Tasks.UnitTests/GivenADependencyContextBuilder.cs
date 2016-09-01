@@ -25,7 +25,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         public void ItBuildsDependencyContextsFromProjectLockFiles(
             string mainProjectName,
             string mainProjectVersion,
-            ITaskItem compilerOptionsItem,
+            CompilationOptions compilationOptions,
             string baselineFileName)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
@@ -33,7 +33,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             DependencyContext dependencyContext = new DependencyContextBuilder().Build(
                 mainProjectName,
                 mainProjectVersion,
-                compilerOptionsItem,
+                compilationOptions,
                 lockFile,
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime: null);
@@ -66,30 +66,25 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         {
             get
             {
-                ITaskItem compilerOptionsItem = new MockTaskItem(
-                    itemSpec: "CompilerOptions",
-                    metadata: new Dictionary<string, string>
-                    {
-                        { "DefineConstants", "DEBUG;TRACE" },
-                        { "LangVersion", "6" },
-                        { "PlatformTarget", "x64" },
-                        { "AllowUnsafeBlocks", "true" },
-                        { "WarningsAsErrors", "false" },
-                        //{ "Optimize", "" }, Explicitly not setting Optmize
-                        { "AssemblyOriginatorKeyFile", "../keyfile.snk" },
-                        { "DelaySign", "" },
-                        { "PublicSign", "notFalseOrTrue" },
-                        { "DebugType", "portable" },
-                        { "OutputType", "Exe" },
-                        { "GenerateDocumentationFile", "true" },
-                    }
-                );
+                CompilationOptions compilationOptions = new CompilationOptions(
+                    defines: new[] { "DEBUG", "TRACE" },
+                    languageVersion: "6",
+                    platform: "x64",
+                    allowUnsafe: true,
+                    warningsAsErrors: false,
+                    optimize: null,
+                    keyFile: "../keyfile.snk",
+                    delaySign: null,
+                    publicSign: null,
+                    debugType: "portable",
+                    emitEntryPoint: true,
+                    generateXmlDocumentation: true);
 
                 return new[]
                 {
                     new object[] { "dotnet.new", "1.0.0", null, "dotnet.new" },
                     new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies" },
-                    new object[] { "simple.dependencies", "1.0.0", compilerOptionsItem, "simple.dependencies.compilerOptions" },
+                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions" },
                 };
             }
         }

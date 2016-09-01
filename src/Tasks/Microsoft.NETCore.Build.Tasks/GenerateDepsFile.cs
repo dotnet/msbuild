@@ -38,11 +38,12 @@ namespace Microsoft.NETCore.Build.Tasks
         public override bool Execute()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
+            CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
             DependencyContext dependencyContext = new DependencyContextBuilder().Build(
                 projectName: AssemblyName,
                 projectVersion: AssemblyVersion,
-                compilerOptionsItem: CompilerOptions,
+                compilationOptions: compilationOptions,
                 lockFile: lockFile,
                 framework: TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework),
                 runtime: RuntimeIdentifier);

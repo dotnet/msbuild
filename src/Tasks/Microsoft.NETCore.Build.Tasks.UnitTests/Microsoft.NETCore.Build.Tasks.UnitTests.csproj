@@ -26,6 +26,7 @@
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GivenACompilationOptionsConverter.cs" />
     <Compile Include="GivenAResolvePackageDependenciesTask.cs" />
     <Compile Include="Mocks\MockPackageResolver.cs" />
     <Compile Include="Mocks\MockTaskItem.cs" />
