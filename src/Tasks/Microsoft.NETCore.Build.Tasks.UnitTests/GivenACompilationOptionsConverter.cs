@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Reflection;
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.DependencyModel;
@@ -11,11 +12,17 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     public class GivenACompilationOptionsConverter
     {
+        private static MethodInfo s_convertFromMethod = typeof(GenerateDepsFile)
+            .GetTypeInfo()
+            .Assembly
+            .GetType("Microsoft.NETCore.Build.Tasks.CompilationOptionsConverter")
+            .GetMethod("ConvertFrom");
+        
         [Theory]
         [MemberData("CompilerOptionsData")]
         public void ItConvertsFromITaskItemsCorrectly(ITaskItem taskItem, CompilationOptions expectedOptions)
         {
-            CompilationOptions resultOptions = CompilationOptionsConverter.ConvertFrom(taskItem);
+            CompilationOptions resultOptions = (CompilationOptions)s_convertFromMethod.Invoke(null, new object[] {taskItem});
 
             resultOptions.ShouldBeEquivalentTo(expectedOptions);
         }

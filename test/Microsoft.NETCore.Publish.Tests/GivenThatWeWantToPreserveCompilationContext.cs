@@ -35,9 +35,10 @@ namespace Microsoft.NETCore.Publish.Tests
 
             var publishDirectory = publishCommand.GetOutputDirectory();
 
-            publishDirectory.Should().HaveFile("TestApp.dll");
-            publishDirectory.Should().HaveFile("TestLibrary.dll");
-            publishDirectory.Should().HaveFile("Newtonsoft.Json.dll");
+            publishDirectory.Should().HaveFiles(new[] {
+                "TestApp.dll",
+                "TestLibrary.dll",
+                "Newtonsoft.Json.dll"});
 
             var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
             // Should have compilation time assemblies

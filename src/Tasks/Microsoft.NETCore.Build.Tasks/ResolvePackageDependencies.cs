@@ -207,7 +207,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
                 foreach (var file in package.Files)
                 {
-                    if (Path.GetFileName(file) == "_._")
+                    if (NuGetUtils.IsPlaceholderFile(file))
                     {
                         continue;
                     }
@@ -330,7 +330,7 @@ namespace Microsoft.NETCore.Build.Tasks
                 var filePathList = fileGroup.GetFilePathListFor(package);
                 foreach (var filePath in filePathList)
                 {
-                    if (Path.GetFileName(filePath) == "_._")
+                    if (NuGetUtils.IsPlaceholderFile(filePath))
                     {
                         continue;
                     }

@@ -18,8 +18,7 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             _lockFileTarget = lockFileTarget;
 
-            IsPortable = string.IsNullOrEmpty(_lockFileTarget.RuntimeIdentifier) &&
-                _lockFileTarget.GetPlatformLibrary() != null;
+            IsPortable = _lockFileTarget.IsPortable();
         }
 
         public IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries()

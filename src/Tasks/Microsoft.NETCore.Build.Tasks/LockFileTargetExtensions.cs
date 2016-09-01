@@ -16,6 +16,12 @@ namespace Microsoft.NETCore.Build.Tasks
             return new ProjectContext(lockFileTarget);
         }
 
+        public static bool IsPortable(this LockFileTarget lockFileTarget)
+        {
+            return string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier) &&
+                lockFileTarget.GetPlatformLibrary() != null;
+        }
+
         public static LockFileTargetLibrary GetPlatformLibrary(this LockFileTarget lockFileTarget)
         {
             // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
