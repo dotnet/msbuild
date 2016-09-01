@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
@@ -8,6 +9,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
+using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
 
 namespace dotnet_new3
@@ -99,7 +101,18 @@ namespace dotnet_new3
                     return -1;
                 }
 
-                if (await TemplateCreator.Instantiate(app, template.Value ?? "", name, dir, help, alias, parameters, quiet.HasValue(), skipUpdateCheck.HasValue()) == -1)
+                if (string.IsNullOrWhiteSpace(template.Value) && help.HasValue())
+                {
+                    app.ShowHelp();
+                    return 0;
+                }
+
+                string aliasName = alias.HasValue() ? alias.Value() : null;
+                ITemplateEngineHost host = new DotNetNew3TemplateEngineHost();
+
+                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+
+                if (await TemplateCreator.Instantiate(host, template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
                 {
                     ListTemplates(template);
                     return -1;
