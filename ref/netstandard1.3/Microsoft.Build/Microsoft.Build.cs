@@ -458,18 +458,6 @@ namespace Microsoft.Build.Construction
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
     }
 }
-namespace Microsoft.Build.Debugging
-{
-    public static partial class DebuggerManager
-    {
-        public sealed partial class IslandThread : System.IDisposable
-        {
-            internal IslandThread() { }
-            public static void IslandWorker(Microsoft.Build.Debugging.DebuggerManager.IslandThread controller) { }
-            void System.IDisposable.Dispose() { }
-        }
-    }
-}
 namespace Microsoft.Build.Evaluation
 {
     public partial class GlobResult
@@ -802,7 +790,7 @@ namespace Microsoft.Build.Evaluation
     public enum ToolsetDefinitionLocations
     {
         ConfigurationFile = 1,
-        Default = 3,
+        Default = 4,
         Local = 4,
         None = 0,
         Registry = 2,
@@ -813,12 +801,9 @@ namespace Microsoft.Build.Exceptions
     public partial class BuildAbortedException : System.Exception
     {
         public BuildAbortedException() { }
-        protected BuildAbortedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public BuildAbortedException(string message) { }
         public BuildAbortedException(string message, System.Exception innerException) { }
         public string ErrorCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public sealed partial class InternalLoggerException : System.Exception
     {
@@ -829,8 +814,6 @@ namespace Microsoft.Build.Exceptions
         public string ErrorCode { get { throw null; } }
         public string HelpKeyword { get { throw null; } }
         public bool InitializationException { get { throw null; } }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public sealed partial class InvalidProjectFileException : System.Exception
     {
@@ -849,20 +832,15 @@ namespace Microsoft.Build.Exceptions
         public int LineNumber { get { throw null; } }
         public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class InvalidToolsetDefinitionException : System.Exception
     {
         public InvalidToolsetDefinitionException() { }
-        protected InvalidToolsetDefinitionException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public InvalidToolsetDefinitionException(string message) { }
         public InvalidToolsetDefinitionException(string message, System.Exception innerException) { }
         public InvalidToolsetDefinitionException(string message, string errorCode) { }
         public InvalidToolsetDefinitionException(string message, string errorCode, System.Exception innerException) { }
         public string ErrorCode { get { throw null; } }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
 }
 namespace Microsoft.Build.Execution
@@ -890,7 +868,6 @@ namespace Microsoft.Build.Execution
         public BuildParameters() { }
         public BuildParameters(Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IDictionary<string, string> BuildProcessEnvironment { get { throw null; } }
-        public System.Threading.ThreadPriority BuildThreadPriority { get { throw null; } set { } }
         public System.Globalization.CultureInfo Culture { get { throw null; } set { } }
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }
@@ -1011,7 +988,7 @@ namespace Microsoft.Build.Execution
     }
     public partial class OutOfProcNode
     {
-        public OutOfProcNode() { }
+        public OutOfProcNode(string clientToServerPipeHandle, string serverToClientPipeHandle) { }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
     }

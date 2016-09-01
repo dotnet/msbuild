@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
         public static bool IsEquivalentTo(this Type type, Type other)
         {

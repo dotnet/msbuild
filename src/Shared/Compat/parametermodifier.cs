@@ -15,7 +15,7 @@ namespace System.Reflection
 
     [Serializable]
 [System.Runtime.InteropServices.ComVisible(true)]
-    public struct ParameterModifier 
+    internal struct ParameterModifier 
     {
         #region Private Data Members
         private bool[] _byRef;
