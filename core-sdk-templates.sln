@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25624.1
+VisualStudioVersion = 15.0.25630.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CAEE03D-60F1-4E77-B25B-9CD8757E1F09}"
 	ProjectSection(SolutionItems) = preProject
@@ -50,6 +50,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasicConsoleApplicati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasicTemplatesSetup", "src\Templates\VisualBasicTemplatesSetup\VisualBasicTemplatesSetup.csproj", "{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasicClassLibrary", "src\Templates\ProjectTemplates\VisualBasic\.NETCore\ClassLibrary\VisualBasicClassLibrary.csproj", "{DCDD8266-D269-46BD-B563-E4D4B811A5B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,5 +99,6 @@ Global
 		{E281FDCB-10B7-403C-84D4-EE4FF92845B9} = {98132BF6-2450-4753-B4E9-878F468E60BB}
 		{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51} = {E281FDCB-10B7-403C-84D4-EE4FF92845B9}
 		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53} = {C86A71A6-9D35-436B-BBC5-0940041410F1}
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1} = {E281FDCB-10B7-403C-84D4-EE4FF92845B9}
 	EndGlobalSection
 EndGlobal

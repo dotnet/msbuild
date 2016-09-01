@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "NETStandard.Library": "1.3",
+    "Microsoft.NETCore.Sdk": "$$buildversion$$"
+  },
+  "frameworks": {
+    "netstandard1.3": {
+    }
+  }
+}
