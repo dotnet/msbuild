@@ -1,11 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Utils.CommandParsing;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
@@ -75,8 +77,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         internal string FormatScriptCommand(string scriptCommandline, string scriptExtensionPropertyName)
         {
-            var command = AddScriptExtensionPropertyToCommandLine(scriptCommandline, scriptExtensionPropertyName);
-            return ReplaceScriptVariables(command);
+            var command = ReplaceScriptVariables(scriptCommandline);
+            command = AddScriptExtensionPropertyToCommandLine(command, scriptExtensionPropertyName);
+            return command;
         }
 
         internal string AddScriptExtensionPropertyToCommandLine(string scriptCommandline,
@@ -113,27 +116,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return command;
         }
 
-        internal string ReplaceScriptVariables(string command)
+        internal string ReplaceScriptVariables(string scriptCommandline)
         {
-            foreach (var scriptVariableEntry in ScriptVariableToMSBuildMap)
+            Func<string, string> scriptVariableReplacementDelegate = key =>
             {
-                var scriptVariableName = scriptVariableEntry.Key;
-                var msbuildMapping = scriptVariableEntry.Value;
-
-                if (command.Contains($"%{scriptVariableName}%"))
+                if (ScriptVariableToMSBuildMap.ContainsKey(key))
                 {
-                    if (msbuildMapping == null)
+                    if (ScriptVariableToMSBuildMap[key] == null)
                     {
                         MigrationErrorCodes.MIGRATE1016(
-                                $"{scriptVariableName} is currently an unsupported script variable for project migration")
+                                $"{key} is currently an unsupported script variable for project migration")
                             .Throw();
                     }
 
-                    command = command.Replace($"%{scriptVariableName}%", msbuildMapping);
+                    return ScriptVariableToMSBuildMap[key];
                 }
-            }
+                return $"$({key})";
+            };
 
-            return command;
+            var scriptArguments = CommandGrammar.Process(
+                scriptCommandline,
+                scriptVariableReplacementDelegate,
+                preserveSurroundingQuotes: true);
+
+            scriptArguments = scriptArguments.Where(argument => !string.IsNullOrEmpty(argument)).ToArray();
+
+            return string.Join(" ", scriptArguments);
         }
 
         private bool IsPathRootedForAnyOS(string path)
@@ -175,7 +183,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             { "postpublish", new TargetHookInfo(false, "Publish") }
         };
 
-        private static Dictionary<string, string> ScriptVariableToMSBuildMap => new Dictionary<string, string>()
+        private static Dictionary<string, string> ScriptVariableToMSBuildMap => new Dictionary<string, string>
         {
             { "compile:TargetFramework", null },  // TODO: Need Short framework name in CSProj
             { "compile:ResponseFile", null },     // Not migrated
