@@ -825,27 +825,23 @@ namespace Microsoft.Build.Evaluation
                 EvaluateItemGroupElement(itemGroupElement, lazyEvaluator);
             }
 
-            if (lazyEvaluator != null)
+            // Tell the lazy evaluator to compute the items and add them to _data
+            IList<LazyItemEvaluator<P, I, M, D>.ItemData> items = lazyEvaluator.GetAllItems();
+            foreach (var itemData in items)
             {
-
-                // Tell the lazy evaluator to compute the items and add them to _data
-                IList<LazyItemEvaluator<P, I, M, D>.ItemData> items = lazyEvaluator.GetAllItems();
-                foreach (var itemData in items)
+                if (itemData.ConditionResult)
                 {
-                    if (itemData.ConditionResult)
-                    {
-                        _data.AddItem(itemData.Item);
-
-                        if (_data.ShouldEvaluateForDesignTime)
-                        {
-                            _data.AddToAllEvaluatedItemsList(itemData.Item);
-                        }
-                    }
+                    _data.AddItem(itemData.Item);
 
                     if (_data.ShouldEvaluateForDesignTime)
                     {
-                        _data.AddItemIgnoringCondition(itemData.Item);
+                        _data.AddToAllEvaluatedItemsList(itemData.Item);
                     }
+                }
+
+                if (_data.ShouldEvaluateForDesignTime)
+                {
+                    _data.AddItemIgnoringCondition(itemData.Item);
                 }
             }
 
