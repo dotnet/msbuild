@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
     public class PackageDependencyProvider
     {
         private readonly FallbackPackagePathResolver _packagePathResolver;
+        private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly FrameworkReferenceResolver _frameworkReferenceResolver;
 
         public PackageDependencyProvider(INuGetPathContext nugetPathContext, FrameworkReferenceResolver frameworkReferenceResolver)
@@ -24,6 +25,9 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             if (nugetPathContext != null)
             {
                 _packagePathResolver = new FallbackPackagePathResolver(nugetPathContext);
+
+                // This resolver is only used for building file names, so that base path is not required.
+                _versionFolderPathResolver = new VersionFolderPathResolver(path: null);
             }
 
             _frameworkReferenceResolver = frameworkReferenceResolver;
@@ -48,6 +52,12 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var path = _packagePathResolver?.GetPackageDirectory(package.Name, package.Version);
             bool exists = path != null;
 
+            string hashPath = null;
+            if (_versionFolderPathResolver != null)
+            {
+                hashPath = _versionFolderPathResolver.GetHashFileName(package.Name, package.Version);
+            }
+
             if (exists)
             {
                 // If the package's compile time assemblies is for a portable profile then, read the assembly metadata
@@ -57,6 +67,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
             var packageDescription = new PackageDescription(
                 path,
+                hashPath,
                 package,
                 targetLibrary,
                 dependencies,

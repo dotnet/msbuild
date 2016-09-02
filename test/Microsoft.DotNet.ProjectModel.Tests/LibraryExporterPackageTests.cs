@@ -17,10 +17,16 @@ namespace Microsoft.DotNet.ProjectModel.Tests
     public class LibraryExporterPackageTests
     {
         private const string PackagePath = "PackagePath";
+        private const string HashPath = "PackageHashPath";
 
-        private PackageDescription CreateDescription(LockFileTargetLibrary target = null, LockFilePackageLibrary package = null)
+        private PackageDescription CreateDescription(
+            LockFileTargetLibrary target = null,
+            LockFilePackageLibrary package = null,
+            string hashPath = null)
         {
-            return new PackageDescription(PackagePath,
+            return new PackageDescription(
+                PackagePath,
+                hashPath ?? HashPath,
                 package ?? new LockFilePackageLibrary(),
                 target ?? new LockFileTargetLibrary(),
                 new List<LibraryRange>(), compatible: true, resolved: true);

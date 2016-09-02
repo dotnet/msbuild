@@ -25,7 +25,7 @@
     "Microsoft.DotNet.InternalAbstractions": {
   	  "target": "project"
   	},
-    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919"
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
   },
 
   "frameworks": {

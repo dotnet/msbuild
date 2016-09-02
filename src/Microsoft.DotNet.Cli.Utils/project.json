@@ -8,11 +8,11 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000919",
-    "NuGet.Versioning": "3.6.0-beta.1.msbuild.1",
-    "NuGet.Packaging": "3.6.0-beta.1.msbuild.1",
-    "NuGet.Frameworks": "3.6.0-beta.1.msbuild.1",
-    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.1"
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
+    "NuGet.Versioning": "3.6.0-beta.1.msbuild.4",
+    "NuGet.Packaging": "3.6.0-beta.1.msbuild.4",
+    "NuGet.Frameworks": "3.6.0-beta.1.msbuild.4",
+    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.4"
   },
   "frameworks": {
     "net451": {
