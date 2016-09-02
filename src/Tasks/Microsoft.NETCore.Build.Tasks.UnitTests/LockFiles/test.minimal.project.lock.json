@@ -1,0 +1,119 @@
+{
+  "locked": false,
+  "version": 2,
+  "targets": {
+    ".NETCoreApp,Version=v1.0": {
+      "LibA/1.2.3": {
+        "type": "package",
+        "dependencies": {
+          "LibB": "1.2.3"
+        },
+        "frameworkAssemblies": [
+          "System.Some.Lib"
+        ],
+        "compile": {
+          "lib/file/A.dll": {},
+          "lib/file/B.dll": {}
+        },
+        "runtime": {
+          "lib/file/A.dll": {},
+          "lib/file/B.dll": {}
+        }
+      },
+      "LibB/1.2.3": {
+        "type": "package",
+        "dependencies": {
+          "LibC": "1.2.3"
+        },
+        "frameworkAssemblies": [
+          "System.Some.Lib"
+        ],
+        "compile": {
+          "lib/file/D.dll": {},
+          "lib/file/E.dll": {}
+        },
+        "runtime": {
+          "lib/file/D.dll": {},
+          "lib/file/E.dll": {}
+        }
+      },
+      "LibC/1.2.3": {
+        "type": "package",
+        "compile": {
+          "lib/file/G.dll": {},
+          "lib/file/H.dll": {}
+        },
+        "runtime": {
+          "lib/file/G.dll": {},
+          "lib/file/H.dll": {}
+        }
+      }
+    },
+    ".NETCoreApp,Version=v1.0/osx.10.11-x64": {
+      "LibB/1.2.3": {
+        "type": "package",
+        "dependencies": {
+          "LibC": "1.2.3"
+        },
+        "frameworkAssemblies": [
+          "System.Some.Lib"
+        ],
+        "compile": {
+          "lib/file/D.dll": {},
+          "lib/file/E.dll": {}
+        },
+        "runtime": {
+          "lib/file/D.dll": {},
+          "lib/file/E.dll": {}
+        }
+      },
+      "LibC/1.2.3": {
+        "type": "package",
+        "compile": {
+          "lib/file/G.dll": {},
+          "lib/file/H.dll": {}
+        },
+        "runtime": {
+          "lib/file/G.dll": {},
+          "lib/file/H.dll": {}
+        }
+      }        
+    }
+  },
+  "libraries": {
+      "LibA/1.2.3": {
+          "sha512": "abcde==",
+          "type": "package",
+          "files": [
+              "lib/file/A.dll",
+              "lib/file/B.dll",
+              "lib/file/C.dll"
+          ]
+      },
+      "LibB/1.2.3": {
+          "sha512": "abcde==",
+          "type": "package",
+          "files": [
+              "lib/file/D.dll",
+              "lib/file/E.dll",
+              "lib/file/F.dll"
+          ]
+      },
+      "LibC/1.2.3": {
+          "sha512": "abcde==",
+          "type": "package",
+          "files": [
+              "lib/file/G.dll",
+              "lib/file/H.dll",
+              "lib/file/I.dll"
+          ]
+      }
+  },
+  "projectFileDependencyGroups": {
+      "": [
+          "LibA >= 1.2.3"
+      ],
+      ".NETCoreApp,Version=v1.0": [],
+      ".NETCoreApp,Version=v1.0/osx.10.11-x64": []
+  }
+}
