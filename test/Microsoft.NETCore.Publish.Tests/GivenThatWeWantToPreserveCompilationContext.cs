@@ -20,7 +20,7 @@ namespace Microsoft.NETCore.Publish.Tests
         public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file()
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("TestAppCompilationContext")
+                .CopyTestAsset("CompilationContext", "PreserveCompilationContext")
                 .WithSource()
                 .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
 
