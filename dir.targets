@@ -79,6 +79,7 @@
          (due to open source signing). -->
     <!-- No parallel execution because most of our tests do bad things
          with state.  They were passing because MSTest was serial. -->
+    <Message Importance="High" Text="xunit -> %(MainAssembly.Filename)..." />
 
     <!-- Run tests on the full framework -->
     <Exec Command="$(ToolPackagesDir)\xunit.runner.console\$(XunitVersion)\tools\xunit.console.x86.exe @(AssemblyUnderTest, ' ') $(XunitOptions) -noshadow -parallel none -xml %(AssemblyUnderTest.FullPath)_TestResults.xml -html %(AssemblyUnderTest.FullPath)_TestResults.html > %(AssemblyUnderTest.FullPath)_stdout.txt"
