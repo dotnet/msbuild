@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Tests
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new");
+
             _nugetCacheFolder = new DirectoryInfo(testNugetCache);
         }        
 
