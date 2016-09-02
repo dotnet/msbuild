@@ -37,7 +37,7 @@
     <CompilerToolsVersion>2.0.0-beta3</CompilerToolsVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <GitVersioningVersion>1.4.30</GitVersioningVersion>
+    <GitVersioningVersion>1.5.46</GitVersioningVersion>
 
     <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
     <BuildToolsTaskDir>$(ToolsDir)net45\</BuildToolsTaskDir>
