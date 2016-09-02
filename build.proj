@@ -25,8 +25,8 @@
     <SharedHostVersion>1.0.1</SharedHostVersion>
     <HostFxrVersion>1.0.1</HostFxrVersion>
 
-    <CoreCLRVersion>1.0.2</CoreCLRVersion>
-    <JitVersion>1.0.2</JitVersion>
+    <CoreCLRVersion>1.0.4</CoreCLRVersion>
+    <JitVersion>1.0.4</JitVersion>
 
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
