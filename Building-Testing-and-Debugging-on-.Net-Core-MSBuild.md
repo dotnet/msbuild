@@ -65,6 +65,6 @@ git checkout origin/xplat
 init-tools.cmd # windows
 ./init-tools.sh # unix
 
-./Tools/corerun ./Tools/MSBuild.exe /path/to/project
+./Tools/dotnetcli/dotnet ./Tools/MSBuild.exe /path/to/project
 ```
 
