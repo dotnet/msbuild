@@ -22,25 +22,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <FileAlignment>512</FileAlignment>
     <GlobalExclude>bin\**;obj\**;</GlobalExclude>
-  </PropertyGroup>
 
-  <!-- User-facing configuration-specific defaults -->
-  <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>$(NoWarn);1701</NoWarn>
   </PropertyGroup>
 
+  <!-- User-facing configuration-specific defaults -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -48,7 +44,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Default settings for .NET Core build logic -->
   <PropertyGroup>
+    <DebugType>portable</DebugType>
+
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
+
+    <!-- all references (even the StdLib) come from packages -->
+    <NoStdLib>true</NoStdLib>
 
     <!-- force the compiler to always emit .dll for .NET Core projects, even if $(OutputType) == 'exe' -->
     <TargetExt>.dll</TargetExt>
@@ -59,23 +60,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core projects -->
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  
+
+  <!-- Temporary hacks to work around bugs -->
   <PropertyGroup>
-    <NoStdLib>true</NoStdLib>
-    <!-- TODO: Need to figure out runtimes -->
-
-    <!-- TODO: Below are hacks eerhardt made on top of davkean's .props file -->
-    
-    <!-- Temp Hack: davkean had this, but that casues all references not to be copied to output dir: 
-    <CopyNuGetImplementations>false</CopyNuGetImplementations>
-         This will be set to false during "build", but set to true during "publish"
-    -->
-
     <!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
     <NoLogo>true</NoLogo>
-
-    <!-- Need to revisit this and see if this is the correct default for both Debug and Release -->
-    <DebugType>portable</DebugType>
 
     <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
