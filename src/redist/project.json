@@ -6,7 +6,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "tool_csc": "1.0.0-preview3-*",
     "dotnet": "1.0.0-preview3-*",

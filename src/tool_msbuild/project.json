@@ -6,7 +6,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "MSBuild": "0.1.0-preview-00033-160829",
     "Microsoft.Build.Framework": "0.1.0-preview-00033-160829",

@@ -190,4 +190,3 @@ namespace Microsoft.DotNet.Tools.New
         }
     }
 }
-

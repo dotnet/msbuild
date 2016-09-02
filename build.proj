@@ -21,7 +21,7 @@
 
     <CoreSetupChannel>preview</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-    <SharedFrameworkVersion>1.0.0</SharedFrameworkVersion>
+    <SharedFrameworkVersion>1.0.1</SharedFrameworkVersion>
     <SharedHostVersion>1.0.1</SharedHostVersion>
     <HostFxrVersion>1.0.1</HostFxrVersion>
 
