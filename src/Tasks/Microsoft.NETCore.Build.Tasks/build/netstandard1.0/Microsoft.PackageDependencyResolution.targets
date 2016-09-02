@@ -38,9 +38,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Build and Publish Properties to determine whether we are building or publishing. Default values -->
     <ResolvePackageDependenciesForBuild Condition="'$(ResolvePackageDependenciesForBuild)' == ''">true</ResolvePackageDependenciesForBuild>
-    <ResolvePackageDependenciesForPublish Condition="'$(ResolvePackageDependenciesForPublish)' == ''">false</ResolvePackageDependenciesForPublish>
+    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <!-- Target Moniker + RID-->
@@ -60,12 +59,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
       ResolvePackageDependenciesForBuild;
-      ResolvePackageDependenciesForPublish
     </ResolveAssemblyReferencesDependsOn>
 
     <PrepareResourcesDependsOn>
       ResolvePackageDependenciesForBuild;
-      ResolvePackageDependenciesForPublish;
       $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
 
@@ -74,7 +71,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     *************************************
-    3. BUILD and PUBLISH TARGETS
+    3. BUILD TARGETS
     - Override the Depends-On properties, or the individual targets
     *************************************
     -->
@@ -96,25 +93,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ResolvePackageDependenciesForBuild"
           Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectLockFile)')"
           DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
-
-  <!--
-    ============================================================
-                     ResolvePackageDependenciesForPublish
-
-    Populate items for publish...
-    ============================================================
-    -->
-  <PropertyGroup>
-    <ResolvePackageDependenciesForPublishDependsOn>
-      ResolveLockFileReferences;
-      ResolveLockFileAnalyzers;
-      ResolveLockFileCopyLocalFullFramework;
-    </ResolvePackageDependenciesForPublishDependsOn>
-  </PropertyGroup>
-  <Target Name="ResolvePackageDependenciesForPublish"
-          Condition="'$(ResolvePackageDependenciesForPublish)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectLockFile)')"
-          DependsOnTargets="$(ResolvePackageDependenciesForPublishDependsOn)" />
-
 
   <!--
     *************************************
@@ -242,7 +220,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     CopyLocal Targets: For populating CopyLocal based on lock file
     - _ComputeLockFileCopyLocal
     - ResolveLockFileCopyLocalProjectDeps
-    - ResolveLockFileCopyLocalFullFramework
     ============================================================
     -->
 
@@ -281,21 +258,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ResolveLockFileCopyLocalProjectDeps"
+          Condition="'$(CopyLocalLockFileAssemblies)' == 'true'"
           DependsOnTargets="_ComputeLockFileCopyLocal">
 
     <!-- Add the copy local items -->
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="@(RuntimeCopyLocalItems)" />
-    </ItemGroup>
-
-  </Target>
-
-  <Target Name="ResolveLockFileCopyLocalFullFramework"
-          DependsOnTargets="_ComputeLockFileCopyLocal">
-
-    <!-- Add the copy local items -->
-    <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
       <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
     </ItemGroup>
 

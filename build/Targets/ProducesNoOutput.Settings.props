@@ -8,6 +8,7 @@
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <OutputType>Library</OutputType>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
     <NonShipping>true</NonShipping>
   </PropertyGroup>

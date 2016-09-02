@@ -23,12 +23,10 @@ namespace Microsoft.NETCore.Publish.Tests
         [Fact]
         public void It_publishes_projects_with_simple_dependencies()
         {
-            string packagesDirectory =
-                Path.Combine(RepoInfo.RepoRoot, "bin", RepoInfo.Configuration, "Packages");
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset("SimpleDependencies")
                 .WithSource()
-                .Restore("--fallbacksource", $"{packagesDirectory}");
+                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
