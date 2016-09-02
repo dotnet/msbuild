@@ -28,7 +28,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
             List<ResolvedFile> results = new List<ResolvedFile>();
 
-            foreach (LockFileTargetLibrary targetLibrary in projectContext.RuntimeLibraries)
+            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries())
             {
                 string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
 
