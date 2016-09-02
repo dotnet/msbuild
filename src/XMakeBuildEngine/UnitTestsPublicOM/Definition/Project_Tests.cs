@@ -2833,6 +2833,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceShouldWorkWithEscapedCharacters()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`a;%61;*%61*`/>
+                    <A Update=`a;%61;*%61*`/>
+                    <A Remove=`a;%61;*%61*`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral | Provenance.Glob, 3),
+                Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 3),
+                Tuple.Create("A", Operation.Remove, Provenance.StringLiteral | Provenance.Glob, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "a");
+            AssertProvenanceResult(expected, project, "%61");
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldWorkWithUpdateElements()
         {
             var project =
