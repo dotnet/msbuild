@@ -51,25 +51,32 @@ namespace Microsoft.Extensions.Testing.Abstractions
 
         private static ISymUnmanagedReader3 CreateNativeSymReader(Stream pdbStream)
         {
-            object symReader = null;
-            var guid = default(Guid);
-            if (IntPtr.Size == 4)
+            try
             {
-                CreateSymReader32(ref guid, out symReader);
+                object symReader = null;
+                var guid = default(Guid);
+                if (IntPtr.Size == 4)
+                {
+                    CreateSymReader32(ref guid, out symReader);
+                }
+                else
+                {
+                    CreateSymReader64(ref guid, out symReader);
+                }
+                var reader = (ISymUnmanagedReader3)symReader;
+                var hr = reader.Initialize(new DummyMetadataImport(), null, null, new ComStreamWrapper(pdbStream));
+                SymUnmanagedReaderExtensions.ThrowExceptionForHR(hr);
+                return reader;
             }
-            else
+            catch (Exception e)
             {
-                CreateSymReader64(ref guid, out symReader);
+                throw new IOException(e.Message, e);
             }
-            var reader = (ISymUnmanagedReader3)symReader;
-            var hr = reader.Initialize(new DummyMetadataImport(), null, null, new ComStreamWrapper(pdbStream));
-            SymUnmanagedReaderExtensions.ThrowExceptionForHR(hr);
-            return reader;
         }
 
         public void Dispose()
         {
-            ((ISymUnmanagedDispose) _symReader).Destroy();
+            ((ISymUnmanagedDispose)_symReader).Destroy();
         }
     }
 
