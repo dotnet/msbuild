@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
     "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09",
-    "System.Security.Principal.Windows": "4.3.0-beta-24430-01",
+    "System.Security.Principal.Windows": "4.0.0",
     "xunit": "2.1.0",
     "xunit.assert": "2.1.0",
     "xunit.core": "2.1.0",

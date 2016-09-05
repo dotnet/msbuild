@@ -304,12 +304,13 @@ namespace Microsoft.Build.Tasks
             }
 
             bool linkCreated = false;
+            string errorMessage = string.Empty;
 
             // If we want to create hard or symbolic links, then try that first
             if (UseHardlinksIfPossible)
-                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination, errorMessage) => NativeMethods.MakeHardLink(destination, source, out errorMessage));
+                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
             else if (UseSymboliclinksIfPossible)
-                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination, errorMessage) => NativeMethods.MakeSymbolicLink(destination, source, out errorMessage));
+                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
@@ -333,7 +334,7 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, Func<string, string, string, bool> createLink)
+        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessageFromResources(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
@@ -354,8 +355,7 @@ namespace Microsoft.Build.Tasks
             {
                 FileUtilities.DeleteNoThrow(destinationFileState.Name);
             }
-
-            string errorMessage = string.Empty;
+            
             linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
 
             if (!linkCreated)
