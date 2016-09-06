@@ -29,7 +29,7 @@
         "Microsoft.Win32.Primitives":  "4.0.1",
         "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
         "Microsoft.NETCore.TestHost": "1.0.0",
-        "System.Runtime.Serialization.Xml": "4.1.0"
+        "System.Runtime.Serialization.Xml": "4.1.1"
       },
       "imports": [ "portable-net451+win81", "dnxcore50" ]
     }
