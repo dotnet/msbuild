@@ -55,7 +55,6 @@
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
