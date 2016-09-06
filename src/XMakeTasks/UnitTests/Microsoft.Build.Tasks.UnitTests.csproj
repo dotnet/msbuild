@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -112,6 +112,9 @@
     <Compile Include="MockUnmanagedMemoryHelper.cs" />
     <Compile Include="Move_Tests.cs" />
     <Compile Include="MSBuild_Tests.cs" />
+    <Compile Include="ProjectExtensionsImportTestBase.cs" />
+    <Compile Include="ProjectExtensionsPropsImportTest.cs" />
+    <Compile Include="ProjectExtensionsTargetsImportTest.cs" />
     <Compile Include="PropertyParser_Tests.cs" />
     <Compile Include="ReadLinesFromFile_Tests.cs" />
     <Compile Include="RemoveDir_Tests.cs" />
