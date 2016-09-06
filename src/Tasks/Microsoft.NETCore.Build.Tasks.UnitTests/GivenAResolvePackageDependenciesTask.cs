@@ -529,42 +529,5 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
             return task;
         }
-
-        private static readonly string ProjectGroup =
-            CreateProjectFileDependencyGroup("", "LibA >= 1.2.3");
-
-        private static readonly string NETCoreGroup =
-            CreateProjectFileDependencyGroup(".NETCoreApp,Version=v1.0");
-
-        private static readonly string NETCoreOsxGroup = 
-            CreateProjectFileDependencyGroup(".NETCoreApp,Version=v1.0/osx.10.11-x64");
-
-        private static readonly string LibADefn = 
-            CreateLibrary("LibA/1.2.3", "package", "lib/file/A.dll", "lib/file/B.dll", "lib/file/C.dll");
-
-        private static readonly string LibBDefn =
-            CreateLibrary("LibB/1.2.3", "package", "lib/file/D.dll", "lib/file/E.dll", "lib/file/F.dll");
-
-        private static readonly string LibCDefn =
-            CreateLibrary("LibC/1.2.3", "package", "lib/file/G.dll", "lib/file/H.dll", "lib/file/I.dll");
-
-        private static readonly string TargetLibA = CreateTargetLibrary("LibA/1.2.3", "package",
-            dependencies: new string[] { "\"LibB\": \"1.2.3\"" },
-            frameworkAssemblies: new string[] { "System.Some.Lib" },
-            compile: new string[] { CreateFileItem("lib/file/A.dll"), CreateFileItem("lib/file/B.dll") },
-            runtime: new string[] { CreateFileItem("lib/file/A.dll"), CreateFileItem("lib/file/B.dll") }
-            );
-
-        private static readonly string TargetLibB = CreateTargetLibrary("LibB/1.2.3", "package",
-            dependencies: new string[] { "\"LibC\": \"1.2.3\"" },
-            frameworkAssemblies: new string[] { "System.Some.Lib" },
-            compile: new string[] { CreateFileItem("lib/file/D.dll"), CreateFileItem("lib/file/E.dll") },
-            runtime: new string[] { CreateFileItem("lib/file/D.dll"), CreateFileItem("lib/file/E.dll") }
-            );
-
-        private static readonly string TargetLibC = CreateTargetLibrary("LibC/1.2.3", "package",
-            compile: new string[] { CreateFileItem("lib/file/G.dll"), CreateFileItem("lib/file/H.dll") },
-            runtime: new string[] { CreateFileItem("lib/file/G.dll"), CreateFileItem("lib/file/H.dll") }
-            );
     }
 }
