@@ -112,57 +112,9 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 .Should().OnlyContain(p => allProjectDeps.Any(dep => dep.IndexOf(p) != -1));
         }
 
-
-        [Theory]
-        [InlineData("test.minimal")]
-        public void ItAssignsExpectedTopLevelDependencies(string projectName)
-        {
-            // Libraries:
-            // LibA/1.2.3 ==> Top Level Dependency
-            // LibB/1.2.3
-            // LibC/1.2.3
-
-            LockFile lockFile;
-            var task = GetExecutedTaskFromPrefix(projectName, out lockFile);
-
-            var topLevels = task.PackageDependencies
-                .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)))
-                .ToList();
-
-            topLevels.Count.Should().Be(1);
-
-            var item = topLevels[0];
-            item.ItemSpec.Should().Be("LibA/1.2.3");
-        }
-
-        [Theory]
-        [InlineData("test.minimal")]
-        public void ItAssignsPackageDefinitionMetadata(string projectName)
-        {
-            LockFile lockFile;
-            var task = GetExecutedTaskFromPrefix(projectName, out lockFile);
-
-            var validPackageNames = new HashSet<string>() {
-                "LibA", "LibB", "LibC"
-            };
-
-            task.PackageDefinitions.Count().Should().Be(3);
-
-            foreach (var package in task.PackageDefinitions)
-            {
-                string name = package.GetMetadata(MetadataKeys.Name);
-                validPackageNames.Contains(name).Should().BeTrue();
-                package.GetMetadata(MetadataKeys.Version).Should().Be("1.2.3");
-                package.GetMetadata(MetadataKeys.Type).Should().Be("package");
-
-                // TODO resolved path
-                // TODO other package types
-            }
-        }
-
         //- Top level projects correspond to expected values
         [Fact]
-        public void ItAssignsExpectedTopLevelDependencies2()
+        public void ItAssignsExpectedTopLevelDependencies()
         {
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
@@ -222,7 +174,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
         //- Package definitions have expected metadata(including resolved path)
         [Fact]
-        public void ItAssignsPackageDefinitionMetadata2()
+        public void ItAssignsPackageDefinitionMetadata()
         {
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {

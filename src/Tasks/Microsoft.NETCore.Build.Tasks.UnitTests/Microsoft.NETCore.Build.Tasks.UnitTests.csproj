@@ -46,9 +46,6 @@
     <None Include="LockFiles\dotnet.new.project.lock.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="LockFiles\test.minimal.project.lock.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="project.json" />
     <None Include="simple.dependencies.deps.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
