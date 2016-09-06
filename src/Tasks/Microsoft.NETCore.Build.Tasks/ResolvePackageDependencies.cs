@@ -263,8 +263,29 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private bool IsAnalyzer(string file)
         {
-            return file.StartsWith("analyzers", StringComparison.Ordinal)
-                && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase);
+            bool isAnalyzer = false;
+
+            if (file.StartsWith("analyzers", StringComparison.Ordinal)
+                && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase))
+            {
+                var projectLanguage = ProjectLanguage?.ToLowerInvariant();
+
+                if (projectLanguage == "cs" || projectLanguage == "vb")
+                {
+                    string excludeLanguage = projectLanguage == "vb" ? "cs" : "vb";
+                    var fileParts = file.Split('/');
+
+                    isAnalyzer =
+                        fileParts.Any(x => x.Equals(projectLanguage, StringComparison.OrdinalIgnoreCase)) ||
+                        !fileParts.Any(x => x.Equals(excludeLanguage, StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    isAnalyzer = true;
+                }
+            }
+
+            return isAnalyzer;
         }
 
         // get target definitions and package and file dependencies

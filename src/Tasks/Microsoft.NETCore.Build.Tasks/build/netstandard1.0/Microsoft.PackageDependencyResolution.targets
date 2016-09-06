@@ -114,7 +114,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="RunResolvePackageDependencies">
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
-      ProjectLockFile="$(ProjectLockFile)">
+      ProjectLockFile="$(ProjectLockFile)"
+      ProjectLanguage="$(Language)">
 
       <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />
       <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />

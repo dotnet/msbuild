@@ -112,14 +112,15 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 .Should().OnlyContain(p => allProjectDeps.Any(dep => dep.IndexOf(p) != -1));
         }
 
-        //- Top level projects correspond to expected values
+        //- What about 'project' and 'externalProject' library types
+
         [Fact]
         public void ItAssignsExpectedTopLevelDependencies()
         {
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
                     CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
-                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibB, TargetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibA, TargetLibB, TargetLibC),
                 },
                 libraries: new string[] { LibADefn, LibBDefn, LibCDefn },
                 projectFileDependencyGroups: new string[] {
@@ -134,12 +135,60 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
 
-            topLevels.Count().Should().Be(1);
-
-            topLevels.First().ItemSpec.Should().Be("LibA/1.2.3");
+            topLevels.Count().Should().Be(2);
+            topLevels.All(t => t.ItemSpec == "LibA/1.2.3").Should().BeTrue();
+            topLevels.Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
+                .Should().Contain(new string[] {
+                    ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64"
+                });
         }
 
-        //- Target definitions get expected metadata
+        [Fact]
+        public void ItAssignsExpectedTopLevelDependenciesFromAllTargets()
+        {
+            string targetLibD = CreateTargetLibrary("LibD/1.2.3", "package",
+                dependencies: new string[] {
+                    "\"LibC\": \"1.2.3\""
+                });
+
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC, targetLibD),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibA, TargetLibB, TargetLibC),
+                },
+                libraries: new string[] {
+                    LibADefn, LibBDefn, LibCDefn,
+                    CreateLibrary("LibD/1.2.3", "package", "lib/file/Z.dll")
+                },
+                projectFileDependencyGroups: new string[] {
+                    CreateProjectFileDependencyGroup("", "LibA >= 1.2.3"), // Default
+                    CreateProjectFileDependencyGroup(".NETCoreApp,Version=v1.0", "LibD >= 1.2.3"), // NETCore only
+                    NETCoreOsxGroup
+                }
+            );
+
+            LockFile lockFile;
+            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+
+            var topLevels = task.PackageDependencies
+                .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
+
+            topLevels.Count().Should().Be(3);
+            topLevels.Where(t => t.ItemSpec == "LibA/1.2.3").Count().Should().Be(2);
+            topLevels.Where(t => t.ItemSpec == "LibA/1.2.3")
+                .Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
+                .Should().Contain(new string[] {
+                    ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64"
+                });
+
+            topLevels.Where(t => t.ItemSpec == "LibD/1.2.3").Count().Should().Be(1);
+            topLevels.Where(t => t.ItemSpec == "LibD/1.2.3")
+                .Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
+                .Should().Contain(new string[] {
+                    ".NETCoreApp,Version=v1.0"
+                });
+        }
+
         [Fact]
         public void ItAssignsTargetDefinitionMetadata()
         {
@@ -172,7 +221,6 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             target.GetMetadata(MetadataKeys.Type).Should().Be("target");
         }
 
-        //- Package definitions have expected metadata(including resolved path)
         [Fact]
         public void ItAssignsPackageDefinitionMetadata()
         {
@@ -202,8 +250,6 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 package.GetMetadata(MetadataKeys.Type).Should().Be("package");
                 package.GetMetadata(MetadataKeys.Path).Should().BeEmpty(); // value is null for type 'package'
                 package.GetMetadata(MetadataKeys.ResolvedPath).Should().Be($"{_packageRoot}\\{name}\\1.2.3\\path");
-
-                // TODO other package types
             }
         }
 
@@ -285,7 +331,6 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             fileDeps.First().GetMetadata(MetadataKeys.ParentPackage).Should().Be("LibB/1.2.3");
         }
 
-        //- File definitions excluded placeholders
         [Fact]
         public void ItExcludesPlaceholderFiles()
         {
@@ -327,10 +372,8 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 .Should().BeFalse();
         }
 
-        //- Analyzer assemblies have expected metadata
-        //- Analyzer assemblies produce File dependencies(with matching parent targets)
         [Fact]
-        public void ItAssignsAnalyzerMetadata()
+        public void ItAddsAnalyzerMetadataAndFileDependencies()
         {
             string libCDefn = CreateLibrary("LibC/1.2.3", "package", 
                 "lib/file/G.dll", "lib/file/H.dll", "lib/file/I.dll",
@@ -380,19 +423,109 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 item.GetMetadata(MetadataKeys.Type).Should().Be("AnalyzerAssembly");
                 item.GetMetadata(MetadataKeys.Path).Should().Be(analyzer);
 
-                // expect two file dependencies for each
+                // expect two file dependencies for each, one per target
                 var fileDeps = task.FileDependencies.Where(t => t.ItemSpec == fileKey);
+
                 fileDeps.Count().Should().Be(2);
 
-                var parentTargets = fileDeps.Select(f => f.GetMetadata(MetadataKeys.ParentTarget));
-                parentTargets.Should().Contain(expectedTargets);
+                fileDeps.Select(f => f.GetMetadata(MetadataKeys.ParentTarget))
+                    .Should().Contain(expectedTargets);
 
                 fileDeps.All(f => f.GetMetadata(MetadataKeys.ParentPackage) == "LibC/1.2.3");
             }
         }
 
-        //- Top Levels can come from default or other tfms
-        //- Package dependencies with version range
+        [Fact]
+        public void ItFiltersAnalyzersByProjectLanguage()
+        {
+            string projectLanguage = "cs";
+
+            // expected included analyzers
+            string[] expectIncluded = new string[] {
+                "analyzers/dotnet/IncludedAlpha.dll",
+                "analyzers/dotnet/cs/IncludedBeta.dll",
+                "analyzers/dotnet/cs/vb/IncludedChi.dll",
+            };
+
+            // expected excluded files
+            string[] expectExcluded = new string[] {
+                "analyzers/dotnet/vb/ExcludedAlpha.dll",
+                "analyzers/dotnet/ExcludedBeta.txt",
+                "analyzers/dotnet/cs/ExcludedChi.txt",
+                "dotnet/ExcludedDelta.dll",
+                "dotnet/cs/ExcludedEpsilon.dll"
+            };
+
+            var libCFiles = new List<string>()
+            {
+                "lib/file/G.dll", "lib/file/H.dll", "lib/file/I.dll"
+            };
+            libCFiles.AddRange(expectIncluded);
+            libCFiles.AddRange(expectExcluded);
+
+            string libCDefn = CreateLibrary("LibC/1.2.3", "package", libCFiles.ToArray());
+
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibB, TargetLibC),
+                },
+                libraries: new string[] {
+                    LibADefn, LibBDefn, libCDefn
+                },
+                projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
+            );
+
+            LockFile lockFile = TestLockFiles.CreateLockFile(lockFileContent);
+            var task = new ResolvePackageDependencies(lockFile, new MockPackageResolver())
+            {
+                ProjectLockFile = lockFile.Path,
+                ProjectPath = null,
+                ProjectLanguage = projectLanguage // set language
+            };
+            task.Execute().Should().BeTrue();
+
+            IEnumerable<ITaskItem> fileDefns;
+
+            fileDefns = task.FileDefinitions
+                .Where(t => t.GetMetadata(MetadataKeys.Type) == "AnalyzerAssembly");
+            fileDefns.Count().Should().Be(3);
+
+            var expectedTargets = new string[] {
+                ".NETCoreApp,Version=v1.0",
+                ".NETCoreApp,Version=v1.0/osx.10.11-x64"
+            };
+
+            foreach (var analyzer in expectIncluded)
+            {
+                var fileKey = $"LibC/1.2.3/{analyzer}";
+                var item = task.FileDefinitions.Where(t => t.ItemSpec == fileKey).First();
+                item.GetMetadata(MetadataKeys.Type).Should().Be("AnalyzerAssembly");
+                item.GetMetadata(MetadataKeys.Path).Should().Be(analyzer);
+
+                // expect two file dependencies for each, one per target
+                var fileDeps = task.FileDependencies.Where(t => t.ItemSpec == fileKey);
+
+                fileDeps.Count().Should().Be(2);
+
+                fileDeps.Select(f => f.GetMetadata(MetadataKeys.ParentTarget))
+                    .Should().Contain(expectedTargets);
+
+                fileDeps.All(f => f.GetMetadata(MetadataKeys.ParentPackage) == "LibC/1.2.3");
+            }
+
+            foreach (var otherFile in expectExcluded)
+            {
+                var fileKey = $"LibC/1.2.3/{otherFile}";
+                var item = task.FileDefinitions.Where(t => t.ItemSpec == fileKey).First();
+                item.GetMetadata(MetadataKeys.Type).Should().NotBe("AnalyzerAssembly");
+
+                // expect no file dependencies for each
+                task.FileDependencies.Where(t => t.ItemSpec == fileKey)
+                    .Should().BeEmpty();
+            }
+        }
+
         [Fact]
         public void ItUsesMinVersionFromPackageDependencyRanges()
         {
