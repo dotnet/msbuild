@@ -14,7 +14,6 @@
         "System.Diagnostics.Process": "4.1.0",
         "System.Diagnostics.TraceSource": "4.0.0",
         "System.Security.Cryptography.X509Certificates": "4.1.0",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
         "System.Threading.Thread": "4.0.0",
         "System.IO.FileSystem": "4.0.1",
         "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
