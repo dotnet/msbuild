@@ -45,7 +45,11 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             string[] dependencies = null,
             string[] frameworkAssemblies = null,
             string[] compile = null,
-            string[] runtime = null)
+            string[] runtime = null,
+            string[] native = null,
+            string[] resource = null,
+            string[] runtimeTargets = null,
+            string[] contentFiles = null)
         {
             List<string> parts = new List<string>();
             parts.Add($"\"type\": \"{type}\"");
@@ -63,6 +67,10 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             addListIfPresent("dependencies", dependencies);
             addListIfPresent("compile", compile);
             addListIfPresent("runtime", runtime);
+            addListIfPresent("native", native);
+            addListIfPresent("resource", resource);
+            addListIfPresent("runtimeTargets", runtimeTargets);
+            addListIfPresent("contentFiles", contentFiles);
 
             return $@" ""{nameVer}"": {{
                 {string.Join(",", parts)}
@@ -127,6 +135,35 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         public static readonly string TargetLibC = CreateTargetLibrary("LibC/1.2.3", "package",
             compile: new string[] { CreateFileItem("lib/file/G.dll"), CreateFileItem("lib/file/H.dll") },
             runtime: new string[] { CreateFileItem("lib/file/G.dll"), CreateFileItem("lib/file/H.dll") }
+            );
+
+        public static readonly string TargetLibBAllAssets = CreateTargetLibrary("LibB/1.2.3", "package",
+            frameworkAssemblies: new string[] { "System.Some.Lib" },
+            dependencies: new string[] { "\"LibC\": \"1.2.3\"" },
+            compile: new string[] { CreateFileItem("lib/file/C1.dll") },
+            runtime: new string[] { CreateFileItem("lib/file/R1.dll") },
+            native: new string[] { CreateFileItem("lib/file/N1.dll") },
+            resource: new string[] {
+                    CreateFileItem(
+                        "lib/file/R2.resources.dll",
+                        metadata: new Dictionary<string, string>() { {"locale", "de"} })
+            },
+            runtimeTargets: new string[] {
+                    CreateFileItem(
+                        "runtimes/osx/native/R3.dylib",
+                        metadata: new Dictionary<string, string>() {
+                            { "assetType", "native"}, { "rid", "osx" }
+                        })
+            },
+            contentFiles: new string[] {
+                    CreateFileItem(
+                        "contentFiles/any/images/C2.png",
+                        metadata: new Dictionary<string, string>() {
+                            { "buildAction", "EmbeddedResource" },
+                            { "codeLanguage", "any" },
+                            { "copyToOutput", "false" },
+                        })
+            }
             );
 
         #endregion

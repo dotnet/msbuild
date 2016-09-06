@@ -129,8 +129,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -167,8 +166,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -201,8 +199,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             task.TargetDefinitions.Count().Should().Be(2);
 
@@ -233,8 +230,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             var validPackageNames = new HashSet<string>() {
                 "LibA", "LibB", "LibC"
@@ -253,7 +249,6 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             }
         }
 
-        //- Expected package dependencies and their metadata
         [Fact]
         public void ItAssignsPackageDependenciesMetadata()
         {
@@ -265,8 +260,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             task.PackageDependencies.Count().Should().Be(3);
 
@@ -283,52 +277,101 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             packageDep.GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
         }
 
-        //- File definitions have expected metadata(including resolved path)
-        //- File definitions get type depending on how they occur in targets(including "unknown")
-        //- Expected file dependencies and their metadata
         [Fact]
         public void ItAssignsFileDefinitionMetadata()
         {
-            string targetLibB = CreateTargetLibrary("LibB/1.2.3", "package",
-                frameworkAssemblies: new string[] { "System.Some.Lib" },
-                dependencies: new string[] { "\"LibC\": \"1.2.3\"" },
-                compile: new string[] { CreateFileItem("lib/file/C1.dll") },
-                runtime: new string[] { CreateFileItem("lib/file/R1.dll") }
-                );
+            var expectedTypes = new Dictionary<string, string>()
+            {
+                { "lib/file/U1.dll",                "unknown" },
+                { "lib/file/C1.dll",                "assembly" }, // compile
+                { "lib/file/R1.dll",                "assembly" }, // runtime
+                { "lib/file/N1.dll",                "assembly" }, // native
+                { "lib/file/R2.resources.dll",      "assembly" }, // resource
+                { "runtimes/osx/native/R3.dylib",   "assembly" }, // runtime target
+                { "System.Some.Lib",                "frameworkAssembly" },
+                { "contentFiles/any/images/C2.png", "content" }, 
+            };
 
-            string libBDefn = CreateLibrary("LibB/1.2.3", "package",
-                "lib/file/C1.dll", "lib/file/R1.dll");
+            string libBAllAssetsDefn = CreateLibrary("LibB/1.2.3", "package", expectedTypes.Keys.ToArray());
 
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
-                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, targetLibB, TargetLibC),
-                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", targetLibB, TargetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibBAllAssets, TargetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibBAllAssets, TargetLibC),
                 },
                 libraries: new string[] {
-                    LibADefn, libBDefn, LibCDefn
+                    LibADefn, libBAllAssetsDefn, LibCDefn
                 },
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
-            IEnumerable<ITaskItem> fileDefns, fileDeps;
+            IEnumerable<ITaskItem> fileDefns;
 
-            // compile
-            fileDefns = task.FileDefinitions
-                .Where(t => t.ItemSpec == "LibB/1.2.3/lib/file/C1.dll");
-            fileDefns.Count().Should().Be(1);
-            fileDefns.First().GetMetadata(MetadataKeys.Path).Should().Be("lib/file/C1.dll");
-            fileDefns.First().GetMetadata(MetadataKeys.ResolvedPath).Should().Be($"{_packageRoot}\\LibB\\1.2.3\\path\\lib\\file\\C1.dll");
-            fileDefns.First().GetMetadata(MetadataKeys.Type).Should().Be("assembly");
+            foreach (var pair in expectedTypes)
+            {
+                fileDefns = task.FileDefinitions
+                    .Where(t => t.ItemSpec == $"LibB/1.2.3/{pair.Key}");
+                fileDefns.Count().Should().Be(1);
+                fileDefns.First().GetMetadata(MetadataKeys.Type).Should().Be(pair.Value);
+                fileDefns.First().GetMetadata(MetadataKeys.Path).Should().Be(pair.Key);
+                fileDefns.First().GetMetadata(MetadataKeys.ResolvedPath)
+                    .Should().Be($"{_packageRoot}\\LibB\\1.2.3\\path\\{pair.Key.Replace("/", "\\")}");
+            }
+        }
 
-            fileDeps = task.FileDependencies
-                .Where(t => t.ItemSpec == "LibB/1.2.3/lib/file/C1.dll");
-            fileDeps.Count().Should().Be(2);
-            fileDeps.First().GetMetadata(MetadataKeys.FileGroup).Should().Be(FileGroup.CompileTimeAssembly.ToString());
-            fileDeps.First().GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
-            fileDeps.First().GetMetadata(MetadataKeys.ParentPackage).Should().Be("LibB/1.2.3");
+        [Fact]
+        public void ItAssignsFileDependenciesMetadata()
+        {
+            var expectedFileGroups = new Dictionary<string, string>()
+            {
+                { "lib/file/U1.dll",                null },
+                { "lib/file/C1.dll",                FileGroup.CompileTimeAssembly.ToString() },
+                { "lib/file/R1.dll",                FileGroup.RuntimeAssembly.ToString() }, 
+                { "lib/file/N1.dll",                FileGroup.NativeLibrary.ToString() }, 
+                { "lib/file/R2.resources.dll",      FileGroup.ResourceAssembly.ToString() }, 
+                { "runtimes/osx/native/R3.dylib",   FileGroup.RuntimeTarget.ToString() }, 
+                { "System.Some.Lib",                FileGroup.FrameworkAssembly.ToString() },
+                { "contentFiles/any/images/C2.png", FileGroup.ContentFile.ToString() },
+            };
+
+            string libBAllAssetsDefn = CreateLibrary("LibB/1.2.3", "package", expectedFileGroups.Keys.ToArray());
+
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibBAllAssets, TargetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibBAllAssets, TargetLibC),
+                },
+                libraries: new string[] {
+                    LibADefn, libBAllAssetsDefn, LibCDefn
+                },
+                projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent);
+
+            IEnumerable<ITaskItem> fileDeps;
+
+            foreach (var pair in expectedFileGroups)
+            {
+                if (pair.Value == null)
+                {
+                    // these files do not appear as a dependency anywhere
+                    task.FileDependencies
+                        .Where(t => t.ItemSpec == $"LibB/1.2.3/{pair.Key}")
+                        .Should().BeEmpty();
+                }
+                else
+                {
+                    fileDeps = task.FileDependencies
+                        .Where(t => t.ItemSpec == $"LibB/1.2.3/{pair.Key}");
+                    fileDeps.Count().Should().Be(2);
+                    fileDeps.First().GetMetadata(MetadataKeys.FileGroup).Should().Be(pair.Value);
+                    fileDeps.First().GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
+                    fileDeps.First().GetMetadata(MetadataKeys.ParentPackage).Should().Be("LibB/1.2.3");
+                }
+            }
         }
 
         [Fact]
@@ -352,8 +395,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             task.FileDefinitions
                 .Any(t => t.GetMetadata(MetadataKeys.Path) == "lib/file/Z.dll")
@@ -396,8 +438,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             IEnumerable<ITaskItem> fileDefns;
 
@@ -551,8 +592,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            LockFile lockFile;
-            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             task.PackageDependencies
                 .Where(t => t.ItemSpec.StartsWith("Dep.Lib."))
