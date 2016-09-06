@@ -473,8 +473,14 @@ namespace Microsoft.Build.Shared
             // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
             var stringComparison = StringComparison.OrdinalIgnoreCase;
 
-            var firstFullPath = GetFullPathNoThrow(first, currentDirectory);
-            var secondFullPath = GetFullPathNoThrow(second, currentDirectory);
+            // perf: try comparing the bare strings first
+            if (string.Equals(first, second, stringComparison))
+            {
+                return true;
+            }
+
+            var firstFullPath = NormalizePathForComparisonNoThrow(first, currentDirectory);
+            var secondFullPath = NormalizePathForComparisonNoThrow(second, currentDirectory);
 
             return string.Equals(firstFullPath, secondFullPath, stringComparison);
         }

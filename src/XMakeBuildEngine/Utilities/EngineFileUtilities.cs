@@ -172,81 +172,50 @@ namespace Microsoft.Build.Internal
         /// Assumes inputs may be escaped, so it unescapes them
         internal static Func<string, bool> GetMatchTester(IList<string> filespecsEscaped, string currentDirectory)
         {
-            List<Regex> regexes = null;
+            var matchers = filespecsEscaped
+                .Select(fs => new Lazy<Func<string, bool>>(() => GetMatchTester(fs, currentDirectory)))
+                .ToList();
+
+            return file => matchers.Any(m => m.Value(file));
+        }
+
+        internal static Func<string, bool> GetMatchTester(string filespec, string currentDirectory)
+        {
+            var unescapedSpec = EscapingUtilities.UnescapeAll(filespec);
+            Regex regex = null;
 
             // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
-            var exactmatches = new Lazy<HashSet<string>>(() => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-            var pathMatches = new Lazy<HashSet<string>>(() => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
 
-            foreach (var spec in filespecsEscaped)
+            if (FilespecHasWildcards(filespec))
             {
-                if (FilespecHasWildcards(spec))
-                {
-                    var unescapedSpec = EscapingUtilities.UnescapeAll(spec);
+                Regex regexFileMatch;
+                bool isRecursive;
+                bool isLegal;
 
-                    Regex regexFileMatch;
-                    bool isRecursive;
-                    bool isLegal;
-                    //  TODO: If creating Regex's here ends up being expensive perf-wise, consider how to avoid it in common cases
-                    FileMatcher.GetFileSpecInfo
-                    (
-                        unescapedSpec,
-                        out regexFileMatch,
-                        out isRecursive,
-                        out isLegal,
-                        FileMatcher.s_defaultGetFileSystemEntries
-                    );
+                //  TODO: If creating Regex's here ends up being expensive perf-wise, consider how to avoid it in common cases
+                FileMatcher.GetFileSpecInfo(
+                    unescapedSpec,
+                    out regexFileMatch,
+                    out isRecursive,
+                    out isLegal,
+                    FileMatcher.s_defaultGetFileSystemEntries);
 
-                    if (isLegal)
-                    {
-                        if (regexes == null)
-                        {
-                            regexes = new List<Regex>();
-                        }
-                        regexes.Add(regexFileMatch);
-                    }
-                    else
-                    {
-                        //  If the spec is not legal, it doesn't match anything
-                    }
-                }
-                else
-                {
-                    exactmatches.Value.Add(EscapingUtilities.UnescapeAll(spec));
-                    pathMatches.Value.Add(FileUtilities.NormalizePathForComparisonNoThrow(spec, currentDirectory));
-                }
+                // If the spec is not legal, it doesn't match anything
+                regex = isLegal ? regexFileMatch : null;
             }
 
             return file =>
             {
                 var unescapedFile = EscapingUtilities.UnescapeAll(file);
 
-                // compare as if items are plain strings
-                if (exactmatches.IsValueCreated && exactmatches.Value.Contains(unescapedFile))
-                {
-                    return true;
-                }
-
-                // compare as if items are files
-                var normalizedFile = FileUtilities.NormalizePathForComparisonNoThrow(file, currentDirectory);
-                if (pathMatches.IsValueCreated && pathMatches.Value.Contains(normalizedFile))
-                {
-                    return true;
-                }
-
                 // check if there is a regex matching the file
-                if (regexes != null)
+                if (regex != null)
                 {
-                    return regexes.Any(regex => regex.IsMatch(unescapedFile));
+                    return regex.IsMatch(unescapedFile);
                 }
 
-                return false;
+                return FileUtilities.ComparePathsNoThrow(unescapedSpec, unescapedFile, currentDirectory);
             };
-        }
-
-        internal static Func<string, bool> GetMatchTester(string filespec, string currentDirectory)
-        {
-            return GetMatchTester(new List<string>() {filespec}, currentDirectory);
         }
     }
 }
