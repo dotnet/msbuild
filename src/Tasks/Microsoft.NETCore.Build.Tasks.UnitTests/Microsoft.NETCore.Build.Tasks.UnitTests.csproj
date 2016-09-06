@@ -27,6 +27,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GivenAResolvePackageDependenciesTask.cs" />
+    <Compile Include="LockFileSnippets.cs" />
     <Compile Include="Mocks\MockPackageResolver.cs" />
     <Compile Include="Mocks\MockTaskItem.cs" />
     <Compile Include="GivenThatWeWantToGetDependenciesViaDesignTimeBuild.cs" />

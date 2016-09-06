@@ -101,6 +101,14 @@ namespace Microsoft.NETCore.Build.Tasks
             get; set;
         }
 
+        /// <summary>
+        /// Optional the Project Language (E.g. C#, VB)
+        /// </summary>
+        public string ProjectLanguage
+        {
+            get; set;
+        }
+
         #endregion
 
         #region Test Support
