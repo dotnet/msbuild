@@ -15,7 +15,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     public class GivenAResolvePackageDependenciesTask
     {
-        private const string _packageRoot = "\\root\\packages";
+        private static readonly string _packageRoot = "\\root\\packages".Replace('\\', Path.DirectorySeparatorChar);
 
         [Theory]
         [MemberData("ItemCounts")]
@@ -262,7 +262,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 {
                     package.GetMetadata(MetadataKeys.Type).Should().Be("package");
                     package.GetMetadata(MetadataKeys.Path).Should().Be($"{name}/1.2.3");
-                    package.GetMetadata(MetadataKeys.ResolvedPath).Should().Be($"{_packageRoot}\\{name}\\1.2.3\\path");
+                    package.GetMetadata(MetadataKeys.ResolvedPath).Should().Be(Path.Combine(_packageRoot, name, "1.2.3", "path"));
                 }
             }
         }
@@ -349,7 +349,8 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 fileDefns.First().GetMetadata(MetadataKeys.Type).Should().Be(pair.Value);
                 fileDefns.First().GetMetadata(MetadataKeys.Path).Should().Be(pair.Key);
                 fileDefns.First().GetMetadata(MetadataKeys.ResolvedPath)
-                    .Should().Be($"{_packageRoot}\\LibB\\1.2.3\\path\\{pair.Key.Replace("/", "\\")}");
+                    .Should().Be(Path.Combine(_packageRoot, "LibB", "1.2.3", "path", 
+                        pair.Key.Replace('/', Path.DirectorySeparatorChar)));
             }
         }
 

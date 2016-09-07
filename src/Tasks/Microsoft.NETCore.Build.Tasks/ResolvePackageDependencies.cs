@@ -422,8 +422,9 @@ namespace Microsoft.NETCore.Build.Tasks
             {
                 return null;
             }
-
-            relativePath = relativePath.Replace('/', '\\');
+            
+            relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
+            relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
             return resolvedPackagePath != null
                 ? Path.Combine(resolvedPackagePath, relativePath)
                 : string.Empty;
