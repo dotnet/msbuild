@@ -3,8 +3,8 @@
 
   <Target Name="LayoutSdkPackage">
     <PropertyGroup>
-      <CoreSetupVersion>1.0.1-beta-000925</CoreSetupVersion>
-      <NuGetVersion>3.5.0-rc1-1697</NuGetVersion>
+      <CoreSetupVersion>1.0.1-beta-000933</CoreSetupVersion>
+      <NuGetVersion>3.6.0-beta.1.msbuild.4</NuGetVersion>
     </PropertyGroup>
     
     <ItemGroup>

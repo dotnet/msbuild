@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
+using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 
@@ -15,8 +16,12 @@ namespace Microsoft.NETCore.Build.Tasks
 {
     public class DependencyContextBuilder
     {
+        private readonly VersionFolderPathResolver _versionFolderPathResolver;
+
         public DependencyContextBuilder()
         {
+            // This resolver is only used for building file names, so that base path is not required.
+            _versionFolderPathResolver = new VersionFolderPathResolver(path: null);
         }
 
         public DependencyContext Build(
@@ -215,12 +220,14 @@ namespace Microsoft.NETCore.Build.Tasks
 
             string hash = string.Empty;
             string path = null;
+            string hashPath = null;
             LockFileLibrary library;
             if (libraryLookup.TryGetValue(export.Name, out library))
             {
                 if (!string.IsNullOrEmpty(library.Sha512))
                 {
                     hash = "sha512-" + library.Sha512;
+                    hashPath = _versionFolderPathResolver.GetHashFileName(export.Name, export.Version);
                 }
 
                 path = library.Path;
@@ -238,7 +245,8 @@ namespace Microsoft.NETCore.Build.Tasks
                     export.ResourceAssemblies.Select(CreateResourceAssembly),
                     libraryDependencies,
                     serviceable,
-                    path);
+                    path,
+                    hashPath);
             }
             else
             {
@@ -255,7 +263,8 @@ namespace Microsoft.NETCore.Build.Tasks
                     assemblies,
                     libraryDependencies,
                     serviceable,
-                    path);
+                    path,
+                    hashPath);
             }
         }
 
