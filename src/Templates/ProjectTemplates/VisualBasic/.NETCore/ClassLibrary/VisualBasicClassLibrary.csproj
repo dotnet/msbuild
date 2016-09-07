@@ -59,7 +59,7 @@
     <None Include="Class1.vb" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ConsoleApplication.png" />
+    <None Include="ClassLibrary.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

@@ -3,7 +3,7 @@
   <TemplateData>
     <Name Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="3"/>
     <Description Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="4"/>
-    <Icon>ConsoleApplication.png</Icon>
+    <Icon>ClassLibrary.png</Icon>
     <ProjectType>VisualBasic</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
     <SortOrder>1</SortOrder>
