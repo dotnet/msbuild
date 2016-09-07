@@ -302,13 +302,13 @@ namespace Microsoft.Build.UnitTests
         {
             if (eventArgs is BuildWarningEventArgs)
             {
-                BuildWarningEventArgs w = (BuildWarningEventArgs)eventArgs;
+                BuildWarningEventArgs w = (BuildWarningEventArgs) eventArgs;
 
                 // hack: disregard the MTA warning.
                 // need the second condition to pass on ploc builds
                 if (w.Code != "MSB4056" && !w.Message.Contains("MSB4056"))
                 {
-                    _fullLog.AppendFormat("{0}({1},{2}): {3} warning {4}: {5}\r\n",
+                    string logMessage = string.Format("{0}({1},{2}): {3} warning {4}: {5}",
                         w.File,
                         w.LineNumber,
                         w.ColumnNumber,
@@ -316,21 +316,26 @@ namespace Microsoft.Build.UnitTests
                         w.Code,
                         w.Message);
 
+                    _fullLog.AppendLine(logMessage);
+                    _testOutputHelper?.WriteLine(logMessage);
+
                     ++_warningCount;
                     _warnings.Add(w);
                 }
             }
             else if (eventArgs is BuildErrorEventArgs)
             {
-                BuildErrorEventArgs e = (BuildErrorEventArgs)eventArgs;
+                BuildErrorEventArgs e = (BuildErrorEventArgs) eventArgs;
 
-                _fullLog.AppendFormat("{0}({1},{2}): {3} error {4}: {5}\r\n",
+                string logMessage = string.Format("{0}({1},{2}): {3} error {4}: {5}",
                     e.File,
                     e.LineNumber,
                     e.ColumnNumber,
                     e.Subcategory,
                     e.Code,
                     e.Message);
+                _fullLog.AppendLine(logMessage);
+                _testOutputHelper?.WriteLine(logMessage);
 
                 ++_errorCount;
                 _errors.Add(e);
@@ -338,11 +343,12 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 // Log the message unless we are a build finished event and logBuildFinished is set to false.
-                bool logMessage = !(eventArgs is BuildFinishedEventArgs) || (eventArgs is BuildFinishedEventArgs && _logBuildFinishedEvent);
+                bool logMessage = !(eventArgs is BuildFinishedEventArgs) ||
+                                  (eventArgs is BuildFinishedEventArgs && _logBuildFinishedEvent);
                 if (logMessage)
                 {
-                    _fullLog.Append(eventArgs.Message);
-                    _fullLog.Append("\r\n");
+                    _fullLog.AppendLine(eventArgs.Message);
+                    _testOutputHelper?.WriteLine(eventArgs.Message);
                 }
             }
 
