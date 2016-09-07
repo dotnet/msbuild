@@ -268,7 +268,7 @@ namespace Microsoft.NETCore.Build.Tasks
             if (file.StartsWith("analyzers", StringComparison.Ordinal)
                 && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase))
             {
-                var projectLanguage = ProjectLanguage?.ToLowerInvariant();
+                var projectLanguage = GetLockFileLanguageName(ProjectLanguage);
 
                 if (projectLanguage == "cs" || projectLanguage == "vb")
                 {
@@ -279,13 +279,19 @@ namespace Microsoft.NETCore.Build.Tasks
                         fileParts.Any(x => x.Equals(projectLanguage, StringComparison.OrdinalIgnoreCase)) ||
                         !fileParts.Any(x => x.Equals(excludeLanguage, StringComparison.OrdinalIgnoreCase));
                 }
-                else
-                {
-                    isAnalyzer = true;
-                }
             }
 
             return isAnalyzer;
+        }
+
+        private static string GetLockFileLanguageName(string projectLanguage)
+        {
+            switch (projectLanguage)
+            {
+                case "C#": return "cs";
+                case "F#": return "fs";
+                default: return projectLanguage?.ToLowerInvariant();
+            }
         }
 
         // get target definitions and package and file dependencies

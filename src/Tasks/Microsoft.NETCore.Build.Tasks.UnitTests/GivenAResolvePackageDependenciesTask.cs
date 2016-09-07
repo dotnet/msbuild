@@ -38,11 +38,11 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 {
                     new object[] {
                         "dotnet.new",
-                        new int[] { 110, 2536, 1, 846, 77 }
+                        new int[] { 110, 2536, 1, 846, 73 }
                     },
                     new object[] {
                         "simple.dependencies",
-                        new int[] { 113, 2613, 1, 878, 98}
+                        new int[] { 113, 2613, 1, 878, 94}
                     },
                 };
             }
@@ -453,6 +453,8 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         [Fact]
         public void ItAddsAnalyzerMetadataAndFileDependencies()
         {
+            string projectLanguage = "VB";
+
             string libCDefn = CreateLibrary("LibC/1.2.3", "package", 
                 "lib/file/G.dll", "lib/file/H.dll", "lib/file/I.dll",
                 "analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
@@ -474,17 +476,22 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            LockFile lockFile = TestLockFiles.CreateLockFile(lockFileContent);
+            var task = new ResolvePackageDependencies(lockFile, new MockPackageResolver())
+            {
+                ProjectLockFile = lockFile.Path,
+                ProjectPath = null,
+                ProjectLanguage = projectLanguage // set language
+            };
+            task.Execute().Should().BeTrue();
 
             IEnumerable<ITaskItem> fileDefns;
 
             fileDefns = task.FileDefinitions
                 .Where(t => t.GetMetadata(MetadataKeys.Type) == "AnalyzerAssembly");
-            fileDefns.Count().Should().Be(4);
+            fileDefns.Count().Should().Be(2);
 
             var analyzers = new string[] {
-                "analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
-                "analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
                 "analyzers/dotnet/vb/Microsoft.CodeAnalysis.Analyzers.dll",
                 "analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll",
             };
@@ -515,7 +522,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         [Fact]
         public void ItFiltersAnalyzersByProjectLanguage()
         {
-            string projectLanguage = "cs";
+            string projectLanguage = "C#";
 
             // expected included analyzers
             string[] expectIncluded = new string[] {
