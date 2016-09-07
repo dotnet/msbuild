@@ -48,6 +48,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
     <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
     <NeutralLanguage Condition="'$(NeutralLanguage)' == ''">en</NeutralLanguage>
+    <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -137,17 +138,23 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <PropertyGroup>
+    <CreateSatelliteAssembliesDependsOn>
+      $(CreateSatelliteAssembliesDependsOn);
+      CoreGenerateSatelliteAssemblies
+    </CreateSatelliteAssembliesDependsOn>
+  </PropertyGroup>
 
   <!--
     ============================================================
-                    GenerateSatelliteAssemblies
+                    CoreGenerateSatelliteAssemblies
     ============================================================
-  -->
+-->
 
-  <Target Name="GenerateSatelliteAssemblies"
+  <Target Name="CoreGenerateSatelliteAssemblies"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
-          Condition="'@(_SatelliteAssemblyResourceInputs)' != ''">
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != ''  and '$(GenerateSatelliteAssembliesForCore)' == 'true' ">
 
     <MakeDir Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
 
