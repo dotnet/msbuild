@@ -8,8 +8,8 @@
     ".NETCoreApp,Version=v1.0": {
       "simple.dependencies/1.0.0": {
         "dependencies": {
-          "System.Collections.NonGeneric": "4.0.1",
-          "Newtonsoft.Json": "9.0.1"
+          "Newtonsoft.Json": "9.0.1",
+          "System.Collections.NonGeneric": "4.0.1"
         },
         "runtime": {
           "simple.dependencies.dll": {}
@@ -39,26 +39,28 @@
     "simple.dependencies/1.0.0": {
       "type": "project",
       "serviceable": false,
-      "sha512": "",
-      "path": null
+      "sha512": ""
     },
     "newtonsoft.json/9.0.1": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-U82mHQSKaIk+lpSVCbWYKNavmNH1i5xrExDEquU1i6I5pV6UMOqRnJRSlKO3cMPfcpp0RgDY+8jUXHdQ4IfXvw==",
-      "path": "Newtonsoft.Json/9.0.1"
+      "path": "Newtonsoft.Json/9.0.1",
+      "hashPath": "newtonsoft.json.9.0.1.nupkg.sha512"
     },
     "system.collections.nongeneric/4.0.1": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-hMxFT2RhhlffyCdKLDXjx8WEC5JfCvNozAZxCablAuFRH74SCV4AgzE8yJCh/73bFnEoZgJ9MJmkjQ0dJmnKqA==",
-      "path": "System.Collections.NonGeneric/4.0.1"
+      "path": "System.Collections.NonGeneric/4.0.1",
+      "hashPath": "system.collections.nongeneric.4.0.1.nupkg.sha512"
     },
     "system.runtime.serialization.primitives/4.1.1": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-HZ6Du5QrTG8MNJbf4e4qMO3JRAkIboGT5Fk804uZtg3Gq516S7hAqTm2UZKUHa7/6HUGdVy3AqMQKbns06G/cg==",
-      "path": "System.Runtime.Serialization.Primitives/4.1.1"
+      "path": "System.Runtime.Serialization.Primitives/4.1.1",
+      "hashPath": "system.runtime.serialization.primitives.4.1.1.nupkg.sha512"
     }
   }
 }
