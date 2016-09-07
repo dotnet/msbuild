@@ -57,6 +57,10 @@
           DestinationFolder="$(TestDeploymentDir)\%(RecursiveDir)"
           SkipUnchangedFiles="true"
           />
+
+    <Copy SourceFiles="$(SourceDir)\Shared\UnitTests\App.config"
+          DestinationFiles="$(TestDeploymentDir)\MSBuild.exe.config"
+          />
   </Target>
 
   <Target Name="DeployForTargetRuntime"
