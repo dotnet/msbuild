@@ -30,7 +30,17 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             return $@" ""{nameVer}"": {{
                 ""sha512"": ""abcde=="",
                 ""type"": ""{type}"",
+                ""path"": ""{nameVer}"",
                 ""files"": [{ToStringList(members)}]
+            }}";
+        }
+
+        public static string CreateProjectLibrary(string nameVer, string path, string msbuildProject)
+        {
+            return $@" ""{nameVer}"": {{
+                ""type"": ""project"",
+                ""path"": ""{path}"",
+                ""msbuildProject"": ""{msbuildProject}""
             }}";
         }
 

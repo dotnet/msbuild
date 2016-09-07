@@ -6,6 +6,7 @@ using Microsoft.Build.Framework;
 using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Xunit;
 using static Microsoft.NETCore.Build.Tasks.UnitTests.LockFileSnippets;
@@ -111,8 +112,6 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 .Select(s => s.Substring(0, s.IndexOf("/")))
                 .Should().OnlyContain(p => allProjectDeps.Any(dep => dep.IndexOf(p) != -1));
         }
-
-        //- What about 'project' and 'externalProject' library types
 
         [Fact]
         public void ItAssignsExpectedTopLevelDependencies()
@@ -221,48 +220,77 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         [Fact]
         public void ItAssignsPackageDefinitionMetadata()
         {
+            // project lib
+            string classLibPDefn = CreateProjectLibrary("ClassLibP/1.2.3", 
+                path: "../ClassLibP/project.json", 
+                msbuildProject: "../ClassLibP/ClassLibP.csproj");
+
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
                     CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
                     CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibB, TargetLibC),
                 },
-                libraries: new string[] { LibADefn, LibBDefn, LibCDefn },
+                libraries: new string[] { LibADefn, LibBDefn, LibCDefn, classLibPDefn },
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            LockFile lockFile;
+            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
 
             var validPackageNames = new HashSet<string>() {
-                "LibA", "LibB", "LibC"
+                "LibA", "LibB", "LibC", "ClassLibP"
             };
 
-            task.PackageDefinitions.Count().Should().Be(3);
+            task.PackageDefinitions.Count().Should().Be(4);
 
             foreach (var package in task.PackageDefinitions)
             {
                 string name = package.GetMetadata(MetadataKeys.Name);
                 validPackageNames.Contains(name).Should().BeTrue();
                 package.GetMetadata(MetadataKeys.Version).Should().Be("1.2.3");
-                package.GetMetadata(MetadataKeys.Type).Should().Be("package");
-                package.GetMetadata(MetadataKeys.Path).Should().BeEmpty(); // value is null for type 'package'
-                package.GetMetadata(MetadataKeys.ResolvedPath).Should().Be($"{_packageRoot}\\{name}\\1.2.3\\path");
+
+                if (name == "ClassLibP")
+                {
+                    package.GetMetadata(MetadataKeys.Type).Should().Be("project");
+                    package.GetMetadata(MetadataKeys.Path).Should().Be($"../ClassLibP/project.json");
+
+                    var resolvedPath = Path.GetDirectoryName(Path.GetFullPath(lockFile.Path));
+                    resolvedPath = Path.GetFullPath(Path.Combine(resolvedPath, "../ClassLibP/ClassLibP.csproj"));
+                    package.GetMetadata(MetadataKeys.ResolvedPath).Should().Be(resolvedPath);
+                }
+                else
+                {
+                    package.GetMetadata(MetadataKeys.Type).Should().Be("package");
+                    package.GetMetadata(MetadataKeys.Path).Should().Be($"{name}/1.2.3");
+                    package.GetMetadata(MetadataKeys.ResolvedPath).Should().Be($"{_packageRoot}\\{name}\\1.2.3\\path");
+                }
             }
         }
 
         [Fact]
         public void ItAssignsPackageDependenciesMetadata()
         {
+            // project lib
+            string classLibPDefn = CreateProjectLibrary("ClassLibP/1.2.3",
+                path: "../ClassLibP/project.json",
+                msbuildProject: "../ClassLibP/ClassLibP.csproj");
+
+            string targetLibP = CreateTargetLibrary("ClassLibP/1.2.3", "project",
+                dependencies: new string[] { "\"LibC\": \"1.2.3\"" }
+                );
+
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
-                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC)
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC, targetLibP)
                 },
-                libraries: new string[] { LibADefn, LibBDefn, LibCDefn },
+                libraries: new string[] { LibADefn, LibBDefn, LibCDefn, classLibPDefn },
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            LockFile lockFile;
+            var task = GetExecutedTaskFromContents(lockFileContent, out lockFile);
 
-            task.PackageDependencies.Count().Should().Be(3);
+            task.PackageDependencies.Count().Should().Be(4);
 
             var packageDep = task.PackageDependencies.Where(t => t.ItemSpec == "LibA/1.2.3").First();
             packageDep.GetMetadata(MetadataKeys.ParentPackage).Should().BeEmpty();
@@ -272,9 +300,13 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             packageDep.GetMetadata(MetadataKeys.ParentPackage).Should().Be("LibA/1.2.3");
             packageDep.GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
 
-            packageDep = task.PackageDependencies.Where(t => t.ItemSpec == "LibC/1.2.3").First();
-            packageDep.GetMetadata(MetadataKeys.ParentPackage).Should().Be("LibB/1.2.3");
-            packageDep.GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
+            // LibC has both a package and project that depend on it
+            var packageDeps = task.PackageDependencies.Where(t => t.ItemSpec == "LibC/1.2.3");
+            packageDeps.Count().Should().Be(2);
+            packageDeps.Select(t => t.GetMetadata(MetadataKeys.ParentPackage))
+                .Should().Contain(new string[] { "LibB/1.2.3", "ClassLibP/1.2.3" });
+            packageDeps.Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
+                .Should().OnlyContain(s => s == ".NETCoreApp,Version=v1.0");
         }
 
         [Fact]
@@ -367,9 +399,12 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                     fileDeps = task.FileDependencies
                         .Where(t => t.ItemSpec == $"LibB/1.2.3/{pair.Key}");
                     fileDeps.Count().Should().Be(2);
-                    fileDeps.First().GetMetadata(MetadataKeys.FileGroup).Should().Be(pair.Value);
-                    fileDeps.First().GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
-                    fileDeps.First().GetMetadata(MetadataKeys.ParentPackage).Should().Be("LibB/1.2.3");
+                    fileDeps.Select(t => t.GetMetadata(MetadataKeys.FileGroup))
+                        .Should().OnlyContain(s => s == pair.Value);
+                    fileDeps.Select(t => t.GetMetadata(MetadataKeys.ParentPackage))
+                        .Should().OnlyContain(s => s == "LibB/1.2.3");
+                    fileDeps.Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
+                        .Should().Contain(new string[] { ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64" });
                 }
             }
         }
