@@ -2135,10 +2135,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static List<ProjectItem> GetItemsFromFragmentWithGlobs(out string rootDir, string itemGroupFragment, params string[] globFiles)
         {
-            var projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory($"{Guid.NewGuid()}.proj", ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment));
-            rootDir = Path.GetDirectoryName(projectFile);
+            var formattedProjectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment);
 
-            Helpers.CreateFilesInDirectory(rootDir, globFiles);
+            string projectFile;
+            string[] createdFiles;
+            rootDir = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, globFiles, out projectFile, out createdFiles);
 
             return Helpers.MakeList(new Project(projectFile).GetItems("i"));
         }
