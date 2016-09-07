@@ -25,6 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <PropertyGroup>
     <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
@@ -136,6 +137,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+
   <!--
     ============================================================
                     GenerateSatelliteAssemblies
@@ -147,12 +149,28 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
           Condition="'@(_SatelliteAssemblyResourceInputs)' != ''">
 
-    <MakeDir
-        Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
+    <MakeDir Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
+
+    <PropertyGroup>
+      <_AssemblyInfoFile>$(IntermediateOutputPath)%(_SatelliteAssemblyResourceInputs.Culture)\$(TargetName).resources.cs</_AssemblyInfoFile>
+      <_OutputAssembly>$(IntermediateOutputPath)%(_SatelliteAssemblyResourceInputs.Culture)\$(TargetName).resources.dll</_OutputAssembly>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <SatelliteAssemblyAttribute Include="@(AssemblyAttribute)" />
+      <SatelliteAssemblyAttribute Include="System.Reflection.AssemblyCultureAttribute" Condition="'%(_SatelliteAssemblyResourceInputs.Culture)' != ''">
+        <_Parameter1>%(_SatelliteAssemblyResourceInputs.Culture)</_Parameter1>
+      </SatelliteAssemblyAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment AssemblyAttributes="@(SatelliteAssemblyAttribute)" Language="$(Language)" OutputFile="$(_AssemblyInfoFile)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
 
     <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
-                                 OutputAssembly="$(IntermediateOutputPath)%(_SatelliteAssemblyResourceInputs.Culture)\$(TargetName).resources.dll"
-                                 Culture="%(_SatelliteAssemblyResourceInputs.Culture)"
+                                 AssemblyInfoFile="$(_AssemblyInfoFile)"
+                                 OutputAssembly="$(_OutputAssembly)"
                                  References="@(Reference)">
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>

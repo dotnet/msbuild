@@ -10,11 +10,12 @@ using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.DependencyModel;
+using System.Reflection;
 
 namespace Microsoft.NETCore.Build.Tasks
 {
     /// <summary>
-    /// Generates the $(project).deps.json file.
+    /// Generates Satellite Assemblies
     /// </summary>
     public class GenerateSatelliteAssemblies : Task
     {
@@ -26,12 +27,10 @@ namespace Microsoft.NETCore.Build.Tasks
         public ITaskItem OutputAssembly { get; set; }
 
         [Required]
-        public string Culture { get; set; }
-
-        [Required]
         public string[] References { get; set; }
 
-        public string Version { get; set; }
+        [Required]
+        public string AssemblyInfoFile { get; set; }
 
         public override bool Execute()
         {
@@ -39,10 +38,10 @@ namespace Microsoft.NETCore.Build.Tasks
 
             foreach (var input in EmbedResources)
             {
-                var fileName = input.GetMetadata("Filename");
+                var resourceName = input.GetMetadata("ManifestResourceName") + input.GetMetadata("Extension");
                 var fullPath = input.GetMetadata("FullPath");
                 var fileInfo = new FileInfo(fullPath);
-                resourceDescriptions.Add(new ResourceDescription(fileName, () => fileInfo.OpenRead(), true));
+                resourceDescriptions.Add(new ResourceDescription(resourceName, () => fileInfo.OpenRead(), true));
             }
 
             var compilationOptions = new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary);
@@ -50,13 +49,7 @@ namespace Microsoft.NETCore.Build.Tasks
                 references: References.Select(reference => MetadataReference.CreateFromFile(reference)),
                 options: compilationOptions);
 
-            var metadata = new AssemblyInfoOptions
-            {
-                Culture = Culture,
-                AssemblyVersion = Version,
-            };
-
-            var cs = AssemblyInfoFileGenerator.GenerateCSharp(metadata, Enumerable.Empty<string>());            
+            var cs = File.ReadAllText(AssemblyInfoFile);
             compilation = compilation.AddSyntaxTrees(new[]
             {
                 CSharpSyntaxTree.ParseText(cs)
@@ -73,7 +66,7 @@ namespace Microsoft.NETCore.Build.Tasks
                     foreach (var diagnostic in result.Diagnostics)
                     {
                         Log.LogError(diagnostic.ToString());
-                    }                    
+                    }
                 }
             }
 
