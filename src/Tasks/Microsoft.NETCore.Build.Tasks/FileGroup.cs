@@ -11,7 +11,7 @@ namespace Microsoft.NETCore.Build.Tasks
     /// <summary>
     /// Values for File Group Metadata corresponding to the groups in a target library
     /// </summary>
-    internal enum FileGroup
+    public enum FileGroup
     {
         CompileTimeAssembly,
         RuntimeAssembly,
@@ -22,12 +22,12 @@ namespace Microsoft.NETCore.Build.Tasks
         FrameworkAssembly
     }
 
-    internal static class FileGroupExtensions
+    public static class FileGroupExtensions
     {
         /// <summary>
         /// Return Type metadata that should be applied to files in the target library group 
         /// </summary>
-        internal static string GetTypeMetadata(this FileGroup fileGroup)
+        public static string GetTypeMetadata(this FileGroup fileGroup)
         {
             switch (fileGroup)
             {
@@ -52,7 +52,7 @@ namespace Microsoft.NETCore.Build.Tasks
         /// <summary>
         /// Return a list of file paths from the corresponding group in the target library
         /// </summary>
-        internal static IEnumerable<string> GetFilePathListFor(this FileGroup fileGroup, LockFileTargetLibrary package)
+        public static IEnumerable<string> GetFilePathListFor(this FileGroup fileGroup, LockFileTargetLibrary package)
         {
             switch (fileGroup)
             {

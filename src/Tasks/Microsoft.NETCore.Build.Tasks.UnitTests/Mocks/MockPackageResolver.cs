@@ -8,9 +8,16 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     public class MockPackageResolver : IPackageResolver
     {
+        private readonly string _root;
+
+        public MockPackageResolver(string root = "/root")
+        {
+            _root = root;
+        }
+
         public string GetPackageDirectory(string packageId, NuGetVersion version)
         {
-            return Path.Combine("/root", packageId, version.ToNormalizedString(), "path");
+            return Path.Combine(_root, packageId, version.ToNormalizedString(), "path");
         }
     }
 }
