@@ -14,7 +14,7 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0"
+          "version": "1.0.1"
         },
         "System.Linq.Expressions": "4.1.0",
         "System.Runtime.Serialization.Primitives": "4.1.1"

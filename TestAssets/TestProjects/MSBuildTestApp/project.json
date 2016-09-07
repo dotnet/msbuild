@@ -4,7 +4,7 @@
       "dependencies": {
         "Microsoft.NETCore.Sdk": "1.0.0-alpha-20160831-1",
         "Microsoft.NETCore.App": {
-          "version": "1.0.0",
+          "version": "1.0.1",
           "type": "platform"
         }
       }

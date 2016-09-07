@@ -121,6 +121,7 @@ namespace Microsoft.DotNet.Migration.Tests
         private MigratedBuildComparisonData GetDotnetNewComparisonData(string projectDirectory, string dotnetNewType)
         {
             DotnetNew(projectDirectory, dotnetNewType);
+            File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(projectDirectory, "NuGet.Config"));
             Restore(projectDirectory);
 
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);

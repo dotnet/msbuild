@@ -1,12 +1,12 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
-    "copyToOutput": ["MSBuild.exe", "MSBuild.exe.config"]
+    "copyToOutput": ["MSBuild.exe", "MSBuild.exe.config", "NuGet.tempaspnetpatch.config"]
   },
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "Microsoft.DotNet.ProjectJsonMigration": {
       "target": "project"
