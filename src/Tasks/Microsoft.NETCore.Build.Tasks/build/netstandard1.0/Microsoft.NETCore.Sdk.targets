@@ -137,5 +137,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets')" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />
-
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
 </Project>
