@@ -17,6 +17,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform>AnyCPU</Platform>
 
