@@ -7,11 +7,18 @@ namespace Microsoft.NETCore.Build.Tasks
 {
     internal static class ITaskItemExtensions
     {
-        public static bool IsAnalyzer(this ITaskItem item)
+        public static bool? GetBooleanMetadata(this ITaskItem item, string metadataName)
         {
-            var isAnalyzer = false;
-            var analyzerString = item.GetMetadata(MetadataKeys.Analyzer);
-            return bool.TryParse(analyzerString, out isAnalyzer) && isAnalyzer;
+            bool? result = null;
+
+            string value = item.GetMetadata(metadataName);
+            bool parsedResult;
+            if (bool.TryParse(value, out parsedResult))
+            {
+                result = parsedResult;
+            }
+
+            return result;
         }
     }
 }

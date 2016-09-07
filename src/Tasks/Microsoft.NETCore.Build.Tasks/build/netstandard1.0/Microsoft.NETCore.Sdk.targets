@@ -83,7 +83,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
-                      RuntimeIdentifier="$(RuntimeIdentifier)" />
+                      RuntimeIdentifier="$(RuntimeIdentifier)"
+                      CompilerOptions="@(DependencyFileCompilerOptions)" />
 
     <!--
     TODO: https://github.com/dotnet/sdk/issues/21
@@ -137,7 +138,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets')" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.PreserveCompilationContext.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.PreserveCompilationContext.targets')" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
 </Project>

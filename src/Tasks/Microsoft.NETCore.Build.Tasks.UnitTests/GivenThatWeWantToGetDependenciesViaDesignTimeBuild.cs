@@ -836,8 +836,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                     { MetadataKeys.Name, "mockChildAnalyzerAssembly" },
                     { MetadataKeys.Path, "some path" },
                     { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Unknown" },
-                    { MetadataKeys.Analyzer, "true" },
+                    { MetadataKeys.Type, "AnalyzerAssembly" },
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
                 });
 
@@ -935,7 +934,6 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             VerifyTargetTaskItem(DependencyType.FrameworkAssembly, mockChildAssembly2, resultChildAssembly2[0]);
 
             mockChildAnalyzerAssembly.SetMetadata(MetadataKeys.Path, mockChildAnalyzerAssembly.GetMetadata(MetadataKeys.ResolvedPath));
-            mockChildAnalyzerAssembly.SetMetadata(MetadataKeys.Analyzer, string.Empty);
             var resultChildAnalyzerAssembly = task.DependenciesDesignTime
                 .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/somepath/mockChildAnalyzerAssembly")).ToArray();
             resultChildAnalyzerAssembly.Length.Should().Be(1);

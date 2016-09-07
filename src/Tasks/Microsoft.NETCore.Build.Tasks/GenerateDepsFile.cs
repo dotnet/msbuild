@@ -33,14 +33,17 @@ namespace Microsoft.NETCore.Build.Tasks
         [Required]
         public string AssemblyVersion { get; set; }
 
+        public ITaskItem CompilerOptions { get; set; }
+
         public override bool Execute()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
+            CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
             DependencyContext dependencyContext = new DependencyContextBuilder().Build(
                 projectName: AssemblyName,
                 projectVersion: AssemblyVersion,
-                compilerOptions: null, // TODO: PreserveCompilationContext - https://github.com/dotnet/sdk/issues/11
+                compilationOptions: compilationOptions,
                 lockFile: lockFile,
                 framework: TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework),
                 runtime: RuntimeIdentifier);
