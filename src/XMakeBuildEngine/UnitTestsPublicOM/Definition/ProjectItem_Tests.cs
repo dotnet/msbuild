@@ -534,9 +534,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 string[] createdFiles;
                 string projectFile;
                 var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
+
                 root = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, inputFiles, out projectFile, out createdFiles);
 
-                ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
+                // on Unix, the glob expander returns paths with slashes instead of backslashes, therefore we must normalize the slashes when asserting
+                ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), normalizeSlashes: true);
             }
             finally
             {
@@ -1924,10 +1926,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static List<ProjectItem> GetItemsFromFragmentWithGlobs(out string rootDir, string itemGroupFragment, params string[] globFiles)
         {
-            var projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory($"{Guid.NewGuid()}.proj", ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment));
-            rootDir = Path.GetDirectoryName(projectFile);
+            var formattedProjectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment);
 
-            Helpers.CreateFilesInDirectory(rootDir, globFiles);
+            string projectFile;
+            string[] createdFiles;
+            rootDir = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, globFiles, out projectFile, out createdFiles);
 
             return Helpers.MakeList(new Project(projectFile).GetItems("i"));
         }

@@ -862,7 +862,7 @@ namespace Microsoft.Build.UnitTests
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
         {
             string[] files = null;
-            string outputPath = Path.GetTempPath() + "\\" + Guid.NewGuid().ToString("N");
+            string outputPath = Path.Combine(Path.GetTempPath(),Guid.NewGuid().ToString("N"));
 
             try
             {
@@ -924,7 +924,7 @@ namespace Microsoft.Build.UnitTests
         public void SynthesizeLinkMetadataForItemsOnWhitelist()
         {
             string[] files = null;
-            string outputPath = Path.GetTempPath() + Path.DirectorySeparatorChar + Guid.NewGuid().ToString("N");
+            string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string directoryToDelete = null;
 
             try
@@ -1003,7 +1003,7 @@ namespace Microsoft.Build.UnitTests
         public void DontSynthesizeLinkMetadataIfPropertyNotSet()
         {
             string[] files = null;
-            string outputPath = Path.GetTempPath() + "\\" + Guid.NewGuid().ToString("N");
+            string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string directoryToDelete = null;
 
             try
