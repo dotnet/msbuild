@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<Rule
+    Name="WebConfigurationGeneralBrowseObject"
+    DisplayName="General"
+    PageTemplate="generic"
+    Description="General"
+    xmlns="http://schemas.microsoft.com/build/2009/properties">
+  <Rule.Categories>
+    <Category Name="General" DisplayName="General" Description="General" />
+    <Category Name="DevelopmentServer" DisplayName="Development Server" Description="Development Server" />
+  </Rule.Categories>
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" Label="Configuration" HasConfigurationCondition="false" />
+  </Rule.DataSource>
+  <StringProperty Name="ApplicationIcon" DisplayName="Application Icon" Visible="False"/>
+  <DynamicEnumProperty Name="TargetFrameworkMoniker"
+                       DisplayName="Target Framework Moniker"
+                       EnumProvider="TargetFrameworkMoniker"
+                       Visible="False"/>
+  <StringProperty Name="TargetDNXVersion" ReadOnly="False" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" HasConfigurationCondition="false" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="AssemblyName" ReadOnly="False" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" HasConfigurationCondition="false" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="DebugCLRTypeOverride" ReadOnly="False" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="UserFile" HasConfigurationCondition="false" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="ActiveDebugFramework" ReadOnly="False" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="UserFile" HasConfigurationCondition="false" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <BoolProperty Name="IsWebProject" ReadOnly="True" Visible="False">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" HasConfigurationCondition="false" />
+    </BoolProperty.DataSource>
+  </BoolProperty>
+  <BoolProperty Name="IsClasslibraryProject" ReadOnly="False" Visible="false">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" HasConfigurationCondition="false" />
+    </BoolProperty.DataSource>
+  </BoolProperty>
+  <StringProperty Name="Name" Visible="False"/>
+  <StringProperty Name="RootNamespace" DisplayName="Root namespace" />
+
+  <!-- This property is calculated as [HIWORD] = Major, LowWord is split into [Build][minor] bytes-->
+  <IntProperty Name="TargetFramework" Visible="False">
+    <IntProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="TargetFramework" />
+    </IntProperty.DataSource>
+  </IntProperty>
+  <StringProperty Name="OutputName" Visible="False"/>
+  <EnumProperty Name="OutputType" ReadOnly="True" Visible="False">
+    <EnumValue Name="Library"/>
+  </EnumProperty>
+  <StringListProperty Name="AvailablePlatforms" Separator="," Visible="False"/>
+  <!-- Note that FullPath returns the dirctory path which contains the project file, not the project file. This is to remain
+       compatible with the VB\C# project system and is NOT the default for CPS projects. 
+  -->
+  <StringProperty Name="FullPath" DisplayName="Folder Path" ReadOnly="True">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" PersistedName="MSBuildProjectDirectory" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="FileName" DisplayName="File Name" ReadOnly="True">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" PersistedName="MSBuildProjectFile" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="ProjectUrl" ReadOnly="True" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="ProjectUrl" HasConfigurationCondition="False" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="SSLUrl" ReadOnly="True" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="SSLUrl" HasConfigurationCondition="False" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <BoolProperty Name="WindowsAuthentication" Default="False" ReadOnly="False" Visible="False">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="WindowsAuthentication" HasConfigurationCondition="False" />
+    </BoolProperty.DataSource>
+  </BoolProperty>
+  <BoolProperty Name="AnonymousAuthentication" Default="True" ReadOnly="False" Visible="False">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="AnonymousAuthentication" HasConfigurationCondition="False" />
+    </BoolProperty.DataSource>
+  </BoolProperty>
+  <BoolProperty Name="ProduceOutputsOnBuild" Visible="False" ReadOnly="False">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="True"/>
+    </BoolProperty.DataSource>
+  </BoolProperty>
+  <BoolProperty Name="SSLEnabled" ReadOnly="False" Visible="False">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="SSLEnabled" HasConfigurationCondition="False"  />
+    </BoolProperty.DataSource>
+  </BoolProperty>
+  <StringProperty Name="IISExpressLaunchUrl" ReadOnly="False" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="IISExpressLaunchUrl" HasConfigurationCondition="False"  />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="UserSecretsId" ReadOnly="False" Visible="False">
+    <StringProperty.DataSource>
+      <DataSource Persistence="DnxDynamic" PersistedName="UserSecretsId" HasConfigurationCondition="False"  />
+    </StringProperty.DataSource>
+  </StringProperty>
+
+</Rule>

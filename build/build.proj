@@ -19,6 +19,7 @@
 
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
+    <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Web.Nuget.proj" />
   </ItemGroup>
 
   <Target Name="RestorePackages">
@@ -68,12 +69,24 @@
              Targets="Build"
              Properties="$(CommonMSBuildGlobalProperties)"
              />
+
+    <MSBuild BuildInParallel="true"
+             Projects="@(WebNuGetProjectFile)"
+             Targets="Build"
+             Properties="$(CommonMSBuildGlobalProperties)"
+             />
   </Target>
 
   <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
+             Targets="Rebuild"
+             Properties="$(CommonMSBuildGlobalProperties)"
+             />
+
+    <MSBuild BuildInParallel="true"
+             Projects="@(WebNuGetProjectFile)"
              Targets="Rebuild"
              Properties="$(CommonMSBuildGlobalProperties)"
              />

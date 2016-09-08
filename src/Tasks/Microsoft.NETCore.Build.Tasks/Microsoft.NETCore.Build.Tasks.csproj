@@ -62,6 +62,17 @@
     <Compile Include="MetadataKeys.cs" />
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="webbuild\netstandard1.0\en-us\web.general.browseobject.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Include="webbuild\netstandard1.0\Microsoft.NETCore.Web.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="webbuild\netstandard1.0\Microsoft.NETCore.Web.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

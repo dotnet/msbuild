@@ -4,7 +4,7 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "Microsoft.NETCore.Sdk": {
+    "Microsoft.NETCore.Web": {
       "version": "$$buildversion$$"
     },
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",
