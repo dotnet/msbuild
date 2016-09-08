@@ -450,44 +450,100 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c", "z", "a", "c", "u" }, items);
         }
 
-        /// <summary>
-        /// Include and Exclude containing wildcards
-        /// </summary>
-        [Fact]
-        public void Wildcards()
+        private const string ExcludeWithWildCards = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='{0}' Exclude='{1}'/>
+                        </ItemGroup>
+                    </Project>
+                ";
+        [Theory]
+        [InlineData(
+            ExcludeWithWildCards,
+            "a.*",
+            "*.1",
+            new[] { "a.1", "a.2", "a.1" },
+            new[] { "a.2" })]
+        [InlineData(
+            ExcludeWithWildCards,
+            @"**\*.cs",
+            @"a\**",
+            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
+            new[] { "1.cs" })]
+        [InlineData(
+            ExcludeWithWildCards,
+            @"**\*",
+            @"**\b\**",
+            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
+            new[] { "1.cs", @"a\2.cs", "build.proj" })]
+        [InlineData(ExcludeWithWildCards,
+            @"**\*",
+            @"**\b\**\*.cs",
+            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs", @"a\b\c\5.txt" },
+            new[] { "1.cs", @"a\2.cs", @"a\b\c\5.txt", "build.proj" })]
+        [InlineData(
+            ExcludeWithWildCards,
+            @"src\**\proj\**\*.cs",
+            @"src\**\proj\**\none\**\*",
+            new[]
+            {
+                "1.cs",
+                @"src\2.cs",
+                @"src\a\3.cs",
+                @"src\proj\4.cs",
+                @"src\proj\a\5.cs",
+                @"src\a\proj\6.cs",
+                @"src\a\proj\a\7.cs",
+                @"src\proj\none\8.cs",
+                @"src\proj\a\none\9.cs",
+                @"src\proj\a\none\a\10.cs",
+                @"src\a\proj\a\none\11.cs",
+                @"src\a\proj\a\none\a\12.cs"
+            },
+            new[]
+            {
+                @"src\a\proj\6.cs",
+                @"src\a\proj\a\7.cs",
+                @"src\proj\4.cs",
+                @"src\proj\a\5.cs"
+            })]
+        [InlineData(
+            ExcludeWithWildCards,
+            @"**\*",
+            "foo",
+            new[]
+            {
+                "foo",
+                @"a\foo",
+                @"a\a\foo",
+                @"a\b\foo",
+            },
+            new string[]
+            {
+                @"a\a\foo",
+                @"a\b\foo",
+                @"a\foo",
+                "build.proj"
+            })]
+        public void ExcludeVectorWithWildCards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
-            string directory = null;
-            string file1 = null;
-            string file2 = null;
-            string file3 = null;
-
+            //todo run the test twice with slashes and back-slashes when fixing https://github.com/Microsoft/msbuild/issues/724
+            string root = "";
             try
             {
-                directory = Path.Combine(Path.GetTempPath(), "ProjectItem_Tests_Wildcards");
-                Directory.CreateDirectory(directory);
+                string[] createdFiles;
+                string projectFile;
+                var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
 
-                file1 = Path.Combine(directory, "a.1");
-                file2 = Path.Combine(directory, "a.2");
-                file3 = Path.Combine(directory, "b.1");
+                root = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, inputFiles, out projectFile, out createdFiles);
 
-                File.WriteAllText(file1, String.Empty);
-                File.WriteAllText(file2, String.Empty);
-                File.WriteAllText(file3, String.Empty);
-
-                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(String.Format(NativeMethodsShared.IsWindows ?
-                    @"<i Include='{0}\a.*' Exclude='{0}\*.1'/>" :
-                    @"<i Include='{0}/a.*' Exclude='{0}/*.1'/>", directory));
-
-                Assert.Equal(1, items.Count);
-                Assert.Equal(String.Format(NativeMethodsShared.IsWindows ? @"{0}\a.2" : "{0}/a.2", directory), items[0].EvaluatedInclude);
+                // on Unix, the glob expander returns paths with slashes instead of backslashes, therefore we must normalize the slashes when asserting
+                ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), normalizeSlashes: true);
             }
             finally
             {
-                File.Delete(file1);
-                File.Delete(file2);
-                File.Delete(file3);
-
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
+                ObjectModelHelpers.DeleteDirectory(root);
+                Directory.Delete(root);
             }
         }
 
@@ -1870,10 +1926,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static List<ProjectItem> GetItemsFromFragmentWithGlobs(out string rootDir, string itemGroupFragment, params string[] globFiles)
         {
-            var projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory($"{Guid.NewGuid()}.proj", ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment));
-            rootDir = Path.GetDirectoryName(projectFile);
+            var formattedProjectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment);
 
-            Helpers.CreateFilesInDirectory(ref rootDir, globFiles);
+            string projectFile;
+            string[] createdFiles;
+            rootDir = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, globFiles, out projectFile, out createdFiles);
 
             return Helpers.MakeList(new Project(projectFile).GetItems("i"));
         }
