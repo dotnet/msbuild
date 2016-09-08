@@ -1939,7 +1939,9 @@ namespace Microsoft.Build.Construction
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
-                    using (XmlTextReader xtr = new XmlTextReader(fullPath))
+                    var stream = new StreamReader(fullPath);
+
+                    using (XmlTextReader xtr = new XmlTextReader(stream))
                     {
                         // Start the reader so it has an idea of what the encoding is.
                         xtr.DtdProcessing = DtdProcessing.Ignore;
