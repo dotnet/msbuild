@@ -71,6 +71,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       </AssemblyAttribute>
     </ItemGroup>
 
+    <ItemGroup>
+      <!-- Ensure the generated assemblyinfo file is not already part of the Compile sources, as a workaround for https://github.com/dotnet/sdk/issues/114 -->
+      <Compile Remove="$(GeneratedAssemblyInfoFile)" />
+    </ItemGroup>
+
     <WriteCodeFragment AssemblyAttributes="@(AssemblyAttribute)" Language="$(Language)" OutputFile="$(GeneratedAssemblyInfoFile)">
       <Output TaskParameter="OutputFile" ItemName="Compile" />
       <Output TaskParameter="OutputFile" ItemName="FileWrites" />

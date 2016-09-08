@@ -32,11 +32,33 @@ namespace Microsoft.NETCore.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory();
 
-            outputDirectory.Should().OnlyHaveFiles(new [] {
+            outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestLibrary.dll",
                 "TestLibrary.pdb",
                 "TestLibrary.deps.json"
             });
+        }
+
+        [Fact]
+        public void It_builds_the_library_twice_in_a_row()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource()
+                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }
