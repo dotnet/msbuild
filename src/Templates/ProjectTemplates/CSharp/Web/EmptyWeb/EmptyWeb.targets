@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(NuGetPackageRoot)' == ''">
+    <NuGetPackageRoot>C:\git\sdk\packages</NuGetPackageRoot>
+  </PropertyGroup>
+  <ImportGroup>
+    <Import Project="$(NuGetPackageRoot)\microsoft.vssdk.buildtools\15.0.25604-preview4\build\Microsoft.VSSDK.BuildTools.targets" Condition="Exists('$(NuGetPackageRoot)\microsoft.vssdk.buildtools\15.0.25604-preview4\build\Microsoft.VSSDK.BuildTools.targets')" />
+  </ImportGroup>
+</Project>

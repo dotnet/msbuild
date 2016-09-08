@@ -101,6 +101,14 @@ namespace Microsoft.NETCore.Build.Tasks
             get; set;
         }
 
+        /// <summary>
+        /// Optional the Project Language (E.g. C#, VB)
+        /// </summary>
+        public string ProjectLanguage
+        {
+            get; set;
+        }
+
         #endregion
 
         #region Test Support
@@ -255,8 +263,35 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private bool IsAnalyzer(string file)
         {
-            return file.StartsWith("analyzers", StringComparison.Ordinal)
-                && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase);
+            bool isAnalyzer = false;
+
+            if (file.StartsWith("analyzers", StringComparison.Ordinal)
+                && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase))
+            {
+                var projectLanguage = GetLockFileLanguageName(ProjectLanguage);
+
+                if (projectLanguage == "cs" || projectLanguage == "vb")
+                {
+                    string excludeLanguage = projectLanguage == "vb" ? "cs" : "vb";
+                    var fileParts = file.Split('/');
+
+                    isAnalyzer =
+                        fileParts.Any(x => x.Equals(projectLanguage, StringComparison.OrdinalIgnoreCase)) ||
+                        !fileParts.Any(x => x.Equals(excludeLanguage, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+
+            return isAnalyzer;
+        }
+
+        private static string GetLockFileLanguageName(string projectLanguage)
+        {
+            switch (projectLanguage)
+            {
+                case "C#": return "cs";
+                case "F#": return "fs";
+                default: return projectLanguage?.ToLowerInvariant();
+            }
         }
 
         // get target definitions and package and file dependencies
@@ -393,8 +428,9 @@ namespace Microsoft.NETCore.Build.Tasks
             {
                 return null;
             }
-
-            relativePath = relativePath.Replace('/', '\\');
+            
+            relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
+            relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
             return resolvedPackagePath != null
                 ? Path.Combine(resolvedPackagePath, relativePath)
                 : string.Empty;
