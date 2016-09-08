@@ -44,14 +44,14 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETCore\ClassLibrary\VisualBasicClassLibrary.csproj">
+    <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETCore\VisualBasicClassLibrary\VisualBasicClassLibrary.csproj">
       <Project>{dcdd8266-d269-46bd-b563-e4d4b811a5b1}</Project>
       <Name>VisualBasicClassLibrary</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>      
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
-    <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETCore\ConsoleApplication\VisualBasicConsoleApplication.csproj">
+    <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETCore\VisualBasicConsoleApplication\VisualBasicConsoleApplication.csproj">
       <Project>{622c1d9e-a9e1-422d-83df-ce5ce0aaaf51}</Project>
       <Name>VisualBasicConsoleApplication</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
@@ -68,7 +68,7 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>  
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectRootDir)build\Targets\Templates.Imports.targets" />
 </Project>

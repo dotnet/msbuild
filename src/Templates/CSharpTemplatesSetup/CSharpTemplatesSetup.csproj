@@ -44,14 +44,14 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProjectTemplates\CSharp\.NETCore\ConsoleApplication\CSharpConsoleApplication.csproj">
+    <ProjectReference Include="..\ProjectTemplates\CSharp\.NETCore\CSharpConsoleApplication\CSharpConsoleApplication.csproj">
       <Project>{0c52951f-4eef-4f2f-b587-0bcf6004c459}</Project>
       <Name>CSharpConsoleApplication</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
-    <ProjectReference Include="..\ProjectTemplates\CSharp\.NETCore\ClassLibrary\CSharpClassLibrary.csproj">
+    <ProjectReference Include="..\ProjectTemplates\CSharp\.NETCore\CSharpClassLibrary\CSharpClassLibrary.csproj">
       <Project>{a103c9a3-c76c-4a48-b67c-695fd1cb2f15}</Project>
       <Name>CSharpClassLibrary</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
