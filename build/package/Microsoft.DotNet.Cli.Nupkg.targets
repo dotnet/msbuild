@@ -47,6 +47,10 @@
         <ProjectName>Microsoft.DotNet.Tools.Test</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
+      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectJsonMigration">
+        <ProjectName>Microsoft.DotNet.ProjectJsonMigration</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
     </ItemGroup>
   </Target>
 
