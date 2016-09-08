@@ -1,0 +1,70 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CAEE03D-60F1-4E77-B25B-9CD8757E1F09}"
+	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
+		build.ps1 = build.ps1
+		Common.props = Common.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27-BA35-44B2-AC57-E54551791C64}"
+	ProjectSection(SolutionItems) = preProject
+		build\build.proj = build\build.proj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signing", "Signing", "{385C3C61-B7FC-4447-A88D-6D018B7CE5E4}"
+	ProjectSection(SolutionItems) = preProject
+		build\Signing\Microsoft.NETCore.Signing.proj = build\Signing\Microsoft.NETCore.Signing.proj
+		build\Signing\SignToolConfig.json = build\Signing\SignToolConfig.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{0C1312C0-0A29-4EB2-8294-6D1C54D78F61}"
+	ProjectSection(SolutionItems) = preProject
+		build\Targets\ProducesNoOutput.Imports.props = build\Targets\ProducesNoOutput.Imports.props
+		build\Targets\ProducesNoOutput.Settings.props = build\Targets\ProducesNoOutput.Settings.props
+		build\Targets\Templates.Imports.targets = build\Targets\Templates.Imports.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{C86A71A6-9D35-436B-BBC5-0940041410F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectTemplates", "ProjectTemplates", "{1F16979A-2572-444B-9DD7-51D4289309DA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSharp", "CSharp", "{82D4E69F-8B61-4CC3-8AF1-11D02AAE99CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{78DFB5BC-0BE9-456D-B76F-CAD5567F7F08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpWebTemplatesSetup", "src\Templates\CSharpWebTemplatesSetup\CSharpWebTemplatesSetup.csproj", "{8D1B6233-3DE7-4554-8C8E-F649BDF918FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emptyweb", "src\Templates\ProjectTemplates\CSharp\Web\EmptyWeb\EmptyWeb.csproj", "{2B564EBF-C589-46CA-B98B-C2EC4EB9C255}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8D1B6233-3DE7-4554-8C8E-F649BDF918FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D1B6233-3DE7-4554-8C8E-F649BDF918FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D1B6233-3DE7-4554-8C8E-F649BDF918FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D1B6233-3DE7-4554-8C8E-F649BDF918FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B564EBF-C589-46CA-B98B-C2EC4EB9C255}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B564EBF-C589-46CA-B98B-C2EC4EB9C255}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B564EBF-C589-46CA-B98B-C2EC4EB9C255}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B564EBF-C589-46CA-B98B-C2EC4EB9C255}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{385C3C61-B7FC-4447-A88D-6D018B7CE5E4} = {50A89C27-BA35-44B2-AC57-E54551791C64}
+		{0C1312C0-0A29-4EB2-8294-6D1C54D78F61} = {50A89C27-BA35-44B2-AC57-E54551791C64}
+		{1F16979A-2572-444B-9DD7-51D4289309DA} = {C86A71A6-9D35-436B-BBC5-0940041410F1}
+		{82D4E69F-8B61-4CC3-8AF1-11D02AAE99CF} = {1F16979A-2572-444B-9DD7-51D4289309DA}
+		{78DFB5BC-0BE9-456D-B76F-CAD5567F7F08} = {82D4E69F-8B61-4CC3-8AF1-11D02AAE99CF}
+		{8D1B6233-3DE7-4554-8C8E-F649BDF918FD} = {C86A71A6-9D35-436B-BBC5-0940041410F1}
+		{2B564EBF-C589-46CA-B98B-C2EC4EB9C255} = {78DFB5BC-0BE9-456D-B76F-CAD5567F7F08}
+	EndGlobalSection
+EndGlobal

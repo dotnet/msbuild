@@ -15,6 +15,7 @@
   <ItemGroup>
     <SolutionFile Include="$(RepositoryRootDirectory)core-sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
     <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
+    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-web-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
 
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
