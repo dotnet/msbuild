@@ -49,14 +49,14 @@
       <Name>CSharpConsoleApplication</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
     <ProjectReference Include="..\ProjectTemplates\CSharp\.NETCore\ClassLibrary\CSharpClassLibrary.csproj">
       <Project>{a103c9a3-c76c-4a48-b67c-695fd1cb2f15}</Project>
       <Name>CSharpClassLibrary</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

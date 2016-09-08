@@ -49,14 +49,14 @@
       <Name>VisualBasicClassLibrary</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>      
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>      
     </ProjectReference>
     <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETCore\ConsoleApplication\VisualBasicConsoleApplication.csproj">
       <Project>{622c1d9e-a9e1-422d-83df-ce5ce0aaaf51}</Project>
       <Name>VisualBasicConsoleApplication</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
