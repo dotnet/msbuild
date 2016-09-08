@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 
@@ -52,10 +53,10 @@ namespace Microsoft.Build.Internal
             (
             string directoryEscaped,
             string filespecEscaped,
-            IEnumerable<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsEscaped = null
             )
         {
-            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, excludeSpecsUnescaped);
+            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, excludeSpecsEscaped);
         }
 
         private static bool FilespecHasWildcards(string filespecEscaped)
@@ -100,18 +101,24 @@ namespace Microsoft.Build.Internal
             string directoryEscaped,
             string filespecEscaped,
             bool returnEscaped,
-            IEnumerable<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsEscaped = null
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, "filespecEscaped");
+
+            if (excludeSpecsEscaped == null)
+            {
+                excludeSpecsEscaped = Enumerable.Empty<string>();
+            }
 
             string[] fileList;
 
             if (FilespecHasWildcards(filespecEscaped))
             {
                 // Unescape before handing it to the filesystem.
-                string directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
-                string filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
+                var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
+                var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
+                var excludeSpecsUnescaped = excludeSpecsEscaped.Where(IsValidExclude).Select(EscapingUtilities.UnescapeAll);
 
                 // Get the list of actual files which match the filespec.  Put
                 // the list into a string array.  If the filespec started out
@@ -149,82 +156,66 @@ namespace Microsoft.Build.Internal
             return fileList;
         }
 
-        //  Returns a Func that will return true IFF its argument matches any of the specified filespecs
-        internal static Func<string, bool> GetMatchTester(IList<string> filespecs)
+        private static bool IsValidExclude(string exclude)
         {
-            List<Regex> regexes = null;
-            HashSet<string> exactmatches = null;
+            // TODO: assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
+            // Excludes that have both wildcards and non escaped wildcards will never be matched on Windows, because
+            // wildcard characters are invalid in Windows paths.
+            // Filtering these excludes early keeps the glob expander simpler. Otherwise unescaping logic would reach all the way down to
+            // filespec parsing (parse escaped string (to correctly ignore escaped wildcards) and then
+            // unescape the path fragments to unfold potentially escaped wildcard chars)
+            var hasBothWildcardsAndEscapedWildcards = FileMatcher.HasWildcards(exclude) && EscapingUtilities.ContainsEscapedWildcards(exclude);
+            return !hasBothWildcardsAndEscapedWildcards;
+        }
 
-            foreach (var spec in filespecs)
+        /// Returns a Func that will return true IFF its argument matches any of the specified filespecs
+        /// Assumes inputs may be escaped, so it unescapes them
+        internal static Func<string, bool> GetMatchTester(IList<string> filespecsEscaped, string currentDirectory)
+        {
+            var matchers = filespecsEscaped
+                .Select(fs => new Lazy<Func<string, bool>>(() => GetMatchTester(fs, currentDirectory)))
+                .ToList();
+
+            return file => matchers.Any(m => m.Value(file));
+        }
+
+        internal static Func<string, bool> GetMatchTester(string filespec, string currentDirectory)
+        {
+            var unescapedSpec = EscapingUtilities.UnescapeAll(filespec);
+            Regex regex = null;
+
+            // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+
+            if (FilespecHasWildcards(filespec))
             {
-                if (FilespecHasWildcards(spec))
-                {
-                    Regex regexFileMatch;
-                    bool isRecursive;
-                    bool isLegal;
-                    //  TODO: If creating Regex's here ends up being expensive perf-wise, consider how to avoid it in common cases
-                    FileMatcher.GetFileSpecInfo
-                    (
-                        spec,
-                        out regexFileMatch,
-                        out isRecursive,
-                        out isLegal,
-                        FileMatcher.s_defaultGetFileSystemEntries
-                    );
+                Regex regexFileMatch;
+                bool isRecursive;
+                bool isLegal;
 
-                    if (isLegal)
-                    {
-                        if (regexes == null)
-                        {
-                            regexes = new List<Regex>();
-                        }
-                        regexes.Add(regexFileMatch);
-                    }
-                    else
-                    {
-                        //  If the spec is not legal, it doesn't match anything
-                    }
-                }
-                else
-                {
-                    if (exactmatches == null)
-                    {
-                        //  TODO: How to handle case sensitivity here?  Existing behavior is to be case-insensitive,
-                        //  which works for Windows but probably isn't the right thing on other OS's
-                        exactmatches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    }
-                    exactmatches.Add(spec);
-                }
+                //  TODO: If creating Regex's here ends up being expensive perf-wise, consider how to avoid it in common cases
+                FileMatcher.GetFileSpecInfo(
+                    unescapedSpec,
+                    out regexFileMatch,
+                    out isRecursive,
+                    out isLegal,
+                    FileMatcher.s_defaultGetFileSystemEntries);
+
+                // If the spec is not legal, it doesn't match anything
+                regex = isLegal ? regexFileMatch : null;
             }
 
             return file =>
             {
-                if (exactmatches != null)
+                var unescapedFile = EscapingUtilities.UnescapeAll(file);
+
+                // check if there is a regex matching the file
+                if (regex != null)
                 {
-                    if (exactmatches.Contains(file))
-                    {
-                        return true;
-                    }
+                    return regex.IsMatch(unescapedFile);
                 }
 
-                if (regexes != null)
-                {
-                    foreach (Regex regex in regexes)
-                    {
-                        if (regex.IsMatch(file))
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
+                return FileUtilities.ComparePathsNoThrow(unescapedSpec, unescapedFile, currentDirectory);
             };
-        }
-
-        internal static Func<string, bool> GetMatchTester(string filespec)
-        {
-            return GetMatchTester(new List<string>() {filespec});
         }
     }
 }

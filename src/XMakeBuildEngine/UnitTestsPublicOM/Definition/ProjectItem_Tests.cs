@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -22,6 +23,27 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// </summary>
     public class ProjectItem_Tests
     {
+        internal const string ItemWithIncludeAndExclude = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='{0}' Exclude='{1}'/>
+                        </ItemGroup>
+                    </Project>
+                ";
+        internal const string ItemWithIncludeUpdateAndRemove= @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='{0}'>
+                               <m>contents</m>
+                            </i>
+                            <i Update='{1}'>
+                               <m>updated</m>
+                            </i>
+                            <i Remove='{2}'/>
+                        </ItemGroup>
+                    </Project>
+                ";
+
         /// <summary>
         /// Project getter
         /// </summary>
@@ -38,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// No metadata, simple case
         /// </summary>
         [Fact]
-        public void NoMetadata()
+        public void SingleItemWithNoMetadata()
         {
             string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
@@ -441,39 +463,97 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c", "z", "a", "c", "u" }, items);
         }
 
-        private const string ExcludeWithWildCards = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <ItemGroup>
-                            <i Include='{0}' Exclude='{1}'/>
-                        </ItemGroup>
-                    </Project>
-                ";
         [Theory]
-        [InlineData(
-            ExcludeWithWildCards,
+        // items as strings: escaped includes appear as unescaped
+        [InlineData(ItemWithIncludeAndExclude,
+            "%61;%62",
+            "b",
+            new string[0],
+            new[] { "a" })]
+        //// items as strings: escaped include matches non-escaped exclude
+        [InlineData(ItemWithIncludeAndExclude,
+            "%61",
+            "a",
+            new string[0],
+            new string[0])]
+        //// items as strings: non-escaped include matches escaped exclude
+        [InlineData(ItemWithIncludeAndExclude,
+            "a",
+            "%61",
+            new string[0],
+            new string[0])]
+        // items as strings: include with escaped wildcard and non-escaped wildcard matches exclude with escaped wildcard and non-escaped wildcard. Both are treated as values and not as globs
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**/a%2Axb",
+            @"**/a%2Axb",
+            new string[0],
+            new string[0])]
+        // items as files: non-escaped wildcard include matches escaped non-wildcard character
+        [InlineData(ItemWithIncludeAndExclude,
+            "a?b",
+            "a%40b",
+            new[] { "acb", "a@b" },
+            new[] { "acb" })]
+       // items as files: non-escaped non-wildcard include matches escaped non-wildcard character
+       [InlineData(ItemWithIncludeAndExclude,
+           "acb;a@b",
+           "a%40b",
+           new string[0],
+           new[] { "acb" })]
+        // items as files: escaped wildcard include matches escaped non-wildcard exclude
+        [InlineData(ItemWithIncludeAndExclude,
+            "a%40*b",
+            "a%40bb",
+            new[] { "a@b", "a@ab", "a@bb" },
+            new[] { "a@ab", "a@b" })]
+        // items as files: escaped wildcard include matches escaped wildcard exclude
+        [InlineData(ItemWithIncludeAndExclude,
+            "a%40*b",
+            "a%40?b",
+            new[] { "a@b", "a@ab", "a@bb" },
+            new[] { "a@b" })]
+       // items as files: non-escaped recursive wildcard include matches escaped recursive wildcard exclude
+       [InlineData(ItemWithIncludeAndExclude,
+           @"**\a*b",
+           @"**\a*%78b",
+           new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
+           new[] { "aab", @"dir\abb" })]
+        // items as files: include with non-escaped glob does not match exclude with escaped wildcard character.
+        // The exclude is treated as a literal and only matches against non-glob include fragments (i.e., against values and item references)
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\a*b;**\a%2Axb",
+            @"**\a%2Axb",
+            new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
+            new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" })]
+        public void IncludeExcludeWithEscapedCharacters(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        {
+            //todo run the test twice with slashes and back-slashes when fixing https://github.com/Microsoft/msbuild/issues/724
+            var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
+            Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
+        }
+
+        [Theory]
+        [InlineData(ItemWithIncludeAndExclude,
             "a.*",
             "*.1",
             new[] { "a.1", "a.2", "a.1" },
             new[] { "a.2" })]
-        [InlineData(
-            ExcludeWithWildCards,
+        [InlineData(ItemWithIncludeAndExclude,
             @"**\*.cs",
             @"a\**",
             new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
             new[] { "1.cs" })]
-        [InlineData(
-            ExcludeWithWildCards,
+        [InlineData(ItemWithIncludeAndExclude,
             @"**\*",
             @"**\b\**",
             new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
             new[] { "1.cs", @"a\2.cs", "build.proj" })]
-        [InlineData(ExcludeWithWildCards,
+        [InlineData(ItemWithIncludeAndExclude,
             @"**\*",
             @"**\b\**\*.cs",
             new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs", @"a\b\c\5.txt" },
             new[] { "1.cs", @"a\2.cs", @"a\b\c\5.txt", "build.proj" })]
-        [InlineData(
-            ExcludeWithWildCards,
+        [InlineData(ItemWithIncludeAndExclude,
             @"src\**\proj\**\*.cs",
             @"src\**\proj\**\none\**\*",
             new[]
@@ -498,8 +578,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"src\proj\4.cs",
                 @"src\proj\a\5.cs"
             })]
-        [InlineData(
-            ExcludeWithWildCards,
+        [InlineData(ItemWithIncludeAndExclude,
             @"**\*",
             "foo",
             new[]
@@ -509,7 +588,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"a\a\foo",
                 @"a\b\foo",
             },
-            new string[]
+            new []
             {
                 @"a\a\foo",
                 @"a\b\foo",
@@ -519,21 +598,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ExcludeVectorWithWildCards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
             //todo run the test twice with slashes and back-slashes when fixing https://github.com/Microsoft/msbuild/issues/724
-            string root = "";
-            try
-            {
-                string[] createdFiles;
-                string projectFile;
-                var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
-                root = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, inputFiles, out projectFile, out createdFiles);
-
-                ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
-            }
-            finally
-            {
-                ObjectModelHelpers.DeleteDirectory(root);
-                Directory.Delete(root);
-            }
+            var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
+            Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
         }
 
         /// <summary>
@@ -1930,6 +1996,99 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
+        }
+
+        public static IEnumerable<Object[]> UpdateAndRemoveShouldWorkWithEscapedCharactersTestData
+        {
+            get
+
+            {
+                var expectedMetadata = new[]
+                {
+                    new Dictionary<string, string> {{"m", "contents"}},
+                    new Dictionary<string, string> {{"m", "updated"}}
+                };
+
+                // escaped value matches and nonescaped value include
+                yield return new object[]
+                {
+                    ItemWithIncludeUpdateAndRemove,
+                    "i;u;r",
+                    "%75",
+                    "%72",
+                    new[] {"i", "u"},
+                    expectedMetadata
+                };
+
+                // escaped value matches and escaped value include
+                yield return new object[]
+                {
+                    ItemWithIncludeUpdateAndRemove,
+                    "i;%75;%72",
+                    "%75",
+                    "%72",
+                    new[] {"i", "u"},
+                    expectedMetadata
+                };
+
+                // unescaped value matches and escaped value include
+                yield return new object[]
+                {
+                    ItemWithIncludeUpdateAndRemove,
+                    "i;%75;%72",
+                    "u",
+                    "r",
+                    new[] {"i", "u"},
+                    expectedMetadata
+                };
+
+                // escaped glob matches and nonescaped value include
+                yield return new object[]
+                {
+                    ItemWithIncludeUpdateAndRemove,
+                    "i;u;r",
+                    "*%75*",
+                    "*%72*",
+                    new[] {"i", "u"},
+                    expectedMetadata
+                };
+
+                // escaped glob matches and escaped value include
+                yield return new object[]
+                {
+                    ItemWithIncludeUpdateAndRemove,
+                    "i;%75;%72",
+                    "*%75*",
+                    "*%72*",
+                    new[] {"i", "u"},
+                    expectedMetadata
+                };
+
+                // escaped matching items as globs containing escaped wildcards; treated as normal values
+                yield return new object[]
+                {
+                    ItemWithIncludeUpdateAndRemove,
+                    "i;u;r;%2A%75%2A;%2A%72%2A",
+                    "%2A%75%2A",
+                    "%2A%72%2A",
+                    new[] {"i", "u", "r", "*u*"},
+                    new[]
+                    {
+                        new Dictionary<string, string> {{"m", "contents"}},
+                        new Dictionary<string, string> {{"m", "contents"}},
+                        new Dictionary<string, string> {{"m", "contents"}},
+                        new Dictionary<string, string> {{"m", "updated"}}
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(UpdateAndRemoveShouldWorkWithEscapedCharactersTestData))]
+        public void UpdateAndRemoveShouldWorkWithEscapedCharacters(string projectContents, string include, string update, string remove, string[] expectedInclude, Dictionary<string, string>[] expectedMetadata)
+        {
+            var formattedProjectContents = string.Format(projectContents, include, update, remove);
+            Helpers.AssertItemEvaluation(formattedProjectContents, new string[0], expectedInclude, expectedMetadata);
         }
 
         [Theory]

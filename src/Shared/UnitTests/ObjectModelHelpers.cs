@@ -1094,7 +1094,7 @@ namespace Microsoft.Build.UnitTests
                 listTwo.Add(item);
             }
 
-            AssertCollectionsValueEqual<T>(listOne, listTwo);
+            AssertCollectionsValueEqual(listOne, listTwo);
         }
 
         /// <summary>
@@ -1240,7 +1240,7 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                File.WriteAllText(fullPath, string.Empty);
+                File.WriteAllText(fullPath, String.Empty);
                 result[i] = fullPath;
             }
 
@@ -1413,6 +1413,32 @@ namespace Microsoft.Build.UnitTests
             string[] result = content.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             return result;
+        }
+
+        internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null)
+        {
+            string root = "";
+            try
+            {
+                string[] createdFiles;
+                string projectFile;
+                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
+
+                if (expectedMetadataPerItem == null)
+                {
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
+                }
+                else
+                {
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem);
+                }
+                
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteDirectory(root);
+                Directory.Delete(root);
+            }
         }
     }
 }

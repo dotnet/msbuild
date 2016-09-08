@@ -54,7 +54,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (excludePatterns.Any())
                     {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(excludePatterns));
+                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(excludePatterns, _rootDirectory));
                     }
                 }
 
@@ -91,8 +91,12 @@ namespace Microsoft.Build.Evaluation
                     else if (fragment is GlobFragment)
                     {
                         string glob = ((GlobFragment)fragment).ItemSpecFragment;
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob,
-                            excludePatterns.Count > 0 ? (IEnumerable<string>) excludePatterns.Concat(globsToIgnore) : globsToIgnore);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                            _rootDirectory,
+                            glob,
+                            excludePatterns.Count > 0 ? (IEnumerable<string>) excludePatterns.Concat(globsToIgnore) : globsToIgnore
+                            );
+
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
                             itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
