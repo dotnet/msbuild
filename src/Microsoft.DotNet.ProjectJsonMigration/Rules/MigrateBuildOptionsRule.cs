@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 new AddPropertyTransform<CommonCompilerOptions>("OutputType", "Exe",
                     compilerOptions => compilerOptions.EmitEntryPoint != null && compilerOptions.EmitEntryPoint.Value),
                 new AddPropertyTransform<CommonCompilerOptions>("OutputType", "Library",
-                    compilerOptions => compilerOptions.EmitEntryPoint == null || !compilerOptions.EmitEntryPoint.Value)
+                    compilerOptions => compilerOptions.EmitEntryPoint != null && !compilerOptions.EmitEntryPoint.Value)
             };
 
         private AddPropertyTransform<CommonCompilerOptions>[] KeyFileTransforms
@@ -39,12 +39,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private AddPropertyTransform<CommonCompilerOptions> DefineTransform => new AddPropertyTransform<CommonCompilerOptions>(
             "DefineConstants", 
-            compilerOptions => string.Join(";", compilerOptions.Defines),
+            compilerOptions => "$(DefineConstants);" + string.Join(";", compilerOptions.Defines),
             compilerOptions => compilerOptions.Defines != null && compilerOptions.Defines.Any());
 
         private AddPropertyTransform<CommonCompilerOptions> NoWarnTransform => new AddPropertyTransform<CommonCompilerOptions>(
             "NoWarn",
-            compilerOptions => string.Join(";", compilerOptions.SuppressWarnings),
+            compilerOptions => "$(NoWarn);" + string.Join(";", compilerOptions.SuppressWarnings),
             compilerOptions => compilerOptions.SuppressWarnings != null && compilerOptions.SuppressWarnings.Any());
 
         private AddPropertyTransform<CommonCompilerOptions> PreserveCompilationContextTransform =>
@@ -129,11 +129,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>> CopyToOutputFilesTransformExecute =>
             (compilerOptions, projectDirectory) =>
                     CopyToOutputFilesTransform.Transform(GetCopyToOutputIncludeContext(compilerOptions, projectDirectory));
-
-        private readonly string _configuration;
-        private readonly NuGetFramework _framework;
+        
         private readonly ProjectPropertyGroupElement _configurationPropertyGroup;
         private readonly ProjectItemGroupElement _configurationItemGroup;
+        private readonly CommonCompilerOptions _configurationBuildOptions;
 
         private List<AddPropertyTransform<CommonCompilerOptions>> _propertyTransforms;
         private List<Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>>> _includeContextTransformExecutes;
@@ -147,14 +146,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         }
 
         public MigrateBuildOptionsRule(
-            string configuration,
-            NuGetFramework framework,
+            CommonCompilerOptions configurationBuildOptions,
             ProjectPropertyGroupElement configurationPropertyGroup,
             ProjectItemGroupElement configurationItemGroup,
             ITransformApplicator transformApplicator = null)
         {
-            _configuration = configuration;
-            _framework = framework;
+            _configurationBuildOptions = configurationBuildOptions;
             _configurationPropertyGroup = configurationPropertyGroup;
             _configurationItemGroup = configurationItemGroup;
             _transformApplicator = transformApplicator ?? new TransformApplicator();
@@ -201,13 +198,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var propertyGroup = _configurationPropertyGroup ?? migrationRuleInputs.CommonPropertyGroup;
             var itemGroup = _configurationItemGroup ?? migrationRuleInputs.CommonItemGroup;
 
-            var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(projectContext.TargetFramework, null);
-            var configurationCompilerOptions =
-                projectContext.ProjectFile.GetCompilerOptions(_framework, _configuration);
+            var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(null, null);
 
             // If we're in a configuration, we need to be careful not to overwrite values from BuildOptions
             // without a configuration
-            if (_configuration == null)
+            if (_configurationBuildOptions == null)
             {
                 CleanExistingProperties(csproj);
 
@@ -222,7 +217,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             {
                 PerformConfigurationPropertyAndItemMappings(
                     compilerOptions,
-                    configurationCompilerOptions,
+                    _configurationBuildOptions,
                     propertyGroup,
                     itemGroup,
                     _transformApplicator,
@@ -254,47 +249,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 var nonConfigurationOutput = includeContextTransformExecute(compilerOptions, projectDirectory);
                 var configurationOutput = includeContextTransformExecute(configurationCompilerOptions, projectDirectory).ToArray();
 
-                if (configurationOutput != null && nonConfigurationOutput != null)
-                {
-                    // TODO: HACK: this is leaky, see top comments, the throw at least covers the scenario
-                    ThrowIfConfigurationHasAdditionalExcludes(configurationOutput, nonConfigurationOutput);
-                    RemoveCommonIncludes(configurationOutput, nonConfigurationOutput);
-                    configurationOutput = configurationOutput.Where(i => i != null && !string.IsNullOrEmpty(i.Include)).ToArray();
-                }
-
-                // Don't merge with existing items when doing a configuration
-                transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: false);
-            }
-        }
-
-        private void ThrowIfConfigurationHasAdditionalExcludes(IEnumerable<ProjectItemElement> configurationOutput, IEnumerable<ProjectItemElement> nonConfigurationOutput)
-        {
-            foreach (var item1 in configurationOutput)
-            {
-                if (item1 == null)
-                {
-                    continue;
-                }
-
-                var item2Excludes = new HashSet<string>();
-                foreach (var item2 in nonConfigurationOutput)
-                {
-                    if (item2 != null)
-                    {
-                        item2Excludes.UnionWith(item2.Excludes());
-                    }
-                }
-                var configurationHasAdditionalExclude =
-                    item1.Excludes().Any(exclude => item2Excludes.All(item2Exclude => item2Exclude != exclude));
-
-                if (configurationHasAdditionalExclude)
-                {
-                    MigrationTrace.Instance.WriteLine(item1.Exclude);
-                    MigrationTrace.Instance.WriteLine(item2Excludes.ToString());
-
-                    MigrationErrorCodes.MIGRATE20012("Unable to migrate projects with excluded files in configurations.")
-                        .Throw();
-                }
+                transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: true);
             }
         }
 

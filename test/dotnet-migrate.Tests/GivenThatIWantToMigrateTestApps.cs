@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Migration.Tests
         // TODO: Standalone apps [InlineData("TestAppSimple", false)]
         // https://github.com/dotnet/sdk/issues/73 [InlineData("TestAppWithLibrary/TestApp", false)]
         [InlineData("TestAppWithRuntimeOptions")]
+        [InlineData("TestAppWithContents")]
         public void It_migrates_apps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
@@ -204,6 +205,8 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private string BuildMSBuild(string projectDirectory, string configuration="Debug")
         {
+            DeleteXproj(projectDirectory);
+
             var result = new Build3Command()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"/p:Configuration={configuration}");
@@ -213,6 +216,15 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Pass();
 
             return result.StdOut;
+        }
+
+        private void DeleteXproj(string projectDirectory)
+        {
+            var xprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj");
+            foreach (var xprojFile in xprojFiles)
+            {
+                File.Delete(xprojFile);
+            }
         }
 
         private void OutputDiagnostics(MigratedBuildComparisonData comparisonData)

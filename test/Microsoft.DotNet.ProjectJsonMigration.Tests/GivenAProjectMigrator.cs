@@ -51,8 +51,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             migrateAction.ShouldThrow<Exception>().Where(
                 e => e.Message.Contains("MIGRATE1011::Deprecated Project:")
-                     && e.Message.Contains("The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead.")
-                     && e.Message.Contains("The 'compilationOptions' option is deprecated. Use 'buildOptions' instead."));
+                     && e.Message.Contains("The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead. (line: 6, file:")
+                     && e.Message.Contains("The 'compilationOptions' option is deprecated. Use 'buildOptions' instead. (line: 3, file:"));
         }
 
         [Fact]

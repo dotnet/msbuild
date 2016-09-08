@@ -40,6 +40,29 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void Frameworks_buildOptions_produce_expected_properties_in_a_group_with_a_condition()
+        {
+            var mockProj = RunConfigurationsRuleOnPj(@"
+                {
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {
+                            ""buildOptions"": {
+                                ""emitEntryPoint"": ""true"",
+                                ""debugType"": ""full""
+                            }
+                        }
+                    }
+                }");
+
+            mockProj.Properties.Count(
+                prop => prop.Name == "OutputType" || prop.Name == "DebugType").Should().Be(2);
+
+            mockProj.Properties.First(p => p.Name == "OutputType")
+                .Parent.Condition.Should()
+                .Contain("'$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '.NETCoreApp,Version=v1.0'");
+        }
+
+        [Fact]
         public void Configuration_buildOptions_properties_are_not_written_when_they_overlap_with_buildOptions()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
@@ -67,11 +90,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             {
                 property.Parent.Condition.Should().Be(string.Empty);
             }
-
         }
 
         [Fact]
-        public void Configuration_buildOptions_includes_are_not_written_when_they_overlap_with_buildOptions()
+        public void Configuration_buildOptions_includes_and_Remove_are_written_when_they_differ_from_base_buildOptions()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -97,25 +119,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            mockProj.Items.Count(item => item.ItemType == "Content").Should().Be(3);
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
 
-            mockProj.Items.Where(item => item.ItemType == "Content")
-                .Count(item => !string.IsNullOrEmpty(item.Parent.Condition))
-                .Should()
-                .Be(1);
+            contentItems.Count().Should().Be(4);
 
-            var configContent = mockProj.Items
-                .Where(item => item.ItemType == "Content").First(item => !string.IsNullOrEmpty(item.Parent.Condition));
+            // 2 for Base Build options
+            contentItems.Where(i => i.ConditionChain().Count() == 0).Should().HaveCount(2);
+
+            // 2 for Configuration BuildOptions (1 Remove, 1 Include)
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(2);
+            
+            var configIncludeContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0 && !string.IsNullOrEmpty(item.Include));
+            var configRemoveContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0 && !string.IsNullOrEmpty(item.Remove));
 
             // Directories are not converted to globs in the result because we did not write the directory
-            configContent.Include.Should().Be(@"root;rootfile.cs");
-            configContent.Exclude.Should().Be(@"src;rootfile.cs;src\file2.cs");
+            configRemoveContentItem.Remove.Should().Be(@"root;src;rootfile.cs");
+            configIncludeContentItem.Include.Should().Be(@"root;src;rootfile.cs");
+            configIncludeContentItem.Exclude.Should().Be(@"src;rootfile.cs;src\file2.cs");
         }
 
         [Fact]
-        public void Configuration_buildOptions_includes_which_have_different_excludes_than_buildOptions_throws()
+        public void Configuration_buildOptions_which_have_different_excludes_than_buildOptions_overwrites()
         {
-            Action action = () => RunConfigurationsRuleOnPj(@"
+            var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
                     ""buildOptions"": {
                         ""copyToOutput"": {
@@ -130,7 +158,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                             ""buildOptions"": {
                                 ""copyToOutput"": {
                                     ""include"": [""root"", ""src"", ""rootfile.cs""],
-                                    ""exclude"": [""src"", ""rootfile.cs""],
+                                    ""exclude"": [""rootfile.cs"", ""someotherfile.cs""],
                                     ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
                                     ""excludeFiles"": [""src/file2.cs""]
                                 }
@@ -139,10 +167,307 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            action.ShouldThrow<Exception>()
-                .WithMessage(
-                    "MIGRATE20012::Configuration Exclude: Unable to migrate projects with excluded files in configurations.");
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+
+            contentItems.Count().Should().Be(5);
+
+            // 2 for Base Build options
+            contentItems.Where(i => i.ConditionChain().Count() == 0).Should().HaveCount(2);
+
+            // 3 for Configuration BuildOptions (1 Remove, 2 Include)
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);
+
+            var configIncludeContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0 
+                    && item.Include.Contains("root"));
+
+            var configIncludeContentItem2 = contentItems.First(
+                item => item.ConditionChain().Count() > 0 
+                    && item.Include.Contains(@"src\file1.cs"));
+
+            var configRemoveContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0 && !string.IsNullOrEmpty(item.Remove));
+
+            // Directories are not converted to globs in the result because we did not write the directory
+            configRemoveContentItem.Removes()
+                .Should().BeEquivalentTo("root", "src", "rootfile.cs", @"src\file1.cs", @"src\file2.cs");
+
+            configIncludeContentItem.Includes().Should().BeEquivalentTo("root", "src", "rootfile.cs");
+            configIncludeContentItem.Excludes()
+                .Should().BeEquivalentTo("rootfile.cs", "someotherfile.cs", @"src\file2.cs");
+
+            configIncludeContentItem2.Includes().Should().BeEquivalentTo(@"src\file1.cs", @"src\file2.cs");
+            configIncludeContentItem2.Excludes().Should().BeEquivalentTo(@"src\file2.cs");
         }
+
+        [Fact]
+        public void Configuration_buildOptions_which_have_mappings_to_directory_add_link_metadata_with_item_metadata()
+        {
+            var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
+                {
+                    ""configurations"": {
+                        ""testconfig"": {
+                            ""buildOptions"": {
+                                ""copyToOutput"": {
+                                    ""mappings"": {
+                                        ""/some/dir/"" : {
+                                            ""include"": [""src"", ""root""],
+                                            ""exclude"": [""src"", ""rootfile.cs""],
+                                            ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
+                                            ""excludeFiles"": [""src/file2.cs""]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+
+            contentItems.Count().Should().Be(2);
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(2);
+
+            var configIncludeContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include.Contains("root"));
+
+            var configIncludeContentItem2 = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include.Contains(@"src\file1.cs"));
+
+            configIncludeContentItem.Includes().Should().BeEquivalentTo("root", "src");
+            configIncludeContentItem.Excludes()
+                .Should().BeEquivalentTo("rootfile.cs", "src", @"src\file2.cs");
+
+            configIncludeContentItem.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configIncludeContentItem2.Includes().Should().BeEquivalentTo(@"src\file1.cs", @"src\file2.cs");
+            configIncludeContentItem2.Excludes().Should().BeEquivalentTo(@"src\file2.cs");
+
+            configIncludeContentItem2.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem2.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+
+            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+        }
+
+        [Fact]
+        public void Configuration_buildOptions_which_have_mappings_overlapping_with_includes_in_same_configuration_merged_items_have_Link_metadata()
+        {
+            var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
+                {
+                    ""configurations"": {
+                        ""testconfig"": {
+                            ""buildOptions"": {
+                                ""copyToOutput"": {
+                                    ""include"": [""src"", ""root""],
+                                    ""exclude"": [""src"", ""rootfile.cs""],
+                                    ""includeFiles"": [""src/file1.cs""],
+                                    ""excludeFiles"": [""src/file2.cs""],
+                                    ""mappings"": {
+                                        ""/some/dir/"" : {
+                                            ""include"": [""src""],
+                                            ""exclude"": [""src"", ""src/rootfile.cs""]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+
+            contentItems.Count().Should().Be(3);
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);
+
+            var configIncludeContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include == "root");
+            
+            var configIncludeContentItem2 = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include == "src");
+
+            var configIncludeContentItem3 = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include.Contains(@"src\file1.cs"));
+
+            // Directories are not converted to globs in the result because we did not write the directory
+
+            configIncludeContentItem.Includes().Should().BeEquivalentTo("root");
+            configIncludeContentItem.Excludes()
+                .Should().BeEquivalentTo("rootfile.cs", "src", @"src\file2.cs");
+
+            configIncludeContentItem.GetMetadataWithName("Link").Should().BeNull();
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configIncludeContentItem2.Include.Should().Be("src");
+            configIncludeContentItem2.Excludes().Should().BeEquivalentTo("src", "rootfile.cs", @"src\rootfile.cs", @"src\file2.cs");
+
+            configIncludeContentItem2.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem2.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configIncludeContentItem3.Includes().Should().BeEquivalentTo(@"src\file1.cs");
+            configIncludeContentItem3.Exclude.Should().Be(@"src\file2.cs");
+
+            configIncludeContentItem3.GetMetadataWithName("Link").Should().BeNull();
+            configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+        }
+        
+        [Fact]
+        public void Configuration_buildOptions_which_have_mappings_overlapping_with_includes_in_root_buildoptions_has_remove()
+        {
+            var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"" : {
+                        ""copyToOutput"": {
+                            ""include"": [""src"", ""root""],
+                            ""exclude"": [""src"", ""rootfile.cs""],
+                            ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
+                            ""excludeFiles"": [""src/file2.cs""]
+                        }
+                    },
+                    ""configurations"": {
+                        ""testconfig"": {
+                            ""buildOptions"": {
+                                ""copyToOutput"": {
+                                    ""mappings"": {
+                                        ""/some/dir/"" : {
+                                            ""include"": [""src""],
+                                            ""exclude"": [""src"", ""rootfile.cs""]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+
+            contentItems.Count().Should().Be(4);
+            
+            var rootBuildOptionsContentItems = contentItems.Where(i => i.ConditionChain().Count() == 0).ToList();
+            rootBuildOptionsContentItems.Count().Should().Be(2);
+            foreach (var buildOptionContentItem in rootBuildOptionsContentItems)
+            {
+                buildOptionContentItem.GetMetadataWithName("Link").Should().BeNull();
+                buildOptionContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+            }
+
+            var configItems = contentItems.Where(i => i.ConditionChain().Count() == 1);
+            configItems.Should().HaveCount(2);
+
+            var configIncludeContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include.Contains("src"));
+
+            var configRemoveContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && !string.IsNullOrEmpty(item.Remove));
+
+            configIncludeContentItem.Include.Should().Be("src");
+
+            configIncludeContentItem.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configRemoveContentItem.Remove.Should().Be("src");
+        }
+
+        [Fact]
+        public void Configuration_buildOptions_which_have_mappings_overlapping_with_includes_in_same_configuration_and_root_buildOptions_have_removes_and_Link_metadata_and_encompassed_items_are_merged()
+        {
+            var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"" : {
+                        ""copyToOutput"": {
+                            ""include"": [""src"", ""root""],
+                            ""exclude"": [""src"", ""rootfile.cs""],
+                            ""includeFiles"": [""src/file1.cs""],
+                            ""excludeFiles"": [""src/file2.cs""]
+                        }
+                    },
+                    ""configurations"": {
+                        ""testconfig"": {
+                            ""buildOptions"": {
+                                ""copyToOutput"": {
+                                    ""include"": [""src"", ""root""],
+                                    ""exclude"": [""src"", ""rootfile.cs""],
+                                    ""includeFiles"": [""src/file3.cs""],
+                                    ""excludeFiles"": [""src/file2.cs""],
+                                    ""mappings"": {
+                                        ""/some/dir/"" : {
+                                            ""include"": [""src""],
+                                            ""exclude"": [""src"", ""src/rootfile.cs""]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+
+            contentItems.Count().Should().Be(5);
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);
+
+            var rootBuildOptionsContentItems = contentItems.Where(i => i.ConditionChain().Count() == 0).ToList();
+            rootBuildOptionsContentItems.Count().Should().Be(2);
+            foreach (var buildOptionContentItem in rootBuildOptionsContentItems)
+            {
+                buildOptionContentItem.GetMetadataWithName("Link").Should().BeNull();
+                buildOptionContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+            }
+
+            var configIncludeEncompassedItem = contentItems.FirstOrDefault(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include == "root");
+            configIncludeEncompassedItem.Should().BeNull();
+            
+            var configIncludeContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include == "src");
+
+            var configIncludeContentItem2 = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Include.Contains(@"src\file3.cs"));
+
+            var configRemoveContentItem = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && !string.IsNullOrEmpty(item.Remove));
+
+            configIncludeContentItem.Include.Should().Be("src");
+            configIncludeContentItem.Excludes().Should().BeEquivalentTo("src", "rootfile.cs", @"src\rootfile.cs", @"src\file2.cs");
+
+            configIncludeContentItem.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configIncludeContentItem2.Includes().Should().BeEquivalentTo(@"src\file3.cs");
+            configIncludeContentItem2.Exclude.Should().Be(@"src\file2.cs");
+
+            configIncludeContentItem2.GetMetadataWithName("Link").Should().BeNull();
+            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configRemoveContentItem.Removes().Should().BeEquivalentTo("src");
+        }
+
         private ProjectRootElement RunConfigurationsRuleOnPj(string s, string testDirectory = null)
         {
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;

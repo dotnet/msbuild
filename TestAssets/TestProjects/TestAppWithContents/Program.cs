@@ -7,7 +7,7 @@ namespace ConsoleApplication
         public static int Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            return 100;
+            return 0;
         }
     }
 }
