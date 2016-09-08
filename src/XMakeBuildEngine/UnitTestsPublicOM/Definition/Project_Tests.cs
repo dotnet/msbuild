@@ -59,6 +59,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(0, ProjectCollection.GlobalProjectCollection.GlobalProperties.Count);
         }
 
+        private static readonly string ProjectWithItemGroup =
+@"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+{0}
+                  </ItemGroup>
+                </Project>
+            ";
+
         /// <summary>
         /// Since when the project file is saved it may be intented we want to make sure the indent charachters do not affect the evaluation against empty. 
         /// We test here newline, tab, and carriage return.
@@ -2608,27 +2616,79 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistant");
         }
 
-        [Fact]
-        public void GetItemProvenanceByProjectItem()
+        public static IEnumerable<Object[]> GetItemProvenanceByProjectItemTestData
         {
-            var project =
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    <A Include=`*.foo;1.foo`/>
-                    <B Include=`1;2;3;*.foo` Exclude=`*.foo;1.foo`/>
-                    <B Include=`*.foo;1.foo`/>
-                    <C Include=`2;3` Exclude=`2`/>
-                  </ItemGroup>
-                </Project>
-            ";
-
-            var expected = new ProvenanceResultTupleList
+            get
             {
-                Tuple.Create("B", Operation.Exclude, Provenance.Glob | Provenance.StringLiteral, 2),
-                Tuple.Create("B", Operation.Include, Provenance.Glob | Provenance.StringLiteral, 2)
-            };
+                // Provenance for an item in the last element. Nothing matches
+                yield return new object[]
+                {
+                    @"
+                    <A Include=`a;b`/>
+                    <A Update=`a`/>
+                    <A Update=`b`/>
+                    <A Include=`a;b`/>
+                    ",
+                    "a",
+                    1, // item 'a' from last include
+                    new ProvenanceResultTupleList()
+                };
 
-            AssertProvenanceResult(expected, project, "1.foo", 1);
+                // Nothing matches
+                yield return new object[]
+                {
+                    @"
+                    <A Include=`a;b;c`/>
+                    <A Update=`c;*ab`/>
+                    <A Remove=`b`/>
+                    <A Include=`a`/>
+                    ",
+                    "a",
+                    0, // item 'a' from first include
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    @"
+                    <A Remove=`a`/>
+
+                    <A Include=`a;b;c`/>
+                    <A Update=`a`/>
+                    <A Update=`b`/>
+                    <B Update=`a`/>
+                    <A Remove=`b`/>
+
+                    <A Include=`a;b`/>
+                    <A Update=`a;a`/>
+                    <A Update=`b`/>
+                    <B Update=`a`/>
+                    <A Remove=`b`/>
+
+                    <A Include=`a`/>
+                    <A Update=`a;a*`/>
+                    <A Update=`b`/>
+                    <B Update=`a`/>
+                    <A Remove=`b`/>
+                    ",
+                    "a",
+                    1, // item 'a' from second include
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral, 2),
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 2)
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetItemProvenanceByProjectItemTestData))]
+        public void GetItemProvenanceByProjectItem(string items, string itemValue, int itemPosition, ProvenanceResultTupleList expected)
+        {
+            var formattedProject = string.Format(ProjectWithItemGroup, items);
+
+            AssertProvenanceResult(expected, formattedProject, itemValue, itemPosition);
         }
 
         [Fact]

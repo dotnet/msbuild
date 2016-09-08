@@ -1198,9 +1198,26 @@ namespace Microsoft.Build.Evaluation
                 return new List<ProvenanceResult>();
             }
 
-            var itemElementsAbove = GetItemElementsAboveItem(_data.EvaluatedItemElements, item);
+            var itemElementsAbove = GetItemElementsThatMightAffectItem(_data.EvaluatedItemElements, item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
+        }
+
+        private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
+        {
+            return evaluatedItemElements
+                // Skip until we encounter the element that produced the item because
+                // there are no item operations that can affect future items
+                .SkipWhile((i => i != item.Xml))
+                // leave out the item element that produced the item
+                .Skip(1)
+                .Where(itemElement =>
+                    itemElement.ItemType.Equals(item.ItemType) &&
+                    // other includes cannot affect the current item
+                    itemElement.IncludeLocation == null &&
+                    // any remove that matches this item will cause the ProjectItem to not be produced in the first place
+                    // all other removes do not apply
+                    itemElement.RemoveLocation == null);
         }
 
         private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
