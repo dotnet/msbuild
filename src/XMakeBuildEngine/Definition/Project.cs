@@ -1085,20 +1085,6 @@ namespace Microsoft.Build.Evaluation
             return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
-        /// <summary>
-        /// Overload of <see cref="Project.GetAllGlobs()"/>
-        /// </summary>
-        /// <param name="item">Confine search to item elements appearing above this item, inclusively.</param>
-        public List<GlobResult> GetAllGlobs(ProjectItem item)
-        {
-            if (item == null)
-            {
-                return new List<GlobResult>();
-            }
-
-            return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
-        }
-
         private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
         {
             return projectItemElements.SelectMany(GetAllGlobs).ToList();
@@ -1223,17 +1209,6 @@ namespace Microsoft.Build.Evaluation
         private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
         {
             return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
-        }
-
-        private static List<ProjectItemElement> GetItemElementsAboveItem(IEnumerable<ProjectItemElement> itemElements, ProjectItem item)
-        {
-            var itemElementsAbove = itemElements
-                .Where(i => i.ItemType.Equals(item.ItemType))
-                .TakeWhile(i => i != item.Xml)
-                .ToList();
-
-            itemElementsAbove.Add(item.Xml);
-            return itemElementsAbove;
         }
 
         private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )

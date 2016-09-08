@@ -3010,8 +3010,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             AssertGlobResult(expected, project, "");
             AssertGlobResult(expected, project, null);
-
-            AssertGlobResult(expected, project, null, 2);
         }
 
         [Fact]
@@ -3060,29 +3058,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             AssertGlobResult(expected, project, "A");
             AssertGlobResult(new GlobResultList(), project, "NotExistant");
-        }
-
-        [Fact]
-        public void GetAllGlobsShouldFindGlobsByProjectItem()
-        {
-            var project =
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    <A Include=`*.1` Exclude=`1`/>
-                    <A Include=`*.2;marker` Exclude=`2`/>
-                    <B Include=`a;**;b;c;*` Exclude=`B`/>
-                    <A Include=`*.3;` Exclude=`3`/>
-                  </ItemGroup>
-                </Project>
-                ";
-
-            var expected = new GlobResultList
-            {
-                Tuple.Create("A", "*.1", new[] { "1" }.ToImmutableHashSet()),
-                Tuple.Create("A", "*.2", new[] { "2" }.ToImmutableHashSet()),
-            };
-
-            AssertGlobResult(expected, project, "marker", 0);
         }
 
         [Fact]
@@ -3138,15 +3113,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private static void AssertGlobResult(GlobResultList expected, string project, string itemType)
         {
             var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType) ;
-            AssertGlobResultsEqual(expected, globs);
-        }
-        private static void AssertGlobResult(GlobResultList expected, string project, string itemValue, int position)
-        {
-            Project p;
-            ProjectItem item;
-            GetProjectAndItemAtPosition(project, itemValue, position, out p, out item);
-
-            var globs = p.GetAllGlobs(item);
             AssertGlobResultsEqual(expected, globs);
         }
 
