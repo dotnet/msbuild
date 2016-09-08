@@ -14,6 +14,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     TODO: The VB compiler outputs foo.dll.exe when the output type is Exe even when we pass in /o:foo.dll. 
     We workaround that here by changing the extension. However we really should change the compiler (maybe add a flag).
+    https://github.com/dotnet/roslyn/issues/13681 tracks the compiler bug.
     -->
   <PropertyGroup>
     <TargetsTriggeredByCompilation Condition="'($OutputType)' == 'exe'">ChangeExtensionOfOutputAssembly;$(TargetsTriggeredByCompilation)</TargetsTriggeredByCompilation>
