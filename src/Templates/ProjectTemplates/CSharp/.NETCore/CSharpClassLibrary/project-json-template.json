@@ -4,7 +4,7 @@
     "Microsoft.NETCore.Sdk": "$$buildversion$$"
   },
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.4": {
     }
   }
 }
