@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.NETCore.Web</id>
+    <summary>The MSBuild targets and properties for building .NET Core Web projects.</summary>
+    <description>
+      The MSBuild targets and properties for building .NET Core Web projects.
+    </description>
+    <language>en-US</language>
+    <version>$version$</version>
+    <authors>dotnet</authors>
+    <projectUrl>http://dot.net</projectUrl>
+    <dependencies>
+	  <dependency id="Microsoft.NETCore.Sdk" version="$version$" />
+	</dependencies>	
+  </metadata>
+  <files>
+    <file src="WebPackagesLayout\**" />
+  </files>
+
+</package>
