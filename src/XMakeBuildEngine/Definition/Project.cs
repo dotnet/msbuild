@@ -6,8 +6,8 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -1078,6 +1078,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">Confine search to item elements of this type</param>
         public List<GlobResult> GetAllGlobs(string itemType)
         {
+            if (string.IsNullOrEmpty(itemType))
+            {
+                return new List<GlobResult>();
+            }
             return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
@@ -1087,6 +1091,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="item">Confine search to item elements appearing above this item, inclusively.</param>
         public List<GlobResult> GetAllGlobs(ProjectItem item)
         {
+            if (item == null)
+            {
+                return new List<GlobResult>();
+            }
+
             return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
         }
 
@@ -1097,28 +1106,21 @@ namespace Microsoft.Build.Evaluation
 
         private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
         {
-            Func<string, IElementLocation, HashSet<string>> expandItemSpecIntoFragments = (s, l) =>
-                {
-                    var expandedItemSpec = _data.Expander.ExpandIntoStringListLeaveEscaped(s, ExpanderOptions.ExpandProperties, l);
+            var includeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
+            var excludeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
 
-                    // don't care about duplicates
-                    var set = new HashSet<string>(expandedItemSpec);
+            var excludeSet =
+                new Lazy<IEnumerable<string>>(
+                    () =>
+                        excludeItemspec.Fragments.Where(
+                            // take out item references, we can't reason about them
+                            f => !(f is ItemExpressionFragment<ProjectProperty, ProjectItem>))
+                            .Select(f => f.ItemSpecFragment)
+                            .ToImmutableHashSet());
 
-                    // take out item references, we can't reason about them
-                    set.RemoveWhere(IsItemReferenceFragment);
-
-                    return set;
-                };
-
-            var includeFragments = expandItemSpecIntoFragments(itemElement.Include, itemElement.IncludeLocation);
-            var excludeFragments = expandItemSpecIntoFragments(itemElement.Exclude, itemElement.ExcludeLocation);
-
-            foreach (var itemFragment in includeFragments)
+            foreach (var globFragment in includeItemspec.Fragments.Where(f => f is GlobFragment))
             {
-                if (IsGlobFragment(itemFragment))
-                {
-                    yield return new GlobResult(itemElement, itemFragment, excludeFragments);
-                }
+                yield return new GlobResult(itemElement, globFragment.ItemSpecFragment, excludeSet.Value);
             }
         }
 
@@ -1191,6 +1193,11 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(ProjectItem item)
         {
+            if (item == null)
+            {
+                return new List<ProvenanceResult>();
+            }
+
             var itemElementsAbove = GetItemElementsAboveItem(_data.EvaluatedItemElements, item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
@@ -1214,6 +1221,11 @@ namespace Microsoft.Build.Evaluation
 
         private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
         {
+            if (string.IsNullOrEmpty(itemToMatch))
+            {
+                return new List<ProvenanceResult>();
+            }
+
             return
                 projectItemElements.Select(i => ComputeProvenanceResult(itemToMatch, i))
                     .Where(r => r != null)
@@ -1222,8 +1234,6 @@ namespace Microsoft.Build.Evaluation
 
         private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
         {
-            Func<IElementLocation, Func<string, ExpanderOptions, string>> expandForXmlLocation = (l) => (s, o) => _data.Expander.ExpandIntoStringLeaveEscaped(s, o, l);
-
             Func<string, IElementLocation, Operation, ProvenanceResult> singleItemSpecProvenance = (itemSpec, elementLocation, operation) =>
             {
                 if (elementLocation == null)
@@ -1231,7 +1241,9 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                var result = ComputeProvenanceResult(itemToMatch, itemSpec, expandForXmlLocation(elementLocation));
+                Provenance provenance;
+                var matchOccurrences = ItemMatchesInSpecCompareViaExpander(itemToMatch, itemSpec, elementLocation, _data.Expander, out provenance);
+                var result = matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
 
                 return result?.Item2 > 0
                     ? new ProvenanceResult(itemElement, operation, result.Item1, result.Item2)
@@ -1265,14 +1277,6 @@ namespace Microsoft.Build.Evaluation
             return provenanceProviders.Select(provider => provider()).FirstOrDefault(provenanceResult => provenanceResult != null);
         }
 
-        private Tuple<Provenance, int> ComputeProvenanceResult(string itemToMatch, string itemSpecToLookIn, Func<string, ExpanderOptions, string> expand)
-        {
-            Provenance provenance;
-            var matchOccurrences = ItemMatchesInSpecCompareViaExpander(itemToMatch, itemSpecToLookIn, expand, out provenance);
-
-            return matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
-        }
-
         /// <summary>
         /// Since:
         ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
@@ -1280,7 +1284,7 @@ namespace Microsoft.Build.Evaluation
         /// 
         /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
         /// </summary>
-        private int ItemMatchesInSpecCompareViaExpander(string itemToMatch, string itemSpec, Func<string, ExpanderOptions, string> expand, out Provenance provenance)
+        private int ItemMatchesInSpecCompareViaExpander(string itemToMatch, string itemSpec, IElementLocation elementLocation, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
         {
             if (string.IsNullOrEmpty(itemSpec))
             {
@@ -1289,96 +1293,57 @@ namespace Microsoft.Build.Evaluation
             }
 
             // look into the itemspec as if it were expanded by the Expander
-            Provenance provenanceFromExpandedPropertiesAndItems;
-            var expandedMatches = ItemMatchesInSpec(itemToMatch, expand(itemSpec, ExpanderOptions.ExpandPropertiesAndItems), out provenanceFromExpandedPropertiesAndItems);
+            Provenance provenanceFromExpandedProperties;
+            var itemSpecWithExpandedProperties = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: true);
+            var expandedMatches = ItemMatchesInSpec(itemToMatch, itemSpecWithExpandedProperties, out provenanceFromExpandedProperties);
 
             // look into the raw itemspec
-            Provenance provenanceFromNonExpandedString;
-            var nonExpandedMatches = ItemMatchesInSpec(itemToMatch, itemSpec, out provenanceFromNonExpandedString);
+            Provenance provenanceFromNonExpandedProperties;
+            var itemSpecWithoutExpandedProperties = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: false);
+            var nonExpandedMatches = ItemMatchesInSpec(itemToMatch, itemSpecWithoutExpandedProperties, out provenanceFromNonExpandedProperties);
 
             if (expandedMatches > nonExpandedMatches)
             {
-                // return the number of occurences when properties AND items are expanded to get the correct occurence count
-
-                // return the provenance WITHOUT item expansion. Otherwise the items coming from a referenced item get interpreted as StringLiteral
-                // include="*.cs;@(Compile)" needs to return Inconclusive|Glob and not Inconclusive|Glob|StringLiteral
-                Provenance provenanceFromExpandedProperties;
-                ItemMatchesInSpec(itemToMatch, expand(itemSpec, ExpanderOptions.ExpandProperties), out provenanceFromExpandedProperties);
+                // return the number of occurences when properties are expanded to get the correct occurence count
 
                 provenance = Provenance.Inconclusive | provenanceFromExpandedProperties;
                 return expandedMatches;
             }
             else
             {
-                provenance = provenanceFromNonExpandedString;
+                provenance = provenanceFromNonExpandedProperties;
                 return nonExpandedMatches;
             }
         }
 
-        private int ItemMatchesInSpec(string itemToMatch, string itemSpec, out Provenance provenance)
+        private int ItemMatchesInSpec(string itemToMatch, ItemSpec<ProjectProperty, ProjectItem> itemSpec, out Provenance provenance)
         {
             provenance = Provenance.Undefined;
 
             var occurrences = 0;
 
-            if (string.IsNullOrEmpty(itemSpec))
+            var fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out occurrences);
+            foreach (var fragment in fragmentsMatchingItem)
             {
-                return occurrences;
-            }
-
-            foreach (var itemFragment in ExpressionShredder.SplitSemiColonSeparatedList(itemSpec))
-            {
-                if (IsPropertyReferenceFragment(itemFragment) || IsItemReferenceFragment(itemFragment))
-                {
-                    continue;
-                }
-
-                if (IsGlobFragment(itemFragment) && ItemMatchesGlob(itemFragment, itemToMatch))
-                {
-                    provenance |= Provenance.Glob;
-                    occurrences++;
-                }
-
-                if (ItemMatchesStringLiteral(itemToMatch, itemFragment))
+                if (fragment is ValueFragment)
                 {
                     provenance |= Provenance.StringLiteral;
-                    occurrences++;
+                }
+                else if (fragment is GlobFragment)
+                {
+                    provenance |= Provenance.Glob;
+                }
+                else if (fragment is ItemExpressionFragment<ProjectProperty, ProjectItem>)
+                {
+                    provenance |= Provenance.Inconclusive;
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
                 }
             }
 
             return occurrences;
-        }
-
-        private bool ItemMatchesStringLiteral(string itemToMatch, string itemFragment)
-        {
-            var thisProjectPath = _data.Directory;
-
-            // It is either a direct string match or the two strings refer to the same file, relative to the project directory
-            return itemToMatch.Equals(itemFragment) || FileUtilities.ComparePathsNoThrow(itemToMatch, itemFragment, thisProjectPath);
-        }
-
-        private static bool ItemMatchesGlob(string globPattern, string file)
-        {
-            var match = FileMatcher.FileMatch(globPattern, file);
-            return match.isLegalFileSpec && match.isMatch;
-        }
-
-        private static bool IsGlobFragment(string itemFragment)
-        {
-            var containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(itemFragment);
-            var containsRealWildcards = FileMatcher.HasWildcards(itemFragment);
-
-            return !containsEscapedWildcards && containsRealWildcards;
-        }
-
-        private static bool IsItemReferenceFragment(string itemFragment)
-        {
-            return itemFragment.Contains("@(");
-        }
-
-        private static bool IsPropertyReferenceFragment(string itemFragment)
-        {
-            return itemFragment.Contains("$(");
         }
 
         /// <summary>
@@ -3505,10 +3470,10 @@ namespace Microsoft.Build.Evaluation
     public class GlobResult
     {
         public string Glob { get; private set; }
-        public ISet<string> Excludes{ get; private set; }
+        public IEnumerable<string> Excludes{ get; private set; }
         public ProjectItemElement ItemElement { get; private set; }
 
-        public GlobResult(ProjectItemElement itemElement, string glob, ISet<string> excludes)
+        public GlobResult(ProjectItemElement itemElement, string glob, IEnumerable<string> excludes)
         {
             ItemElement = itemElement;
             Glob = glob;

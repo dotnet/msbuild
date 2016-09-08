@@ -1,14 +1,11 @@
-﻿using Microsoft.Build.Collections;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using System.Collections.Immutable;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
@@ -61,14 +58,14 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                foreach (var operation in _operations)
+                foreach (var fragment in _itemSpec.Fragments)
                 {
-                    if (operation.Item1 == ItemOperationType.Expression)
+                    if (fragment is ItemExpressionFragment<P, I>)
                     {
                         // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                         bool throwaway;
                         var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            (ExpressionShredder.ItemExpressionCapture) operation.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
+                            ((ItemExpressionFragment<P, I>)fragment).Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
                             false /* do not include null expansion results */, out throwaway, _itemElement.IncludeLocation);
 
                         if (excludeTester != null)
@@ -80,9 +77,9 @@ namespace Microsoft.Build.Evaluation
                             itemsToAdd.AddRange(itemsFromExpression);
                         }
                     }
-                    else if (operation.Item1 == ItemOperationType.Value)
+                    else if (fragment is ValueFragment)
                     {
-                        string value = (string)operation.Item2;
+                        string value = ((ValueFragment)fragment).ItemSpecFragment;
 
                         if (excludeTester == null ||
                             !excludeTester.Value(value))
@@ -91,9 +88,9 @@ namespace Microsoft.Build.Evaluation
                             itemsToAdd.Add(item);
                         }
                     }
-                    else if (operation.Item1 == ItemOperationType.Glob)
+                    else if (fragment is GlobFragment)
                     {
-                        string glob = (string)operation.Item2;
+                        string glob = ((GlobFragment)fragment).ItemSpecFragment;
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob,
                             excludePatterns.Count > 0 ? (IEnumerable<string>) excludePatterns.Concat(globsToIgnore) : globsToIgnore);
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
@@ -103,7 +100,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        throw new InvalidOperationException(operation.Item1.ToString());
+                        throw new InvalidOperationException(fragment.GetType().ToString());
                     }
                 }
 

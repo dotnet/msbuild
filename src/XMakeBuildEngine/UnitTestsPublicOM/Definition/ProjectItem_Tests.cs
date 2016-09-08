@@ -1536,6 +1536,23 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude))); ;
         }
 
+        [Theory]
+        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @"1.foo;.\2.foo;.\.\3.foo")]
+        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @".\1.foo;.\.\2.foo;.\.\.\3.foo")]
+        public void RemoveShouldMatchNonCanonicPaths(string include, string remove)
+        {
+            var content = @"
+                            <i Include='" + include + @"'>
+                                <m1>m1_contents</m1>
+                                <m2>m2_contents</m2>
+                            </i>
+                            <i Remove='" + remove + @"'/>";
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
+
+            Assert.Empty(items);
+        }
+
         [Fact]
         public void UpdateMetadataShouldAddOrReplace()
         {
@@ -1889,14 +1906,43 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void UpdateShouldUseCaseInsensitiveMatching()
+        public void UpdateAndRemoveShouldUseCaseInsensitiveMatching()
         {
             var content = @"
-                            <i Include='x'>
+                            <i Include='x;y'>
                                 <m1>m1_contents</m1>
                                 <m2>m2_contents</m2>
                             </i>
                             <i Update='X'>
+                                <m1>m1_updated</m1>
+                                <m2>m2_updated</m2>
+                            </i>
+                            <i Remove='Y'/>";
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
+
+            Assert.Equal(1, items.Count);
+
+            var expectedUpdated = new Dictionary<string, string>
+            {
+                {"m1", "m1_updated"},
+                {"m2", "m2_updated"},
+            };
+
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
+        }
+
+        [Theory]
+        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @"1.foo;.\2.foo;.\.\3.foo")]
+        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @".\1.foo;.\.\2.foo;.\.\.\3.foo")]
+        public void UpdateShouldMatchNonCanonicPaths(string include, string update)
+        {
+            var content = @"
+                            <i Include='" + include + @"'>
+                                <m1>m1_contents</m1>
+                                <m2>m2_contents</m2>
+                            </i>
+                            <i Update='" + update + @"'>
                                 <m1>m1_updated</m1>
                                 <m2>m2_updated</m2>
                             </i>";
@@ -1909,7 +1955,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m2", "m2_updated"},
             };
 
-            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
+            foreach (var item in items)
+            {
+                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, item);
+            }
         }
 
         private static List<ProjectItem> GetItemsFromFragmentWithGlobs(out string rootDir, string itemGroupFragment, params string[] globFiles)

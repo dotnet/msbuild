@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -24,16 +28,12 @@ namespace Microsoft.Build.Evaluation
 
             public ImmutableHashSet<string>.Builder GetRemovedGlobs()
             {
-                var ret = ImmutableHashSet.CreateBuilder<string>();
-                foreach (var operation in _operations)
-                {
-                    if (operation.Item1 == ItemOperationType.Glob)
-                    {
-                        ret.Add((string)operation.Item2);
-                    }
-                }
+                var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment);
+                var builder = ImmutableHashSet.CreateBuilder<string>();
 
-                return ret;
+                builder.UnionWith(globs);
+
+                return builder;
             }
         }
     }
