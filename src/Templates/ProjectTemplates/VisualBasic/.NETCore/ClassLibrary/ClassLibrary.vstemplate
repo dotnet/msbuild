@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
   <TemplateData>
-    <Name Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="3"/>
-    <Description Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="4"/>
-    <Icon>ClassLibrary.png</Icon>
+    <Name Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="6"/>
+    <Description Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="7"/>
+    <Icon Package="{164B10B9-B200-11D0-8C61-00A0C91E29D5}" ID="4500" />
     <ProjectType>VisualBasic</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
-    <SortOrder>1</SortOrder>
+    <SortOrder>21</SortOrder>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <TemplateID>Microsoft.VisualBasic.NETCore.ClassLibrary</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>

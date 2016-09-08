@@ -59,9 +59,6 @@
     <None Include="Class1.vb" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassLibrary.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

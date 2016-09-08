@@ -1,3 +1,8 @@
-﻿class Class1
+﻿using System;
+
+namespace $safeprojectname$
 {
+    public class Class1
+    {
+    }
 }

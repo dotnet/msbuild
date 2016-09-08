@@ -3,7 +3,7 @@
   
   <PropertyGroup>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
