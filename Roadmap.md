@@ -19,11 +19,12 @@ This version of MSBuild is the version we ship with Visual Studio (previously sh
 * Improved incremental build with help of fully deterministic Roslyn builds. [post Update 1 time-frame]
 
 ##Technical Debt
-* Merge codebases (xplat, master, and internal branches). Introduce compiler constants for CoreCLR feature flags.
+* Merge codebases (xplat, master, and internal branches). [RC time-frame]
+* Introduce compiler constants for CoreCLR feature flags.
 * Ship MSBuild for Visual Studio out of GitHub sources. [Visual Studio vNext time-frame]
 
 ##Telemetry
-* Gather additional data on usage and issues (hangs in Visual Studio, etc). [post Update 1 time-frame]
+* Gather additional data on usage and issues (hangs in Visual Studio, etc). [tentatively RTM time-frame]
 
 #Branch Strategy
 * `xplat`: Work for cross-platform support, primarily focused on CoreCLR.  In the medium term, we should build both CoreCLR and Desktop MSBuild from the same branch and merge this branch into `master`.
