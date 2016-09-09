@@ -1935,12 +1935,11 @@ namespace Microsoft.Build.Construction
             {
                 try
                 {
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
-                    var stream = new StreamReader(fullPath);
-
+                    using (var stream = new StreamReader(fullPath))
                     using (XmlTextReader xtr = new XmlTextReader(stream))
                     {
                         // Start the reader so it has an idea of what the encoding is.

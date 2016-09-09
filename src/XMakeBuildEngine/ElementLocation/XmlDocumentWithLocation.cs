@@ -169,13 +169,12 @@ namespace Microsoft.Build.Construction
 
             _fullPath = fullPath;
 
-            var stream = new StreamReader(fullPath);
-
             // For security purposes we need to disable DTD processing when loading an XML file
             XmlReaderSettings rs = new XmlReaderSettings();
             rs.DtdProcessing = DtdProcessing.Ignore;
 
-            using (XmlReader xmlReader = XmlReader.Create(stream, rs))
+            using (var stream = new StreamReader(fullPath))
+            using(XmlReader xmlReader = XmlReader.Create(stream, rs))
             {
                 this.Load(xmlReader);
             }
