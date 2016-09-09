@@ -147,34 +147,64 @@ namespace Microsoft.Build.Evaluation
 
             public ImmutableList<ItemData>.Builder GetItems(ImmutableHashSet<string> globsToIgnore)
             {
-                ImmutableList<ItemData>.Builder items;
-                if (_previous == null)
-                {
-                    items = ImmutableList.CreateBuilder<ItemData>();
-                }
-                else
-                {
-                    var globsToIgnoreForPreviousOperations = globsToIgnore;
+                //  TODO: Check for cached results
 
+                return GetItemsImplementation(this, globsToIgnore);
+            }
+
+            static ImmutableList<ItemData>.Builder GetItemsImplementation(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
+            {
+                Stack<LazyItemList> itemListStack = new Stack<LazyItemList>();
+
+                //  Keep a separate stack of lists of globs to ignore that only gets modified for Remove operations
+                Stack<ImmutableHashSet<string>> globsToIgnoreStack = null;
+
+                for (var currentList = lazyItemList; currentList != null; currentList = currentList._previous)
+                {
                     //  If this is a remove operation, then add any globs that will be removed
-                    //  to the list of globs to ignore in previous operations
-                    var removeOperation = _operation as RemoveOperation;
+                    //  to a list of globs to ignore in previous operations
+                    var removeOperation = currentList._operation as RemoveOperation;
                     if (removeOperation != null)
                     {
-                        var globsToIgnoreBuilder = removeOperation.GetRemovedGlobs();
-                        foreach (var globToRemove in globsToIgnoreForPreviousOperations)
+                        if (globsToIgnoreStack == null)
                         {
-                            globsToIgnoreBuilder.Add(globToRemove);
+                            globsToIgnoreStack = new Stack<ImmutableHashSet<string>>();
                         }
-                        globsToIgnoreForPreviousOperations = globsToIgnoreBuilder.ToImmutable();
+
+                        var globsToIgnoreFromFutureOperations = globsToIgnoreStack.Count > 0 ? globsToIgnoreStack.Peek() : globsToIgnore;
+
+                        var globsToIgnoreForPreviousOperations = removeOperation.GetRemovedGlobs();
+                        foreach (var globToRemove in globsToIgnoreFromFutureOperations)
+                        {
+                            globsToIgnoreForPreviousOperations.Add(globToRemove);
+                        }
+
+                        globsToIgnoreStack.Push(globsToIgnoreForPreviousOperations.ToImmutable());
                     }
 
-                    items = _previous.GetItems(globsToIgnoreForPreviousOperations);
+                    itemListStack.Push(currentList);
                 }
 
-                _operation.Apply(items, globsToIgnore);
+                ImmutableList<ItemData>.Builder items = ImmutableList.CreateBuilder<ItemData>();
+                ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack == null ? globsToIgnore : globsToIgnoreStack.Peek();
 
-                //  TODO: cache result if any globs were executed
+                //  Walk back down the stack of item lists applying operations
+                while (itemListStack.Count > 0)
+                {
+                    var currentList = itemListStack.Pop();
+
+                    //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
+                    //  modified entry off the stack of globs to ignore
+                    var removeOperation = currentList._operation as RemoveOperation;
+                    if (removeOperation != null)
+                    {
+                        globsToIgnoreStack.Pop();
+                        currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? globsToIgnore : globsToIgnoreStack.Peek();
+                    }
+
+                    currentList._operation.Apply(items, currentGlobsToIgnore);
+                    //  TODO: Cache result of operation (possibly only if it involved executing globs)
+                }
 
                 return items;
             }
