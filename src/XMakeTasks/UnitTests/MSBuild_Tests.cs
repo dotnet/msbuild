@@ -324,7 +324,11 @@ namespace Microsoft.Build.UnitTests
         /// However, it's a situation where the project author doesn't have control over the
         /// property value and so he can't escape it himself.
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/259")]
+#else
+        [Fact]
+#endif
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
