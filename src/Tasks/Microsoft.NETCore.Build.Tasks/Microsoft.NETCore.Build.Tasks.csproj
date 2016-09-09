@@ -41,6 +41,18 @@
     <None Include="build\netstandard1.0\Microsoft.NETCore.GenerateAssemblyInfo.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.VisualBasic.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.CSharp.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.VisualBasic.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.CSharp.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

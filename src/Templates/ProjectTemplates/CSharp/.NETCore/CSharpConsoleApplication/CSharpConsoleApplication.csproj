@@ -11,22 +11,23 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{F535071D-F755-403A-AB63-468A0F547702}</ProjectGuid>
+    <ProjectGuid>{0C52951F-4EEF-4F2F-B587-0BCF6004C459}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Microsoft.VisualStudio</RootNamespace>
-    <AssemblyName>Microsoft.VisualStudio.ProjectSystem.CSharp.Templates</AssemblyName>
+    <AssemblyName>CSharpConsoleApplication</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
-    <VSSDKTargetPlatformRegRootSuffix>RoslynDev</VSSDKTargetPlatformRegRootSuffix>
     <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
     <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
     <ImportVSSDKTargets>true</ImportVSSDKTargets>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CreateVsixContainer>false</CreateVsixContainer>
+    <DeployExtension>false</DeployExtension>
+    <DeployVSTemplates>false</DeployVSTemplates>
+    <CopyVsixManifestToOutput>false</CopyVsixManifestToOutput>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <NoDocumentationFile>true</NoDocumentationFile>
     <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
-    <ProjectSystemLayer>VisualStudio</ProjectSystemLayer>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -44,30 +45,24 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProjectTemplates\CSharp\.NETCore\CSharpConsoleApplication\CSharpConsoleApplication.csproj">
-      <Project>{0c52951f-4eef-4f2f-b587-0bcf6004c459}</Project>
-      <Name>CSharpConsoleApplication</Name>
-      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
-    <ProjectReference Include="..\ProjectTemplates\CSharp\.NETCore\CSharpClassLibrary\CSharpClassLibrary.csproj">
-      <Project>{a103c9a3-c76c-4a48-b67c-695fd1cb2f15}</Project>
-      <Name>CSharpClassLibrary</Name>
-      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
+    <ProjectJsonTemplate Include="project-json-template.json">
+      <TargetPath>project.json.template</TargetPath>
+    </ProjectJsonTemplate>
+    <None Include="ProjectTemplate.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <VSTemplate Include="ConsoleApplication.vstemplate">
+      <SubType>Designer</SubType>
+    </VSTemplate>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ConsoleApplication.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
-    <None Include="source.extension.vsixmanifest" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ProjectSelector.pkgdef">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectRootDir)build\Targets\Templates.Imports.targets" />

@@ -17,6 +17,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform>AnyCPU</Platform>
 
@@ -25,8 +26,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>$(NoWarn);1701</NoWarn>
   </PropertyGroup>
 
   <!-- User-facing configuration-specific defaults -->
@@ -34,12 +33,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugSymbols>true</DebugSymbols>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <!-- Default settings for .NET Core build logic -->
@@ -69,5 +66,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
   </PropertyGroup>
-
+  
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
 </Project>

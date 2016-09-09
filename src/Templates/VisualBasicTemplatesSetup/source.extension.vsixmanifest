@@ -2,9 +2,9 @@
 <!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="A45AB8EC-B6A9-439E-9473-CB6C62C0C09D" Version="|%CurrentProject%;GetBuildVersion|" Language="en-US" Publisher="Microsoft" />
-    <DisplayName>CSharp templates</DisplayName>
-    <Description xml:space="preserve">CSharp templates</Description>
+    <Identity Id="A40894B6-B035-4BFE-A674-2FF0C582C971" Version="|%CurrentProject%;GetBuildVersion|" Language="en-US" Publisher="Microsoft" />
+    <DisplayName>Visual Basic templates</DisplayName>
+    <Description xml:space="preserve">Visual Basic templates</Description>
   </Metadata>
   <Installation SystemComponent="true" >
     <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.Pro" />
@@ -17,7 +17,7 @@
   </Dependencies>
   <Assets>
     <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="ProjectSelector.pkgdef" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="CSharpConsoleApplication" d:TargetPath="|CSharpConsoleApplication;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="CSharpClassLibrary" d:TargetPath="|CSharpClassLibrary;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="VisualBasicConsoleApplication" d:TargetPath="|VisualBasicConsoleApplication;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="VisualBasicClassLibrary" d:TargetPath="|VisualBasicClassLibrary;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
   </Assets>
 </PackageManifest>
