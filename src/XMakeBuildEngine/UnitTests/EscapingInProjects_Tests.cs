@@ -919,23 +919,23 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Class;!@(foo)'^(Library1`, `Class;!@(foo)'^(Library1\Class;!@(foo)'^(Library1.csproj`, `{0B4B78CC-C752-43C2-BE9A-319D20216129}`
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
                 EndGlobal
                 ";
 
@@ -952,6 +952,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -975,9 +976,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Class1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1016,6 +1017,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1039,9 +1041,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("Class1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1080,6 +1082,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1103,9 +1106,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Class1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1138,6 +1141,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1161,9 +1165,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("Class1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1196,6 +1200,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1219,9 +1224,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Class1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1254,6 +1259,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1277,9 +1283,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("Class1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1312,6 +1318,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1335,9 +1342,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Class;1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1370,6 +1377,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1393,9 +1401,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ObjectModelHelpers.CreateFileInTempProjectDirectory("Class;1.cs", @"
                 namespace ClassLibrary16
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
             ");
 
@@ -1499,13 +1507,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 namespace Console____foo____Application1
                 {
-	                class Program
-	                {
-		                static void Main(string[] args)
-		                {
-			                Class____foo____Library1.Class1 foo = new Class____foo____Library1.Class1();
-		                }
-	                }
+                    class Program
+                    {
+                        static void Main(string[] args)
+                        {
+                            Class____foo____Library1.Class1 foo = new Class____foo____Library1.Class1();
+                        }
+                    }
                 }
                 ");
 
@@ -1566,9 +1574,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 @"
                 namespace Class____foo____Library1
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
                 ");
 
@@ -1670,13 +1678,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 namespace Console____foo____Application1
                 {
-	                class Program
-	                {
-		                static void Main(string[] args)
-		                {
-			                Class____foo____Library1.Class1 foo = new Class____foo____Library1.Class1();
-		                }
-	                }
+                    class Program
+                    {
+                        static void Main(string[] args)
+                        {
+                            Class____foo____Library1.Class1 foo = new Class____foo____Library1.Class1();
+                        }
+                    }
                 }
                 ");
 
@@ -1737,9 +1745,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     @"
                 namespace Class____foo____Library1
                 {
-	                public class Class1
-	                {
-	                }
+                    public class Class1
+                    {
+                    }
                 }
                 ");
 

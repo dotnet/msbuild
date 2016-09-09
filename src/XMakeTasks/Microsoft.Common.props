@@ -32,6 +32,33 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(DirectoryBuildPropsPath)" Condition="'$(ImportDirectoryBuildProps)' == 'true' and exists('$(DirectoryBuildPropsPath)')"/>
 
   <!-- 
+        Prepare to import project extensions which usually come from packages.  Package management systems will create a file at:
+          $(MSBuildProjectExtensionsPath)\$(MSBuildProjectFile).<SomethingUnique>.props
+          
+        Each package management system should use a unique moniker to avoid collisions.  It is a wild-card import so the package
+        management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
+    -->
+  <PropertyGroup>
+    <!--
+            The declaration of $(BaseIntermediateOutputPath) had to be moved up from Microsoft.Common.CurrentVersion.targets
+            in order for the $(MSBuildProjectExtensionsPath) to use it as a default.
+        -->
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">obj\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath Condition="'$(MSBuildProjectExtensionsPath)' == '' ">$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <!--
+        Import paths that are relative default to be relative to the importing file.  However, since MSBuildExtensionsPath
+        defaults to BaseIntermediateOutputPath we expect it to be relative to the project directory.  So if the path is relative
+        it needs to be made absolute based on the project directory.
+      -->
+    <MSBuildProjectExtensionsPath Condition="'$([System.IO.Path]::IsPathRooted($(MSBuildProjectExtensionsPath)))' == 'false'">$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(MSBuildProjectExtensionsPath)'))</MSBuildProjectExtensionsPath>
+    <MSBuildProjectExtensionsPath Condition="!HasTrailingSlash('$(MSBuildProjectExtensionsPath)')">$(MSBuildProjectExtensionsPath)\</MSBuildProjectExtensionsPath>
+    <ImportProjectExtensionProps Condition="'$(ImportProjectExtensionProps)' == ''">true</ImportProjectExtensionProps>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.props" Condition="'$(ImportProjectExtensionProps)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
+
+  <!-- 
         Import wildcard "ImportBefore" props files if we're actually in a 12.0+ project (rather than a project being
         treated as 4.0)
     -->
