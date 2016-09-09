@@ -1,4 +1,13 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    Include the output assembly in the <FilesToSign /> item group if project being built is not a test project.
+  -->
+  <ItemGroup Condition="'$(IsTestProject)' != 'true'">
+    <FilesToSign Include="$(OutDir)\$(AssemblyName)$(TargetExt)">
+      <Authenticode>Microsoft</Authenticode>
+      <StrongName>StrongName</StrongName>
+    </FilesToSign>
+  </ItemGroup>
   <Import Project="..\dir.targets" />
 
   <PropertyGroup>
