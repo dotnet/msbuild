@@ -1085,20 +1085,6 @@ namespace Microsoft.Build.Evaluation
             return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
-        /// <summary>
-        /// Overload of <see cref="Project.GetAllGlobs()"/>
-        /// </summary>
-        /// <param name="item">Confine search to item elements appearing above this item, inclusively.</param>
-        public List<GlobResult> GetAllGlobs(ProjectItem item)
-        {
-            if (item == null)
-            {
-                return new List<GlobResult>();
-            }
-
-            return GetAllGlobs(GetItemElementsAboveItem(_data.EvaluatedItemElements, item));
-        }
-
         private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
         {
             return projectItemElements.SelectMany(GetAllGlobs).ToList();
@@ -1198,25 +1184,31 @@ namespace Microsoft.Build.Evaluation
                 return new List<ProvenanceResult>();
             }
 
-            var itemElementsAbove = GetItemElementsAboveItem(_data.EvaluatedItemElements, item);
+            var itemElementsAbove = GetItemElementsThatMightAffectItem(_data.EvaluatedItemElements, item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
+        }
+
+        private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
+        {
+            return evaluatedItemElements
+                // Skip until we encounter the element that produced the item because
+                // there are no item operations that can affect future items
+                .SkipWhile((i => i != item.Xml))
+                // leave out the item element that produced the item
+                .Skip(1)
+                .Where(itemElement =>
+                    itemElement.ItemType.Equals(item.ItemType) &&
+                    // other includes cannot affect the current item
+                    itemElement.IncludeLocation == null &&
+                    // any remove that matches this item will cause the ProjectItem to not be produced in the first place
+                    // all other removes do not apply
+                    itemElement.RemoveLocation == null);
         }
 
         private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
         {
             return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
-        }
-
-        private static List<ProjectItemElement> GetItemElementsAboveItem(IEnumerable<ProjectItemElement> itemElements, ProjectItem item)
-        {
-            var itemElementsAbove = itemElements
-                .Where(i => i.ItemType.Equals(item.ItemType))
-                .TakeWhile(i => i != item.Xml)
-                .ToList();
-
-            itemElementsAbove.Add(item.Xml);
-            return itemElementsAbove;
         }
 
         private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
