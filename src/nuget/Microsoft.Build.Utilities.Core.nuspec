@@ -23,5 +23,21 @@
   </metadata>
   <files>
     <file src="Microsoft.Build.Utilities.Core.dll" target="lib\net46" />
+
+    <!-- Satellite assemblies -->
+    <file src="cs\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\cs" />
+    <file src="de\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\de" />
+    <file src="en\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\en" />
+    <file src="es\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\es" />
+    <file src="fr\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\fr" />
+    <file src="it\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\it" />
+    <file src="ja\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\ja" />
+    <file src="ko\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\ko" />
+    <file src="pl\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\pl" />
+    <file src="pt\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\pt" />
+    <file src="ru\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\ru" />
+    <file src="tr\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\tr" />
+    <file src="zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\zh-Hans" />
+    <file src="zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" target="lib\net46\zh-Hant" />
   </files>
 </package>
