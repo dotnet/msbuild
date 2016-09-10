@@ -527,9 +527,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" })]
         public void IncludeExcludeWithEscapedCharacters(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
-            //todo run the test twice with slashes and back-slashes when fixing https://github.com/Microsoft/msbuild/issues/724
-            var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
-            Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
+            TestIncludeExclude(projectContents, includeString, excludeString, inputFiles, expectedInclude);
         }
 
         [Theory]
@@ -597,10 +595,27 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             })]
         public void ExcludeVectorWithWildCards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
-            //todo run the test twice with slashes and back-slashes when fixing https://github.com/Microsoft/msbuild/issues/724
-            var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
-            Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
+            TestIncludeExclude(projectContents, includeString, excludeString, inputFiles, expectedInclude);
         }
+
+        private static void TestIncludeExclude(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        {
+            Action<string, string> runTest = (include, exclude) =>
+            {
+                var formattedProjectContents = string.Format(projectContents, include, exclude);
+                Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
+            };
+
+            var includeWithForwardSlash = ToForwardSlash(includeString);
+            var excludeWithForwardSlash = ToForwardSlash(excludeString);
+
+            runTest(includeString, excludeString);
+            runTest(includeWithForwardSlash, excludeWithForwardSlash);
+            runTest(includeString, excludeWithForwardSlash);
+            runTest(includeWithForwardSlash, excludeString);
+        }
+
+        private static string ToForwardSlash(string s) => s.Replace("\\", "/");
 
         /// <summary>
         /// Expression like @(x) should clone metadata, but metadata should still point at the original XML objects
