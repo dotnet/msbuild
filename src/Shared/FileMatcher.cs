@@ -29,7 +29,9 @@ namespace Microsoft.Build.Shared
 
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
-        internal static readonly char[] directorySeparatorCharacters = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+        // on OSX both System.IO.Path separators are '/'
+        internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
         internal static readonly GetFileSystemEntries s_defaultGetFileSystemEntries = new GetFileSystemEntries(GetAccessibleFileSystemEntries);
         private static readonly DirectoryExists s_defaultDirectoryExists = new DirectoryExists(Directory.Exists);
 
@@ -1452,7 +1454,7 @@ namespace Microsoft.Build.Shared
             // The double trim fixes https://github.com/Microsoft/msbuild/issues/917
             // System.IO does not leave trailing slashes in directory enumerations.
             // Since this string will be matched against System.IO directory enumerations, both need to agree on trailing slashes
-            result.BaseDirectory = fixedDirectoryPart.TrimEnd(Path.AltDirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
+            result.BaseDirectory = fixedDirectoryPart.TrimEnd('/', '\\');
             result.RemainingWildcardDirectory = wildcardDirectoryPart;
 
             return SearchAction.RunSearch;
