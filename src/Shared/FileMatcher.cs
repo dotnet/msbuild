@@ -577,7 +577,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        struct FileSearchRecursionResult
+        struct RecursiveStepResult
         {
             public string[] Files;
             public string[] Subdirs;
@@ -642,7 +642,7 @@ namespace Microsoft.Build.Shared
         /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Assumes no trailing slashes</param>
         private static void GetFilesRecursive
         (
-            System.Collections.IList listOfFiles,
+            IList<string> listOfFiles,
             RecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
@@ -686,16 +686,16 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            FileSearchRecursionResult nextStep = GetFilesRecursiveStep(
+            RecursiveStepResult nextStep = GetFilesRecursiveStep(
                 recursionState,
                 projectDirectory,
                 stripProjectDirectory,
                 getFileSystemEntries);
 
-            FileSearchRecursionResult[] excludeNextSteps = null;
+            RecursiveStepResult[] excludeNextSteps = null;
             if (searchesToExclude != null)
             {
-                excludeNextSteps = new FileSearchRecursionResult[searchesToExclude.Count];
+                excludeNextSteps = new RecursiveStepResult[searchesToExclude.Count];
                 for (int i = 0; i < searchesToExclude.Count; i++)
                 {
                     excludeNextSteps[i] = GetFilesRecursiveStep(
@@ -749,6 +749,7 @@ namespace Microsoft.Build.Shared
                         for (int i = 0; i < excludeNextSteps.Length; i++)
                         {
                             if (excludeNextSteps[i].Subdirs != null &&
+                                // file system assumption on case sensitivity: https://github.com/Microsoft/msbuild/issues/781
                                 excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir.Equals(subdir, StringComparison.Ordinal)))
                             {
                                 RecursionState thisExcludeStep = searchesToExclude[i];
@@ -776,12 +777,19 @@ namespace Microsoft.Build.Shared
 
                     // We never want to strip the project directory from the leaves, because the current 
                     // process directory maybe different
-                    GetFilesRecursive(listOfFiles, newRecursionState, projectDirectory, stripProjectDirectory, getFileSystemEntries, newSearchesToExclude, searchesToExcludeInSubdirs);
+                    GetFilesRecursive(
+                        listOfFiles,
+                        newRecursionState,
+                        projectDirectory,
+                        stripProjectDirectory,
+                        getFileSystemEntries,
+                        newSearchesToExclude,
+                        searchesToExcludeInSubdirs);
                 }
             }
         }
 
-        private static FileSearchRecursionResult GetFilesRecursiveStep
+        private static RecursiveStepResult GetFilesRecursiveStep
         (
             RecursionState recursionState,
             string projectDirectory,
@@ -789,7 +797,7 @@ namespace Microsoft.Build.Shared
             GetFileSystemEntries getFileSystemEntries
         )
         {
-            FileSearchRecursionResult ret = new FileSearchRecursionResult();
+            RecursiveStepResult ret = new RecursiveStepResult();
 
             /*
              * Get the matching files.
@@ -1329,14 +1337,14 @@ namespace Microsoft.Build.Shared
             return files;
         }
 
-        enum GetSearchDataResult
+        enum SearchAction
         {
             RunSearch,
             ReturnFileSpec,
             ReturnEmptyList,
         }
 
-        static GetSearchDataResult GetFileSearchData(string projectDirectoryUnescaped, string filespecUnescaped,
+        static SearchAction GetFileSearchData(string projectDirectoryUnescaped, string filespecUnescaped,
             GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists, out bool stripProjectDirectory,
             out RecursionState result)
         {
@@ -1366,7 +1374,7 @@ namespace Microsoft.Build.Shared
              */
             if (!isLegalFileSpec)
             {
-                return GetSearchDataResult.ReturnFileSpec;
+                return SearchAction.ReturnFileSpec;
             }
 
             // The projectDirectory is not null only if we are running the evaluation from
@@ -1382,7 +1390,7 @@ namespace Microsoft.Build.Shared
                     }
                     catch (ArgumentException)
                     {
-                        return GetSearchDataResult.ReturnEmptyList;
+                        return SearchAction.ReturnEmptyList;
                     }
 
                     stripProjectDirectory = !String.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
@@ -1400,7 +1408,7 @@ namespace Microsoft.Build.Shared
              */
             if (fixedDirectoryPart.Length > 0 && !directoryExists(fixedDirectoryPart))
             {
-                return GetSearchDataResult.ReturnEmptyList;
+                return SearchAction.ReturnEmptyList;
             }
 
             // determine if we need to use the regular expression to match the files
@@ -1447,7 +1455,7 @@ namespace Microsoft.Build.Shared
             result.BaseDirectory = fixedDirectoryPart.TrimEnd(Path.AltDirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
             result.RemainingWildcardDirectory = wildcardDirectoryPart;
 
-            return GetSearchDataResult.RunSearch;
+            return SearchAction.RunSearch;
         }
 
         static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, IEnumerable<string> excludeSpecsUnescaped)
@@ -1506,21 +1514,21 @@ namespace Microsoft.Build.Shared
              */
             bool stripProjectDirectory;
             RecursionState state;
-            var result = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped, getFileSystemEntries, directoryExists,
+            var action = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped, getFileSystemEntries, directoryExists,
                 out stripProjectDirectory, out state);
 
-            if (result == GetSearchDataResult.ReturnEmptyList)
+            if (action == SearchAction.ReturnEmptyList)
             {
                 return new string[0];
             }
-            else if (result == GetSearchDataResult.ReturnFileSpec)
+            else if (action == SearchAction.ReturnFileSpec)
             {
                 return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
             }
-            else if (result != GetSearchDataResult.RunSearch)
+            else if (action != SearchAction.RunSearch)
             {
                 //  This means the enum value wasn't valid (or a new one was added without updating code correctly)
-                throw new NotSupportedException(result.ToString());
+                throw new NotSupportedException(action.ToString());
             }
 
             List<RecursionState> searchesToExclude = null;
@@ -1539,10 +1547,10 @@ namespace Microsoft.Build.Shared
                     bool excludeStripProjectDirectory;
 
                     RecursionState excludeState;
-                    var excludeResult = GetFileSearchData(projectDirectoryUnescaped, excludeSpec, getFileSystemEntries, directoryExists,
+                    var excludeAction = GetFileSearchData(projectDirectoryUnescaped, excludeSpec, getFileSystemEntries, directoryExists,
                         out excludeStripProjectDirectory, out excludeState);
 
-                    if (excludeResult == GetSearchDataResult.ReturnFileSpec)
+                    if (excludeAction == SearchAction.ReturnFileSpec)
                     {
                         if (resultsToExclude == null)
                         {
@@ -1550,15 +1558,15 @@ namespace Microsoft.Build.Shared
                         }
                         resultsToExclude.Add(excludeSpec);
                     }
-                    else if (excludeResult == GetSearchDataResult.ReturnEmptyList)
+                    else if (excludeAction == SearchAction.ReturnEmptyList)
                     {
                         //  Nothing to do
                         continue;
                     }
-                    else if (excludeResult != GetSearchDataResult.RunSearch)
+                    else if (excludeAction != SearchAction.RunSearch)
                     {
                         //  This means the enum value wasn't valid (or a new one was added without updating code correctly)
-                        throw new NotSupportedException(excludeResult.ToString());
+                        throw new NotSupportedException(excludeAction.ToString());
                     }
 
                     if (excludeState.BaseDirectory != state.BaseDirectory)
@@ -1658,16 +1666,21 @@ namespace Microsoft.Build.Shared
              * This is because it's cheaper to add items to an IList and this code
              * might potentially do a lot of that.
              */
-            System.Collections.ArrayList arrayListOfFiles = new System.Collections.ArrayList();
-            System.Collections.IList listOfFiles = (System.Collections.IList)arrayListOfFiles;
+            var listOfFiles = new List<string>();
 
             /*
              * Now get the files that match, starting at the lowest fixed directory.
              */
             try
             {
-                GetFilesRecursive(listOfFiles, state,
-                   projectDirectoryUnescaped, stripProjectDirectory, getFileSystemEntries, searchesToExclude, searchesToExcludeInSubdirs);
+                GetFilesRecursive(
+                    listOfFiles,
+                    state,
+                    projectDirectoryUnescaped,
+                    stripProjectDirectory,
+                    getFileSystemEntries,
+                    searchesToExclude,
+                    searchesToExcludeInSubdirs);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
@@ -1678,16 +1691,10 @@ namespace Microsoft.Build.Shared
             /*
              * Build the return array.
              */
+            var files = resultsToExclude != null
+                ? listOfFiles.Where(f => !resultsToExclude.Contains(f)).ToArray()
+                : listOfFiles.ToArray();
 
-            string[] files;
-            if (resultsToExclude != null)
-            {
-                files = arrayListOfFiles.Cast<string>().Where(f => !resultsToExclude.Contains(f)).ToArray();
-            }
-            else
-            {
-                files = (string[])arrayListOfFiles.ToArray(typeof(string));
-            }
             return files;
         }
     }
