@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
   <TemplateData>
-    <Name Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="6"/>
-    <Description Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="7"/>
+    <Name Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="5"/>
+    <Description Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="6"/>
     <Icon Package="{FAE04EC1-301F-11d3-BF4B-00C04F79EFBC}" ID="4547" />
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
@@ -18,7 +18,7 @@
   <TemplateContent>
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" TargetFileName="project.json">project.json.template</ProjectItem>
-      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>      
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>
