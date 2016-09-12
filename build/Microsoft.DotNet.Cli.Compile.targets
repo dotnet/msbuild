@@ -216,10 +216,13 @@
       <Copy SourceFiles="@(MSBuildTargetsToCopy)"
             DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
-      <!-- Temporary workaround for MSBuild placing their .props files in the old 14.1 directory -->
-      <Move SourceFiles="$(SdkOutputDirectory)/14.1/Microsoft.Common.props"
+      <!-- 
+      MSBuild's nupkg puts Microsoft.Common.props in an "Extensions" folder.  Take that folder out of the hierarchy, since
+      the CLI sets $(MSBuildExtensionsPath) to be the $(SdkOutputDirectory).
+      -->
+      <Move SourceFiles="$(SdkOutputDirectory)/Extensions/15.0/Microsoft.Common.props"
             DestinationFolder="$(SdkOutputDirectory)/15.0" />
-      <RemoveDir Directories="$(SdkOutputDirectory)/14.1" />
+      <RemoveDir Directories="$(SdkOutputDirectory)/Extensions" />
 
       <ItemGroup>
         <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
