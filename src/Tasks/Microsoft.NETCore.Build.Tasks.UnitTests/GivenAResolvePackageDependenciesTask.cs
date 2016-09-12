@@ -411,6 +411,47 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ItRaisesAssetPropertiesToFileDependenciesMetadata()
+        {
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibBAllAssets, TargetLibC)
+                },
+                libraries: new string[] {
+                    LibADefn, LibBDefn, LibCDefn
+                },
+                projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent);
+
+            IEnumerable<ITaskItem> fileDeps;
+
+            // assert asset properties are raised as metadata
+            
+            // Resource Assemblies
+            fileDeps = task.FileDependencies
+                .Where(t => t.ItemSpec == "LibB/1.2.3/lib/file/R2.resources.dll");
+            fileDeps.Count().Should().Be(1);
+            fileDeps.First().GetMetadata("locale").Should().Be("de");
+            
+            // Runtime Targets
+            fileDeps = task.FileDependencies
+                .Where(t => t.ItemSpec == "LibB/1.2.3/runtimes/osx/native/R3.dylib");
+            fileDeps.Count().Should().Be(1);
+            fileDeps.First().GetMetadata("assetType").Should().Be("native");
+            fileDeps.First().GetMetadata("rid").Should().Be("osx");
+
+            // Content Files
+            fileDeps = task.FileDependencies
+                .Where(t => t.ItemSpec == "LibB/1.2.3/contentFiles/any/images/C2.png");
+            fileDeps.Count().Should().Be(1);
+            fileDeps.First().GetMetadata("buildAction").Should().Be("EmbeddedResource");
+            fileDeps.First().GetMetadata("codeLanguage").Should().Be("any");
+            fileDeps.First().GetMetadata("copyToOutput").Should().Be("false");
+        }
+
+        [Fact]
         public void ItExcludesPlaceholderFiles()
         {
             string targetLibC = CreateTargetLibrary("LibC/1.2.3", "package",

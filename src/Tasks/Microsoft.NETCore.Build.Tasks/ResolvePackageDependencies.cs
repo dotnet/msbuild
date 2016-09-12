@@ -362,9 +362,12 @@ namespace Microsoft.NETCore.Build.Tasks
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
             {
-                var filePathList = fileGroup.GetFilePathListFor(package);
-                foreach (var filePath in filePathList)
+                var filePathList = fileGroup.GetFilePathAndProperies(package);
+                foreach (var entry in filePathList)
                 {
+                    string filePath = entry.Item1;
+                    IDictionary<string, string> properties = entry.Item2;
+
                     if (NuGetUtils.IsPlaceholderFile(filePath))
                     {
                         continue;
@@ -375,6 +378,11 @@ namespace Microsoft.NETCore.Build.Tasks
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
+
+                    foreach (var property in properties)
+                    {
+                        item.SetMetadata(property.Key, property.Value);
+                    }
 
                     _fileDependencies.Add(item);
 

@@ -8,6 +8,8 @@ using System.Linq;
 
 namespace Microsoft.NETCore.Build.Tasks
 {
+    using PathAndPropertiesTuple = Tuple<string, IDictionary<string, string>>;
+
     /// <summary>
     /// Values for File Group Metadata corresponding to the groups in a target library
     /// </summary>
@@ -24,6 +26,8 @@ namespace Microsoft.NETCore.Build.Tasks
 
     public static class FileGroupExtensions
     {
+        private static readonly IDictionary<string, string> _emptyProperties = new Dictionary<string, string>();
+
         /// <summary>
         /// Return Type metadata that should be applied to files in the target library group 
         /// </summary>
@@ -52,7 +56,8 @@ namespace Microsoft.NETCore.Build.Tasks
         /// <summary>
         /// Return a list of file paths from the corresponding group in the target library
         /// </summary>
-        public static IEnumerable<string> GetFilePathListFor(this FileGroup fileGroup, LockFileTargetLibrary package)
+        public static IEnumerable<PathAndPropertiesTuple> GetFilePathAndProperies(
+            this FileGroup fileGroup, LockFileTargetLibrary package)
         {
             switch (fileGroup)
             {
@@ -63,7 +68,7 @@ namespace Microsoft.NETCore.Build.Tasks
                     return SelectPath(package.RuntimeAssemblies);
 
                 case FileGroup.ContentFile:
-                    return package.ContentFiles.Select(c => c.Path);
+                    return SelectPath(package.ContentFiles);
 
                 case FileGroup.NativeLibrary:
                     return SelectPath(package.NativeLibraries);
@@ -72,17 +77,18 @@ namespace Microsoft.NETCore.Build.Tasks
                     return SelectPath(package.ResourceAssemblies);
 
                 case FileGroup.RuntimeTarget:
-                    return package.RuntimeTargets.Select(c => c.Path);
+                    return SelectPath(package.RuntimeTargets);
 
                 case FileGroup.FrameworkAssembly:
-                    return package.FrameworkAssemblies;
+                    return package.FrameworkAssemblies.Select(c => Tuple.Create(c, _emptyProperties));
 
                 default:
                     throw new Exception($"Unexpected file group in project.lock.json target library {package.Name}");
             }
         }
 
-        private static IEnumerable<string> SelectPath(IList<LockFileItem> fileItemList)
-            => fileItemList.Select(c => c.Path);
+        private static IEnumerable<PathAndPropertiesTuple> SelectPath<T>(IList<T> fileItemList) 
+            where T : LockFileItem
+            => fileItemList.Select(c => Tuple.Create(c.Path, c.Properties));
     }
 }
