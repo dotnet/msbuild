@@ -199,11 +199,29 @@ namespace Microsoft.Build.Framework
         #endregion
 
         #region Constants
+        /// <summary>
+        /// Indicates an invalid project context identifier.
+        /// </summary>
         public const int InvalidProjectContextId = -2;
+        /// <summary>
+        /// Indicates an invalid task identifier.
+        /// </summary>
         public const int InvalidTaskId = -1;
+        /// <summary>
+        /// Indicates an invalid target identifier.
+        /// </summary>
         public const int InvalidTargetId = -1;
+        /// <summary>
+        /// Indicates an invalid node identifier.
+        /// </summary>
         public const int InvalidNodeId = -2;
+        /// <summary>
+        /// Indicates an invalid project instance identifier.
+        /// </summary>
         public const int InvalidProjectInstanceId = -1;
+        /// <summary>
+        /// Indicates an invalid submission identifier.
+        /// </summary>
         public const int InvalidSubmissionId = -1;
         #endregion
 

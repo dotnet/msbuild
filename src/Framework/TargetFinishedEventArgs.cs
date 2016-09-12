@@ -92,6 +92,7 @@ namespace Microsoft.Build.Framework
         /// <param name="targetFile">file in which the target is defined</param>
         /// <param name="succeeded">true if target built successfully</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
+        /// <param name="targetOutputs">An <see cref="IEnumerable"/> containing the outputs of the target.</param>
         public TargetFinishedEventArgs
         (
             string message,

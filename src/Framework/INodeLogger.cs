@@ -13,6 +13,11 @@ namespace Microsoft.Build.Framework
     [ComVisible(true)]
     public interface INodeLogger : ILogger
     {
+        /// <summary>
+        /// Initializes the current <see cref="INodeLogger"/> instance.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="nodeCount"></param>
         void Initialize(IEventSource eventSource, int nodeCount);
     }
 }
