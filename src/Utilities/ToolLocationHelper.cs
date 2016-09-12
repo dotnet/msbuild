@@ -17,7 +17,6 @@ using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
-using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
