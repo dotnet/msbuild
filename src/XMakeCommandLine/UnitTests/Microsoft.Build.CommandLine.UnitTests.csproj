@@ -35,7 +35,6 @@
     <Compile Include="..\..\Shared\VersionUtilities.cs">
       <Link>VersionUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\AssemblyResources.cs" />
     <Compile Include="..\..\Shared\UnitTests\MockEngine.cs" />
     <Compile Include="..\..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\..\Shared\UnitTests\ObjectModelHelpers.cs" />
