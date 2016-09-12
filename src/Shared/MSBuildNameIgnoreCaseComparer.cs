@@ -129,7 +129,6 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-#if RETAIL
             if ((s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64) && (s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM))
             {
                 // The use of unsafe here is quite a bit faster than the regular
@@ -159,13 +158,11 @@ namespace Microsoft.Build.Collections
                 }
             }
             else
-#endif
             {
                 return String.Compare(compareToString, 0, constrainedString, start, lengthToCompare, StringComparison.OrdinalIgnoreCase) == 0;
             }
-#if RETAIL
+
             return true;
-#endif
         }
 
         /// <summary>
@@ -348,7 +345,7 @@ namespace Microsoft.Build.Collections
                     }
                 }
             }
-#if RETAIL
+
             if ((s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64) && (s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM))
             {
                 unsafe
@@ -400,7 +397,6 @@ namespace Microsoft.Build.Collections
                 }
             }
             else
-#endif
             {
                 return StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Substring(start, length));
             }
