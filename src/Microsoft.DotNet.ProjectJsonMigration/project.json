@@ -13,9 +13,7 @@
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
-    "Microsoft.Build.Framework": "0.1.0-preview-00029-160805",
-    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00029-160805",
-    "Microsoft.Build": "0.1.0-preview-00029-160805",
+    "Microsoft.Build": "0.1.0-preview-00034-160909"
   },
   "frameworks": {
     "netcoreapp1.0": {
