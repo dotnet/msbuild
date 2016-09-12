@@ -327,7 +327,9 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+    <NuGetCacheDir Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</NuGetCacheDir>
+    <NuGetCacheDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(HOME), '.nuget', 'packages'))</NuGetCacheDir>
+    <CompilerToolsDir>$([System.IO.Path]::Combine($(NuGetCacheDir), Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
