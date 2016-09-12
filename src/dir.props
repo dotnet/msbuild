@@ -7,8 +7,4 @@
     <SolutionFile Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(SolutionRoot),"MSBuild.sln"))</SolutionFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(EnableDocumentationFile)' == 'true'">
-    <DocumentationFile>$(OutputPath)$(TargetName).xml</DocumentationFile>
-  </PropertyGroup>
-
 </Project>
