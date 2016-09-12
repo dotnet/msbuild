@@ -35,26 +35,7 @@ namespace Microsoft.DotNet.Tools.Run
                 return runCmd.Start();
             });
 
-            try
-            {
-                return app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Reporter.Error.WriteLine(ex.ToString());
-#else
-                if (Reporter.IsVerbose)
-                {
-                    Reporter.Error.WriteLine(ex.ToString());
-                }
-                else
-                {
-                    Reporter.Error.WriteLine(ex.Message);
-                }
-#endif
-                return 1;
-            }
+            return app.Execute(args);
         }
     }
 }

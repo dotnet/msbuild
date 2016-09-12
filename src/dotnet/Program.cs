@@ -74,6 +74,22 @@ namespace Microsoft.DotNet.Cli
 
                 return 1;
             }
+            catch (Exception ex)
+            {
+#if DEBUG
+                Reporter.Error.WriteLine(ex.ToString());
+#else
+                if (Reporter.IsVerbose)
+                {
+                    Reporter.Error.WriteLine(ex.ToString());
+                }
+                else
+                {
+                    Reporter.Error.WriteLine(ex.Message);
+                }
+#endif
+                return 1;
+            }
             finally
             {
                 if (PerfTrace.Enabled)

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 
@@ -37,6 +38,8 @@ namespace Microsoft.DotNet.Tools.Run
         {
             Initialize();
 
+            EnsureProjectIsBuilt();
+
             ITaskItem runInfoItem = GetRunInformation();
 
             string commandName = runInfoItem.GetMetadata("CommandName");
@@ -47,6 +50,27 @@ namespace Microsoft.DotNet.Tools.Run
             return command
                 .Execute()
                 .ExitCode;
+        }
+
+        private void EnsureProjectIsBuilt()
+        {
+            List<string> buildArgs = new List<string>();
+
+            buildArgs.Add("/nologo");
+            buildArgs.Add("/verbosity:quiet");
+
+            if (!string.IsNullOrWhiteSpace(Configuration))
+            {
+                buildArgs.Add($"/p:Configuration={Configuration}");
+            }
+
+            var buildResult = new MSBuildForwardingApp(buildArgs).Execute();
+
+            if (buildResult != 0)
+            {
+                Reporter.Error.WriteLine();
+                throw new GracefulException("The build failed. Please fix the build errors and run again.");
+            }
         }
 
         private ITaskItem GetRunInformation()
