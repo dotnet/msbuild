@@ -59,7 +59,7 @@ if ($RealSign) {
     $signType = 'real'
 }
 
-$commonBuildArgs = echo $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType 
+$commonBuildArgs = echo $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /nodeReuse:false 
 
 # Template Build
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "templates.log"
