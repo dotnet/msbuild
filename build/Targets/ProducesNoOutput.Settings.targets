@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+ <!-- Return this back when up-to-date bug is fixed (projects are being build everytime) -->
+  <!--<Import Project="Settings.targets" />-->
+  <Import Project="VSL.Settings.targets" />
+
+  <PropertyGroup>
+    <IsDeployment Condition="'$(IsDeployment)' == ''">false</IsDeployment>
+    <IsPortable Condition="'$(IsPortable)' == ''">true</IsPortable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsDeployment)' == 'false'">
+    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+    <OutputPath>bin</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Return this back when up-to-date bug is fixed (projects are being build everytime) -->
+    <!--<CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+        <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>-->
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsPortable)' == 'true'">
+    <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile7</TargetFrameworkProfile>    
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsPortable)' != 'true'">
+    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+  </PropertyGroup>
+  
+</Project>
