@@ -19,6 +19,9 @@
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="NugetContentAssetPreprocessor.cs" />
+    <Compile Include="IContentAssetPreprocessor.cs" />
+    <Compile Include="ProduceContentAssets.cs" />
     <Compile Include="ITaskItemExtensions.cs" />
     <Compile Include="CompilationOptionsConverter.cs" />
     <Compile Include="NuGetUtils.cs" />
