@@ -307,9 +307,9 @@ namespace Microsoft.Build.Tasks
 
             // If we want to create hard or symbolic links, then try that first
             if (UseHardlinksIfPossible)
-                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateHardLink(destination, source, IntPtr.Zero /* reserved, must be NULL */));
+                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination, errorMessage) => NativeMethods.MakeHardLink(destination, source, out errorMessage));
             else if (UseSymboliclinksIfPossible)
-                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateSymbolicLink(destination, source, SymbolicLink.File));
+                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination, errorMessage) => NativeMethods.MakeSymbolicLink(destination, source, out errorMessage));
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
@@ -333,7 +333,7 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, Func<string, string, bool> createLink)
+        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, Func<string, string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessageFromResources(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
@@ -354,15 +354,14 @@ namespace Microsoft.Build.Tasks
             {
                 FileUtilities.DeleteNoThrow(destinationFileState.Name);
             }
-                        
-            linkCreated = createLink(sourceFileState.Name, destinationFileState.Name);
+
+            string errorMessage = string.Empty;
+            linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
 
             if (!linkCreated)
             {
-                int errorCode = Marshal.GetHRForLastWin32Error();
-                Exception linkException = Marshal.GetExceptionForHR(errorCode);
                 // This is only a message since we don't want warnings when copying to network shares etc.
-                Log.LogMessageFromResources(messageImportance, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, linkException.Message);
+                Log.LogMessageFromResources(messageImportance, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, errorMessage);
             }
         }
 

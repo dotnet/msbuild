@@ -809,6 +809,26 @@ namespace Microsoft.Build.Tasks
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
+        [DllImport("libc", SetLastError = true)]
+        internal static extern int symlink(string oldpath, string newpath);
+
+        internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, out string errorMessage)
+        {
+            bool symbolicLinkCreated;
+            if (NativeMethodsShared.IsWindows)
+            {
+                symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, SymbolicLink.File);
+                errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+            }
+            else
+            {
+                symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
+                errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+            }
+
+            return symbolicLinkCreated;
+        }
+
         //------------------------------------------------------------------------------
         // MoveFileEx
         //------------------------------------------------------------------------------
@@ -1182,7 +1202,7 @@ typedef enum _tagAssemblyComparisonResult
                 return false;
             }
 
-            for (int i=0; i<rpkt.Length; i++)
+            for (int i = 0; i < rpkt.Length; i++)
             {
                 if (rpkt[i] != dpkt[i])
                 {

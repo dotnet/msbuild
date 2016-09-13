@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
+using PlatformID = Xunit.PlatformID;
 using System.Security.Principal;
 
 namespace Microsoft.Build.UnitTests
@@ -1156,7 +1157,7 @@ namespace Microsoft.Build.UnitTests
                     Assert.Equal(1, t.CopiedFiles.Length);
 
                     ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026");
-                        // Didn't do retries, no op then invalid
+                    // Didn't do retries, no op then invalid
                 }
             }
             finally
@@ -2208,8 +2209,8 @@ namespace Microsoft.Build.UnitTests
         [StructLayout(LayoutKind.Sequential)]
         public struct _PRIVILEGE_SET
         {
-            public uint PrivilegeCount;
-            public uint Control;
+            public ulong PrivilegeCount;
+            public ulong Control;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
             public LUID_AND_ATTRIBUTES[] Privilege_1;
         }
@@ -2232,9 +2233,12 @@ namespace Microsoft.Build.UnitTests
         public static extern bool PrivilegeCheck(IntPtr ClientToken, IntPtr
         RequiredPrivileges, ref int pfResult);
 
-        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public extern static bool LookupPrivilegeValue(string lpSystemName, string
         lpName, IntPtr pLuid);
+
+        [DllImport("wtsapi32.dll", SetLastError = true)]
+        static extern bool WTSQueryUserToken(ulong SessionId, out IntPtr Token);
 
         public bool CheckPrivilege(string privilege)
         {
@@ -2260,12 +2264,12 @@ namespace Microsoft.Build.UnitTests
 
                 IntPtr ptrPs = IntPtr.Zero;
                 ptrPs = Marshal.AllocHGlobal(64); // 64 byte buffer
-                Marshal.WriteInt32(ptrPs, (int)ps.PrivilegeCount);
-                Marshal.WriteInt32((IntPtr)((int)ptrPs + 4), (int)ps.Control); // Hardcoded offset!!!
-                Marshal.StructureToPtr(ps.Privilege_1[0], (IntPtr)((int)ptrPs + 8), false);
 
-                WindowsIdentity.Impersonate(WindowsIdentity.GetCurrent().Token);
-                hToken = WindowsIdentity.GetCurrent().Token;
+                Marshal.WriteInt64(ptrPs, (long)ps.PrivilegeCount);
+                Marshal.WriteInt64(ptrPs + 4, (long)ps.Control); // Hardcoded offset!!!
+                Marshal.StructureToPtr(ps.Privilege_1[0], (IntPtr)((long)ptrPs + 8), false);
+
+                WTSQueryUserToken((ulong)Process.GetCurrentProcess().SessionId, out hToken);
 
                 PrivilegeCheck(hToken, ptrPs, ref result);
 
@@ -2289,7 +2293,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CopyToDestinationFolderWithSymbolicLinkCheck()
         {
-            if (CheckPrivilege("SeCreateSymbolicLinkPrivilege"))
+            var isPrivileged = true;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!CheckPrivilege("SeCreateSymbolicLinkPrivilege"))
+                {
+                    isPrivileged = false;
+                    Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
+                }
+            }
+
+            if (isPrivileged)
             {
                 string sourceFile = FileUtilities.GetTemporaryFile();
                 string temp = Path.GetTempPath();
@@ -2297,7 +2312,7 @@ namespace Microsoft.Build.UnitTests
                 string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
                 try
                 {
-                    using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                         sw.Write("This is a source temp file.");
 
                     // Don't create the dest folder, let task do that
@@ -2320,12 +2335,14 @@ namespace Microsoft.Build.UnitTests
 
                     Assert.True(success); // "success"
                     Assert.True(File.Exists(destFile)); // "destination exists"
-                    Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+
+                    MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
                     me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
 
                     string destinationFileContents;
-                    using (StreamReader sr = new StreamReader(destFile))
+
+                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
                         destinationFileContents = sr.ReadToEnd();
 
                     Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
@@ -2338,11 +2355,12 @@ namespace Microsoft.Build.UnitTests
                     // Now we will write new content to the source file
                     // we'll then check that the destination file automatically
                     // has the same content (i.e. it's been hard linked)
-                    using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
+
+                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
                         sw.Write("This is another source temp file.");
 
                     // Read the destination file (it should have the same modified content as the source)
-                    using (StreamReader sr = new StreamReader(destFile))
+                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
                         destinationFileContents = sr.ReadToEnd();
 
                     Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
@@ -2352,12 +2370,10 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    Helpers.DeleteFiles(sourceFile, destFile);
+                    File.Delete(sourceFile);
+                    File.Delete(destFile);
+                    FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
                 }
-            }
-            else
-            {
-                Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
             }
         }
     }
