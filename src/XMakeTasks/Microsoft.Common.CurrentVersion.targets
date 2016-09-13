@@ -1511,17 +1511,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
 
-      <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkConfiguration" />
+      <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
 
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)'">
-        <SetTargetFramework>$(_ProjectReferenceTargetFrameworkConfiguration)</SetTargetFramework>
+        <SetTargetFramework>$(_ProjectReferenceTargetFrameworkProperties)</SetTargetFramework>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
     <PropertyGroup>
-      <_ProjectReferenceTargetFrameworkConfiguration />
+      <_ProjectReferenceTargetFrameworkProperties />
     </PropertyGroup>
   </Target>
 
