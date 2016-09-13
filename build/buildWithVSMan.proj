@@ -43,7 +43,7 @@
              />
   </Target>
   
-  <Target Name="BuildModernVsixPackages">
+  <Target Name="BuildModernVsixPackages" DependsOnTargets="SignPackages">
     <Message Importance="High" Text="'$(BUILD_BUILDNUMBER)'" />
     <MSBuild Projects="@(VsManProjectFile)"
              Targets="Build"
@@ -51,7 +51,7 @@
              />
   </Target>
 
-  <Target Name="RebuildModernVsixPackages">
+  <Target Name="RebuildModernVsixPackages" DependsOnTargets="SignPackages">
 
     <MSBuild Projects="@(VsManProjectFile)"
              Targets="Rebuild"
