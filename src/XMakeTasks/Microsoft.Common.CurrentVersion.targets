@@ -3327,7 +3327,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <ItemGroup>
       <IntermediateSatelliteAssembliesWithTargetPath Include="$(IntermediateOutputPath)%(EmbeddedResource.Culture)\$(TargetName).resources.dll"
-                                                     Condition="'%(EmbeddedResource.Culture)' != '' and '$(MSBuildRuntimeType)' != 'Core'">
+                                                     Condition="'%(EmbeddedResource.Culture)' != ''">
         <Culture>%(EmbeddedResource.Culture)</Culture>
         <TargetPath>%(EmbeddedResource.Culture)\$(TargetName).resources.dll</TargetPath>
       </IntermediateSatelliteAssembliesWithTargetPath>
