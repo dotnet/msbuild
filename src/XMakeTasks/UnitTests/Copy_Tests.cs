@@ -2206,82 +2206,6 @@ namespace Microsoft.Build.UnitTests
 
     public class CopySymbolicLink_Tests : Copy_Tests
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct _PRIVILEGE_SET
-        {
-            public ulong PrivilegeCount;
-            public ulong Control;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-            public LUID_AND_ATTRIBUTES[] Privilege_1;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct LUID_AND_ATTRIBUTES
-        {
-            public LUID Luid;
-            public uint Attributes;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct LUID
-        {
-            public uint LowPart;
-            public uint HighPart;
-        }
-
-        [DllImport("advapi32.dll", SetLastError = true)]
-        public static extern bool PrivilegeCheck(IntPtr ClientToken, IntPtr
-        RequiredPrivileges, ref int pfResult);
-
-        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public extern static bool LookupPrivilegeValue(string lpSystemName, string
-        lpName, IntPtr pLuid);
-
-        [DllImport("wtsapi32.dll", SetLastError = true)]
-        static extern bool WTSQueryUserToken(ulong SessionId, out IntPtr Token);
-
-        public bool CheckPrivilege(string privilege)
-        {
-            if (String.IsNullOrEmpty(privilege))
-                return false;
-
-            var isPrivileged = false;
-            int result = 0;
-            IntPtr hToken;
-            _PRIVILEGE_SET ps = new _PRIVILEGE_SET();
-
-            ps.PrivilegeCount = 1;
-            ps.Privilege_1 = new LUID_AND_ATTRIBUTES[1];
-            int privSize = Marshal.SizeOf(ps.Privilege_1[0]);
-
-            IntPtr ptr = IntPtr.Zero;
-            ptr = Marshal.AllocHGlobal(privSize * (int)ps.PrivilegeCount);
-            Marshal.StructureToPtr(ps.Privilege_1[0], ptr, false);
-
-            if (LookupPrivilegeValue(null, privilege, ptr))
-            {
-                ps.Privilege_1[0] = (LUID_AND_ATTRIBUTES)Marshal.PtrToStructure(ptr, typeof(LUID_AND_ATTRIBUTES));
-
-                IntPtr ptrPs = IntPtr.Zero;
-                ptrPs = Marshal.AllocHGlobal(64); // 64 byte buffer
-
-                Marshal.WriteInt64(ptrPs, (long)ps.PrivilegeCount);
-                Marshal.WriteInt64(ptrPs + 4, (long)ps.Control); // Hardcoded offset!!!
-                Marshal.StructureToPtr(ps.Privilege_1[0], (IntPtr)((long)ptrPs + 8), false);
-
-                WTSQueryUserToken((ulong)Process.GetCurrentProcess().SessionId, out hToken);
-
-                PrivilegeCheck(hToken, ptrPs, ref result);
-
-                isPrivileged = Convert.ToBoolean(result);
-
-                Marshal.FreeHGlobal(ptrPs); // Free allocated mem   
-            }
-            Marshal.FreeHGlobal(ptr); // Free alocated mem
-
-            return isPrivileged;
-        }
-
         public CopySymbolicLink_Tests()
         {
             useSymbolicLinks = true;
@@ -2297,7 +2221,7 @@ namespace Microsoft.Build.UnitTests
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (!CheckPrivilege("SeCreateSymbolicLinkPrivilege"))
+                if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
                 {
                     isPrivileged = false;
                     Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
