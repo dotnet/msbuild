@@ -44,7 +44,7 @@
   </Target>
   
   <Target Name="BuildModernVsixPackages">
-
+    <Message Importance="High" Text="'$(BUILD_BUILDNUMBER)'" />
     <MSBuild Projects="@(VsManProjectFile)"
              Targets="Build"
              Condition="'$(RunningInMicroBuild)' == 'true'"
