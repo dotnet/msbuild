@@ -1508,8 +1508,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Targets="GetTargetFrameworkProperties"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(TargetFrameworkMoniker)"
-        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '$(BuildingProject)' == 'true'"
-        ContinueOnError="$(ContinueOnError)"
+        ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
 
       <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkConfiguration" />
