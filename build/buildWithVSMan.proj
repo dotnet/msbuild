@@ -20,6 +20,7 @@
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
     <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Web.Nuget.proj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsmanproj" />
   </ItemGroup>
 
   <Target Name="RestorePackages">
@@ -42,7 +43,21 @@
              />
   </Target>
   
+  <Target Name="BuildModernVsixPackages">
+    <Message Importance="High" Text="'$(BUILD_BUILDNUMBER)'" />
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Build"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
+             />
+  </Target>
 
+  <Target Name="RebuildModernVsixPackages">
+
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Rebuild"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
+             />
+  </Target>
   
   <Target Name="RebuildSolution">
 
@@ -124,7 +139,7 @@
 
   </Target>
 
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;Test" />
-  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;Test" />
+  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildModernVsixPackages;BuildNuGetPackages;Test" />
+  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;BuildModernVsixPackages;RebuildNuGetPackages;Test" />
 
 </Project>

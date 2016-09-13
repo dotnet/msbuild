@@ -60,13 +60,14 @@ if ($RealSign) {
 }
 
 $commonBuildArgs = echo $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType 
+$commonBuildArgsVsMan = echo $RepoRoot\build\buildWithVSMan.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType 
 
 # Template Build
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "templates.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "templates.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "templates.err"
 
-msbuild $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+msbuild $commonBuildArgsVsMan /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
 
 # NET Core Build 
