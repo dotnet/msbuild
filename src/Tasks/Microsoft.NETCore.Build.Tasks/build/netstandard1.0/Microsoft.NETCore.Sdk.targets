@@ -139,7 +139,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <!-- TODO: https://github.com/dotnet/sdk/issues/20 Need to get the DotNetHost path from MSBuild -->
         <RunCommand Condition="'$(RunCommand)' == ''">dotnet</RunCommand>
 
-        <_NetCoreRunArguments>exec $(TargetPath)</_NetCoreRunArguments>
+        <_NetCoreRunArguments>exec &quot;$(TargetPath)&quot;</_NetCoreRunArguments>
         <RunArguments Condition="'$(RunArguments)' == '' and '$(StartArguments)' != ''">$(_NetCoreRunArguments) $(StartArguments)</RunArguments>
         <RunArguments Condition="'$(RunArguments)' == ''">$(_NetCoreRunArguments)</RunArguments>
 
