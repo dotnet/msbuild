@@ -20,6 +20,7 @@
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
     <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Web.Nuget.proj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\EditorsPackage\Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsmanproj" />
   </ItemGroup>
 
   <Target Name="RestorePackages">
@@ -41,7 +42,23 @@
              Properties="$(CommonMSBuildGlobalProperties)"
              />
   </Target>
+  
+  <Target Name="BuildModernVsixPackages">
 
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Build"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
+             />
+  </Target>
+
+  <Target Name="RebuildModernVsixPackages">
+
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Rebuild"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
+             />
+  </Target>
+  
   <Target Name="RebuildSolution">
 
     <Message Text="Rebuilding %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />

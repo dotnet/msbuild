@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Settings.targets" />
+
+  <PropertyGroup>
+    <FinalizeManifest>true</FinalizeManifest>
+    <FinalizeSkipLayout>true</FinalizeSkipLayout>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <OutputPath>$(OutDir)\VsixV3</OutputPath>
+    <IsPackage>true</IsPackage>
+    <UseVisualStudioVersion>true</UseVisualStudioVersion>
+  </PropertyGroup>
+
+  <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.props" />
+  <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
+
+  <Target Name="BeforeBuild">
+    <MSBuild Projects="Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.swixproj" Targets="Build" />
+  </Target>
+
+  <ItemGroup>
+    <MergeManifest Include="$(OutputPath)\Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.json" />
+  </ItemGroup>
+</Project>
