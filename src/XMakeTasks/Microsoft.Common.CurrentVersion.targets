@@ -318,9 +318,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <GenerateBindingRedirectsOutputType Condition="'$(OutputType)'=='exe' or '$(OutputType)'=='winexe'">true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(AutoUnifyAssemblyReferences)' == ''">
     <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
     <AutoUnifyAssemblyReferences Condition="'$(GenerateBindingRedirectsOutputType)' == 'true' and '$(AutoGenerateBindingRedirects)' != 'true'">false</AutoUnifyAssemblyReferences>
+  </PropertyGroup>
+  <PropertyGroup>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">obj\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <CleanFile Condition="'$(CleanFile)'==''">$(MSBuildProjectFile).FileListAbsolute.txt</CleanFile>
