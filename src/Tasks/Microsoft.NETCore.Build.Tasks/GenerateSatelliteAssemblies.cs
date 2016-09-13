@@ -56,7 +56,7 @@ namespace Microsoft.NETCore.Build.Tasks
             });
 
             var satelliteAssembly = OutputAssembly.GetMetadata("FullPath");
-            using (var outputStream = new FileInfo(satelliteAssembly).Create())
+            using (var outputStream = File.Create(satelliteAssembly))
             {
                 var result = compilation.Emit(outputStream, manifestResources: resourceDescriptions);
 
