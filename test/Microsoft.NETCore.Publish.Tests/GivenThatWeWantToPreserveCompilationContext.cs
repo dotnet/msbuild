@@ -16,7 +16,7 @@ namespace Microsoft.NETCore.Publish.Tests
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
-        [Fact]
+        //[Fact]
         public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file()
         {
             var testAsset = _testAssetsManager

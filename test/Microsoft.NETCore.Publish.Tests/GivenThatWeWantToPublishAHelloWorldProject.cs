@@ -20,7 +20,7 @@ namespace Microsoft.NETCore.Publish.Tests
             _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
         }
 
-        [Fact]
+        //[Fact]
         public void It_publishes_the_project_to_the_publish_folder_and_the_app_should_run()
         {
             var helloWorldAsset = _testAssetsManager
