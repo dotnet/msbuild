@@ -139,7 +139,7 @@
 
   </Target>
 
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;Test" />
-  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;Test" />
+  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildModernVsixPackages;BuildNuGetPackages;Test" />
+  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;BuildModernVsixPackages;RebuildNuGetPackages;Test" />
 
 </Project>
