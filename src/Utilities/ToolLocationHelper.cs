@@ -1558,6 +1558,12 @@ namespace Microsoft.Build.Utilities
             return GetPathToDotNetFrameworkSdk(version, VisualStudioVersion.VersionLatest);
         }
 
+        /// <summary>
+        /// Returns the path to the .NET Framework SDK.
+        /// </summary>
+        /// <param name="version">The <see cref="TargetDotNetFrameworkVersion"/> of the .NET Framework.</param>
+        /// <param name="visualStudioVersion">The <see cref="VisualStudioVersion"/> of Visual Studio.</param>
+        /// <returns></returns>
         public static string GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion)
         {
             var dotNetFrameworkVersion = TargetDotNetFrameworkVersionToSystemVersion(version);
@@ -1787,6 +1793,8 @@ namespace Microsoft.Build.Utilities
         /// Generate the list of reference assembly paths for well known .net framework versions
         /// </summary>
         /// <param name="frameworkName">Target framework moniker class which contains the targetframeworkVersion</param>
+        /// <param name="PathToDotNetFramework"></param>
+        /// <param name="PathToReferenceAssemblies"></param>
         /// <returns>A collection of strings which list the chained reference assembly paths with the highest version being first</returns>
         internal static IList<string> HandleLegacyDotNetFrameworkReferenceAssemblyPaths(VersionToPath PathToDotNetFramework, VersionToPath PathToReferenceAssemblies, FrameworkNameVersioning frameworkName)
         {
@@ -2102,7 +2110,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given framework version and properly chains the reference assemblies if required.
         /// </summary>
-        /// <param name="targetFrameworkMoniker">Moniker being targeted</param>
         /// <returns>Collection of reference assembly locations.</returns>
         internal static IList<String> GetPathAndChainReferenceAssemblyLocations(string targetFrameworkRootPath, FrameworkNameVersioning frameworkName, bool chain)
         {
@@ -3149,6 +3156,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
         /// <param name="version">Version of the targeted .NET Framework</param>
+        /// <param name="visualStudioVersion">Version of Visual Studio</param>
         /// <param name="architecture">The required architecture of the requested file.</param>
         /// <returns>Path string.</returns>
         public static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, UtilitiesDotNetFrameworkArchitecture architecture)
@@ -3168,6 +3176,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
         /// <param name="version">Version of the targeted .NET Framework</param>
+        /// <param name="visualStudioVersion">Version of Visual Studio</param>
         /// <param name="architecture">The required architecture of the requested file.</param>
         /// <param name="canFallBackIfNecessary">If true, will follow the fallback pattern -- from requested architecture, to 
         /// current architecture, to x86.  Otherwise, if the requested architecture path doesn't exist, that's it -- no path 
@@ -3348,6 +3357,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="version">Target .NET Framework version.</param>
         /// <param name="visualStudioVersion">Version of Visual Studio associated with the SDK.</param>
         /// <param name="architecture">Desired architecture of the resultant file.</param>
+        /// <param name="canFallBackIfNecessary"><code>true</code> to fallback, otherwise <code>false</code>.</param>
         /// <returns>Path to the appropriate Windows SDK file</returns>
         [Obsolete("Consider using GetPlatformSDKLocationFile instead")]
         private static string GetPathToWindowsSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, DotNetFrameworkArchitecture architecture, bool canFallBackIfNecessary)

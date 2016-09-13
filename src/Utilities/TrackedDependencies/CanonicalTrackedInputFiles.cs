@@ -64,7 +64,9 @@ namespace Microsoft.Build.Utilities
             set { _sourcesNeedingCompilation = value; }
         }
 
-        // Provide external access to the dependencyTable
+        /// <summary>
+        /// Gets the current dependency table.
+        /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public Dictionary<string, Dictionary<string, string>> DependencyTable
         {
@@ -153,6 +155,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="tlogFiles">The .read. tlog files to interpret</param>
         /// <param name="sourceFiles">The primary source files to interpret dependencies for</param>
         /// <param name="outputs">The output files produced by compiling this set of sources</param>
+        /// <param name="outputFiles">The output files.</param>
         /// <param name="excludedInputPaths">The set of paths that contain files that are to be ignored during up to date check</param>
         /// <param name="useMinimalRebuildOptimization">WARNING: Minimal rebuild optimization requires 100% accurate computed outputs to be specified!</param>
         /// <param name="maintainCompositeRootingMarkers">True to keep composite rooting markers around (many-to-one case) or false to shred them (one-to-one or one-to-many case)</param>
@@ -453,8 +456,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Given a composite output rooting marker, gathers up all the sources it depends on.
         /// </summary>
-        /// <param name="outputs">List of outputs to populate</param>
-        /// <param name="sourceKey">The source to gather outputs for</param>
         private void SourceDependenciesForOutputRoot(Dictionary<string, ITaskItem> sourceDependencies, string sourceKey, ITaskItem[] filesToIgnore)
         {
             Dictionary<string, string> dependencies;
@@ -989,7 +990,6 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
-        /// <param name="correspondingOutputs">Outputs that correspond ot the sources (used for same file processing)</param>
         public void RemoveEntriesForSource(ITaskItem source)
         {
             RemoveEntriesForSource(new ITaskItem[] { source });
@@ -999,7 +999,6 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Sources that should be removed from the graph</param>
-        /// <param name="correspondingOutputs">Outputs that correspond ot the sources (used for same file processing)</param>
         public void RemoveEntriesForSource(ITaskItem[] source)
         {
             // construct a root marker for the sources and outputs to remove from the graph
@@ -1029,6 +1028,7 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="sources">Sources that should be removed from the graph</param>
+        /// <param name="dependencyToRemove">A <see cref="ITaskItem"/> to remove as a dependency.</param>
         public void RemoveDependencyFromEntry(ITaskItem[] sources, ITaskItem dependencyToRemove)
         {
             string rootingMarker = FileTracker.FormatRootingMarker(sources);
@@ -1039,6 +1039,7 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given source and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
+        /// <param name="dependencyToRemove">A <see cref="ITaskItem"/> to remove as a dependency.</param>
         public void RemoveDependencyFromEntry(ITaskItem source, ITaskItem dependencyToRemove)
         {
             string rootingMarker = FileTracker.FormatRootingMarker(source);
@@ -1048,7 +1049,8 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
-        /// <param name="source">Sources that should be removed from the graph</param>
+        /// <param name="rootingMarker">The rooting marker that should be removed from the graph</param>
+        /// <param name="dependencyToRemove">A <see cref="ITaskItem"/> to remove as a dependency.</param>
         private void RemoveDependencyFromEntry(string rootingMarker, ITaskItem dependencyToRemove)
         {
             // construct a root marker for the source that will remove the dependency from
@@ -1077,7 +1079,7 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
-        /// <param name="correspondingOutputs">Output that correspond ot the sources (used for same file processing)</param>
+        /// <param name="correspondingOutput">Output that correspond ot the sources (used for same file processing)</param>
         public void RemoveDependenciesFromEntryIfMissing(ITaskItem source, ITaskItem correspondingOutput)
         {
             RemoveDependenciesFromEntryIfMissing(new ITaskItem[] { source }, new ITaskItem[] { correspondingOutput });

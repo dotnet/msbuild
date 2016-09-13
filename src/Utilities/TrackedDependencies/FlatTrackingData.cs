@@ -16,6 +16,9 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class FlatTrackingData
     {
         #region Constants
@@ -213,7 +216,6 @@ namespace Microsoft.Build.Utilities
         /// Constructor
         /// </summary>
         /// <param name="tlogFiles">The .write. tlog files to interpret</param>
-        /// <param name="skipMissingFiles">Ignore files that do not exist on disk</param>
         /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
         public FlatTrackingData(ITaskItem[] tlogFiles, DateTime missingFileTimeUtc)
         {
@@ -224,7 +226,7 @@ namespace Microsoft.Build.Utilities
         /// Constructor
         /// </summary>
         /// <param name="tlogFiles">The .write. tlog files to interpret</param>
-        /// <param name="skipMissingFiles">Ignore files that do not exist on disk</param>
+        /// <param name="tlogFilesToIgnore">The .tlog files to ignore</param>
         /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
         public FlatTrackingData(ITaskItem[] tlogFiles, ITaskItem[] tlogFilesToIgnore, DateTime missingFileTimeUtc)
         {
@@ -255,7 +257,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="ownerTask">The task that is using file tracker</param>
         /// <param name="tlogFiles">The tlog files to interpret</param>
-        /// <param name="skipMissingFiles">Ignore files that do not exist on disk</param>
         /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
         public FlatTrackingData(ITask ownerTask, ITaskItem[] tlogFiles, DateTime missingFileTimeUtc)
         {
@@ -287,8 +288,10 @@ namespace Microsoft.Build.Utilities
         /// Internal constructor
         /// </summary>
         /// <param name="ownerTask">The task that is using file tracker</param>
-        /// <param name="tlogFiles">The .write. tlog files to interpret</param>
+        /// <param name="tlogFilesLocal">The local .tlog files.</param>
+        /// <param name="tlogFilesToIgnore">The .tlog files to ignore</param>
         /// <param name="skipMissingFiles">Ignore files that do not exist on disk</param>
+        /// /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
         /// <param name="excludedInputPaths">The set of paths that contain files that are to be ignored during up to date check</param>
         private void InternalConstruct(ITask ownerTask, ITaskItem[] tlogFilesLocal, ITaskItem[] tlogFilesToIgnore, bool skipMissingFiles, DateTime missingFileTimeUtc, string[] excludedInputPaths)
         {
@@ -588,7 +591,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Record the time and missing state of the entry in the tlog
         /// </summary>
-        /// <param name="tlogEntry"></param>
         private void RecordEntryDetails(string tlogEntry, bool populateTable)
         {
             if (FileIsExcludedFromDependencyCheck(tlogEntry))
@@ -724,7 +726,7 @@ namespace Microsoft.Build.Utilities
         /// Note: If things are not up to date, then the TLogs are compacted to remove all entries in preparation to
         /// re-track execution of work.
         /// </summary>
-        /// <param name="Log">TaskLoggingHelper from the host task</param>
+        /// <param name="hostTask">The <see cref="Task"/> host</param>
         /// <param name="upToDateCheckType">UpToDateCheckType</param>
         /// <param name="readTLogNames">The array of read tlogs</param>
         /// <param name="writeTLogNames">The array of write tlogs</param>
@@ -953,8 +955,17 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public enum UpToDateCheckType
     {
+        /// <summary>
+        /// The input is newer than the output.
+        /// </summary>
         InputNewerThanOutput,
+        /// <summary>
+        /// The input or output are newer than the tracking file.
+        /// </summary>
         InputOrOutputNewerThanTracking,
+        /// <summary>
+        /// THe input is newer than the tracking file.
+        /// </summary>
         InputNewerThanTracking
     }
 }

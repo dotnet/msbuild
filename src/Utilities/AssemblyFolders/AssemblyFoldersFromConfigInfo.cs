@@ -8,10 +8,13 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {
+    /// <summary>
+    /// Represents information about assembly folders.
+    /// </summary>
     [DebuggerDisplay("DirectoryPath: {DirectoryPath}, TargetFrameworkVersion = {TargetFrameworkVersion}")]
     public class AssemblyFoldersFromConfigInfo
     {
-        public AssemblyFoldersFromConfigInfo(string directoryPath, Version targetFrameworkVersion)
+        internal AssemblyFoldersFromConfigInfo(string directoryPath, Version targetFrameworkVersion)
         {
             ErrorUtilities.VerifyThrowArgumentNull(directoryPath, "directoryPath");
             ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion, "targetFrameworkVersion");
@@ -28,8 +31,14 @@ namespace Microsoft.Build.Utilities
             TargetFrameworkVersion = targetFrameworkVersion;
         }
 
+        /// <summary>
+        /// Gets the path to the assembly folder.
+        /// </summary>
         public string DirectoryPath { get; }
 
+        /// <summary>
+        /// Gets the <see cref="Version"/> of the target framework.
+        /// </summary>
         public Version TargetFrameworkVersion { get; }
     }
 }

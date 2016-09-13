@@ -180,6 +180,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="intermediateDirectory">The directory into which to write the tracking log files</param>
         /// <param name="taskName">The name of the task calling this function, used to determine the 
         /// names of the tracking log files</param>
+        /// <param name="rootMarkerResponseFile">The path to the root marker response file.</param>
         public static void StartTrackingContextWithRoot(string intermediateDirectory, string taskName, string rootMarkerResponseFile)
         {
             InprocTrackingNativeMethods.StartTrackingContextWithRoot(intermediateDirectory, taskName, rootMarkerResponseFile);
@@ -274,7 +275,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="fileName">
         /// Full path of the file to test
         /// </param>
-        /// <param name="filePath">
+        /// <param name="path">
         /// Is the file under this full path?
         /// </param>
         public static bool FileIsUnderPath(string fileName, string path)
@@ -296,9 +297,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
-        /// <param name="sources">
-        /// ITaskItem array of primary sources.
-        /// </param>
+        /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
         public static string FormatRootingMarker(ITaskItem source)
         {
             return FormatRootingMarker(new ITaskItem[] { source }, null);
@@ -307,9 +306,8 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
-        /// <param name="sources">
-        /// ITaskItem array of primary sources.
-        /// </param>
+        /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
+        /// <param name="output">An <see cref="ITaskItem"/> containing information about the output.</param>
         public static string FormatRootingMarker(ITaskItem source, ITaskItem output)
         {
             return FormatRootingMarker(new ITaskItem[] { source }, new ITaskItem[] { output });
@@ -332,6 +330,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="sources">
         /// ITaskItem array of primary sources.
         /// </param>
+        /// <param name="outputs">ITaskItem array of outputs.</param>
         public static string FormatRootingMarker(ITaskItem[] sources, ITaskItem[] outputs)
         {
             ErrorUtilities.VerifyThrowArgumentNull(sources, "sources");
@@ -374,7 +373,9 @@ namespace Microsoft.Build.Utilities
         /// Given a set of source files in the form of ITaskItem, creates a temporary response
         /// file containing the rooting marker that corresponds to those sources. 
         /// </summary>
-        /// <param name="rootMarker">The rooting marker to put in the response file.</param>
+        /// <param name="sources">
+        /// ITaskItem array of primary sources.
+        /// </param>
         /// <returns>The response file path.</returns>
         public static string CreateRootingMarkerResponseFile(ITaskItem[] sources)
         {
@@ -485,6 +486,7 @@ namespace Microsoft.Build.Utilities
         /// Determines whether we must track out-of-proc, or whether inproc tracking will work. 
         /// </summary>
         /// <param name="toolType">The executable type for the tool being tracked</param>
+        /// <param name="dllName">An optional assembly name.</param>
         /// <param name="cancelEventName">The name of the cancel event tracker should listen for, or null if there isn't one</param>
         /// <returns>True if we need to track out-of-proc, false if inproc tracking is OK</returns>
         public static bool ForceOutOfProcTracking(ExecutableType toolType, string dllName, string cancelEventName)
@@ -514,7 +516,7 @@ namespace Microsoft.Build.Utilities
         /// know about our current bitness, figures out and returns the path to the correct
         /// Tracker.exe. 
         /// </summary>
-        /// <param name="toolExecutableTypeToUse">The executable type of the tool being wrapped</param>
+        /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
         public static string GetTrackerPath(ExecutableType toolType)
         {
             return GetTrackerPath(toolType, null);
@@ -525,7 +527,7 @@ namespace Microsoft.Build.Utilities
         /// know about our current bitness, figures out and returns the path to the correct
         /// Tracker.exe. 
         /// </summary>
-        /// <param name="toolExecutableTypeToUse">The executable type of the tool being wrapped</param>
+        /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
         /// <param name="rootPath">The root path for Tracker.exe.  Overrides the toolType if specified.</param>
         public static string GetTrackerPath(ExecutableType toolType, string rootPath)
         {
@@ -537,7 +539,7 @@ namespace Microsoft.Build.Utilities
         /// know about our current bitness, figures out and returns the path to the correct
         /// FileTracker.dll. 
         /// </summary>
-        /// <param name="toolExecutableTypeToUse">The executable type of the tool being wrapped</param>
+        /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
         public static string GetFileTrackerPath(ExecutableType toolType)
         {
             return GetFileTrackerPath(toolType, null);
@@ -548,7 +550,7 @@ namespace Microsoft.Build.Utilities
         /// know about our current bitness, figures out and returns the path to the correct
         /// FileTracker.dll. 
         /// </summary>
-        /// <param name="toolExecutableTypeToUse">The executable type of the tool being wrapped</param>
+        /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
         /// <param name="rootPath">The root path for FileTracker.dll.  Overrides the toolType if specified.</param>
         public static string GetFileTrackerPath(ExecutableType toolType, string rootPath)
         {
@@ -808,6 +810,7 @@ namespace Microsoft.Build.Utilities
         /// Logs a message of the given importance using the specified string.
         /// </summary>
         /// <remarks>This method is not thread-safe.</remarks>
+        /// <param name="Log">The Log to log to.</param>
         /// <param name="importance">The importance level of the message.</param>
         /// <param name="message">The message string.</param>
         /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
@@ -824,6 +827,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Logs a warning using the specified resource string.
         /// </summary>
+        /// <param name="Log">The Log to log to.</param>
         /// <param name="messageResourceName">The name of the string resource to load.</param>
         /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>messageResourceName</c> is null.</exception>

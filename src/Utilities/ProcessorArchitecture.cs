@@ -16,17 +16,17 @@ namespace Microsoft.Build.Utilities
     static public class ProcessorArchitecture
     {
         // Known processor architectures
-        public const string X86 = "x86";
-        public const string IA64 = "IA64";
+        internal const string X86 = "x86";
+        internal const string IA64 = "IA64";
 
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "AMD", Justification = "This is the correct casing for ProcessorArchitecture")]
-        public const string AMD64 = "AMD64";
+        internal const string AMD64 = "AMD64";
 
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "MSIL", Justification = "This is the correct casing for ProcessorArchitecture")]
-        public const string MSIL = "MSIL";
+        internal const string MSIL = "MSIL";
 
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ARM", Justification = "This is the correct casing for ProcessorArchitecture")]
-        public const string ARM = "ARM";
+        internal const string ARM = "ARM";
 
         /// <summary>
         /// Lazy-initted property for getting the architecture of the currently running process
