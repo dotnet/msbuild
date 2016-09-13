@@ -28,15 +28,15 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             _exists = exists;
         }
 
-        public bool Process(string originalAssetPath, string packageId, string packageVersion, string ppOutputPath, out string pathToFinalAsset)
+        public bool Process(string originalAssetPath, string relativeOutputPath, out string pathToFinalAsset)
         {
             bool fileWritten = false;
 
-            // We need the preprocessed output, so let's run the preprocessor here
-            pathToFinalAsset = Path.Combine(_preprocessedOutputDirectory, packageId, packageVersion, ppOutputPath);
+            pathToFinalAsset = Path.Combine(_preprocessedOutputDirectory, relativeOutputPath);
 
             if (!_exists(pathToFinalAsset))
             {
+                // Mock reading, processsing and writing content
                 var inputBytes = Encoding.ASCII.GetBytes(MockReadContent);
                 using (MemoryStream input = new MemoryStream(inputBytes))
                 {

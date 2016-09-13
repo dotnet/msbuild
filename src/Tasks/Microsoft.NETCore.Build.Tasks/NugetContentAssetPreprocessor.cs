@@ -22,12 +22,11 @@ namespace Microsoft.NETCore.Build.Tasks
             _preprocessedOutputDirectory = Path.Combine(outputDirectory, BuildPreprocessedContentHash(preprocessorValues));
         }
 
-        public bool Process(string originalAssetPath, string packageId, string packageVersion, string ppOutputPath, out string pathToFinalAsset)
+        public bool Process(string originalAssetPath, string relativeOutputPath, out string pathToFinalAsset)
         {
             bool fileWritten = false;
 
-            // We need the preprocessed output, so let's run the preprocessor here
-            pathToFinalAsset = Path.Combine(_preprocessedOutputDirectory, packageId, packageVersion, ppOutputPath);
+            pathToFinalAsset = Path.Combine(_preprocessedOutputDirectory, relativeOutputPath);
 
             if (!File.Exists(pathToFinalAsset))
             {

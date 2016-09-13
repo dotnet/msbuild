@@ -8,23 +8,10 @@ using System.Linq;
 namespace Microsoft.NETCore.Build.Tasks
 {
     /// <summary>
-    /// Inputs:
-    /// string ContentPreprocessorOutputDirectory
-    /// ITaskItem[] ContentPreprocessorValues
-    /// FileDefinitions
-    /// FileDependencies.Where("ContentFiles")
-    /// string ProjectLanguage
-    /// 
-    /// Outputs:
-    /// _fileWrites (final output files) => FileWrites
-    /// _copyLocalItems (if content file is marked copyToOutput) need to know output path? => ResolvedCopyLocalItems
-    /// _contentItems (why is this needed?) contains path to final file. => ContentItems
-    /// 
-    /// Strategy:
-    /// - Write processed files to intermediate folder
-    /// - Emit items indicating the files that were written and their final paths
-    /// - Publish Task will copy files marked appropriately to proper place
-    /// - What about what needs to be copied by build? Emit copy local items
+    /// Read raised lock file items for content assets and apply process them to handle
+    /// preprocessing tokens, identify items that should be copied to output, and
+    /// other filtering on content assets, including whether they match the active 
+    /// project language.
     /// </summary>
     public sealed class ProduceContentAssets : Task
     {
@@ -113,6 +100,9 @@ namespace Microsoft.NETCore.Build.Tasks
 
         #endregion
 
+        /// <summary>
+        /// Resource for reading, processing and writing content assets
+        /// </summary>
         public IContentAssetPreprocessor AssetPreProcessor { get; private set; }
 
         public override bool Execute()
@@ -244,7 +234,8 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
 
                 // We need the preprocessed output, so let's run the preprocessor here
-                if(AssetPreProcessor.Process(resolvedPath, parts[0], parts[1], ppOutputPath, out pathToFinalAsset))
+                string relativeOutputPath = Path.Combine(parts[0], parts[1], ppOutputPath);
+                if (AssetPreProcessor.Process(resolvedPath, relativeOutputPath, out pathToFinalAsset))
                 {
                     _fileWrites.Add(new TaskItem(pathToFinalAsset));
                 }

@@ -12,25 +12,6 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
     public class GivenAProduceContentsAssetsTask
     {
-        //Basic Preprocessor
-        //- input with processing gets output with processed values in expected items
-
-        //Missing Inputs
-        //- Nothing to process
-        //- No Output directory
-        //- No Project Language
-        //- Incorrect File Definitions
-
-        //Project Language affects what get process
-        //- all set to 'any'
-        //- at least set to C# when project language == C#
-        //- one set to VB and none to C#, when project language == C#
-
-        //Provided metadata
-        //- ppOutputPath
-        //- copyToOutput (w/wo outputPath)
-        //- buildAction (=none, other)
-
         [Fact]
         public void ItProcessesContentFiles()
         {
