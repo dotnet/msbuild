@@ -1,6 +1,6 @@
 ﻿<!--
 ***********************************************************************************************
-Microsoft.Common.Traversal.targets
+Microsoft.Common.CrossTargeting.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -11,6 +11,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(CoreTraversalTargetsPath)" 
-          Condition="'$(CoreTraversalTargetsPath)' != '' and Exists('$(CoreTraversalTargetsPath)')" />
+  <Import Project="$(CoreCrossTargetingTargetsPath)" 
+          Condition="'$(CoreCrossTargetingTargetsPath)' != '' and Exists('$(CoreCrossTargetingTargetsPath)')" />
 </Project>

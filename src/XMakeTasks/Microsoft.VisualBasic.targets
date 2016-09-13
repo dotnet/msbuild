@@ -18,12 +18,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- 
-       We are doing a cross-targeting traversal build if there is no list of target frameworks specified
+       We are doing a cross-targeting build if there is no list of target frameworks specified
        nor is there a current target framework being built individually. In that case, this import is
-       redirected to Microsoft.Common.Traversal.targets.
+       redirected to Microsoft.Common.CrossTargeting.targets.
    -->
    <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
-      <IsTraversalBuild>true</IsTraversalBuild>
+      <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
    </PropertyGroup>
 
    <!--
@@ -50,9 +50,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <VbcToolPath Condition="'$(VbcToolPath)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">$(MsBuildFrameworkToolsPath)</VbcToolPath>
       </PropertyGroup>
     </When>
-    <When Condition="'$(IsTraversalBuild)' == 'true'">
+    <When Condition="'$(IsCrossTargetingBuild)' == 'true'">
       <PropertyGroup>
-        <VisualBasicTargetsPath>$(MSBuildToolsPath)\Microsoft.Common.Traversal.targets</VisualBasicTargetsPath>
+        <VisualBasicTargetsPath>$(MSBuildToolsPath)\Microsoft.Common.CrossTargeting.targets</VisualBasicTargetsPath>
       </PropertyGroup>
     </When>
     <Otherwise>

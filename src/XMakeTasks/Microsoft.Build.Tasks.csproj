@@ -676,7 +676,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Microsoft.Common.Traversal.targets">
+    <Content Include="Microsoft.Common.CrossTargeting.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
@@ -828,7 +828,7 @@
     <DataFile Include="Microsoft.Common.CurrentVersion.targets">
       <SubType>Designer</SubType>
     </DataFile>
-    <DataFile Include="Microsoft.Common.Traversal.targets">
+    <DataFile Include="Microsoft.Common.CrossTargeting.targets">
       <SubType>Designer</SubType>
     </DataFile>
     <DataFile Include="Microsoft.NETFramework.targets" />
