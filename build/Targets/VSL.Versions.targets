@@ -55,7 +55,7 @@
       $(BUILD_BUILDNUMBER.Split('.')[0])
     </BuildNumberPart1>
     <BuildNumberPart2 Condition="'$(BUILD_BUILDNUMBER)' != ''">
-      $(BUILD_BUILDNUMBER.Split('.')[1].PadLeft(2,'0'))
+      $(BUILD_BUILDNUMBER.Split('.')[0])
     </BuildNumberPart2>
 
     <RoslynNuGetPreReleaseVersion>$(RoslynSemanticVersion)-beta1</RoslynNuGetPreReleaseVersion>
