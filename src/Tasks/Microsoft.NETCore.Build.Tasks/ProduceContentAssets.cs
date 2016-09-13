@@ -8,7 +8,7 @@ using System.Linq;
 namespace Microsoft.NETCore.Build.Tasks
 {
     /// <summary>
-    /// Read raised lock file items for content assets and apply process them to handle
+    /// Read raised lock file items for content assets and process them to handle
     /// preprocessing tokens, identify items that should be copied to output, and
     /// other filtering on content assets, including whether they match the active 
     /// project language.

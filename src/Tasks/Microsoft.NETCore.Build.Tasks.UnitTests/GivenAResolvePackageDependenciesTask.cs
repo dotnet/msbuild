@@ -427,8 +427,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
             IEnumerable<ITaskItem> fileDeps;
 
-            // assert asset properties are raised as metadata
-            
+            // Assert asset properties are raised as metadata            
             // Resource Assemblies
             fileDeps = task.FileDependencies
                 .Where(t => t.ItemSpec == "LibB/1.2.3/lib/file/R2.resources.dll");
