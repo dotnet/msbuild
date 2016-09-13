@@ -61,6 +61,7 @@ namespace Microsoft.Build.Framework
         /// <param name="targetName">target name</param>
         /// <param name="projectFile">project file</param>
         /// <param name="targetFile">file in which the target is defined</param>
+        /// <param name="parentTarget">The part of the target.</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         public TargetStartedEventArgs
         (

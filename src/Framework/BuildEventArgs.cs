@@ -87,7 +87,7 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of event sender</param>
-        /// <param name="eventTimeStamp">TimeStamp of when the event was created</param>
+        /// <param name="eventTimestamp">TimeStamp of when the event was created</param>
         protected BuildEventArgs(string message, string helpKeyword, string senderName, DateTime eventTimestamp)
         {
             this.message = message;

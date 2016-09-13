@@ -5,6 +5,8 @@
     <!-- Don't copy NuGet implementations directly, since that would require setting a runtime and targeting a specific architecture.
          Instead, it they will be deployed by DeployDependencies.proj. -->
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
+
+    <DocumentationFile Condition="'$(EnableDocumentationFile)' == 'true'">$(OutputPath)$(TargetName).xml</DocumentationFile>
   </PropertyGroup>
 
   <Import Project="$(CSharpTargets)" 

@@ -27,6 +27,9 @@ namespace Microsoft.Build.Framework
     public class ProjectStartedEventArgs : BuildStatusEventArgs
     {
         #region Constants
+        /// <summary>
+        /// Indicates an invalid project identifier.
+        /// </summary>
         public const int InvalidProjectId = -1;
         #endregion
 
@@ -101,6 +104,8 @@ namespace Microsoft.Build.Framework
         /// <param name="properties">list of properties</param>
         /// <param name="items">list of items</param>
         /// <param name="parentBuildEventContext">event context info for the parent project</param>
+        /// <param name="globalProperties">An <see cref="IDictionary{String, String}"/> containing global properties.</param>
+        /// <param name="toolsVersion">The tools version.</param>
         public ProjectStartedEventArgs
         (
             int projectId,
@@ -130,6 +135,7 @@ namespace Microsoft.Build.Framework
         /// <param name="targetNames">targets we are going to build (empty indicates default targets)</param>
         /// <param name="properties">list of properties</param>
         /// <param name="items">list of items</param>
+        /// <param name="eventTimestamp">The <see cref="DateTime"/> of the event.</param>
         public ProjectStartedEventArgs
         (
             string message,
@@ -169,6 +175,7 @@ namespace Microsoft.Build.Framework
         /// <param name="properties">list of properties</param>
         /// <param name="items">list of items</param>
         /// <param name="parentBuildEventContext">event context info for the parent project</param>
+        /// /// <param name="eventTimestamp">The <see cref="DateTime"/> of the event.</param>
         public ProjectStartedEventArgs
         (
             int projectId,
@@ -196,6 +203,9 @@ namespace Microsoft.Build.Framework
 #endif
         private int projectId;
 
+        /// <summary>
+        /// Gets the idenifier of the project.
+        /// </summary>
         public int ProjectId
         {
             get
