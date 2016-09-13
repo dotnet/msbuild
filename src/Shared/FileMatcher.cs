@@ -641,7 +641,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <param name="getFileSystemEntries">Delegate.</param>
         /// <param name="searchesToExclude">Patterns to exclude from the results</param>
-        /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Assumes no trailing slashes</param>
+        /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Keys assume paths are normalized with forward slashes and no trailing slashes</param>
         private static void GetFilesRecursive
         (
             IList<string> listOfFiles,
@@ -668,14 +668,14 @@ namespace Microsoft.Build.Shared
                 foreach (var searchToExclude in searchesToExclude)
                 {
                     //  The BaseDirectory of all the exclude searches should be the same as the include one
-                    Debug.Assert(searchToExclude.BaseDirectory == recursionState.BaseDirectory, "Expected exclude search base directory to match include search base directory");
+                    Debug.Assert(FileUtilities.PathsEqual(searchToExclude.BaseDirectory, recursionState.BaseDirectory), "Expected exclude search base directory to match include search base directory");
 
                     //  We can exclude all results in this folder if:
                     if (
                         //  We are matching files based on a filespec and not a regular expression
                         searchToExclude.SearchData.Filespec != null &&
                         //  The wildcard path portion of the excluded search matches the include search
-                        searchToExclude.RemainingWildcardDirectory == recursionState.RemainingWildcardDirectory &&
+                        FileUtilities.PathsEqual(searchToExclude.RemainingWildcardDirectory, recursionState.RemainingWildcardDirectory) &&
                         //  The exclude search will match ALL filenames OR
                         (searchToExclude.SearchData.Filespec == "*" || searchToExclude.SearchData.Filespec == "*.*" ||
                             //  The exclude search filename pattern matches the include search's pattern
@@ -751,8 +751,7 @@ namespace Microsoft.Build.Shared
                         for (int i = 0; i < excludeNextSteps.Length; i++)
                         {
                             if (excludeNextSteps[i].Subdirs != null &&
-                                // file system assumption on case sensitivity: https://github.com/Microsoft/msbuild/issues/781
-                                excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir.Equals(subdir, StringComparison.Ordinal)))
+                                excludeNextSteps[i].Subdirs.Any(excludedDir => FileUtilities.PathsEqual(excludedDir, subdir)))
                             {
                                 RecursionState thisExcludeStep = searchesToExclude[i];
                                 thisExcludeStep.BaseDirectory = subdir;
@@ -766,7 +765,9 @@ namespace Microsoft.Build.Shared
                     {
                         List<RecursionState> searchesForSubdir;
 
-                        if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
+                        // The normalization fixes https://github.com/Microsoft/msbuild/issues/917
+                        // and is a partial fix for https://github.com/Microsoft/msbuild/issues/724
+                        if (searchesToExcludeInSubdirs.TryGetValue(subdir.NormalizeForPathComparison(), out searchesForSubdir))
                         {
                             //  We've found the base directory that these exclusions apply to.  So now add them as normal searches
                             if (newSearchesToExclude == null)
@@ -860,32 +861,34 @@ namespace Microsoft.Build.Shared
                 // Find the next directory piece.
                 string pattern = null;
 
-                if (recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch &&
-                    recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch + s_directorySeparator)
+                if (!IsRecursiveDirectoryMatch(recursionState.RemainingWildcardDirectory))
                 {
                     int indexOfNextSlash = recursionState.RemainingWildcardDirectory.IndexOfAny(directorySeparatorCharacters);
                     ErrorUtilities.VerifyThrow(indexOfNextSlash != -1, "Slash should be guaranteed.");
 
-                    // Peel off the leftmost directory piece. So for example, if remainingWildcardDirectory
-                    // contains:
-                    //
-                    //        ?emp\foo\**\bar
-                    //
-                    // then put '?emp' into pattern. Then put the remaining part,
-                    //
-                    //        foo\**\bar
-                    //
-                    // back into remainingWildcardDirectory.
-                    // This is a performance optimization. We don't want to enumerate everything if we 
-                    // don't have to.
                     pattern = recursionState.RemainingWildcardDirectory.Substring(0, indexOfNextSlash);
-                    recursionState.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory.Substring(indexOfNextSlash + 1);
 
-                    // If pattern turned into **, then there's no choice but to enumerate everything.
                     if (pattern == recursiveDirectoryMatch)
                     {
+                        // If pattern turned into **, then there's no choice but to enumerate everything.
                         pattern = null;
                         recursionState.RemainingWildcardDirectory = recursiveDirectoryMatch;
+                    }
+                    else
+                    {
+                        // Peel off the leftmost directory piece. So for example, if remainingWildcardDirectory
+                        // contains:
+                        //
+                        //        ?emp\foo\**\bar
+                        //
+                        // then put '?emp' into pattern. Then put the remaining part,
+                        //
+                        //        foo\**\bar
+                        //
+                        // back into remainingWildcardDirectory.
+                        // This is a performance optimization. We don't want to enumerate everything if we 
+                        // don't have to.
+                        recursionState.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory.Substring(indexOfNextSlash + 1);
                     }
                 }
 
@@ -1419,7 +1422,7 @@ namespace Microsoft.Build.Shared
                 // if we have a directory specification that uses wildcards, and
                 (wildcardDirectoryPart.Length > 0) &&
                 // the specification is not a simple "**"
-                (wildcardDirectoryPart != (recursiveDirectoryMatch + s_directorySeparator));
+                !IsRecursiveDirectoryMatch(wildcardDirectoryPart);
             // then we need to use the regular expression
 
             // if we're not using the regular expression, get the file pattern extension
@@ -1450,11 +1453,7 @@ namespace Microsoft.Build.Shared
                 needsRecursion);
 
             result.SearchData = searchData;
-
-            // The double trim fixes https://github.com/Microsoft/msbuild/issues/917
-            // System.IO does not leave trailing slashes in directory enumerations.
-            // Since this string will be matched against System.IO directory enumerations, both need to agree on trailing slashes
-            result.BaseDirectory = fixedDirectoryPart.TrimEnd('/', '\\');
+            result.BaseDirectory = fixedDirectoryPart;
             result.RemainingWildcardDirectory = wildcardDirectoryPart;
 
             return SearchAction.RunSearch;
@@ -1571,21 +1570,24 @@ namespace Microsoft.Build.Shared
                         throw new NotSupportedException(excludeAction.ToString());
                     }
 
-                    if (excludeState.BaseDirectory != state.BaseDirectory)
+                    var excludeBaseDirectoryNormalized = excludeState.BaseDirectory.NormalizeForPathComparison();
+                    var includeBaseDirectoryNormalized = state.BaseDirectory.NormalizeForPathComparison();
+
+                    if (excludeBaseDirectoryNormalized != includeBaseDirectoryNormalized)
                     {
                         //  What to do if the BaseDirectory for the exclude search doesn't match the one for inclusion?
                         //  - If paths don't match (one isn't a prefix of the other), then ignore the exclude search.  Examples:
                         //      - c:\Foo\ - c:\Bar\
                         //      - c:\Foo\Bar\ - C:\Foo\Baz\
                         //      - c:\Foo\ - c:\Foo2\
-                        if (excludeState.BaseDirectory.Length == state.BaseDirectory.Length)
+                        if (excludeBaseDirectoryNormalized.Length == includeBaseDirectoryNormalized.Length)
                         {
                             //  Same length, but different paths.  Ignore this exclude search
                             continue;
                         }
-                        else if (excludeState.BaseDirectory.Length > state.BaseDirectory.Length)
+                        else if (excludeBaseDirectoryNormalized.Length > includeBaseDirectoryNormalized.Length)
                         {
-                            if (!excludeState.BaseDirectory.StartsWith(state.BaseDirectory))
+                            if (!excludeBaseDirectoryNormalized.StartsWith(includeBaseDirectoryNormalized))
                             {
                                 //  Exclude path is longer, but doesn't start with include path.  So ignore it.
                                 continue;
@@ -1603,11 +1605,13 @@ namespace Microsoft.Build.Shared
                                 searchesToExcludeInSubdirs = new Dictionary<string, List<RecursionState>>();
                             }
                             List<RecursionState> listForSubdir;
-                            if (!searchesToExcludeInSubdirs.TryGetValue(excludeState.BaseDirectory, out listForSubdir))
+                            if (!searchesToExcludeInSubdirs.TryGetValue(excludeBaseDirectoryNormalized, out listForSubdir))
                             {
                                 listForSubdir = new List<RecursionState>();
 
-                                searchesToExcludeInSubdirs[excludeState.BaseDirectory] = listForSubdir;
+                                // The normalization fixes https://github.com/Microsoft/msbuild/issues/917
+                                // and is a partial fix for https://github.com/Microsoft/msbuild/issues/724
+                                searchesToExcludeInSubdirs[excludeBaseDirectoryNormalized] = listForSubdir;
                             }
                             listForSubdir.Add(excludeState);
                         }
@@ -1629,7 +1633,7 @@ namespace Microsoft.Build.Shared
                                 //  Example: include="c:\git\msbuild\src\Framework\**\*.cs" exclude="c:\git\msbuild\*.cs"
                                 continue;
                             }
-                            else if (excludeState.RemainingWildcardDirectory == recursiveDirectoryMatch + s_directorySeparator)
+                            else if (IsRecursiveDirectoryMatch(excludeState.RemainingWildcardDirectory))
                             {
                                 //  The wildcard part is exactly "**\", so the exclude pattern will apply to everything in the include
                                 //  pattern, so simply update the exclude's BaseDirectory to be the same as the include baseDirectory
@@ -1699,5 +1703,7 @@ namespace Microsoft.Build.Shared
 
             return files;
         }
+
+        private static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
     }
 }

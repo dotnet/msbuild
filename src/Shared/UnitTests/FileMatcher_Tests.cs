@@ -691,9 +691,9 @@ namespace Microsoft.Build.UnitTests
         public void ExcludePattern()
         {
 
-            MatchDriverWithForwardAndBackwardSlashes(
+            MatchDriverWithDifferentSlashes(
                 @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
+                new[]    //  Exclude patterns
                 {
                     @"bin\**"
                 },
@@ -703,7 +703,7 @@ namespace Microsoft.Build.UnitTests
                 new string[]    //  Non matching files
                 {
                 },
-                new string[]    //  Non matching files that shouldn't be touched
+                new[]    //  Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",
@@ -711,22 +711,22 @@ namespace Microsoft.Build.UnitTests
                 }
             );
 
-            MatchDriverWithForwardAndBackwardSlashes(
+            MatchDriverWithDifferentSlashes(
                 @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
+                new[]    //  Exclude patterns
                 {
                     @"bin\**"
                 },
-                new string[]    //  Matching files
+                new[]    //  Matching files
                 {
                     "a.cs",
                     @"b\b.cs",
                 },
-                new string[]    //  Non matching files
+                new[]    //  Non matching files
                 {
                     @"b\b.txt"
                 },
-                new string[]    //  Non matching files that shouldn't be touched
+                new[]    //  Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",
@@ -734,24 +734,24 @@ namespace Microsoft.Build.UnitTests
                 }
             );
 
-            MatchDriverWithForwardAndBackwardSlashes(
+            MatchDriverWithDifferentSlashes(
                 @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
+                new[]    //  Exclude patterns
                 {
                     @"bin\**"
                 },
-                new string[]    //  Matching files
+                new[]    //  Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new string[]    //  Non matching files
+                new[]    //  Non matching files
                 {
                     @"foo.txt",
                     @"Foo\foo.txt",
                 },
-                new string[]    //  Non matching files that shouldn't be touched
+                new[]    //  Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",
@@ -763,20 +763,20 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExcludeSpecificFiles()
         {
-            MatchDriverWithForwardAndBackwardSlashes(
+            MatchDriverWithDifferentSlashes(
                 @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
+                new[]    //  Exclude patterns
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Matching files
+                new[]    //  Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new string[]    //  Non matching files
+                new[]    //  Non matching files
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
@@ -790,29 +790,29 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExcludePatternAndSpecificFiles()
         {
-            MatchDriverWithForwardAndBackwardSlashes(
+            MatchDriverWithDifferentSlashes(
                 @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
+                new[]    //  Exclude patterns
                 {
                     @"bin\**",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
 
                 },
-                new string[]    //  Matching files
+                new[]    //  Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new string[]    //  Non matching files
+                new[]    //  Non matching files
                 {
                     @"foo.txt",
                     @"Foo\foo.txt",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Non matching files that shouldn't be touched
+                new[]    //  Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",
@@ -821,68 +821,72 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [Fact]
-        public void ExcludeComplexPattern()
+        [Theory]
+        [InlineData(
+            @"**\*.cs", // Include Pattern
+            new[] // Exclude patterns
+            {
+                @"**\bin\**\*.cs",
+                @"src\Common\**",
+            },
+            new[] // Matching files
+            {
+                @"foo.cs",
+                @"src\Framework\Properties\AssemblyInfo.cs",
+                @"src\Framework\Foo\Bar\Baz\Buzz.cs"
+            },
+            new[] // Non matching files
+            {
+                @"foo.txt",
+                @"src\Framework\Readme.md",
+                @"src\Common\foo.cs",
+
+                // Ideally these would be untouchable
+                @"src\Framework\bin\foo.cs",
+                @"src\Framework\bin\Debug",
+                @"src\Framework\bin\Debug\foo.cs",
+            },
+            new[] // Non matching files that shouldn't be touched
+            {
+                @"src\Common\Properties\",
+                @"src\Common\Properties\AssemblyInfo.cs",
+            }
+            )]
+        [InlineData(
+            @"src\**\proj\**\*.cs", // Include Pattern
+            new[] // Exclude patterns
+            {
+                @"src\**\proj\**\none\**\*",
+            },
+            new[] // Matching files
+            {
+                @"src\proj\m1.cs",
+                @"src\proj\a\m2.cs",
+                @"src\b\proj\m3.cs",
+                @"src\c\proj\d\m4.cs",
+            },
+            new[] // Non matching files
+            {
+                @"nm1.cs",
+                @"a\nm2.cs",
+                @"src\nm3.cs",
+                @"src\a\nm4.cs",
+
+                // Ideally these would be untouchable
+                @"src\proj\none\nm5.cs",
+                @"src\proj\a\none\nm6.cs",
+                @"src\b\proj\none\nm7.cs",
+                @"src\c\proj\d\none\nm8.cs",
+                @"src\e\proj\f\none\g\nm8.cs",
+            },
+            new string[] // Non matching files that shouldn't be touched
+            {
+            }
+            )]
+        // patterns with excludes that ideally would prune entire recursive subtrees (files in pruned tree aren't touched at all) but the exclude pattern is too complex for that to work with the current logic
+        public void ExcludeComplexPattern(string include, string[] exclude, string[] matching, string[] nonMatching, string[] untouchable)
         {
-            MatchDriverWithForwardAndBackwardSlashes(
-                @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
-                {
-                    @"**\bin\**\*.cs",
-                    @"src\Common\**",
-                },
-                new string[]    //  Matching files
-                {
-                    @"foo.cs",
-                    @"src\Framework\Properties\AssemblyInfo.cs",
-                    @"src\Framework\Foo\Bar\Baz\Buzz.cs"
-                },
-                new string[]    //  Non matching files
-                {
-                    @"foo.txt",
-                    @"src\Framework\Readme.md",
-                    @"src\Common\foo.cs",
-
-                    //  Ideally these would be in the files that aren't touched at all, but the exclude pattern is too complex for that to work with the current logic
-                    @"src\Framework\bin\foo.cs",
-                    @"src\Framework\bin\Debug",
-                    @"src\Framework\bin\Debug\foo.cs",
-                },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                }
-            );
-
-            MatchDriverWithForwardAndBackwardSlashes(
-                @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
-                {
-                    @"**\bin\**\*.cs",
-                    @"src\Common\**",
-                },
-                new string[]    //  Matching files
-                {
-                    @"foo.cs",
-                    @"src\Framework\Properties\AssemblyInfo.cs",
-                    @"src\Framework\Foo\Bar\Baz\Buzz.cs"
-                },
-                new string[]    //  Non matching files
-                {
-                    @"foo.txt",
-                    @"src\Framework\Readme.md",
-                    @"src\Common\foo.cs",
-
-                    //  Ideally these would be in the files that aren't touched at all, but the exclude pattern is too complex for that to work with the current logic
-                    @"src\Framework\bin\foo.cs",
-                    @"src\Framework\bin\Debug",
-                    @"src\Framework\bin\Debug\foo.cs",
-                },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                    @"src\Common\Properties\",
-                    @"src\Common\Properties\AssemblyInfo.cs",
-                }
-            );
+            MatchDriverWithDifferentSlashes(include, exclude, matching, nonMatching, untouchable);
         }
 
 
@@ -993,7 +997,7 @@ namespace Microsoft.Build.UnitTests
                         }
 
                         // Does the candidate directory match the requested path?
-                        if (String.Compare(path, candidateDirectoryName, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (FileUtilities.PathsEqual(path, candidateDirectoryName))
                         {
                             // Match the basic *.* or null. These both match any file.
                             if
@@ -1156,7 +1160,7 @@ namespace Microsoft.Build.UnitTests
                 string normalized = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 
                 // Replace leading UNC.
-                if (normalized.Substring(0, 2) == @"\\")
+                if (normalized.StartsWith(@"\\"))
                 {
                     normalized = "<:UNC:>" + normalized.Substring(2);
                 }
@@ -1298,7 +1302,7 @@ namespace Microsoft.Build.UnitTests
         /// 
         /// To preserve current MSBuild behaviour, it only does so if the path is not rooted. Rooted paths do not support forward slashes (as observed on MSBuild 14.0.25420.1)
         /// </summary>
-        private static void MatchDriverWithForwardAndBackwardSlashes
+        private static void MatchDriverWithDifferentSlashes
             (
             string filespec,
             string[] excludeFilespecs,

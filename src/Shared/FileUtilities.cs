@@ -56,6 +56,9 @@ namespace Microsoft.Build.Shared
             cacheDirectory = null;
         }
 
+        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+        internal static readonly StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
+
         /// <summary>
         /// Retrieves the MSBuild runtime cache directory
         /// </summary>
@@ -327,7 +330,7 @@ namespace Microsoft.Build.Shared
                        // is available here - we don't want managed apps mucking 
                        // with this for security reasons.
                     */
-                    if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1)
+                    if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(@"\\?\globalroot", PathComparison) != -1)
                     {
                         finalFullPath = Path.GetFullPath(finalFullPath);
                     }
@@ -470,11 +473,9 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool ComparePathsNoThrow(string first, string second, string currentDirectory)
         {
-            // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
-            var stringComparison = StringComparison.OrdinalIgnoreCase;
 
             // perf: try comparing the bare strings first
-            if (string.Equals(first, second, stringComparison))
+            if (string.Equals(first, second, PathComparison))
             {
                 return true;
             }
@@ -482,7 +483,7 @@ namespace Microsoft.Build.Shared
             var firstFullPath = NormalizePathForComparisonNoThrow(first, currentDirectory);
             var secondFullPath = NormalizePathForComparisonNoThrow(second, currentDirectory);
 
-            return string.Equals(firstFullPath, secondFullPath, stringComparison);
+            return string.Equals(firstFullPath, secondFullPath, PathComparison);
         }
 
         /// <summary>
@@ -698,7 +699,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsSolutionFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".sln", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".sln", PathComparison));
         }
 
         /// <summary>
@@ -706,7 +707,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".vcproj", PathComparison));
         }
 
         /// <summary>
@@ -714,7 +715,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsMetaprojectFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".metaproj", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".metaproj", PathComparison));
         }
 
         /// <summary>
@@ -835,6 +836,37 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(paths, nameof(paths));
 
             return paths.Aggregate(root, Path.Combine);
+        }
+
+        internal static string TrimTrailingSlashes(this string s)
+        {
+            return s.TrimEnd('/', '\\');
+        }
+
+        /// <summary>
+        /// Replace all backward slashes to forward slashes
+        /// </summary>
+        internal static string ToSlash(this string s)
+        {
+            return s.Replace('\\', '/');
+        }
+
+        internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();
+
+        internal static bool PathsEqual(string path1, string path2)
+        {
+            var trim1 = path1.TrimTrailingSlashes();
+            var trim2 = path2.TrimTrailingSlashes();
+
+            if (string.Equals(trim1, trim2, PathComparison))
+            {
+                return true;
+            }
+
+            var slash1 = trim1.ToSlash();
+            var slash2 = trim2.ToSlash();
+
+            return string.Equals(slash1, slash2, PathComparison);
         }
     }
 }

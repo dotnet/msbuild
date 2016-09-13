@@ -1448,6 +1448,6 @@ namespace Microsoft.Build.UnitTests
         internal static string ToForwardSlash(string path) =>
             Path.IsPathRooted(path)
                 ? path
-                : path.Replace("\\", "/");
+                : path.ToSlash();
     }
 }
