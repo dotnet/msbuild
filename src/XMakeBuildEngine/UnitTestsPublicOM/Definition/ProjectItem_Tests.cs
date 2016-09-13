@@ -606,16 +606,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
             };
 
-            var includeWithForwardSlash = ToForwardSlash(includeString);
-            var excludeWithForwardSlash = ToForwardSlash(excludeString);
+            var includeWithForwardSlash = Helpers.ToForwardSlash(includeString);
+            var excludeWithForwardSlash = Helpers.ToForwardSlash(excludeString);
 
             runTest(includeString, excludeString);
             runTest(includeWithForwardSlash, excludeWithForwardSlash);
             runTest(includeString, excludeWithForwardSlash);
             runTest(includeWithForwardSlash, excludeString);
         }
-
-        private static string ToForwardSlash(string s) => s.Replace("\\", "/");
 
         /// <summary>
         /// Expression like @(x) should clone metadata, but metadata should still point at the original XML objects

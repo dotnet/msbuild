@@ -1440,5 +1440,14 @@ namespace Microsoft.Build.UnitTests
                 Directory.Delete(root);
             }
         }
+
+        /// <summary>
+        /// Used for file matching tests
+        /// MSBuild does not accept forward slashes on rooted paths, so those are returned unchanged
+        /// </summary>
+        internal static string ToForwardSlash(string path) =>
+            Path.IsPathRooted(path)
+                ? path
+                : path.Replace("\\", "/");
     }
 }
