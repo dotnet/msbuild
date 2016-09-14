@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Resgen
             using (var input = sourceFile.File.OpenRead())
             {
                 var document = XDocument.Load(input);
-                var data = document.Root.Elements("data");
+                var data = document.Root.Elements("data").ToArray();
                 if (data.Any())
                 {
                     var rw = new ResourceWriter(outputStream);
@@ -25,7 +25,8 @@ namespace Microsoft.DotNet.Tools.Resgen
                     foreach (var e in data)
                     {
                         var name = e.Attribute("name").Value;
-                        var value = e.Element("value").Value;
+                        var valueElement = e.Element("value");
+                        var value = valueElement != null ? valueElement.Value : e.Value;
                         rw.AddResource(name, value);
                     }
 
