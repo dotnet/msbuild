@@ -836,12 +836,12 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         //  TODO: Test preprocessor formatting (project.SaveLogicalProject)
         //  TODO: Test loading project from string instead of file
         //        ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-        //  TODO: Add test for whether single quotes get changed to double quotes
         //  TODO: Rename preserveWhitespace parameters (and variable names, etc) to preserveFormatting
         //  TODO: If preserveFormatting is true, don't change single quotes to double quotes
+        //  TODO: Add tests for preserving formatting when mutating project (ie adding an item, modifying a property)
 
-        //  TODO: Not sure this actually belongs in the preprocessor tests
-        
+        //  TODO: Not sure the formatting tests actually belongs in the preprocessor tests
+
         [Fact]
         public void ProjectCommentFormatting()
         {
@@ -854,7 +854,43 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </ItemGroup>
 </Project>");
 
-            VerifyWhitespacePreserved(content);
+            string reformattedContent = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj`>
+      <!-- Comment -->
+      <Project>{3699f81b-2d03-46c5-abd7-e88a4c946f28}</Project>
+    </ProjectReference>
+  </ItemGroup>
+</Project>");
+
+            VerifyFormattingPreserved(content);
+            VerifyProjectReformatting(content, reformattedContent);
+        }
+
+        [Fact]
+        public void ProjectWhitespaceFormatting()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>  
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj`>
+<Project>{3699f81b-2d03-46c5-abd7-e88a4c946f28}</Project>
+    </ProjectReference>
+  </ItemGroup>
+</Project>");
+
+            string reformattedContent = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj`>
+      <Project>{3699f81b-2d03-46c5-abd7-e88a4c946f28}</Project>
+    </ProjectReference>
+  </ItemGroup>
+</Project>");
+
+            VerifyFormattingPreserved(content);
+            VerifyProjectReformatting(content, reformattedContent);
         }
 
         [Fact]
@@ -869,10 +905,20 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </ItemGroup>
 </Project>");
 
-            VerifyWhitespacePreserved(content);
+            string reformattedContent = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <ProjectReference Include=""..\CLREXE\CLREXE.vcxproj"">
+      <Project>{3699f81b-2d03-46c5-abd7-e88a4c946f28}</Project>
+    </ProjectReference>
+  </ItemGroup>
+</Project>");
+
+            VerifyFormattingPreserved(content);
+            VerifyProjectReformatting(content, reformattedContent);
         }
 
-        void VerifyWhitespacePreserved(string projectContents)
+        void VerifyFormattingPreserved(string projectContents)
         {
             string directory = null;
 
@@ -892,6 +938,36 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
                 string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
                     projectContents;
+                string actual = writer.ToString();
+
+                Helpers.VerifyAssertLineByLine(expected, actual);
+            }
+            finally
+            {
+                Directory.Delete(directory, true);
+            }
+        }
+
+        void VerifyProjectReformatting(string originalContents, string expectedContents)
+        {
+            string directory = null;
+
+            try
+            {
+                directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                Directory.CreateDirectory(directory);
+
+                string file = Path.Combine(directory, "test.proj");
+                File.WriteAllText(file, originalContents);
+
+                ProjectRootElement xml = ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection,
+                    preserveWhitespace: false);
+                Project project = new Project(xml);
+                StringWriter writer = new StringWriter();
+                project.Save(writer);
+
+                string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
+                    expectedContents;
                 string actual = writer.ToString();
 
                 Helpers.VerifyAssertLineByLine(expected, actual);
