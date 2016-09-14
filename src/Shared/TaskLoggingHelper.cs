@@ -53,7 +53,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Public constructor which can be used by task factories to assist them in logging messages.
         /// </summary>
-        /// <param name="taskInstance">task containing an instance of this class</param>
         public TaskLoggingHelper(IBuildEngine buildEngine, string taskName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(buildEngine, "buildEngine");

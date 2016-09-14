@@ -6,7 +6,7 @@
          Instead, it they will be deployed by DeployDependencies.proj. -->
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
 
-    <DocumentationFile Condition="'$(EnableDocumentationFile)' == 'true'">$(OutputPath)$(TargetName).xml</DocumentationFile>
+    <DocumentationFile Condition="'$(EnableDocumentationFile)' == 'true'">$(OutputPath)$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
   <Import Project="$(CSharpTargets)" 

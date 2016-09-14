@@ -1320,6 +1320,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
+        /// <param name="excludeSpecsUnescaped"></param>
         /// <returns>The array of files.</returns>
         internal static string[] GetFiles
         (
@@ -1479,6 +1480,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
+        /// <param name="excludeSpecsUnescaped"></param>
         /// <param name="getFileSystemEntries">Get files that match the given file spec.</param>
         /// <param name="directoryExists">Determine whether a directory exists.</param>
         /// <returns>The array of files.</returns>
