@@ -56,7 +56,7 @@
              />
   </Target>
 
-  <Target Name="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
+  <Target Name="SignPackages" >
 
     <MSBuild BuildInParallel="true"
              Projects="@(SigningProjectFile)"
