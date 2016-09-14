@@ -4,7 +4,7 @@ package name=Microsoft.VisualStudio.ProjectSystem.CSharp.Templates
         version=2.0.0.0
         vs.package.type=vsix
         vs.package.vsixId=A45AB8EC-B6A9-439E-9473-CB6C62C0C09D
-        vs.package.installSize=12747
+        vs.package.installSize=32768
 
 vs.localizedResources
   vs.localizedResource language=en-us

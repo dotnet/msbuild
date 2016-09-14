@@ -1,0 +1,15 @@
+use vs
+
+package name=Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates
+        version=2.0.0.0
+        vs.package.type=vsix
+        vs.package.vsixId=A40894B6-B035-4BFE-A674-2FF0C582C971
+        vs.package.installSize=32768
+
+vs.localizedResources
+  vs.localizedResource language=en-us
+                       title="Microsoft VisualStudio ProjectSystem VisualBasic Templates"
+                       description="ProjectSystem VisualBasic Templates"
+
+vs.payloads
+  vs.payload source=$(OutputPath)\Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsix

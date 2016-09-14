@@ -13,13 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
-    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
-    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-web-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
-
-    <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
-    <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
-    <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Web.Nuget.proj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsmanproj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsmanproj" />
   </ItemGroup>
   <Target Name="BuildModernVsixPackages">
@@ -36,36 +30,6 @@
              Targets="Rebuild"
              Condition="'$(RunningInMicroBuild)' == 'true'"
              />
-  </Target>
-
-  <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
-
-    <ItemGroup>
-      <TestAssembly Include="$(TestsDirectory)*Tests.dll" />
-      <XmlTestFile Include="$(TestsDirectory)TestResults.xml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <NetCoreAppProductAssets Include="$(PackagesLayoutToolsNetCoreAppDir)\*" />
-    </ItemGroup>
-
-    <Message Text="Running tests for %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
-
-    <!-- Copy all the 'netcore1.0' product assemblies to the test directory, so the tests can load them. -->
-    <Copy SourceFiles="@(NetCoreAppProductAssets)"
-          DestinationFolder="$(TestsDirectory)"
-          />
-
-    <Exec Command="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;"
-          LogStandardErrorAsError="true"
-          WorkingDirectory="$(TestsDirectory)"
-          IgnoreExitCode="true"
-          >
-      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
-    </Exec>
-
-    <Error Text="There were test failures, for full log see %(XmlTestFile.FullPath)" Condition="$(ExitCode) != 0" />
-
   </Target>
 
   <Target Name="Build" DependsOnTargets="BuildModernVsixPackages" />
