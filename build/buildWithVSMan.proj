@@ -43,21 +43,7 @@
              />
   </Target>
   
-  <Target Name="BuildModernVsixPackages" DependsOnTargets="SignPackages">
-    <Message Importance="High" Text="'$(BUILD_BUILDNUMBER)'" />
-    <MSBuild Projects="@(VsManProjectFile)"
-             Targets="Build"
-             Condition="'$(RunningInMicroBuild)' == 'true'"
-             />
-  </Target>
 
-  <Target Name="RebuildModernVsixPackages" DependsOnTargets="SignPackages">
-
-    <MSBuild Projects="@(VsManProjectFile)"
-             Targets="Rebuild"
-             Condition="'$(RunningInMicroBuild)' == 'true'"
-             />
-  </Target>
   
   <Target Name="RebuildSolution">
 
@@ -106,6 +92,22 @@
              Projects="@(WebNuGetProjectFile)"
              Targets="Rebuild"
              Properties="$(CommonMSBuildGlobalProperties)"
+             />
+  </Target>
+
+  <Target Name="BuildModernVsixPackages" DependsOnTargets="SignPackages">
+    <Message Importance="High" Text="'$(BUILD_BUILDNUMBER)'" />
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Build"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
+             />
+  </Target>
+
+  <Target Name="RebuildModernVsixPackages" DependsOnTargets="SignPackages">
+
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Rebuild"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
              />
   </Target>
 
