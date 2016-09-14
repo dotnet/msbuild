@@ -58,6 +58,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static readonly ProjectRootElementCache.OpenProjectRootElement s_openLoaderDelegate = OpenLoader;
 
+        private static readonly ProjectRootElementCache.OpenProjectRootElement s_openLoaderPreserveWhitespaceDelegate = OpenLoaderPreserveWhitespace;
+
         /// <summary>
         /// The default encoding to use / assume for a new project.
         /// </summary>
@@ -200,7 +202,8 @@ namespace Microsoft.Build.Construction
         /// Assumes path is already normalized.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        private ProjectRootElement(string path, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext)
+        private ProjectRootElement(string path, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext,
+            bool preserveWhitespace)
             : base()
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
@@ -214,7 +217,7 @@ namespace Microsoft.Build.Construction
             _versionOnDisk = _version;
             _timeLastChangedUtc = DateTime.UtcNow;
 
-            XmlDocumentWithLocation document = LoadDocument(path);
+            XmlDocumentWithLocation document = LoadDocument(path, preserveWhitespace);
 
             ProjectParser.Parse(document, this);
 
@@ -996,12 +999,18 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection)
         {
+            return Open(path, projectCollection,
+                preserveWhitespace: false);
+        }
+
+        public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool preserveWhitespace)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
 
             path = FileUtilities.NormalizePath(path);
 
-            return Open(path, projectCollection.ProjectRootElementCache, true /*Is explicitly loaded*/);
+            return Open(path, projectCollection.ProjectRootElementCache, true /*Is explicitly loaded*/, preserveWhitespace);
         }
 
         /// <summary>
@@ -1735,11 +1744,14 @@ namespace Microsoft.Build.Construction
         /// Uses the specified project root element cache.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        internal static ProjectRootElement Open(string path, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded)
+        internal static ProjectRootElement Open(string path, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded,
+            bool preserveWhitespace)
         {
             ErrorUtilities.VerifyThrowInternalRooted(path);
 
-            ProjectRootElement projectRootElement = projectRootElementCache.Get(path, s_openLoaderDelegate, isExplicitlyLoaded);
+            ProjectRootElement projectRootElement = projectRootElementCache.Get(path,
+                preserveWhitespace ? s_openLoaderPreserveWhitespaceDelegate : s_openLoaderDelegate,
+                isExplicitlyLoaded);
 
             return projectRootElement;
         }
@@ -1771,7 +1783,8 @@ namespace Microsoft.Build.Construction
 
             ProjectRootElement projectRootElement = projectRootElementCache.Get(
                 fullPath,
-                (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, loggingService, cache, buildEventContext),
+                (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, loggingService, cache, buildEventContext,
+                                    preserveWhitespace: false),
                 isExplicitlyLoaded);
 
             return projectRootElement;
@@ -1870,10 +1883,23 @@ namespace Microsoft.Build.Construction
         /// <param name="projectRootElementCache">The cache to load the PRE into.</param>
         private static ProjectRootElement OpenLoader(string path, ProjectRootElementCache projectRootElementCache)
         {
+            return OpenLoader(path, projectRootElementCache,
+                preserveWhitespace: false);
+        }
+
+        private static ProjectRootElement OpenLoaderPreserveWhitespace(string path, ProjectRootElementCache projectRootElementCache)
+        {
+            return OpenLoader(path, projectRootElementCache,
+                preserveWhitespace: true);
+        }
+
+        private static ProjectRootElement OpenLoader(string path, ProjectRootElementCache projectRootElementCache, bool preserveWhitespace)
+        {
             return new ProjectRootElement(
                 path,
                 projectRootElementCache,
-                new BuildEventContext(0, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId));
+                new BuildEventContext(0, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId),
+                preserveWhitespace);
         }
 
         /// <summary>
@@ -1890,7 +1916,8 @@ namespace Microsoft.Build.Construction
                 string toolsVersion,
                 ILoggingService loggingService,
                 ProjectRootElementCache projectRootElementCache,
-                BuildEventContext buildEventContext
+                BuildEventContext buildEventContext,
+                bool preserveWhitespace
             )
         {
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
@@ -1903,7 +1930,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 // OK it's a regular project file, load it normally.
-                return new ProjectRootElement(projectFile, projectRootElementCache, buildEventContext);
+                return new ProjectRootElement(projectFile, projectRootElementCache, buildEventContext, preserveWhitespace);
             }
             catch (InvalidProjectFileException)
             {
@@ -1924,11 +1951,12 @@ namespace Microsoft.Build.Construction
         /// Does NOT add to the ProjectRootElementCache. Caller should add after verifying subsequent MSBuild parsing succeeds.
         /// </summary>
         /// <param name="fullPath">The full path to the document to load.</param>
-        private XmlDocumentWithLocation LoadDocument(string fullPath)
+        private XmlDocumentWithLocation LoadDocument(string fullPath, bool preserveWhitespace)
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
             XmlDocumentWithLocation document = new XmlDocumentWithLocation();
+            document.PreserveWhitespace = preserveWhitespace;
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectLoadFromFileBegin, CodeMarkerEvent.perfMSBuildProjectLoadFromFileEnd))
 #endif

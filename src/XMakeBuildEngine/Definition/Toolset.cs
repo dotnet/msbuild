@@ -1011,7 +1011,9 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        projectRootElement = ProjectRootElement.Open(defaultTasksFile, projectRootElementCache, false /*The tasks file is not a explicitly loaded file*/);
+                        projectRootElement = ProjectRootElement.Open(defaultTasksFile, projectRootElementCache,
+                            false /*The tasks file is not a explicitly loaded file*/,
+                            preserveWhitespace: false);
                     }
 
                     foreach (ProjectElement elementXml in projectRootElement.Children)

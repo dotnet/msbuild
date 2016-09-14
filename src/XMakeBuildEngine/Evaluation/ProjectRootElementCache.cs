@@ -227,6 +227,8 @@ namespace Microsoft.Build.Evaluation
                             // use: it checks the file content as well as the timestamp. That's better than completely disabling
                             // the cache as we get test coverage of the rest of the cache code.
                             XmlDocument document = new XmlDocument();
+                            //  TODO: does PreserveWhitespace need to be an option here?
+                            //document.PreserveWhitespace = true;
                             using (XmlTextReader xtr = new XmlTextReader(projectRootElement.FullPath))
                             {
                                 xtr.DtdProcessing = DtdProcessing.Ignore;
