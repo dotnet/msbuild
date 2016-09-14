@@ -17,7 +17,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
-    /// 
+    /// Class used to store and interrogate inputs and outputs recorded by tracking operations.
     /// </summary>
     public class FlatTrackingData
     {
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="tlogFilesLocal">The local .tlog files.</param>
         /// <param name="tlogFilesToIgnore">The .tlog files to ignore</param>
         /// <param name="skipMissingFiles">Ignore files that do not exist on disk</param>
-        /// /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
+        /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
         /// <param name="excludedInputPaths">The set of paths that contain files that are to be ignored during up to date check</param>
         private void InternalConstruct(ITask ownerTask, ITaskItem[] tlogFilesLocal, ITaskItem[] tlogFilesToIgnore, bool skipMissingFiles, DateTime missingFileTimeUtc, string[] excludedInputPaths)
         {
@@ -964,7 +964,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         InputOrOutputNewerThanTracking,
         /// <summary>
-        /// THe input is newer than the tracking file.
+        /// The input is newer than the tracking file.
         /// </summary>
         InputNewerThanTracking
     }

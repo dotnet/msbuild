@@ -14,7 +14,12 @@ namespace Microsoft.Build.Utilities
     [DebuggerDisplay("DirectoryPath: {DirectoryPath}, TargetFrameworkVersion = {TargetFrameworkVersion}")]
     public class AssemblyFoldersFromConfigInfo
     {
-        internal AssemblyFoldersFromConfigInfo(string directoryPath, Version targetFrameworkVersion)
+        /// <summary>
+        /// Initializes a new instance of the AssemblyFoldersFromConfigInfo class.
+        /// </summary>
+        /// <param name="directoryPath">The directory path.</param>
+        /// <param name="targetFrameworkVersion">The <see cref="Version"/> of the target framework.</param>
+        public AssemblyFoldersFromConfigInfo(string directoryPath, Version targetFrameworkVersion)
         {
             ErrorUtilities.VerifyThrowArgumentNull(directoryPath, "directoryPath");
             ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion, "targetFrameworkVersion");

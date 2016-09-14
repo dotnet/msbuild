@@ -67,7 +67,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="ownerTask">The task that is using file tracker</param>
         /// <param name="tlogFiles">The .write. tlog files to interpret</param>
-        /// /// <param name="constructOutputsFromTLogs">The output graph is built from the .write. tlogs</param>
+        /// <param name="constructOutputsFromTLogs">The output graph is built from the .write. tlogs</param>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLogs", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public CanonicalTrackedOutputFiles(ITask ownerTask, ITaskItem[] tlogFiles, bool constructOutputsFromTLogs)
         {
