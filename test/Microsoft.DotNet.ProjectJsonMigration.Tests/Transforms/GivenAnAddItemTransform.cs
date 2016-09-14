@@ -9,7 +9,7 @@ using FluentAssertions;
 using Microsoft.DotNet.ProjectJsonMigration.Models;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
-namespace Microsoft.DotNet.Migration.Tests
+namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenAnAddItemTransform
     {

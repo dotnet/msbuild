@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.Migration.Tests;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.TestFramework;

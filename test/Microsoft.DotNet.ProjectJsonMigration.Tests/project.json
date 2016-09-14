@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "buildOptions": {
     "copyToOutput": ["MSBuild.exe", "MSBuild.exe.config"],
-    "keyFile": "../../tools/Key.snk"
+    "keyFile": "../../tools/test_key.snk",
   },
   "dependencies": {
     "Microsoft.NETCore.App": {
