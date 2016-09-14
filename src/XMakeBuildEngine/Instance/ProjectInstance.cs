@@ -2127,7 +2127,8 @@ namespace Microsoft.Build.Execution
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
 
-            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded);
+            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded,
+                preserveFormatting: false);
             projectRootElement.DirectoryPath = Path.GetDirectoryName(projectFile);
             ProjectInstance instance = new ProjectInstance(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext);
             return new ProjectInstance[] { instance };

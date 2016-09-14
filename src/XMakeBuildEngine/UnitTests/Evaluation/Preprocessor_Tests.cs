@@ -834,9 +834,6 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         }
 
         //  TODO: Test preprocessor formatting (project.SaveLogicalProject)
-        //  TODO: Test loading project from string instead of file
-        //        ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-        //  TODO: Rename preserveWhitespace parameters (and variable names, etc) to preserveFormatting
         //  TODO: If preserveFormatting is true, don't change single quotes to double quotes
         //  TODO: Add tests for preserving formatting when mutating project (ie adding an item, modifying a property)
 
@@ -920,6 +917,28 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
         void VerifyFormattingPreserved(string projectContents)
         {
+            VerifyFormattingPreservedFromString(projectContents);
+            VerifyFormattingPreservedFromFile(projectContents);
+        }
+
+        void VerifyFormattingPreservedFromString(string projectContents)
+        {
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectContents)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
+                projectContents;
+            string actual = writer.ToString();
+
+            Helpers.VerifyAssertLineByLine(expected, actual);
+        }
+
+        void VerifyFormattingPreservedFromFile(string projectContents)
+        {
             string directory = null;
 
             try
@@ -931,7 +950,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 File.WriteAllText(file, projectContents);
 
                 ProjectRootElement xml = ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection,
-                    preserveWhitespace: true);
+                    preserveFormatting: true);
                 Project project = new Project(xml);
                 StringWriter writer = new StringWriter();
                 project.Save(writer);
@@ -950,6 +969,28 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
         void VerifyProjectReformatting(string originalContents, string expectedContents)
         {
+            VerifyProjectReformattingFromString(originalContents, expectedContents);
+            VerifyProjectReformattingFromFile(originalContents, expectedContents);
+        }
+
+        void VerifyProjectReformattingFromString(string originalContents, string expectedContents)
+        {
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(originalContents)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: false);
+            Project project = new Project(xml);
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
+                expectedContents;
+            string actual = writer.ToString();
+
+            Helpers.VerifyAssertLineByLine(expected, actual);
+        }
+
+        void VerifyProjectReformattingFromFile(string originalContents, string expectedContents)
+        {
             string directory = null;
 
             try
@@ -961,7 +1002,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 File.WriteAllText(file, originalContents);
 
                 ProjectRootElement xml = ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection,
-                    preserveWhitespace: false);
+                    preserveFormatting: false);
                 Project project = new Project(xml);
                 StringWriter writer = new StringWriter();
                 project.Save(writer);
