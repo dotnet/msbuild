@@ -1,6 +1,6 @@
 use vs
 
-package name=Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates
+package name=Microsoft.VisualStudio.Templates.VisualBasic.NetCore
         version=2.0.0.0
         vs.package.type=vsix
         vs.package.vsixId=A40894B6-B035-4BFE-A674-2FF0C582C971
@@ -12,4 +12,4 @@ vs.localizedResources
                        description="ProjectSystem VisualBasic Templates"
 
 vs.payloads
-  vs.payload source=$(OutputPath)\Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsix
+  vs.payload source=$(OutputPath)\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsix

@@ -13,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsmanproj" />
-    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsmanproj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsmanproj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
   </ItemGroup>
   <Target Name="BuildModernVsixPackages">
     <Message Importance="High" Text="'$(BUILD_BUILDNUMBER)'" />

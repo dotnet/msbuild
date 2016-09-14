@@ -7,7 +7,7 @@
     <OutputLocalized>false</OutputLocalized>
     <OutputType>manifest</OutputType>
     <IsPackage>true</IsPackage>
-    <OutputName>Microsoft.VisualStudio.ProjectSystem.CSharp.Templates</OutputName>
+    <OutputName>Microsoft.VisualStudio.Templates.VisualBasic.NetCore</OutputName>
     <UseVisualStudioVersion>true</UseVisualStudioVersion>
   </PropertyGroup>
 
@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Package Include="Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.swr" />
+    <Package Include="Microsoft.VisualStudio.Templates.VisualBasic.NetCore.swr" />
   </ItemGroup>
 
   <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />

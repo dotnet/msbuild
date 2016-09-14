@@ -14,10 +14,10 @@
   <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
 
   <Target Name="BeforeBuild">
-    <MSBuild Projects="Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.swixproj" Targets="Build" />
+    <MSBuild Projects="Microsoft.VisualStudio.Templates.VisualBasic.NetCore.swixproj" Targets="Build" />
   </Target>
 
   <ItemGroup>
-    <MergeManifest Include="$(OutputPath)\Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.json" />
+    <MergeManifest Include="$(OutputPath)\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.json" />
   </ItemGroup>
 </Project>
