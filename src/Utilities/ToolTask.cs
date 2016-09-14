@@ -943,7 +943,7 @@ namespace Microsoft.Build.Utilities
         /// Delete temporary file. If the delete fails for some reason (e.g. file locked by anti-virus) then
         /// the call will not throw an exception. Instead a warning will be logged, but the build will not fail.
         /// </summary>
-        /// <param name="filename">File to delete</param>
+        /// <param name="fileName">File to delete</param>
         protected void DeleteTempFile(string fileName)
         {
             if (s_preserveTempFiles)
@@ -1073,7 +1073,6 @@ namespace Microsoft.Build.Utilities
         /// Kills the given process that is executing the tool, because the tool's
         /// time-out period expired.
         /// </summary>
-        /// <param name="proc"></param>
         private void KillToolProcessOnTimeout(Process proc, bool isBeingCancelled)
         {
             // kill the process if it's not finished yet
@@ -1182,6 +1181,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="dataQueue"></param>
         /// <param name="dataAvailableSignal"></param>
         /// <param name="messageImportance"></param>
+        /// <param name="queueType"></param>
         private void LogMessagesFromStandardErrorOrOutput
         (
             Queue dataQueue,

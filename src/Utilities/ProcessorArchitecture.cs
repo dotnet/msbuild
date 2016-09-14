@@ -15,16 +15,30 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     static public class ProcessorArchitecture
     {
-        // Known processor architectures
+        /// <summary>
+        /// Represents the 32-bit x86 processor architecture.
+        /// </summary>
         public const string X86 = "x86";
+        /// <summary>
+        /// Represents the 64-bit IA64 processor architecture.
+        /// </summary>
         public const string IA64 = "IA64";
 
+        /// <summary>
+        /// Represents the 64-bit AMD64 processor architecture.
+        /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "AMD", Justification = "This is the correct casing for ProcessorArchitecture")]
         public const string AMD64 = "AMD64";
 
+        /// <summary>
+        /// Represents the Microsoft Intermediate Language processor architecture.
+        /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "MSIL", Justification = "This is the correct casing for ProcessorArchitecture")]
         public const string MSIL = "MSIL";
 
+        /// <summary>
+        /// Represents the ARM processor architecture.
+        /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ARM", Justification = "This is the correct casing for ProcessorArchitecture")]
         public const string ARM = "ARM";
 
