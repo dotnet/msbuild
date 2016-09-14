@@ -1,7 +1,8 @@
 ﻿{
   "version": "1.0.0-preview3-*",
   "buildOptions": {
-    "warningsAsErrors": true
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
     "Microsoft.DotNet.Compiler.Common": {
