@@ -116,25 +116,45 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        GetRunInformation
+                                        Run Information
 
-    Returns the ProcessStart information that can be used to run this project.
+    The ProcessStart information that can be used to run this project.
     ============================================================
     -->
 
-  <Target Name="GetRunInformation"
-          DependsOnTargets="GenerateRunInformation"
-          Outputs="@(RunInformation)" />
+  <PropertyGroup>
+    <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(StartWorkingDirectory)</RunWorkingDirectory>
+  </PropertyGroup>
 
-  <Target Name="GenerateRunInformation">
-    <ItemGroup>
-      <RunInformation Include="$(MSBuildProjectFullPath)">
+  <Choose>
+    <When Condition="'$(StartAction)' == 'Program'">
+      <PropertyGroup>
+        <RunCommand Condition="'$(RunCommand)' == ''">$(StartProgram)</RunCommand>
+        <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
+      </PropertyGroup>
+    </When>
+    
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe'">
+      <PropertyGroup>
         <!-- TODO: https://github.com/dotnet/sdk/issues/20 Need to get the DotNetHost path from MSBuild -->
-        <CommandName>dotnet</CommandName>
-        <Args>exec;$(TargetDir)/$(AssemblyName).dll</Args>
-      </RunInformation>
-    </ItemGroup>
-  </Target>
+        <RunCommand Condition="'$(RunCommand)' == ''">dotnet</RunCommand>
+
+        <_NetCoreRunArguments>exec &quot;$(TargetPath)&quot;</_NetCoreRunArguments>
+        <RunArguments Condition="'$(RunArguments)' == '' and '$(StartArguments)' != ''">$(_NetCoreRunArguments) $(StartArguments)</RunArguments>
+        <RunArguments Condition="'$(RunArguments)' == ''">$(_NetCoreRunArguments)</RunArguments>
+
+        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(OutDir)</RunWorkingDirectory>
+      </PropertyGroup>
+    </When>
+    
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(OutputType)' == 'Exe'">
+      <PropertyGroup>
+        <RunCommand Condition="'$(RunCommand)' == ''">$(TargetPath)</RunCommand>
+        <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
+        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(OutDir)</RunWorkingDirectory>
+      </PropertyGroup>
+    </When>
+  </Choose>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets')" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />
