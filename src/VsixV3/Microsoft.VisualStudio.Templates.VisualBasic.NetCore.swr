@@ -12,4 +12,4 @@ vs.localizedResources
                        description="ProjectSystem VisualBasic Templates"
 
 vs.payloads
-  vs.payload source=$(OutputPath)\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsix
+  vs.payload source=$(OutputPath)\Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsix
