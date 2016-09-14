@@ -20,8 +20,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="assembly"></param>
         internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo)
             : this(type, assemblyLoadInfo, null)
         {

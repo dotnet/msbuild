@@ -164,6 +164,9 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        /// <summary>
+        /// Gets or sets the Update value.
+        /// </summary>
         public string Update
         {
             [DebuggerStepThrough]

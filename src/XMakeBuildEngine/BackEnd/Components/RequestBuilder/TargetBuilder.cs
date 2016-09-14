@@ -121,6 +121,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="callback">The callback to be used to handle new project build requests.</param>
         /// <param name="targetNames">The names of the targets to build.</param>
         /// <param name="baseLookup">The Lookup containing all current items and properties for this target.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to use when building the targets.</param>
         /// <returns>The target's outputs and result codes</returns>
         public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
@@ -240,6 +241,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="targets">The targets to build.</param>
         /// <param name="continueOnError">True to continue building the remaining targets if one fails.</param>
+        /// <param name="taskLocation">The <see cref="ElementLocation"/> of the task.</param>
         /// <returns>The results for each target.</returns>
         /// <remarks>
         /// Dev9 behavior refers to the following:
@@ -618,6 +620,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="baseLookup">The lookup to be used to build these targets.</param>
         /// <param name="addAsErrorTarget">True if this should be considered an error target.</param>
         /// <param name="stopProcessingOnCompletion">True if target stack processing should terminate when the last target in the list is processed.</param>
+        /// <param name="pushType">The <see cref="TargetPushType"/> targets being pushed onto the stack.</param>
         /// <returns>True if we actually pushed any targets, false otherwise.</returns>
         private async Task<bool> PushTargets(IList<TargetSpecification> targets, TargetEntry parentTargetEntry, Lookup baseLookup, bool addAsErrorTarget, bool stopProcessingOnCompletion, TargetPushType pushType)
         {

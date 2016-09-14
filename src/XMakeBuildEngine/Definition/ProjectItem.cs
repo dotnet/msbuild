@@ -870,6 +870,7 @@ namespace Microsoft.Build.Evaluation
             /// Used for making items from "just strings" and from expressions like "@(Compile, ';')"
             /// </summary>
             /// <param name="include">The include.</param>
+            /// <param name="definingProject">The path to the project that defined the item.</param>
             /// <returns>A new project item.</returns>
             /// <comments>
             /// NOTE: defining project is ignored because we already know the ItemElement associated with 

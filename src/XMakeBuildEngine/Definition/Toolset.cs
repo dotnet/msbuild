@@ -231,6 +231,8 @@ namespace Microsoft.Build.Evaluation
         /// Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.
         /// </param>
+        /// <param name="projectCollection">The project collection that this toolset should inherit from</param>
+        /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
         public Toolset(string toolsVersion, string toolsPath, IDictionary<string, string> buildProperties, ProjectCollection projectCollection, string msbuildOverrideTasksPath)
             : this(toolsVersion, toolsPath, buildProperties, projectCollection, null, msbuildOverrideTasksPath)
         {
@@ -266,6 +268,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="toolsVersion">Name of the toolset</param>
         /// <param name="toolsPath">Path to this toolset's tasks and targets</param>
+        /// <param name="environmentProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the environment properties.</param>
+        /// <param name="globalProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the global properties.</param>
+        /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
+        /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion)
         {
             ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
@@ -291,6 +297,12 @@ namespace Microsoft.Build.Evaluation
         /// Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.
         /// </param>
+        /// <param name="environmentProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the environment properties.</param>
+        /// <param name="globalProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the global properties.</param>
+        /// <param name="subToolsets">The set of sub-toolsets to add to this toolset</param>
+        /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
+        /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
+        /// <param name="importSearchPathsTable">Map of project import properties to their list of fall-back search paths.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, List<string>> importSearchPathsTable = null)
             : this(toolsVersion, toolsPath, environmentProperties, globalProperties, msbuildOverrideTasksPath, defaultOverrideToolsVersion)
         {
@@ -328,6 +340,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The project collection.</param>
         /// <param name="getFiles">A delegate to intercept GetFiles calls.  For unit testing.</param>
         /// <param name="loadXmlFromPath">A delegate to intercept Xml load calls.  For unit testing.</param>
+        /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
+        /// <param name="directoryExists"></param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, ProjectCollection projectCollection, DirectoryGetFiles getFiles, LoadXmlFromPath loadXmlFromPath, string msbuildOverrideTasksPath, DirectoryExists directoryExists)
             : this(toolsVersion, toolsPath, buildProperties, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, null, msbuildOverrideTasksPath, null)
         {
@@ -813,6 +827,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="loggingServices">The logging services used to log during task registration.</param>
         /// <param name="buildEventContext">The build event context used to log during task registration.</param>
+        /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         /// <returns>The task registry</returns>
         internal TaskRegistry GetTaskRegistry(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCache projectRootElementCache)
         {
@@ -840,6 +855,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="loggingServices">The logging services used to log during task registration.</param>
         /// <param name="buildEventContext">The build event context used to log during task registration.</param>
+        /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         /// <returns>The task registry</returns>
         internal TaskRegistry GetOverrideTaskRegistry(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCache projectRootElementCache)
         {
@@ -860,6 +876,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         /// <param name="loggingServices">The logging services to use to log during this registration.</param>
         /// <param name="buildEventContext">The build event context to use to log during this registration.</param>
+        /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         private void RegisterDefaultTasks(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCache projectRootElementCache)
         {
             if (!_defaultTasksRegistrationAttempted)

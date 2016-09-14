@@ -190,6 +190,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         /// <param name="projectFile">The project file which contains the ProjectRootElement.  Must be a full path.</param>
         /// <param name="openProjectRootElement">The delegate to use to load if necessary. May be null.</param>
+        /// <param name="isExplicitlyLoaded"><code>true</code> if the project is explicitly loaded, otherwise <code>false</code>.</param>
         /// <returns>The ProjectRootElement instance if one exists.  Null otherwise.</returns>
         internal ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement, bool isExplicitlyLoaded)
         {

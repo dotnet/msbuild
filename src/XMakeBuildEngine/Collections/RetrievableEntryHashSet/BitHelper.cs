@@ -66,7 +66,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Instantiates a BitHelper with a heap alloc'd array of ints
         /// </summary>
-        /// <param name="bitArray">int array to hold bits</param>
+        /// <param name="bitArrayPtr">int array to hold bits</param>
         /// <param name="length">length of int array</param>
         [SecurityCritical]
         internal BitHelper(int* bitArrayPtr, int length)

@@ -59,6 +59,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         Local = 4,
 
+        /// <summary>
+        /// Use the default location or locations.
+        /// </summary>
         Default = None
 #if FEATURE_SYSTEM_CONFIGURATION
                 | ConfigurationFile
@@ -1673,7 +1676,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Reset the toolsets using the provided toolset reader, used by unit tests
-        /// <summary>
+        /// </summary>
         internal void ResetToolsetsForTests(ToolsetRegistryReader registryReaderForTestsOnly)
         {
             InitializeToolsetCollection(registryReader:registryReaderForTestsOnly);

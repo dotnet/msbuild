@@ -1823,6 +1823,7 @@ namespace Microsoft.Build.Execution
                 /// Creates an instance-model item.
                 /// </summary>
                 /// <param name="include">The include.</param>
+                /// <param name="definingProject">The project that defined the item.</param>
                 /// <returns>A new instance item.</returns>
                 public ProjectItemInstance CreateItem(string include, string definingProject)
                 {
@@ -1964,6 +1965,7 @@ namespace Microsoft.Build.Execution
                 /// Creates a taskitem.
                 /// </summary>
                 /// <param name="includeEscaped">The include.</param>
+                /// <param name="definingProject">The project that defined the item.</param>
                 /// <returns>A new instance item.</returns>
                 public TaskItem CreateItem(string includeEscaped, string definingProject)
                 {

@@ -352,8 +352,6 @@ namespace Microsoft.Build.BackEnd
         /// Extract only the unique inputs and outputs from all the inputs and outputs gathered
         /// during depedency analysis
         /// </summary>
-        /// <param name="inputs">[out] the unique inputs</param>
-        /// <param name="outputs">[out] the unique outputs</param>
         private void LogUniqueInputsAndOutputs()
         {
             string inputs = null;
@@ -819,6 +817,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="itemVectors">Collection for item vectors</param>
         /// <param name="itemVectorTransforms">Collection for transforms if they should be collected separately, else null</param>
         /// <param name="discreteItems"></param>
+        /// <param name="elementLocation"></param>
         private void SeparateItemVectorsFromDiscreteItems
         (
             IList<string> items,
@@ -981,8 +980,6 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// NOTE: Internal for unit test purposes only.
         /// </remarks>
-        /// <param name="inputs"></param>
-        /// <param name="outputs"></param>
         /// <returns>true, if any "input" is newer than any "output", or if any input or output does not exist.</returns>
         internal static bool IsAnyOutOfDate<T>(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, string projectDirectory, IList<T> inputs, IList<T> outputs)
         {

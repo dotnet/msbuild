@@ -145,6 +145,7 @@ namespace Microsoft.Build.Execution
         /// <param name="toolsVersion">The tools version to use for the build.  May be null.</param>
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use.  May be null.</param>
+        /// <param name="flags">The <see cref="BuildRequestDataFlags"/> to use.</param>
         public BuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, string toolsVersion, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags)
         {

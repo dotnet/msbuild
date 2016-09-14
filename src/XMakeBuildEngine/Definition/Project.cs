@@ -191,6 +191,8 @@ namespace Microsoft.Build.Evaluation
         /// Project will be added to the specified project collection when it is named.
         /// </summary>
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
+        /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         public Project(IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection)
             : this(ProjectRootElement.Create(projectCollection), globalProperties, toolsVersion, projectCollection)
         {
@@ -234,6 +236,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="xml">ProjectRootElement to use</param>
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
         /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection)
             : this(xml, globalProperties, toolsVersion, projectCollection, ProjectLoadSettings.Default)
         {
@@ -249,6 +252,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="xml">ProjectRootElement to use</param>
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
         /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
+        /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
             : this(xml, globalProperties, toolsVersion, null /* no explicit sub-toolset version */, projectCollection, loadSettings)
         {
@@ -265,6 +270,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
         /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
         /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
+        /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
@@ -332,6 +339,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
         /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
+        /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
             : this(xmlReader, globalProperties, toolsVersion, null /* no explicit sub-toolset version */, projectCollection, loadSettings)
         {
@@ -427,6 +435,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="globalProperties">The global properties. May be null.</param>
         /// <param name="toolsVersion">The tools version. May be null.</param>
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
+        /// <param name="loadSettings">The load settings for this project.</param>
         public Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
             : this(projectFile, globalProperties, toolsVersion, null /* no explicitly specified sub-toolset version */, projectCollection, loadSettings)
         {
@@ -1044,10 +1053,10 @@ namespace Microsoft.Build.Evaluation
         /// 
         ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
         ///<Foo Include="*.a" Exclude="3.a"/>
-        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b";**\bar\*.b"/>
+        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
         ///<Foo Include="$(P)"/> 
         ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
-        ///<Foo Include="*.cs"/ Exclude="@(Bar)"/> (out of project cone glob)
+        ///<Foo Include="*.cs" Exclude="@(Bar)"/> (out of project cone glob)
         ///</code>
         /// 
         ///Example result: 
@@ -3424,7 +3433,6 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Returns the property with the specified name or null if it was not present
             /// </summary>
-            /// <param name="name">The property name.</param>
             /// <returns>The property.</returns>
             public ProjectProperty GetProperty(string name, int startIndex, int endIndex)
             {
@@ -3502,13 +3510,29 @@ namespace Microsoft.Build.Evaluation
     }
     /// <summary>
     /// Data class representing a result from <see cref="Project.GetAllGlobs()"/> and its overloads.
+    /// This represents a glob found in an item include together with the item element it came from
+    /// and the excludes that were present on that item.
     /// </summary>
     public class GlobResult
     {
+        /// <summary>
+        /// Gets the original glob used to generate the result.
+        /// </summary>
         public string Glob { get; private set; }
+
+        /// <summary>
+        /// Gets an <see cref="ISet{String}"/> containing paths that were excluded.
+        /// </summary>
         public ISet<string> Excludes{ get; private set; }
+
+        /// <summary>
+        /// Gets the original <see cref="ProjectItemElement"/> that contained the glob.
+        /// </summary>
         public ProjectItemElement ItemElement { get; private set; }
 
+        /// <summary>
+        /// Initializes an instance of the GlobResult class.
+        /// </summary>
         public GlobResult(ProjectItemElement itemElement, string glob, ISet<string> excludes)
         {
             ItemElement = itemElement;
@@ -3549,9 +3573,21 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     public enum Operation
     {
-        Include, 
+        /// <summary>
+        /// The element referenced the item by an Include.
+        /// </summary>
+        Include,
+        /// <summary>
+        /// The element referenced the item by an Exclude.
+        /// </summary>
         Exclude,
+        /// <summary>
+        /// The element referenced the item by an Update.
+        /// </summary>
         Update,
+        /// <summary>
+        /// The element referenced the item by a Remove.
+        /// </summary>
         Remove
     }
 
@@ -3560,11 +3596,29 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     public class ProvenanceResult
     {
+        /// <summary>
+        /// Gets the <see cref="Operation"/> that was performed.
+        /// </summary>
         public Operation Operation { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="ProjectItemElement"/> that contains the operation.
+        /// </summary>
         public ProjectItemElement ItemElement { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="Provenance"/> of how the item appeared in the operation.
+        /// </summary>
         public Provenance Provenance { get; private set; }
+
+        /// <summary>
+        /// Gets the number of occurences of the item.
+        /// </summary>
         public int Occurrences { get; private set; }
 
+        /// <summary>
+        /// Initializes an instance of the ProvenanceResult class.
+        /// </summary>
         public ProvenanceResult(ProjectItemElement itemElement, Operation operation, Provenance provenance, int occurrences)
         {
             ItemElement = itemElement;

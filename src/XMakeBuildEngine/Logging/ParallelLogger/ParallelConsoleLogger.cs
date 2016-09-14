@@ -627,6 +627,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// property values, using the cached reference to the list from the 
         /// appropriate ProjectStarted event.
         /// </summary>
+        /// <param name="e">A <see cref="BuildEventArgs"/> object containing information about the build event.</param>
         /// <param name="properties">List of properties</param>
         internal void WriteProperties(BuildEventArgs e, IEnumerable properties)
         {
@@ -689,6 +690,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// items, using the cached reference to the list from the 
         /// appropriate ProjectStarted event.
         /// </summary>
+        /// <param name="e">A <see cref="BuildEventArgs"/> object containing information about the build event.</param>
         /// <param name="items">List of items</param>
         internal void WriteItems(BuildEventArgs e, IEnumerable items)
         {
@@ -1242,6 +1244,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="message">Message to be formatted to fit on the console</param>
         /// <param name="prefixAlreadyWritten">Has the prefix(timestamp or key been written)</param>
+        /// <param name="prefixAdjustment">An amount to adjust the prefix by.</param>
         private void WriteMessageAligned(string message, bool prefixAlreadyWritten, int prefixAdjustment)
         {
             // This method may require the splitting of lines inorder to format them to the console, this must be an atomic operation
@@ -1292,8 +1295,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Write message takinginto account whether or not the prefix (timestamp and key) have already been written on the line
         /// </summary>
-        /// <param name="nonNullMessage"></param>
-        /// <param name="prefixAlreadyWritten"></param>
         private void WriteBasedOnPrefix(string nonNullMessage, bool prefixAlreadyWritten, int adjustedPrefixWidth)
         {
             if (prefixAlreadyWritten)

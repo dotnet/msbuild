@@ -324,7 +324,7 @@ namespace Microsoft.Build.Construction
         /// Returns "true" if it's a project that's expected to be buildable, or false if it's 
         /// not (e.g. a solution folder) 
         /// </summary>
-        /// <param name="projectType">The project type</param>
+        /// <param name="project">The project in the solution</param>
         /// <returns>Whether the project is expected to be buildable</returns>
         internal static bool IsBuildableProject(ProjectInSolution project)
         {

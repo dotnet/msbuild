@@ -96,6 +96,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Consumes the buildEventArg and creates a logMessagePacket
         /// </summary>
         /// <param name="buildEvent">Build event to package into a INodePacket</param>
+        /// <param name="sinkId">The sink identifier.</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void Consume(BuildEventArgs buildEvent, int sinkId)
         {

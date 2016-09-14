@@ -126,6 +126,8 @@ namespace Microsoft.Build.Execution
         /// <param name="taskLocation">The location for this task.</param>
         /// <param name="condition">The unevaluated condition.</param>
         /// <param name="continueOnError">The unevaluated continue on error.</param>
+        /// <param name="msbuildRuntime">The MSBuild runtime.</param>
+        /// <param name="msbuildArchitecture">The MSBuild architecture.</param>
         internal ProjectTaskInstance
             (
             string name,

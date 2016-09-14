@@ -172,6 +172,7 @@ namespace Microsoft.Build.Execution
         /// this constructor instead of the toolset state.
         /// </summary>
         /// <param name="toolset">The Toolset containing the toolser task registry</param>
+        /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         internal TaskRegistry(Toolset toolset, ProjectRootElementCache projectRootElementCache)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -954,8 +955,9 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal const string XamlTaskFactory = "XamlTaskFactory";
 
-            /// <summary>
+
 #if FEATURE_APPDOMAIN
+            /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
             private static readonly Object s_taskFactoryTypeLoaderLock = new Object();

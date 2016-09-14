@@ -22,12 +22,30 @@ namespace Microsoft.Build.Construction
     /// </remarks>
     public enum SolutionProjectType
     {
-        Unknown,            // Everything else besides the below well-known project types.
-        KnownToBeMSBuildFormat,     // C#, VB, and VJ# projects
-        SolutionFolder,     // Not really a project, but persisted as such in the .SLN file.
-        WebProject,         // Venus projects
-        WebDeploymentProject, // Web Deployment (.wdproj) projects -- MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
-        EtpSubProject       // Project inside an Enterprise Template project
+        /// <summary>
+        /// Everything else besides the below well-known project types.
+        /// </summary>
+        Unknown,
+        /// <summary>
+        /// C#, VB, and VJ# projects
+        /// </summary>
+        KnownToBeMSBuildFormat,
+        /// <summary>
+        /// 
+        /// </summary>
+        SolutionFolder,       // Not really a project, but persisted as such in the .SLN file.
+        /// <summary>
+        /// ASP.NET projects
+        /// </summary>
+        WebProject,
+        /// <summary>
+        /// Web Deployment (.wdproj) projects
+        /// </summary>
+        WebDeploymentProject, //  MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
+        /// <summary>
+        /// Project inside an Enterprise Template project
+        /// </summary>
+        EtpSubProject
     }
 
     internal struct AspNetCompilerParameters

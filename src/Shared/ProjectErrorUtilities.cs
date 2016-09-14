@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Xml;
 
 /******************************************************************************
  * 
@@ -18,7 +17,6 @@ using System.Xml;
 #if FEATURE_MSBUILD_DEBUGGER
 using Microsoft.Build.Debugging;
 #endif
-using Microsoft.Build.Evaluation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.Shared
@@ -39,7 +37,7 @@ namespace Microsoft.Build.Shared
         /// ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         internal static void VerifyThrowInvalidProject
         (
@@ -54,7 +52,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for one string format argument.
         /// </summary>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         internal static void ThrowInvalidProject
@@ -71,7 +69,7 @@ namespace Microsoft.Build.Shared
         /// Overload for one string format argument.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         internal static void VerifyThrowInvalidProject
@@ -88,7 +86,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for two string format arguments.
         /// </summary>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -106,7 +104,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for three string format arguments.
         /// </summary>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -126,7 +124,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for four string format arguments.
         /// </summary>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -148,8 +146,9 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for if there are more than four string format arguments.
         /// </summary>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
+        /// <param name="args"></param>
         internal static void ThrowInvalidProject
         (
             IElementLocation elementLocation,
@@ -164,7 +163,7 @@ namespace Microsoft.Build.Shared
         /// Overload for two string format arguments.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -184,7 +183,7 @@ namespace Microsoft.Build.Shared
         /// Overload for three string format arguments.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -206,7 +205,7 @@ namespace Microsoft.Build.Shared
         /// Overload for four string format arguments.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -234,7 +233,7 @@ namespace Microsoft.Build.Shared
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the
         /// error sub-category (can be null).</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         internal static void VerifyThrowInvalidProject
         (
@@ -258,7 +257,7 @@ namespace Microsoft.Build.Shared
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the
         /// error sub-category (can be null).</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         internal static void VerifyThrowInvalidProject
@@ -285,7 +284,7 @@ namespace Microsoft.Build.Shared
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the
         /// error sub-category (can be null).</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -314,7 +313,7 @@ namespace Microsoft.Build.Shared
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the
         /// error sub-category (can be null).</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -345,7 +344,7 @@ namespace Microsoft.Build.Shared
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the
         /// error sub-category (can be null).</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
@@ -382,7 +381,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="errorSubCategoryResourceName">The resource string for the
         /// error sub-category (can be null).</param>
-        /// <param name="xmlNode">The invalid project node (can be null).</param>
+        /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         private static void ThrowInvalidProject

@@ -41,6 +41,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="nodeConfigId">The node-assigned configuration id</param>
         /// <param name="globalConfigId">The build manager-assigned configuration id</param>
+        /// <param name="resultsNodeId">The result node identifier.</param>
         public BuildRequestConfigurationResponse(int nodeConfigId, int globalConfigId, int resultsNodeId)
         {
             _nodeConfigId = nodeConfigId;

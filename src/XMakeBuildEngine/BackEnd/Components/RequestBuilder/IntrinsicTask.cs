@@ -73,6 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskInstance">The task instance object.</param>
         /// <param name="loggingContext">The logging context.</param>
         /// <param name="projectInstance">The project instance.</param>
+        /// <param name="logTaskInputs"><code>true</code> to log task inputs, otherwise <code>false</code>.</param>
         /// <returns>An instantiated intrinsic task.</returns>
         internal static IntrinsicTask InstantiateTask(ProjectTargetInstanceChild taskInstance, TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs)
         {

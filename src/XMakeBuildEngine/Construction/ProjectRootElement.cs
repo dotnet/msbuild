@@ -1025,6 +1025,7 @@ namespace Microsoft.Build.Construction
         /// Uses the specified project collection.
         /// </summary>
         /// <param name="path">The path of the ProjectRootElement, cannot be null.</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> to load the project into.</param>
         /// <returns>The loaded ProjectRootElement, or null if it is not currently in memory.</returns>
         /// <remarks>
         /// It is possible for ProjectRootElements to be brought into memory and discarded due to memory pressure. Therefore

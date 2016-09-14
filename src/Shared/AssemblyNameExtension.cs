@@ -430,8 +430,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Compare one assembly name to another.
         /// </summary>
-        /// <param name="that"></param>
-        /// <returns></returns>
         internal int CompareTo(AssemblyNameExtension that, bool considerRetargetableFlag)
         {
             // Are they identical?
@@ -671,7 +669,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Compare two assembly names for equality.
         /// </summary>
-        /// <param name="that"></param>
         /// <returns></returns>
         private bool EqualsImpl(AssemblyNameExtension that, bool ignoreVersion, bool considerRetargetableFlag)
         {

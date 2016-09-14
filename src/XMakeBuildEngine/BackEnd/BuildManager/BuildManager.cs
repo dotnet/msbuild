@@ -213,6 +213,9 @@ namespace Microsoft.Build.Execution
         private bool _disposed = false;
 
 #if DEBUG
+        /// <summary>
+        /// <code>true</code> to wait for a debugger to be attached, otherwise <code>false</code>.
+        /// </summary>
         public static bool WaitForDebugger { get; set; }
 #endif
 

@@ -114,6 +114,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="function">Function name for errors</param>
         /// <param name="argumentNode">Argument to be expanded</param>
+        /// <param name="state"></param>
         /// <param name="isFilePath">True if this is afile name and the path should be normalized</param>
         /// <returns>Scalar result</returns>
         private string ExpandArgumentForScalarParameter(string function, GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state,
@@ -156,7 +157,6 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Check that the number of function arguments is correct.
         /// </summary>
-        /// <param name="expected"></param>
         private void VerifyArgumentCount(int expected, ConditionEvaluator.IConditionEvaluationState state)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject

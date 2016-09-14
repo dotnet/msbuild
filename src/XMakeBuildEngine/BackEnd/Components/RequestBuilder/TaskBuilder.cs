@@ -135,6 +135,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="mode">The mode in which to execute tasks.</param>
         /// <param name="inferLookup">The lookup to be used for inference.</param>
         /// <param name="executeLookup">The lookup to be used during execution.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to use when executing the task.</param>
         /// <returns>The result of running the task batch.</returns>
         /// <remarks>
         /// The ExecuteTask method takes a task as specified by XML and executes it.  This procedure is comprised 

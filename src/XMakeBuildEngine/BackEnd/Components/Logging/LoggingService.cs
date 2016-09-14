@@ -228,6 +228,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Initialize an instance of a loggingService.
         /// </summary>
         /// <param name="loggerMode">Should the events be processed synchronously or asynchronously</param>
+        /// <param name="nodeId">The node identifier.</param>
         protected LoggingService(LoggerMode loggerMode, int nodeId)
         {
             _projectFileMap = new Dictionary<int, string>();
@@ -528,6 +529,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This method is used by the object factories to create instances of components.
         /// </summary>
         /// <param name="mode">Should the logger component created be synchronous or asynchronous</param>
+        /// <param name="node">The identifier of the node.</param>
         /// <returns>An instantiated LoggingService as a IBuildComponent</returns>
         public static ILoggingService CreateLoggingService(LoggerMode mode, int node)
         {
@@ -944,6 +946,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// In Synchronous mode the event should be routed to the correct sink or logger right away
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
+        /// <param name="allowThrottling"><code>true</code> to allow throttling, otherwise <code>false</code>.</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         internal virtual void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
         {

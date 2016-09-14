@@ -169,8 +169,6 @@ namespace Microsoft.Build.Collections
         /// Since resizes are relatively expensive (require rehashing), this attempts to minimize 
         /// the need to resize by setting the initial capacity based on size of collection. 
         /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="comparer"></param>
         public RetrievableEntryHashSet(int suggestedCapacity, IEqualityComparer<IKeyed> comparer)
             : this(comparer)
         {
@@ -182,8 +180,6 @@ namespace Microsoft.Build.Collections
         /// Since resizes are relatively expensive (require rehashing), this attempts to minimize 
         /// the need to resize by setting the initial capacity based on size of collection. 
         /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="comparer"></param>
         public RetrievableEntryHashSet(IEnumerable<T> collection, IEqualityComparer<IKeyed> comparer)
             : this(comparer)
         {
@@ -339,7 +335,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Gets the item if any with the given name
         /// </summary>
-        /// <param name="item">item to check for containment</param>
+        /// <param name="key">key to check for containment</param>
         /// <returns>true if item contained; false if not</returns>
         public T Get(string key)
         {
@@ -1181,7 +1177,6 @@ namespace Microsoft.Build.Collections
         /// defragmentation, allowing faster execution; note that this is reasonable since 
         /// AddEvenIfPresent attempts to insert new elements in re-opened spots.
         /// </summary>
-        /// <param name="sizeSuggestion"></param>
         private void IncreaseCapacity()
         {
             Debug.Assert(_buckets != null, "IncreaseCapacity called on a set with no elements");

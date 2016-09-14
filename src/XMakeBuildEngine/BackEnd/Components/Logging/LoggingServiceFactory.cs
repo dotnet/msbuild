@@ -37,6 +37,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Tell the factory what kind of logging services is should create
         /// </summary>
         /// <param name="mode">Synchronous or Asynchronous</param>
+        /// <param name="nodeId">The node identifier.</param>
         internal LoggingServiceFactory(LoggerMode mode, int nodeId)
         {
             _logMode = mode;

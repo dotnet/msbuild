@@ -70,7 +70,9 @@ namespace Microsoft.Build.BackEnd
         /// Creates an instance of this class using the given bucket data.
         /// </summary>
         /// <param name="itemNames">Item types being batched on: null indicates no batching is occurring</param>
-        /// <param name="itemMetadata">Hashtable of item metadata values: null indicates no batching is occurring</param>
+        /// <param name="metadata">Hashtable of item metadata values: null indicates no batching is occurring</param>
+        /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
+        /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
         internal ItemBucket
         (
             ICollection<string> itemNames,
@@ -131,7 +133,6 @@ namespace Microsoft.Build.BackEnd
         /// PERF NOTE: A dummy bucket is intentionally very light-weight, and it
         /// allocates a minimum of memory compared to a real bucket.
         /// </remarks>
-        /// <param name="itemMetadata"></param>
         /// <returns>An item bucket that is invalid for everything except comparisons.</returns>
         internal static ItemBucket GetDummyBucketForComparisons(Dictionary<string, string> metadata)
         {
