@@ -67,7 +67,7 @@ $msbuildSummaryLog = Join-Path -path $logPath -childPath "templates.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "templates.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "templates.err"
 
-msbuild $commonBuildArgsVsMan /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+msbuild $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
 
 # NET Core Build 
@@ -76,4 +76,7 @@ $msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
 
 dotnet build3 $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+if($LASTEXITCODE -ne 0) { throw "Failed to build" }
+
+msbuild $commonBuildArgsVsMan /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }

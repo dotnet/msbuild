@@ -22,80 +22,7 @@
     <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Web.Nuget.proj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsmanproj" />
   </ItemGroup>
-
-  <Target Name="RestorePackages">
-
-    <Message Text="Restoring packages for %(SolutionFile.Filename)" Importance="high" />
-
-    <Exec Command="$(DotNetTool) restore src test --legacy-packages-directory --verbosity Minimal"
-          WorkingDirectory="$(RepositoryRootDirectory)"
-          />
-  </Target>
-
-  <Target Name="BuildSolution">
-
-    <Message Text="Building %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(SolutionFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-  
-
-  
-  <Target Name="RebuildSolution">
-
-    <Message Text="Rebuilding %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(SolutionFile)"
-             Targets="Rebuild"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-
-  <Target Name="SignPackages" >
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(SigningProjectFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-
-  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(NuGetProjectFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(WebNuGetProjectFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-
-  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(NuGetProjectFile)"
-             Targets="Rebuild"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(WebNuGetProjectFile)"
-             Targets="Rebuild"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-
-  <Target Name="BuildModernVsixPackages" DependsOnTargets="SignPackages">
+  <Target Name="BuildModernVsixPackages">
     <Message Importance="High" Text="'$(BUILD_BUILDNUMBER)'" />
     <MSBuild Projects="@(VsManProjectFile)"
              Targets="Build"
@@ -103,7 +30,7 @@
              />
   </Target>
 
-  <Target Name="RebuildModernVsixPackages" DependsOnTargets="SignPackages">
+  <Target Name="RebuildModernVsixPackages">
 
     <MSBuild Projects="@(VsManProjectFile)"
              Targets="Rebuild"
@@ -141,7 +68,7 @@
 
   </Target>
 
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildModernVsixPackages;BuildNuGetPackages;Test" />
-  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;BuildModernVsixPackages;RebuildNuGetPackages;Test" />
+  <Target Name="Build" DependsOnTargets="BuildModernVsixPackages" />
+  <Target Name="Rebuild" DependsOnTargets="BuildModernVsixPackages" />
 
 </Project>
