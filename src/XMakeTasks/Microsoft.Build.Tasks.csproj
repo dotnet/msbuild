@@ -721,6 +721,10 @@
     <Content Include="Microsoft.Common.CurrentVersion.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Microsoft.Common.CrossTargeting.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Microsoft.Common.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -819,6 +823,9 @@
       <SubType>Designer</SubType>
     </DataFile>
     <DataFile Include="Microsoft.Common.CurrentVersion.targets">
+      <SubType>Designer</SubType>
+    </DataFile>
+    <DataFile Include="Microsoft.Common.CrossTargeting.targets">
       <SubType>Designer</SubType>
     </DataFile>
     <DataFile Include="Microsoft.NETFramework.targets" />
