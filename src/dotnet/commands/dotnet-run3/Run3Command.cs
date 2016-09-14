@@ -13,10 +13,6 @@ namespace Microsoft.DotNet.Tools.Run
 {
     public partial class Run3Command
     {
-        private const string RunCommandPropName = "RunCommand";
-        private const string RunArgumentsPropName = "RunArguments";
-        private const string RunWorkingDirectoryPropName = "RunWorkingDirectory";
-        
         public string Configuration { get; set; }
         public string Project { get; set; }
         public IReadOnlyList<string> Args { get; set; }
@@ -75,14 +71,19 @@ namespace Microsoft.DotNet.Tools.Run
 
             ProjectInstance projectInstance = new ProjectInstance(Project, globalProperties, null);
 
-            string runProgram = projectInstance.GetPropertyValue(RunCommandPropName);
+            string runProgram = projectInstance.GetPropertyValue("RunCommand");
             if (string.IsNullOrEmpty(runProgram))
             {
-                throw new InvalidOperationException($"The property named '{RunCommandPropName}' does not have a value in your project. Please ensure 'dotnet run' supports this project.");
+                string outputType = projectInstance.GetPropertyValue("OutputType");
+
+                throw new GracefulException(string.Join(Environment.NewLine,
+                    "Unable to run your project.",
+                    "Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.",
+                    $"The current OutputType is '{outputType}'."));
             }
 
-            string runArguments = projectInstance.GetPropertyValue(RunArgumentsPropName);
-            string runWorkingDirectory = projectInstance.GetPropertyValue(RunWorkingDirectoryPropName);
+            string runArguments = projectInstance.GetPropertyValue("RunArguments");
+            string runWorkingDirectory = projectInstance.GetPropertyValue("RunWorkingDirectory");
 
             string fullArguments = runArguments;
             if (_args.Any())
