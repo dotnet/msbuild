@@ -1940,12 +1940,13 @@ namespace Microsoft.Build.Construction
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
                     using (var stream = new StreamReader(fullPath))
-                    using (XmlTextReader xtr = new XmlTextReader(stream))
+                    using (XmlReader xtr = XmlReader.Create(stream))
                     {
                         // Start the reader so it has an idea of what the encoding is.
-                        xtr.DtdProcessing = DtdProcessing.Ignore;
+                        xtr.Settings.DtdProcessing = DtdProcessing.Ignore;
                         xtr.Read();
-                        _encoding = xtr.Encoding;
+                        var encoding = xtr.GetAttribute("encoding");
+                        _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : Encoding.Default;
                         document.Load(xtr);
                     }
 

@@ -228,9 +228,9 @@ namespace Microsoft.Build.Evaluation
                             // the cache as we get test coverage of the rest of the cache code.
                             XmlDocument document = new XmlDocument();
                             using(var stream = new StreamReader(projectRootElement.FullPath))
-                            using (XmlTextReader xtr = new XmlTextReader(stream))
+                            using (XmlReader xtr = XmlReader.Create(stream))
                             {
-                                xtr.DtdProcessing = DtdProcessing.Ignore;
+                                xtr.Settings.DtdProcessing = DtdProcessing.Ignore;
                                 document.Load(xtr);
                             }
 
