@@ -133,24 +133,29 @@ namespace Microsoft.Build.UnitTests
             Assert.True(false, "Didn't throw " + exception.ToString());
         }
 
-        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
+        internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
-            Assert.Equal(expectedItems.Length, items.Count);
-
-            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
-
-            for (int i = 0; i < expectedItems.Length; i++)
+            string root = "";
+            try
             {
-                if(!normalizeSlashes)
+                string[] createdFiles;
+                string projectFile;
+                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
+
+                if (expectedMetadataPerItem == null)
                 {
-                    Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
                 }
                 else
                 {
-                    Assert.Equal(NormalizeSlashes(expectedItems[i]), NormalizeSlashes(items[i].EvaluatedInclude));
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem, normalizeSlashes);
                 }
-                
-                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteDirectory(root);
+                Directory.Delete(root);
             }
         }
 
@@ -178,6 +183,27 @@ namespace Microsoft.Build.UnitTests
             }
 
             AssertItems(expectedItems, items, metadata, normalizeSlashes);
+        }
+
+        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
+        {
+            Assert.Equal(expectedItems.Length, items.Count);
+
+            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
+
+            for (int i = 0; i < expectedItems.Length; i++)
+            {
+                if (!normalizeSlashes)
+                {
+                    Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                }
+                else
+                {
+                    Assert.Equal(NormalizeSlashes(expectedItems[i]), NormalizeSlashes(items[i].EvaluatedInclude));
+                }
+
+                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+            }
         }
 
         /// <summary>
@@ -1453,32 +1479,6 @@ namespace Microsoft.Build.UnitTests
             string[] result = content.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             return result;
-        }
-
-        internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null)
-        {
-            string root = "";
-            try
-            {
-                string[] createdFiles;
-                string projectFile;
-                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
-
-                if (expectedMetadataPerItem == null)
-                {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
-                }
-                else
-                {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem);
-                }
-                
-            }
-            finally
-            {
-                ObjectModelHelpers.DeleteDirectory(root);
-                Directory.Delete(root);
-            }
         }
 
         /// <summary>
