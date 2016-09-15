@@ -17,7 +17,7 @@ using System.Runtime.Versioning;
 namespace System.Xml {
  
     // Specifies formatting options for XmlTextWriter.
-    public enum Formatting {
+    internal enum Formatting {
         // No special formatting is done (this is the default).
         None,
  
@@ -33,7 +33,7 @@ namespace System.Xml {
     // and the Namespaces in XML specification.
  
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public class XmlTextWriter : XmlWriter {
+    internal class XmlTextWriter : XmlWriter {
 //
 // Private types
 //

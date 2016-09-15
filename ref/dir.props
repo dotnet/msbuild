@@ -1,0 +1,26 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), src\dir.props))\src\dir.props" />
+
+  <PropertyGroup>
+
+    <GenerateReferenceAssemblySources Condition="'$(OS)' != 'Windows_NT'">false</GenerateReferenceAssemblySources>
+    
+    <IntermediateOutputPath>$([System.IO.Path]::Combine($(IntermediateOutputPath),'ref'))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <OutputPath>$([System.IO.Path]::Combine($(OutputPath),'ref'))$([System.IO.Path]::DirectorySeparatorChar)</OutputPath>
+
+    <CopyBuildOutputToDeploymentDirectories>false</CopyBuildOutputToDeploymentDirectories>
+    <DeployDependencies>false</DeployDependencies>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Include="$(MSBuildProjectName).cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+  </ItemGroup>
+
+</Project>

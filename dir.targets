@@ -16,6 +16,7 @@
   <Target Name="Test" />
 
   <Target Name="EnsureDependenciesDeployed"
+          Condition="'$(DeployDependencies)' != 'false'"
           AfterTargets="Build">
     <MSBuild Projects="$(RepoRoot)\targets\DeployDependencies.proj"
              Targets="DeployDependencies"
@@ -43,7 +44,8 @@
     <XunitOptions Condition="'$(OS)'=='Windows_NT' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
   </PropertyGroup>
 
-  <Target Name="CopyBuildOutputToDeploymentDirectories">
+  <Target Name="CopyBuildOutputToDeploymentDirectories"
+          Condition="'$(CopyBuildOutputToDeploymentDirectories)' != 'false'">
     <ItemGroup>
       <OutputItems Include="$(OutputPath)\**\*.*"/>
     </ItemGroup>

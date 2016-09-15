@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$id$</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>This package contains the $id$ assembly which is a common assembly used by other MSBuild assemblies.</description>
+    <tags>MSBuild</tags>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <dependencies>
+      <group targetFramework="netstandard1.3">
+        <dependency id="System.Collections" version="4.0.11" />
+        <dependency id="System.Runtime" version="4.1.0" />
+        <dependency id="System.Runtime.InteropServices" version="4.1.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="$configuration$\Output\$id$.dll" target="lib\net46\$id$.dll" />
+    <file src="$configuration$-NetCore\Output\$id$.dll" target="lib\netstandard1.3\$id$.dll" />
+    <file src="$configuration$\Output\ref\$id$.dll" target="ref\net46\$id$.dll" />
+    <file src="$configuration$-NetCore\Output\ref\$id$.dll" target="ref\netstandard1.3\$id$.dll" />
+  </files>
+</package>

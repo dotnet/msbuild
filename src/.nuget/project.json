@@ -4,7 +4,8 @@
     "Nerdbank.GitVersioning": "1.4.30",
     "NuSpec.ReferenceGenerator": "1.4.2",
     "Microsoft.Net.Compilers": "2.0.0-beta3",
-    "MicroBuild.Core": "0.2.0"
+    "MicroBuild.Core": "0.2.0",
+    "Microsoft.DotNet.BuildTools.GenAPI": "1.0.0-beta2-00731-01"
   },
   "frameworks": {
     "net46": {}
