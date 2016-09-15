@@ -44,7 +44,9 @@ namespace Microsoft.NETCore.Build.Tasks
                 resourceDescriptions.Add(new ResourceDescription(resourceName, () => fileInfo.OpenRead(), true));
             }
 
-            var compilationOptions = new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary);
+            var compilationOptions = new CSharpCompilationOptions(
+                outputKind: OutputKind.DynamicallyLinkedLibrary, 
+                deterministic: true);
             var compilation = CSharpCompilation.Create(OutputAssembly.GetMetadata("Filename"),
                 references: References.Select(reference => MetadataReference.CreateFromFile(reference)),
                 options: compilationOptions);
