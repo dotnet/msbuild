@@ -44,23 +44,42 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoTempFileLeaks()
         {
-            // Get a count of how many temp files there are right now.
-            string tempPath = Path.GetTempPath();
-            string[] tempFiles = Directory.GetFiles(tempPath);
-            int originalTempFileCount = tempFiles.Length;
+            string oldTmpPath = Environment.GetEnvironmentVariable("TMP");
+            var newTempPath = Path.GetFullPath(@"TempPathForNoTempFileLeaksTest");
 
-            // Now run the Exec task on a simple command.
-            Exec exec = PrepareExec("echo Four days 'till ZBB!");
-            bool result = exec.Execute();
+            try
+            {
+                // This test counts files in TEMP. If it uses the system TEMP, some
+                // other process may interfere. Use a private TEMP instead.
+                Directory.CreateDirectory(newTempPath);
+                Environment.SetEnvironmentVariable("TMP", newTempPath);
 
-            // Get the new count of temp files.
-            tempFiles = Directory.GetFiles(tempPath);
-            int newTempFileCount = tempFiles.Length;
+                string tempPath = Path.GetTempPath();
+                Assert.StartsWith(newTempPath, tempPath);
 
-            // Ensure that Exec succeeded.
-            Assert.True(result);
-            // Ensure the new temp file count equals the old temp file count.
-            Assert.Equal(originalTempFileCount, newTempFileCount);
+                // Get a count of how many temp files there are right now.
+                string[] tempFiles = Directory.GetFiles(tempPath);
+
+                Assert.Empty(tempFiles);
+
+                // Now run the Exec task on a simple command.
+                Exec exec = PrepareExec("echo Four days 'till ZBB!");
+                bool result = exec.Execute();
+
+                // Get the new count of temp files.
+                tempFiles = Directory.GetFiles(tempPath);
+
+                // Ensure that Exec succeeded.
+                Assert.True(result);
+
+                // Ensure that no files linger in TEMP.
+                Assert.Empty(tempFiles);
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(newTempPath, true);
+                Environment.SetEnvironmentVariable("TMP", oldTmpPath);
+            }
         }
 
         [Fact]
