@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [Theory]
         // TODO: Enable this when X-Targeting is in
         // [InlineData("TestLibraryWithMultipleFrameworks")]
-        public void It_migrates_projects_with_multiple_TFMs()
+        public void It_migrates_projects_with_multiple_TFMs(string projectName)
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
