@@ -18,6 +18,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -1318,8 +1319,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the expected content matches the actual content
         /// </summary>
-        private static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual)
+        internal static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, ITestOutputHelper testOutput = null)
         {
+            Action<string> LogLine = testOutput == null ? (Action<string>) Console.WriteLine : testOutput.WriteLine;
+
             string[] actualLines = SplitIntoLines(actual);
 
             if (ignoreFirstLineOfActual)
@@ -1344,7 +1347,7 @@ namespace Microsoft.Build.UnitTests
                 if (expectedLines[i] != actualLines[i])
                 {
                     expectedAndActualDontMatch = true;
-                    Console.WriteLine("<   " + expectedLines[i] + "\n>   " + actualLines[i] + "\n");
+                    LogLine("<   " + expectedLines[i] + "\n>   " + actualLines[i] + "\n");
                 }
             }
 
@@ -1358,15 +1361,15 @@ namespace Microsoft.Build.UnitTests
 
             if (actualLines.Length > expectedLines.Length)
             {
-                Console.WriteLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
-                Console.WriteLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
+                LogLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
+                LogLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
 
                 Assert.True(false, "Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
             }
             else if (actualLines.Length < expectedLines.Length)
             {
-                Console.WriteLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
-                Console.WriteLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
+                LogLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
+                LogLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
 
                 Assert.True(false, "Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
             }

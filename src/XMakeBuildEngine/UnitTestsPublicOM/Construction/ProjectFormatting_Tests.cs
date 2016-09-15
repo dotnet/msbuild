@@ -9,13 +9,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 {
     public class ProjectFormatting_Tests : IDisposable
     {
-        public ProjectFormatting_Tests()
+        private readonly ITestOutputHelper _testOutput;
+
+        public ProjectFormatting_Tests(ITestOutputHelper testOutput)
         {
+            _testOutput = testOutput;
             Setup();
         }
 
@@ -117,6 +121,105 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyProjectReformatting(content, reformattedContent);
         }
 
+        [Fact]
+        public void ProjectAddItemFormatting_StartOfGroup()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class2.cs"" />
+    <Compile Include=""Program.cs""/>
+  </ItemGroup>
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+            ProjectItemElement item = xml.AddItem("Compile", "Class1.cs");
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Class2.cs"" />
+    <Compile Include=""Program.cs"" />
+  </ItemGroup>
+</Project>");
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ProjectAddItemFormatting_MiddleOfGroup()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Program.cs""/>
+  </ItemGroup>
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+            ProjectItemElement item = xml.AddItem("Compile", "Class2.cs");
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Class2.cs"" />
+    <Compile Include=""Program.cs"" />
+  </ItemGroup>
+</Project>");
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ProjectAddItemFormatting_EndOfGroup()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Class2.cs""/>
+  </ItemGroup>
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+            ProjectItemElement item = xml.AddItem("Compile", "Program.cs");
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Class2.cs"" />
+    <Compile Include=""Program.cs"" />
+  </ItemGroup>
+</Project>");
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/362")]
         public void PreprocessorFormatting()
         {
@@ -142,7 +245,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
                 content;
 
-            Helpers.VerifyAssertLineByLine(expected, actual);
+            VerifyAssertLineByLine(expected, actual);
         }
 
         void VerifyFormattingPreserved(string projectContents)
@@ -164,7 +267,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 projectContents;
             string actual = writer.ToString();
 
-            Helpers.VerifyAssertLineByLine(expected, actual);
+            VerifyAssertLineByLine(expected, actual);
         }
 
         void VerifyFormattingPreservedFromFile(string projectContents)
@@ -189,7 +292,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                     projectContents;
                 string actual = writer.ToString();
 
-                Helpers.VerifyAssertLineByLine(expected, actual);
+                VerifyAssertLineByLine(expected, actual);
             }
             finally
             {
@@ -216,7 +319,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 expectedContents;
             string actual = writer.ToString();
 
-            Helpers.VerifyAssertLineByLine(expected, actual);
+            VerifyAssertLineByLine(expected, actual);
         }
 
         void VerifyProjectReformattingFromFile(string originalContents, string expectedContents)
@@ -241,12 +344,17 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                     expectedContents;
                 string actual = writer.ToString();
 
-                Helpers.VerifyAssertLineByLine(expected, actual);
+                VerifyAssertLineByLine(expected, actual);
             }
             finally
             {
                 Directory.Delete(directory, true);
             }
+        }
+
+        void VerifyAssertLineByLine(string expected, string actual)
+        {
+            Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
         }
     }
 }

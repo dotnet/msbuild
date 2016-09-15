@@ -170,6 +170,18 @@ namespace Microsoft.Build.Construction
             }
 
             XmlElement.InsertAfter(child.XmlElement, reference.XmlElement);
+            if (XmlDocument.PreserveWhitespace)
+            {
+                //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
+                //  So try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
+                //  after, and inserting the same whitespace between the previous node and the one we added
+                if (reference.XmlElement.PreviousSibling != null &&
+                    reference.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                {
+                    var newWhitespaceNode = XmlDocument.CreateWhitespace(reference.XmlElement.PreviousSibling.Value);
+                    XmlElement.InsertAfter(newWhitespaceNode, reference.XmlElement);
+                }
+            }
 
             _count++;
             MarkDirty("Insert element {0}", child.ElementName);
@@ -220,6 +232,19 @@ namespace Microsoft.Build.Construction
             }
 
             XmlElement.InsertBefore(child.XmlElement, reference.XmlElement);
+
+            if (XmlDocument.PreserveWhitespace)
+            {
+                //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
+                //  So try to match the surrounding formatting by by checking the whitespace that precedes where we inserted
+                //  the new node, and inserting the same whitespace between the node we added and the one after it.
+                if (child.XmlElement.PreviousSibling != null &&
+                    child.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                {
+                    var newWhitespaceNode = XmlDocument.CreateWhitespace(child.XmlElement.PreviousSibling.Value);
+                    XmlElement.InsertBefore(newWhitespaceNode, reference.XmlElement);
+                }
+            }
 
             _count++;
             MarkDirty("Insert element {0}", child.ElementName);
