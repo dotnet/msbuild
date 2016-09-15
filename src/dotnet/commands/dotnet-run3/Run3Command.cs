@@ -6,32 +6,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Run
 {
     public partial class Run3Command
     {
-        private const string GetRunInformationTaskName = "GetRunInformation";
-
         public string Configuration { get; set; }
         public string Project { get; set; }
         public IReadOnlyList<string> Args { get; set; }
 
-        private readonly ICommandFactory _commandFactory;
         private List<string> _args;
 
         public Run3Command()
-            : this(new RunCommandFactory())
         {
-        }
-
-        public Run3Command(ICommandFactory commandFactory)
-        {
-            _commandFactory = commandFactory;
         }
 
         public int Start()
@@ -40,14 +29,9 @@ namespace Microsoft.DotNet.Tools.Run
 
             EnsureProjectIsBuilt();
 
-            ITaskItem runInfoItem = GetRunInformation();
+            ICommand runCommand = GetRunCommand();
 
-            string commandName = runInfoItem.GetMetadata("CommandName");
-            string[] args = runInfoItem.GetMetadata("Args").Split(';');
-
-            ICommand command = _commandFactory.Create(commandName, Enumerable.Concat(args, _args));
-
-            return command
+            return runCommand
                 .Execute()
                 .ExitCode;
         }
@@ -73,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Run
             }
         }
 
-        private ITaskItem GetRunInformation()
+        private ICommand GetRunCommand()
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>()
             {
@@ -87,30 +71,30 @@ namespace Microsoft.DotNet.Tools.Run
 
             ProjectInstance projectInstance = new ProjectInstance(Project, globalProperties, null);
 
-            BuildRequestData buildRequestData = new BuildRequestData(projectInstance, new string[] { GetRunInformationTaskName });
-            BuildParameters buildParameters = new BuildParameters();
-
-            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
-
-            TargetResult runInfoResult;
-            if (!result.ResultsByTarget.TryGetValue(GetRunInformationTaskName, out runInfoResult))
+            string runProgram = projectInstance.GetPropertyValue("RunCommand");
+            if (string.IsNullOrEmpty(runProgram))
             {
-                throw new InvalidOperationException($"Could not find a target named '{GetRunInformationTaskName}' in your project. Please ensure 'dotnet run' supports this project.");
+                string outputType = projectInstance.GetPropertyValue("OutputType");
+
+                throw new GracefulException(string.Join(Environment.NewLine,
+                    "Unable to run your project.",
+                    "Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.",
+                    $"The current OutputType is '{outputType}'."));
             }
 
-            if (runInfoResult.ResultCode != TargetResultCode.Success)
+            string runArguments = projectInstance.GetPropertyValue("RunArguments");
+            string runWorkingDirectory = projectInstance.GetPropertyValue("RunWorkingDirectory");
+
+            string fullArguments = runArguments;
+            if (_args.Any())
             {
-                throw new InvalidOperationException($"Could not get the run information for project {Project}. An internal MSBuild error has occured" + Environment.NewLine +
-                    runInfoResult.Exception?.ToString());
+                fullArguments += " " + ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(_args);
             }
 
-            ITaskItem runInfoItem = runInfoResult.Items.FirstOrDefault(i => i.ItemSpec == projectInstance.FullPath);
-            if (runInfoItem == null)
-            {
-                throw new InvalidOperationException($"'{GetRunInformationTaskName}' did not return an ITaskItem with the project's FullPath as the ItemSpec.");
-            }
+            CommandSpec commandSpec = new CommandSpec(runProgram, fullArguments, CommandResolutionStrategy.None);
 
-            return runInfoItem;
+            return Command.Create(commandSpec)
+                .WorkingDirectory(runWorkingDirectory);
         }
 
         private void Initialize()
@@ -142,14 +126,6 @@ namespace Microsoft.DotNet.Tools.Run
             else
             {
                 _args = new List<string>(Args);
-            }
-        }
-
-        private class RunCommandFactory : ICommandFactory
-        {
-            public ICommand Create(string commandName, IEnumerable<string> args, NuGetFramework framework = null, string configuration = Constants.DefaultConfiguration)
-            {
-                return Command.Create(commandName, args, framework, configuration);
             }
         }
     }
