@@ -62,8 +62,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExitCodeCausesFailure()
         {
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? "xcopy thisisanonexistentfile" : "cp thisisanonexistentfile thatisanonexistentfile");
