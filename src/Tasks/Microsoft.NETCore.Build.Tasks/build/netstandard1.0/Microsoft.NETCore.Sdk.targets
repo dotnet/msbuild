@@ -25,6 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <PropertyGroup>
     <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
@@ -47,6 +48,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
     <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
     <NeutralLanguage Condition="'$(NeutralLanguage)' == ''">en</NeutralLanguage>
+    <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -155,6 +157,51 @@ Copyright (c) .NET Foundation. All rights reserved.
       </PropertyGroup>
     </When>
   </Choose>
+
+  <PropertyGroup>
+    <CreateSatelliteAssembliesDependsOn>
+      $(CreateSatelliteAssembliesDependsOn);
+      CoreGenerateSatelliteAssemblies
+    </CreateSatelliteAssembliesDependsOn>
+  </PropertyGroup>
+
+  <!--
+    ============================================================
+                    CoreGenerateSatelliteAssemblies
+    ============================================================
+-->
+
+  <Target Name="CoreGenerateSatelliteAssemblies"
+          Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+          Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != ''  and '$(GenerateSatelliteAssembliesForCore)' == 'true' ">
+
+    <MakeDir Directories="@(_SatelliteAssemblyResourceInputs->'$(IntermediateOutputPath)%(Culture)')" />
+
+    <PropertyGroup>
+      <_AssemblyInfoFile>$(IntermediateOutputPath)%(_SatelliteAssemblyResourceInputs.Culture)\$(TargetName).resources.cs</_AssemblyInfoFile>
+      <_OutputAssembly>$(IntermediateOutputPath)%(_SatelliteAssemblyResourceInputs.Culture)\$(TargetName).resources.dll</_OutputAssembly>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <SatelliteAssemblyAttribute Include="@(AssemblyAttribute)" />
+      <SatelliteAssemblyAttribute Include="System.Reflection.AssemblyCultureAttribute" Condition="'%(_SatelliteAssemblyResourceInputs.Culture)' != ''">
+        <_Parameter1>%(_SatelliteAssemblyResourceInputs.Culture)</_Parameter1>
+      </SatelliteAssemblyAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment AssemblyAttributes="@(SatelliteAssemblyAttribute)" Language="$(Language)" OutputFile="$(_AssemblyInfoFile)">
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
+
+    <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
+                                 AssemblyInfoFile="$(_AssemblyInfoFile)"
+                                 OutputAssembly="$(_OutputAssembly)"
+                                 References="@(Reference)">
+
+      <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
+    </GenerateSatelliteAssemblies>
+  </Target>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets')" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />

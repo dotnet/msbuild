@@ -23,6 +23,7 @@
     <Compile Include="CompilationOptionsConverter.cs" />
     <Compile Include="NuGetUtils.cs" />
     <Compile Include="GetAssemblyVersion.cs" />
+    <Compile Include="GenerateSatelliteAssemblies.cs" />
     <Compile Include="ProjectContext.cs" />
     <Compile Include="NuGetPackageResolver.cs" />
     <Compile Include="IPackageResolver.cs" />
