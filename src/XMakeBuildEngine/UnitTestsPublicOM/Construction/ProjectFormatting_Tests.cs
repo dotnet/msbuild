@@ -117,6 +117,34 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyProjectReformatting(content, reformattedContent);
         }
 
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/362")]
+        public void PreprocessorFormatting()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+  <Target
+    Name=""XamlPreCompile""
+    Inputs=""$(MSBuildAllProjects);
+           @(Compile);
+           @(_CoreCompileResourceInputs);""
+  />
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)), ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+
+            StringWriter writer = new StringWriter();
+
+            project.SaveLogicalProject(writer);
+
+            string actual = writer.ToString();
+            string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
+                content;
+
+            Helpers.VerifyAssertLineByLine(expected, actual);
+        }
+
         void VerifyFormattingPreserved(string projectContents)
         {
             VerifyFormattingPreservedFromString(projectContents);
