@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigrateScripts : TestBase
     {
         [Theory]
+        [InlineData("compile:TargetFramework", "$(TargetFramework)")]
+        [InlineData("publish:TargetFramework", "$(TargetFramework)")]
         [InlineData("compile:FullTargetFramework", "$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)")]
         [InlineData("compile:Configuration", "$(Configuration)")]
         [InlineData("compile:OutputFile", "$(TargetPath)")]
@@ -37,12 +39,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
-        [InlineData("compile:TargetFramework")]
         [InlineData("compile:ResponseFile")]
         [InlineData("compile:CompilerExitCode")]
         [InlineData("compile:RuntimeOutputDir")]
         [InlineData("compile:RuntimeIdentifier")]
-        [InlineData("publish:TargetFramework")]
         public void Formatting_script_commands_throws_when_variable_is_unsupported(string unsupportedVariable)
         {
             var scriptMigrationRule = new MigrateScriptsRule();
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
 
-            var commands = new[] { "compile:FullTargetFramework", "compile:Configuration"};
+            var commands = new[] { "%compile:FullTargetFramework%", "%compile:Configuration%"};
 
             var target = scriptMigrationRule.MigrateScriptSet(mockProj, mockProj.AddPropertyGroup(), commands, scriptName);
             target.Tasks.Count().Should().Be(commands.Length);
@@ -130,75 +130,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             foreach (var task in target.Tasks)
             {
                 var taskCommand = task.GetParameter("Command");
+                Console.WriteLine("TASK: " + taskCommand);
                 var commandIndex = Array.IndexOf(commands, taskCommand);
 
                 commandIndex.Should().Be(-1, "Expected command array elements to be replaced by appropriate msbuild properties");
             }
-        }
-
-        [Theory]
-        [InlineData("precompile")]
-        [InlineData("postcompile")]
-        [InlineData("prepublish")]
-        [InlineData("postpublish")]
-        public void Migrated_ScriptSet_has_two_MigratedScriptExtensionProperties_for_each_script(string scriptName)
-        {
-            var scriptMigrationRule = new MigrateScriptsRule();
-            ProjectRootElement mockProj = ProjectRootElement.Create();
-
-            var commands = new string[] {"compile:FullTargetFramework", "compile:Configuration"};
-            var propertyGroup = mockProj.AddPropertyGroup();
-            var target = scriptMigrationRule.MigrateScriptSet(mockProj, propertyGroup, commands,
-                scriptName);
-
-            Console.WriteLine(string.Join(";", propertyGroup.Properties.Select(n => n.Name)));
-            propertyGroup.Properties.Count().Should().Be(commands.Length * 2);
-
-            var count = 0;
-            foreach (var command in commands)
-            {
-                count += 1;
-                var scriptExtensionProperties =
-                    propertyGroup.Properties.Where(p => p.Name.Contains($"MigratedScriptExtension_{scriptName}_{count}")).ToArray();
-
-                scriptExtensionProperties.All(p => p.Value == ".sh" || p.Value == ".cmd").Should().BeTrue();
-                scriptExtensionProperties.Count().Should().Be(2);
-            }
-        }
-
-        [Theory]
-        [InlineData("echo", ".\\echo$(MigratedScriptExtension_1)")]
-        [InlineData("echo hello world", ".\\echo$(MigratedScriptExtension_1) hello world")]
-        [InlineData("\"echo\"", ".\\\"echo$(MigratedScriptExtension_1)\"")]
-        [InlineData("\"echo space\"", ".\\\"echo space$(MigratedScriptExtension_1)\"")]
-        [InlineData("\"echo space\" other args", ".\\\"echo space$(MigratedScriptExtension_1)\" other args")]
-        [InlineData("\"echo space\" \"other space\"", ".\\\"echo space$(MigratedScriptExtension_1)\" \"other space\"")]
-        public void Migrated_ScriptSet_has_ScriptExtension_added_to_script_command(string scriptCommandline, string expectedOutputCommand)
-        {
-            var scriptMigrationRule = new MigrateScriptsRule();
-
-            var formattedCommand = scriptMigrationRule.AddScriptExtensionPropertyToCommandLine(scriptCommandline,
-                "MigratedScriptExtension_1");
-
-            formattedCommand.Should().Be(expectedOutputCommand);
-        }
-
-        [Theory]
-        [InlineData("echo", @".\echo")]
-        [InlineData("/usr/echo", "/usr/echo")]
-        [InlineData(@"C:\usr\echo", @"C:\usr\echo")]
-        [InlineData("\"echo\"", @".\""echo")]
-        [InlineData("\"/usr/echo\"", @"""/usr/echo")]
-        [InlineData(@"""C:\usr\echo", @"""C:\usr\echo")]
-        public void Migrated_ScriptSet_has_dotSlash_prepended_when_command_is_not_rooted(string scriptCommandline,
-            string expectedOutputCommandPrefix)
-        {
-            var scriptMigrationRule = new MigrateScriptsRule();
-
-            var formattedCommand = scriptMigrationRule.FormatScriptCommand(scriptCommandline,
-                "MigratedScriptExtension_1");
-
-            formattedCommand.Should().StartWith(expectedOutputCommandPrefix);
         }
 
         [Fact]
@@ -206,6 +142,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             scriptMigrationRule.ReplaceScriptVariables($"%UnknownVariable%").Should().Be("$(UnknownVariable)");
+        }
+
+        [Fact]
+        public void Migrating_scripts_creates_target_with_IsCrossTargettingBuild_not_equal_true_Condition()
+        {
+            var scriptMigrationRule = new MigrateScriptsRule();
+            ProjectRootElement mockProj = ProjectRootElement.Create();
+
+            var commands = new[] { "compile:FullTargetFramework", "compile:Configuration"};
+
+            var target = scriptMigrationRule.MigrateScriptSet(mockProj, mockProj.AddPropertyGroup(), commands, "prepublish");
+            target.Condition.Should().Be(" '$(IsCrossTargetingBuild)' != 'true' ");
         }
     }
 }

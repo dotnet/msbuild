@@ -71,6 +71,26 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Theory]
+        // TODO: Enable this when X-Targeting is in
+        // [InlineData("TestLibraryWithMultipleFrameworks")]
+        public void It_migrates_projects_with_multiple_TFMs()
+        {
+            var projectDirectory =
+                TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
+
+            var outputsIdentical =
+                outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
+
+            if (!outputsIdentical)
+            {
+                OutputDiagnostics(outputComparisonData);
+            }
+
+            outputsIdentical.Should().BeTrue();
+        }
+
+        [Theory]
         [InlineData("TestAppWithLibrary/TestLibrary")]
         [InlineData("TestLibraryWithAnalyzer")]
         [InlineData("TestLibraryWithConfiguration")]
