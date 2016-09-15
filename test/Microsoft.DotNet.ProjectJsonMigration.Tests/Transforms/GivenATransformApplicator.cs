@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.DotNet.ProjectJsonMigration.Models;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
-namespace Microsoft.DotNet.ProjectJsonMigration.Tests.Transforms
+namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenATransformApplicator
     {

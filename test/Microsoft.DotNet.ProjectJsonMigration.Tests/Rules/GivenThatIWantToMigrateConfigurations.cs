@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.Migration.Tests;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -13,7 +12,7 @@ using FluentAssertions;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.ProjectJsonMigration.Tests;
 
-namespace Microsoft.DotNet.ProjectJsonMigrationMigration.Tests
+namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenThatIWantToMigrateConfigurations : TestBase
     {
