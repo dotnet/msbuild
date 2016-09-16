@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
             if (!NativeMethodsShared.IsWindows)
             {
-                ((MockEngine)exec.BuildEngine).AssertLogContains("cp: cannot stat");
+                ((MockEngine)exec.BuildEngine).AssertLogContains("cp: ");
             }
         }
 
