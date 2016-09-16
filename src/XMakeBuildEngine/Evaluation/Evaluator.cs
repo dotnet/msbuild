@@ -2424,7 +2424,8 @@ namespace Microsoft.Build.Evaluation
                             _projectRootElementCache,
                             _buildEventContext,
                             explicitlyLoaded),
-                        explicitlyLoaded);
+                        explicitlyLoaded,
+                        preserveFormatting: false);
 
                     if (duplicateImport)
                     {
