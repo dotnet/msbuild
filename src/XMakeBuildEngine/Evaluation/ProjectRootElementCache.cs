@@ -227,10 +227,11 @@ namespace Microsoft.Build.Evaluation
                             // use: it checks the file content as well as the timestamp. That's better than completely disabling
                             // the cache as we get test coverage of the rest of the cache code.
                             XmlDocument document = new XmlDocument();
-                            using(var stream = new StreamReader(projectRootElement.FullPath))
-                            using (XmlReader xtr = XmlReader.Create(stream))
+                            XmlReaderSettings dtdSettings = new XmlReaderSettings();
+                            dtdSettings.DtdProcessing = DtdProcessing.Ignore;
+                            using (var stream = new StreamReader(projectRootElement.FullPath))
+                            using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
                             {
-                                xtr.Settings.DtdProcessing = DtdProcessing.Ignore;
                                 document.Load(xtr);
                             }
 

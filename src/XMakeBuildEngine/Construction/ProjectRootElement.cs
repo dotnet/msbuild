@@ -1939,11 +1939,13 @@ namespace Microsoft.Build.Construction
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
+                    XmlReaderSettings dtdSettings = new XmlReaderSettings();
+                    dtdSettings.DtdProcessing = DtdProcessing.Ignore;
+
                     using (var stream = new StreamReader(fullPath))
-                    using (XmlReader xtr = XmlReader.Create(stream))
+                    using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
                     {
                         // Start the reader so it has an idea of what the encoding is.
-                        xtr.Settings.DtdProcessing = DtdProcessing.Ignore;
                         xtr.Read();
                         var encoding = xtr.GetAttribute("encoding");
                         _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : Encoding.Default;
