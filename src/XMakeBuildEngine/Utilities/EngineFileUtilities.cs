@@ -96,7 +96,7 @@ namespace Microsoft.Build.Internal
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
         /// <param name="returnEscaped"><code>true</code> to return escaped specs.</param>
-        /// <param name="excludeSpecsUnescaped"></param>
+        /// <param name="excludeSpecsUnescaped">The exclude specification, unescaped.</param>
         /// <returns>Array of file paths.</returns>
         private static string[] GetFileList
             (

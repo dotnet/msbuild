@@ -31,9 +31,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         KnownToBeMSBuildFormat,
         /// <summary>
-        /// 
+        /// Solution folders appear in the .sln file, but aren't buildable projects.
         /// </summary>
-        SolutionFolder,       // Not really a project, but persisted as such in the .SLN file.
+        SolutionFolder,
         /// <summary>
         /// ASP.NET projects
         /// </summary>

@@ -137,8 +137,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="child">The item specification to evaluate and add.</param>
         /// <param name="bucket">The batching bucket.</param>
-        /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata to keep.</param>
-        /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata to remove.</param>
+        /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
+        /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
         private void ExecuteAdd(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata)
         {
             // First, collect up the appropriate metadata collections.  We need the one from the item definition, if any, and
@@ -244,8 +244,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="child">The item specification to evaluate and modify.</param>
         /// <param name="bucket">The batching bucket.</param>
-        /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata to keep.</param>
-        /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata to remove.</param>
+        /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
+        /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
         private void ExecuteModify(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
@@ -324,8 +324,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="originalItem">The original item data</param>
         /// <param name="expander">The expander to use.</param>
-        /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata to keep.</param>
-        /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata to remove.</param>
+        /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
+        /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
         /// <remarks>
         /// This code is very close to that which exists in the Evaluator.EvaluateItemXml method.  However, because
         /// it invokes type constructors, and those constructors take arguments of fundamentally different types, it has not

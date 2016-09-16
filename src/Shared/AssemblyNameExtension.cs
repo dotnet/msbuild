@@ -669,7 +669,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Compare two assembly names for equality.
         /// </summary>
-        /// <returns></returns>
         private bool EqualsImpl(AssemblyNameExtension that, bool ignoreVersion, bool considerRetargetableFlag)
         {
             // Pointer compare.
