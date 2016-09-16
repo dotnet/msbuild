@@ -40,10 +40,6 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             Setup();
         }
 
-        //  TODO: Test preprocessor formatting (project.SaveLogicalProject): https://github.com/Microsoft/msbuild/issues/362
-        //  TODO: If preserveFormatting is true, don't change single quotes to double quotes
-        //  TODO: Add tests for preserving formatting when mutating project (ie adding an item, modifying a property)
-
         [Fact]
         public void ProjectCommentFormatting()
         {
@@ -136,7 +132,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
             Project project = new Project(xml);
-            ProjectItemElement item = xml.AddItem("Compile", "Class1.cs");
+            project.AddItem("Compile", "Class1.cs");
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -169,7 +165,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
             Project project = new Project(xml);
-            ProjectItemElement item = xml.AddItem("Compile", "Class2.cs");
+            project.AddItem("Compile", "Class2.cs");
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -202,7 +198,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
             Project project = new Project(xml);
-            ProjectItemElement item = xml.AddItem("Compile", "Program.cs");
+            project.AddItem("Compile", "Program.cs");
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -233,7 +229,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
             Project project = new Project(xml);
-            ProjectItemElement item = xml.AddItem("Compile", "Program.cs");
+            project.AddItem("Compile", "Program.cs");
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -260,13 +256,88 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
             Project project = new Project(xml);
-            ProjectItemElement item = xml.AddItem("Compile", "Program.cs");
+            project.AddItem("Compile", "Program.cs");
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <ItemGroup>
+    <Compile Include=""Program.cs"" />
+  </ItemGroup>
+</Project>");
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ProjectRemoveItemFormatting()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Class2.cs""/>
+    <Compile Include=""Program.cs""/>
+  </ItemGroup>
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+
+            var itemToRemove = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
+            project.RemoveItem(itemToRemove);
+            
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Program.cs"" />
+  </ItemGroup>
+</Project>");
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ProjectAddItemMetadataFormatting()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Class2.cs""/>
+    <Compile Include=""Program.cs""/>
+  </ItemGroup>
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+
+            var itemToEdit = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
+            itemToEdit.SetMetadataValue("ExcludeFromStyleCop", "true");
+            
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Class1.cs"" />
+    <Compile Include=""Class2.cs"">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include=""Program.cs"" />
   </ItemGroup>
 </Project>");
