@@ -502,6 +502,12 @@ namespace Microsoft.Build.Tasks
         public int dwThreadId;
     }
 
+    internal enum SymbolicLink
+    {
+        File = 0,
+        Directory = 1
+    }
+
     /// <summary>
     /// Interop methods.
     /// </summary>
@@ -780,7 +786,7 @@ namespace Microsoft.Build.Tasks
         [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
-        internal static bool MakeHardLink(string newFileName, string exitingFileName, out string errorMessage)
+        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage)
         {
             bool hardLinkCreated;
             if (NativeMethodsShared.IsWindows)
@@ -795,6 +801,32 @@ namespace Microsoft.Build.Tasks
             }
 
             return hardLinkCreated;
+        }
+
+        //------------------------------------------------------------------------------
+        // CreateSymbolicLink
+        //------------------------------------------------------------------------------
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
+
+        [DllImport("libc", SetLastError = true)]
+        internal static extern int symlink(string oldpath, string newpath);
+
+        internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
+        {
+            bool symbolicLinkCreated;
+            if (NativeMethodsShared.IsWindows)
+            {
+                symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, SymbolicLink.File);
+                errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+            }
+            else
+            {
+                symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
+                errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+            }
+
+            return symbolicLinkCreated;
         }
 
         //------------------------------------------------------------------------------
@@ -1170,7 +1202,7 @@ typedef enum _tagAssemblyComparisonResult
                 return false;
             }
 
-            for (int i=0; i<rpkt.Length; i++)
+            for (int i = 0; i < rpkt.Length; i++)
             {
                 if (rpkt[i] != dpkt[i])
                 {

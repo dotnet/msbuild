@@ -3862,8 +3862,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <!-- By default we're not using Hard Links to copy to the output directory, and never when building in VS -->
+    <!-- By default we're not using Hard or Symbolic Links to copy to the output directory, and never when building in VS -->
     <CreateHardLinksForCopyAdditionalFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForCopyAdditionalFilesIfPossible)' == ''">false</CreateHardLinksForCopyAdditionalFilesIfPossible>
+    <CreateSymbolicLinksForCopyAdditionalFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForCopyAdditionalFilesIfPossible)' == ''">false</CreateSymbolicLinksForCopyAdditionalFilesIfPossible>
   </PropertyGroup>
 
   <Target
@@ -3880,6 +3881,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- By default we're not using Hard Links to copy to the output directory, and never when building in VS -->
       <CreateHardLinksForCopyFilesToOutputDirectoryIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)' == ''">false</CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>
+      <CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)' == ''">false</CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -3896,6 +3898,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'"
             >
 
@@ -3915,6 +3918,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyAdditionalFilesIfPossible)"
         Condition="'@(AddModules)' != ''"
             >
 
@@ -3931,6 +3935,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(_SGenDllCreated)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -3946,6 +3951,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -3961,6 +3967,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(_DocumentationFileProduced)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -3976,6 +3983,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'@(IntermediateSatelliteAssembliesWithTargetPath)' != ''"
             >
 
@@ -3995,6 +4003,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyAdditionalFilesIfPossible)"
         Condition="'@(ReferenceComWrappersToCopyLocal)' != '' or '@(ResolvedIsolatedComModules)' != '' or '@(_DeploymentLooseManifestFile)' != '' or '@(NativeReferenceFile)' != '' "
             >
 
@@ -4011,6 +4020,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(SkipCopyWinMDArtifact)' != 'true' and '@(WinMDExpArtifacts)' != ''"
             >
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4036,6 +4046,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- By default we're not using Hard Links to copy to the output directory, and never when building in VS -->
       <CreateHardLinksForCopyLocalIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForCopyLocalIfPossible)' == ''">false</CreateHardLinksForCopyLocalIfPossible>
+      <CreateSymbolicLinksForCopyLocalIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForCopyLocalIfPossible)' == ''">false</CreateSymbolicLinksForCopyLocalIfPossible>
     </PropertyGroup>
 
     <Copy
@@ -4046,6 +4057,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyLocalIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyLocalIfPossible)"
         Condition="'$(UseCommonOutputDirectory)' != 'true'"
             >
 
@@ -4189,6 +4201,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4219,6 +4232,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4252,6 +4266,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4280,6 +4295,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
         Condition="'$(GenerateClickOnceManifests)'=='true' or '$(_DeploymentCopyApplicationManifest)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentMainApplicationManifest"/>
@@ -4297,6 +4313,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
         Condition="'$(GenerateClickOnceManifests)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentMainDeployManifest"/>
@@ -4946,8 +4963,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <PropertyGroup>
-      <!-- By default we're not using Hard Links to copy to the publish directory, and never when building in VS -->
+      <!-- By default we're not using Hard or Symbolic Links to copy to the publish directory, and never when building in VS -->
       <CreateHardLinksForPublishFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForPublishFilesIfPossible)' == ''">false</CreateHardLinksForPublishFilesIfPossible>
+      <CreateSymbolicLinksForPublishFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForPublishFilesIfPossible)' == ''">false</CreateSymbolicLinksForPublishFilesIfPossible>
     </PropertyGroup>
 
     <!-- Copy files to publish folder -->
@@ -4970,6 +4988,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
         Retries="$(CopyRetryCount)"
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"/>
 
     <Copy
@@ -4980,6 +4999,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
         Condition="'%(_DeploymentManifestDependencies.DependencyType)'=='Install'"/>
 
     <Copy
@@ -4990,6 +5010,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
             />
 
     <FormatUrl InputUrl="$(_DeploymentApplicationUrl)">
