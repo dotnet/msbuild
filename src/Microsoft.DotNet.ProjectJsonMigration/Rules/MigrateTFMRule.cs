@@ -8,7 +8,6 @@ using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using NuGet.Frameworks;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
@@ -17,15 +16,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
     public class MigrateTFMRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
-        private readonly AddPropertyTransform<IEnumerable<NuGetFramework>>[] _transforms;
+        private readonly AddPropertyTransform<NuGetFramework>[] _transforms;
 
         public MigrateTFMRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
 
-            _transforms = new AddPropertyTransform<IEnumerable<NuGetFramework>>[]
+            _transforms = new AddPropertyTransform<NuGetFramework>[]
             {
-                FrameworksTransform
+                OutputPathTransform,
+                FrameworkIdentifierTransform,
+                FrameworkVersionTransform
             };
         }
 
@@ -36,10 +37,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             CleanExistingProperties(csproj);
 
+            _transformApplicator.Execute(
+                FrameworksTransform.Transform(migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                propertyGroup);
+
             foreach (var transform in _transforms)
             {
                 _transformApplicator.Execute(
-                    transform.Transform(migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                    transform.Transform(migrationRuleInputs.DefaultProjectContext.TargetFramework),
                     propertyGroup);
             }
         }
@@ -75,6 +80,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return sb.ToString();
         }
 
+        // TODO: When we have this inferred in the sdk targets, we won't need this
+        private AddPropertyTransform<NuGetFramework> OutputPathTransform =>
+            new AddPropertyTransform<NuGetFramework>("OutputPath",
+                f => $"bin/$(Configuration)/{f.GetShortFolderName()}",
+                f => true);
+
+        private AddPropertyTransform<NuGetFramework> FrameworkIdentifierTransform =>
+            new AddPropertyTransform<NuGetFramework>("TargetFrameworkIdentifier",
+                f => f.Framework,
+                f => true);
+
+        private AddPropertyTransform<NuGetFramework> FrameworkVersionTransform =>
+            new AddPropertyTransform<NuGetFramework>("TargetFrameworkVersion",
+                f => "v" + GetDisplayVersion(f.Version),
+                f => true);
         private AddPropertyTransform<IEnumerable<NuGetFramework>> FrameworksTransform =>
             new AddPropertyTransform<IEnumerable<NuGetFramework>>("TargetFrameworks",
                 frameworks => string.Join(";", frameworks.Select(f => f.GetShortFolderName())),
