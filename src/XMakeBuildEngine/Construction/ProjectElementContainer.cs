@@ -486,6 +486,8 @@ namespace Microsoft.Build.Construction
                     //  before the closing tag.  So we add the default indentation to it so the child will now be indented
                     //  further, and then create a new whitespace node after the child so the closing tag will be on
                     //  a new line with the same indentation.
+                    //  If the whitespace we end up copying isn't actually (newline + indentation) like we expect, then it
+                    //  should still be OK to copy it, as we'll still be trying to match the surrounding formatting.
                     string whitespace = XmlElement.FirstChild.Value;
                     XmlElement.FirstChild.Value = whitespace + DEFAULT_INDENT;
                     var newWhitespaceNode = XmlDocument.CreateWhitespace(whitespace);
@@ -494,14 +496,14 @@ namespace Microsoft.Build.Construction
                 else if (XmlElement.PreviousSibling != null &&
                          XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
                 {
-                    //  This container didn't have any whitespace in in.  This probably means it didn't have separate open
+                    //  This container didn't have any whitespace in it.  This probably means it didn't have separate open
                     //  and close tags.  So add a whitespace node before the new child with additional indentation over the
                     //  container's indentation, and add a whitespace node with the same level of indentation as the container
                     //  after the new child so the closing tag will be indented properly.
-                    string whitespace = XmlElement.PreviousSibling.Value;
-                    var indentedWhitespaceNode = XmlDocument.CreateWhitespace(whitespace + DEFAULT_INDENT);
+                    string parentWhitespace = XmlElement.PreviousSibling.Value;
+                    var indentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace + DEFAULT_INDENT);
                     XmlElement.InsertBefore(indentedWhitespaceNode, child.XmlElement);
-                    var unindentedWhitespaceNode = XmlDocument.CreateWhitespace(whitespace);
+                    var unindentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace);
                     XmlElement.InsertAfter(unindentedWhitespaceNode, child.XmlElement);
                 }
             }

@@ -1753,7 +1753,7 @@ namespace Microsoft.Build.Construction
 
             ProjectRootElement projectRootElement = projectRootElementCache.Get(path,
                 preserveFormatting ? s_openLoaderPreserveFormattingDelegate : s_openLoaderDelegate,
-                isExplicitlyLoaded);
+                isExplicitlyLoaded, preserveFormatting);
 
             return projectRootElement;
         }
@@ -1787,7 +1787,8 @@ namespace Microsoft.Build.Construction
                 fullPath,
                 (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, loggingService, cache, buildEventContext,
                                     preserveFormatting: false),
-                isExplicitlyLoaded);
+                isExplicitlyLoaded,
+                preserveFormatting: false);
 
             return projectRootElement;
         }
