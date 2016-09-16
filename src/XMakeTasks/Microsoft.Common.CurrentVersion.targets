@@ -2065,6 +2065,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            TargetPlatformVersion="$(TargetPlatformVersionWindows81)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifierWindows81)"
            Condition="'@(SDKReference)' != '' and '$(SupportWindows81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindows81)' != '' and '$(TargetPlatformVersionWindows81)' != ''"
+           WarnWhenNoSDKsFound="false"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
     </GetInstalledSDKLocations>
@@ -2076,6 +2077,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            TargetPlatformVersion="$(TargetPlatformVersionWindowsPhone81)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifierWindowsPhone81)"
            Condition="'@(SDKReference)' != '' and '$(SupportWindowsPhone81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindowsPhone81)' != '' and '$(TargetPlatformVersionWindowsPhone81)' != ''"
+           WarnWhenNoSDKsFound="false"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
     </GetInstalledSDKLocations>
