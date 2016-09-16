@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NuGet.Packaging.Core;
+using NuGet.ProjectModel;
 
 namespace Microsoft.NETCore.Build.Tasks
 {
@@ -19,6 +20,11 @@ namespace Microsoft.NETCore.Build.Tasks
         public static IEnumerable<string> FilterPlaceHolderFiles(this IEnumerable<string> files)
         {
             return files.Where(f => !IsPlaceholderFile(f));
+        }
+
+        public static IEnumerable<LockFileItem> FilterPlaceHolderFiles(this IEnumerable<LockFileItem> files)
+        {
+            return files.Where(f => !IsPlaceholderFile(f.Path));
         }
     }
 }
