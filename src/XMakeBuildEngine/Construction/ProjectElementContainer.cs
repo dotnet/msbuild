@@ -332,7 +332,19 @@ namespace Microsoft.Build.Construction
                 LastChild = child.PreviousSibling;
             }
 
+            var previousSibling = child.XmlElement.PreviousSibling;
+
             XmlElement.RemoveChild(child.XmlElement);
+
+            if (XmlDocument.PreserveWhitespace)
+            {
+                //  If we are trying to preserve formatting of the file, then also remove any whitespace
+                //  that came before the node we removed.
+                if (previousSibling != null && previousSibling.NodeType == XmlNodeType.Whitespace)
+                {
+                    XmlElement.RemoveChild(previousSibling);
+                }
+            }
 
             _count--;
             MarkDirty("Remove element {0}", child.ElementName);
