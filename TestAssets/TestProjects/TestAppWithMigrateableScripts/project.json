@@ -14,16 +14,16 @@
   },
   "scripts": {
     "prepublish": [
-      "echoscript prepublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:FullTargetFramework%?"
+      "./echoscript prepublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:FullTargetFramework%?"
     ],
     "postpublish": [
-      "echoscript postpublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:FullTargetFramework%?"
+      "./echoscript postpublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:FullTargetFramework%?"
     ],
     "precompile": [
-      "echoscript precompile_output ?%compile:Configuration%? ?%compile:OutputDir%? ?%compile:FullTargetFramework%?"
+      "./echoscript precompile_output ?%compile:Configuration%? ?%compile:OutputDir%? ?%compile:FullTargetFramework%?"
     ],
     "postcompile": [
-      "echoscript postcompile_output ?%compile:Configuration%? ?%compile:OutputDir%? ?%compile:FullTargetFramework%?"
+      "./echoscript postcompile_output ?%compile:Configuration%? ?%compile:OutputDir%? ?%compile:FullTargetFramework%?"
     ]
   }
 }
