@@ -2606,6 +2606,9 @@
   <data name="Copy.ExactlyOneTypeOfLink">
     <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
   </data>
+  <data name="Copy.SameDestinationPath">
+    <value>MSB3892: There are multiple source files that try to write to the same destination file.</value>    
+  </data>
   
   <!--
         The tasks message bucket is: MSB3001 - MSB3999

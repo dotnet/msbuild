@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using System.Linq;
 
 namespace Microsoft.Build.Tasks
 {
@@ -407,6 +408,12 @@ namespace Microsoft.Build.Tasks
                 _destinationFiles = new TaskItem[0];
                 _copiedFiles = new TaskItem[0];
                 return true;
+            }
+
+            if(_destinationFiles != null && _destinationFiles.Distinct().Count() != _destinationFiles.Length)
+            {
+                Log.LogErrorFromResources("Copy.SameDestinationPath");
+                return false;
             }
 
             if (!(ValidateInputs() && InitializeDestinationFiles()))
