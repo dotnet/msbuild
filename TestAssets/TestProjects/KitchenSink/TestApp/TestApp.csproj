@@ -18,6 +18,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
 
+    <EmbeddedResource Include="**\*.resx" Exclude="Resource1.resx"/>
+
     <Content Include="ContentAlways.txt">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
