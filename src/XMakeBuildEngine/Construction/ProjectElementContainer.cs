@@ -23,6 +23,8 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public abstract class ProjectElementContainer : ProjectElement
     {
+        const string DEFAULT_INDENT = "  ";
+
         /// <summary>
         /// Number of children of any kind
         /// </summary>
@@ -461,6 +463,36 @@ namespace Microsoft.Build.Construction
             child.NextSibling = null;
 
             XmlElement.AppendChild(child.XmlElement);
+
+            if (XmlDocument.PreserveWhitespace)
+            {
+                //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
+                //  So try to match the surrounding formatting and add one indentation level
+                if (XmlElement.FirstChild.NodeType == XmlNodeType.Whitespace)
+                {
+                    //  This container had a whitespace node, which should generally be a newline and the indent
+                    //  before the closing tag.  So we add the default indentation to it so the child will now be indented
+                    //  further, and then create a new whitespace node after the child so the closing tag will be on
+                    //  a new line with the same indentation.
+                    string whitespace = XmlElement.FirstChild.Value;
+                    XmlElement.FirstChild.Value = whitespace + DEFAULT_INDENT;
+                    var newWhitespaceNode = XmlDocument.CreateWhitespace(whitespace);
+                    XmlElement.InsertAfter(newWhitespaceNode, child.XmlElement);
+                }
+                else if (XmlElement.PreviousSibling != null &&
+                         XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                {
+                    //  This container didn't have any whitespace in in.  This probably means it didn't have separate open
+                    //  and close tags.  So add a whitespace node before the new child with additional indentation over the
+                    //  container's indentation, and add a whitespace node with the same level of indentation as the container
+                    //  after the new child so the closing tag will be indented properly.
+                    string whitespace = XmlElement.PreviousSibling.Value;
+                    var indentedWhitespaceNode = XmlDocument.CreateWhitespace(whitespace + DEFAULT_INDENT);
+                    XmlElement.InsertBefore(indentedWhitespaceNode, child.XmlElement);
+                    var unindentedWhitespaceNode = XmlDocument.CreateWhitespace(whitespace);
+                    XmlElement.InsertAfter(unindentedWhitespaceNode, child.XmlElement);
+                }
+            }
 
             _count++;
             MarkDirty("Add child element named '{0}'", child.ElementName);
