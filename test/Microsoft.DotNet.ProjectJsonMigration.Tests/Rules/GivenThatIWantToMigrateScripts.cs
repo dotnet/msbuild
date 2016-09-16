@@ -130,7 +130,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             foreach (var task in target.Tasks)
             {
                 var taskCommand = task.GetParameter("Command");
-                Console.WriteLine("TASK: " + taskCommand);
                 var commandIndex = Array.IndexOf(commands, taskCommand);
 
                 commandIndex.Should().Be(-1, "Expected command array elements to be replaced by appropriate msbuild properties");

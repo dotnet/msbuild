@@ -30,9 +30,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectContext = ProjectContext.Create(testDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
 
-            var testSettings = new MigrationSettings(testDirectory, testDirectory, "1.0.0", mockProj);
-            var testInputs = new MigrationRuleInputs(new[] { projectContext }, mockProj, mockProj.AddItemGroup(), mockProj.AddPropertyGroup());
-            new MigrateTFMRule().Apply(testSettings, testInputs);
+            var migrationSettings = new MigrationSettings(testDirectory, testDirectory, "1.0.0", mockProj);
+            var migrationInputs = new MigrationRuleInputs(
+                new[] { projectContext }, 
+                mockProj, 
+                mockProj.AddItemGroup(),
+                mockProj.AddPropertyGroup());
+
+            new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
 
             mockProj.Properties.Count(p => p.Name == "TargetFrameworkIdentifier").Should().Be(0);
             mockProj.Properties.Count(p => p.Name == "TargetFrameworkVersion").Should().Be(0);
@@ -48,12 +53,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectContext = ProjectContext.Create(testDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
 
-            var testSettings = new MigrationSettings(testDirectory, testDirectory, "1.0.0", mockProj);
-            var testInputs = new MigrationRuleInputs(new[] { projectContext }, mockProj, mockProj.AddItemGroup(), mockProj.AddPropertyGroup());
-            new MigrateTFMRule().Apply(testSettings, testInputs);
+            var migrationSettings = new MigrationSettings(testDirectory, testDirectory, "1.0.0", mockProj);
+            var migrationInputs = new MigrationRuleInputs(
+                new[] { projectContext }, 
+                mockProj, 
+                mockProj.AddItemGroup(), 
+                mockProj.AddPropertyGroup());
+
+            new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
 
             mockProj.Properties.Count(p => p.Name == "TargetFrameworks").Should().Be(1);
-            mockProj.Properties.First(p => p.Name == "TargetFrameworks").Value.Should().Be("net20;net35;net40;net461;netstandard1.5");
+            mockProj.Properties.First(p => p.Name == "TargetFrameworks")
+                .Value.Should().Be("net20;net35;net40;net461;netstandard1.5");
         }
 
         public void Migrating_Single_TFM_project_Populates_TargetFrameworks_with_short_tfm()
@@ -71,9 +82,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var mockProj = ProjectRootElement.Create();
 
             // Run BuildOptionsRule
-            var testSettings = new MigrationSettings(testDirectory, testDirectory, "1.0.0", mockProj);
-            var testInputs = new MigrationRuleInputs(new[] { projectContext }, mockProj, mockProj.AddItemGroup(), mockProj.AddPropertyGroup());
-            new MigrateTFMRule().Apply(testSettings, testInputs);
+            var migrationSettings = new MigrationSettings(testDirectory, testDirectory, "1.0.0", mockProj);
+            var migrationInputs = new MigrationRuleInputs(
+                new[] { projectContext }, 
+                mockProj, 
+                mockProj.AddItemGroup(), 
+                mockProj.AddPropertyGroup());
+            
+            new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
 
             mockProj.Properties.Count(p => p.Name == "TargetFrameworks").Should().Be(1);
             mockProj.Properties.First(p => p.Name == "TargetFrameworks").Value.Should().Be("netcoreapp1.0");
