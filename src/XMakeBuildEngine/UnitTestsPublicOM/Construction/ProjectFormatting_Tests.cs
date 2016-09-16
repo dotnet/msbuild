@@ -93,31 +93,6 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
         }
 
         [Fact]
-        public void ProjectQuoteFormatting()
-        {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
-<Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-  <ItemGroup>
-    <ProjectReference Include='..\CLREXE\CLREXE.vcxproj'>
-      <Project>{3699f81b-2d03-46c5-abd7-e88a4c946f28}</Project>
-    </ProjectReference>
-  </ItemGroup>
-</Project>");
-
-            string reformattedContent = ObjectModelHelpers.CleanupFileContents(@"
-<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-  <ItemGroup>
-    <ProjectReference Include=""..\CLREXE\CLREXE.vcxproj"">
-      <Project>{3699f81b-2d03-46c5-abd7-e88a4c946f28}</Project>
-    </ProjectReference>
-  </ItemGroup>
-</Project>");
-
-            VerifyFormattingPreserved(content);
-            VerifyProjectReformatting(content, reformattedContent);
-        }
-
-        [Fact]
         public void ProjectAddItemFormatting_StartOfGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
