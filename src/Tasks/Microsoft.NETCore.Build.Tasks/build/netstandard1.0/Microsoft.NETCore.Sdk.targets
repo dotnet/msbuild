@@ -22,6 +22,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
   </ImportGroup>
 
+  <PropertyGroup>
+    <DefaultExcludes>bin\**;obj\**</DefaultExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="$(DefaultExcludes)" />
+    <EmbeddedResource Remove="$(DefaultExcludes)" />
+  </ItemGroup>
+  
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />

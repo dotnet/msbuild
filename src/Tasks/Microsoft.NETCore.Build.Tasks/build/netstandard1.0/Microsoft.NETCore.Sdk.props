@@ -20,12 +20,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputType>Library</OutputType>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform>AnyCPU</Platform>
-
     <FileAlignment>512</FileAlignment>
-    <GlobalExclude>bin\**;obj\**;</GlobalExclude>
-
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
   <!-- User-facing configuration-specific defaults -->
@@ -42,7 +41,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default settings for .NET Core build logic -->
   <PropertyGroup>
     <DebugType>portable</DebugType>
-
+    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+    <DesignTimeAutoUnify>true</DesignTimeAutoUnify>
+    
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
 
     <!-- all references (even the StdLib) come from packages -->
