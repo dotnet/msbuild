@@ -1942,13 +1942,13 @@ namespace Microsoft.Build.Construction
                     XmlReaderSettings dtdSettings = new XmlReaderSettings();
                     dtdSettings.DtdProcessing = DtdProcessing.Ignore;
 
-                    using (var stream = new StreamReader(fullPath))
+                    using (var stream = new StreamReader(fullPath, true))
                     using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
                     {
                         // Start the reader so it has an idea of what the encoding is.
                         xtr.Read();
                         var encoding = xtr.GetAttribute("encoding");
-                        _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : Encoding.Default;
+                        _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : stream.CurrentEncoding;
                         document.Load(xtr);
                     }
 
