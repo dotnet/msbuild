@@ -220,6 +220,62 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
+        [Fact]
+        public void ProjectAddItemFormatting_EmptyGroup()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+  </ItemGroup>
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+            ProjectItemElement item = xml.AddItem("Compile", "Program.cs");
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Program.cs"" />
+  </ItemGroup>
+</Project>");
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ProjectAddItemFormatting_NoItemGroup()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+</Project>");
+
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            Project project = new Project(xml);
+            ProjectItemElement item = xml.AddItem("Compile", "Program.cs");
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <Compile Include=""Program.cs"" />
+  </ItemGroup>
+</Project>");
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/362")]
         public void PreprocessorFormatting()
         {
