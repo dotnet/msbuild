@@ -26,15 +26,16 @@ namespace Microsoft.Build.Shared
         private const string dotdot = "..";
 
         private static readonly string s_directorySeparator = new string(Path.DirectorySeparatorChar, 1);
-        private static readonly string s_altDirectorySeparator = new string(Path.AltDirectorySeparatorChar, 1);
 
         private static readonly string s_thisDirectory = "." + s_directorySeparator;
 
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
 
-        // on OSX both System.IO.Path separators are '/'
+        // on OSX both System.IO.Path separators are '/', so we have to use the literals
         internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
+        internal static readonly string[] directorySeparatorStrings = directorySeparatorCharacters.Select(c => c.ToString()).ToArray();
+
         internal static readonly GetFileSystemEntries s_defaultGetFileSystemEntries = new GetFileSystemEntries(GetAccessibleFileSystemEntries);
         private static readonly DirectoryExists s_defaultDirectoryExists = new DirectoryExists(Directory.Exists);
 
@@ -983,8 +984,10 @@ namespace Microsoft.Build.Shared
             /*
              *  Call out our special matching characters.
              */
-            matchFileExpression.Replace(s_directorySeparator, "<:dirseparator:>");
-            matchFileExpression.Replace(s_altDirectorySeparator, "<:dirseparator:>");
+            foreach (var separator in directorySeparatorStrings)
+            {
+                matchFileExpression.Replace(separator, "<:dirseparator:>");
+            }
 
             /*
              * Capture the leading \\ in UNC paths, so that the doubled slash isn't
