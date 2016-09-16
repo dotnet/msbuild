@@ -12,6 +12,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <EnableDocumentationFile>true</EnableDocumentationFile>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
