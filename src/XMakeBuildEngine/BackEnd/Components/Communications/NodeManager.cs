@@ -99,6 +99,7 @@ namespace Microsoft.Build.BackEnd
         /// Creates a node on an available NodeProvider, if any..
         /// </summary>
         /// <param name="configuration">The configuration to use for the remote node.</param>
+        /// <param name="nodeAffinity">The <see cref="NodeAffinity"/> to use.</param>
         /// <returns>A NodeInfo describing the node created, or null if none could be created.</returns>
         public NodeInfo CreateNode(NodeConfiguration configuration, NodeAffinity nodeAffinity)
         {
@@ -323,6 +324,7 @@ namespace Microsoft.Build.BackEnd
         /// Attempts to create a node on the specified machine using the specified provider.
         /// </summary>
         /// <param name="nodeProvider">The provider used to create the node.</param>
+        /// <param name="nodeConfiguration">The <see cref="NodeConfiguration"/> to use.</param>
         /// <returns>The id of the node created.</returns>
         private int AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration)
         {

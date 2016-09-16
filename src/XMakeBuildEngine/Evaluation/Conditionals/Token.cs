@@ -68,8 +68,6 @@ namespace Microsoft.Build.Evaluation
         /// represents the token.
         /// If the string may contain content that needs expansion, expandable is set.
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="tokenString"></param>
         internal Token(TokenType type, string tokenString, bool expandable)
         {
             ErrorUtilities.VerifyThrow

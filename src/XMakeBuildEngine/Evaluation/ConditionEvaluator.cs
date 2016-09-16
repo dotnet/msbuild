@@ -424,7 +424,6 @@ namespace Microsoft.Build.Evaluation
             /// Expands the properties and items in the specified expression into a list of taskitems.
             /// </summary>
             /// <param name="expression">The expression to expand.</param>
-            /// <param name="elementLocation">The element location context for the expression, used for error reporting.</param>
             /// <returns>A list of items.</returns>
             public IList<TaskItem> ExpandIntoTaskItems(string expression)
             {
@@ -441,7 +440,6 @@ namespace Microsoft.Build.Evaluation
             /// Expands the specified expression into a string.
             /// </summary>
             /// <param name="expression">The expression to expand.</param>
-            /// <param name="elementLocation">The element location context for the expression, used for error reporting.</param>
             /// <returns>The expanded string.</returns>
             public string ExpandIntoString(string expression)
             {

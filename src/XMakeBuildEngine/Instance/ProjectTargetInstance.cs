@@ -501,6 +501,8 @@ namespace Microsoft.Build.Execution
         /// <param name="taskName">The name of the task to create.</param>
         /// <param name="condition">The task's condition.</param>
         /// <param name="continueOnError">The continue on error flag.</param>
+        /// <param name="msbuildRuntime">The MSBuild runtime.</param>
+        /// <param name="msbuildArchitecture">The MSBuild architecture.</param>
         /// <returns>The new task instance.</returns>
         internal ProjectTaskInstance AddTask(string taskName, string condition, string continueOnError, string msbuildRuntime, string msbuildArchitecture)
         {

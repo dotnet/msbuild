@@ -38,7 +38,6 @@ namespace Microsoft.Build.Internal
         /// Initializes this RegistryKeyWrapper to wrap the specified key.
         /// Does not check for a null key.
         /// </summary>
-        /// <param name="wrappedKey"></param>
         protected RegistryKeyWrapper(RegistryKey wrappedKey, RegistryKey registryHive)
         {
             _wrappedKey = wrappedKey;

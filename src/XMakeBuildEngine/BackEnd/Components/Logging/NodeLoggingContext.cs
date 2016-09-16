@@ -25,6 +25,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="loggingService">The logging service to use.</param>
         /// <param name="nodeId">The </param>
+        /// <param name="inProcNode"><code>true</code> if this is an in-process node, otherwise <code>false</code>.</param>
         internal NodeLoggingContext(ILoggingService loggingService, int nodeId, bool inProcNode)
             : base(loggingService, new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId), inProcNode)
         {

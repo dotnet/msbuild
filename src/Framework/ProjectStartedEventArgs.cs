@@ -175,7 +175,7 @@ namespace Microsoft.Build.Framework
         /// <param name="properties">list of properties</param>
         /// <param name="items">list of items</param>
         /// <param name="parentBuildEventContext">event context info for the parent project</param>
-        /// /// <param name="eventTimestamp">The <see cref="DateTime"/> of the event.</param>
+        /// <param name="eventTimestamp">The <see cref="DateTime"/> of the event.</param>
         public ProjectStartedEventArgs
         (
             int projectId,

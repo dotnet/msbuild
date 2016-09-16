@@ -1288,6 +1288,7 @@ namespace Microsoft.Build.BackEnd
         /// Queue an action to be run in the engine.
         /// </summary>
         /// <param name="action">The action to execute.</param>
+        /// <param name="isLastTask"><code>true</code> if this is the last task for this queue, otherwise <code>false</code>.</param>
         /// <returns>True if the task was scheduled, false otherwise.</returns>
         /// <remarks>This method will return false if an attempt is made to schedule an action after the queue has been shut down.</remarks>
         private bool QueueAction(Action action, bool isLastTask)
@@ -1404,6 +1405,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="sourceEntry">The build request originating these requests.</param>
             /// <param name="blockingGlobalRequestId">The request on which we are blocked.</param>
+            /// <param name="blockingTarget">The target on which we are blocked.</param>
             public PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget)
             {
                 this.SourceEntry = sourceEntry;

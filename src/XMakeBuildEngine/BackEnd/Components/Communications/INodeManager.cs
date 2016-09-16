@@ -24,6 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// Requests that a new node be created.
         /// </summary>
         /// <param name="configuration">The configuration to use to create the node.</param>
+        /// <param name="affinity">The <see cref="NodeAffinity"/> to use.</param>
         /// <returns>Information about the node created</returns>
         /// <remarks>
         /// Throws an exception if the node could not be created.

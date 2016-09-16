@@ -332,6 +332,9 @@ namespace Microsoft.Build.Logging
             _consoleLogger.Initialize(eventSource);
         }
 
+        /// <summary>
+        /// Initializes the logger.
+        /// </summary>
         public virtual void Initialize(IEventSource eventSource, int nodeCount)
         {
             _numberOfProcessors = nodeCount;

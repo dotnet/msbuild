@@ -35,7 +35,6 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns a read-only serializer.
         /// </summary>
-        /// <param name="stream">The stream containing data to deserialize.</param>
         /// <returns>The serializer.</returns>
         static internal INodePacketTranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
         {
@@ -70,7 +69,6 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
-            /// <param name="packetStream">The stream serving as the source or destination of data.</param>
             public NodePacketReadTranslator(Stream packetStream, SharedReadBuffer buffer)
             {
                 _packetStream = packetStream;

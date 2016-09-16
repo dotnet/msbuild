@@ -365,6 +365,7 @@ namespace Microsoft.Build.BackEnd
         /// is being built by another request.
         /// </summary>
         /// <param name="blockingGlobalRequestId">The id of the request on which we are blocked.</param>
+        /// <param name="blockingTarget">The target on which we are blocked.</param>
         public async Task BlockOnTargetInProgress(int blockingGlobalRequestId, string blockingTarget)
         {
             VerifyIsNotZombie();

@@ -37,6 +37,7 @@ namespace Microsoft.Build.BackEnd
         /// configuration due to another request.
         /// </summary>
         /// <param name="blockingRequestId">The request on which we are blocked.</param>
+        /// <param name="blockingTarget">The target on which we are blocked.</param>
         Task BlockOnTargetInProgress(int blockingRequestId, string blockingTarget);
 
         /// <summary>

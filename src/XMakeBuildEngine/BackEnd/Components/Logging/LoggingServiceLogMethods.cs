@@ -605,6 +605,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="targetName">Name of target</param>
         /// <param name="projectFile">Project file being built</param>
         /// <param name="projectFileOfTargetElement">Project file which contains the target</param>
+        /// <param name="parentTargetName">The name of the parent target.</param>
         /// <returns>The build event context for the target.</returns>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
         public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName)

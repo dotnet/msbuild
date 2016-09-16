@@ -139,6 +139,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectFile">
         /// The project file.  If set to String.Empty, all projects will use the specified affinity.  If set to null, all affinities will be cleared.
         /// </param>
+        /// <param name="nodeAffinity">The <see cref="NodeAffinity"/> to set.</param>
         public void SetNodeAffinity(string projectFile, NodeAffinity nodeAffinity)
         {
             if (projectFile == null)

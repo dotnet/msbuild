@@ -675,6 +675,8 @@ namespace Microsoft.Build.Evaluation
             /// Metadata may be qualified, like %(Compile.WarningLevel), or unqualified, like %(Compile)
             /// </summary>
             /// <param name="expression">The expression containing item metadata references</param>
+            /// <param name="metadata"></param>
+            /// <param name="options"></param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
             internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options)
             {

@@ -8,11 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.IO;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
@@ -293,6 +289,7 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
+        /// <param name="dictionaryCreator">A factory used to create a <see cref="NodePacketDictionaryCreator{D}"/>.</param>
         void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketDictionaryCreator<D> dictionaryCreator)
             where D : IDictionary<string, T>
             where T : class, INodePacketTranslatable;

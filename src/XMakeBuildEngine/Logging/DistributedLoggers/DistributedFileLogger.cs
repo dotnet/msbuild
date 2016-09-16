@@ -28,6 +28,9 @@ namespace Microsoft.Build.Logging
 
         #region Methods
 
+        /// <summary>
+        /// Initializes the logger.
+        /// </summary>
         public void Initialize(IEventSource eventSource, int nodeCount)
         {
             Initialize(eventSource);
@@ -88,6 +91,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        /// <summary>
+        /// Initializes the logger.
+        /// </summary>
         public void Initialize(IEventSource eventSource)
         {
             ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
@@ -127,6 +133,9 @@ namespace Microsoft.Build.Logging
             _nodeFileLogger.Initialize(eventSource, 2);
         }
 
+        /// <summary>
+        /// Instructs the logger to shut down.
+        /// </summary>
         public void Shutdown()
         {
             if (_nodeFileLogger != null)
@@ -146,6 +155,10 @@ namespace Microsoft.Build.Logging
                 return _nodeFileLogger;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IEventRedirector"/> object used to redirect build events.
+        /// </summary>
         public IEventRedirector BuildEventRedirector
         {
             get
@@ -158,7 +171,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        // Node Id of the node which the forwarding logger is attached to
+        /// <summary>
+        /// Gets or sets the identifier of the node which the forwarding logger is attached to.
+        /// </summary>
         public int NodeId
         {
             get
@@ -171,7 +186,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        // The verbosity for now is set at detailed
+        /// <summary>
+        /// Gets or sets <see cref="LoggerVerbosity"/>.  This is currently hard-coded as <see cref="LoggerVerbosity.Detailed"/>.
+        /// </summary>
         public LoggerVerbosity Verbosity
         {
             get
@@ -185,6 +202,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        /// <summary>
+        /// Gets or sets the parameters.
+        /// </summary>
         public string Parameters
         {
             get

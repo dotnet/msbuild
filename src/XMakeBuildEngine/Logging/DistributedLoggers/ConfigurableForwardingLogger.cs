@@ -60,6 +60,9 @@ namespace Microsoft.Build.Logging
             set { _buildEventRedirector = value; }
         }
 
+        /// <summary>
+        /// The identifier of the node.
+        /// </summary>
         public int NodeId
         {
             get { return _nodeId; }
@@ -440,6 +443,10 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        /// <summary>
+        /// Forwards the specified event.
+        /// </summary>
+        /// <param name="e">The <see cref="BuildEventArgs"/> to forward.</param>
         protected virtual void ForwardToCentralLogger(BuildEventArgs e)
         {
             _buildEventRedirector.ForwardEvent(e);
@@ -500,7 +507,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// A table indicating if a particular event type should be forwarded
         /// The value is type int rather than bool to avoid the problem of JITting generics.
-        /// <see cref="Dictionary{string, int}" /> is already compiled into mscorlib.
+        /// <see cref="Dictionary{String, Int}" /> is already compiled into mscorlib.
         /// </summary>
         private Dictionary<string, int> _forwardingTable;
 

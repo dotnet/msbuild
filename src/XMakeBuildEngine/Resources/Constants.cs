@@ -240,7 +240,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Constructs the fully qualified method name (<see cref="typeFullName"/>::<see cref="simpleMethodName"/> and adds it to the cache)
+        /// Constructs the fully qualified method name and adds it to the cache
         /// </summary>
         /// <param name="typeFullName"></param>
         /// <param name="simpleMethodName"></param>
@@ -272,8 +272,8 @@ namespace Microsoft.Build.Internal
         /// Tries to retrieve the type information for a type name / method name combination. 
         /// 
         /// It does 2 lookups:
-        /// 1st try: <see cref="typeFullName"/>;
-        /// 2nd try: <see cref="typeFullName"/>::<see cref="simpleMethodName"/>
+        /// 1st try: 'typeFullName'
+        /// 2nd try: 'typeFullName::simpleMethodName'
         /// 
         /// </summary>
         /// <param name="typeFullName">namespace qualified type name</param>
@@ -287,7 +287,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Returns the fully qualified format for the given method: <see cref="typeFullName"/>::<see cref="methodName"/>
+        /// Returns the fully qualified format for the given method: see typeFullName::methodName
         /// </summary>
         /// <param name="typeFullName">namespace qualified type name</param>
         /// <param name="simpleMethodName">simple name of the method</param>

@@ -397,6 +397,7 @@ namespace Microsoft.Build.Construction
         /// Parse a ProjectImportGroupElement
         /// </summary>
         /// <param name="element">The XML element to parse</param>
+        /// <param name="parent">The parent <see cref="ProjectRootElement"/>.</param>
         /// <returns>A ProjectImportGroupElement derived from the XML element passed in</returns>
         private ProjectImportGroupElement ParseProjectImportGroupElement(XmlElementWithLocation element, ProjectRootElement parent)
         {

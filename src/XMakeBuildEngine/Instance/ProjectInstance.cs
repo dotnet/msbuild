@@ -306,6 +306,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="projectFile">The full path to give to this project.</param>
         /// <param name="projectToInheritFrom">The traversal project from which global properties and tools version will be inherited.</param>
+        /// <param name="globalProperties">An <see cref="IDictionary{String,String}"/> containing global properties.</param>
         internal ProjectInstance(string projectFile, ProjectInstance projectToInheritFrom, IDictionary<string, string> globalProperties)
         {
             _projectFileLocation = ElementLocation.Create(projectFile);
@@ -588,6 +589,9 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        /// <summary>
+        /// Gets a <see cref="List{ProjectItemElement}"/> object containing evaluated items.
+        /// </summary>
         public List<ProjectItemElement> EvaluatedItemElements
         {
             get;
@@ -2053,6 +2057,7 @@ namespace Microsoft.Build.Execution
         /// <param name="buildParameters">The build parameters.</param>
         /// <param name="loggingService">The logging service used to log messages etc. from the solution wrapper generator.</param>
         /// <param name="projectBuildEventContext">The build event context in which this project is being constructed.</param>
+        /// <param name="isExplicitlyLoaded"><code>true</code> if the project is explicitly loaded, otherwise <code>false</code>.</param>
         /// <returns>An appropriate ProjectRootElement</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM
@@ -2139,6 +2144,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <typeparam name="TValue">The value stored in the dictionary</typeparam>
         /// <param name="dictionary">Dictionary to clone.</param>
+        /// <param name="strComparer">The <see cref="StringComparer"/> to use for the cloned dictionary.</param>
         private static ObjectModel.ReadOnlyDictionary<string, TValue> CreateCloneDictionary<TValue>(IDictionary<string, TValue> dictionary, StringComparer strComparer)
         {
             Dictionary<string, TValue> clone;

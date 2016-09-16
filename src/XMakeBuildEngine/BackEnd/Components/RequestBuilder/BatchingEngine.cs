@@ -94,7 +94,7 @@ namespace Microsoft.Build.BackEnd
         /// Determines how many times the batchable object needs to be executed (each execution is termed a "batch"), and prepares
         /// buckets of items to pass to the object in each batch.
         /// </summary>
-        /// <param name="parentNode"></param>
+        /// <param name="elementLocation"></param>
         /// <param name="batchableObjectParameters"></param>
         /// <param name="lookup"></param>
         /// <param name="implicitBatchableItemType">Any item type that can be considered an implicit input to this batchable object.

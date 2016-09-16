@@ -23,9 +23,6 @@ namespace Microsoft.Build.Tasks
         /// Given a string of semi-colon delimited name=value pairs, this method parses it and creates 
         /// a hash table containing the property names as keys and the property values as values.  
         /// </summary>
-        /// <param name="log"></param>
-        /// <param name="propertyList"></param>
-        /// <param name="propertiesTable"></param>
         /// <returns>true on success, false on failure.</returns>
         static internal bool GetTable(TaskLoggingHelper log, string parameterName, string[] propertyList, out Hashtable propertiesTable)
         {
@@ -85,9 +82,6 @@ namespace Microsoft.Build.Tasks
         /// are going to be passed to a method (such as that expects the appropriate escaping to have happened
         /// already.
         /// </summary>
-        /// <param name="log"></param>
-        /// <param name="propertyList"></param>
-        /// <param name="propertiesTable"></param>
         /// <returns>true on success, false on failure.</returns>
         static internal bool GetTableWithEscaping(TaskLoggingHelper log, string parameterName, string syntaxName, string[] propertyNameValueStrings, out Hashtable finalPropertiesTable)
         {

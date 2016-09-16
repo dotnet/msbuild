@@ -113,6 +113,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="host">The component host</param>
         /// <param name="requestEntry">The build request entry</param>
+        /// <param name="taskLocation">The <see cref="ElementLocation"/> of the task.</param>
+        /// <param name="targetBuilderCallback">An <see cref="ITargetBuilderCallback"/> to use to invoke targets and build projects.</param>
         public TaskHost(IBuildComponentHost host, BuildRequestEntry requestEntry, ElementLocation taskLocation, ITargetBuilderCallback targetBuilderCallback)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");

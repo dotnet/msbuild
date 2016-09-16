@@ -146,6 +146,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="node">The node ID to which the request should be sent.</param>
         /// <param name="request">The request to send.</param>
+        /// <param name="sendConfiguration"><code>true</code> to send the configuration, otherwise <code>false</code>.</param>
         private ScheduleResponse(int node, BuildRequest request, bool sendConfiguration)
         {
             Action = sendConfiguration ? ScheduleActionType.ScheduleWithConfiguration : ScheduleActionType.Schedule;

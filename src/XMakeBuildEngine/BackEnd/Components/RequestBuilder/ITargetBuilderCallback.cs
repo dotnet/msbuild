@@ -25,6 +25,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="targets">The targets to build.</param>
         /// <param name="continueOnError">True to continue building the remaining targets if one fails.</param>
+        /// <param name="referenceLocation">The <see cref="ElementLocation"/> of the reference.</param>
         /// <returns>The results for each target.</returns>
         /// <remarks>
         /// The target is run using the data context of the Project, rather than the data context 
