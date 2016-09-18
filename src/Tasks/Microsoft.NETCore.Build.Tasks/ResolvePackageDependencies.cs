@@ -316,6 +316,9 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private void GetPackageAndFileDependencies(LockFileTarget target)
         {
+            var resolvedPackageVersions = target.Libraries
+                .ToDictionary(pkg => pkg.Name, pkg => pkg.Version.ToString());
+
             TaskItem item;
             foreach (var package in target.Libraries)
             {
@@ -331,20 +334,30 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
 
                 // get sub package dependencies
-                GetPackageDependencies(package, target.Name);
+                GetPackageDependencies(package, target.Name, resolvedPackageVersions);
 
                 // get file dependencies on this package
                 GetFileDependencies(package, target.Name);
             }
         }
 
-        private void GetPackageDependencies(LockFileTargetLibrary package, string targetName)
+        private void GetPackageDependencies(
+            LockFileTargetLibrary package, 
+            string targetName, 
+            Dictionary<string, string> resolvedPackageVersions)
         {
             string packageId = $"{package.Name}/{package.Version.ToString()}";
             TaskItem item;
             foreach (var deps in package.Dependencies)
             {
-                string depsName = $"{deps.Id}/{deps.VersionRange.MinVersion.ToString()}";
+                string version;
+                if (!resolvedPackageVersions.TryGetValue(deps.Id, out version))
+                {
+                    Log.LogError($"Unexpected Dependency {deps.Id} with no version number");
+                    continue;
+                }
+
+                string depsName = $"{deps.Id}/{version}";
 
                 item = new TaskItem(depsName);
                 item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
