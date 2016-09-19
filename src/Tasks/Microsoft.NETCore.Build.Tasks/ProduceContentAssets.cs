@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Framework;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
@@ -95,7 +98,7 @@ namespace Microsoft.NETCore.Build.Tasks
         public ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
             : this()
         {
-            AssetPreProcessor = assetPreprocessor;
+            AssetPreprocessor = assetPreprocessor;
         }
 
         #endregion
@@ -103,7 +106,7 @@ namespace Microsoft.NETCore.Build.Tasks
         /// <summary>
         /// Resource for reading, processing and writing content assets
         /// </summary>
-        public IContentAssetPreprocessor AssetPreProcessor { get; private set; }
+        public IContentAssetPreprocessor AssetPreprocessor { get; private set; }
 
         public override bool Execute()
         {
@@ -159,9 +162,9 @@ namespace Microsoft.NETCore.Build.Tasks
                         $" Choosing &apos;{preprocessorValues[duplicatedPreprocessorKey]}&apos; as the value.");
                 }
 
-                if (AssetPreProcessor == null)
+                if (AssetPreprocessor == null)
                 {
-                    AssetPreProcessor = new NugetContentAssetPreprocessor(ContentPreprocessorOutputDirectory, preprocessorValues);
+                    AssetPreprocessor = new NugetContentAssetPreprocessor(ContentPreprocessorOutputDirectory, preprocessorValues);
                 }
             }
 
@@ -178,7 +181,7 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
                 else
                 {
-                    string projectLanguage = GetLockFileLanguageName(ProjectLanguage);
+                    string projectLanguage = NuGetUtils.GetLockFileLanguageName(ProjectLanguage);
                     if (grouping.Any(t => t.GetMetadata("codeLanguage") == projectLanguage))
                     {
                         codeLanguageToSelect = projectLanguage;
@@ -222,7 +225,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
             if (ppOutputPath != null)
             {
-                if (AssetPreProcessor == null)
+                if (AssetPreprocessor == null)
                 {
                     throw new Exception($"The {nameof(ContentPreprocessorOutputDirectory)} property must be set in order to consume preprocessed content");
                 }
@@ -235,7 +238,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
                 // We need the preprocessed output, so let's run the preprocessor here
                 string relativeOutputPath = Path.Combine(parts[0], parts[1], ppOutputPath);
-                if (AssetPreProcessor.Process(resolvedPath, relativeOutputPath, out pathToFinalAsset))
+                if (AssetPreprocessor.Process(resolvedPath, relativeOutputPath, out pathToFinalAsset))
                 {
                     _fileWrites.Add(new TaskItem(pathToFinalAsset));
                 }
@@ -273,16 +276,6 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
 
                 _contentItems.Add(item);
-            }
-        }
-
-        private static string GetLockFileLanguageName(string projectLanguage)
-        {
-            switch (projectLanguage)
-            {
-                case "C#": return "cs";
-                case "F#": return "fs";
-                default: return projectLanguage?.ToLowerInvariant();
             }
         }
     }

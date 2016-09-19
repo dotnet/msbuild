@@ -72,7 +72,10 @@ namespace Microsoft.NETCore.Build.Tasks
 
                 stream.Position = 0;
 
-                return SHA1.Create().ComputeHash(stream).Aggregate("", (s, b) => s + b.ToString("x2"));
+                using (var sha1 = SHA1.Create())
+                {
+                    return sha1.ComputeHash(stream).Aggregate("", (s, b) => s + b.ToString("x2"));
+                }
             }
         }
     }
