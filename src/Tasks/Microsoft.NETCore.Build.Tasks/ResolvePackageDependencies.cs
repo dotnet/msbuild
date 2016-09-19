@@ -18,9 +18,8 @@ namespace Microsoft.NETCore.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageDependencies : Task
     {
-        private readonly List<string> _packageFolders = new List<string>();
-        private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>();
-        private readonly HashSet<string> _projectFileDependencies = new HashSet<string>();
+        private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _projectFileDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private IPackageResolver _packageResolver;
         private LockFile _lockFile;
 
@@ -200,11 +199,11 @@ namespace Microsoft.NETCore.Build.Tasks
             TaskItem item;
             foreach (var package in LockFile.Libraries)
             {
-                string packageId = $"{package.Name}/{package.Version.ToString()}";
+                string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
                 item = new TaskItem(packageId);
                 item.SetMetadata(MetadataKeys.Name, package.Name);
                 item.SetMetadata(MetadataKeys.Type, package.Type);
-                item.SetMetadata(MetadataKeys.Version, package.Version.ToString());
+                item.SetMetadata(MetadataKeys.Version, package.Version.ToNormalizedString());
 
                 item.SetMetadata(MetadataKeys.Path, package.Path ?? string.Empty);
 
@@ -306,10 +305,13 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private void GetPackageAndFileDependencies(LockFileTarget target)
         {
+            var resolvedPackageVersions = target.Libraries
+                .ToDictionary(pkg => pkg.Name, pkg => pkg.Version.ToNormalizedString(), StringComparer.OrdinalIgnoreCase);
+
             TaskItem item;
             foreach (var package in target.Libraries)
             {
-                string packageId = $"{package.Name}/{package.Version.ToString()}";
+                string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
 
                 if (_projectFileDependencies.Contains(package.Name))
                 {
@@ -321,20 +323,30 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
 
                 // get sub package dependencies
-                GetPackageDependencies(package, target.Name);
+                GetPackageDependencies(package, target.Name, resolvedPackageVersions);
 
                 // get file dependencies on this package
                 GetFileDependencies(package, target.Name);
             }
         }
 
-        private void GetPackageDependencies(LockFileTargetLibrary package, string targetName)
+        private void GetPackageDependencies(
+            LockFileTargetLibrary package, 
+            string targetName, 
+            Dictionary<string, string> resolvedPackageVersions)
         {
-            string packageId = $"{package.Name}/{package.Version.ToString()}";
+            string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
             TaskItem item;
             foreach (var deps in package.Dependencies)
             {
-                string depsName = $"{deps.Id}/{deps.VersionRange.MinVersion.ToString()}";
+                string version;
+                if (!resolvedPackageVersions.TryGetValue(deps.Id, out version))
+                {
+                    Log.LogError($"Unexpected Dependency {deps.Id} with no version number");
+                    continue;
+                }
+
+                string depsName = $"{deps.Id}/{version}";
 
                 item = new TaskItem(depsName);
                 item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
@@ -346,7 +358,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private void GetFileDependencies(LockFileTargetLibrary package, string targetName)
         {
-            string packageId = $"{package.Name}/{package.Version.ToString()}";
+            string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
             TaskItem item;
 
             // for each type of file group
