@@ -18,7 +18,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <ItemGroup>
     <ProjectCapability Include="DotNetCoreWeb" />   
-    <ProjectCapability Include="DependencyPackageManagement" />
   </ItemGroup>
   
   <ItemGroup>
