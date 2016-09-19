@@ -32,7 +32,8 @@ Commands:
   publish       Publishes a .NET project for deployment (including the runtime)
   run           Compiles and immediately executes a .NET project
   test          Runs unit tests using the test runner specified in the project
-  pack          Creates a NuGet package";
+  pack          Creates a NuGet package
+  vstest        Runs tests from the specified files";
 
         public static int Run(string[] args)
         {

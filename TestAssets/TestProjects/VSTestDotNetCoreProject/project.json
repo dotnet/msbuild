@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "MSTest.TestAdapter": "1.0.3-preview",
+    "MSTest.TestFramework": "1.0.1-preview"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.Sdk": "1.0.0-alpha-20160914-1",
+        "Microsoft.NETCore.App": {
+          "version": "1.0.1",
+          "type": "platform"
+        }
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

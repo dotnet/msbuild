@@ -23,6 +23,7 @@ using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.Restore3;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
+using Microsoft.DotNet.Tools.VSTest;
 using Microsoft.DotNet.Tools.Migrate;
 using NuGet.Frameworks;
 
@@ -45,6 +46,7 @@ namespace Microsoft.DotNet.Cli
             ["build3"] = Build3Command.Run,
             ["run3"] = Run3Command.Run,
             ["restore3"] = Restore3Command.Run,
+            ["vstest"] = VSTestCommand.Run,
             ["pack3"] = Pack3Command.Run,
             ["migrate"] = MigrateCommand.Run,
             ["projectmodel-server"] = ProjectModelServerCommand.Run,
