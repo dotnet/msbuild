@@ -527,9 +527,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" })]
         public void IncludeExcludeWithEscapedCharacters(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
-            //todo run the test twice with slashes and back-slashes when fixing https://github.com/Microsoft/msbuild/issues/724
-            var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
-            Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
+            TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
         }
 
         [Theory]
@@ -597,9 +595,94 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             })]
         public void ExcludeVectorWithWildCards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
-            //todo run the test twice with slashes and back-slashes when fixing https://github.com/Microsoft/msbuild/issues/724
-            var formattedProjectContents = string.Format(projectContents, includeString, excludeString);
-            Helpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude);
+            TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
+        }
+
+        [Theory]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"src/**/*.cs",
+            new[]
+            {
+                @"src\a.cs",
+                @"src\a\b\b.cs",
+            },
+            new[]
+            {
+                @"src/a.cs",
+                @"src/a\b\b.cs",
+            })]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"src/test/**/*.cs",
+            new[]
+            {
+                @"src\test\a.cs",
+                @"src\test\a\b\c.cs",
+            },
+            new[]
+            {
+                @"src/test/a.cs",
+                @"src/test/a\b\c.cs",
+            })]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"src/test/**/a/b/**/*.cs",
+            new[]
+            {
+                @"src\test\dir\a\b\a.cs",
+                @"src\test\dir\a\b\c\a.cs",
+            },
+            new[]
+            {
+                @"src/test/dir\a\b\a.cs",
+                @"src/test/dir\a\b\c\a.cs",
+            })]
+        public void IncludeWithWildcardShouldPreserveUserSlashesInFixedDirPart(string projectContents, string includeString, string[] inputFiles, string[] expectedInclude)
+        {
+            TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, "");
+        }
+
+        private static void TestIncludeExcludeWithDifferentSlashes(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        {
+            Action<string, string> runTest = (include, exclude) =>
+            {
+                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true);
+            };
+
+            var includeWithForwardSlash = Helpers.ToForwardSlash(includeString);
+            var excludeWithForwardSlash = Helpers.ToForwardSlash(excludeString);
+
+            runTest(includeString, excludeString);
+            runTest(includeWithForwardSlash, excludeWithForwardSlash);
+            runTest(includeString, excludeWithForwardSlash);
+            runTest(includeWithForwardSlash, excludeString);
+        }
+
+        private static void TestIncludeExclude(string projectContents, string[] inputFiles, string[] expectedInclude, string include, string exclude, bool normalizeSlashes = false)
+        {
+            var formattedProjectContents = string.Format(projectContents, include, exclude);
+            ObjectModelHelpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude, expectedMetadataPerItem: null, normalizeSlashes: normalizeSlashes);
+        }
+
+        [Theory]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\*",
+            "foo",
+            new[]
+            {
+                "foo",
+                @"a\foo",
+                @"a\a\foo",
+                @"a\b\foo",
+            },
+            new[]
+            {
+                @"a\a\foo",
+                @"a\b\foo",
+                @"a\foo",
+                "build.proj"
+            })]
+        public void IncludeShouldPreserveUserSlashes(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        {
+            //TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
         }
 
         /// <summary>
@@ -2088,7 +2171,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateAndRemoveShouldWorkWithEscapedCharacters(string projectContents, string include, string update, string remove, string[] expectedInclude, Dictionary<string, string>[] expectedMetadata)
         {
             var formattedProjectContents = string.Format(projectContents, include, update, remove);
-            Helpers.AssertItemEvaluation(formattedProjectContents, new string[0], expectedInclude, expectedMetadata);
+            ObjectModelHelpers.AssertItemEvaluation(formattedProjectContents, new string[0], expectedInclude, expectedMetadata);
         }
 
         [Theory]
@@ -2122,10 +2205,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static List<ProjectItem> GetItemsFromFragmentWithGlobs(out string rootDir, string itemGroupFragment, params string[] globFiles)
         {
-            var projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory($"{Guid.NewGuid()}.proj", ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment));
-            rootDir = Path.GetDirectoryName(projectFile);
+            var formattedProjectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment);
 
-            Helpers.CreateFilesInDirectory(rootDir, globFiles);
+            string projectFile;
+            string[] createdFiles;
+            rootDir = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, globFiles, out projectFile, out createdFiles);
 
             return Helpers.MakeList(new Project(projectFile).GetItems("i"));
         }

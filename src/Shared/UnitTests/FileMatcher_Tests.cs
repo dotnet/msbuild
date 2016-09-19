@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -686,52 +688,100 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(strings[0], "\\Machine\\directorymorechars\\1.file");
         }
 
-        [Fact]
-        public void ExcludePattern()
+        [Theory]
+        [InlineData(
+            @"src/**/*.cs", //  Include Pattern
+            new string[] //  Matching files
+            {
+                @"src/a.cs",
+                @"src/a\b\b.cs",
+            }
+            )]
+        [InlineData(
+            @"src/test/**/*.cs", //  Include Pattern
+            new string[] //  Matching files
+            {
+                @"src/test/a.cs",
+                @"src/test/a\b\c.cs",
+            }
+            )]
+        [InlineData(
+            @"src/test/**/a/b/**/*.cs", //  Include Pattern
+            new string[] //  Matching files
+            {
+                @"src/test/dir\a\b\a.cs",
+                @"src/test/dir\a\b\c\a.cs",
+            }
+            )]
+        public void IncludePatternShouldPreserveUserSlashesInFixedDirPart(string include, string[] matching)
         {
-            MatchDriver(
-                @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
-                {
-                    @"bin\**"
-                },
-                new string[]    //  Matching files
-                {
-                    @"foo.cs",
-                    @"Properties\AssemblyInfo.cs",
-                    @"Foo\Bar\Baz\Buzz.cs"
-                },
-                new string[]    //  Non matching files
-                {
-                    @"foo.txt",
-                    @"Foo\foo.txt",
-                },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                    @"bin\foo.cs",
-                    @"bin\bar\foo.cs",
-                    @"bin\bar\"
-                }
-            );
+            MatchDriver(include, null, matching, null, null, normalizePaths: false);
+        }
+
+        [Theory]
+        [InlineData(
+            @"**\*.cs", //  Include Pattern
+            new[] //  Exclude patterns
+            {
+                @"bin\**"
+            },
+            new string[] //  Matching files
+            {
+            },
+            new string[] //  Non matching files
+            {
+            },
+            new[] //  Non matching files that shouldn't be touched
+            {
+                @"bin\foo.cs",
+                @"bin\bar\foo.cs",
+                @"bin\bar\"
+            }
+            )]
+        [InlineData(
+            @"**\*.cs", //  Include Pattern
+            new[] //  Exclude patterns
+            {
+                @"bin\**"
+            },
+            new[] //  Matching files
+            {
+                "a.cs",
+                @"b\b.cs",
+            },
+            new[] //  Non matching files
+            {
+                @"b\b.txt"
+            },
+            new[] //  Non matching files that shouldn't be touched
+            {
+                @"bin\foo.cs",
+                @"bin\bar\foo.cs",
+                @"bin\bar\"
+            }
+            )]
+        public void ExcludePattern(string include, string[] exclude, string[] matching, string[] nonMatching, string[] untouchable)
+        {
+            MatchDriver(include, exclude, matching, nonMatching, untouchable);
         }
 
         [Fact]
         public void ExcludeSpecificFiles()
         {
-            MatchDriver(
+            MatchDriverWithDifferentSlashes(
                 @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
+                new[]    //  Exclude patterns
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Matching files
+                new[]    //  Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new string[]    //  Non matching files
+                new[]    //  Non matching files
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
@@ -745,29 +795,29 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExcludePatternAndSpecificFiles()
         {
-            MatchDriver(
+            MatchDriverWithDifferentSlashes(
                 @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
+                new[]    //  Exclude patterns
                 {
                     @"bin\**",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
 
                 },
-                new string[]    //  Matching files
+                new[]    //  Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new string[]    //  Non matching files
+                new[]    //  Non matching files
                 {
                     @"foo.txt",
                     @"Foo\foo.txt",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Non matching files that shouldn't be touched
+                new[]    //  Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",
@@ -776,39 +826,72 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [Fact]
-        public void ExcludeComplexPattern()
-        {
-            MatchDriver(
-                @"**\*.cs",     //  Include Pattern
-                new string[]    //  Exclude patterns
-                {
-                    @"**\bin\**\*.cs",
-                    @"src\Common\**",
-                },
-                new string[]    //  Matching files
-                {
-                    @"foo.cs",
-                    @"src\Framework\Properties\AssemblyInfo.cs",
-                    @"src\Framework\Foo\Bar\Baz\Buzz.cs"
-                },
-                new string[]    //  Non matching files
-                {
-                    @"foo.txt",
-                    @"src\Framework\Readme.md",
-                    @"src\Common\foo.cs",
+        [Theory]
+        [InlineData(
+            @"**\*.cs", // Include Pattern
+            new[] // Exclude patterns
+            {
+                @"**\bin\**\*.cs",
+                @"src\Common\**",
+            },
+            new[] // Matching files
+            {
+                @"foo.cs",
+                @"src\Framework\Properties\AssemblyInfo.cs",
+                @"src\Framework\Foo\Bar\Baz\Buzz.cs"
+            },
+            new[] // Non matching files
+            {
+                @"foo.txt",
+                @"src\Framework\Readme.md",
+                @"src\Common\foo.cs",
 
-                    //  Ideally these would be in the files that aren't touched at all, but the exclude pattern is too complex for that to work with the current logic
-                    @"src\Framework\bin\foo.cs",
-                    @"src\Framework\bin\Debug",
-                    @"src\Framework\bin\Debug\foo.cs",
-                },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                    @"src\Common\Properties\",
-                    @"src\Common\Properties\AssemblyInfo.cs",
-                }
-            );
+                // Ideally these would be untouchable
+                @"src\Framework\bin\foo.cs",
+                @"src\Framework\bin\Debug",
+                @"src\Framework\bin\Debug\foo.cs",
+            },
+            new[] // Non matching files that shouldn't be touched
+            {
+                @"src\Common\Properties\",
+                @"src\Common\Properties\AssemblyInfo.cs",
+            }
+            )]
+        [InlineData(
+            @"src\**\proj\**\*.cs", // Include Pattern
+            new[] // Exclude patterns
+            {
+                @"src\**\proj\**\none\**\*",
+            },
+            new[] // Matching files
+            {
+                @"src\proj\m1.cs",
+                @"src\proj\a\m2.cs",
+                @"src\b\proj\m3.cs",
+                @"src\c\proj\d\m4.cs",
+            },
+            new[] // Non matching files
+            {
+                @"nm1.cs",
+                @"a\nm2.cs",
+                @"src\nm3.cs",
+                @"src\a\nm4.cs",
+
+                // Ideally these would be untouchable
+                @"src\proj\none\nm5.cs",
+                @"src\proj\a\none\nm6.cs",
+                @"src\b\proj\none\nm7.cs",
+                @"src\c\proj\d\none\nm8.cs",
+                @"src\e\proj\f\none\g\nm8.cs",
+            },
+            new string[] // Non matching files that shouldn't be touched
+            {
+            }
+            )]
+        // patterns with excludes that ideally would prune entire recursive subtrees (files in pruned tree aren't touched at all) but the exclude pattern is too complex for that to work with the current logic
+        public void ExcludeComplexPattern(string include, string[] exclude, string[] matching, string[] nonMatching, string[] untouchable)
+        {
+            MatchDriverWithDifferentSlashes(include, exclude, matching, nonMatching, untouchable);
         }
 
 
@@ -893,7 +976,6 @@ namespace Microsoft.Build.UnitTests
                 get { return _fileSet3Hits; }
             }
 
-
             /// <summary>
             /// Return files that match the given files.
             /// </summary>
@@ -902,9 +984,10 @@ namespace Microsoft.Build.UnitTests
             /// <param name="pattern">The pattern to search for.</param>
             /// <param name="files">Hashtable receives the files.</param>
             /// <returns></returns>
-            private int GetMatchingFiles(string[] candidates, string path, string pattern, Hashtable files)
+            private int GetMatchingFiles(string[] candidates, string path, string pattern, ISet<string> files)
             {
                 int hits = 0;
+
                 if (candidates != null)
                 {
                     foreach (string candidate in candidates)
@@ -919,7 +1002,7 @@ namespace Microsoft.Build.UnitTests
                         }
 
                         // Does the candidate directory match the requested path?
-                        if (String.Compare(path, candidateDirectoryName, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (FileUtilities.PathsEqual(path, candidateDirectoryName))
                         {
                             // Match the basic *.* or null. These both match any file.
                             if
@@ -929,7 +1012,7 @@ namespace Microsoft.Build.UnitTests
                             )
                             {
                                 ++hits;
-                                files[normalizedCandidate] = String.Empty;
+                                files.Add(candidate);
                             }
                             else if (pattern.Substring(0, 2) == "*.") // Match patterns like *.cs
                             {
@@ -938,7 +1021,7 @@ namespace Microsoft.Build.UnitTests
                                 if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
                                 {
                                     ++hits;
-                                    files[normalizedCandidate] = String.Empty;
+                                    files.Add(candidate);
                                 }
                             }
                             else if (pattern.Substring(pattern.Length - 4, 2) == ".?") // Match patterns like foo.?xt
@@ -952,7 +1035,7 @@ namespace Microsoft.Build.UnitTests
                                     if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
                                     {
                                         ++hits;
-                                        files[normalizedCandidate] = String.Empty;
+                                        files.Add(candidate);
                                     }
                                 }
                             }
@@ -961,7 +1044,7 @@ namespace Microsoft.Build.UnitTests
                                 if (normalizedCandidate == Path.Combine(path, pattern))
                                 {
                                     ++hits;
-                                    files[normalizedCandidate] = String.Empty;
+                                    files.Add(candidate);
                                 }
                             }
                             else
@@ -982,7 +1065,7 @@ namespace Microsoft.Build.UnitTests
             /// <param name="path">The path to search.</param>
             /// <param name="pattern">The pattern to match.</param>
             /// <param name="directories">Receives the directories.</param>
-            private void GetMatchingDirectories(string[] candidates, string path, string pattern, Hashtable directories)
+            private void GetMatchingDirectories(string[] candidates, string path, string pattern, ISet<string> directories)
             {
                 if (candidates != null)
                 {
@@ -1010,7 +1093,7 @@ namespace Microsoft.Build.UnitTests
                                     || pattern == null
                                 )
                                 {
-                                    directories[match] = String.Empty;
+                                    directories.Add(match);
                                 }
                                 else if    // Match patterns like ?emp
                                     (
@@ -1022,7 +1105,7 @@ namespace Microsoft.Build.UnitTests
                                     string baseMatchTail = baseMatch.Substring(1);
                                     if (String.Compare(tail, baseMatchTail, StringComparison.OrdinalIgnoreCase) == 0)
                                     {
-                                        directories[match] = String.Empty;
+                                        directories.Add(match);
                                     }
                                 }
                                 else
@@ -1047,7 +1130,7 @@ namespace Microsoft.Build.UnitTests
             {
                 string normalizedPath = Normalize(path);
 
-                Hashtable files = new Hashtable();
+                ISet<string> files = new HashSet<string>();
                 if (entityType == FileMatcher.FileSystemEntity.Files || entityType == FileMatcher.FileSystemEntity.FilesAndDirectories)
                 {
                     _fileSet1Hits += GetMatchingFiles(_fileSet1, normalizedPath, pattern, files);
@@ -1061,10 +1144,8 @@ namespace Microsoft.Build.UnitTests
                     GetMatchingDirectories(_fileSet2, normalizedPath, pattern, files);
                     GetMatchingDirectories(_fileSet3, normalizedPath, pattern, files);
                 }
-                ArrayList uniqueFiles = new ArrayList();
-                uniqueFiles.AddRange(files.Keys);
 
-                return (string[])uniqueFiles.ToArray(typeof(string));
+                return files.ToArray();
             }
 
             /// <summary>
@@ -1082,7 +1163,7 @@ namespace Microsoft.Build.UnitTests
                 string normalized = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 
                 // Replace leading UNC.
-                if (normalized.Substring(0, 2) == @"\\")
+                if (normalized.StartsWith(@"\\"))
                 {
                     normalized = "<:UNC:>" + normalized.Substring(2);
                 }
@@ -1218,14 +1299,38 @@ namespace Microsoft.Build.UnitTests
             MatchDriver(filespec, null, matchingFiles, nonmatchingFiles, untouchableFiles);
         }
 
-        private static void MatchDriver
-        (
+        /// <summary>
+        /// Runs the test 4 times with the include and exclude using either forward or backward slashes.
+        /// Expects the <param name="filespec"></param> and <param name="excludeFileSpects"></param> to contain only backward slashes
+        /// 
+        /// To preserve current MSBuild behaviour, it only does so if the path is not rooted. Rooted paths do not support forward slashes (as observed on MSBuild 14.0.25420.1)
+        /// </summary>
+        private static void MatchDriverWithDifferentSlashes
+            (
             string filespec,
             string[] excludeFilespecs,
             string[] matchingFiles,
             string[] nonmatchingFiles,
             string[] untouchableFiles
-        )
+            )
+        {
+            // tests should call this method with backward slashes
+            Assert.DoesNotContain(filespec, "/");
+            foreach (var excludeFilespec in excludeFilespecs)
+            {
+                Assert.DoesNotContain(excludeFilespec, "/");
+            }
+
+            var forwardSlashFileSpec = Helpers.ToForwardSlash(filespec);
+            var forwardSlashExcludeSpecs = excludeFilespecs.Select(Helpers.ToForwardSlash).ToArray();
+
+            MatchDriver(filespec, excludeFilespecs, matchingFiles, nonmatchingFiles, untouchableFiles);
+            MatchDriver(filespec, forwardSlashExcludeSpecs, matchingFiles, nonmatchingFiles, untouchableFiles);
+            MatchDriver(forwardSlashFileSpec, excludeFilespecs, matchingFiles, nonmatchingFiles, untouchableFiles);
+            MatchDriver(forwardSlashFileSpec, forwardSlashExcludeSpecs, matchingFiles, nonmatchingFiles, untouchableFiles);
+        }
+
+        private static void MatchDriver(string filespec, string[] excludeFilespecs, string[] matchingFiles, string[] nonmatchingFiles, string[] untouchableFiles, bool normalizePaths = true)
         {
             MockFileSystem mockFileSystem = new MockFileSystem(matchingFiles, nonmatchingFiles, untouchableFiles);
             string[] files = FileMatcher.GetFiles
@@ -1237,17 +1342,21 @@ namespace Microsoft.Build.UnitTests
                 new DirectoryExists(mockFileSystem.DirectoryExists)
             );
 
+            Func<string[], string[]> normalize = (paths => normalizePaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
+
+            string[] normalizedFiles = normalize(files);
+
             // Validate the matching files.
             if (matchingFiles != null)
             {
-                foreach (string matchingFile in matchingFiles)
+                string[] normalizedMatchingFiles = normalize(matchingFiles);
+
+                foreach (string matchingFile in normalizedMatchingFiles)
                 {
                     int timesFound = 0;
-                    foreach (string file in files)
+                    foreach (string file in normalizedFiles)
                     {
-                        string normalizedFile = MockFileSystem.Normalize(file);
-                        string normalizedMatchingFile = MockFileSystem.Normalize(matchingFile);
-                        if (String.Compare(normalizedFile, normalizedMatchingFile, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Compare(file, matchingFile, StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             ++timesFound;
                         }
@@ -1256,18 +1365,17 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-
             // Validate the non-matching files
             if (nonmatchingFiles != null)
             {
-                foreach (string nonmatchingFile in nonmatchingFiles)
+                string[] normalizedNonMatchingFiles = normalize(nonmatchingFiles);
+
+                foreach (string nonmatchingFile in normalizedNonMatchingFiles)
                 {
                     int timesFound = 0;
-                    foreach (string file in files)
+                    foreach (string file in normalizedFiles)
                     {
-                        string normalizedFile = MockFileSystem.Normalize(file);
-                        string normalizedNonmatchingFile = MockFileSystem.Normalize(nonmatchingFile);
-                        if (String.Compare(normalizedFile, normalizedNonmatchingFile, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Compare(file, nonmatchingFile, StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             ++timesFound;
                         }

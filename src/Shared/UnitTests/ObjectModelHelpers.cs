@@ -134,23 +134,41 @@ namespace Microsoft.Build.UnitTests
             Assert.True(false, "Didn't throw " + exception.ToString());
         }
 
-        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem)
+        internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
-            Assert.Equal(expectedItems.Length, items.Count);
-
-            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
-
-            for (int i = 0; i < expectedItems.Length; i++)
+            string root = "";
+            try
             {
-                Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
-                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+                string[] createdFiles;
+                string projectFile;
+                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
+
+                if (expectedMetadataPerItem == null)
+                {
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
+                }
+                else
+                {
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem, normalizeSlashes);
+                }
+
             }
+            finally
+            {
+                ObjectModelHelpers.DeleteDirectory(root);
+                Directory.Delete(root);
+            }
+        }
+
+        internal static string NormalizeSlashes(string path)
+        {
+            return path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
         }
 
         /// <summary>
         /// Asserts that the list of items has the specified evaluated includes.
         /// </summary>
-        internal static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null)
+        internal static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
             if (expectedDirectMetadata == null)
             {
@@ -165,7 +183,28 @@ namespace Microsoft.Build.UnitTests
                 metadata[i] = expectedDirectMetadata;
             }
 
-            AssertItems(expectedItems, items, metadata);
+            AssertItems(expectedItems, items, metadata, normalizeSlashes);
+        }
+
+        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
+        {
+            Assert.Equal(expectedItems.Length, items.Count);
+
+            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
+
+            for (int i = 0; i < expectedItems.Length; i++)
+            {
+                if (!normalizeSlashes)
+                {
+                    Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                }
+                else
+                {
+                    Assert.Equal(NormalizeSlashes(expectedItems[i]), NormalizeSlashes(items[i].EvaluatedInclude));
+                }
+
+                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+            }
         }
 
         /// <summary>
@@ -1237,15 +1276,42 @@ namespace Microsoft.Build.UnitTests
 
             for (var i = 0; i < files.Length; i++)
             {
-                var fullPath = Path.Combine(rootDirectory, files[i]);
+                // On Unix there is the risk of creating one file with '\' in its name instead of directories.
+                // Therefore split the arguments into path fragments and recompose the path.
+                var fileFragments = SplitPathIntoFragments(files[i]);
+                var rootDirectoryFragments = SplitPathIntoFragments(rootDirectory);
+                var pathFragments = rootDirectoryFragments.Concat(fileFragments);
 
-                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+                var fullPath = Path.Combine(pathFragments.ToArray());
 
-                File.WriteAllText(fullPath, String.Empty);
+                var directoryName = Path.GetDirectoryName(fullPath);
+
+                Directory.CreateDirectory(directoryName);
+                Assert.True(Directory.Exists(directoryName));
+
+                File.WriteAllText(fullPath, string.Empty);
+                Assert.True(File.Exists(fullPath));
+
                 result[i] = fullPath;
             }
 
             return result;
+        }
+
+        private static string[] SplitPathIntoFragments(string path)
+        {
+            // Both Path.AltDirectorSeparatorChar and Path.DirectorySeparator char return '/' on OSX, 
+            // which renders them useless for the following case where I want to split a path that may contain either separator
+            var splits = path.Split('/', '\\');
+
+            // if the path is rooted then the first split is either empty (Unix) or 'c:' (Windows)
+            // in this case the root must be restored back to '/' (Unix) or 'c:\' (Windows)
+            if (Path.IsPathRooted(path))
+            {
+                splits[0] = Path.GetPathRoot(path);
+            }
+
+            return splits;
         }
 
         /// <summary>
@@ -1418,30 +1484,13 @@ namespace Microsoft.Build.UnitTests
             return result;
         }
 
-        internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null)
-        {
-            string root = "";
-            try
-            {
-                string[] createdFiles;
-                string projectFile;
-                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
-
-                if (expectedMetadataPerItem == null)
-                {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
-                }
-                else
-                {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem);
-                }
-                
-            }
-            finally
-            {
-                ObjectModelHelpers.DeleteDirectory(root);
-                Directory.Delete(root);
-            }
-        }
+        /// <summary>
+        /// Used for file matching tests
+        /// MSBuild does not accept forward slashes on rooted paths, so those are returned unchanged
+        /// </summary>
+        internal static string ToForwardSlash(string path) =>
+            Path.IsPathRooted(path)
+                ? path
+                : path.ToSlash();
     }
 }
