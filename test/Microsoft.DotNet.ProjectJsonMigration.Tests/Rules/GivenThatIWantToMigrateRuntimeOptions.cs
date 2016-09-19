@@ -41,7 +41,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var migratedRuntimeOptionsPath = Path.Combine(projectDir, s_runtimeConfigFileName);
 
             File.Exists(migratedRuntimeOptionsPath).Should().BeTrue();
-            Console.WriteLine(migratedRuntimeOptionsPath);
 
             var migratedRuntimeOptionsContent = JObject.Parse(File.ReadAllText(migratedRuntimeOptionsPath));
             JToken.DeepEquals(rawRuntimeOptions, migratedRuntimeOptionsContent).Should().BeTrue();

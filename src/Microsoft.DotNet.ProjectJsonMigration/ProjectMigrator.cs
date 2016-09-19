@@ -68,11 +68,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         private void VerifyProject(IEnumerable<ProjectContext> projectContexts, string projectDirectory)
         {
-            if (projectContexts.Count() > 1)
-            {
-                MigrationErrorCodes.MIGRATE20011($"Multi-TFM projects currently not supported.").Throw();
-            }
-
             if (!projectContexts.Any())
             {
                 MigrationErrorCodes.MIGRATE1013($"No projects found in {projectDirectory}").Throw();

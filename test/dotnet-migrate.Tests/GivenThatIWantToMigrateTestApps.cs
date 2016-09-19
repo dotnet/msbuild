@@ -15,6 +15,7 @@ using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Migrate;
 using Build3Command = Microsoft.DotNet.Tools.Test.Utilities.Build3Command;
+using BuildCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildCommand;
 
 namespace Microsoft.DotNet.Migration.Tests
 {
@@ -71,6 +72,26 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Theory]
+        // TODO: Enable this when X-Targeting is in
+        // [InlineData("TestLibraryWithMultipleFrameworks")]
+        public void It_migrates_projects_with_multiple_TFMs(string projectName)
+        {
+            var projectDirectory =
+                TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
+
+            var outputsIdentical =
+                outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
+
+            if (!outputsIdentical)
+            {
+                OutputDiagnostics(outputComparisonData);
+            }
+
+            outputsIdentical.Should().BeTrue();
+        }
+
+        [Theory]
         [InlineData("TestAppWithLibrary/TestLibrary")]
         [InlineData("TestLibraryWithAnalyzer")]
         [InlineData("TestLibraryWithConfiguration")]
@@ -89,33 +110,6 @@ namespace Microsoft.DotNet.Migration.Tests
             }
 
             outputsIdentical.Should().BeTrue();
-        }
-
-        [Fact]
-        public void It_migrates_an_app_with_scripts_and_the_scripts_run()
-        {
-            var projectDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithMigrateableScripts", callingMethod: "i").WithLockFiles().Path;
-
-            BuildProjectJson(projectDirectory);
-            var projectJsonBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
-            CleanBinObj(projectDirectory);
-
-            MigrateProject(projectDirectory);
-            Restore(projectDirectory);
-            var msBuildStdOut = BuildMSBuild(projectDirectory);
-
-            var msbuildBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
-
-            var outputsIdentical = projectJsonBuildOutputs.SetEquals(msbuildBuildOutputs);
-            outputsIdentical.Should().BeTrue();
-                VerifyAllMSBuildOutputsRunnable(projectDirectory);
-
-            var outputDir =
-                PathUtility.EnsureTrailingSlash(Path.Combine(projectDirectory, "bin", "Debug", "netcoreapp1.0"));
-
-            msBuildStdOut.Should().Contain($"precompile_output ?Debug? ?{outputDir}? ?.NETCoreApp,Version=v1.0?");
-            msBuildStdOut.Should().Contain($"postcompile_output ?Debug? ?{outputDir}? ?.NETCoreApp,Version=v1.0?");
         }
 
         private MigratedBuildComparisonData GetDotnetNewComparisonData(string projectDirectory, string dotnetNewType)

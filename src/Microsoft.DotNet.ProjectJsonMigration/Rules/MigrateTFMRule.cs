@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using NuGet.Frameworks;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
@@ -35,6 +36,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var propertyGroup = migrationRuleInputs.CommonPropertyGroup;
 
             CleanExistingProperties(csproj);
+
+            if (migrationRuleInputs.ProjectContexts.Count() > 1)
+            {
+                _transformApplicator.Execute(
+                    FrameworksTransform.Transform(migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                    propertyGroup);
+            }
 
             foreach (var transform in _transforms)
             {
@@ -90,5 +98,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             new AddPropertyTransform<NuGetFramework>("TargetFrameworkVersion",
                 f => "v" + GetDisplayVersion(f.Version),
                 f => true);
+        private AddPropertyTransform<IEnumerable<NuGetFramework>> FrameworksTransform =>
+            new AddPropertyTransform<IEnumerable<NuGetFramework>>("TargetFrameworks",
+                frameworks => string.Join(";", frameworks.Select(f => f.GetShortFolderName())),
+                frameworks => true);
     }
 }

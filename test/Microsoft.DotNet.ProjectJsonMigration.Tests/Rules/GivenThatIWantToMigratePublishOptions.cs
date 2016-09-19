@@ -79,10 +79,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            Console.WriteLine(string.Join(";", mockProj.Items.Select(i => " ;; " + i.ItemType)));
-            Console.WriteLine(string.Join(";", mockProj.Items.Select(i => " ;; " + i.Include)));
-            Console.WriteLine(string.Join(";", mockProj.Items.Select(i => " ;; " + i.Exclude)));
-
             mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(3);
 
             // From ProjectReader #L725 (Both are empty)
