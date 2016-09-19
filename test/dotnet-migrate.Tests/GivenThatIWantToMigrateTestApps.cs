@@ -114,6 +114,12 @@ namespace Microsoft.DotNet.Migration.Tests
         [Fact]
         public void It_migrates_an_app_with_scripts_and_the_scripts_run()
         {
+            var oldPathExt = Environment.GetEnvironmentVariable("PATHEXT");
+            if (oldPathExt != null)
+            {
+                Environment.SetEnvironmentVariable("PATHEXT", ".cmd");
+            }
+            
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppWithMigrateableScripts", callingMethod: "i").WithLockFiles().Path;
 
@@ -136,6 +142,11 @@ namespace Microsoft.DotNet.Migration.Tests
 
             msBuildStdOut.Should().Contain($"precompile_output ?Debug? ?{outputDir}? ?.NETCoreApp,Version=v1.0?");
             msBuildStdOut.Should().Contain($"postcompile_output ?Debug? ?{outputDir}? ?.NETCoreApp,Version=v1.0?");
+
+            if (oldPathExt != null)
+            {
+                Environment.SetEnvironmentVariable("PATHEXT", oldPathExt);
+            }
         }
 
         private MigratedBuildComparisonData GetDotnetNewComparisonData(string projectDirectory, string dotnetNewType)
