@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => null, true);
+                ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => null, true, false);
             }
            );
         }
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => ProjectRootElement.Create("c:\\bar"), true);
+                ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => ProjectRootElement.Create("c:\\bar"), true, false);
             }
            );
         }
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         public void AddEntry()
         {
             ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
-            ProjectRootElement projectRootElement2 = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true);
+            ProjectRootElement projectRootElement2 = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true, false);
 
             Assert.Same(projectRootElement, projectRootElement2);
         }
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             projectRootElement = null;
             GC.Collect();
 
-            projectRootElement = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true);
+            projectRootElement = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true, false);
 
             Assert.NotNull(projectRootElement);
 

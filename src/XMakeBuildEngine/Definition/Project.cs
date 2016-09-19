@@ -359,7 +359,8 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                _xml = ProjectRootElement.Create(xmlReader, projectCollection);
+                _xml = ProjectRootElement.Create(xmlReader, projectCollection,
+                    preserveFormatting: false);
             }
             catch (InvalidProjectFileException ex)
             {
