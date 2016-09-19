@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenThatIWantToMigrateProjectFramework : TestBase
     {
-        [Fact]
+        [Fact(Skip="Emitting this until x-targetting full support is in")]
         public void Migrating_netcoreapp_project_Does_not_populate_TargetFrameworkIdentifier_and_TargetFrameworkVersion()
         {
             var testDirectory = Temp.CreateDirectory().Path;
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 mockProj, 
                 mockProj.AddItemGroup(), 
                 mockProj.AddPropertyGroup());
-            
+
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
 
             mockProj.Properties.Count(p => p.Name == "TargetFrameworks").Should().Be(1);
