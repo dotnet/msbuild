@@ -37,9 +37,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             CleanExistingProperties(csproj);
 
-            _transformApplicator.Execute(
-                FrameworksTransform.Transform(migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
-                propertyGroup);
+            if (migrationRuleInputs.ProjectContexts.Count() > 1)
+            {
+                _transformApplicator.Execute(
+                    FrameworksTransform.Transform(migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                    propertyGroup);
+            }
 
             foreach (var transform in _transforms)
             {
