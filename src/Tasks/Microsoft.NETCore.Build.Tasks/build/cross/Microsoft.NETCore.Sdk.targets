@@ -1,0 +1,59 @@
+<!--
+***********************************************************************************************
+cross/Microsoft.NETCore.Sdk.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- ================================================================================== -->
+  <!--  TODO: Move everything in this section to Microsoft.Commmon.CrossTargeting.targets -->
+  <!--  https://github.com/dotnet/sdk/issues/145                                          -->
+  <!-- ================================================================================== -->
+  <ItemGroup>
+    <TargetFramework Include="$(TargetFrameworks)" />
+  </ItemGroup>
+
+  <Target Name="Build" Returns="@(InnerOutput)">
+    <PropertyGroup  Condition="'$(InnerTargets)' == ''">
+      <InnerTargets>Build</InnerTargets>
+    </PropertyGroup>
+
+    <MSBuild Projects="$(MSBuildProjectFile)"
+             Condition="'$(TargetFrameworks)' != '' "
+             Targets="$(InnerTargets)"
+             Properties="TargetFramework=%(TargetFramework.Identity)">
+      <Output ItemName="InnerOutput" TaskParameter="TargetOutputs" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="Clean" DependsOnTargets="_SetCleanInnerTarget;Build" />
+  <Target Name="_SetCleanInnerTarget">
+    <PropertyGroup>
+      <InnerTargets>Clean</InnerTargets>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="Rebuild" DependsOnTargets="_SetRebuildInnerTarget;Build" />
+  <Target Name="_SetRebuildInnerTarget">
+    <PropertyGroup>
+      <InnerTargets>Rebuild</InnerTargets>
+    </PropertyGroup>
+  </Target>
+
+  <!-- ===================================================================================== -->
+  <!-- End of what should be moved to Microsoft.Common.CrossTargeting.targets                -->
+  <!-- ===================================================================================== -->
+
+  <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
+
+  <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework)">
+    <GetNearestTargetFramework ReferringTargetFramework="$(ReferringTargetFramework)" PossibleTargetFrameworks="@(TargetFramework)">
+      <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
+    </GetNearestTargetFramework>
+  </Target>
+</Project>
