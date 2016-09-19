@@ -73,7 +73,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
             // set of valid targets and packages
             HashSet<string> validTargets = new HashSet<string>(lockFile.Targets.Select(x => x.Name));
-            HashSet<string> validPackages = new HashSet<string>(lockFile.Libraries.Select(x => $"{x.Name}/{x.Version.ToString()}"));
+            HashSet<string> validPackages = new HashSet<string>(lockFile.Libraries.Select(x => $"{x.Name}/{x.Version.ToNormalizedString()}"));
 
             Func<ITaskItem[], bool> allValidParentTarget =
                 (items) => items.All(x => validTargets.Contains(x.GetMetadata(MetadataKeys.ParentTarget)));
