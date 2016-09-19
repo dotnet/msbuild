@@ -409,8 +409,8 @@ namespace Microsoft.Build.Tasks
                 _copiedFiles = new TaskItem[0];
                 return true;
             }
-
-            if(_destinationFiles != null && _destinationFiles.Distinct().Count() != _destinationFiles.Length)
+            
+            if (_destinationFiles != null && _destinationFiles.Distinct().Count() != _destinationFiles.Length)
             {
                 Log.LogErrorFromResources("Copy.SameDestinationPath");
                 return false;

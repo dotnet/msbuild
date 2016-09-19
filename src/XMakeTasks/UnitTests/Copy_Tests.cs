@@ -1766,6 +1766,41 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3027");
         }
 
+        [Fact]
+        public void SameDestinationShouldThrowError()
+        {
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string sourceFile2 = FileUtilities.GetTemporaryFile();
+            var fileOut = new TaskItem("1.cs");
+            var fileOut2 = new TaskItem("1.cs");
+
+            try
+            {
+                Copy t = new Copy();
+                t.RetryDelayMilliseconds = 1; // speed up tests!
+                // Allow the task's default (false) to have a chance
+                if (useHardLinks)
+                {
+                    t.UseHardlinksIfPossible = useHardLinks;
+                }
+                MockEngine engine = new MockEngine();
+                t.BuildEngine = engine;
+                t.SourceFiles = new ITaskItem[] { new TaskItem(sourceFile), new TaskItem(sourceFile2) };
+                t.DestinationFiles = new ITaskItem[] { fileOut, fileOut2 };
+                t.SkipUnchangedFiles = false;
+                bool success = t.Execute();
+
+                Assert.False(success);
+
+                ((MockEngine)t.BuildEngine).AssertLogContains("MSB3892"); // Didn't do retries, no op then invalid
+            }
+            finally
+            {
+                File.Delete(sourceFile);
+                File.Delete(sourceFile2);
+            }
+        }
+
         /// <summary>
         /// Helper functor for retry tests.
         /// Simulates the File.Copy method without touching the disk.
