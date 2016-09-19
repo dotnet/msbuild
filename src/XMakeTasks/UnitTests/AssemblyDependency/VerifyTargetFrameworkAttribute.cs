@@ -183,7 +183,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if it is the same framework and a higher version but specific version is true.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
         public void HigherVersionButSpecificVersionInDirect()
         {
             MockEngine e = new MockEngine();
@@ -245,7 +244,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if there is an indirect reference to a dll that is higher that what the current target framework is but IgnoreFrameworkAttributeVersionMismatch is true.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
         public void HigherVersionInDirectIgnoreMismatch()
         {
             MockEngine e = new MockEngine();

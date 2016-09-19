@@ -109,7 +109,11 @@ namespace Microsoft.Build.UnitTests
         /// being in MSBuildToolsPath anymore, that this does NOT affect full fusion AssemblyNames -- 
         /// it's picked up from the GAC, where it is anyway, so there's no need to redirect. 
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "FEATURE: LEGACY TASKS")]
+#else
+        [Fact]
+#endif
         public void BuildTaskSimpleCodeFactory_NoAssemblyNameRedirect()
         {
             string projectFileContents = @"

@@ -6,9 +6,6 @@
         Parameters:
           NuGetConfigDir         - this directory may contain the following files:
                                    NuGet.Config - configuration file
-                                   packages.config - old-facioned way to installed packages
-                                   packages.Linux.config - old-facioned way to install packages for Linux
-                                   packages.Windows_NT.config - old-facioned way to install packages for Windows
                                    project.json - new way to install packages
           NuGetDir               - location to install packages
           SolutionRoot           - Process all project.json files under this directory. Excludes project.json in NuGetConfigDir.
@@ -20,7 +17,6 @@
   <!-- These properties are related to NuGet -->
   <PropertyGroup>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
-    <NuGetPackagesFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.config"))</NuGetPackagesFile>
     <NuGetProjectJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.json"))</NuGetProjectJsonFile>
     <NugetVersion>v3.3.0</NugetVersion>
     <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/$(NugetVersion)/nuget.exe</NugetDownloadURL>
@@ -31,7 +27,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <RestoreBuildToolsPackagesConfigInputs>$(GlobalPropertiesFile);$(NuGetPackagesFile);$(NuGetProjectJsonFile)</RestoreBuildToolsPackagesConfigInputs>
+    <RestoreBuildToolsPackagesConfigInputs>$(GlobalPropertiesFile);$(NuGetProjectJsonFile)</RestoreBuildToolsPackagesConfigInputs>
   </PropertyGroup>
 
   <!-- Restore NuGet.exe and use it to process Nuget.config. -->

@@ -103,7 +103,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/270")]
+#else
+        [Fact]
+#endif
         public void TestLargeElementLocationUsedLargeColumn()
         {
             string file = null;
@@ -131,7 +135,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/270")]
+#else
+        [Fact]
+#endif
         public void TestLargeElementLocationUsedLargeLine()
         {
             string file = null;
