@@ -111,44 +111,6 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
         }
 
-        [Fact]
-        public void It_migrates_an_app_with_scripts_and_the_scripts_run()
-        {
-            var oldPathExt = Environment.GetEnvironmentVariable("PATHEXT");
-            if (oldPathExt != null)
-            {
-                Environment.SetEnvironmentVariable("PATHEXT", ".cmd");
-            }
-            
-            var projectDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithMigrateableScripts", callingMethod: "i").WithLockFiles().Path;
-
-            BuildProjectJson(projectDirectory);
-            var projectJsonBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
-            CleanBinObj(projectDirectory);
-
-            MigrateProject(projectDirectory);
-            Restore(projectDirectory);
-            var msBuildStdOut = BuildMSBuild(projectDirectory);
-
-            var msbuildBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
-
-            var outputsIdentical = projectJsonBuildOutputs.SetEquals(msbuildBuildOutputs);
-            outputsIdentical.Should().BeTrue();
-                VerifyAllMSBuildOutputsRunnable(projectDirectory);
-
-            var outputDir =
-                PathUtility.EnsureTrailingSlash(Path.Combine(projectDirectory, "bin", "Debug", "netcoreapp1.0"));
-
-            msBuildStdOut.Should().Contain($"precompile_output ?Debug? ?{outputDir}? ?.NETCoreApp,Version=v1.0?");
-            msBuildStdOut.Should().Contain($"postcompile_output ?Debug? ?{outputDir}? ?.NETCoreApp,Version=v1.0?");
-
-            if (oldPathExt != null)
-            {
-                Environment.SetEnvironmentVariable("PATHEXT", oldPathExt);
-            }
-        }
-
         private MigratedBuildComparisonData GetDotnetNewComparisonData(string projectDirectory, string dotnetNewType)
         {
             DotnetNew(projectDirectory, dotnetNewType);
