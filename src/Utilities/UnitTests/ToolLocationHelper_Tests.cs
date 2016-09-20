@@ -4047,7 +4047,8 @@ namespace Microsoft.Build.UnitTests
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["AnotherAssembly, Version=1.0"].Equals(
                     Path.Combine(
-                        new[] { _fakeStructureRoot, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0" }),
+                        new[] {_fakeStructureRoot, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0"}) +
+                    Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("3.0"), null);
