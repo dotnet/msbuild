@@ -23,7 +23,7 @@
     </NuGetContent>
 
     <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\PublishProfiles\*.*">
-      <Destination>Content\Properties\PublishProfiles</Destination>
+      <Destination>PublishProfiles</Destination>
     </NuGetContent>
     
     <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publishing.Targets\Microsoft.DotNet.Publishing.props" />

@@ -1,6 +1,6 @@
 ﻿<!--
 ***********************************************************************************************
-Microsoft.DotNet.Publishing.targets  
+Microsoft.DotNet.Publishing.Props  
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -12,8 +12,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<!-- -->
-
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
  
   <!-- 
@@ -23,6 +21,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
 
   <PropertyGroup>
+    <DotNetPublishingTasksDir Condition=" '$(DotNetPublishingTasksDir)'=='' ">$(MSBuildThisFileDirectory)</DotNetPublishingTasksDir>
+    <DotNetPublishingSaveFilesDirectory Condition=" '$(DotNetPublishingSaveFilesDirectory)' == ''">$(MSBuildThisFileDirectory)SaveTargets\</DotNetPublishingSaveFilesDirectory>
+    <DotNetPublishingCollectFilesDirectory Condition=" '$(DotNetPublishingCollectFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)CollectTargets\</DotNetPublishingCollectFilesDirectory>
+    <DotNetPublishingTransformFilesDirectory Condition=" '$(DotNetPublishingTransformFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)TransformTargets\</DotNetPublishingTransformFilesDirectory>
+    <DotNetPublishingDeployFilesDirectory Condition=" '$(DotNetPublishingDeployFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)DeployTargets\</DotNetPublishingDeployFilesDirectory>
+    <DotNetPublishingProfilesDirectory Condition=" '$(DotNetPublishingProfilesDirectory)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</DotNetPublishingProfilesDirectory>
+
     <!-- For website project we will always exclude debug symbols from publishing. This can be overridden in the .pubxml file. -->
     <ExcludeGeneratedDebugSymbol Condition="'$(ExcludeGeneratedDebugSymbol)'=='' And '$(_WebProjectType)' == 'WebSite'">True</ExcludeGeneratedDebugSymbol>
     <ExcludeGeneratedDebugSymbol Condition="'$(ExcludeGeneratedDebugSymbol)'=='' And '$(Configuration)' == 'Release'">True</ExcludeGeneratedDebugSymbol>

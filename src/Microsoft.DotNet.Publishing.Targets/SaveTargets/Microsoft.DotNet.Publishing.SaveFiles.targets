@@ -17,13 +17,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DotNetPublishSaveFiles>
       $(DotNetPublishSaveFiles);
       RemoveExcludeFiles;
+      DeletePublishIntermediateOutputPath;
       SaveFilesToPublishIntermediateOutputPath;
     </DotNetPublishSaveFiles>
   </PropertyGroup>
 
 
   <!--********************************************************************-->
-  <!-- Task RemoveExcludeFiles -->
+  <!-- Target RemoveExcludeFiles -->
   <!--********************************************************************-->
 
   <PropertyGroup>
@@ -40,10 +41,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
     
   </Target>
+
+  <!--********************************************************************-->
+  <!-- Target DeletePublishIntermediateOutputPath -->
+  <!--********************************************************************-->
+
+  <PropertyGroup>
+    <DeletePublishIntermediateOutputPathDependsOn>
+      $(DeletePublishIntermediateOutputPathDependsOn);
+    </DeletePublishIntermediateOutputPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="DeletePublishIntermediateOutputPath"
+          DependsOnTargets="$(DeletePublishIntermediateOutputPathDependsOn)" >
+
+    <!-- Remove all the files from the temp directory first-->
+    <ItemGroup>
+      <_PublishTempFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
+    </ItemGroup>
+
+    <!-- Remove the temporary files & directory-->
+    <Delete Files="@(_PublishTempFiles)" ContinueOnError="true" />
+    <MakeDir Directories="$(PublishIntermediateOutputPath)" Condition="!Exists('$(PublishIntermediateOutputPath)')"/>
+
+  </Target>
          
   
   <!--********************************************************************-->
-  <!-- Task CopyAllFilesToPublishIntermediateOutputPath -->
+  <!-- Target CopyAllFilesToPublishIntermediateOutputPath -->
   <!--********************************************************************-->
   <PropertyGroup>
     <SaveFilesToPublishIntermediateOutputPathDependsOn>
@@ -55,20 +80,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         DependsOnTargets="$(SaveFilesToPublishIntermediateOutputPathDependsOn)"
         Inputs="@(DotNetPublishFiles)"
         Outputs="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)$(DotNetPublishFilesRelativePath)')">
-
-    <!-- Remove all the files from the temp directory first-->
-    <ItemGroup>
-      <_PublishTempFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
-    </ItemGroup>
-
-    <!-- Remove the temporary files & directory-->
-    <Delete Files="@(_PublishTempFiles)" ContinueOnError="true" />
-    <MakeDir Directories="$(PublishIntermediateOutputPath)" Condition="!Exists('$(PublishIntermediateOutputPath)')"/>
     
     <Copy
     SourceFiles="@(DotNetPublishFiles)"
-    DestinationFiles="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)%(DestinationRelativePath)')"
-    />
+    DestinationFiles="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)%(DestinationRelativePath)')"  />
+    
   </Target>
 
   <!--********************************************************************-->

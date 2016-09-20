@@ -29,6 +29,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </DotNetPublishCollectFiles>
   </PropertyGroup>
 
-  <Import Project="Microsoft.DotNet.Common.Publishing.CollectFiles.targets"/>
+  <Import Project="Microsoft.DotNet.Common.Publishing.CollectFiles.targets" Condition="Exists('Microsoft.DotNet.Common.Publishing.CollectFiles.targets')"/>
   
 </Project>

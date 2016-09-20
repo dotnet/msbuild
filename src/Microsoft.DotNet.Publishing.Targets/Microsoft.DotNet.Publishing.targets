@@ -12,82 +12,65 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<!-- -->
-
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <DotNetPublishingTasksDir Condition=" '$(DotNetPublishingTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\</DotNetPublishingTasksDir>
-    <DotNetPublishingSaveFilesDirectory Condition=" '$(DotNetPublishingSaveFilesDirectory)' == ''">$(MSBuildThisFileDirectory)..\SaveTargets\</DotNetPublishingSaveFilesDirectory>
-    <DotNetPublishingCollectFilesDirectory Condition=" '$(DotNetPublishingCollectFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\CollectTargets\</DotNetPublishingCollectFilesDirectory>
-    <DotNetPublishingTransformFilesDirectory Condition=" '$(DotNetPublishingTransformFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\TransformTargets\</DotNetPublishingTransformFilesDirectory>
-    <DotNetPublishingDeployFilesDirectory Condition=" '$(DotNetPublishingDeployFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\DeployTargets\</DotNetPublishingDeployFilesDirectory>
-    <DotNetPublishingProfilesDirectory Condition=" '$(DotNetPublishingProfilesDirectory)'=='' ">$(MSBuildThisFileDirectory)..\Content\Properties\PublishProfiles\</DotNetPublishingProfilesDirectory>
-  </PropertyGroup>
-
-  <!-- 
-  ***********************************************************************************************
-  Global Properties
-  ***********************************************************************************************
-  -->
-
-  <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.DotNet.Publishing.Props" />
-
+  <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.DotNet.Publishing.Props" Condition="Exists('$(MSBuildThisFileDirectory)\..\Microsoft.DotNet.Publishing.Props')"/>
+  <Import Project="$(DotNetPublishingSaveFilesDirectory)Microsoft.DotNet.Publishing.SaveFiles.targets" Condition="Exists('$(DotNetPublishingSaveFilesDirectory)Microsoft.DotNet.Publishing.SaveFiles.targets')"/>
 
   <!--
   ***********************************************************************************************
-  Import the Saving target
+  Import the Collection target
   ***********************************************************************************************
  -->
-  <Import Project="$(DotNetPublishingSaveFilesDirectory)Microsoft.DotNet.Publishing.SaveFiles.targets"/>
   
-  <!--
-  ***********************************************************************************************
-  Import the Deployment target
-  ***********************************************************************************************
- -->
   <PropertyGroup>
-    <PublishProtocol Condition="'$(PublishProtocol)' == ''">FileSystem</PublishProtocol>
-  </PropertyGroup>
-  <Import Project="$(DotNetPublishingDeployFilesDirectory)Microsoft.$(PublishProtocol).Publishing.targets"/>
-
-  <!--
-    ***********************************************************************************************
-  Import the CollectFiles
-  ***********************************************************************************************
-  -->
-  <PropertyGroup>
+    <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">Core</PublishProjectType> 
     <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</PublishProjectType>
     <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</PublishProjectType>
     <PublishProjectType Condition="'$(PublishProjectType)' == '' ">WebSite</PublishProjectType>
   </PropertyGroup>
 
-  <Import Project="$(DotNetPublishingCollectFilesDirectory)Microsoft.DotNet.$(PublishProjectType).Publishing.CollectFiles.targets"/>
+  <Import Project="$(DotNetPublishingCollectFilesDirectory)Microsoft.DotNet.$(PublishProjectType).Publishing.CollectFiles.targets" Condition="Exists('$(DotNetPublishingCollectFilesDirectory)Microsoft.DotNet.$(PublishProjectType).Publishing.CollectFiles.targets')" />
 
     <!-- Extension points for pre-publish and post-publish events-->
   <Target Name="PrePublish" />
-  <Target Name="PostPublish" />
   <Target Name="BeforeCollectFiles" />
   <Target Name="AfterCollectFiles" />
   <Target Name="BeforePublishFiles" />
   <Target Name="AfterPublishFiles" />
-  
+  <Target Name="PostPublish" />
+
   <!--
   ***********************************************************************************************
-  Import the PublishProfiles target
+  Import the PublishProfiles
   ***********************************************************************************************
  -->
 
   <PropertyGroup>
     <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</PublishProfileRootFolder>
     <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</PublishProfileRootFolder>
-    <PublishProfile Condition="'$(PublishProfile)' ==''">$(PublishProtocol)Profile</PublishProfile>
+    <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystemProfile</PublishProfile>
     <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
     <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
     <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(DotNetPublishingProfilesDirectory)$(PublishProfileName).pubxml</PublishProfileFullPath>
+
+    <!-- This is what get passed from the Visual Studio UI.-->
+    <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == ''">$(PublishProfileFullPath)</WebPublishProfileFile>
+  </PropertyGroup>
+
+  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)')" />
+
+  <!--
+  ***********************************************************************************************
+  Import the PublishProtocol target
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <PublishProtocol Condition="'$(PublishProtocol)' == ''">$(WebPublishMethod)</PublishProtocol>
   </PropertyGroup>
   
-  <Import Project="$(PublishProfileFullPath)" Condition="Exists('$(PublishProfileFullPath)')" />
+  <Import Project="$(DotNetPublishingDeployFilesDirectory)Microsoft.$(PublishProtocol).Publishing.targets" Condition="Exists('$(DotNetPublishingDeployFilesDirectory)Microsoft.$(PublishProtocol).Publishing.targets')"/>
   
   <!--
   ***********************************************************************************************
