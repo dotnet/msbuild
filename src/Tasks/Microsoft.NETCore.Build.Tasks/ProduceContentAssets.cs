@@ -244,7 +244,7 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
             }
 
-            if (string.Equals(contentFile.GetMetadata("copyToOutput"), "True", StringComparison.OrdinalIgnoreCase))
+            if (contentFile.GetBooleanMetadata("copyToOutput") == true)
             {
                 string outputPath = contentFile.GetMetadata("outputPath") ?? ppOutputPath;
 
@@ -255,6 +255,11 @@ namespace Microsoft.NETCore.Build.Tasks
                     item.SetMetadata(MetadataKeys.ParentPackage, parentPackage);
 
                     _copyLocalItems.Add(item);
+                }
+                else
+                {
+                    Log.LogWarning($"Content Item for {pathToFinalAsset} sets 'copyToOutput' " + 
+                        "but does not provide an 'outputPath' or 'ppOutputPath'");
                 }
             }
 
