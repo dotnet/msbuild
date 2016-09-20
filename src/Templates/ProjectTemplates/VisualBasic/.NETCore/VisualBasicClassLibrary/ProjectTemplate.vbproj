@@ -2,6 +2,10 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   
   <PropertyGroup>
+    <TargetFrameworks>netstandard1.4</TargetFrameworks>
+
+    <!-- Temporarily simulate an inner build until cross-targeting is checked in. -->
+    <TargetFramework>netstandard1.4</TargetFramework>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.4</TargetFrameworkVersion>
   </PropertyGroup>
@@ -9,8 +13,16 @@
   <ItemGroup>
     <Compile Include="**\*.vb" />
     <EmbeddedResource Include="**\*.resx" />
-    <None Include="project.json" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library">
+      <Version>1.6</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Sdk">
+      <Version>$$buildversion$$</Version>
+    </PackageReference>
+  </ItemGroup>
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

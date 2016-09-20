@@ -3,6 +3,10 @@
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+
+    <!-- Temporarily simulate an inner build until cross-targeting is checked in. -->
+    <TargetFramework>netcoreapp1.0</TargetFramework>
     <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
   </PropertyGroup>
@@ -10,8 +14,16 @@
   <ItemGroup>
     <Compile Include="**\*.vb" />
     <EmbeddedResource Include="**\*.resx" />
-    <None Include="project.json" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.App">
+      <Version>1.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Sdk">
+      <Version>$$buildversion$$</Version>
+    </PackageReference>
+  </ItemGroup>
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
