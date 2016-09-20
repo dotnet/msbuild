@@ -410,10 +410,18 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
             
-            if (_destinationFiles != null && _destinationFiles.Distinct().Count() != _destinationFiles.Length)
+            if (_destinationFiles != null)
             {
-                Log.LogErrorFromResources("Copy.SameDestinationPath");
-                return false;
+                var sameDestinationFiles = _destinationFiles.GroupBy(x => x).Where(g => g.Count() > 1).Select(y => y.First());
+
+                if ((sameDestinationFiles.Count() + _destinationFiles.Length) != _destinationFiles.Length)
+                {
+                    foreach(var item in sameDestinationFiles)
+                    {
+                        Log.LogErrorFromResources("Copy.SameDestinationPath", item.ItemSpec);
+                    }
+                    return false;
+                }
             }
 
             if (!(ValidateInputs() && InitializeDestinationFiles()))

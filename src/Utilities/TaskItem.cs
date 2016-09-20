@@ -27,7 +27,7 @@ namespace Microsoft.Build.Utilities
     /// <comment>
     /// Surprisingly few of these Utilities TaskItems are created: typically several orders of magnitude fewer than the number of engine TaskItems.
     /// </comment>
-    public sealed class TaskItem : MarshalByRefObject, ITaskItem, ITaskItem2, IEquatable<TaskItem>
+    public sealed class TaskItem : MarshalByRefObject, ITaskItem, ITaskItem2
     {
         #region Member Data
 
@@ -489,22 +489,6 @@ namespace Microsoft.Build.Utilities
 
             return (IDictionary)_metadata.Clone();
         }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as TaskItem);
-        }
-
-        public override int GetHashCode()
-        {
-            return ItemSpec == null ? 0 : ItemSpec.GetHashCode();
-        }
-
-        public bool Equals(TaskItem other)
-        {
-            return other.ItemSpec == ItemSpec;
-        }
-
         #endregion
     }
 }
