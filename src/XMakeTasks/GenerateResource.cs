@@ -1828,7 +1828,7 @@ namespace Microsoft.Build.Tasks
                     }
                     finally
                     {
-                        reader.Close();
+                        reader?.Close();
                     }
                 }
             }
