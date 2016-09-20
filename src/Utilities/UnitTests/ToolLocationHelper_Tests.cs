@@ -4068,7 +4068,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Contains("MyAssembly, Version=1.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].Path.Equals(
-                    Path.Combine(_fakeStructureRoot, "MyAssembly", "2.0") + Path.DirectorySeparatorChar,
+                    Path.Combine(_fakeStructureRoot, "MyPlatform", "2.0") + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
