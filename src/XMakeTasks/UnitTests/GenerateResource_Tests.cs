@@ -1469,7 +1469,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Non-string resource with text output
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
         [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/308")]
+#else
+        [Fact]
+#endif
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
