@@ -1,14 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
-using NuGet.Versioning;
-using System.Diagnostics;
 using NuGet.Frameworks;
-using System.Runtime.Versioning;
 using System.Linq;
 
 namespace Microsoft.DotNet.Core.Build.Tasks
@@ -61,7 +57,15 @@ namespace Microsoft.DotNet.Core.Build.Tasks
                 Log.LogError($"Project has no no target framework compatible with '{ReferringTargetFramework}'");
             }
 
-            NearestTargetFramework = PossibleTargetFrameworks[possibleNuGetFrameworks.IndexOf(nearestNuGetFramework)];
+            // Note that there can be more than one spelling of the same target framework (e.g. net45 and net4.5) and 
+            // we must return a value that is spelled exactly the same way as the PossibleTargetFrameworks input. To 
+            // achieve this, we find the index of the returned framework among the set we passed to nuget and use that
+            // to retrive a value at the same position in the input.
+            //
+            // This is required to guarantee that a project can use whatever spelling appears in $(TargetFrameworks)
+            // in a condition that compares against $(TargetFramework).
+            int indexOfNearestFramework = possibleNuGetFrameworks.IndexOf(nearestNuGetFramework);
+            NearestTargetFramework = PossibleTargetFrameworks[indexOfNearestFramework];
             return true;
         }
 

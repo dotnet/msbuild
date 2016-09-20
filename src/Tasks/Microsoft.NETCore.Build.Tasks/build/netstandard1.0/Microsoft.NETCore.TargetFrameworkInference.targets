@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.NETCore.TargetFrameworkInference.props
+Microsoft.NETCore.TargetFrameworkInference.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -77,7 +77,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <!--
-     Apply the same defaults as common targets now since we're rnning before them, but need to respect defaults
+     Apply the same defaults as common targets now since we're running before them, but need to respect defaults
      in our override of intermediate and output paths below.
    -->
   <PropertyGroup>

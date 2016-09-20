@@ -14,5 +14,4 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Condition="'$(TargetFramework)' != ''"
           Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.TargetFrameworkInference.targets" />
 
-  </Project>
-
+</Project>
