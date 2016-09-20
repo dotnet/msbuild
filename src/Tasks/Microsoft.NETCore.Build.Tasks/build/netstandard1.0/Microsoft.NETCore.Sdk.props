@@ -25,6 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ErrorReport>prompt</ErrorReport>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <!-- User-facing configuration-specific defaults -->
