@@ -1,18 +1,11 @@
 ﻿
 namespace Microsoft.DotNet.Publishing.Tasks.MsDeploy
 {
-    using Diagnostics = System.Diagnostics;
-    using Collections = System.Collections;
-    using Framework = Microsoft.Build.Framework;
-    using Utilities = Microsoft.Build.Utilities;
-    using Threading = System.Threading;
-    using Net = System.Net;
-    using Cryptography = System.Security.Cryptography;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-    using System.Collections.Generic;
     using Microsoft.Build.Framework;
+    using Collections = System.Collections;
+    using Diagnostics = System.Diagnostics;
+    using Framework = Build.Framework;
+    using Utilities = Build.Utilities;
 
 
     /// <summary>
@@ -859,6 +852,13 @@ namespace Microsoft.DotNet.Publishing.Tasks.MsDeploy
             else
             {
                 dest = VSMSDeployObjectFactory.CreateVSMSDeployObject(this.Destination[0]);
+                VSHostObject hostObj = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
+                string username, password;
+                if (hostObj.ExtractCredentials(out username, out password))
+                {
+                    dest.UserName = username;
+                    dest.Password = password;
+                }
             }
 
             //$Todo, Should we split the Disable Link to two set of setting, one for source, one for destination

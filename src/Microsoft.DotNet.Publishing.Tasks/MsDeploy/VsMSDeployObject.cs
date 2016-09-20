@@ -286,9 +286,6 @@ namespace Microsoft.DotNet.Publishing.Tasks.MsDeploy
             m_fNoDisplayRoot = fNoDisplayRoot;
         }
 
-
-        
-
         private string GetDictionaryValue(string name)
         {
             string value = null;

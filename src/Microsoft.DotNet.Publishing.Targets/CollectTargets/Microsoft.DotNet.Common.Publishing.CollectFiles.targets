@@ -14,7 +14,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!--***************************************************************-->
-  <!-- Task CollectFilesFromOutDir                     -->
+  <!-- Target CollectFilesFromOutDir                     -->
   <!--***************************************************************-->
   <PropertyGroup>
     <CollectFilesFromOutDirDependsOn>
@@ -29,7 +29,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_OutDirFiles
         Include="$(OutDir)**\*.*"
-        Exclude="$(OutDir)PublishOutput\**\*.*">
+        Exclude="$(OutDir)PublishOutput\**\*.*">        
       </_OutDirFiles>
     </ItemGroup>
 
@@ -46,7 +46,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <!--***************************************************************-->
-  <!-- Task CollectFilesFromContent                     -->
+  <!-- Target CollectFilesFromContent                     -->
   <!--***************************************************************-->
   <PropertyGroup>
     <CollectFilesFromContentDependsOn>

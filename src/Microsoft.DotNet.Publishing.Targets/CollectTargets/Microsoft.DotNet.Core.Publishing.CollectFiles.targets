@@ -12,4 +12,45 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <DotNetPublishCollectFiles>
+      Publish;
+      $(DotNetPublishCollectFiles);
+      CollectFilesFromPublishDir;
+    </DotNetPublishCollectFiles>
+  </PropertyGroup>
+
+
+  <!--***************************************************************-->
+  <!-- Task CollectFilesFromPublishDir                               -->
+  <!--***************************************************************-->
+  <PropertyGroup>
+    <CollectFilesFromPublishDirDependsOn>
+      $(CollectFilesFromPublishDirDependsOn);
+    </CollectFilesFromPublishDirDependsOn>
+  </PropertyGroup>
+  
+  <Target Name="CollectFilesFromPublishDir"
+        DependsOnTargets="$(CollectFilesFromPublishDirDependsOn)"
+        Condition="'$(PublishDir)' != ''">
+
+    <ItemGroup>
+      <_PublishDirFiles
+        Include="$(PublishDir)**\*.*">
+      </_PublishDirFiles>
+    </ItemGroup>
+
+    <CreateItem
+      Include="@(_PublishDirFiles)"
+      AdditionalMetadata="DestinationRelativePath=%(RecursiveDir)%(Filename)%(Extension)">
+      <Output TaskParameter="Include" ItemName="_publishDirFilesWithMetadata"/>
+    </CreateItem>
+
+    <ItemGroup>
+      <DotNetPublishFiles Include="@(_publishDirFilesWithMetadata)" />
+    </ItemGroup>
+
+  </Target>
+
 </Project>

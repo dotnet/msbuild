@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.DotNet.Publishing.Tasks</RootNamespace>
     <AssemblyName>Microsoft.DotNet.Publishing.Tasks</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -32,12 +32,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build" />
-    <Reference Include="Microsoft.Build.Framework" />
-    <Reference Include="Microsoft.Build.Utilities.Core" />
+    <Reference Include="Microsoft.Build, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.Build.Framework, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.Build.Utilities.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -54,10 +53,13 @@
     <Compile Include="Kudu\KuduZipDeploy.cs" />
     <Compile Include="MsDeploy\CommonUtility.cs" />
     <Compile Include="MsDeploy\DynamicAssembly.cs" />
+    <Compile Include="MsDeploy\FileSkipData.cs" />
     <Compile Include="MsDeploy\IVSMSDeployTask.cs" />
     <Compile Include="MsDeploy\MSDeploy.cs" />
     <Compile Include="MsDeploy\NormalizeServiceUrl.cs" />
+    <Compile Include="MsDeploy\VSHostObject.cs" />
     <Compile Include="MsDeploy\VsMsdeploy.cs" />
+    <Compile Include="MsDeploy\VSMSDeployHostObject.cs" />
     <Compile Include="MsDeploy\VsMSDeployObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ValidateParameter.cs" />
