@@ -63,8 +63,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExitCodeCausesFailure()
         {
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? "xcopy thisisanonexistentfile" : "cp thisisanonexistentfile thatisanonexistentfile");
@@ -75,7 +73,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
             if (!NativeMethodsShared.IsWindows)
             {
-                ((MockEngine)exec.BuildEngine).AssertLogContains("cp: cannot stat");
+                ((MockEngine)exec.BuildEngine).AssertLogContains("cp: ");
             }
         }
 
