@@ -19,9 +19,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <PublishDir Condition=" '$(PublishDir)' == '' ">$(OutDir)publish\</PublishDir>
+    <_PublishDirName Condition=" '$(_PublishDirName)' == '' ">publish</_PublishDirName>
+
+    <!-- TODO: https://github.com/dotnet/sdk/issues/143 - find a way to default $(PublishDir) before Microsoft.Common.CurrentVersion.targets defaults it -->
+    <_ShouldSetPublishDir Condition=" '$(PublishDir)' == '' or '$(PublishDir)' == '$(OutputPath)app.publish\'">true</_ShouldSetPublishDir>
+    <PublishDir Condition=" '$(_ShouldSetPublishDir)' == 'true' ">$(OutDir)$(_PublishDirName)\</PublishDir>
+    <PublishDir Condition=" '$(_ShouldSetPublishDir)' == 'true' and '$(RuntimeIdentifier)' != ''  ">$(OutDir)$(RuntimeIdentifier)\$(_PublishDirName)\</PublishDir>
+
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
+
+    <!-- publishing self-contained apps should publish the native host as $(AssemblyName).exe -->
+    <RenamePublishedHost Condition=" '$(RenamePublishedHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != ''">true</RenamePublishedHost>
   </PropertyGroup>
 
   <Target Name="Publish"
@@ -58,6 +67,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="CopyFilesToPublishDirectory"
           DependsOnTargets="ComputeFilesToPublish;
+                            RenamePublishedHost;
                             _CopySourceItemsToPublishDirectory">
 
     <Copy SourceFiles="@(ResolvedFilesToPublish)"
@@ -416,6 +426,32 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(_PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        RenamePublishedHost
+
+    Renames the dotnet native host to match the application's name.
+    ============================================================
+    -->
+
+  <Target Name="RenamePublishedHost"
+          Condition="'$(RenamePublishedHost)' == 'true'">
+
+    <PropertyGroup>
+      <_DotNetHostExecutableName>dotnet</_DotNetHostExecutableName>
+      <_DotNetHostExecutableName Condition="$(RuntimeIdentifier.StartsWith('win'))">$(_DotNetHostExecutableName).exe</_DotNetHostExecutableName>
+    </PropertyGroup>
+
+    <ItemGroup>
+
+      <ResolvedFilesToPublish Condition="'%(ResolvedFilesToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
+        <RelativePath>$(AssemblyName)%(ResolvedFilesToPublish.Extension)</RelativePath>
+      </ResolvedFilesToPublish>
+
+    </ItemGroup>
 
   </Target>
 

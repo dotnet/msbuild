@@ -35,7 +35,7 @@ namespace Microsoft.NETCore.Build.Tasks
                 results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, libraryPath));
                 results.AddRange(GetResolvedFiles(targetLibrary.NativeLibraries, libraryPath));
 
-                foreach (LockFileRuntimeTarget runtimeTarget in targetLibrary.RuntimeTargets)
+                foreach (LockFileRuntimeTarget runtimeTarget in targetLibrary.RuntimeTargets.FilterPlaceHolderFiles())
                 {
                     if (string.Equals(runtimeTarget.AssetType, "native", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(runtimeTarget.AssetType, "runtime", StringComparison.OrdinalIgnoreCase))
@@ -47,7 +47,7 @@ namespace Microsoft.NETCore.Build.Tasks
                     }
                 }
 
-                foreach (LockFileItem resourceAssembly in targetLibrary.ResourceAssemblies)
+                foreach (LockFileItem resourceAssembly in targetLibrary.ResourceAssemblies.FilterPlaceHolderFiles())
                 {
                     string locale;
                     if (!resourceAssembly.Properties.TryGetValue("locale", out locale))
@@ -67,7 +67,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private static IEnumerable<ResolvedFile> GetResolvedFiles(IEnumerable<LockFileItem> items, string libraryPath)
         {
-            foreach (LockFileItem item in items)
+            foreach (LockFileItem item in items.FilterPlaceHolderFiles())
             {
                 yield return new ResolvedFile(
                     sourcePath: Path.Combine(libraryPath, item.Path),
