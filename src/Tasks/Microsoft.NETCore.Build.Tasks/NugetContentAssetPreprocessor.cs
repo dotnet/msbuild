@@ -18,8 +18,8 @@ namespace Microsoft.NETCore.Build.Tasks
 
         public NugetContentAssetPreprocessor(string outputDirectory, Dictionary<string, string> preprocessorValues)
         {
-            _preprocessorValues = preprocessorValues;
-            _preprocessedOutputDirectory = Path.Combine(outputDirectory, BuildPreprocessedContentHash(preprocessorValues));
+            _preprocessorValues = preprocessorValues ?? new Dictionary<string, string>();
+            _preprocessedOutputDirectory = Path.Combine(outputDirectory, BuildPreprocessedContentHash(_preprocessorValues));
         }
 
         public bool Process(string originalAssetPath, string relativeOutputPath, out string pathToFinalAsset)
@@ -38,7 +38,7 @@ namespace Microsoft.NETCore.Build.Tasks
                         string value;
                         if (!_preprocessorValues.TryGetValue(token, out value))
                         {
-                            throw new Exception($"The token &apos;${token}$&apos; is unrecognized");
+                            throw new Exception($"The token '${token}$' is unrecognized");
                         }
                         return value;
                     });
@@ -55,7 +55,7 @@ namespace Microsoft.NETCore.Build.Tasks
         /// preprocessed files into a folder with the name so we know to regenerate when any of the
         /// inputs change.
         /// </summary>
-        public static string BuildPreprocessedContentHash(IReadOnlyDictionary<string, string> values)
+        private static string BuildPreprocessedContentHash(IReadOnlyDictionary<string, string> values)
         {
             using (var stream = new MemoryStream())
             {
@@ -74,7 +74,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
                 using (var sha1 = SHA1.Create())
                 {
-                    return sha1.ComputeHash(stream).Aggregate("", (s, b) => s + b.ToString("x2"));
+                    return BitConverter.ToString(sha1.ComputeHash(stream)).Replace("-", "");
                 }
             }
         }
