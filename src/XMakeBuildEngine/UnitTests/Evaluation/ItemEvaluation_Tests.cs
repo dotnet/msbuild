@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Xunit;
+using System.Text;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -134,6 +135,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
             };
 
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, items, new [] {a, b, c});
+        }
+
+        [Fact]
+        public void LongIncludeChain()
+        {
+            const int INCLUDE_COUNT = 10000;
+            
+            //  This was about the minimum count needed to repro a StackOverflowException
+            //const int INCLUDE_COUNT = 4000;
+
+            StringBuilder content = new StringBuilder();
+            for (int i = 0; i < INCLUDE_COUNT; i++)
+            {
+                content.AppendLine($"<i Include='ItemValue{i}' />");
+            }
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content.ToString());
+
+            Assert.Equal(INCLUDE_COUNT, items.Count);
         }
     }
 }

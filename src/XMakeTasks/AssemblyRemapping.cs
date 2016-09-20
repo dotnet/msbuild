@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
         public override bool Equals(object obj)
         {
             AssemblyNameExtension name = obj as AssemblyNameExtension;
-            if (obj == null)
+            if (name == null)
             {
                 return false;
             }

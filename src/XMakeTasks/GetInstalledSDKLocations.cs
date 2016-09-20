@@ -126,6 +126,11 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// When set to true, the task will produce a warning if there were no SDKs found.
+        /// </summary>
+        public bool WarnWhenNoSDKsFound { get; set; } = true;
+
+        /// <summary>
         /// Set of items that represent all of the installed SDKs found in the SDKDirectory and SDKRegistry roots.
         /// The itemspec is the SDK install location. There is a piece of metadata called SDKName which contains the name of the SDK.
         /// </summary>
@@ -198,7 +203,10 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                Log.LogWarningWithCodeFromResources("GetInstalledSDKs.NoSDksFound");
+                if (WarnWhenNoSDKsFound)
+                {
+                    Log.LogWarningWithCodeFromResources("GetInstalledSDKs.NoSDksFound", TargetPlatformIdentifier, TargetPlatformVersion);
+                }
             }
 
             InstalledSDKs = outputItems.ToArray();

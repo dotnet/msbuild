@@ -2039,8 +2039,8 @@ namespace Microsoft.Build.Tasks
                         // Some files may have been skipped. Log warnings for these.
                         for (int i = 0; i < whiteListErrors.Count; ++i)
                         {
-                            Exception e = whiteListErrors[i] as Exception;
-                            string filename = whiteListErrorFilesNames[i] as string;
+                            Exception e = whiteListErrors[i];
+                            string filename = whiteListErrorFilesNames[i];
 
                             // Give the user a warning about the bad file (or files).
                             Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.InvalidInstalledAssemblySubsetTablesFile", filename, SubsetListFinder.SubsetListFolder, e.Message);
@@ -2583,17 +2583,13 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkSubsetLogHeader");
 
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkRedistLogHeader");
-                    if (installedAssemblyTableInfo != null)
+                    foreach (AssemblyTableInfo redistInfo in installedAssemblyTableInfo)
                     {
-                        foreach (AssemblyTableInfo redistInfo in installedAssemblyTableInfo)
+                        if (redistInfo != null)
                         {
-                            if (redistInfo != null)
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FormattedAssemblyInfo", redistInfo.Path));
-                            }
+                            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FormattedAssemblyInfo", redistInfo.Path));
                         }
                     }
-
 
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader");
                     if (whiteListSubsetTableInfo != null)

@@ -581,8 +581,8 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
-                    h1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetH
-                    ", projectFile1, projectFile2);
+                    h1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetH
+                    ", projectFile2);
 
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, msbuildTask.TargetOutputs, false /* order of items not enforced */);
             }

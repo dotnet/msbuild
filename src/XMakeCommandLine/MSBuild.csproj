@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PlatformSpecificBuild>true</PlatformSpecificBuild>
@@ -12,12 +12,12 @@
     <AssemblyName>MSBuild</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
-
     <AppConfig>app.config</AppConfig>
     <!-- Temporary solution for
          https://github.com/Microsoft/msbuild/issues/834 Long term
          two files should be generated from a single source. -->
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
+    <ApplicationIcon>MSBuild.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
@@ -206,6 +206,7 @@
     </EmbeddedResource>
 
     <!-- Content Files -->
+    <Content Include="MSBuild.ico" />
     <Content Include="MSBuild.rsp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -237,6 +238,12 @@
     </None>
     <None Include="MSBuild.exe.manifest" />
     <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToSign Include="$(OutDir)\$(AssemblyName)$(TargetExt)">
+      <Authenticode>Microsoft</Authenticode>
+      <StrongName>StrongName</StrongName>
+    </FilesToSign>
   </ItemGroup>
   <Import Project="..\dir.targets" />
 </Project>

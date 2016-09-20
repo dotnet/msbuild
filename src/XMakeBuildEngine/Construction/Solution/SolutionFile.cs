@@ -814,16 +814,13 @@ namespace Microsoft.Build.Construction
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(line != null, "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(FullPath), "SolutionParseProjectEofError", proj.ProjectName);
 
-            if (proj != null)
+            // Add the project to the collection
+            AddProjectToSolution(proj);
+            // If the project is an etp project then parse the etp project file 
+            // to get the projects contained in it.
+            if (IsEtpProjectFile(proj.RelativePath))
             {
-                // Add the project to the collection
-                AddProjectToSolution(proj);
-                // If the project is an etp project then parse the etp project file 
-                // to get the projects contained in it.
-                if (IsEtpProjectFile(proj.RelativePath))
-                {
-                    ParseEtpProject(proj);
-                }
+                ParseEtpProject(proj);
             }
         } // ParseProject()
 

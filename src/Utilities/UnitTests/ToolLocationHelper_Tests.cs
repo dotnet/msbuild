@@ -23,13 +23,17 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class ToolLocationHelper_Tests
     {
-        public ToolLocationHelper_Tests()
+        private readonly ITestOutputHelper _output;
+
+        public ToolLocationHelper_Tests(ITestOutputHelper output)
         {
+            _output = output;
             ToolLocationHelper.ClearStaticCaches();
         }
 
@@ -1041,7 +1045,7 @@ namespace Microsoft.Build.UnitTests
                         </Target>
                     </Project>");
 
-            ILogger logger = new MockLogger();
+            ILogger logger = new MockLogger(_output);
             ProjectCollection collection = new ProjectCollection();
             Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, logger);
 
@@ -1082,7 +1086,7 @@ namespace Microsoft.Build.UnitTests
                         </Target>
                     </Project>";
 
-            ILogger logger = new MockLogger();
+            ILogger logger = new MockLogger(_output);
 
             ProjectCollection collection = new ProjectCollection();
             Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, logger, "4.0");
@@ -1124,7 +1128,7 @@ namespace Microsoft.Build.UnitTests
                         </Target>
                     </Project>";
 
-            ILogger logger = new MockLogger();
+            ILogger logger = new MockLogger(_output);
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties.Add("VisualStudioVersion", "10.0");
 
@@ -1178,7 +1182,7 @@ namespace Microsoft.Build.UnitTests
                         </Target>
                     </Project>";
 
-            ILogger logger = new MockLogger();
+            ILogger logger = new MockLogger(_output);
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties.Add("VisualStudioVersion", "11.0");
 
@@ -2862,12 +2866,15 @@ namespace Microsoft.Build.UnitTests
         // Path to the fake SDk directory structure created under the temp directory.
         private string _fakeStructureRoot = null;
         private string _fakeStructureRoot2 = null;
+        private ITestOutputHelper _output;
 
-        public GetPlatformExtensionSDKLocationsTestFixture()
+        public GetPlatformExtensionSDKLocationsTestFixture(ITestOutputHelper output)
         {
 #if FEATURE_WIN32_REGISTRY
             getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
 #endif
+
+            _output = output;
 
             _fakeStructureRoot = MakeFakeSDKStructure();
             _fakeStructureRoot2 = MakeFakeSDKStructure2();
@@ -3538,7 +3545,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(_output);
 
                 ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
@@ -3612,7 +3619,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(_output);
 
                 ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
@@ -3708,7 +3715,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(_output);
 
                 ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);

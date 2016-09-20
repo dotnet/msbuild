@@ -2494,8 +2494,8 @@
     <comment>{StrBegin="MSB3784: "} TargetPlatformVersion and TargetPlatformIdentifier root are property names and should not be localized</comment>
    </data>
   <data name="GetInstalledSDKs.NoSDksFound" xml:space="preserve">
-    <value>MSB3785: No SDKs were found. SDKReference items will not be resolved. If your application requires these references there may be compilation errors.</value>
-    <comment>{StrBegin="MSB3785: "} "SDKReference" referrs to SDKReference items in the project file and should not be localized.</comment>
+    <value>MSB3785: No SDKs were found for TargetPlatform = {0} v{1}. SDKReference items will not be resolved. If your application requires these references there may be compilation errors.</value>
+    <comment>{StrBegin="MSB3785: "} "SDKReference" refers to SDKReference items in the project file and should not be localized.</comment>
    </data>
   <data name="GetInstalledSDKs.CouldNotGetSDKList" xml:space="preserve">
     <value>MSB3786: There was a problem retrieving the installed SDKs on the machine. {0}</value>

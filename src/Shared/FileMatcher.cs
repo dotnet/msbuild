@@ -24,13 +24,18 @@ namespace Microsoft.Build.Shared
     {
         private const string recursiveDirectoryMatch = "**";
         private const string dotdot = "..";
-        private static readonly string s_currentDirectoryPattern = "." + Path.DirectorySeparatorChar;
+
         private static readonly string s_directorySeparator = new string(Path.DirectorySeparatorChar, 1);
-        private static readonly string s_altDirectorySeparator = new string(Path.AltDirectorySeparatorChar, 1);
+
+        private static readonly string s_thisDirectory = "." + s_directorySeparator;
 
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
-        internal static readonly char[] directorySeparatorCharacters = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+        // on OSX both System.IO.Path separators are '/', so we have to use the literals
+        internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
+        internal static readonly string[] directorySeparatorStrings = directorySeparatorCharacters.Select(c => c.ToString()).ToArray();
+
         internal static readonly GetFileSystemEntries s_defaultGetFileSystemEntries = new GetFileSystemEntries(GetAccessibleFileSystemEntries);
         private static readonly DirectoryExists s_defaultDirectoryExists = new DirectoryExists(Directory.Exists);
 
@@ -170,7 +175,7 @@ namespace Microsoft.Build.Shared
             try
             {
                 // look in current directory if no path specified
-                string dir = ((path.Length == 0) ? s_currentDirectoryPattern : path);
+                string dir = ((path.Length == 0) ? s_thisDirectory : path);
 
                 // get all files in specified directory, unless a file-spec has been provided
                 string[] files = (filespec == null)
@@ -188,7 +193,7 @@ namespace Microsoft.Build.Shared
                 // IDE, which expects just the filename if it is in the current
                 // directory.  But only do this if the original path requested
                 // didn't itself contain a ".\".
-                else if (!path.StartsWith(s_currentDirectoryPattern, StringComparison.Ordinal))
+                else if (!path.StartsWith(s_thisDirectory, StringComparison.Ordinal))
                 {
                     RemoveInitialDotSlash(files);
                 }
@@ -228,11 +233,11 @@ namespace Microsoft.Build.Shared
 
                 if (pattern == null)
                 {
-                    directories = Directory.GetDirectories((path.Length == 0) ? s_currentDirectoryPattern : path);
+                    directories = Directory.GetDirectories((path.Length == 0) ? s_thisDirectory : path);
                 }
                 else
                 {
-                    directories = Directory.GetDirectories((path.Length == 0) ? s_currentDirectoryPattern : path, pattern);
+                    directories = Directory.GetDirectories((path.Length == 0) ? s_thisDirectory : path, pattern);
                 }
 
                 // Subdirectories in the current directory are coming back with a ".\"
@@ -240,7 +245,7 @@ namespace Microsoft.Build.Shared
                 // IDE, which expects just the filename if it is in the current
                 // directory.  But only do this if the original path requested
                 // didn't itself contain a ".\".
-                if (!path.StartsWith(s_currentDirectoryPattern, StringComparison.Ordinal))
+                if (!path.StartsWith(s_thisDirectory, StringComparison.Ordinal))
                 {
                     RemoveInitialDotSlash(directories);
                 }
@@ -529,7 +534,7 @@ namespace Microsoft.Build.Shared
         {
             for (int i = 0; i < paths.Length; i++)
             {
-                if (paths[i].StartsWith(s_currentDirectoryPattern, StringComparison.Ordinal))
+                if (paths[i].StartsWith(s_thisDirectory, StringComparison.Ordinal))
                 {
                     paths[i] = paths[i].Substring(2);
                 }
@@ -580,7 +585,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        struct FileSearchRecursionResult
+        struct RecursiveStepResult
         {
             public string[] Files;
             public string[] Subdirs;
@@ -642,10 +647,10 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <param name="getFileSystemEntries">Delegate.</param>
         /// <param name="searchesToExclude">Patterns to exclude from the results</param>
-        /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Assumes no trailing slashes</param>
+        /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Keys assume paths are normalized with forward slashes and no trailing slashes</param>
         private static void GetFilesRecursive
         (
-            System.Collections.IList listOfFiles,
+            IList<string> listOfFiles,
             RecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
@@ -669,14 +674,14 @@ namespace Microsoft.Build.Shared
                 foreach (var searchToExclude in searchesToExclude)
                 {
                     //  The BaseDirectory of all the exclude searches should be the same as the include one
-                    Debug.Assert(searchToExclude.BaseDirectory == recursionState.BaseDirectory, "Expected exclude search base directory to match include search base directory");
+                    Debug.Assert(FileUtilities.PathsEqual(searchToExclude.BaseDirectory, recursionState.BaseDirectory), "Expected exclude search base directory to match include search base directory");
 
                     //  We can exclude all results in this folder if:
                     if (
                         //  We are matching files based on a filespec and not a regular expression
                         searchToExclude.SearchData.Filespec != null &&
                         //  The wildcard path portion of the excluded search matches the include search
-                        searchToExclude.RemainingWildcardDirectory == recursionState.RemainingWildcardDirectory &&
+                        FileUtilities.PathsEqual(searchToExclude.RemainingWildcardDirectory, recursionState.RemainingWildcardDirectory) &&
                         //  The exclude search will match ALL filenames OR
                         (searchToExclude.SearchData.Filespec == "*" || searchToExclude.SearchData.Filespec == "*.*" ||
                             //  The exclude search filename pattern matches the include search's pattern
@@ -689,16 +694,16 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            FileSearchRecursionResult nextStep = GetFilesRecursiveStep(
+            RecursiveStepResult nextStep = GetFilesRecursiveStep(
                 recursionState,
                 projectDirectory,
                 stripProjectDirectory,
                 getFileSystemEntries);
 
-            FileSearchRecursionResult[] excludeNextSteps = null;
+            RecursiveStepResult[] excludeNextSteps = null;
             if (searchesToExclude != null)
             {
-                excludeNextSteps = new FileSearchRecursionResult[searchesToExclude.Count];
+                excludeNextSteps = new RecursiveStepResult[searchesToExclude.Count];
                 for (int i = 0; i < searchesToExclude.Count; i++)
                 {
                     excludeNextSteps[i] = GetFilesRecursiveStep(
@@ -752,7 +757,7 @@ namespace Microsoft.Build.Shared
                         for (int i = 0; i < excludeNextSteps.Length; i++)
                         {
                             if (excludeNextSteps[i].Subdirs != null &&
-                                excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir.Equals(subdir, StringComparison.Ordinal)))
+                                excludeNextSteps[i].Subdirs.Any(excludedDir => FileUtilities.PathsEqual(excludedDir, subdir)))
                             {
                                 RecursionState thisExcludeStep = searchesToExclude[i];
                                 thisExcludeStep.BaseDirectory = subdir;
@@ -766,7 +771,9 @@ namespace Microsoft.Build.Shared
                     {
                         List<RecursionState> searchesForSubdir;
 
-                        if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
+                        // The normalization fixes https://github.com/Microsoft/msbuild/issues/917
+                        // and is a partial fix for https://github.com/Microsoft/msbuild/issues/724
+                        if (searchesToExcludeInSubdirs.TryGetValue(subdir.NormalizeForPathComparison(), out searchesForSubdir))
                         {
                             //  We've found the base directory that these exclusions apply to.  So now add them as normal searches
                             if (newSearchesToExclude == null)
@@ -779,12 +786,19 @@ namespace Microsoft.Build.Shared
 
                     // We never want to strip the project directory from the leaves, because the current 
                     // process directory maybe different
-                    GetFilesRecursive(listOfFiles, newRecursionState, projectDirectory, stripProjectDirectory, getFileSystemEntries, newSearchesToExclude, searchesToExcludeInSubdirs);
+                    GetFilesRecursive(
+                        listOfFiles,
+                        newRecursionState,
+                        projectDirectory,
+                        stripProjectDirectory,
+                        getFileSystemEntries,
+                        newSearchesToExclude,
+                        searchesToExcludeInSubdirs);
                 }
             }
         }
 
-        private static FileSearchRecursionResult GetFilesRecursiveStep
+        private static RecursiveStepResult GetFilesRecursiveStep
         (
             RecursionState recursionState,
             string projectDirectory,
@@ -792,7 +806,7 @@ namespace Microsoft.Build.Shared
             GetFileSystemEntries getFileSystemEntries
         )
         {
-            FileSearchRecursionResult ret = new FileSearchRecursionResult();
+            RecursiveStepResult ret = new RecursiveStepResult();
 
             /*
              * Get the matching files.
@@ -853,32 +867,34 @@ namespace Microsoft.Build.Shared
                 // Find the next directory piece.
                 string pattern = null;
 
-                if (recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch &&
-                    recursionState.RemainingWildcardDirectory != recursiveDirectoryMatch + s_directorySeparator)
+                if (!IsRecursiveDirectoryMatch(recursionState.RemainingWildcardDirectory))
                 {
                     int indexOfNextSlash = recursionState.RemainingWildcardDirectory.IndexOfAny(directorySeparatorCharacters);
                     ErrorUtilities.VerifyThrow(indexOfNextSlash != -1, "Slash should be guaranteed.");
 
-                    // Peel off the leftmost directory piece. So for example, if remainingWildcardDirectory
-                    // contains:
-                    //
-                    //        ?emp\foo\**\bar
-                    //
-                    // then put '?emp' into pattern. Then put the remaining part,
-                    //
-                    //        foo\**\bar
-                    //
-                    // back into remainingWildcardDirectory.
-                    // This is a performance optimization. We don't want to enumerate everything if we 
-                    // don't have to.
                     pattern = recursionState.RemainingWildcardDirectory.Substring(0, indexOfNextSlash);
-                    recursionState.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory.Substring(indexOfNextSlash + 1);
 
-                    // If pattern turned into **, then there's no choice but to enumerate everything.
                     if (pattern == recursiveDirectoryMatch)
                     {
+                        // If pattern turned into **, then there's no choice but to enumerate everything.
                         pattern = null;
                         recursionState.RemainingWildcardDirectory = recursiveDirectoryMatch;
+                    }
+                    else
+                    {
+                        // Peel off the leftmost directory piece. So for example, if remainingWildcardDirectory
+                        // contains:
+                        //
+                        //        ?emp\foo\**\bar
+                        //
+                        // then put '?emp' into pattern. Then put the remaining part,
+                        //
+                        //        foo\**\bar
+                        //
+                        // back into remainingWildcardDirectory.
+                        // This is a performance optimization. We don't want to enumerate everything if we 
+                        // don't have to.
+                        recursionState.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory.Substring(indexOfNextSlash + 1);
                     }
                 }
 
@@ -970,8 +986,10 @@ namespace Microsoft.Build.Shared
             /*
              *  Call out our special matching characters.
              */
-            matchFileExpression.Replace(s_directorySeparator, "<:dirseparator:>");
-            matchFileExpression.Replace(s_altDirectorySeparator, "<:dirseparator:>");
+            foreach (var separator in directorySeparatorStrings)
+            {
+                matchFileExpression.Replace(separator, "<:dirseparator:>");
+            }
 
             /*
              * Capture the leading \\ in UNC paths, so that the doubled slash isn't
@@ -1117,8 +1135,6 @@ namespace Microsoft.Build.Shared
 
             return matchFileExpression.ToString();
         }
-
-
 
         /// <summary>
         /// Given a filespec, get the information needed for file matching. 
@@ -1320,7 +1336,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
-        /// <param name="excludeSpecsUnescaped"></param>
         /// <returns>The array of files.</returns>
         internal static string[] GetFiles
         (
@@ -1333,14 +1348,14 @@ namespace Microsoft.Build.Shared
             return files;
         }
 
-        enum GetSearchDataResult
+        enum SearchAction
         {
             RunSearch,
             ReturnFileSpec,
             ReturnEmptyList,
         }
 
-        static GetSearchDataResult GetFileSearchData(string projectDirectoryUnescaped, string filespecUnescaped,
+        static SearchAction GetFileSearchData(string projectDirectoryUnescaped, string filespecUnescaped,
             GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists, out bool stripProjectDirectory,
             out RecursionState result)
         {
@@ -1370,7 +1385,7 @@ namespace Microsoft.Build.Shared
              */
             if (!isLegalFileSpec)
             {
-                return GetSearchDataResult.ReturnFileSpec;
+                return SearchAction.ReturnFileSpec;
             }
 
             // The projectDirectory is not null only if we are running the evaluation from
@@ -1386,7 +1401,7 @@ namespace Microsoft.Build.Shared
                     }
                     catch (ArgumentException)
                     {
-                        return GetSearchDataResult.ReturnEmptyList;
+                        return SearchAction.ReturnEmptyList;
                     }
 
                     stripProjectDirectory = !String.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
@@ -1404,7 +1419,7 @@ namespace Microsoft.Build.Shared
              */
             if (fixedDirectoryPart.Length > 0 && !directoryExists(fixedDirectoryPart))
             {
-                return GetSearchDataResult.ReturnEmptyList;
+                return SearchAction.ReturnEmptyList;
             }
 
             // determine if we need to use the regular expression to match the files
@@ -1413,7 +1428,7 @@ namespace Microsoft.Build.Shared
                 // if we have a directory specification that uses wildcards, and
                 (wildcardDirectoryPart.Length > 0) &&
                 // the specification is not a simple "**"
-                (wildcardDirectoryPart != (recursiveDirectoryMatch + s_directorySeparator));
+                !IsRecursiveDirectoryMatch(wildcardDirectoryPart);
             // then we need to use the regular expression
 
             // if we're not using the regular expression, get the file pattern extension
@@ -1444,14 +1459,10 @@ namespace Microsoft.Build.Shared
                 needsRecursion);
 
             result.SearchData = searchData;
-
-            // The double trim fixes https://github.com/Microsoft/msbuild/issues/917
-            // System.IO does not leave trailing slashes in directory enumerations.
-            // Since this string will be matched against System.IO directory enumerations, both need to agree on trailing slashes
-            result.BaseDirectory = fixedDirectoryPart.TrimEnd(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            result.BaseDirectory = fixedDirectoryPart;
             result.RemainingWildcardDirectory = wildcardDirectoryPart;
 
-            return GetSearchDataResult.RunSearch;
+            return SearchAction.RunSearch;
         }
 
         static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, IEnumerable<string> excludeSpecsUnescaped)
@@ -1480,7 +1491,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
-        /// <param name="excludeSpecsUnescaped"></param>
         /// <param name="getFileSystemEntries">Get files that match the given file spec.</param>
         /// <param name="directoryExists">Determine whether a directory exists.</param>
         /// <returns>The array of files.</returns>
@@ -1507,33 +1517,25 @@ namespace Microsoft.Build.Shared
             // UNDONE (perf): Short circuit the complex processing when we only have a path and a wildcarded filename
 
             /*
-             * Even though we return a string[] we work internally with an IList.
-             * This is because it's cheaper to add items to an IList and this code
-             * might potentially do a lot of that.
-             */
-            System.Collections.ArrayList arrayListOfFiles = new System.Collections.ArrayList();
-            System.Collections.IList listOfFiles = (System.Collections.IList)arrayListOfFiles;
-
-            /*
              * Analyze the file spec and get the information we need to do the matching.
              */
             bool stripProjectDirectory;
             RecursionState state;
-            var result = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped, getFileSystemEntries, directoryExists,
+            var action = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped, getFileSystemEntries, directoryExists,
                 out stripProjectDirectory, out state);
 
-            if (result == GetSearchDataResult.ReturnEmptyList)
+            if (action == SearchAction.ReturnEmptyList)
             {
                 return new string[0];
             }
-            else if (result == GetSearchDataResult.ReturnFileSpec)
+            else if (action == SearchAction.ReturnFileSpec)
             {
                 return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
             }
-            else if (result != GetSearchDataResult.RunSearch)
+            else if (action != SearchAction.RunSearch)
             {
                 //  This means the enum value wasn't valid (or a new one was added without updating code correctly)
-                throw new NotSupportedException(result.ToString());
+                throw new NotSupportedException(action.ToString());
             }
 
             List<RecursionState> searchesToExclude = null;
@@ -1552,10 +1554,10 @@ namespace Microsoft.Build.Shared
                     bool excludeStripProjectDirectory;
 
                     RecursionState excludeState;
-                    var excludeResult = GetFileSearchData(projectDirectoryUnescaped, excludeSpec, getFileSystemEntries, directoryExists,
+                    var excludeAction = GetFileSearchData(projectDirectoryUnescaped, excludeSpec, getFileSystemEntries, directoryExists,
                         out excludeStripProjectDirectory, out excludeState);
 
-                    if (excludeResult == GetSearchDataResult.ReturnFileSpec)
+                    if (excludeAction == SearchAction.ReturnFileSpec)
                     {
                         if (resultsToExclude == null)
                         {
@@ -1563,32 +1565,35 @@ namespace Microsoft.Build.Shared
                         }
                         resultsToExclude.Add(excludeSpec);
                     }
-                    else if (excludeResult == GetSearchDataResult.ReturnEmptyList)
+                    else if (excludeAction == SearchAction.ReturnEmptyList)
                     {
                         //  Nothing to do
                         continue;
                     }
-                    else if (excludeResult != GetSearchDataResult.RunSearch)
+                    else if (excludeAction != SearchAction.RunSearch)
                     {
                         //  This means the enum value wasn't valid (or a new one was added without updating code correctly)
-                        throw new NotSupportedException(excludeResult.ToString());
+                        throw new NotSupportedException(excludeAction.ToString());
                     }
 
-                    if (excludeState.BaseDirectory != state.BaseDirectory)
+                    var excludeBaseDirectoryNormalized = excludeState.BaseDirectory.NormalizeForPathComparison();
+                    var includeBaseDirectoryNormalized = state.BaseDirectory.NormalizeForPathComparison();
+
+                    if (excludeBaseDirectoryNormalized != includeBaseDirectoryNormalized)
                     {
                         //  What to do if the BaseDirectory for the exclude search doesn't match the one for inclusion?
                         //  - If paths don't match (one isn't a prefix of the other), then ignore the exclude search.  Examples:
                         //      - c:\Foo\ - c:\Bar\
                         //      - c:\Foo\Bar\ - C:\Foo\Baz\
                         //      - c:\Foo\ - c:\Foo2\
-                        if (excludeState.BaseDirectory.Length == state.BaseDirectory.Length)
+                        if (excludeBaseDirectoryNormalized.Length == includeBaseDirectoryNormalized.Length)
                         {
                             //  Same length, but different paths.  Ignore this exclude search
                             continue;
                         }
-                        else if (excludeState.BaseDirectory.Length > state.BaseDirectory.Length)
+                        else if (excludeBaseDirectoryNormalized.Length > includeBaseDirectoryNormalized.Length)
                         {
-                            if (!excludeState.BaseDirectory.StartsWith(state.BaseDirectory))
+                            if (!excludeBaseDirectoryNormalized.StartsWith(includeBaseDirectoryNormalized))
                             {
                                 //  Exclude path is longer, but doesn't start with include path.  So ignore it.
                                 continue;
@@ -1606,11 +1611,13 @@ namespace Microsoft.Build.Shared
                                 searchesToExcludeInSubdirs = new Dictionary<string, List<RecursionState>>();
                             }
                             List<RecursionState> listForSubdir;
-                            if (!searchesToExcludeInSubdirs.TryGetValue(excludeState.BaseDirectory, out listForSubdir))
+                            if (!searchesToExcludeInSubdirs.TryGetValue(excludeBaseDirectoryNormalized, out listForSubdir))
                             {
                                 listForSubdir = new List<RecursionState>();
 
-                                searchesToExcludeInSubdirs[excludeState.BaseDirectory] = listForSubdir;
+                                // The normalization fixes https://github.com/Microsoft/msbuild/issues/917
+                                // and is a partial fix for https://github.com/Microsoft/msbuild/issues/724
+                                searchesToExcludeInSubdirs[excludeBaseDirectoryNormalized] = listForSubdir;
                             }
                             listForSubdir.Add(excludeState);
                         }
@@ -1632,7 +1639,7 @@ namespace Microsoft.Build.Shared
                                 //  Example: include="c:\git\msbuild\src\Framework\**\*.cs" exclude="c:\git\msbuild\*.cs"
                                 continue;
                             }
-                            else if (excludeState.RemainingWildcardDirectory == recursiveDirectoryMatch + s_directorySeparator)
+                            else if (IsRecursiveDirectoryMatch(excludeState.RemainingWildcardDirectory))
                             {
                                 //  The wildcard part is exactly "**\", so the exclude pattern will apply to everything in the include
                                 //  pattern, so simply update the exclude's BaseDirectory to be the same as the include baseDirectory
@@ -1667,12 +1674,25 @@ namespace Microsoft.Build.Shared
             }
 
             /*
+             * Even though we return a string[] we work internally with an IList.
+             * This is because it's cheaper to add items to an IList and this code
+             * might potentially do a lot of that.
+             */
+            var listOfFiles = new List<string>();
+
+            /*
              * Now get the files that match, starting at the lowest fixed directory.
              */
             try
             {
-                GetFilesRecursive(listOfFiles, state,
-                   projectDirectoryUnescaped, stripProjectDirectory, getFileSystemEntries, searchesToExclude, searchesToExcludeInSubdirs);
+                GetFilesRecursive(
+                    listOfFiles,
+                    state,
+                    projectDirectoryUnescaped,
+                    stripProjectDirectory,
+                    getFileSystemEntries,
+                    searchesToExclude,
+                    searchesToExcludeInSubdirs);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
@@ -1683,17 +1703,13 @@ namespace Microsoft.Build.Shared
             /*
              * Build the return array.
              */
+            var files = resultsToExclude != null
+                ? listOfFiles.Where(f => !resultsToExclude.Contains(f)).ToArray()
+                : listOfFiles.ToArray();
 
-            string[] files;
-            if (resultsToExclude != null)
-            {
-                files = arrayListOfFiles.Cast<string>().Where(f => !resultsToExclude.Contains(f)).ToArray();
-            }
-            else
-            {
-                files = (string[])arrayListOfFiles.ToArray(typeof(string));
-            }
             return files;
         }
+
+        private static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
     }
 }
