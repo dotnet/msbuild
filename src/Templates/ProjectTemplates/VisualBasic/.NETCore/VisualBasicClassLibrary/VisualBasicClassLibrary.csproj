@@ -45,10 +45,10 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectJsonTemplate Include="project-json-template.json">
-      <TargetPath>project.json.template</TargetPath>
-    </ProjectJsonTemplate>
-    <None Include="ProjectTemplate.vbproj" />
+    <ProjectTemplate Include="ProjectTemplate.vbproj">
+      <TargetPath>Project.vbproj</TargetPath>
+      <SubType>Designer</SubType>
+    </ProjectTemplate>
   </ItemGroup>
   <ItemGroup>
     <VSTemplate Include="ClassLibrary.vstemplate">
