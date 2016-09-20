@@ -442,7 +442,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <_DotNetHostExecutableName>dotnet</_DotNetHostExecutableName>
-      <_DotNetHostExecutableName Condition="'$(OS)'=='Windows_NT'">$(_DotNetHostExecutableName).exe</_DotNetHostExecutableName>
+      <_DotNetHostExecutableName Condition="$(RuntimeIdentifier.StartsWith('win'))">$(_DotNetHostExecutableName).exe</_DotNetHostExecutableName>
     </PropertyGroup>
 
     <ItemGroup>
