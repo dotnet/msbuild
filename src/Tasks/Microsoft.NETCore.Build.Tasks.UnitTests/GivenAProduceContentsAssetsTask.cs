@@ -255,15 +255,15 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             contentItems.Count().Should().Be(3);
 
             var item = contentItems.Where(t => t.ItemSpec.EndsWith(assetWritePath)).First();
-            item.GetMetadata("buildAction").Should().Be("Content");
+            item.GetMetadata("ProcessedItemType").Should().Be("Content");
             item.GetMetadata(MetadataKeys.ParentPackage).Should().Be(package);
 
             item = contentItems.Where(t => t.ItemSpec.EndsWith(contentFiles[1])).First();
-            item.GetMetadata("buildAction").Should().Be("EmbeddedResource");
+            item.GetMetadata("ProcessedItemType").Should().Be("EmbeddedResource");
             item.GetMetadata(MetadataKeys.ParentPackage).Should().Be(package);
 
             item = contentItems.Where(t => t.ItemSpec.EndsWith(contentFiles[2])).First();
-            item.GetMetadata("buildAction").Should().Be("Content");
+            item.GetMetadata("ProcessedItemType").Should().Be("Content");
             item.GetMetadata(MetadataKeys.ParentPackage).Should().Be(package);
 
             // not added to content items
@@ -307,7 +307,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
             var contentItems = task.ProcessedContentItems;
             contentItems.Count().Should().Be(3);
-            contentItems.All(t => t.GetMetadata("buildAction") == "Content").Should().BeTrue();
+            contentItems.All(t => t.GetMetadata("ProcessedItemType") == "Content").Should().BeTrue();
             contentItems.All(t => t.GetMetadata(MetadataKeys.ParentPackage) == package).Should().BeTrue();
         }
 
@@ -356,7 +356,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             contentItems.Count().Should().Be(1);
             contentItems.First().ItemSpec
                 .Should().Be(Path.Combine(PackageRootDirectory, "LibA", "1.2.3", contentFiles[0]));
-            contentItems.First().GetMetadata("buildAction").Should().Be("Content");
+            contentItems.First().GetMetadata("ProcessedItemType").Should().Be("Content");
             contentItems.First().GetMetadata(MetadataKeys.ParentPackage).Should().Be(package);
         }
 
@@ -410,7 +410,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 item = contentItems[i];
                 item.ItemSpec.Should().Be(
                     Path.Combine(PackageRootDirectory, "LibA", "1.2.3", contentFiles[i+1]));
-                item.GetMetadata("buildAction").Should().Be("Content");
+                item.GetMetadata("ProcessedItemType").Should().Be("Content");
                 item.GetMetadata(MetadataKeys.ParentPackage).Should().Be(package);
             }
         }

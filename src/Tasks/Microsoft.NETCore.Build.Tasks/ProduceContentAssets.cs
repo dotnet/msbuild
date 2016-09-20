@@ -18,7 +18,7 @@ namespace Microsoft.NETCore.Build.Tasks
     /// </summary>
     public sealed class ProduceContentAssets : Task
     {
-        private readonly Dictionary<string, string> _resolvedPaths = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _resolvedPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly List<ITaskItem> _contentItems = new List<ITaskItem>();
         private readonly List<ITaskItem> _fileWrites = new List<ITaskItem>();
         private readonly List<ITaskItem> _copyLocalItems = new List<ITaskItem>();
@@ -266,7 +266,7 @@ namespace Microsoft.NETCore.Build.Tasks
                 item.SetMetadata(MetadataKeys.ParentPackage, parentPackage);
 
                 // We'll put additional metadata on the item so we can convert it back to the real item group in our targets
-                item.SetMetadata("buildAction", buildAction);
+                item.SetMetadata("ProcessedItemType", buildAction);
 
                 // TODO is this needed for .NETCore?
                 // If this is XAML, the build targets expect Link metadata to construct the relative path

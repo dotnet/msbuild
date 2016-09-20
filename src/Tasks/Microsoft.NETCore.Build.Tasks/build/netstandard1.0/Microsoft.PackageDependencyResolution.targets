@@ -65,9 +65,27 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvePackageDependenciesForBuild;
       $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
-
   </PropertyGroup>
 
+  <!-- Common tokens used in preprocessed content files -->
+  <ItemGroup>
+    <PreprocessorValue Include="@(NuGetPreprocessorValue)" Condition="'@(NuGetPreprocessorValue)' != ''"/>
+    <PreprocessorValue Include="rootnamespace">
+      <Value>$(RootNamespace)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="assemblyname">
+      <Value>$(AssemblyName)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="fullpath">
+      <Value>$(MSBuildProjectDirectory)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="outputfilename">
+      <Value>$(TargetFileName)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="filename">
+      <Value>$(MSBuildProjectFile)</Value>
+    </PreprocessorValue>
+  </ItemGroup>
 
   <!--
     *************************************
@@ -101,9 +119,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     *************************************
     -->
 
-  <UsingTask TaskName="Microsoft.NETCore.Build.Tasks.ResolvePackageDependencies"
-             AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
-
   <!--
     ============================================================
                      RunResolvePackageDependencies
@@ -111,6 +126,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     Generate Definitions and Dependencies based on ResolvePackageDependencies task
     ============================================================
     -->
+
+  <UsingTask TaskName="Microsoft.NETCore.Build.Tasks.ResolvePackageDependencies"
+             AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
+
   <Target Name="RunResolvePackageDependencies">
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
@@ -151,6 +170,46 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
+  </Target>
+
+  <!--
+    ============================================================
+                     RunProduceContentAssets
+
+    Process content assets by handling preprocessing tokens where necessary, and 
+    produce copy local items, content items grouped by "build action" and file writes
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.NETCore.Build.Tasks.ProduceContentAssets"
+             AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
+
+  <Target Name="RunProduceContentAssets"
+          Returns="_ContentCopyLocalItems;FileWrites"
+          DependsOnTargets="RunResolvePackageDependencies">
+    <ItemGroup>
+      <_ContentFileDeps Include="@(FileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
+      <__ContentFileDefs Include="@(FileDefinitions)" Exclude="@(_ContentFileDeps)" />
+      <_ContentFileDefs Include="@(FileDefinitions)" Exclude="@(__ContentFileDefs)" />
+    </ItemGroup>
+    
+    <ProduceContentAssets
+      ContentFileDefinitions="@(_ContentFileDefs)"
+      ContentFileDependencies="@(_ContentFileDeps)"
+      ContentPreprocessorValues="@(PreprocessorValue)"
+      ContentPreprocessorOutputDirectory="$(IntermediateOutputPath)\NuGet"
+      ProjectLanguage="$(Language)">
+
+      <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />
+      <Output TaskParameter="ProcessedContentItems" ItemName="_ProcessedContentItems" />
+      <Output TaskParameter="FileWrites" ItemName="FileWrites" />
+    </ProduceContentAssets>
+
+    <!-- The items in _ProcessedContentItems need to go into the appropriately-named item group, 
+         but the names depend upon the items themselves. Split it apart. -->
+    <CreateItem Include="@(_ProcessedContentItems)" Condition="'@(_ProcessedContentItems)' != ''">
+      <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
+    </CreateItem>
   </Target>
 
   <!--
@@ -225,7 +284,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileCopyLocal"
-        DependsOnTargets="RunResolvePackageDependencies"
+        DependsOnTargets="RunResolvePackageDependencies;RunProduceContentAssets"
         Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
     <ItemGroup>
       <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
@@ -249,7 +308,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResourceCopyLocalItems Include="%(_ResourceCopyLocalItems.ResolvedPath)" />
 
       <!-- ALL -->
-      <AllCopyLocalItems Include="@(NativeCopyLocalItems);@(RuntimeCopyLocalItems);@(ResourceCopyLocalItems)">
+      <AllCopyLocalItems Include="@(NativeCopyLocalItems);@(RuntimeCopyLocalItems);@(ResourceCopyLocalItems);@(_ContentCopyLocalItems)">
         <Private>false</Private>
         <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
         <NuGetSourceType>Package</NuGetSourceType>
