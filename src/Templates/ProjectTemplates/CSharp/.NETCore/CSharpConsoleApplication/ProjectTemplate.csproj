@@ -3,12 +3,12 @@
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.0.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
 
     <!-- Temporarily simulate an inner build until cross-targeting is checked in. -->
-    <TargetFramework>netcoreapp1.0.1</TargetFramework>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
     <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.0.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -13,12 +13,11 @@
   <ItemGroup>
     <Compile Include="**\*.vb" />
     <EmbeddedResource Include="**\*.resx" />
-    <None Include="project.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.0</Version>
+    <PackageReference Include="NETStandard.Library">
+      <Version>1.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Sdk">
       <Version>$$buildversion$$</Version>
