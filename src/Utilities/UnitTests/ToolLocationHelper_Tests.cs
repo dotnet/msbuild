@@ -3975,7 +3975,7 @@ namespace Microsoft.Build.UnitTests
 
             ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatforms);
 
-            if (!NativeMethodsShared.IsWindows)
+            if (NativeMethodsShared.IsWindows)
             {
                 ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, new FileExists(File.Exists));
                 ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, new FileExists(File.Exists));
