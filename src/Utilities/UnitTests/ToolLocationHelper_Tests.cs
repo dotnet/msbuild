@@ -3982,18 +3982,18 @@ namespace Microsoft.Build.UnitTests
             }
 
             TargetPlatformSDK key = new TargetPlatformSDK("Windows", new Version("1.0"), null);
-            Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 2);
+            Assert.Equal(2, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.True(
                 targetPlatforms[key].Path.Equals(
                     Path.Combine(_fakeStructureRoot, "Windows", "1.0") + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
+            Assert.Contains("MyAssembly, Version=1.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
                     Path.Combine(new[] { _fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
                     + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
+            Assert.Contains("MyAssembly, Version=2.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(
                     Path.Combine(new[] { _fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" })
@@ -4001,38 +4001,39 @@ namespace Microsoft.Build.UnitTests
                     StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("Windows", new Version("2.0"), null);
-            Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 1);
+            Assert.Equal(1, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.True(
                 targetPlatforms[key].Path.Equals(
                     Path.Combine(_fakeStructureRoot, "Windows", "2.0") + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
+            Assert.Contains("MyAssembly, Version=3.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].Equals(
                     Path.Combine(new[] { _fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" })
                     + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
 
+            // This is present in the registry but not on disk.
             key = new TargetPlatformSDK("MyPlatform", new Version("6.0"), null);
-            Assert.True(targetPlatforms.ContainsKey(key));
+            Assert.Contains(key, targetPlatforms.Keys);
             Assert.True(
                 targetPlatforms[key].Path.Equals(
                     Path.Combine(_fakeStructureRoot, "Windows Kits", "6.0") + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("5.0"), null);
-            Assert.True(targetPlatforms.ContainsKey(key));
-            Assert.Equal(0, targetPlatforms[key].ExtensionSDKs.Count);
+            Assert.Contains(key, targetPlatforms.Keys);
+            Assert.Empty(targetPlatforms[key].ExtensionSDKs);
             Assert.Null(targetPlatforms[key].Path);
 
             key = new TargetPlatformSDK("MyPlatform", new Version("4.0"), null);
-            Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 2);
+            Assert.Equal(2, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.True(
                 targetPlatforms[key].Path.Equals(
                     Path.Combine(_fakeStructureRoot, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0")
                     + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
+            Assert.Contains("MyAssembly, Version=1.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
                     Path.Combine(
@@ -4042,7 +4043,7 @@ namespace Microsoft.Build.UnitTests
                                 "MyAssembly", "1.0"
                             }) + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("AnotherAssembly, Version=1.0"));
+            Assert.Contains("AnotherAssembly, Version=1.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["AnotherAssembly, Version=1.0"].Equals(
                     Path.Combine(
@@ -4050,8 +4051,8 @@ namespace Microsoft.Build.UnitTests
                     StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("3.0"), null);
-            Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 1);
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
+            Assert.Equal(1, targetPlatforms[key].ExtensionSDKs.Count);
+            Assert.Contains("MyAssembly, Version=1.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].Path.Equals(
                     Path.Combine(_fakeStructureRoot, "MyPlatform", "3.0") + Path.DirectorySeparatorChar,
@@ -4063,8 +4064,8 @@ namespace Microsoft.Build.UnitTests
                     StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("2.0"), null);
-            Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 1);
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
+            Assert.Equal(1, targetPlatforms[key].ExtensionSDKs.Count);
+            Assert.Contains("MyAssembly, Version=1.0", targetPlatforms[key].ExtensionSDKs.Keys);
             Assert.True(
                 targetPlatforms[key].Path.Equals(
                     Path.Combine(_fakeStructureRoot, "MyAssembly", "2.0") + Path.DirectorySeparatorChar,
@@ -4080,7 +4081,7 @@ namespace Microsoft.Build.UnitTests
                 targetPlatforms[key].Path.Equals(
                     Path.Combine(_fakeStructureRoot, "MyPlatform", "1.0") + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 0);
+            Assert.Empty(targetPlatforms[key].ExtensionSDKs);
         }
 #endif
 
