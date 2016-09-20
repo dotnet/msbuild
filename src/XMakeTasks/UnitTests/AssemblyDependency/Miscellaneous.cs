@@ -4005,7 +4005,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// A reference with a bogus version is provided. However, the user has chosen
         /// SpecificVersion='false' so we match the first one we come across.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void SpecificVersionFalse()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4023,7 +4023,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.Equal(s_myVersion20Path, t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(Path.Combine(s_myVersion20Path, "System.XML.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
