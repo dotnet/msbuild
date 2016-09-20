@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             {
                 // TODO: localize: https://github.com/dotnet/sdk/issues/33
                 Log.LogError($"Project has no no target framework compatible with '{ReferringTargetFramework}'");
+                return false;
             }
 
             // Note that there can be more than one spelling of the same target framework (e.g. net45 and net4.5) and 
