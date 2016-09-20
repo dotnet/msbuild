@@ -3895,11 +3895,11 @@ namespace Microsoft.Build.UnitTests
                     StringComparison.OrdinalIgnoreCase));
             Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
             Assert.True(
-                targetPlatforms[key].ExtensionSDKs["FlutterShy, Version=1.0"].Equals(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
                     Path.Combine(new[] { _fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
                     + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("FlutterShy, Version=2.0"));
+            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(
                     Path.Combine(new[] { _fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" })
@@ -3937,7 +3937,7 @@ namespace Microsoft.Build.UnitTests
                     Path.Combine(_fakeStructureRoot, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0")
                     + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
-            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("FlutterShy, Version=1.0"));
+            Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
             Assert.True(
                 targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
                     Path.Combine(
@@ -4039,7 +4039,7 @@ namespace Microsoft.Build.UnitTests
                         new[]
                             {
                                 _fakeStructureRoot, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs",
-                                "FlutterShy", "1.0"
+                                "MyAssembly", "1.0"
                             }) + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase));
             Assert.True(targetPlatforms[key].ExtensionSDKs.ContainsKey("AnotherAssembly, Version=1.0"));
@@ -4733,12 +4733,12 @@ namespace Microsoft.Build.UnitTests
                     return new string[] { "MyAssembly" };
                 }
 
-                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return new[] { "v1.1", "1.0", "2.0", "3.0" };
                 }
 
-                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return new[] { "2.0" };
                 }
@@ -4758,7 +4758,7 @@ namespace Microsoft.Build.UnitTests
                     return new[] { string.Empty };
                 }
 
-                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return new[] { "1.0" };
                 }
@@ -4781,7 +4781,7 @@ namespace Microsoft.Build.UnitTests
                     return new[] { "MyAssembly" };
                 }
 
-                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return new[] { "3.0" };
                 }
