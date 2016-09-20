@@ -39,7 +39,7 @@ namespace Microsoft.Runtime.Hosting
                 {
                     if (s_GetRuntimeInterfaceAsObjectMethod == null)
                     {
-                        s_GetRuntimeInterfaceAsObjectMethod = typeof(RuntimeEnvironment).GetMethod("GetRuntimeInterfaceasObject");
+                        s_GetRuntimeInterfaceAsObjectMethod = typeof(RuntimeEnvironment).GetMethod("GetRuntimeInterfaceAsObject");
                     }
 
                     if (s_GetRuntimeInterfaceAsObjectMethod != null)

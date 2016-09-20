@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keycontainer: switch
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void KeyContainer()
         {
             if (!NativeMethodsShared.IsWindows)
