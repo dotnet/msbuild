@@ -3,6 +3,11 @@
   
   <PropertyGroup>
     <TargetFrameworks>netstandard1.4</TargetFrameworks>
+
+    <!-- Temporarily simulate an inner build until cross-targeting is checked in. -->
+    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.4</TargetFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
