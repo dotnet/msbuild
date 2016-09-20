@@ -3874,7 +3874,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
         /// get the expected set out.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void ResolveSDKFromRegistry()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -3966,7 +3966,7 @@ namespace Microsoft.Build.UnitTests
         /// get the expected set out. Make sure that when we resolve from both the disk and registry that there are no duplicates
         /// and make sure we get the expected results.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void ResolveSDKFromRegistryAndDisk()
         {
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
