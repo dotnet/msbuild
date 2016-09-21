@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             if (!configurations.Any() && !frameworks.Any())
             {
+                MigrationTrace.Instance.WriteLine($"{nameof(MigrateConfigurationsRule)}: No configuration or framework build options found in project");
                 return;
             }
 
