@@ -364,7 +364,7 @@ namespace Microsoft.NETCore.Build.Tasks
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
             {
-                var filePathList = fileGroup.GetFilePathAndProperies(package);
+                var filePathList = fileGroup.GetFilePathAndProperties(package);
                 foreach (var entry in filePathList)
                 {
                     string filePath = entry.Item1;

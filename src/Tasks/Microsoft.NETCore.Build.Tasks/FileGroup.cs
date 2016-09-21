@@ -56,7 +56,7 @@ namespace Microsoft.NETCore.Build.Tasks
         /// <summary>
         /// Return a list of file paths from the corresponding group in the target library
         /// </summary>
-        public static IEnumerable<PathAndPropertiesTuple> GetFilePathAndProperies(
+        public static IEnumerable<PathAndPropertiesTuple> GetFilePathAndProperties(
             this FileGroup fileGroup, LockFileTargetLibrary package)
         {
             switch (fileGroup)
