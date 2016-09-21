@@ -130,6 +130,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void GetMetadataWithName_is_case_insensitive()
+        {
+            var project = ProjectRootElement.Create();
+            var item1 = project.AddItem("test", "include1");
+            item1.AddMetadata("name", "value");
+
+            item1.GetMetadataWithName("Name").Should().NotBeNull();
+            item1.GetMetadataWithName("Name").Value.Should().Be("value");
+        }
+
+        [Fact]
         public void HasConflictingMetadata_returns_true_when_items_have_metadata_with_same_name_but_different_value()
         {
             var project = ProjectRootElement.Create();

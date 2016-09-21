@@ -171,20 +171,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public static ProjectMetadataElement GetMetadataWithName(this ProjectItemElement item, string name)
         {
-            return item.Metadata.FirstOrDefault(m => m.Name.Equals(name, StringComparison.Ordinal));
-        }
-
-        public static bool HasConflictingMetadata(this ProjectItemElement item, ProjectItemElement otherItem)
-        {
-            foreach (var metadata in item.Metadata)
-            {
-                if (otherItem.Metadata.Any(m => m.Name == metadata.Name && m.Value != metadata.Value))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return item.Metadata.FirstOrDefault(m => m.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public static void AddMetadata(this ProjectItemElement item, ProjectMetadataElement metadata)
