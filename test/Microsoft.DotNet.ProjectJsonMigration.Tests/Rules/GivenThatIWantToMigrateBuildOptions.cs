@@ -48,18 +48,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_empty_buildOptions_populates_only_AssemblyName_and_OutputType()
+        public void Migrating_empty_buildOptions_populates_only_AssemblyName_Compile_and_EmbeddedResource()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
                     ""buildOptions"": { }
                 }");
 
-            mockProj.Properties.Count().Should().Be(2);
-            mockProj.Properties.Any(
-                p =>
-                    !(p.Name.Equals("AssemblyName", StringComparison.Ordinal) ||
-                      p.Name.Equals("OutputType", StringComparison.Ordinal))).Should().BeFalse();
+            mockProj.Properties.Count().Should().Be(1);
+            mockProj.Properties.Any(p => !p.Name.Equals("AssemblyName", StringComparison.Ordinal)).Should().BeFalse();
 
             mockProj.Items.Count().Should().Be(2);
             mockProj.Items.First(i => i.ItemType == "Compile").Include.Should().Be(@"**\*.cs");
@@ -107,7 +104,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Properties.Count(p => p.Name == "DefineConstants").Should().Be(1);
-            mockProj.Properties.First(p => p.Name == "DefineConstants").Value.Should().Be("DEBUG;TRACE");
+            mockProj.Properties.First(p => p.Name == "DefineConstants")
+                .Value.Should().Be("$(DefineConstants);DEBUG;TRACE");
         }
 
         [Fact]
@@ -121,7 +119,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Properties.Count(p => p.Name == "NoWarn").Should().Be(1);
-            mockProj.Properties.First(p => p.Name == "NoWarn").Value.Should().Be("CS0168;CS0219");
+            mockProj.Properties.First(p => p.Name == "NoWarn").Value.Should().Be("$(NoWarn);CS0168;CS0219");
         }
 
         [Fact]

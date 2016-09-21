@@ -18,13 +18,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     public class ProjectMigrator
     {
         // TODO: Migrate PackOptions
-        // TODO: Support Mappings in IncludeContext Transformations
         // TODO: Migrate Multi-TFM projects
         // TODO: Tests
         // TODO: Out of Scope
         //     - Globs that resolve to directories: /some/path/**/somedir
         //     - Migrating Deprecated project.jsons
-        //     - Configuration dependent source exclusion
 
         private readonly IMigrationRule _ruleSet;
 
@@ -85,7 +83,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             if (diagnostics.Any())
             {
                 MigrationErrorCodes.MIGRATE1011(
-                        $"{projectDirectory}{Environment.NewLine}{string.Join(Environment.NewLine, diagnostics.Select(d => d.Message))}")
+                        $"{projectDirectory}{Environment.NewLine}{string.Join(Environment.NewLine, diagnostics.Select(d => FormatDiagnosticMessage(d)))}")
                     .Throw();
             }
 
@@ -97,6 +95,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 MigrationErrorCodes.MIGRATE20013(
                     $"Cannot migrate project {defaultProjectContext.ProjectFile.ProjectFilePath} using compiler {compilerName}").Throw();
             }
+        }
+
+        private string FormatDiagnosticMessage(DiagnosticMessage d)
+        {
+            return $"{d.Message} (line: {d.StartLine}, file: {d.SourceFilePath})";
         }
 
         private void SetupOutputDirectory(string projectDirectory, string outputDirectory)

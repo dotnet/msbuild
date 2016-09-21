@@ -8,6 +8,139 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenMSBuildExtensions
     {
         [Fact]
+        public void ConditionChain_is_empty_when_element_and_parents_have_no_condition()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+
+            var item1 = itemGroup.AddItem("test", "include1");
+
+            item1.ConditionChain().Should().HaveCount(0);
+        }
+
+        [Fact]
+        public void ConditionChain_has_parent_conditions_when_element_is_empty()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+            itemGroup.Condition = "condition";
+
+            var item1 = itemGroup.AddItem("test", "include1");
+
+            item1.ConditionChain().Should().HaveCount(1);
+            item1.ConditionChain().First().Should().Be("condition");
+        }
+
+        [Fact]
+        public void ConditionChain_has_element_and_parent_conditions_when_they_exist()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+            itemGroup.Condition = "itemGroup";
+
+            var item1 = itemGroup.AddItem("test", "include1");
+            item1.Condition = "item";
+
+            item1.ConditionChain().Should().HaveCount(2);
+            item1.ConditionChain().Should().BeEquivalentTo("itemGroup", "item");
+        }
+
+        [Fact]
+        public void ConditionChainsAreEquivalent_is_true_when_neither_element_or_parents_have_conditions()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+
+            var item1 = itemGroup.AddItem("test", "include1");
+            var item2 = itemGroup.AddItem("test", "include2");
+
+            item1.ConditionChainsAreEquivalent(item2).Should().BeTrue();
+        }
+
+        [Fact]
+        public void ConditionChainsAreEquivalent_is_true_when_elements_have_the_same_condition()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+
+            var item1 = itemGroup.AddItem("test", "include1");
+            var item2 = itemGroup.AddItem("test", "include2");
+            item1.Condition = "item";
+            item2.Condition = "item";
+
+            item1.ConditionChainsAreEquivalent(item2).Should().BeTrue();
+        }
+
+        [Fact]
+        public void ConditionChainsAreEquivalent_is_true_when_element_condition_matches_condition_of_other_element_parent()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup1 = project.AddItemGroup();
+            var itemGroup2 = project.AddItemGroup();
+            itemGroup1.Condition = "item";
+
+            var item1 = itemGroup1.AddItem("test", "include1");
+            var item2 = itemGroup2.AddItem("test", "include2");
+            item2.Condition = "item";
+
+            item1.ConditionChainsAreEquivalent(item2).Should().BeTrue();
+        }
+
+        [Fact]
+        public void ConditionChainsAreEquivalent_is_false_when_elements_have_different_conditions()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+
+            var item1 = itemGroup.AddItem("test", "include1");
+            var item2 = itemGroup.AddItem("test", "include2");
+            item1.Condition = "item";
+            item2.Condition = "item2";
+
+            item1.ConditionChainsAreEquivalent(item2).Should().BeFalse();
+        }
+
+        [Fact]
+        public void ConditionChainsAreEquivalent_is_false_when_other_element_parent_has_a_condition()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup1 = project.AddItemGroup();
+            var itemGroup2 = project.AddItemGroup();
+            itemGroup1.Condition = "item";
+
+            var item1 = itemGroup1.AddItem("test", "include1");
+            var item2 = itemGroup2.AddItem("test", "include2");
+
+            item1.ConditionChainsAreEquivalent(item2).Should().BeFalse();
+        }
+
+        [Fact]
+        public void ConditionChainsAreEquivalent_is_false_when_both_element_parent_conditions_dont_match()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup1 = project.AddItemGroup();
+            var itemGroup2 = project.AddItemGroup();
+            itemGroup1.Condition = "item";
+            itemGroup2.Condition = "item2";
+
+            var item1 = itemGroup1.AddItem("test", "include1");
+            var item2 = itemGroup2.AddItem("test", "include2");
+
+            item1.ConditionChainsAreEquivalent(item2).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GetMetadataWithName_is_case_insensitive()
+        {
+            var project = ProjectRootElement.Create();
+            var item1 = project.AddItem("test", "include1");
+            item1.AddMetadata("name", "value");
+
+            item1.GetMetadataWithName("Name").Should().NotBeNull();
+            item1.GetMetadataWithName("Name").Value.Should().Be("value");
+        }
+
+        [Fact]
         public void Includes_returns_include_value_split_by_semicolon()
         {
             var project = ProjectRootElement.Create();

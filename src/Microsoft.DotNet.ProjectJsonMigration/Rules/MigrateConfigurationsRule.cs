@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using NuGet.Frameworks;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
@@ -13,33 +14,58 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
     {
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
+            MigrationTrace.Instance.WriteLine($"Executing rule: {nameof(MigrateConfigurationsRule)}");
             var projectContext = migrationRuleInputs.DefaultProjectContext;
             var configurations = projectContext.ProjectFile.GetConfigurations().ToList();
 
             var frameworks = new List<NuGetFramework>();
-            frameworks.Add(null);
             frameworks.AddRange(projectContext.ProjectFile.GetTargetFrameworks().Select(t => t.FrameworkName));
 
-            if (!configurations.Any())
+            if (!configurations.Any() && !frameworks.Any())
             {
+                MigrationTrace.Instance.WriteLine($"{nameof(MigrateConfigurationsRule)}: No configuration or framework build options found in project");
                 return;
             }
 
-            var frameworkConfigurationCombinations = frameworks.SelectMany(f => configurations, Tuple.Create);
-
-            foreach (var entry in frameworkConfigurationCombinations)
+            foreach (var framework in frameworks)
             {
-                var framework = entry.Item1;
-                var configuration = entry.Item2;
+                MigrateConfiguration(projectContext.ProjectFile, framework, migrationSettings, migrationRuleInputs);
+            }
 
-                MigrateConfiguration(configuration, framework, migrationSettings, migrationRuleInputs);
+            foreach (var configuration in configurations)
+            {
+                MigrateConfiguration(projectContext.ProjectFile, configuration, migrationSettings, migrationRuleInputs);
             }
         }
 
         private void MigrateConfiguration(
+            Project project,
             string configuration,
-            NuGetFramework framework,
             MigrationSettings migrationSettings, 
+            MigrationRuleInputs migrationRuleInputs)
+        {
+            var buildOptions = project.GetRawCompilerOptions(configuration);
+            var configurationCondition = $" '$(Configuration)' == '{configuration}' ";
+
+            MigrateConfiguration(buildOptions, configurationCondition, migrationSettings, migrationRuleInputs);
+        }
+
+        private void MigrateConfiguration(
+            Project project,
+            NuGetFramework framework,
+            MigrationSettings migrationSettings,
+            MigrationRuleInputs migrationRuleInputs)
+        {
+            var buildOptions = project.GetRawCompilerOptions(framework);
+            var configurationCondition = $" '$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '{framework.DotNetFrameworkName}' ";
+
+            MigrateConfiguration(buildOptions, configurationCondition, migrationSettings, migrationRuleInputs);
+        }
+
+        private void MigrateConfiguration(
+            CommonCompilerOptions buildOptions,
+            string configurationCondition,
+            MigrationSettings migrationSettings,
             MigrationRuleInputs migrationRuleInputs)
         {
             var csproj = migrationRuleInputs.OutputMSBuildProject;
@@ -47,21 +73,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var propertyGroup = CreatePropertyGroupAtEndOfProject(csproj);
             var itemGroup = CreateItemGroupAtEndOfProject(csproj);
 
-            var configurationCondition = $" '$(Configuration)' == '{configuration}' ";
-            if (framework != null)
-            {
-                configurationCondition +=
-                    $" and '$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '{framework.DotNetFrameworkName}' ";
-            }
             propertyGroup.Condition = configurationCondition;
             itemGroup.Condition = configurationCondition;
 
-            new MigrateBuildOptionsRule(configuration, framework, propertyGroup, itemGroup)
+            new MigrateBuildOptionsRule(buildOptions, propertyGroup, itemGroup)
                 .Apply(migrationSettings, migrationRuleInputs);
 
             propertyGroup.RemoveIfEmpty();
             itemGroup.RemoveIfEmpty();
         }
+
 
         private ProjectPropertyGroupElement CreatePropertyGroupAtEndOfProject(ProjectRootElement csproj)
         {

@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var publishCommand = new PublishCommand(testProject);
 
             publishCommand.Execute().Should().Pass();
-            publishCommand.GetOutputDirectory().Should().HaveFile("testcontentfile.txt");
+            publishCommand.GetOutputDirectory(portable: true).Should().HaveFile("testcontentfile.txt");
         }
 
         [Fact]

@@ -8,8 +8,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>1F2EF070-AC5F-4078-AFB0-65745AC691B9</ProjectGuid>
     <RootNamespace>Microsoft.DotNet.ProjectJsonMigration.Tests</RootNamespace>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' “>..\artifact\obj\$(RootNamespace)</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' “>..\artifacts\bin\</OutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\artifact\obj\$(RootNamespace)</BaseIntermediateOutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\artifacts\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>

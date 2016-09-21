@@ -98,8 +98,8 @@ namespace Microsoft.DotNet.ProjectModel
         {
             // Get all project options and combine them
             var rootOptions = GetCompilerOptions();
-            var configurationOptions = configurationName != null ? GetCompilerOptions(configurationName) : null;
-            var targetFrameworkOptions = targetFramework != null ? GetCompilerOptions(targetFramework) : null;
+            var configurationOptions = configurationName != null ? GetRawCompilerOptions(configurationName) : null;
+            var targetFrameworkOptions = targetFramework != null ? GetRawCompilerOptions(targetFramework) : null;
 
             // Combine all of the options
             var compilerOptions = CommonCompilerOptions.Combine(rootOptions, configurationOptions, targetFrameworkOptions);
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.ProjectModel
             return _defaultCompilerOptions;
         }
 
-        private CommonCompilerOptions GetCompilerOptions(string configurationName)
+        internal CommonCompilerOptions GetRawCompilerOptions(string configurationName)
         {
             CommonCompilerOptions options;
             if (_compilerOptionsByConfiguration.TryGetValue(configurationName, out options))
@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.ProjectModel
             return null;
         }
 
-        private CommonCompilerOptions GetCompilerOptions(NuGetFramework frameworkName)
+        internal CommonCompilerOptions GetRawCompilerOptions(NuGetFramework frameworkName)
         {
             return GetTargetFramework(frameworkName)?.CompilerOptions;
         }
