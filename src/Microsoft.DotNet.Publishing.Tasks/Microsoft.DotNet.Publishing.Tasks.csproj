@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core.Collect\WebConfigTransform.cs" />
     <Compile Include="Kudu\KuduConnect.cs" />
     <Compile Include="Kudu\KuduDeploy.cs" />
     <Compile Include="Kudu\KuduMetadata.cs" />

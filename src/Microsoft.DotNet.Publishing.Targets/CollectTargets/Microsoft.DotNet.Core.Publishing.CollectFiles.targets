@@ -13,6 +13,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <UsingTask TaskName="WebConfigTransform" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+
   <PropertyGroup>
     <DotNetPublishCollectFiles>
       Publish;
@@ -34,6 +36,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="CollectFilesFromPublishDir"
         DependsOnTargets="$(CollectFilesFromPublishDirDependsOn)"
         Condition="'$(PublishDir)' != ''">
+
+  <!-- Currently the publish target does not transform the web.config, Hence adding the logic here to transform the web.config from project path -->
+    <WebConfigTransform
+    ProjectDirectory="$(MSBuildProjectDirectory)"
+    PublishDir="$(PublishDir)"
+    AssemblyName="$(AssemblyName)"
+    IsPortableApp="true"
+    />
 
     <ItemGroup>
       <_PublishDirFiles
