@@ -19,13 +19,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Including the tasks
   ***********************************************************************************************
  -->
-  <PropertyGroup>
-    <DotNetTasksDir Condition=" '$(DotNetTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\</DotNetTasksDir>
-  </PropertyGroup>
-  <UsingTask TaskName="MSDeploy" AssemblyFile="$(DotNetTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
-  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(DotNetTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
-  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(DotNetTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
-  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(DotNetTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="MSDeploy" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
 
 
   <PropertyGroup>

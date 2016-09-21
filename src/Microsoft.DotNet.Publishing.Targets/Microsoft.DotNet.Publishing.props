@@ -21,12 +21,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
 
   <PropertyGroup>
-    <DotNetPublishingTasksDir Condition=" '$(DotNetPublishingTasksDir)'=='' ">$(MSBuildThisFileDirectory)</DotNetPublishingTasksDir>
-    <DotNetPublishingSaveFilesDirectory Condition=" '$(DotNetPublishingSaveFilesDirectory)' == ''">$(MSBuildThisFileDirectory)SaveTargets\</DotNetPublishingSaveFilesDirectory>
-    <DotNetPublishingCollectFilesDirectory Condition=" '$(DotNetPublishingCollectFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)CollectTargets\</DotNetPublishingCollectFilesDirectory>
-    <DotNetPublishingTransformFilesDirectory Condition=" '$(DotNetPublishingTransformFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)TransformTargets\</DotNetPublishingTransformFilesDirectory>
-    <DotNetPublishingDeployFilesDirectory Condition=" '$(DotNetPublishingDeployFilesDirectory)'=='' ">$(MSBuildThisFileDirectory)DeployTargets\</DotNetPublishingDeployFilesDirectory>
-    <DotNetPublishingProfilesDirectory Condition=" '$(DotNetPublishingProfilesDirectory)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</DotNetPublishingProfilesDirectory>
+    <DotNetPublishingTasksDir Condition=" '$(DotNetPublishingTasksDir)'=='' ">$(MSBuildThisFileDirectory)tools\net46\</DotNetPublishingTasksDir>
+    <DotNetPublishingSaveFilesDir Condition=" '$(DotNetPublishingSaveFilesDir)' == ''">$(MSBuildThisFileDirectory)SaveTargets\</DotNetPublishingSaveFilesDir>
+    <DotNetPublishingCollectFilesDir Condition=" '$(DotNetPublishingCollectFilesDir)'=='' ">$(MSBuildThisFileDirectory)CollectTargets\</DotNetPublishingCollectFilesDir>
+    <DotNetPublishingTransformFilesDir Condition=" '$(DotNetPublishingTransformFilesDir)'=='' ">$(MSBuildThisFileDirectory)TransformTargets\</DotNetPublishingTransformFilesDir>
+    <DotNetPublishingDeployFilesDir Condition=" '$(DotNetPublishingDeployFilesDir)'=='' ">$(MSBuildThisFileDirectory)DeployTargets\</DotNetPublishingDeployFilesDir>
+    <DotNetPublishingProfilesDir Condition=" '$(DotNetPublishingProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</DotNetPublishingProfilesDir>
 
     <!-- For website project we will always exclude debug symbols from publishing. This can be overridden in the .pubxml file. -->
     <ExcludeGeneratedDebugSymbol Condition="'$(ExcludeGeneratedDebugSymbol)'=='' And '$(_WebProjectType)' == 'WebSite'">True</ExcludeGeneratedDebugSymbol>
