@@ -14,8 +14,6 @@
     <DefaultName>ConsoleApplication</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
     <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
-    <Hidden>true</Hidden>
-    <MaxFrameworkVersion>2.0</MaxFrameworkVersion>
   </TemplateData>
   <TemplateContent>
     <Project File="ProjectTemplate.vbproj" ReplaceParameters="true">
