@@ -141,32 +141,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void HasConflictingMetadata_returns_true_when_items_have_metadata_with_same_name_but_different_value()
-        {
-            var project = ProjectRootElement.Create();
-            var item1 = project.AddItem("test", "include1");
-            item1.AddMetadata("name", "value");
-
-            var item2 = project.AddItem("test1", "include1");
-            item2.AddMetadata("name", "value2");
-
-            item1.HasConflictingMetadata(item2).Should().BeTrue();
-        }
-
-        [Fact]
-        public void HasConflictingMetadata_returns_false_when_items_have_metadata_with_same_nameand_value()
-        {
-            var project = ProjectRootElement.Create();
-            var item1 = project.AddItem("test", "include1");
-            item1.AddMetadata("name", "value");
-
-            var item2 = project.AddItem("test1", "include1");
-            item2.AddMetadata("name", "value");
-
-            item1.HasConflictingMetadata(item2).Should().BeFalse();
-        }
-
-        [Fact]
         public void Includes_returns_include_value_split_by_semicolon()
         {
             var project = ProjectRootElement.Create();
