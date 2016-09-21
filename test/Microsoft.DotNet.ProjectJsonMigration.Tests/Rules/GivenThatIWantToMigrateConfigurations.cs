@@ -118,7 +118,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         }
                     }
                 }");
-            Console.WriteLine(mockProj.RawXml);
 
             var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
 
