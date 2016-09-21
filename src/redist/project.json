@@ -3,11 +3,11 @@
   "buildOptions": {
     "emitEntryPoint": true,
     "copyToOutput": {
-      "include": "RunCsc.sh"
+      "include": ["RunCsc.sh", "RunCsc.cmd"]
     }
   },
   "publishOptions": {
-    "include": "RunCsc.sh"
+    "include": ["RunCsc.sh", "RunCsc.cmd"]
   },
   "dependencies": {
     "Microsoft.NETCore.App": {
