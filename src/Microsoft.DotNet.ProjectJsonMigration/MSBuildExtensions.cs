@@ -20,21 +20,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             // Different includes
             if (item.IntersectIncludes(otherItem).Count() != item.Includes().Count())
             {
-                MigrationTrace.Instance.WriteLine("ms: includes");
+                MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} includes not equivalent.");
                 return false;
             }
 
             // Different Excludes
             if (item.IntersectExcludes(otherItem).Count() != item.Excludes().Count())
             {
-                MigrationTrace.Instance.WriteLine("ms: excludes");
+                MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} excludes not equivalent.");
                 return false;
             }
 
             // Different remove
             if (item.Remove != otherItem.Remove)
             {
-                MigrationTrace.Instance.WriteLine("ms: remove");
+                MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} removes not equivalent.");
                 return false;
             }
 
@@ -49,13 +49,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var otherMetadata = itemToCompare.GetMetadataWithName(metadata.Name);
                 if (otherMetadata == null)
                 {
-                    MigrationTrace.Instance.WriteLine($"ms: metadata doesn't exist {{ {metadata.Name} {metadata.Value} }}");
+                    MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} metadata doesn't exist {{ {metadata.Name} {metadata.Value} }}");
                     return false;
                 }
 
                 if (!metadata.ValueEquals(otherMetadata))
                 {
-                    MigrationTrace.Instance.WriteLine("ms: metadata has another value {{ {metadata.Name} {metadata.Value} {otherMetadata.Value} }}");
+                    MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} metadata has another value {{ {metadata.Name} {metadata.Value} {otherMetadata.Value} }}");
                     return false;
                 }
             }
