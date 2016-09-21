@@ -40,7 +40,7 @@ using System.Windows.Markup;
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, Flags = SecurityPermissionFlag.Execution)]
 #pragma warning restore 618
 #endif
-#if STANDALONEBUILD
+
 #if STATIC_VERSION_NUMBER
 [assembly: AssemblyVersion("15.1.0.0")]
 #endif

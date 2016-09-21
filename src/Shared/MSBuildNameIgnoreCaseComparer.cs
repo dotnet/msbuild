@@ -124,8 +124,8 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_IA64)
-                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_ARM))
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.IA64)
+                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.ARM))
             {
                 // The use of unsafe here is quite a bit faster than the regular
                 // mechanism in the BCL. This is because we can make assumptions
@@ -342,8 +342,8 @@ namespace Microsoft.Build.Collections
                 }
             }
 
-            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_IA64)
-                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_ARM))
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.IA64)
+                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.ARM))
             {
                 unsafe
                 {

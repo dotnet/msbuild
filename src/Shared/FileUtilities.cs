@@ -571,7 +571,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string NormalizePathForComparisonNoThrow(string path, string currentDirectory)
         {
-            return GetFullPathNoThrow(path, currentDirectory).TrimEnd('/', '\\');
+            return GetFullPathNoThrow(path, currentDirectory).NormalizeForPathComparison();
         }
 
         /// <summary>

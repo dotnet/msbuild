@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable 618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, Flags = SecurityPermissionFlag.Execution)]
 #pragma warning restore 618
+#endif
 
 #if STATIC_VERSION_NUMBER
 [assembly: AssemblyVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]
