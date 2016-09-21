@@ -1767,7 +1767,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SameDestinationShouldThrowError()
+        public void SameDestinationFilesShouldThrowError()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
             string sourceFile2 = FileUtilities.GetTemporaryFile();
@@ -1798,6 +1798,82 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(sourceFile);
                 File.Delete(sourceFile2);
+            }
+        }
+
+        [Fact]
+        public void FilesWithSameNameFromDifferentLocationsShouldThrowError()
+        {
+            var temp1 = FileUtilities.GetTemporaryDirectory();
+            var temp2 = FileUtilities.GetTemporaryDirectory();
+            string sourceFile = Path.Combine(temp1, "1.cs");
+            string sourceFile2 = Path.Combine(temp2, "1.cs");
+            var tempOut = FileUtilities.GetTemporaryDirectory();
+
+            try
+            {
+                Copy t = new Copy();
+                t.RetryDelayMilliseconds = 1; // speed up tests!
+                // Allow the task's default (false) to have a chance
+                if (useHardLinks)
+                {
+                    t.UseHardlinksIfPossible = useHardLinks;
+                }
+                MockEngine engine = new MockEngine();
+                t.BuildEngine = engine;
+                t.SourceFiles = new ITaskItem[] { new TaskItem(sourceFile), new TaskItem(sourceFile2) };
+                t.DestinationFolder = new TaskItem(tempOut);
+                t.SkipUnchangedFiles = false;
+                bool success = t.Execute();
+
+                Assert.False(success);
+
+                ((MockEngine)t.BuildEngine).AssertLogContains("MSB3892");
+            }
+            finally
+            {
+                Directory.Delete(temp1, true);
+                Directory.Delete(temp2, true);
+                Directory.Delete(tempOut, true);
+            }
+        }
+
+        [Fact]
+        public void FilesWithSameNameFromDifferentLocationButDifferentDestinationsShouldThrowNoError()
+        {
+            var temp1 = FileUtilities.GetTemporaryDirectory();
+            var temp2 = FileUtilities.GetTemporaryDirectory();
+            string sourceFile1 = Path.Combine(temp1, "1.cs");
+            string sourceFile2 = Path.Combine(temp2, "1.cs");
+            File.Create(sourceFile1).Close();
+            File.Create(sourceFile2).Close();
+            var outFile1 = FileUtilities.GetTemporaryFile();
+            var outFile2 = FileUtilities.GetTemporaryFile();
+
+            try
+            {
+                Copy t = new Copy();
+                t.RetryDelayMilliseconds = 1; // speed up tests!
+                // Allow the task's default (false) to have a chance
+                if (useHardLinks)
+                {
+                    t.UseHardlinksIfPossible = useHardLinks;
+                }
+                MockEngine engine = new MockEngine();
+                t.BuildEngine = engine;
+                t.SourceFiles = new ITaskItem[] { new TaskItem(sourceFile1), new TaskItem(sourceFile2) };
+                t.DestinationFiles = new ITaskItem[] { new TaskItem(outFile1), new TaskItem(outFile2) };
+                t.SkipUnchangedFiles = false;
+                bool success = t.Execute();
+
+                Assert.True(success);
+            }
+            finally
+            {
+                Directory.Delete(temp1, true);
+                Directory.Delete(temp2, true);
+                File.Delete(outFile1);
+                File.Delete(outFile2);
             }
         }
 
