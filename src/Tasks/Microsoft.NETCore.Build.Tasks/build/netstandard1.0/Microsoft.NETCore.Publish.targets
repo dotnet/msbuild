@@ -19,13 +19,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <_PublishDirName Condition=" '$(_PublishDirName)' == '' ">publish</_PublishDirName>
-
-    <!-- TODO: https://github.com/dotnet/sdk/issues/143 - find a way to default $(PublishDir) before Microsoft.Common.CurrentVersion.targets defaults it -->
-    <_ShouldSetPublishDir Condition=" '$(PublishDir)' == '' or '$(PublishDir)' == '$(OutputPath)app.publish\'">true</_ShouldSetPublishDir>
-    <PublishDir Condition=" '$(_ShouldSetPublishDir)' == 'true' ">$(OutDir)$(_PublishDirName)\</PublishDir>
-    <PublishDir Condition=" '$(_ShouldSetPublishDir)' == 'true' and '$(RuntimeIdentifier)' != ''  ">$(OutDir)$(RuntimeIdentifier)\$(_PublishDirName)\</PublishDir>
-
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
 
