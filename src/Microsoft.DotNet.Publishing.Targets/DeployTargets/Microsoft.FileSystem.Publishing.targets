@@ -13,18 +13,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-
-  <!--
-  ***********************************************************************************************
-  Including the tasks
-  ***********************************************************************************************
- -->
-  <PropertyGroup>
-    <DotNetTasksDir Condition=" '$(DotNetTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\</DotNetTasksDir>
-  </PropertyGroup>
   
-  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(DotNetTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
   
   <PropertyGroup>
     <DotNetPublishFiles>
