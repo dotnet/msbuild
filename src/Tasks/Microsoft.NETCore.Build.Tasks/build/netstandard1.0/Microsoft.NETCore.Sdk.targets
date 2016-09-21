@@ -10,21 +10,23 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <MicrosoftNETCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../tools/</MicrosoftNETCoreBuildTasksDirectoryRoot>
-    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</MicrosoftNETCoreBuildTasksTFM>
-    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MicrosoftNETCoreBuildTasksTFM)' == ''">net46</MicrosoftNETCoreBuildTasksTFM>
-    <MicrosoftNETCoreBuildTasksDirectory>$(MicrosoftNETCoreBuildTasksDirectoryRoot)$(MicrosoftNETCoreBuildTasksTFM)/</MicrosoftNETCoreBuildTasksDirectory>
-    <MicrosoftNETCoreBuildTasksAssembly>$(MicrosoftNETCoreBuildTasksDirectory)Microsoft.NETCore.Build.Tasks.dll</MicrosoftNETCoreBuildTasksAssembly>
-  </PropertyGroup>
 
   <ImportGroup>
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
   </ImportGroup>
 
+  <PropertyGroup>
+    <DefaultExcludes>bin\**;obj\**</DefaultExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="$(DefaultExcludes)" />
+    <EmbeddedResource Remove="$(DefaultExcludes)" />
+  </ItemGroup>
+  
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <PropertyGroup>
     <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
@@ -47,6 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
     <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
     <NeutralLanguage Condition="'$(NeutralLanguage)' == ''">en</NeutralLanguage>
+    <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -86,11 +89,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       CompilerOptions="@(DependencyFileCompilerOptions)" />
 
-    <!--
-    TODO: https://github.com/dotnet/sdk/issues/21
-    When OutputType == 'exe' and !IsPortable, we need to verify CoreClr is present in the deps graph, and copy in a host to the output
-    See https://github.com/dotnet/cli/blob/6b54ae0bcc5c63e7c989ac19d851f234f9172bea/src/Microsoft.DotNet.Compiler.Common/Executable.cs#L102-L107
-    -->
   </Target>
 
   <!--
@@ -116,24 +114,89 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        GetRunInformation
+                                        Run Information
 
-    Returns the ProcessStart information that can be used to run this project.
+    The ProcessStart information that can be used to run this project.
     ============================================================
     -->
 
-  <Target Name="GetRunInformation"
-          DependsOnTargets="GenerateRunInformation"
-          Outputs="@(RunInformation)" />
+  <PropertyGroup>
+    <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(StartWorkingDirectory)</RunWorkingDirectory>
+  </PropertyGroup>
 
-  <Target Name="GenerateRunInformation">
-    <ItemGroup>
-      <RunInformation Include="$(MSBuildProjectFullPath)">
+  <Choose>
+    <When Condition="'$(StartAction)' == 'Program'">
+      <PropertyGroup>
+        <RunCommand Condition="'$(RunCommand)' == ''">$(StartProgram)</RunCommand>
+        <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
+      </PropertyGroup>
+    </When>
+    
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe'">
+      <PropertyGroup>
         <!-- TODO: https://github.com/dotnet/sdk/issues/20 Need to get the DotNetHost path from MSBuild -->
-        <CommandName>dotnet</CommandName>
-        <Args>exec;$(TargetDir)/$(AssemblyName).dll</Args>
-      </RunInformation>
+        <RunCommand Condition="'$(RunCommand)' == ''">dotnet</RunCommand>
+
+        <_NetCoreRunArguments>exec &quot;$(TargetPath)&quot;</_NetCoreRunArguments>
+        <RunArguments Condition="'$(RunArguments)' == '' and '$(StartArguments)' != ''">$(_NetCoreRunArguments) $(StartArguments)</RunArguments>
+        <RunArguments Condition="'$(RunArguments)' == ''">$(_NetCoreRunArguments)</RunArguments>
+
+        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(OutDir)</RunWorkingDirectory>
+      </PropertyGroup>
+    </When>
+    
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(OutputType)' == 'Exe'">
+      <PropertyGroup>
+        <RunCommand Condition="'$(RunCommand)' == ''">$(TargetPath)</RunCommand>
+        <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
+        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(OutDir)</RunWorkingDirectory>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+  <PropertyGroup>
+    <CreateSatelliteAssembliesDependsOn>
+      $(CreateSatelliteAssembliesDependsOn);
+      CoreGenerateSatelliteAssemblies
+    </CreateSatelliteAssembliesDependsOn>
+  </PropertyGroup>
+
+  <!--
+    ============================================================
+                    CoreGenerateSatelliteAssemblies
+    ============================================================
+-->
+
+  <Target Name="CoreGenerateSatelliteAssemblies"
+          Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+          Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != ''  and '$(GenerateSatelliteAssembliesForCore)' == 'true' ">
+
+    <MakeDir Directories="@(_SatelliteAssemblyResourceInputs->'$(IntermediateOutputPath)%(Culture)')" />
+
+    <PropertyGroup>
+      <_AssemblyInfoFile>$(IntermediateOutputPath)%(_SatelliteAssemblyResourceInputs.Culture)\$(TargetName).resources.cs</_AssemblyInfoFile>
+      <_OutputAssembly>$(IntermediateOutputPath)%(_SatelliteAssemblyResourceInputs.Culture)\$(TargetName).resources.dll</_OutputAssembly>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <SatelliteAssemblyAttribute Include="@(AssemblyAttribute)" />
+      <SatelliteAssemblyAttribute Include="System.Reflection.AssemblyCultureAttribute" Condition="'%(_SatelliteAssemblyResourceInputs.Culture)' != ''">
+        <_Parameter1>%(_SatelliteAssemblyResourceInputs.Culture)</_Parameter1>
+      </SatelliteAssemblyAttribute>
     </ItemGroup>
+
+    <WriteCodeFragment AssemblyAttributes="@(SatelliteAssemblyAttribute)" Language="$(Language)" OutputFile="$(_AssemblyInfoFile)">
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
+
+    <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
+                                 AssemblyInfoFile="$(_AssemblyInfoFile)"
+                                 OutputAssembly="$(_OutputAssembly)"
+                                 References="@(Reference)">
+
+      <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
+    </GenerateSatelliteAssemblies>
   </Target>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets')" />

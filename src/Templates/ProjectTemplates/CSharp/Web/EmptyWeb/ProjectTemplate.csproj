@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
-    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
+    <Compile Include="**\*.cs" />
+    <EmbeddedResource Include="**\*.resx" />
     <None Include="project.json" />
   </ItemGroup>
 

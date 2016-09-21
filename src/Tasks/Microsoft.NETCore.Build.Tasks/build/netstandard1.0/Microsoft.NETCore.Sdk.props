@@ -20,12 +20,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputType>Library</OutputType>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform>AnyCPU</Platform>
-
     <FileAlignment>512</FileAlignment>
-    <GlobalExclude>bin\**;obj\**;</GlobalExclude>
-
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <!-- User-facing configuration-specific defaults -->
@@ -42,7 +42,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default settings for .NET Core build logic -->
   <PropertyGroup>
     <DebugType>portable</DebugType>
-
+    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+    <DesignTimeAutoUnify>true</DesignTimeAutoUnify>
+    
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
 
     <!-- all references (even the StdLib) come from packages -->
@@ -58,6 +60,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
+  <!-- Shared properties between cross-targeting and inner build targets. -->
+  <PropertyGroup>
+    <MicrosoftNETCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../tools/</MicrosoftNETCoreBuildTasksDirectoryRoot>
+    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</MicrosoftNETCoreBuildTasksTFM>
+    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MicrosoftNETCoreBuildTasksTFM)' == ''">net46</MicrosoftNETCoreBuildTasksTFM>
+    <MicrosoftNETCoreBuildTasksDirectory>$(MicrosoftNETCoreBuildTasksDirectoryRoot)$(MicrosoftNETCoreBuildTasksTFM)/</MicrosoftNETCoreBuildTasksDirectory>
+    <MicrosoftNETCoreBuildTasksAssembly>$(MicrosoftNETCoreBuildTasksDirectory)Microsoft.NETCore.Build.Tasks.dll</MicrosoftNETCoreBuildTasksAssembly>
+  </PropertyGroup>
+
   <!-- Temporary hacks to work around bugs -->
   <PropertyGroup>
     <!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
@@ -65,6 +76,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
+
+    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/1046: Temporary bootstrapping mechanism before cross-targeting participation is extensible just as inner build is. -->
+    <CoreCrossTargetingTargetsPath>$(MSBuildThisFileDirectory)..\cross\Microsoft.NETCore.Sdk.targets</CoreCrossTargetingTargetsPath>
+    
+    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
+    <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
   </PropertyGroup>
   
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />

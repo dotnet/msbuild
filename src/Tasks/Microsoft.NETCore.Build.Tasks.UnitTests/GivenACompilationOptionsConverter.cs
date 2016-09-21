@@ -68,7 +68,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 yield return new object[]
                 {
                     null,
-                    CompilationOptions.Default
+                    null
                 };
             }
         }

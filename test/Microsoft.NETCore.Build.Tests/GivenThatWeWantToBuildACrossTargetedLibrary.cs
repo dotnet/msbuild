@@ -10,15 +10,15 @@ using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NETCore.Build.Tests
 {
-    public class GivenThatWeWantToBuildALibrary
+    public class GivenThatWeWantToBuildACrossTargetedLibrary
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
-       [Fact]
+        [Fact]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
+                .CopyTestAsset("CrossTargeting")
                 .WithSource()
                 .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
 
@@ -31,34 +31,15 @@ namespace Microsoft.NETCore.Build.Tests
                 .Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory();
-
+            var targetFrameworks = new[] { "netstandard1.4", "netstandard1.5" };
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                "TestLibrary.dll",
-                "TestLibrary.pdb",
-                "TestLibrary.deps.json"
-            });
-        }
-
-       [Fact]
-        public void It_builds_the_library_twice_in_a_row()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
-                .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
-
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass();
+                "netstandard1.4/TestLibrary.dll",
+                "netstandard1.4/TestLibrary.pdb",
+                "netstandard1.4/TestLibrary.deps.json",
+                "netstandard1.5/TestLibrary.dll",
+                "netstandard1.5/TestLibrary.pdb",
+                "netstandard1.5/TestLibrary.deps.json"
+            }, SearchOption.AllDirectories);
         }
     }
 }
