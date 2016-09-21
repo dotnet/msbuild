@@ -30,6 +30,12 @@ namespace Microsoft.DotNet.Tools.Pack3
             var noBuild = cmd.Option("--no-build",
                 "Do not build project before packing", 
                 CommandOptionType.NoValue);
+            var includeSymbols = cmd.Option("--include-symbols",
+                "Include PDBs along with the DLLs in the output folder",
+                CommandOptionType.NoValue);
+            var includeSource = cmd.Option("--include-source",
+                "Include PDBs and source files. Source files go into the src folder in the resulting nuget package",
+                CommandOptionType.NoValue);
             var configuration = cmd.Option("-c|--configuration <CONFIGURATION>",
                 "Configuration under which to build", 
                 CommandOptionType.SingleValue);
@@ -53,6 +59,16 @@ namespace Microsoft.DotNet.Tools.Pack3
                 if (noBuild.HasValue())
                 {
                     msbuildArgs.Add($"/p:NoBuild=true");
+                }
+
+                if (includeSymbols.HasValue())
+                {
+                    msbuildArgs.Add($"/p:IncludeSymbols=true");
+                }
+
+                if (includeSource.HasValue())
+                {
+                    msbuildArgs.Add($"/p:IncludeSource=true");
                 }
 
                 if (output.HasValue())
