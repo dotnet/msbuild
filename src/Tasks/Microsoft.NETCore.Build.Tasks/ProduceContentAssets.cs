@@ -22,6 +22,7 @@ namespace Microsoft.NETCore.Build.Tasks
         private readonly List<ITaskItem> _contentItems = new List<ITaskItem>();
         private readonly List<ITaskItem> _fileWrites = new List<ITaskItem>();
         private readonly List<ITaskItem> _copyLocalItems = new List<ITaskItem>();
+        private IContentAssetPreprocessor _assetPreprocessor;
 
         #region Output Items
 
@@ -98,7 +99,7 @@ namespace Microsoft.NETCore.Build.Tasks
         public ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
             : this()
         {
-            AssetPreprocessor = assetPreprocessor;
+            _assetPreprocessor = assetPreprocessor;
         }
 
         #endregion
@@ -106,7 +107,17 @@ namespace Microsoft.NETCore.Build.Tasks
         /// <summary>
         /// Resource for reading, processing and writing content assets
         /// </summary>
-        public IContentAssetPreprocessor AssetPreprocessor { get; private set; }
+        public IContentAssetPreprocessor AssetPreprocessor
+        {
+            get
+            {
+                if (_assetPreprocessor == null)
+                {
+                    _assetPreprocessor = new NugetContentAssetPreprocessor();
+                }
+                return _assetPreprocessor;
+            }
+        }
 
         public override bool Execute()
         {
@@ -162,10 +173,7 @@ namespace Microsoft.NETCore.Build.Tasks
                         $" Choosing &apos;{preprocessorValues[duplicatedPreprocessorKey]}&apos; as the value.");
                 }
 
-                if (AssetPreprocessor == null)
-                {
-                    AssetPreprocessor = new NugetContentAssetPreprocessor(ContentPreprocessorOutputDirectory, preprocessorValues);
-                }
+                AssetPreprocessor.ConfigurePreprocessor(ContentPreprocessorOutputDirectory, preprocessorValues);
             }
 
             var contentFileDeps = ContentFileDependencies ?? Enumerable.Empty<ITaskItem>();
@@ -225,7 +233,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
             if (ppOutputPath != null)
             {
-                if (AssetPreprocessor == null)
+                if (string.IsNullOrEmpty(ContentPreprocessorOutputDirectory))
                 {
                     throw new Exception($"The {nameof(ContentPreprocessorOutputDirectory)} property must be set in order to consume preprocessed content");
                 }

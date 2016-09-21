@@ -40,6 +40,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <ResolvePackageDependenciesForBuild Condition="'$(ResolvePackageDependenciesForBuild)' == ''">true</ResolvePackageDependenciesForBuild>
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
+
+    <ContentPreprocessorOutputDirectory Condition="'$(ContentPreprocessorOutputDirectory)' == ''">$(IntermediateOutputPath)NuGet\</ContentPreprocessorOutputDirectory>
   </PropertyGroup>
 
   <!-- Target Moniker + RID-->
@@ -192,12 +194,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <__ContentFileDefs Include="@(FileDefinitions)" Exclude="@(_ContentFileDeps)" />
       <_ContentFileDefs Include="@(FileDefinitions)" Exclude="@(__ContentFileDefs)" />
     </ItemGroup>
-    
+
     <ProduceContentAssets
       ContentFileDefinitions="@(_ContentFileDefs)"
       ContentFileDependencies="@(_ContentFileDeps)"
       ContentPreprocessorValues="@(PreprocessorValue)"
-      ContentPreprocessorOutputDirectory="$(IntermediateOutputPath)\NuGet"
+      ContentPreprocessorOutputDirectory="$(ContentPreprocessorOutputDirectory)"
       ProjectLanguage="$(Language)">
 
       <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />

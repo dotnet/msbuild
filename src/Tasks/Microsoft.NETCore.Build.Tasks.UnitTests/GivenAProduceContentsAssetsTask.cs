@@ -27,8 +27,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor(
-                ContentOutputDirectory, preprocessorValues, (s) => false);
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
             assetPreprocessor.MockReadContent = inputText;
 
             // input items
@@ -82,8 +81,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor(
-                ContentOutputDirectory, preprocessorValues, (s) => false);
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
             assetPreprocessor.MockReadContent = inputText;
 
             // input items
@@ -139,8 +137,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor(
-                ContentOutputDirectory, preprocessorValues, (s) => false);
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
             assetPreprocessor.MockReadContent = inputText;
 
             // input items
@@ -216,8 +213,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor(
-                ContentOutputDirectory, preprocessorValues, (s) => false);
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
             assetPreprocessor.MockReadContent = inputText;
 
             // input items

@@ -13,17 +13,22 @@ namespace Microsoft.NETCore.Build.Tasks
 {
     public class NugetContentAssetPreprocessor : IContentAssetPreprocessor
     {
-        private readonly Dictionary<string, string> _preprocessorValues;
-        private readonly string _preprocessedOutputDirectory;
+        private Dictionary<string, string> _preprocessorValues = new Dictionary<string, string>();
+        private string _preprocessedOutputDirectory = null;
 
-        public NugetContentAssetPreprocessor(string outputDirectory, Dictionary<string, string> preprocessorValues)
+        public void ConfigurePreprocessor(string outputDirectoryBase, Dictionary<string, string> preprocessorValues)
         {
             _preprocessorValues = preprocessorValues ?? new Dictionary<string, string>();
-            _preprocessedOutputDirectory = Path.Combine(outputDirectory, BuildPreprocessedContentHash(_preprocessorValues));
+            _preprocessedOutputDirectory = Path.Combine(outputDirectoryBase, BuildPreprocessedContentHash(_preprocessorValues));
         }
 
         public bool Process(string originalAssetPath, string relativeOutputPath, out string pathToFinalAsset)
         {
+            if (_preprocessedOutputDirectory == null)
+            {
+                throw new Exception($"{nameof(NugetContentAssetPreprocessor)} should be configured before any assets are processed");
+            }
+
             bool fileWritten = false;
 
             pathToFinalAsset = Path.Combine(_preprocessedOutputDirectory, relativeOutputPath);
