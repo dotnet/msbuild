@@ -242,7 +242,7 @@ namespace Microsoft.NETCore.Build.Tasks
                     hash,
                     CreateRuntimeAssemblyGroups(export),
                     CreateNativeLibraryGroups(export),
-                    export.ResourceAssemblies.Select(CreateResourceAssembly),
+                    export.ResourceAssemblies.FilterPlaceHolderFiles().Select(CreateResourceAssembly),
                     libraryDependencies,
                     serviceable,
                     path,
@@ -252,8 +252,8 @@ namespace Microsoft.NETCore.Build.Tasks
             {
                 IEnumerable<string> assemblies = export
                     .CompileTimeAssemblies
-                    .Select(libraryAsset => libraryAsset.Path)
-                    .FilterPlaceHolderFiles();
+                    .FilterPlaceHolderFiles()
+                    .Select(libraryAsset => libraryAsset.Path);
 
                 return new CompilationLibrary(
                     type.ToString().ToLowerInvariant(),
@@ -275,33 +275,48 @@ namespace Microsoft.NETCore.Build.Tasks
             assemblyGroups.Add(
                 new RuntimeAssetGroup(
                     string.Empty,
-                    export.RuntimeAssemblies.Select(a => a.Path).FilterPlaceHolderFiles()));
+                    export.RuntimeAssemblies.FilterPlaceHolderFiles().Select(a => a.Path)));
 
-            // TODO RuntimeTargets - https://github.com/dotnet/sdk/issues/12
-            //export.RuntimeTargets.GroupBy(l => l.)
+            foreach (var runtimeTargetsGroup in export.GetRuntimeTargetsGroups("runtime"))
+            {
+                assemblyGroups.Add(
+                    new RuntimeAssetGroup(
+                        runtimeTargetsGroup.Key,
+                        runtimeTargetsGroup.Select(t => t.Path)));
+            }
 
             return assemblyGroups;
         }
 
         private IReadOnlyList<RuntimeAssetGroup> CreateNativeLibraryGroups(LockFileTargetLibrary export)
         {
-            return new[] {
+            List<RuntimeAssetGroup> nativeGroups = new List<RuntimeAssetGroup>();
+
+            nativeGroups.Add(
                 new RuntimeAssetGroup(
                     string.Empty,
-                    export.NativeLibraries.Select(a => a.Path).FilterPlaceHolderFiles()
-                    )
-            };
+                    export.NativeLibraries.FilterPlaceHolderFiles().Select(a => a.Path)));
+
+            foreach (var runtimeTargetsGroup in export.GetRuntimeTargetsGroups("native"))
+            {
+                nativeGroups.Add(
+                    new RuntimeAssetGroup(
+                        runtimeTargetsGroup.Key,
+                        runtimeTargetsGroup.Select(t => t.Path)));
+            }
+
+            return nativeGroups;
         }
 
         private ResourceAssembly CreateResourceAssembly(LockFileItem resourceAssembly)
         {
-            // TODO: implement - https://github.com/dotnet/sdk/issues/12
-            return null;
+            string locale;
+            if (!resourceAssembly.Properties.TryGetValue("locale", out locale))
+            {
+                locale = null;
+            }
 
-            //return new ResourceAssembly(
-            //    path: resourceAssembly.Path,
-            //    locale: resourceAssembly.Locale
-            //    );
+            return new ResourceAssembly(resourceAssembly.Path, locale);
         }
     }
 }

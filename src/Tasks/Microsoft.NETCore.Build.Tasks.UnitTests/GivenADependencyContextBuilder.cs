@@ -26,7 +26,8 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             string mainProjectName,
             string mainProjectVersion,
             CompilationOptions compilationOptions,
-            string baselineFileName)
+            string baselineFileName,
+            string runtime)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
 
@@ -36,7 +37,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                 compilationOptions,
                 lockFile,
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                runtime: null);
+                runtime);
 
             JObject result = Save(dependencyContext);
             JObject baseline = ReadJson($"{baselineFileName}.deps.json");
@@ -82,9 +83,11 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
                 return new[]
                 {
-                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new" },
-                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies" },
-                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions" },
+                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new", null },
+                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies", null },
+                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions", null },
+                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.portable", null },
+                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.osx", "osx.10.11-x64" },
                 };
             }
         }

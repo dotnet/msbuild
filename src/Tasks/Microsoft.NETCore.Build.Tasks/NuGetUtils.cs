@@ -17,11 +17,6 @@ namespace Microsoft.NETCore.Build.Tasks
             return string.Equals(Path.GetFileName(path), PackagingCoreConstants.EmptyFolder, StringComparison.Ordinal);
         }
 
-        public static IEnumerable<string> FilterPlaceHolderFiles(this IEnumerable<string> files)
-        {
-            return files.Where(f => !IsPlaceholderFile(f));
-        }
-
         public static IEnumerable<LockFileItem> FilterPlaceHolderFiles(this IEnumerable<LockFileItem> files)
         {
             return files.Where(f => !IsPlaceholderFile(f.Path));

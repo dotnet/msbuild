@@ -38,6 +38,12 @@
     <Compile Include="TestLockFiles.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="all.asset.types.portable.deps.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="all.asset.types.osx.deps.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="dotnet.new.deps.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
