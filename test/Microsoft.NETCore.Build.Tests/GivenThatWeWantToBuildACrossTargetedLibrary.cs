@@ -31,7 +31,6 @@ namespace Microsoft.NETCore.Build.Tests
                 .Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory();
-            var targetFrameworks = new[] { "netstandard1.4", "netstandard1.5" };
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "netstandard1.4/TestLibrary.dll",
                 "netstandard1.4/TestLibrary.pdb",
