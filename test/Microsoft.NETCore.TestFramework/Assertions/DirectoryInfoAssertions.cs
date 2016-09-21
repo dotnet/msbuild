@@ -75,9 +75,12 @@ namespace Microsoft.NETCore.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(new DirectoryInfoAssertions(dir));
         }
 
-        public AndConstraint<DirectoryInfoAssertions> OnlyHaveFiles(IEnumerable<string> expectedFiles)
+        public AndConstraint<DirectoryInfoAssertions> OnlyHaveFiles(IEnumerable<string> expectedFiles, SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            var actualFiles = _dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Select(f => f.Name);
+            var actualFiles = _dirInfo.EnumerateFiles("*", searchOption)
+                              .Select(f => f.FullName.Substring(_dirInfo.FullName.Length + 1) // make relative to _dirInfo
+                              .Replace("\\", "/")); // normalize separator
+
             var missingFiles = Enumerable.Except(expectedFiles, actualFiles);
             var extraFiles = Enumerable.Except(actualFiles, expectedFiles);
             var nl = Environment.NewLine;
