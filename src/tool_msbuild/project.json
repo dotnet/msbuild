@@ -14,7 +14,7 @@
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60920-07",
     "Microsoft.Cci": "4.0.0-rc3-24128-00",
     "Microsoft.Composition": "1.0.30",
-    "Microsoft.NuGet.Build.Tasks": "1.0.0-alpha-000002"
+    "Microsoft.NuGet.Build.Tasks": "1.0.0-alpha-000003"
   },
   "frameworks": {
     "netcoreapp1.0": {
