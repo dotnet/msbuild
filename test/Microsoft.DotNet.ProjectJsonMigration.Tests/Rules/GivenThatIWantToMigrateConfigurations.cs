@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                             ""buildOptions"": {
                                 ""copyToOutput"": {
                                     ""include"": [""root"", ""src"", ""rootfile.cs""],
-                                    ""exclude"": [""src"", ""rootfile.cs""],
+                                    ""exclude"": [""src"", ""root/rootfile.cs""],
                                     ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
                                     ""excludeFiles"": [""src/file2.cs""]
                                 }
@@ -118,6 +118,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         }
                     }
                 }");
+            Console.WriteLine(mockProj.RawXml);
 
             var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
 
@@ -137,7 +138,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             // Directories are not converted to globs in the result because we did not write the directory
             configRemoveContentItem.Remove.Should().Be(@"root;src;rootfile.cs");
             configIncludeContentItem.Include.Should().Be(@"root;src;rootfile.cs");
-            configIncludeContentItem.Exclude.Should().Be(@"src;rootfile.cs;src\file2.cs");
+            configIncludeContentItem.Exclude.Should().Be(@"src;root\rootfile.cs;src\file2.cs");
         }
 
         [Fact]

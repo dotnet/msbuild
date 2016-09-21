@@ -102,12 +102,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
             foreach (var existingItem in existingItemsWithDifferentCondition)
             {
-                // When the existing item encompasses this item and it's condition is empty, ignore the current item
-                if (item.IsEquivalentTo(existingItem))
+                var encompassedIncludes = existingItem.GetEncompassedIncludes(item);
+                if (encompassedIncludes.Any())
                 {
-                    MigrationTrace.Instance.WriteLine($"{nameof(TransformApplicator)}: equivalent {existingItem.ConditionChain().Count()}");
-
-                    if (existingItem.ConditionChain().Count() == 0)
+                    MigrationTrace.Instance.WriteLine($"{nameof(TransformApplicator)}: encompassed includes {string.Join(", ", encompassedIncludes)}");
+                    item.RemoveIncludes(encompassedIncludes);
+                    if (!item.Includes().Any())
                     {
                         MigrationTrace.Instance.WriteLine($"{nameof(TransformApplicator)}: Ignoring Item {{ ItemType: {existingItem.ItemType}, Condition: {existingItem.Condition}, Include: {existingItem.Include}, Exclude: {existingItem.Exclude} }}");
                         return null;

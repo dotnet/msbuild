@@ -15,6 +15,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public static class MSBuildExtensions
     {
+        public static IEnumerable<string> GetEncompassedIncludes(this ProjectItemElement item, 
+            ProjectItemElement otherItem)
+        {
+            if (otherItem.IsEquivalentToExceptIncludeAndExclude(item) && 
+                new HashSet<string>(otherItem.Excludes()).IsSubsetOf(new HashSet<string>(item.Excludes())))
+            {
+                return otherItem.IntersectIncludes(item);
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
         public static bool IsEquivalentTo(this ProjectItemElement item, ProjectItemElement otherItem)
         {
             // Different includes
@@ -31,6 +43,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 return false;
             }
 
+            return item.IsEquivalentToExceptIncludeAndExclude(otherItem);
+        }
+
+        public static bool IsEquivalentToExceptIncludeAndExclude(this ProjectItemElement item, ProjectItemElement otherItem)
+        {
             // Different remove
             if (item.Remove != otherItem.Remove)
             {
