@@ -267,7 +267,7 @@ namespace Microsoft.NETCore.Build.Tasks
             if (file.StartsWith("analyzers", StringComparison.Ordinal)
                 && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase))
             {
-                var projectLanguage = GetLockFileLanguageName(ProjectLanguage);
+                var projectLanguage = NuGetUtils.GetLockFileLanguageName(ProjectLanguage);
 
                 if (projectLanguage == "cs" || projectLanguage == "vb")
                 {
@@ -281,16 +281,6 @@ namespace Microsoft.NETCore.Build.Tasks
             }
 
             return isAnalyzer;
-        }
-
-        private static string GetLockFileLanguageName(string projectLanguage)
-        {
-            switch (projectLanguage)
-            {
-                case "C#": return "cs";
-                case "F#": return "fs";
-                default: return projectLanguage?.ToLowerInvariant();
-            }
         }
 
         // get target definitions and package and file dependencies
@@ -374,9 +364,12 @@ namespace Microsoft.NETCore.Build.Tasks
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
             {
-                var filePathList = fileGroup.GetFilePathListFor(package);
-                foreach (var filePath in filePathList)
+                var filePathList = fileGroup.GetFilePathAndProperties(package);
+                foreach (var entry in filePathList)
                 {
+                    string filePath = entry.Item1;
+                    IDictionary<string, string> properties = entry.Item2;
+
                     if (NuGetUtils.IsPlaceholderFile(filePath))
                     {
                         continue;
@@ -387,6 +380,11 @@ namespace Microsoft.NETCore.Build.Tasks
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
+
+                    foreach (var property in properties)
+                    {
+                        item.SetMetadata(property.Key, property.Value);
+                    }
 
                     _fileDependencies.Add(item);
 

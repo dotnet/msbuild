@@ -26,5 +26,15 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             return files.Where(f => !IsPlaceholderFile(f.Path));
         }
+
+        public static string GetLockFileLanguageName(string projectLanguage)
+        {
+            switch (projectLanguage)
+            {
+                case "C#": return "cs";
+                case "F#": return "fs";
+                default: return projectLanguage?.ToLowerInvariant();
+            }
+        }
     }
 }

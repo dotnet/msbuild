@@ -19,6 +19,9 @@
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="NugetContentAssetPreprocessor.cs" />
+    <Compile Include="IContentAssetPreprocessor.cs" />
+    <Compile Include="ProduceContentAssets.cs" />
     <Compile Include="GetNearestTargetFramework.cs" />
     <Compile Include="ITaskItemExtensions.cs" />
     <Compile Include="CompilationOptionsConverter.cs" />
