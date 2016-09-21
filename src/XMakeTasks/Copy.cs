@@ -409,24 +409,24 @@ namespace Microsoft.Build.Tasks
                 _copiedFiles = new TaskItem[0];
                 return true;
             }
+
+            if (!(ValidateInputs() && InitializeDestinationFiles()))
+            {
+                return false;
+            }
             
             if (_destinationFiles != null)
             {
-                var sameDestinationFiles = _destinationFiles.GroupBy(x => x).Where(g => g.Count() > 1).Select(y => y.First());
+                var sameDestinationFiles = _destinationFiles.GroupBy(x => x.ItemSpec).Where(g => g.Count() > 1).Select(y => y.First());
 
                 if (sameDestinationFiles.Any())
                 {
-                    foreach(var item in sameDestinationFiles)
+                    foreach (var item in sameDestinationFiles)
                     {
                         Log.LogErrorFromResources("Copy.SameDestinationPath", item.ItemSpec);
                     }
                     return false;
                 }
-            }
-
-            if (!(ValidateInputs() && InitializeDestinationFiles()))
-            {
-                return false;
             }
 
             bool success = true;
