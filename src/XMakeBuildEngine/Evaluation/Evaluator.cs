@@ -1642,7 +1642,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (conditionResult)
                 {
-                    _data.EvaluatedItemElements.Add(itemElement);
+                    RecordEvaluatedItemElement(itemElement);
                 }
 
                 return;
@@ -1660,7 +1660,7 @@ namespace Microsoft.Build.Evaluation
 
         private void EvaluateItemElementUpdate(ProjectItemElement itemElement)
         {
-            _data.EvaluatedItemElements.Add(itemElement);
+            RecordEvaluatedItemElement(itemElement);
 
             var expandedItemSet =
                 new HashSet<string>(
@@ -1734,7 +1734,7 @@ namespace Microsoft.Build.Evaluation
             // FINALLY: Add the items to the project
             if (itemConditionResult && itemGroupConditionResult)
             {
-                _data.EvaluatedItemElements.Add(itemElement);
+                RecordEvaluatedItemElement(itemElement);
 
                 foreach (I item in items)
                 {
@@ -2622,6 +2622,14 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 return _data.Directory;
+            }
+        }
+
+        private void RecordEvaluatedItemElement(ProjectItemElement itemElement)
+        {
+            if (_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
+            {
+                _data.EvaluatedItemElements.Add(itemElement);
             }
         }
 

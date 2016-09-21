@@ -61,7 +61,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Throw an exception and stop the evaluation of a project if any circular imports are detected
         /// </summary>
-        RejectCircularImports = 4
+        RejectCircularImports = 4,
+
+        /// <summary>
+        /// Record the item elements that got evaluated
+        /// </summary>
+        RecordEvaluatedItemElements = 8
     }
 
     /// <summary>
@@ -1070,6 +1075,7 @@ namespace Microsoft.Build.Evaluation
         /// </returns>
         public List<GlobResult> GetAllGlobs()
         {
+            ReevaluateForPostMortemAnalysisIfNecessary();
             return GetAllGlobs(_data.EvaluatedItemElements);
         }
 
@@ -1083,6 +1089,8 @@ namespace Microsoft.Build.Evaluation
             {
                 return new List<GlobResult>();
             }
+
+            ReevaluateForPostMortemAnalysisIfNecessary();
             return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
@@ -1157,6 +1165,7 @@ namespace Microsoft.Build.Evaluation
         /// </returns>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch)
         {
+            ReevaluateForPostMortemAnalysisIfNecessary();
             return GetItemProvenance(itemToMatch, _data.EvaluatedItemElements);
         }
 
@@ -1167,6 +1176,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">The item type to constrain the search in</param>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType)
         {
+            ReevaluateForPostMortemAnalysisIfNecessary();
             return GetItemProvenance(itemToMatch, GetItemElementsByType(_data.EvaluatedItemElements, itemType));
         }
 
@@ -1185,9 +1195,28 @@ namespace Microsoft.Build.Evaluation
                 return new List<ProvenanceResult>();
             }
 
+            ReevaluateForPostMortemAnalysisIfNecessary();
             var itemElementsAbove = GetItemElementsThatMightAffectItem(_data.EvaluatedItemElements, item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
+        }
+
+        /// <summary>
+        /// Some project APIs need to do analysis that requires the Evaluator to record more data than usual as it evaluates.
+        /// This method checks if the Evaluator was run with the extra required settings and if not, does a re-evaluation.
+        /// If a re-evaluation was necessary, it saves this information so a next call does not re-evaluate.
+        /// 
+        /// Using this method avoids storing extra data in memory when its not needed.
+        /// </summary>
+        private void ReevaluateForPostMortemAnalysisIfNecessary()
+        {
+            if (_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
+            {
+                return;
+            }
+
+            _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
+            Reevaluate(LoggingService, _loadSettings);
         }
 
         private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
@@ -2394,33 +2423,21 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation)
         {
+            ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings);
+        }
+
+        /// <summary>
+        /// Re-evaluates the project using the specified logging service and load settings.
+        /// </summary>
+        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        {
             // We will skip the evaluation if the flag is set. This will give us better performance on scenarios
             // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes. 
             if (!SkipEvaluation && !_projectCollection.SkipEvaluation && IsDirty)
             {
                 try
                 {
-                    Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, _loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection as IToolsetProvider, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */);
-
-                    // We have to do this after evaluation, because evaluation might have changed
-                    // the imports being pulled in.
-                    int highestXmlVersion = Xml.Version;
-
-                    if (_data.ImportClosure != null)
-                    {
-                        foreach (Triple<ProjectImportElement, ProjectRootElement, int> triple in _data.ImportClosure)
-                        {
-                            highestXmlVersion = (highestXmlVersion < triple.Third) ? triple.Third : highestXmlVersion;
-                        }
-                    }
-
-                    _explicitlyMarkedDirty = false;
-                    _evaluatedVersion = highestXmlVersion;
-                    _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
-                    _evaluationCounter = GetNextEvaluationCounter();
-                    _data.HasUnsavedChanges = false;
-
-                    ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
+                    Reevaluate(loggingServiceForEvaluation, loadSettings);
                 }
                 catch (InvalidProjectFileException ex)
                 {
@@ -2428,6 +2445,31 @@ namespace Microsoft.Build.Evaluation
                     throw;
                 }
             }
+        }
+
+        private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        {
+            Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection as IToolsetProvider, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */);
+
+            // We have to do this after evaluation, because evaluation might have changed
+            // the imports being pulled in.
+            int highestXmlVersion = Xml.Version;
+
+            if (_data.ImportClosure != null)
+            {
+                foreach (Triple<ProjectImportElement, ProjectRootElement, int> triple in _data.ImportClosure)
+                {
+                    highestXmlVersion = (highestXmlVersion < triple.Third) ? triple.Third : highestXmlVersion;
+                }
+            }
+
+            _explicitlyMarkedDirty = false;
+            _evaluatedVersion = highestXmlVersion;
+            _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
+            _evaluationCounter = GetNextEvaluationCounter();
+            _data.HasUnsavedChanges = false;
+
+            ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
         }
 
         /// <summary>
