@@ -489,6 +489,7 @@ namespace Microsoft.Build.Utilities
 
             return (IDictionary)_metadata.Clone();
         }
+
         #endregion
     }
 }

@@ -1792,7 +1792,7 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.False(success);
 
-                ((MockEngine)t.BuildEngine).AssertLogContains("MSB3892"); // Didn't do retries, no op then invalid
+                ((MockEngine)t.BuildEngine).AssertLogContains("MSB3892");
             }
             finally
             {
