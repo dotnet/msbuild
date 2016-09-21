@@ -19,6 +19,7 @@
     <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GetNearestTargetFramework.cs" />
     <Compile Include="ITaskItemExtensions.cs" />
     <Compile Include="CompilationOptionsConverter.cs" />
     <Compile Include="NuGetUtils.cs" />
@@ -42,6 +43,9 @@
     <None Include="build\netstandard1.0\Microsoft.NETCore.GenerateAssemblyInfo.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="build\cross\Microsoft.NETCore.Sdk.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.VisualBasic.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -49,6 +53,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.VisualBasic.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.BeforeCommon.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.CSharp.targets">
@@ -61,6 +68,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Publish.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\netstandard1.0\Microsoft.NETCore.TargetFrameworkInference.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\netstandard1.0\Microsoft.PackageDependencyResolution.targets">

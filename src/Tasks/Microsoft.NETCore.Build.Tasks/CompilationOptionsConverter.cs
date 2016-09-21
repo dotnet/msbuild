@@ -13,7 +13,7 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             if (compilerOptionsItem == null)
             {
-                return CompilationOptions.Default;
+                return null;
             }
 
             return new CompilationOptions(

@@ -6,12 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.NETCore.TestFramework.Commands
 {
     public sealed class PublishCommand : TestCommand
     {
-        private const string PublishSubfolderName = "app.publish";
+        private const string PublishSubfolderName = "publish";
 
         public PublishCommand(MSBuildTest msbuild, string projectPath)
             : base(msbuild, projectPath)
@@ -28,9 +29,9 @@ namespace Microsoft.NETCore.TestFramework.Commands
             return command.Execute();
         }
 
-        public DirectoryInfo GetOutputDirectory()
+        public DirectoryInfo GetOutputDirectory(bool selfContained = false)
         {
-            string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath());
+            string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath(selfContained));
             return new DirectoryInfo(output);
         }
 
@@ -39,9 +40,11 @@ namespace Microsoft.NETCore.TestFramework.Commands
             return Path.Combine(GetOutputDirectory().FullName, $"{appName}.dll");
         }
 
-        private string BuildRelativeOutputPath()
+        private string BuildRelativeOutputPath(bool selfContained)
         {
-            return Path.Combine("Debug", "", PublishSubfolderName);
+            return selfContained ?
+                Path.Combine("Debug", RuntimeEnvironment.GetRuntimeIdentifier(), PublishSubfolderName) :
+                Path.Combine("Debug", PublishSubfolderName);
         }
     }
 }
