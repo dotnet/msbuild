@@ -504,7 +504,7 @@ namespace Microsoft.Build.Tasks
             // Only cache the *. pattern. This is by far the most common pattern
             // and generalized caching would require a call to Path.Combine which
             // is a string-copy.
-            if (pattern == "*.")
+            if (pattern == "*")
             {
                 object cached = instanceLocalDirectories[path];
                 if (cached == null)
