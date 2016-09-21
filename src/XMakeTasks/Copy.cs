@@ -414,7 +414,7 @@ namespace Microsoft.Build.Tasks
             {
                 var sameDestinationFiles = _destinationFiles.GroupBy(x => x).Where(g => g.Count() > 1).Select(y => y.First());
 
-                if ((sameDestinationFiles.Count() + _destinationFiles.Length) != _destinationFiles.Length)
+                if (sameDestinationFiles.Any())
                 {
                     foreach(var item in sameDestinationFiles)
                     {
