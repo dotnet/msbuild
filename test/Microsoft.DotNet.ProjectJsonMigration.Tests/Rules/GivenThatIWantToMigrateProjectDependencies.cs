@@ -116,6 +116,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             migratedProjectReferenceItems.Select(m => m.Include).Should().BeEquivalentTo(expectedMigratedReferences);
         }
 
+        [Fact]
         public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference()
         {
             var projectReference = "some/to.csproj";
@@ -149,6 +150,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             migratedProjectReferenceItem.Condition.Should().Be(" '$(Foo)' == 'bar' ");
         }
 
+        [Fact]
         public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference_parent()
         {
             var projectReference = "some/to.csproj";
@@ -182,6 +184,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             migratedProjectReferenceItem.Condition.Should().Be(" '$(Foo)' == 'bar' ");
         }
 
+        [Fact]
         public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference_parent_and_item()
         {
             var projectReference = "some/to.csproj";

@@ -24,6 +24,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public static Func<string, MigrationError> MIGRATE1016
             => (message) => new MigrationError(nameof(MIGRATE1016), "Unsupported Script Variable", message);
 
+        public static Func<string, MigrationError> MIGRATE1017
+            => (message) => new MigrationError(nameof(MIGRATE1017), "Multiple Xproj Files", message);
+
         // Potentially Temporary (Point in Time) Errors
         public static Func<string, MigrationError> MIGRATE20011
             => (message) => new MigrationError(nameof(MIGRATE20011), "Multi-TFM", message);

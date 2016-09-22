@@ -72,7 +72,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             if (allXprojFiles.Count() > 1)
             {
-                throw new Exception("Multiple xproj files found in {projectDirectory}, please specify which to use");
+                MigrationErrorCodes
+                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
+                    .Throw();
             }
 
             return allXprojFiles.FirstOrDefault();

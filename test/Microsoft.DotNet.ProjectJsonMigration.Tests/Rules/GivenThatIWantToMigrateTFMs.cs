@@ -43,6 +43,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Properties.Count(p => p.Name == "TargetFrameworkVersion").Should().Be(0);
         }
 
+        [Fact]
         public void Migrating_MultiTFM_project_Populates_TargetFrameworks_with_short_tfms()
         {
             var testDirectory = Temp.CreateDirectory().Path;
@@ -67,6 +68,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 .Value.Should().Be("net20;net35;net40;net461;netstandard1.5");
         }
 
+        [Fact]
         public void Migrating_Single_TFM_project_Populates_TargetFrameworks_with_short_tfm()
         {
             var testDirectory = Temp.CreateDirectory().Path;
