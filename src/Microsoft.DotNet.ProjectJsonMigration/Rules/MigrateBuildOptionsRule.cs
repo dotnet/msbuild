@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
-{    // TODO: Should All build options be protected by a configuration condition?
+{
     public class MigrateBuildOptionsRule : IMigrationRule
     {
         private AddPropertyTransform<CommonCompilerOptions>[] EmitEntryPointTransforms
