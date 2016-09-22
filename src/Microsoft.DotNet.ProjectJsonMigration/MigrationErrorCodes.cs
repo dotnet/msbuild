@@ -31,5 +31,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public static Func<string, MigrationError> MIGRATE20013
             => (message) => new MigrationError(nameof(MIGRATE20013), "Non-Csharp App", message);
+
+        public static Func<string, MigrationError> MIGRATE20018
+            => (message) => new MigrationError(nameof(MIGRATE20018), "Files specified under PackOptions", message);
     }
 }
