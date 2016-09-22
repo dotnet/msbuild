@@ -31,6 +31,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectLockFile Condition="Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/$(MSBuildProjectName).project.lock.json</ProjectLockFile>
     <ProjectLockFile Condition="!Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/project.lock.json</ProjectLockFile>
   </PropertyGroup>
+  
+  <!-- For .NET Core projects the lock file will be in the obj folder. NuGet is currently using the presence of the TargetFrameworks property to determine that.
+       This will likely change when PackageReferences for UWP lights up-->
+  <PropertyGroup>
+    <ProjectLockFile Condition="'$(TargetFrameworks)' != ''">$(BaseIntermediateOutputPath)/project.assets.json</ProjectLockFile>
+  </PropertyGroup>
 
   <PropertyGroup>
     <!-- Ensure $(ProjectLockFile) is a full path -->
