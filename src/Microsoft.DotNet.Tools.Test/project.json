@@ -5,7 +5,8 @@
     "compile": {
       "include": [
         "**/*.cs",
-        "../dotnet/CommandLine/*.cs"
+        "../dotnet/CommandLine/*.cs",
+        "../dotnet/DotnetFiles.cs"
       ]
     }
   },

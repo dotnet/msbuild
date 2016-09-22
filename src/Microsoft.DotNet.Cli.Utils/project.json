@@ -15,14 +15,7 @@
     "NuGet.ProjectModel": "3.6.0-rc-1954"
   },
   "frameworks": {
-    "net451": {
-      "frameworkAssemblies": {
-        "System.Runtime": {
-          "type": "build"
-        }
-      }
-    },
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ],

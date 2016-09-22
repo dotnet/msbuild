@@ -11,11 +11,7 @@ namespace Microsoft.Extensions.Testing.Abstractions
     {
         internal static int GetMethodToken(this MethodInfo methodInfo)
         {
-#if NETSTANDARD1_3
-            var methodToken = methodInfo.GetMetadataToken();
-#else
             var methodToken = methodInfo.MetadataToken;
-#endif
 
             return methodToken;
         }

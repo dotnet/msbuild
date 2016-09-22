@@ -142,8 +142,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return ProjectContext.Create(
                 projectRootPath,
                 framework,
-                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers());
-
+                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
         }
 
         private IEnumerable<string> GetAllowedCommandExtensionsFromEnvironment(IEnvironmentProvider environment)
