@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void Project_dependencies_are_migrated_to_ProjectReference()
         {
             var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: "p").WithLockFiles().Path;
+                TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: "p").Path;
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
 
@@ -72,6 +72,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 TestAssetsManager.CreateTestInstance("TestAppWithLibrary").Path;
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
+            var libraryDirectory = Path.Combine(solutionDirectory, "TestLibrary");
+            Directory.Delete(libraryDirectory, true);
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();

@@ -11,28 +11,47 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Common;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     public class MigrateProjectDependenciesRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
+        private readonly  ProjectDependencyFinder _projectDependencyFinder;
         private string _projectDirectory;
 
         public MigrateProjectDependenciesRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
+            _projectDependencyFinder = new ProjectDependencyFinder();
         }
 
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
             _projectDirectory = migrationSettings.ProjectDirectory;
 
+            var possibleProjectDependencies = _projectDependencyFinder
+                .FindPossibleProjectDependencies(migrationRuleInputs.DefaultProjectContext.ProjectFile.ProjectFilePath);
 
             var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationSettings, migrationRuleInputs);
             var migratedXProjDependencyNames = migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(p));
 
-            MigrateProjectJsonProjectDependencies(migrationSettings, migrationRuleInputs, migratedXProjDependencyNames);
+
+            AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
+            MigrateProjectJsonProjectDependencies(
+                possibleProjectDependencies, 
+                migrationRuleInputs.ProjectContexts, 
+                migratedXProjDependencyNames, 
+                migrationRuleInputs.OutputMSBuildProject);
+        }
+
+        private void ThrowIfUnresolvedDependencies(IEnumerable<ProjectContext> projectContexts, List<ProjectDependency> projectDependencies, IEnumerable<string> migratedXProjDependencyNames)
+        {
+            foreach (var projectContext in projectContexts)
+            {
+                var projectExports = projectContext.CreateExporter("_").GetDependencies(LibraryType.Project);
+            }
         }
 
         private IEnumerable<string> MigrateXProjProjectDependencies(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
@@ -67,41 +86,59 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         }
 
         public void MigrateProjectJsonProjectDependencies(
-            MigrationSettings migrationSettings, 
-            MigrationRuleInputs migrationRuleInputs, 
-            IEnumerable<string> migratedXProjDependencyNames)
+            Dictionary<string, ProjectDependency> possibleProjectDependencies,
+            IEnumerable<ProjectContext> projectContexts,
+            IEnumerable<string> migratedXProjDependencyNames,
+            ProjectRootElement outputMSBuildProject)
         {
-            var outputMSBuildProject = migrationRuleInputs.OutputMSBuildProject;
-            var projectContext = migrationRuleInputs.DefaultProjectContext;
-            var projectExports = projectContext.CreateExporter("_").GetDependencies(LibraryType.Project);
-
-            var projectDependencyTransformResults = new List<ProjectItemElement>();
-            foreach (var projectExport in projectExports)
+            foreach (var projectContext in projectContexts)
             {
-                try
+                var projectExports = projectContext.CreateExporter("_").GetDependencies();
+
+                var projectDependencyTransformResults = new List<ProjectItemElement>();
+                foreach (var projectExport in projectExports)
                 {
-                    projectDependencyTransformResults.Add(ProjectDependencyTransform.Transform(projectExport));
-                }
-                catch (MigrationException unresolvedProjectReferenceException)
-                {
-                    if (!migratedXProjDependencyNames.Contains(projectExport.Library.Identity.Name))
+                    var projectExportName = projectExport.Library.Identity.Name;
+                    ProjectDependency projectDependency;
+
+                    if (!possibleProjectDependencies.TryGetValue(projectExportName, out projectDependency))
                     {
-                        throw unresolvedProjectReferenceException;
+                        if (projectExport.Library.Identity.Type.Equals(LibraryType.Project) 
+                            && !migratedXProjDependencyNames.Contains(projectExportName))
+                        {
+                            MigrationErrorCodes
+                                .MIGRATE1014($"Unresolved project dependency ({projectExportName})").Throw();
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
 
-                    MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: Ignoring unresolved project reference {projectExport.Library.Identity.Name} satisfied by xproj to csproj ProjectReference");
+                    projectDependencyTransformResults.Add(ProjectDependencyTransform.Transform(projectDependency));
+                }
+                
+                if (projectDependencyTransformResults.Any())
+                {
+                    AddProjectDependenciesToNewItemGroup(
+                        outputMSBuildProject.AddItemGroup(), 
+                        projectDependencyTransformResults, 
+                        projectContext.TargetFramework);
                 }
             }
             
-            if (projectDependencyTransformResults.Any())
-            {
-                AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
-                AddProjectDependenciesToNewItemGroup(outputMSBuildProject.AddItemGroup(), projectDependencyTransformResults);
-            }
         }
 
-        private void AddProjectDependenciesToNewItemGroup(ProjectItemGroupElement itemGroup, IEnumerable<ProjectItemElement> projectDependencyTransformResults)
+        private void AddProjectDependenciesToNewItemGroup(
+            ProjectItemGroupElement itemGroup, 
+            IEnumerable<ProjectItemElement> projectDependencyTransformResults,
+            NuGetFramework targetFramework)
         {
+            if (targetFramework != null)
+            {
+                itemGroup.Condition = $" '$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '{targetFramework.DotNetFrameworkName}' ";
+            }
+
             foreach (var projectDependencyTransformResult in projectDependencyTransformResults)
             {
                 _transformApplicator.Execute(projectDependencyTransformResult, itemGroup);
@@ -132,25 +169,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             "true",
             b => true);
 
-        private AddItemTransform<LibraryExport> ProjectDependencyTransform => new AddItemTransform<LibraryExport>(
+        private AddItemTransform<ProjectDependency> ProjectDependencyTransform => new AddItemTransform<ProjectDependency>(
             "ProjectReference",
-            export => 
+            dep => 
             {
-                if (!export.Library.Resolved)
-                {
-                    MigrationErrorCodes.MIGRATE1014(
-                        $"Unresolved project dependency ({export.Library.Identity.Name})").Throw();
-                }
-
-                var projectFile = ((ProjectDescription)export.Library).Project.ProjectFilePath;
-                var projectDir = Path.GetDirectoryName(projectFile);
+                var projectDir = Path.GetDirectoryName(dep.ProjectFilePath);
                 var migratedProjectFileName = Path.GetFileName(projectDir) + ".csproj";
                 var relativeProjectDir = PathUtility.GetRelativePath(_projectDirectory + "/", projectDir);
 
                 return Path.Combine(relativeProjectDir, migratedProjectFileName);
             },
-            export => "",
-            export => true);
+            dep => "",
+            dep => true);
 
         private AddItemTransform<string> ProjectDependencyStringTransform => new AddItemTransform<string>(
             "ProjectReference",
