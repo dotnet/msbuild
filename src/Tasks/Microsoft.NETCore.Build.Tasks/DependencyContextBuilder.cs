@@ -25,8 +25,7 @@ namespace Microsoft.NETCore.Build.Tasks
         }
 
         public DependencyContext Build(
-            string projectName,
-            string projectVersion,
+            SingleProjectInfo mainProjectInfo,
             CompilationOptions compilationOptions,
             LockFile lockFile,
             NuGetFramework framework,
@@ -54,8 +53,7 @@ namespace Microsoft.NETCore.Build.Tasks
             var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
 
             RuntimeLibrary projectRuntimeLibrary = GetProjectRuntimeLibrary(
-                projectName,
-                projectVersion,
+                mainProjectInfo,
                 lockFile,
                 lockFileTarget,
                 dependencyLookup);
@@ -67,8 +65,7 @@ namespace Microsoft.NETCore.Build.Tasks
             if (includeCompilationLibraries)
             {
                 CompilationLibrary projectCompilationLibrary = GetProjectCompilationLibrary(
-                    projectName,
-                    projectVersion,
+                    mainProjectInfo,
                     lockFile,
                     lockFileTarget,
                     dependencyLookup);
@@ -144,33 +141,35 @@ namespace Microsoft.NETCore.Build.Tasks
         }
 
         private RuntimeLibrary GetProjectRuntimeLibrary(
-            string projectName,
-            string projectVersion,
+            SingleProjectInfo projectInfo,
             LockFile lockFile,
             LockFileTarget lockFileTarget,
             Dictionary<string, Dependency> dependencyLookup)
         {
-            // TODO: What other information about the current project needs to be included here? - https://github.com/dotnet/sdk/issues/12
 
-            RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, $"{projectName}.dll") };
+            RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.GetOutputName()) };
 
             List<Dependency> dependencies = GetProjectDependencies(lockFile, lockFileTarget, dependencyLookup);
 
+            ResourceAssembly[] resourceAssemblies = projectInfo
+                .ResourceAssemblies
+                .Select(r => new ResourceAssembly(r.RelativePath, r.Culture))
+                .ToArray();
+
             return new RuntimeLibrary(
                 type: "project",
-                name: projectName,
-                version: projectVersion,
+                name: projectInfo.Name,
+                version: projectInfo.Version,
                 hash: string.Empty,
                 runtimeAssemblyGroups: runtimeAssemblyGroups,
                 nativeLibraryGroups: new RuntimeAssetGroup[] { },
-                resourceAssemblies: new ResourceAssembly[] { },
+                resourceAssemblies: resourceAssemblies,
                 dependencies: dependencies.ToArray(),
                 serviceable: false);
         }
 
         private CompilationLibrary GetProjectCompilationLibrary(
-            string projectName,
-            string projectVersion,
+            SingleProjectInfo projectInfo,
             LockFile lockFile,
             LockFileTarget lockFileTarget,
             Dictionary<string, Dependency> dependencyLookup)
@@ -179,10 +178,10 @@ namespace Microsoft.NETCore.Build.Tasks
 
             return new CompilationLibrary(
                 type: "project",
-                name: projectName,
-                version: projectVersion,
+                name: projectInfo.Name,
+                version: projectInfo.Version,
                 hash: string.Empty,
-                assemblies: new[] { $"{projectName}.dll" },
+                assemblies: new[] { projectInfo.GetOutputName() },
                 dependencies: dependencies.ToArray(),
                 serviceable: false);
         }

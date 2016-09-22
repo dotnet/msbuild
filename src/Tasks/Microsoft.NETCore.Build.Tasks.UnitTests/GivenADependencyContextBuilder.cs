@@ -27,13 +27,17 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
             string mainProjectVersion,
             CompilationOptions compilationOptions,
             string baselineFileName,
-            string runtime)
+            string runtime,
+            ITaskItem[] satelliteAssemblies)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
-
-            DependencyContext dependencyContext = new DependencyContextBuilder().Build(
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(
                 mainProjectName,
                 mainProjectVersion,
+                satelliteAssemblies ?? new ITaskItem[] { });
+
+            DependencyContext dependencyContext = new DependencyContextBuilder().Build(
+                mainProject,
                 compilationOptions,
                 lockFile,
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
@@ -81,13 +85,32 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
                     emitEntryPoint: true,
                     generateXmlDocumentation: true);
 
+                ITaskItem[] dotnetNewSatelliteAssemblies = new ITaskItem[]
+                {
+                    new MockTaskItem(
+                        @"de\dotnet.new.resources.dll",
+                        new Dictionary<string, string>
+                        {
+                            { "Culture", "de" },
+                            { "TargetPath", @"de\dotnet.new.resources.dll" },
+                        }),
+                    new MockTaskItem(
+                        @"fr\dotnet.new.resources.dll",
+                        new Dictionary<string, string>
+                        {
+                            { "Culture", "fr" },
+                            { "TargetPath", @"fr\dotnet.new.resources.dll" },
+                        }),
+                };
+
                 return new[]
                 {
-                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new", null },
-                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies", null },
-                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions", null },
-                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.portable", null },
-                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.osx", "osx.10.11-x64" },
+                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new", null, null},
+                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new.resources", null, dotnetNewSatelliteAssemblies },
+                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies", null, null },
+                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions", null, null},
+                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.portable", null, null },
+                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.osx", "osx.10.11-x64", null },
                 };
             }
         }
