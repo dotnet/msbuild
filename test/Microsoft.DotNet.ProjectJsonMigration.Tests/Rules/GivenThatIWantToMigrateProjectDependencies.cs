@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj);
+            var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
             new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
@@ -81,6 +81,38 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             Action action = () => new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
             action.ShouldThrow<Exception>()
                 .Where(e => e.Message.Contains("MIGRATE1014::Unresolved Dependency: Unresolved project dependency (TestLibrary)"));
+        }
+
+        [Theory]
+        [InlineData(@"some/path/to.cSproj", new [] { @"some/path/to.cSproj" })]
+        [InlineData(@"to.CSPROJ",new [] { @"to.CSPROJ" })]
+        public void It_migrates_csproj_ProjectReference_in_xproj(string projectReference, string[] expectedMigratedReferences)
+        {
+            var xproj = ProjectRootElement.Create();
+            xproj.AddItem("ProjectReference", projectReference);
+
+            var projectReferenceName = Path.GetFileNameWithoutExtension(projectReference);
+
+            var projectJson = @"
+                {
+                    ""dependencies"": {" +
+                        $"\"{projectReferenceName}\"" + @": {
+                            ""target"" : ""project""
+                        }
+                    }
+                }
+            ";
+            Console.WriteLine(projectJson);
+
+            var testDirectory = Temp.CreateDirectory().Path;
+            var migratedProj = TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
+                {
+                    new MigrateProjectDependenciesRule()
+                }, projectJson, testDirectory, xproj);
+
+            var migratedProjectReferenceItems = migratedProj.Items.Where(i => i.ItemType == "ProjectReference");
+            migratedProjectReferenceItems.Should().HaveCount(expectedMigratedReferences.Length);
+            migratedProjectReferenceItems.Select(m => m.Include).Should().BeEquivalentTo(expectedMigratedReferences);
         }
     }
 }

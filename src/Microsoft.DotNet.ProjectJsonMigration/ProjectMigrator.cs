@@ -46,6 +46,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private MigrationRuleInputs ComputeMigrationRuleInputs(MigrationSettings migrationSettings)
         {
             var projectContexts = ProjectContext.CreateContextForEachFramework(migrationSettings.ProjectDirectory);
+            var xprojFile = migrationSettings.ProjectXProjFilePath ?? FindXprojFile(migrationSettings.ProjectDirectory);
+            
+            ProjectRootElement xproj = null;
+            if (xprojFile != null)
+            {
+                xproj = ProjectRootElement.Open(xprojFile);
+            }
 
             var templateMSBuildProject = migrationSettings.MSBuildProjectTemplate;
             if (templateMSBuildProject == null)
@@ -56,7 +63,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var propertyGroup = templateMSBuildProject.AddPropertyGroup();
             var itemGroup = templateMSBuildProject.AddItemGroup();
 
-            return new MigrationRuleInputs(projectContexts, templateMSBuildProject, itemGroup, propertyGroup);
+            return new MigrationRuleInputs(projectContexts, templateMSBuildProject, itemGroup, propertyGroup, xproj);
+        }
+
+        private string FindXprojFile(string projectDirectory)
+        {
+            var allXprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj", SearchOption.TopDirectoryOnly);
+
+            if (allXprojFiles.Count() > 1)
+            {
+                throw new Exception("Multiple xproj files found in {projectDirectory}, please specify which to use");
+            }
+
+            return allXprojFiles.FirstOrDefault();
         }
 
         private void VerifyInputs(MigrationRuleInputs migrationRuleInputs, MigrationSettings migrationSettings)

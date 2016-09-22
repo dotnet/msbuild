@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,17 +28,75 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             _projectDirectory = migrationSettings.ProjectDirectory;
 
-            var csproj = migrationRuleInputs.OutputMSBuildProject;
+
+            var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationSettings, migrationRuleInputs);
+            var migratedXProjDependencyNames = migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(p));
+
+            MigrateProjectJsonProjectDependencies(migrationSettings, migrationRuleInputs, migratedXProjDependencyNames);
+        }
+
+        private IEnumerable<string> MigrateXProjProjectDependencies(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
+        {
+            var xproj = migrationRuleInputs.ProjectXproj;
+            if (xproj == null)
+            {
+                MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: No xproj file given.");
+                return Enumerable.Empty<string>();
+            }
+
+            var projectReferenceItems = xproj.Items.Where(i => i.ItemType == "ProjectReference");
+            
+            IEnumerable<string> projectReferences = new List<string>();
+            foreach (var projectReferenceItem in projectReferenceItems)
+            {
+                projectReferences = projectReferences.Union(projectReferenceItem.Includes());
+            }
+
+            var csprojReferences = projectReferences
+                .Where(p => string.Equals(Path.GetExtension(p), ".csproj", StringComparison.OrdinalIgnoreCase));
+            
+            MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: Migrating {csprojReferences.Count()} xproj to csproj references");
+
+            var csprojReferenceTransforms = csprojReferences.Select(r => ProjectDependencyStringTransform.Transform(r));
+            foreach (var csprojReferenceTransform in csprojReferenceTransforms)
+            {
+                _transformApplicator.Execute(csprojReferenceTransform, migrationRuleInputs.CommonItemGroup);
+            }
+
+            return csprojReferences;
+        }
+
+        public void MigrateProjectJsonProjectDependencies(
+            MigrationSettings migrationSettings, 
+            MigrationRuleInputs migrationRuleInputs, 
+            IEnumerable<string> migratedXProjDependencyNames)
+        {
+            var outputMSBuildProject = migrationRuleInputs.OutputMSBuildProject;
             var projectContext = migrationRuleInputs.DefaultProjectContext;
             var projectExports = projectContext.CreateExporter("_").GetDependencies(LibraryType.Project);
 
-            var projectDependencyTransformResults =
-                projectExports.Select(projectExport => ProjectDependencyTransform.Transform(projectExport));
+            var projectDependencyTransformResults = new List<ProjectItemElement>();
+            foreach (var projectExport in projectExports)
+            {
+                try
+                {
+                    projectDependencyTransformResults.Add(ProjectDependencyTransform.Transform(projectExport));
+                }
+                catch (MigrationException unresolvedProjectReferenceException)
+                {
+                    if (!migratedXProjDependencyNames.Contains(projectExport.Library.Identity.Name))
+                    {
+                        throw unresolvedProjectReferenceException;
+                    }
 
+                    MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: Ignoring unresolved project reference {projectExport.Library.Identity.Name} satisfied by xproj to csproj ProjectReference");
+                }
+            }
+            
             if (projectDependencyTransformResults.Any())
             {
                 AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
-                AddProjectDependenciesToNewItemGroup(csproj.AddItemGroup(), projectDependencyTransformResults);
+                AddProjectDependenciesToNewItemGroup(outputMSBuildProject.AddItemGroup(), projectDependencyTransformResults);
             }
         }
 
@@ -92,5 +151,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             },
             export => "",
             export => true);
+
+        private AddItemTransform<string> ProjectDependencyStringTransform => new AddItemTransform<string>(
+            "ProjectReference",
+            path => path,
+            path => "",
+            path => true);
     }
 }

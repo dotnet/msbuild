@@ -15,21 +15,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class MigrationSettings
     {
+        public string ProjectXProjFilePath { get; }
         public string ProjectDirectory { get; }
         public string OutputDirectory { get; }
         public string SdkPackageVersion { get; }
         public ProjectRootElement MSBuildProjectTemplate { get; }
-
+        
         public MigrationSettings(
             string projectDirectory,
             string outputDirectory,
             string sdkPackageVersion,
-            ProjectRootElement msBuildProjectTemplate)
+            ProjectRootElement msBuildProjectTemplate,
+            string projectXprojFilePath=null)
         {
             ProjectDirectory = projectDirectory;
             OutputDirectory = outputDirectory;
             SdkPackageVersion = sdkPackageVersion;
             MSBuildProjectTemplate = msBuildProjectTemplate;
+            ProjectXProjFilePath = projectXprojFilePath;
         }
     }
 }

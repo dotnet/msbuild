@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             CommandOption output = app.Option("-o|--output", "Directory to output migrated project to. The default is the project directory", CommandOptionType.SingleValue);
             CommandOption project = app.Option("-p|--project", "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory", CommandOptionType.SingleValue);
             CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new -t msbuild", CommandOptionType.SingleValue);
+            CommandOption xprojFile = app.Option("-x|--xproj-file", "The path to the xproj file to use. Required when there is more than one xproj in a project directory.", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -31,7 +32,8 @@ namespace Microsoft.DotNet.Tools.Migrate
                     template.Value(), 
                     output.Value(), 
                     project.Value(), 
-                    sdkVersion.Value());
+                    sdkVersion.Value(),
+                    xprojFile.Value());
 
                 return migrateCommand.Execute();
             });
