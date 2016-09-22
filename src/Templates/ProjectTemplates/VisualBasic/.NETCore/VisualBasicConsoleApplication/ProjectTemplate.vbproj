@@ -1,7 +1,9 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Temporarily simulate an inner build until cross-targeting support for VS is checked in. This needs to be 
        above the import of the props because the SDK.props will only get imported if the TargetFramework is set.-->
-  <TargetFramework>netcoreapp1.0</TargetFramework>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
   
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   
