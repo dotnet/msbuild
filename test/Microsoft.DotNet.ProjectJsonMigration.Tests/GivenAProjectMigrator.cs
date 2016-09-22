@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void It_copies_ProjectDirectory_contents_to_OutputDirectory_when_the_directories_are_different()
         {
             var testProjectDirectory = TestAssetsManager.CreateTestInstance("TestAppSimple", callingMethod: "z")
-                .WithLockFiles().Path;
+                .Path;
             var outputDirectory = Temp.CreateDirectory().Path;
 
             var projectDirectoryRelativeFilePaths = EnumerateFilesWithRelativePath(testProjectDirectory);
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var testProjectDirectory =
                 TestAssetsManager.CreateTestInstance("TestLibraryWithDeprecatedProjectFile", callingMethod: "z")
-                    .WithLockFiles().Path;
+                    .Path;
 
             var mockProj = ProjectRootElement.Create();
             var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, "1.0.0", mockProj);
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var testProjectDirectory =
                 TestAssetsManager.CreateTestInstance("FSharpTestProjects/TestApp", callingMethod: "z")
-                    .WithLockFiles().Path;
+                    .Path;
 
             var mockProj = ProjectRootElement.Create();
             var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, "1.0.0", mockProj);

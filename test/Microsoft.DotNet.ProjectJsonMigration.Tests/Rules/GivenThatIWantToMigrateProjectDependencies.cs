@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void If_a_project_dependency_is_present_DesignTimeAutoUnify_and_AutoUnify_are_present()
         {
             var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: "p").WithLockFiles().Path;
+                TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: "p").Path;
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
             var libDirectory = Path.Combine(solutionDirectory, "TestLibrary");

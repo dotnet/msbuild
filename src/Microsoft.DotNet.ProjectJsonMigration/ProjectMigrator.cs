@@ -92,12 +92,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var defaultProjectContext = projectContexts.First();
 
-            if (defaultProjectContext.LockFile == null)
-            {
-                MigrationErrorCodes.MIGRATE1012(
-                    $"project.lock.json not found in {projectDirectory}, please run dotnet restore before doing migration").Throw();
-            }
-
             var diagnostics = defaultProjectContext.ProjectFile.Diagnostics;
             if (diagnostics.Any())
             {
