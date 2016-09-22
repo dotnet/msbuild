@@ -77,7 +77,12 @@ namespace Microsoft.Build.Shared
                 ()=> TryFromFolder(msbuildFromVisualStudioRoot, runningTests, runningInVisualStudio, visualStudioPath),
 
                 // Try from the current directory
-                () => TryFromFolder(currentDirectory, runningTests, runningInVisualStudio, visualStudioPath)
+                () => TryFromFolder(currentDirectory, runningTests, runningInVisualStudio, visualStudioPath),
+
+#if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
+                // Try the base directory that the assembly resolver uses to probe for assemblies.
+                () => TryFromFolder(AppContext.BaseDirectory, runningTests, runningInVisualStudio, visualStudioPath)
+#endif
             };
 
             foreach (var location in possibleLocations)
