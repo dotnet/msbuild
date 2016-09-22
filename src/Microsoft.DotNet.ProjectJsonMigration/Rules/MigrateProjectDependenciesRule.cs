@@ -37,21 +37,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationSettings, migrationRuleInputs);
             var migratedXProjDependencyNames = migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(p));
 
-
             AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
             MigrateProjectJsonProjectDependencies(
                 possibleProjectDependencies, 
                 migrationRuleInputs.ProjectContexts, 
                 migratedXProjDependencyNames, 
                 migrationRuleInputs.OutputMSBuildProject);
-        }
-
-        private void ThrowIfUnresolvedDependencies(IEnumerable<ProjectContext> projectContexts, List<ProjectDependency> projectDependencies, IEnumerable<string> migratedXProjDependencyNames)
-        {
-            foreach (var projectContext in projectContexts)
-            {
-                var projectExports = projectContext.CreateExporter("_").GetDependencies(LibraryType.Project);
-            }
         }
 
         private IEnumerable<string> MigrateXProjProjectDependencies(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
@@ -63,26 +54,38 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 return Enumerable.Empty<string>();
             }
 
-            var projectReferenceItems = xproj.Items.Where(i => i.ItemType == "ProjectReference");
-            
-            IEnumerable<string> projectReferences = new List<string>();
-            foreach (var projectReferenceItem in projectReferenceItems)
+            var csprojTransformedReferences = new List<ProjectItemElement>();
+
+            var csprojReferenceItems = xproj.Items
+                .Where(i => i.ItemType == "ProjectReference")
+                .Where(p => 
+                    p.Includes().Any(
+                        include => string.Equals(Path.GetExtension(include), ".csproj", StringComparison.OrdinalIgnoreCase)));
+
+            foreach (var csprojReferenceItem in csprojReferenceItems)
             {
-                projectReferences = projectReferences.Union(projectReferenceItem.Includes());
+                var conditionChain = csprojReferenceItem.ConditionChain();
+                var condition = string.Join(" and ", conditionChain);
+
+                var referenceInclude = string.Join(";", csprojReferenceItem.Includes()
+                    .Where(include => 
+                        string.Equals(Path.GetExtension(include), ".csproj", StringComparison.OrdinalIgnoreCase)));
+
+                var transformItem = ProjectDependencyStringTransform.Transform(referenceInclude);
+                transformItem.Condition = condition; 
+
+                csprojTransformedReferences.Add(transformItem);
+            }
+                
+            
+            MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: Migrating {csprojTransformedReferences.Count()} xproj to csproj references");
+
+            foreach (var csprojTransformedReference in csprojTransformedReferences)
+            {
+                _transformApplicator.Execute(csprojTransformedReference, migrationRuleInputs.CommonItemGroup);
             }
 
-            var csprojReferences = projectReferences
-                .Where(p => string.Equals(Path.GetExtension(p), ".csproj", StringComparison.OrdinalIgnoreCase));
-            
-            MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: Migrating {csprojReferences.Count()} xproj to csproj references");
-
-            var csprojReferenceTransforms = csprojReferences.Select(r => ProjectDependencyStringTransform.Transform(r));
-            foreach (var csprojReferenceTransform in csprojReferenceTransforms)
-            {
-                _transformApplicator.Execute(csprojReferenceTransform, migrationRuleInputs.CommonItemGroup);
-            }
-
-            return csprojReferences;
+            return csprojTransformedReferences.SelectMany(r => r.Includes());
         }
 
         public void MigrateProjectJsonProjectDependencies(

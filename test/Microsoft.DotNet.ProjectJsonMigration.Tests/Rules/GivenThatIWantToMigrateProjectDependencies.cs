@@ -104,7 +104,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }
             ";
-            Console.WriteLine(projectJson);
 
             var testDirectory = Temp.CreateDirectory().Path;
             var migratedProj = TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
@@ -115,6 +114,106 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var migratedProjectReferenceItems = migratedProj.Items.Where(i => i.ItemType == "ProjectReference");
             migratedProjectReferenceItems.Should().HaveCount(expectedMigratedReferences.Length);
             migratedProjectReferenceItems.Select(m => m.Include).Should().BeEquivalentTo(expectedMigratedReferences);
+        }
+
+        public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference()
+        {
+            var projectReference = "some/to.csproj";
+            var xproj = ProjectRootElement.Create();
+            var csprojReferenceItem = xproj.AddItem("ProjectReference", projectReference);
+            csprojReferenceItem.Condition = " '$(Foo)' == 'bar' ";
+
+            var projectReferenceName = Path.GetFileNameWithoutExtension(projectReference);
+
+            var projectJson = @"
+                {
+                    ""dependencies"": {" +
+                        $"\"{projectReferenceName}\"" + @": {
+                            ""target"" : ""project""
+                        }
+                    }
+                }
+            ";
+
+            var testDirectory = Temp.CreateDirectory().Path;
+            var migratedProj = TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
+                {
+                    new MigrateProjectDependenciesRule()
+                }, projectJson, testDirectory, xproj);
+
+            var migratedProjectReferenceItems = migratedProj.Items.Where(i => i.ItemType == "ProjectReference");
+            migratedProjectReferenceItems.Should().HaveCount(1);
+
+            var migratedProjectReferenceItem = migratedProjectReferenceItems.First();
+            migratedProjectReferenceItem.Include.Should().Be(projectReference);
+            migratedProjectReferenceItem.Condition.Should().Be(" '$(Foo)' == 'bar' ");
+        }
+
+        public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference_parent()
+        {
+            var projectReference = "some/to.csproj";
+            var xproj = ProjectRootElement.Create();
+            var csprojReferenceItem = xproj.AddItem("ProjectReference", projectReference);
+            csprojReferenceItem.Parent.Condition = " '$(Foo)' == 'bar' ";
+
+            var projectReferenceName = Path.GetFileNameWithoutExtension(projectReference);
+
+            var projectJson = @"
+                {
+                    ""dependencies"": {" +
+                        $"\"{projectReferenceName}\"" + @": {
+                            ""target"" : ""project""
+                        }
+                    }
+                }
+            ";
+
+            var testDirectory = Temp.CreateDirectory().Path;
+            var migratedProj = TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
+                {
+                    new MigrateProjectDependenciesRule()
+                }, projectJson, testDirectory, xproj);
+
+            var migratedProjectReferenceItems = migratedProj.Items.Where(i => i.ItemType == "ProjectReference");
+            migratedProjectReferenceItems.Should().HaveCount(1);
+
+            var migratedProjectReferenceItem = migratedProjectReferenceItems.First();
+            migratedProjectReferenceItem.Include.Should().Be(projectReference);
+            migratedProjectReferenceItem.Condition.Should().Be(" '$(Foo)' == 'bar' ");
+        }
+
+        public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference_parent_and_item()
+        {
+            var projectReference = "some/to.csproj";
+            var xproj = ProjectRootElement.Create();
+            var csprojReferenceItem = xproj.AddItem("ProjectReference", projectReference);
+            csprojReferenceItem.Parent.Condition = " '$(Foo)' == 'bar' ";
+            csprojReferenceItem.Condition = " '$(Bar)' == 'foo' ";
+
+            var projectReferenceName = Path.GetFileNameWithoutExtension(projectReference);
+
+            var projectJson = @"
+                {
+                    ""dependencies"": {" +
+                        $"\"{projectReferenceName}\"" + @": {
+                            ""target"" : ""project""
+                        }
+                    }
+                }
+            ";
+
+            var testDirectory = Temp.CreateDirectory().Path;
+            var migratedProj = TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
+                {
+                    new MigrateProjectDependenciesRule()
+                }, projectJson, testDirectory, xproj);
+
+            var migratedProjectReferenceItems = migratedProj.Items.Where(i => i.ItemType == "ProjectReference");
+            migratedProjectReferenceItems.Should().HaveCount(1);
+
+            var migratedProjectReferenceItem = migratedProjectReferenceItems.First();
+            migratedProjectReferenceItem.Include.Should().Be(projectReference);
+            migratedProjectReferenceItem.Condition.Should().Be(" '$(Foo)' == 'bar'  and  '$(Bar)' == 'foo'");
         }
     }
 }
