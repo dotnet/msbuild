@@ -3,15 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli;
 using System.Linq;
 using System.IO;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Tools.Common;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
