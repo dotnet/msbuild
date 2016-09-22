@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Loader;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
+using Microsoft.DotNet.Tools.Build3;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
 using Microsoft.DotNet.Tools.Help;
@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Cli
             ["run"] = RunCommand.Run,
             ["test"] = TestCommand.Run,
             ["build3"] = Build3Command.Run,
+            ["msbuild"] = MSBuildCommand.Run,
             ["run3"] = Run3Command.Run,
             ["restore3"] = Restore3Command.Run,
             ["vstest"] = VSTestCommand.Run,
