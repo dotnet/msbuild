@@ -1,13 +1,12 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Temporarily simulate an inner build until cross-targeting support for VS is checked in. This needs to be 
+       above the import of the props because the SDK.props will only get imported if the TargetFramework is set.-->
+  <TargetFramework>netstandard1.4</TargetFramework>
+
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   
   <PropertyGroup>
     <TargetFrameworks>netstandard1.4</TargetFrameworks>
-
-    <!-- Temporarily simulate an inner build until cross-targeting is checked in. -->
-    <TargetFramework>netstandard1.4</TargetFramework>
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.4</TargetFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
