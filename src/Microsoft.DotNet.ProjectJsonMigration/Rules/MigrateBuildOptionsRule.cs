@@ -9,12 +9,9 @@ using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
 using Newtonsoft.Json.Linq;
-using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    // TODO: Should All build options be protected by a configuration condition?
-    //       This will prevent the entire merge issue altogether and sidesteps the problem of having a duplicate include with different excludes...
     public class MigrateBuildOptionsRule : IMigrationRule
     {
         private AddPropertyTransform<CommonCompilerOptions>[] EmitEntryPointTransforms

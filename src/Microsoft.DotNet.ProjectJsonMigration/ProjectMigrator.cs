@@ -3,15 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Cli;
 using System.Linq;
 using System.IO;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Tools.Common;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
@@ -46,6 +43,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private MigrationRuleInputs ComputeMigrationRuleInputs(MigrationSettings migrationSettings)
         {
             var projectContexts = ProjectContext.CreateContextForEachFramework(migrationSettings.ProjectDirectory);
+            var xprojFile = migrationSettings.ProjectXProjFilePath ?? FindXprojFile(migrationSettings.ProjectDirectory);
+            
+            ProjectRootElement xproj = null;
+            if (xprojFile != null)
+            {
+                xproj = ProjectRootElement.Open(xprojFile);
+            }
 
             var templateMSBuildProject = migrationSettings.MSBuildProjectTemplate;
             if (templateMSBuildProject == null)
@@ -56,7 +60,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var propertyGroup = templateMSBuildProject.AddPropertyGroup();
             var itemGroup = templateMSBuildProject.AddItemGroup();
 
-            return new MigrationRuleInputs(projectContexts, templateMSBuildProject, itemGroup, propertyGroup);
+            return new MigrationRuleInputs(projectContexts, templateMSBuildProject, itemGroup, propertyGroup, xproj);
+        }
+
+        private string FindXprojFile(string projectDirectory)
+        {
+            var allXprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj", SearchOption.TopDirectoryOnly);
+
+            if (allXprojFiles.Count() > 1)
+            {
+                MigrationErrorCodes
+                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
+                    .Throw();
+            }
+
+            return allXprojFiles.FirstOrDefault();
         }
 
         private void VerifyInputs(MigrationRuleInputs migrationRuleInputs, MigrationSettings migrationSettings)
@@ -72,12 +90,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
 
             var defaultProjectContext = projectContexts.First();
-
-            if (defaultProjectContext.LockFile == null)
-            {
-                MigrationErrorCodes.MIGRATE1012(
-                    $"project.lock.json not found in {projectDirectory}, please run dotnet restore before doing migration").Throw();
-            }
 
             var diagnostics = defaultProjectContext.ProjectFile.Diagnostics;
             if (diagnostics.Any())

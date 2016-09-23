@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
@@ -21,6 +24,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public static Func<string, MigrationError> MIGRATE1016
             => (message) => new MigrationError(nameof(MIGRATE1016), "Unsupported Script Variable", message);
+
+        public static Func<string, MigrationError> MIGRATE1017
+            => (message) => new MigrationError(nameof(MIGRATE1017), "Multiple Xproj Files", message);
 
         // Potentially Temporary (Point in Time) Errors
         public static Func<string, MigrationError> MIGRATE20011
