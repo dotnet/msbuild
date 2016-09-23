@@ -5253,7 +5253,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
   <ItemGroup Condition="'$(DocumentationFile)'!='' and '$(OutputType)' != 'winmdobj'">
     <DocumentationProjectOutputGroupOutput Include="@(DocFileItem->'%(FullPath)')">
-      <FinalOutputPath>@(FinalDocFile)</FinalOutputPath>
+      <FinalOutputPath>@(FinalDocFile->'%(FullPath)')</FinalOutputPath>
       <IsKeyOutput>true</IsKeyOutput>
       <TargetPath>@(DocFileItem->'%(Filename)%(Extension)')</TargetPath>
     </DocumentationProjectOutputGroupOutput>
