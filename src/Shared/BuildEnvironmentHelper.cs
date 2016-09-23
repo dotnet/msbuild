@@ -81,6 +81,8 @@ namespace Microsoft.Build.Shared
 
 #if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
                 // Try the base directory that the assembly resolver uses to probe for assemblies.
+                // Under certain scenarios the assemblies are loaded from spurious locations like the NuGet package cache
+                // but the toolset files are copied to the app's directory via "contentFiles".
                 () => TryFromFolder(AppContext.BaseDirectory, runningTests, runningInVisualStudio, visualStudioPath)
 #endif
             };
