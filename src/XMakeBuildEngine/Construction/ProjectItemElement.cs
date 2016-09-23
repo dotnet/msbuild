@@ -345,11 +345,17 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue)
         {
+            return AddMetadata(name, unevaluatedValue, false);
+        }
+
+        public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(name, "name");
             ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, "unevaluatedValue");
 
             ProjectMetadataElement metadata = ContainingProject.CreateMetadataElement(name);
             metadata.Value = unevaluatedValue;
+            metadata.ExpressedAsAttribute = expressAsAttribute;
 
             AppendChild(metadata);
 

@@ -237,6 +237,48 @@ namespace Microsoft.Build.UnitTests.OM.Construction
            );
         }
 
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i include='i1'/>
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i include='i1'/>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i Include='i1' exclude='i2' />
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i Include='i1' exclude='i2' />
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadInvalidItemAttributeCasing(string project)
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            }
+           );
+        }
+
         /// <summary>
         /// Basic reading of items
         /// </summary>
@@ -263,6 +305,24 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                                 <i2 Include='i' Exclude='j'>
                                     <m2>v2</m2>
                                 </i2>
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i1 Include='i' m1='v1' />
+                            <i2 Include='i' Exclude='j' m2='v2' />
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i' m1='v1' />
+                                <i2 Include='i' Exclude='j' m2='v2' />
                             </ItemGroup>
                         </Target>
                     </Project>
