@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         private static string GetRunCscPath()
         {
-            var scriptExtension = RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows ? ".cmd" : ".sh";
+            var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : ".sh";
             return Path.Combine(AppContext.BaseDirectory, $"RunCsc{scriptExtension}");
         }
     }
