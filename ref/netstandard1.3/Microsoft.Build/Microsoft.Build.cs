@@ -697,6 +697,7 @@ namespace Microsoft.Build.Evaluation
         Default = 0,
         IgnoreMissingImports = 1,
         RecordDuplicateButNotCircularImports = 2,
+        RecordEvaluatedItemElements = 8,
         RejectCircularImports = 4,
     }
     [System.Diagnostics.DebuggerDisplayAttribute("{Name}={EvaluatedValue} [{_xml.Value}]")]
