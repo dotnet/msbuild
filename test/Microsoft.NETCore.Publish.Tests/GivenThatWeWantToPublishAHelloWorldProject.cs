@@ -27,8 +27,9 @@ namespace Microsoft.NETCore.Publish.Tests
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .WithSource();
+
+            helloWorldAsset.Restore(helloWorldAsset.TestRoot, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -59,8 +60,9 @@ namespace Microsoft.NETCore.Publish.Tests
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .AsSelfContained()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .AsSelfContained();
+
+            helloWorldAsset.Restore(helloWorldAsset.TestRoot, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={RuntimeEnvironment.GetRuntimeIdentifier()}");

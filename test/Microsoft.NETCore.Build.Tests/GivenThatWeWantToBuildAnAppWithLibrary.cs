@@ -23,10 +23,11 @@ namespace Microsoft.NETCore.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
-                .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+
+            testAsset.Restore(appProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
             buildCommand

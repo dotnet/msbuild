@@ -21,10 +21,11 @@ namespace Microsoft.NETCore.Publish.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CompilationContext", "PreserveCompilationContext")
-                .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+
+            testAsset.Restore(appProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
 

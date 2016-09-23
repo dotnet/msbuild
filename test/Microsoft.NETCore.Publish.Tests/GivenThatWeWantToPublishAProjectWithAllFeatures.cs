@@ -19,10 +19,11 @@ namespace Microsoft.NETCore.Publish.Tests
         {
             TestAsset testAsset = _testAssetsManager
                 .CopyTestAsset("KitchenSink")
-                .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+            
+            testAsset.Restore(appProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
             publishCommand
