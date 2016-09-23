@@ -3,7 +3,9 @@
 
 using System;
 using System.Globalization;
+#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif

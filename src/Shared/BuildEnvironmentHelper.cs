@@ -43,6 +43,7 @@ namespace Microsoft.Build.Shared
             var processNameCurrentProcess = s_getProcessFromRunningProcess();
             var executingAssembly = s_getExecutingAssmblyPath();
             var currentDirectory = s_getCurrentDirectory();
+            var appContextBaseDirectory = s_getAppContextBaseDirectory();
 
 
             // Check if our current process name is in the list of own test runners
@@ -63,12 +64,12 @@ namespace Microsoft.Build.Shared
 
             var possibleLocations = new Func<BuildEnvironment>[]
             {
+                // Check explicit %MSBUILD_EXE_PATH% environment variable.
+                () => TryFromEnvironmentVariable(runningTests, runningInVisualStudio, visualStudioPath),
+
                 // See if we're running from MSBuild.exe
                 () => TryFromCurrentProcess(processNameCommandLine, runningTests, runningInVisualStudio, visualStudioPath),
                 () => TryFromCurrentProcess(processNameCurrentProcess, runningTests, runningInVisualStudio, visualStudioPath),
-
-                // Check explicit %MSBUILD_EXE_PATH% environment variable.
-                () => TryFromEnvironmentVariable(runningTests, runningInVisualStudio, visualStudioPath),
 
                 // Try from our current executing assembly (e.g. path to Microsoft.Build.dll)
                 () => TryFromFolder(Path.GetDirectoryName(executingAssembly), runningTests, runningInVisualStudio, visualStudioPath),
@@ -76,8 +77,15 @@ namespace Microsoft.Build.Shared
                 // Try based on the Visual Studio Root
                 ()=> TryFromFolder(msbuildFromVisualStudioRoot, runningTests, runningInVisualStudio, visualStudioPath),
 
+#if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
+                // Try the base directory that the assembly resolver uses to probe for assemblies.
+                // Under certain scenarios the assemblies are loaded from spurious locations like the NuGet package cache
+                // but the toolset files are copied to the app's directory via "contentFiles".
+                () => TryFromFolder(appContextBaseDirectory, runningTests, runningInVisualStudio, visualStudioPath),
+#endif
+
                 // Try from the current directory
-                () => TryFromFolder(currentDirectory, runningTests, runningInVisualStudio, visualStudioPath)
+                () => TryFromFolder(currentDirectory, runningTests, runningInVisualStudio, visualStudioPath),
             };
 
             foreach (var location in possibleLocations)
@@ -247,17 +255,27 @@ namespace Microsoft.Build.Shared
             return Directory.GetCurrentDirectory();
         }
 
+        private static string GetAppContextBaseDirectory()
+        {
+#if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
+            return AppContext.BaseDirectory;
+#else
+            return null;
+#endif
+        }
+
         /// <summary>
         /// Resets the current singleton instance (for testing).
         /// </summary>
         internal static void ResetInstance_ForUnitTestsOnly(Func<string> getProcessFromCommandLine = null,
             Func<string> getProcessFromRunningProcess = null, Func<string> getExecutingAssmblyPath = null,
-            Func<string> getCurrentDirectory = null)
+            Func<string> getCurrentDirectory = null, Func<string> getAppContextBaseDirectory = null)
         {
             s_getProcessFromCommandLine = getProcessFromCommandLine ?? GetProcessFromCommandLine;
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssmblyPath = getExecutingAssmblyPath ?? GetExecutingAssmblyPath;
             s_getCurrentDirectory = getCurrentDirectory ?? GetCurrentDirectory;
+            s_getAppContextBaseDirectory = getAppContextBaseDirectory ?? GetAppContextBaseDirectory;
 
             BuildEnvironmentHelperSingleton.s_instance = Initialize();
         }
@@ -266,6 +284,7 @@ namespace Microsoft.Build.Shared
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssmblyPath = GetExecutingAssmblyPath;
         private static Func<string> s_getCurrentDirectory = GetCurrentDirectory;
+        private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
 
         private static class BuildEnvironmentHelperSingleton
         {

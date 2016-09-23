@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void GetGoodSDKs()
         {
             try
@@ -348,7 +348,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
 
                 Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
                 Assert.True(
-                    extensionSDKs["FlutterShy, Version=1.0"].Equals(
+                    extensionSDKs["MyAssembly, Version=1.0"].Equals(
                         Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
                         + Path.DirectorySeparatorChar,
@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                         StringComparison.OrdinalIgnoreCase));
                 Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
                 Assert.True(
-                    extensionSDKs["FlutterShy, Version=3.0"].Equals(
+                    extensionSDKs["MyAssembly, Version=3.0"].Equals(
                         Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" })
                         + Path.DirectorySeparatorChar,
@@ -384,7 +384,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                         StringComparison.OrdinalIgnoreCase));
                 Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=6.0"));
                 Assert.True(
-                    extensionSDKs["FlutterShy, Version=6.0"].Equals(
+                    extensionSDKs["MyAssembly, Version=6.0"].Equals(
                         Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "6.0" })
                         + Path.DirectorySeparatorChar,
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void GetGoodSDKs2()
         {
             try
@@ -428,7 +428,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
 
                 Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
                 Assert.True(
-                    extensionSDKs["FlutterShy, Version=1.0"].Equals(
+                    extensionSDKs["MyAssembly, Version=1.0"].Equals(
                         Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
                         + Path.DirectorySeparatorChar,
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
 
                 Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=4.0"));
                 Assert.True(
-                    extensionSDKs["FlutterShy, Version=4.0"].Equals(
+                    extensionSDKs["MyAssembly, Version=4.0"].Equals(
                         Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "4.0" })
                         + Path.DirectorySeparatorChar,
