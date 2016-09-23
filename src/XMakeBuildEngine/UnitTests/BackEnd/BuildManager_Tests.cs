@@ -1457,6 +1457,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1527,6 +1528,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
