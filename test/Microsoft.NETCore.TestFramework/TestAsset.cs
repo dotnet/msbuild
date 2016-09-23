@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.NETCore.TestFramework.Assertions;
 using Microsoft.NETCore.TestFramework.Commands;
-using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 using Newtonsoft.Json.Linq;
+using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NETCore.TestFramework
 {
@@ -52,14 +54,8 @@ namespace Microsoft.NETCore.TestFramework
                 if (System.IO.Path.GetFileName(srcFile).Equals("project.json"))
                 {
                     var projectJson = JObject.Parse(File.ReadAllText(srcFile));
-                    var depNodes = projectJson
-                        .Descendants()
-                        .OfType<JProperty>()
-                        .Where(p => p.Name.Equals("dependencies"))
-                        .Descendants()
-                        .OfType<JProperty>()
-                        .Where(p => p.Name.Equals("Microsoft.NETCore.Sdk"));
-                    foreach (var dep in depNodes)
+                    var sdkDepNodes = GetDependencies(projectJson, "Microsoft.NETCore.Sdk");
+                    foreach (var dep in sdkDepNodes)
                     {
                         dep.Value = _buildVersion;
                     }
@@ -73,6 +69,40 @@ namespace Microsoft.NETCore.TestFramework
             }
 
             return this;
+        }
+
+        // Temporary until PackageReferences are listed in the .csproj
+        public TestAsset AsSelfContained()
+        {
+            string projectJsonFilePath = System.IO.Path.Combine(TestRoot, "project.json");
+
+            var projectJson = JObject.Parse(File.ReadAllText(projectJsonFilePath));
+
+            RemoveTypePlatform(projectJson);
+            AddCurrentRuntime(projectJson);
+
+            File.WriteAllText(projectJsonFilePath, projectJson.ToString());
+
+            return this;
+        }
+
+        private static void AddCurrentRuntime(JObject projectJson)
+        {
+            var runtimesObject =
+                new JObject(
+                    new JProperty(RuntimeEnvironment.GetRuntimeIdentifier(), new JObject())
+                );
+
+            projectJson.Add("runtimes", runtimesObject);
+        }
+
+        private static void RemoveTypePlatform(JObject projectJson)
+        {
+            var netCoreAppDep = GetDependencies(projectJson, "Microsoft.NETCore.App").FirstOrDefault()?.Value as JObject;
+            if (netCoreAppDep != null && netCoreAppDep["type"]?.Value<string>() == "platform")
+            {
+                netCoreAppDep.Remove("type");
+            }
         }
 
         public TestAsset Restore(params string[] args)
@@ -112,6 +142,17 @@ namespace Microsoft.NETCore.TestFramework
             path = path.ToLower();
             return path.Contains(binFolderWithTrailingSlash)
                   || path.Contains(objFolderWithTrailingSlash);
+        }
+
+        private static IEnumerable<JProperty> GetDependencies(JObject projectJson, string dependencyName)
+        {
+            return projectJson
+                .Descendants()
+                .OfType<JProperty>()
+                .Where(p => p.Name.Equals("dependencies"))
+                .Descendants()
+                .OfType<JProperty>()
+                .Where(p => p.Name.Equals(dependencyName, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

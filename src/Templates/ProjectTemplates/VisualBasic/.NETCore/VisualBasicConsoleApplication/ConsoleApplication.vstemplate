@@ -18,8 +18,7 @@
     <MaxFrameworkVersion>2.0</MaxFrameworkVersion>
   </TemplateData>
   <TemplateContent>
-    <Project File="ProjectTemplate.vbproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="project.json">project.json.template</ProjectItem>
+    <Project File="Project.vbproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Program.vb</ProjectItem>      
     </Project>
   </TemplateContent>  

@@ -18,8 +18,7 @@
     <MaxFrameworkVersion>2.0</MaxFrameworkVersion>
   </TemplateData>
   <TemplateContent>
-    <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="project.json">project.json.template</ProjectItem>
+    <Project File="Project.csproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
     </Project>
   </TemplateContent>

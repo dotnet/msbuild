@@ -73,7 +73,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
 
             // set of valid targets and packages
             HashSet<string> validTargets = new HashSet<string>(lockFile.Targets.Select(x => x.Name));
-            HashSet<string> validPackages = new HashSet<string>(lockFile.Libraries.Select(x => $"{x.Name}/{x.Version.ToString()}"));
+            HashSet<string> validPackages = new HashSet<string>(lockFile.Libraries.Select(x => $"{x.Name}/{x.Version.ToNormalizedString()}"));
 
             Func<ITaskItem[], bool> allValidParentTarget =
                 (items) => items.All(x => validTargets.Contains(x.GetMetadata(MetadataKeys.ParentTarget)));
@@ -411,6 +411,46 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ItRaisesAssetPropertiesToFileDependenciesMetadata()
+        {
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibBAllAssets, TargetLibC)
+                },
+                libraries: new string[] {
+                    LibADefn, LibBDefn, LibCDefn
+                },
+                projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent);
+
+            IEnumerable<ITaskItem> fileDeps;
+
+            // Assert asset properties are raised as metadata            
+            // Resource Assemblies
+            fileDeps = task.FileDependencies
+                .Where(t => t.ItemSpec == "LibB/1.2.3/lib/file/R2.resources.dll");
+            fileDeps.Count().Should().Be(1);
+            fileDeps.First().GetMetadata("locale").Should().Be("de");
+            
+            // Runtime Targets
+            fileDeps = task.FileDependencies
+                .Where(t => t.ItemSpec == "LibB/1.2.3/runtimes/osx/native/R3.dylib");
+            fileDeps.Count().Should().Be(1);
+            fileDeps.First().GetMetadata("assetType").Should().Be("native");
+            fileDeps.First().GetMetadata("rid").Should().Be("osx");
+
+            // Content Files
+            fileDeps = task.FileDependencies
+                .Where(t => t.ItemSpec == "LibB/1.2.3/contentFiles/any/images/C2.png");
+            fileDeps.Count().Should().Be(1);
+            fileDeps.First().GetMetadata("buildAction").Should().Be("EmbeddedResource");
+            fileDeps.First().GetMetadata("codeLanguage").Should().Be("any");
+            fileDeps.First().GetMetadata("copyToOutput").Should().Be("false");
+        }
+
+        [Fact]
         public void ItExcludesPlaceholderFiles()
         {
             string targetLibC = CreateTargetLibrary("LibC/1.2.3", "package",
@@ -611,51 +651,46 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void ItUsesMinVersionFromPackageDependencyRanges()
+        public void ItUsesResolvedPackageVersionFromSameTarget()
         {
             string targetLibC = CreateTargetLibrary("LibC/1.2.3", "package",
                 dependencies: new string[] {
-                    "\"Dep.Lib.Alpha\": \"4.0.0\"",
-                    "\"Dep.Lib.Beta\": \"[4.0.0]\"",
                     "\"Dep.Lib.Chi\": \"[4.0.0, 5.0.0)\"",
-                    "\"Dep.Lib.Delta\": \"[4.0.0)\"",
                 });
+
+            string targetLibChi1 = CreateTargetLibrary("Dep.Lib.Chi/4.0.0", "package");
+            string targetLibChi2 = CreateTargetLibrary("Dep.Lib.Chi/4.1.0", "package");
 
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
-                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, targetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, targetLibC, targetLibChi1),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibA, TargetLibB, targetLibC, targetLibChi2),
                 },
                 libraries: new string[] {
                     LibADefn, LibBDefn, LibCDefn,
-                    CreateLibrary("Dep.Lib.Alpha/4.0.0", "package", "lib/file/Alpha.dll"),
-                    CreateLibrary("Dep.Lib.Beta/4.0.0",  "package", "lib/file/Beta.dll"),
                     CreateLibrary("Dep.Lib.Chi/4.0.0",   "package", "lib/file/Chi.dll"),
-                    CreateLibrary("Dep.Lib.Delta/4.0.0", "package", "lib/file/Delta.dll"),
+                    CreateLibrary("Dep.Lib.Chi/4.1.0",   "package", "lib/file/Chi.dll"),
                 },
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
             var task = GetExecutedTaskFromContents(lockFileContent);
 
-            task.PackageDependencies
-                .Where(t => t.ItemSpec.StartsWith("Dep.Lib."))
-                .Count().Should().Be(4);
+            var chiDeps = task.PackageDependencies
+                .Where(t => t.ItemSpec.StartsWith("Dep.Lib.Chi"));
 
-            task.PackageDependencies
-                .Any(t => t.ItemSpec == "Dep.Lib.Alpha/4.0.0")
-                .Should().BeTrue();
+            chiDeps.Count().Should().Be(2);
 
-            task.PackageDependencies
-                .Any(t => t.ItemSpec == "Dep.Lib.Beta/4.0.0")
-                .Should().BeTrue();
+            // Dep.Lib.Chi has version range [4.0.0, 5.0.0), but the version assigned 
+            // is that of the library in the same target
 
-            task.PackageDependencies
-                .Any(t => t.ItemSpec == "Dep.Lib.Chi/4.0.0")
-                .Should().BeTrue();
+            chiDeps.Where(t => t.GetMetadata(MetadataKeys.ParentTarget) == ".NETCoreApp,Version=v1.0")
+                .Select(t => t.ItemSpec)
+                .First().Should().Be("Dep.Lib.Chi/4.0.0");
 
-            task.PackageDependencies
-                .Any(t => t.ItemSpec == "Dep.Lib.Delta/4.0.0")
-                .Should().BeTrue();
+            chiDeps.Where(t => t.GetMetadata(MetadataKeys.ParentTarget) == ".NETCoreApp,Version=v1.0/osx.10.11-x64")
+                .Select(t => t.ItemSpec)
+                .First().Should().Be("Dep.Lib.Chi/4.1.0");
         }
 
         private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)

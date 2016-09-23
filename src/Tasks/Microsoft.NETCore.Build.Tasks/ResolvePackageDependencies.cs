@@ -18,9 +18,8 @@ namespace Microsoft.NETCore.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageDependencies : Task
     {
-        private readonly List<string> _packageFolders = new List<string>();
-        private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>();
-        private readonly HashSet<string> _projectFileDependencies = new HashSet<string>();
+        private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _projectFileDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private IPackageResolver _packageResolver;
         private LockFile _lockFile;
 
@@ -200,11 +199,11 @@ namespace Microsoft.NETCore.Build.Tasks
             TaskItem item;
             foreach (var package in LockFile.Libraries)
             {
-                string packageId = $"{package.Name}/{package.Version.ToString()}";
+                string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
                 item = new TaskItem(packageId);
                 item.SetMetadata(MetadataKeys.Name, package.Name);
                 item.SetMetadata(MetadataKeys.Type, package.Type);
-                item.SetMetadata(MetadataKeys.Version, package.Version.ToString());
+                item.SetMetadata(MetadataKeys.Version, package.Version.ToNormalizedString());
 
                 item.SetMetadata(MetadataKeys.Path, package.Path ?? string.Empty);
 
@@ -268,7 +267,7 @@ namespace Microsoft.NETCore.Build.Tasks
             if (file.StartsWith("analyzers", StringComparison.Ordinal)
                 && Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase))
             {
-                var projectLanguage = GetLockFileLanguageName(ProjectLanguage);
+                var projectLanguage = NuGetUtils.GetLockFileLanguageName(ProjectLanguage);
 
                 if (projectLanguage == "cs" || projectLanguage == "vb")
                 {
@@ -282,16 +281,6 @@ namespace Microsoft.NETCore.Build.Tasks
             }
 
             return isAnalyzer;
-        }
-
-        private static string GetLockFileLanguageName(string projectLanguage)
-        {
-            switch (projectLanguage)
-            {
-                case "C#": return "cs";
-                case "F#": return "fs";
-                default: return projectLanguage?.ToLowerInvariant();
-            }
         }
 
         // get target definitions and package and file dependencies
@@ -316,10 +305,13 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private void GetPackageAndFileDependencies(LockFileTarget target)
         {
+            var resolvedPackageVersions = target.Libraries
+                .ToDictionary(pkg => pkg.Name, pkg => pkg.Version.ToNormalizedString(), StringComparer.OrdinalIgnoreCase);
+
             TaskItem item;
             foreach (var package in target.Libraries)
             {
-                string packageId = $"{package.Name}/{package.Version.ToString()}";
+                string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
 
                 if (_projectFileDependencies.Contains(package.Name))
                 {
@@ -331,20 +323,30 @@ namespace Microsoft.NETCore.Build.Tasks
                 }
 
                 // get sub package dependencies
-                GetPackageDependencies(package, target.Name);
+                GetPackageDependencies(package, target.Name, resolvedPackageVersions);
 
                 // get file dependencies on this package
                 GetFileDependencies(package, target.Name);
             }
         }
 
-        private void GetPackageDependencies(LockFileTargetLibrary package, string targetName)
+        private void GetPackageDependencies(
+            LockFileTargetLibrary package, 
+            string targetName, 
+            Dictionary<string, string> resolvedPackageVersions)
         {
-            string packageId = $"{package.Name}/{package.Version.ToString()}";
+            string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
             TaskItem item;
             foreach (var deps in package.Dependencies)
             {
-                string depsName = $"{deps.Id}/{deps.VersionRange.MinVersion.ToString()}";
+                string version;
+                if (!resolvedPackageVersions.TryGetValue(deps.Id, out version))
+                {
+                    Log.LogError($"Unexpected Dependency {deps.Id} with no version number");
+                    continue;
+                }
+
+                string depsName = $"{deps.Id}/{version}";
 
                 item = new TaskItem(depsName);
                 item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
@@ -356,15 +358,18 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private void GetFileDependencies(LockFileTargetLibrary package, string targetName)
         {
-            string packageId = $"{package.Name}/{package.Version.ToString()}";
+            string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
             TaskItem item;
 
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
             {
-                var filePathList = fileGroup.GetFilePathListFor(package);
-                foreach (var filePath in filePathList)
+                var filePathList = fileGroup.GetFilePathAndProperties(package);
+                foreach (var entry in filePathList)
                 {
+                    string filePath = entry.Item1;
+                    IDictionary<string, string> properties = entry.Item2;
+
                     if (NuGetUtils.IsPlaceholderFile(filePath))
                     {
                         continue;
@@ -375,6 +380,11 @@ namespace Microsoft.NETCore.Build.Tasks
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
+
+                    foreach (var property in properties)
+                    {
+                        item.SetMetadata(property.Key, property.Value);
+                    }
 
                     _fileDependencies.Add(item);
 

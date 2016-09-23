@@ -35,13 +35,25 @@
     </Task>
   </UsingTask>
 
-  <!-- _UpdateNETCoreSdkVersion Target: produce project json template with current build version -->
-  <Target Name="_UpdateNETCoreSdkVersion" BeforeTargets="GetZipFilesFromVSTemplates" 
+  <!-- _UpdateNETCoreSdkVersionForProjectJson Target: produce project json template with current build version -->
+  <Target Name="_UpdateNETCoreSdkVersionForProjectJson" BeforeTargets="GetZipFilesFromVSTemplates" 
     Inputs="@(ProjectJsonTemplate)" Outputs="%(ProjectJsonTemplate.TargetPath)">
 
     <RewriteToken 
       TemplatePath="@(ProjectJsonTemplate)" 
       RewritePath="%(ProjectJsonTemplate.TargetPath)"
+      Token="$$buildversion$$" 
+      Replacement="$(Version)"/>
+
+  </Target>
+
+  <!-- _UpdateNETCoreSdkVersion Target: produce project template with current build version -->
+  <Target Name="_UpdateNETCoreSdkVersion" BeforeTargets="GetZipFilesFromVSTemplates" 
+    Inputs="@(ProjectTemplate)" Outputs="%(ProjectTemplate.TargetPath)">
+
+    <RewriteToken 
+      TemplatePath="@(ProjectTemplate)" 
+      RewritePath="%(ProjectTemplate.TargetPath)"
       Token="$$buildversion$$" 
       Replacement="$(Version)"/>
 
