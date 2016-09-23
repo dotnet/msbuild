@@ -64,34 +64,47 @@ get_current_os_name() {
         echo "osx"
         return 0
     else
-        # Detect Distro
-        if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
-            if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
-                echo "ubuntu.16.04"
-                return 0
-            fi
+        if [ -e /etc/os-release ]; then
+            . /etc/os-release
 
-            echo "ubuntu"
-            return 0
-        elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
-            echo "centos"
-            return 0
-        elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
-            echo "rhel"
-            return 0
-        elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
-            echo "debian"
-            return 0
-        elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
-            if [ "$(cat /etc/*-release | grep -cim1 23)" -eq 1 ]; then
-                echo "fedora.23"
-                return 0
-            fi
-        elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
-            if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
-                echo "opensuse.13.2"
-                return 0
-            fi
+            case "$ID.$VERSION_ID" in
+                "centos.7")
+                    echo "centos"
+                    return 0
+                    ;;
+                "debian.8")
+                    echo "debian"
+                    return 0
+                    ;;
+                "fedora.23")
+                    echo "fedora.23"
+                    return 0
+                    ;;
+                "opensuse.13.2")
+                    echo "opensuse.13.2"
+                    return 0
+                    ;;
+                "opensuse.42.1")
+                    echo "opensuse.42.1"
+                    return 0
+                    ;;
+                "rhel.7.0" | "rhel.7.1" | "rhel.7.2")
+                    echo "rhel"
+                    return 0
+                    ;;
+                "ubuntu.14.04")
+                    echo "ubuntu"
+                    return 0
+                    ;;
+                "ubuntu.16.04")
+                    echo "ubuntu.16.04"
+                    return 0
+                    ;;
+                "ubuntu.16.10")
+                    echo "ubuntu.16.10"
+                    return 0
+                    ;;
+            esac
         fi
     fi
     
