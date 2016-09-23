@@ -1221,19 +1221,21 @@ namespace Microsoft.Build.Evaluation
 
         private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
         {
-            return evaluatedItemElements
+            var relevantElementsAfterInclude =  evaluatedItemElements
                 // Skip until we encounter the element that produced the item because
                 // there are no item operations that can affect future items
                 .SkipWhile((i => i != item.Xml))
-                // leave out the item element that produced the item
-                .Skip(1)
                 .Where(itemElement =>
+                    // items operations of different item types cannot affect each other
                     itemElement.ItemType.Equals(item.ItemType) &&
                     // other includes cannot affect the current item
                     itemElement.IncludeLocation == null &&
                     // any remove that matches this item will cause the ProjectItem to not be produced in the first place
                     // all other removes do not apply
                     itemElement.RemoveLocation == null);
+
+            // add the include operation that created the project item element
+            return new[] {item.Xml}.Concat(relevantElementsAfterInclude);
         }
 
         private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
