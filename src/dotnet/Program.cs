@@ -5,16 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Loader;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.DotNet.Tools.Build;
+using Microsoft.DotNet.Tools.Build3;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
 using Microsoft.DotNet.Tools.Help;
+using Microsoft.DotNet.Tools.Migrate;
+using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
 using Microsoft.DotNet.Tools.Pack3;
@@ -24,7 +26,6 @@ using Microsoft.DotNet.Tools.Restore3;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
-using Microsoft.DotNet.Tools.Migrate;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
@@ -44,6 +45,7 @@ namespace Microsoft.DotNet.Cli
             ["run"] = RunCommand.Run,
             ["test"] = TestCommand.Run,
             ["build3"] = Build3Command.Run,
+            ["msbuild"] = MSBuildCommand.Run,
             ["run3"] = Run3Command.Run,
             ["restore3"] = Restore3Command.Run,
             ["vstest"] = VSTestCommand.Run,
