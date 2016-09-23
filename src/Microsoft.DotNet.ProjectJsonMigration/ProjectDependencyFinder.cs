@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectModel;
 using System.Linq;
 using System.IO;
@@ -14,18 +15,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ProjectDependencyFinder 
     {
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(IEnumerable<ProjectContext> projectContexts)
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(string projectDir, string xprojFile = null)
+        {
+            var projectContexts = ProjectContext.CreateContextForEachFramework(projectDir);
+            xprojFile = xprojFile ?? FindXprojFile(projectDir);
+
+            ProjectRootElement xproj = null;
+            if (xprojFile != null)
+            {
+                xproj = ProjectRootElement.Open(xprojFile);
+            }
+
+            return ResolveProjectDependencies(projectContexts, ResolveXProjProjectDependencyNames(xproj));
+        }
+
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(IEnumerable<ProjectContext> projectContexts, IEnumerable<string> preResolvedProjects=null)
         {
             foreach(var projectContext in projectContexts)
             {
-                foreach(var projectDependency in ResolveProjectDependencies(projectContext))
+                foreach(var projectDependency in ResolveProjectDependencies(projectContext, preResolvedProjects))
                 {
                     yield return projectDependency;
                 }
             }
         }
 
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, HashSet<string> preResolvedProjects=null)
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, IEnumerable<string> preResolvedProjects=null)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 
@@ -57,6 +72,40 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
 
             return projectDependencies;
+        }
+
+        private IEnumerable<string> ResolveXProjProjectDependencyNames(ProjectRootElement xproj)
+        {
+            var xprojDependencies = ResolveXProjProjectDependencies(xproj).SelectMany(r => r.Includes());
+            return new HashSet<string>(xprojDependencies.Select(p => Path.GetFileNameWithoutExtension(p)));
+        }
+
+        internal IEnumerable<ProjectItemElement> ResolveXProjProjectDependencies(ProjectRootElement xproj)
+        {
+            if (xproj == null)
+            {
+                MigrationTrace.Instance.WriteLine($"{nameof(ProjectDependencyFinder)}: No xproj file given.");
+                return Enumerable.Empty<ProjectItemElement>();
+            }
+
+            return xproj.Items
+                        .Where(i => i.ItemType == "ProjectReference")
+                        .Where(p => p.Includes().Any(
+                                    include => string.Equals(Path.GetExtension(include), ".csproj", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        internal string FindXprojFile(string projectDirectory)
+        {
+            var allXprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj", SearchOption.TopDirectoryOnly);
+
+            if (allXprojFiles.Count() > 1)
+            {
+                MigrationErrorCodes
+                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
+                    .Throw();
+            }
+
+            return allXprojFiles.FirstOrDefault();
         }
 
         private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(string projectJsonFilePath)

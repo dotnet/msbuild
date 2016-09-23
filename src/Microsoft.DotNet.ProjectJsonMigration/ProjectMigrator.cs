@@ -40,14 +40,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 throw new ArgumentNullException();
             }
 
-            MigrateHelper(rootSettings);
+            MigrateProject(rootSettings);
 
             if (skipProjectReferences)
             {
                 return;
             }
 
-            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory);
+            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory, rootSettings.ProjectXProjFilePath);
 
             foreach(var project in projectDependencies)
             {
@@ -56,15 +56,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                                                      projectDir,
                                                      rootSettings.SdkPackageVersion,
                                                      rootSettings.MSBuildProjectTemplate);
-                MigrateHelper(settings);
+                MigrateProject(settings);
             }
         }
 
-        private IEnumerable<ProjectDependency> ResolveTransitiveClosureProjectDependencies(string rootProject)
+        private IEnumerable<ProjectDependency> ResolveTransitiveClosureProjectDependencies(string rootProject, string xprojFile)
         {
             HashSet<ProjectDependency> projectsMap = new HashSet<ProjectDependency>(new ProjectDependencyComparer());
-            var projectContexts = ProjectContext.CreateContextForEachFramework(rootProject);
-            var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectContexts);
+            var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(rootProject, xprojFile);
             Queue<ProjectDependency> projectsQueue = new Queue<ProjectDependency>(projectDependencies);
 
             while(projectsQueue.Count() != 0)
@@ -78,8 +77,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
                 projectsMap.Add(projectDependency);
 
-                projectContexts = ProjectContext.CreateContextForEachFramework(projectDependency.ProjectFilePath);
-                projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectContexts);
+                var projectDir = Path.GetDirectoryName(projectDependency.ProjectFilePath);
+                projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectDir);
 
                 foreach(var project in projectDependencies)
                 {
@@ -90,13 +89,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projectsMap;
         }
 
-        private void MigrateHelper(MigrationSettings migrationSettings)
+        private void MigrateProject(MigrationSettings migrationSettings)
         {
             var migrationRuleInputs = ComputeMigrationRuleInputs(migrationSettings);
 
             if (IsMigrated(migrationSettings, migrationRuleInputs))
             {
                 // TODO : Adding user-visible logging
+                MigrationTrace.Instance.WriteLine($"{nameof(ProjectMigrator)}: Skip migrating {migrationSettings.ProjectDirectory}, it is already migrated.");
                 return;
             }
 
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private MigrationRuleInputs ComputeMigrationRuleInputs(MigrationSettings migrationSettings)
         {
             var projectContexts = ProjectContext.CreateContextForEachFramework(migrationSettings.ProjectDirectory);
-            var xprojFile = migrationSettings.ProjectXProjFilePath ?? FindXprojFile(migrationSettings.ProjectDirectory);
+            var xprojFile = migrationSettings.ProjectXProjFilePath ?? _projectDependencyFinder.FindXprojFile(migrationSettings.ProjectDirectory);
             
             ProjectRootElement xproj = null;
             if (xprojFile != null)
@@ -128,20 +128,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var itemGroup = templateMSBuildProject.AddItemGroup();
 
             return new MigrationRuleInputs(projectContexts, templateMSBuildProject, itemGroup, propertyGroup, xproj);
-        }
-
-        private string FindXprojFile(string projectDirectory)
-        {
-            var allXprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj", SearchOption.TopDirectoryOnly);
-
-            if (allXprojFiles.Count() > 1)
-            {
-                MigrationErrorCodes
-                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
-                    .Throw();
-            }
-
-            return allXprojFiles.FirstOrDefault();
         }
 
         private void VerifyInputs(MigrationRuleInputs migrationRuleInputs, MigrationSettings migrationSettings)
