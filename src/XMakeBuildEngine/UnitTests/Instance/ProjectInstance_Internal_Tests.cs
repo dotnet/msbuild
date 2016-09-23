@@ -533,7 +533,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             string projectFileContent = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                        <UsingTask TaskName='Microsoft.Build.Tasks.Message' AssemblyFile='Microsoft.Build.Tasks.Core.dll'/>
+                        <UsingTask TaskName='Microsoft.Build.Tasks.Message' AssemblyFile='$(MSBuildBinPath)\Microsoft.Build.Tasks.Core.dll'/>
                         <ItemGroup>
                             <i Include='i0'/>
                         </ItemGroup>
