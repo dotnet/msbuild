@@ -12,8 +12,10 @@ using System.Linq;
 using Microsoft.Build.Shared;
 using System.Text;
 using System.Runtime.Versioning;
+#if !FEATURE_ASSEMBLY_LOADFROM
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
+#endif
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks

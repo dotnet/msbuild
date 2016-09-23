@@ -43,6 +43,7 @@
     <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.4.30</GitVersioningVersion>
+    <NuSpecReferenceGeneratorVersion>1.4.2</NuSpecReferenceGeneratorVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
@@ -69,9 +70,6 @@
     <!-- nuget cache location. Used by packageresolve.targets -->
     <PackagesDir Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</PackagesDir>
     <PackagesDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(HOME), '.nuget', 'packages'))</PackagesDir>
-    
-    <!-- target framework for msbuild nuget packages. Used by Nuspec.ReferenceGenerator.targets to update corefx dependencies-->
-    <NuSpecTfm>netstandard1.3</NuSpecTfm>
 
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
@@ -193,13 +191,6 @@
     <RuntimeArchitecture>x64</RuntimeArchitecture>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
-    <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
-    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">.NETStandard,Version=v1.3</NuGetTargetMoniker>
-    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true'">.NETFramework,Version=v4.6</NuGetTargetMoniker>
-  </PropertyGroup>
-
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
        the .NET Core surface area.  This way we can build a binary to run ApiPort on to measure progress. -->
   <PropertyGroup Condition="'$(Configuration)' == 'Port-Progress'">
@@ -218,7 +209,7 @@
 
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v1.3</TargetFrameworkVersion>
     <!--
       This property is re-created after importing Microsoft.Portable.CSharp.targets.  If you change the value here, also
       update it in Before.Microsoft.Common.targets -->
@@ -229,7 +220,17 @@
     <WindowsAppContainer>false</WindowsAppContainer>
 
     <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
+    
+    <!-- target framework for msbuild nuget packages. Used by Nuspec.ReferenceGenerator.targets to update corefx dependencies-->
+    <NuSpecTfm>netstandard$(TargetFrameworkVersion.TrimStart('v'))</NuSpecTfm>
 
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
+    <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
+    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">.NETStandard,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true'">.NETFramework,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
   </PropertyGroup>
 
   <!-- csharp targets locations -->

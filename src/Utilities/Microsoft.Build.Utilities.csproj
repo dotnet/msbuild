@@ -12,6 +12,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDocumentationFile>true</EnableDocumentationFile>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

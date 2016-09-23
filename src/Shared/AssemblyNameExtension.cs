@@ -8,7 +8,9 @@ using System.Collections;
 using System.Globalization;
 using System.Diagnostics;
 using System.Collections.Generic;
+#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 using System.IO;
 #if !FEATURE_ASSEMBLY_LOADFROM
 using System.Reflection.PortableExecutable;

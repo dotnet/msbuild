@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v1.5</TargetFrameworkVersion>
+  </PropertyGroup>
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,6 +16,7 @@
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDocumentationFile>true</EnableDocumentationFile>
+    <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -81,9 +85,6 @@
   <ItemGroup>
     <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\parametermodifier.cs">
-      <Link>SharedUtilities\Compat\parametermodifier.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
@@ -729,6 +730,8 @@
     <!-- Assemblies Files we depend on -->
     <!-- Be conservative when adding references... adding System.Xml.Linq can add .47 sec cold start time to our launch time, or 80 ms to warm start time -->
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable" />
+    <Reference Include="System.Threading.Tasks.Dataflow" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />

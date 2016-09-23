@@ -43,9 +43,21 @@
     <!-- Targets from buildtools that restore packages before building. -->
   <!-- TODO: ideally replaced by a standard "dotnet restore" over the solution. -->
   <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
+
+  <ItemGroup Condition="'$(NetCoreBuild)' == 'true' and '$(UpdateNuGetPackageDependencies)' == 'true'">
+    <NuSpecFile Include="$(ProjectDir)build\NuGetPackages\$(MSBuildProjectName).nuspec" Condition="Exists('$(ProjectDir)build\NuGetPackages\$(MSBuildProjectName).nuspec')">
+      <Visible>false</Visible>
+    </NuSpecFile>
+    <NuSpecFile Include="$(ProjectDir)build\NuGetPackages\$(MSBuildProjectName).Core.nuspec" Condition="Exists('$(ProjectDir)build\NuGetPackages\$(MSBuildProjectName).Core.nuspec')">
+      <Visible>false</Visible>
+    </NuSpecFile>
+    <NuSpecProjectFile Include="$(MSBuildProjectFullPath)">
+      <Visible>false</Visible>
+    </NuSpecProjectFile>
+  </ItemGroup>
   
   <!-- Use NuSpec.ReferenceGenerator to create / update the .NET Core dependencies of the packages -->
-  <Import Condition="'$(NetCoreBuild)'=='true' and Exists('$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets')"  Project="$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets"/>
+  <Import Condition="'$(NetCoreBuild)'=='true'  and '$(UpdateNuGetPackageDependencies)' == 'true' and Exists('$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets')"  Project="$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets"/>
 
   <!-- Debugging support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
@@ -80,7 +92,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <NuGetTargetMoniker>.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <NuGetTargetMoniker>.NETStandard,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
   </PropertyGroup>
   
   <Import Project="$(RepoRoot)\targets\GenApi.targets" Condition="'$(OS)' == 'Windows_NT'" />

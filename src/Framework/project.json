@@ -1,19 +1,12 @@
 ﻿{
-  "dependencies": { },
   "frameworks": {
-    "net46": { },
+    "net46": {},
     "netstandard1.3": {
       "dependencies": {
-        "System.Net.NetworkInformation": "4.1.0",
-        "Microsoft.NETCore": "5.0.1",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
-        "System.Console": "4.0.0",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
-        "System.Threading.Thread": "4.0.0",
-        "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
-        "Microsoft.NETCore.TestHost": "1.0.0"
-      },
-      "imports": "portable-net451+win81"
+        "NETStandard.Library": "1.6.0",
+        "System.Runtime.Serialization.Primitives": "4.1.1",
+        "System.Threading.Thread": "4.0.0"
+      }
     }
   }
 }
