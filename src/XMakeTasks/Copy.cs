@@ -414,16 +414,33 @@ namespace Microsoft.Build.Tasks
             {
                 return false;
             }
-            
+
             if (_destinationFiles != null)
             {
-                var sameDestinationFiles = _destinationFiles.GroupBy(x => x.ItemSpec).Where(g => g.Count() > 1).Select(y => y.First());
+                var sameDestinationFiles = _destinationFiles.GroupBy(x => x.ItemSpec).Where(g => g.Count() > 1);
 
                 if (sameDestinationFiles.Any())
                 {
+                    for (int i = 0; i < _sourceFiles.Length; ++i)
+                    {
+                        // Copy meta-data from source to destinationFiles.
+                        _sourceFiles[i].CopyMetadataTo(_destinationFiles[i]);
+                    }
+
                     foreach (var item in sameDestinationFiles)
                     {
-                        Log.LogErrorFromResources("Copy.SameDestinationPath", item.ItemSpec);
+                        string logSource = "";
+                        var lastItem = item.Last();
+
+                        foreach (var subitem in item)
+                        {
+                            logSource += '"' + subitem.GetMetadata("OriginalItemSpec");
+
+                            logSource += !subitem.Equals(lastItem) ? "\"," : "\"";
+                        }
+
+                        string logDestination = '"' + item.Key + '"';
+                        Log.LogErrorFromResources("Copy.SameDestinationPath", logSource, logDestination);
                     }
                     return false;
                 }
