@@ -434,7 +434,9 @@ namespace Microsoft.Build.Tasks
 
                         foreach (var subitem in item)
                         {
-                            logSource += '"' + subitem.GetMetadata("OriginalItemSpec");
+                            var originalPath = subitem.GetMetadata("OriginalItemSpec");
+                            subitem.SetMetadata("CopiedFrom", originalPath);
+                            logSource += '"' + originalPath;
 
                             logSource += !subitem.Equals(lastItem) ? "\"," : "\"";
                         }
