@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
@@ -32,13 +32,8 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return new Dictionary<string, string>
             {
                 { "MSBuildExtensionsPath", AppContext.BaseDirectory },
-                { "DotnetHostPath", GetHostPath() },
+                { "CscToolExe", GetRunCscPath() }
             };
-        }
-
-        private static string GetHostPath()
-        {
-            return new Muxer().MuxerPath;
         }
 
         private static string GetMSBuildExePath()
@@ -46,6 +41,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return Path.Combine(
                 AppContext.BaseDirectory,
                 s_msbuildExeName);
+        }
+
+        private static string GetRunCscPath()
+        {
+            var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : ".sh";
+            return Path.Combine(AppContext.BaseDirectory, $"RunCsc{scriptExtension}");
         }
     }
 }
