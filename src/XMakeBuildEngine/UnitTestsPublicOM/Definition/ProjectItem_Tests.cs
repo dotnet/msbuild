@@ -608,6 +608,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/**/*.cs",
             new[]
@@ -669,29 +670,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             var formattedProjectContents = string.Format(projectContents, include, exclude);
             ObjectModelHelpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude, expectedMetadataPerItem: null, normalizeSlashes: normalizeSlashes);
-        }
-
-        [Theory]
-        [InlineData(ItemWithIncludeAndExclude,
-            @"**\*",
-            "foo",
-            new[]
-            {
-                "foo",
-                @"a\foo",
-                @"a\a\foo",
-                @"a\b\foo",
-            },
-            new[]
-            {
-                @"a\a\foo",
-                @"a\b\foo",
-                @"a\foo",
-                "build.proj"
-            })]
-        public void IncludeShouldPreserveUserSlashes(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
-        {
-            //TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
         }
 
         /// <summary>
