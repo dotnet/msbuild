@@ -15,7 +15,7 @@ namespace Microsoft.NETCore.TestFramework.Commands
 
         public override CommandResult Execute(params string[] args)
         {
-            var newArgs = new System.Collections.Generic.List<string>(); // args.ToList();
+            var newArgs = args.ToList();
 
             newArgs.Insert(0, FullPathProjectFile);
             var command = MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
