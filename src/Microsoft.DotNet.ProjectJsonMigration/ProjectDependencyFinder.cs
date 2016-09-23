@@ -7,12 +7,48 @@ using Microsoft.DotNet.ProjectModel;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Graph;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ProjectDependencyFinder 
     {
-        public Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(string projectJsonFilePath)
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, HashSet<string> preResolvedProjects=null)
+        {
+            preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
+
+            var projectExports = projectContext.CreateExporter("_").GetDependencies();
+            var possibleProjectDependencies = 
+                FindPossibleProjectDependencies(projectContext.ProjectFile.ProjectFilePath);
+
+            var projectDependencies = new List<ProjectDependency>();
+            foreach (var projectExport in projectExports)
+            {
+                var projectExportName = projectExport.Library.Identity.Name;
+                ProjectDependency projectDependency;
+
+                if (!possibleProjectDependencies.TryGetValue(projectExportName, out projectDependency))
+                {
+                    if (projectExport.Library.Identity.Type.Equals(LibraryType.Project) 
+                        && !preResolvedProjects.Contains(projectExportName))
+                    {
+                        MigrationErrorCodes
+                            .MIGRATE1014($"Unresolved project dependency ({projectExportName})").Throw();
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                projectDependencies.Add(projectDependency);
+            }
+
+            return projectDependencies;
+        }
+
+        private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(string projectJsonFilePath)
         {
             var projectDirectory = Path.GetDirectoryName(projectJsonFilePath);
 
@@ -112,7 +148,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return paths;
         }
 
-        public static string ResolveRootDirectory(string projectPath)
+        private static string ResolveRootDirectory(string projectPath)
         {
             var di = new DirectoryInfo(projectPath);
 

@@ -30,15 +30,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             _projectDirectory = migrationSettings.ProjectDirectory;
 
-            var possibleProjectDependencies = _projectDependencyFinder
-                .FindPossibleProjectDependencies(migrationRuleInputs.DefaultProjectContext.ProjectFile.ProjectFilePath);
-
             var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationSettings, migrationRuleInputs);
-            var migratedXProjDependencyNames = migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(p));
+            var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
 
             AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
             MigrateProjectJsonProjectDependencies(
-                possibleProjectDependencies, 
                 migrationRuleInputs.ProjectContexts, 
                 migratedXProjDependencyNames, 
                 migrationRuleInputs.OutputMSBuildProject);
@@ -88,37 +84,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         }
 
         public void MigrateProjectJsonProjectDependencies(
-            Dictionary<string, ProjectDependency> possibleProjectDependencies,
             IEnumerable<ProjectContext> projectContexts,
-            IEnumerable<string> migratedXProjDependencyNames,
+            HashSet<string> migratedXProjDependencyNames,
             ProjectRootElement outputMSBuildProject)
         {
             foreach (var projectContext in projectContexts)
             {
+                var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectContext, migratedXProjDependencyNames);
                 var projectExports = projectContext.CreateExporter("_").GetDependencies();
 
-                var projectDependencyTransformResults = new List<ProjectItemElement>();
-                foreach (var projectExport in projectExports)
-                {
-                    var projectExportName = projectExport.Library.Identity.Name;
-                    ProjectDependency projectDependency;
-
-                    if (!possibleProjectDependencies.TryGetValue(projectExportName, out projectDependency))
-                    {
-                        if (projectExport.Library.Identity.Type.Equals(LibraryType.Project) 
-                            && !migratedXProjDependencyNames.Contains(projectExportName))
-                        {
-                            MigrationErrorCodes
-                                .MIGRATE1014($"Unresolved project dependency ({projectExportName})").Throw();
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-
-                    projectDependencyTransformResults.Add(ProjectDependencyTransform.Transform(projectDependency));
-                }
+                var projectDependencyTransformResults = projectDependencies.Select(p => ProjectDependencyTransform.Transform(p));
                 
                 if (projectDependencyTransformResults.Any())
                 {
