@@ -216,7 +216,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var migratedProjectReferenceItem = migratedProjectReferenceItems.First();
             migratedProjectReferenceItem.Include.Should().Be(projectReference);
-            migratedProjectReferenceItem.Condition.Should().Be(" '$(Foo)' == 'bar'  and  '$(Bar)' == 'foo'");
+            migratedProjectReferenceItem.Condition.Should().Be(" '$(Bar)' == 'foo'  and  '$(Foo)' == 'bar' ");
         }
     }
 }
