@@ -144,9 +144,6 @@
     <Compile Include="AssemblyDependency\VerifyTargetFrameworkAttribute.cs" />
     <Compile Include="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
     <Compile Include="AssemblyDependency\WinMDTests.cs" />
-    <Compile Include="ProjectExtensionsImportTestBase.cs" />
-    <Compile Include="ProjectExtensionsPropsImportTest.cs" />
-    <Compile Include="ProjectExtensionsTargetsImportTest.cs" />
     <Compile Include="ResolveComReference_Tests.cs" />
     <Compile Include="ResolveNonMSBuildProjectOutput_Tests.cs" />
     <Compile Include="ResolveSDKReference_Tests.cs" />
