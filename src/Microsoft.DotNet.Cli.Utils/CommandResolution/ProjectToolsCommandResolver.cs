@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 using FileFormatException = Microsoft.DotNet.ProjectModel.FileFormatException;
-using LockFile = Microsoft.DotNet.ProjectModel.Graph.LockFile;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -71,14 +71,14 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private CommandSpec ResolveCommandSpecFromAllToolLibraries(
-            IEnumerable<LibraryRange> toolsLibraries,
+            IEnumerable<LibraryDependency> toolsLibraries,
             string commandName,
             IEnumerable<string> args,
             ProjectContext projectContext)
         {
             foreach (var toolLibrary in toolsLibraries)
             {
-                var commandSpec = ResolveCommandSpecFromToolLibrary(toolLibrary, commandName, args, projectContext);
+                var commandSpec = ResolveCommandSpecFromToolLibrary(toolLibrary.LibraryRange, commandName, args, projectContext);
 
                 if (commandSpec != null)
                 {
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var depsFileRoot = Path.GetDirectoryName(lockFile.LockFilePath);
+            var depsFileRoot = Path.GetDirectoryName(lockFile.Path);
             var depsFilePath = GetToolDepsFilePath(toolLibraryRange, lockFile, depsFileRoot);
 
             return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             try
             {
-                lockFile = LockFileReader.Read(lockFilePath, designTime: false);
+                lockFile = new LockFileFormat().Read(lockFilePath);
             }
             catch (FileFormatException ex)
             {

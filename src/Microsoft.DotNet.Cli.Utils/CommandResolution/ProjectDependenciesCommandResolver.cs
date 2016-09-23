@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

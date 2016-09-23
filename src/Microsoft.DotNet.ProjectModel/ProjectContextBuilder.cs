@@ -13,6 +13,8 @@ using Microsoft.DotNet.ProjectModel.Resolution;
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -264,12 +266,12 @@ namespace Microsoft.DotNet.ProjectModel
                 libraries.Add(new LibraryKey(mainProject.Identity.Name), mainProject);
             }
 
-            LibraryRange? platformDependency = null;
+            ProjectLibraryDependency platformDependency = null;
             if (mainProject != null)
             {
                 platformDependency = mainProject.Dependencies
                     .Where(d => d.Type.Equals(LibraryDependencyType.Platform))
-                    .Cast<LibraryRange?>()
+                    .Cast<ProjectLibraryDependency>()
                     .FirstOrDefault();
             }
             bool isPortable = platformDependency != null;
@@ -288,7 +290,7 @@ namespace Microsoft.DotNet.ProjectModel
 
                     if (platformDependency != null)
                     {
-                        libraries.TryGetValue(new LibraryKey(platformDependency.Value.Name), out platformLibrary);
+                        libraries.TryGetValue(new LibraryKey(platformDependency.Name), out platformLibrary);
                     }
                 }
             }
@@ -321,7 +323,7 @@ namespace Microsoft.DotNet.ProjectModel
                 diagnostics.Add(new DiagnosticMessage(
                     ErrorCodes.NU1009,
                     $"The expected lock file doesn't exist. Please run \"dotnet restore\" to generate a new lock file.",
-                    Path.Combine(Project.ProjectDirectory, LockFile.FileName),
+                    Path.Combine(Project.ProjectDirectory, LockFileFormat.LockFileName),
                     DiagnosticMessageSeverity.Error));
             }
 
@@ -330,7 +332,7 @@ namespace Microsoft.DotNet.ProjectModel
                 diagnostics.Add(new DiagnosticMessage(
                     ErrorCodes.NU1006,
                     $"{lockFileValidationMessage}. Please run \"dotnet restore\" to generate a new lock file.",
-                    Path.Combine(Project.ProjectDirectory, LockFile.FileName),
+                    Path.Combine(Project.ProjectDirectory, LockFileFormat.LockFileName),
                     DiagnosticMessageSeverity.Warning));
             }
 
@@ -392,9 +394,9 @@ namespace Microsoft.DotNet.ProjectModel
         {
             string result = null;
 
-            if (LockFile != null && !string.IsNullOrEmpty(LockFile.LockFilePath))
+            if (LockFile != null && !string.IsNullOrEmpty(LockFile.Path))
             {
-                result = Path.GetDirectoryName(LockFile.LockFilePath);
+                result = Path.GetDirectoryName(LockFile.Path);
             }
 
             return result;
@@ -411,11 +413,11 @@ namespace Microsoft.DotNet.ProjectModel
                 var lockFilePath = "";
                 if (LockFile != null)
                 {
-                    lockFilePath = LockFile.LockFilePath;
+                    lockFilePath = LockFile.Path;
                 }
                 else if (Project != null)
                 {
-                    lockFilePath = Path.Combine(Project.ProjectDirectory, LockFile.FileName);
+                    lockFilePath = Path.Combine(Project.ProjectDirectory, LockFileFormat.LockFileName);
                 }
 
                 diagnostics.Add(new DiagnosticMessage(
@@ -470,8 +472,11 @@ namespace Microsoft.DotNet.ProjectModel
                     // the target framework installed.
                     requiresFrameworkAssemblies = true;
 
-                    var newKey = new LibraryKey(library.Identity.Name, LibraryType.ReferenceAssembly);
-                    var dependency = new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly);
+                    var newKey = new LibraryKey(library.Identity.Name, LibraryType.Reference);
+                    var dependency = new ProjectLibraryDependency
+                    {
+                        LibraryRange = new LibraryRange(library.Identity.Name, LibraryDependencyTarget.Reference)
+                    };
 
                     var replacement = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework);
 
@@ -498,16 +503,16 @@ namespace Microsoft.DotNet.ProjectModel
                 library.Framework = library.Framework ?? TargetFramework;
                 foreach (var dependency in library.Dependencies)
                 {
-                    var keyType = dependency.Target == LibraryType.ReferenceAssembly ?
-                                  LibraryType.ReferenceAssembly :
-                                  LibraryType.Unspecified;
+                    var keyType = dependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference ?
+                                  LibraryType.Reference :
+                                  (LibraryType?) null;
 
                     var key = new LibraryKey(dependency.Name, keyType);
 
                     LibraryDescription dependencyDescription;
                     if (!libraries.TryGetValue(key, out dependencyDescription))
                     {
-                        if (keyType == LibraryType.ReferenceAssembly)
+                        if (keyType == LibraryType.Reference)
                         {
                             // a dependency is specified to be reference assembly but fail to match
                             // then add a unresolved dependency
@@ -515,7 +520,7 @@ namespace Microsoft.DotNet.ProjectModel
                                                     UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
                             libraries[key] = dependencyDescription;
                         }
-                        else if (!libraries.TryGetValue(new LibraryKey(dependency.Name, LibraryType.ReferenceAssembly), out dependencyDescription))
+                        else if (!libraries.TryGetValue(new LibraryKey(dependency.Name, LibraryType.Reference), out dependencyDescription))
                         {
                             // a dependency which type is unspecified fails to match, then try to find a 
                             // reference assembly type dependency
@@ -531,7 +536,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             // Deduplicate libraries with the same name
             // Priority list is backwards so not found -1 would be last when sorting by descending
-            var priorities = new[] { LibraryType.Package, LibraryType.Project, LibraryType.ReferenceAssembly };
+            var priorities = new[] { LibraryType.Package, LibraryType.Project, LibraryType.Reference };
             var nameGroups = libraries.Keys.ToLookup(libraryKey => libraryKey.Name);
             foreach (var nameGroup in nameGroups)
             {
@@ -556,7 +561,7 @@ namespace Microsoft.DotNet.ProjectModel
             foreach (var library in target.Libraries)
             {
                 LibraryDescription description = null;
-                var type = LibraryType.Unspecified;
+                LibraryDependencyTarget type = LibraryDependencyTarget.All;
 
                 if (string.Equals(library.Type, "project"))
                 {
@@ -567,13 +572,13 @@ namespace Microsoft.DotNet.ProjectModel
                         if (MSBuildDependencyProvider.IsMSBuildProjectLibrary(projectLibrary))
                         {
                             description = msbuildResolver.GetDescription(TargetFramework, projectLibrary, library, IsDesignTime);
-                            type = LibraryType.MSBuildProject;
+                            type = LibraryDependencyTarget.Project;
                         }
                         else
                         {
                             var path = Path.GetFullPath(Path.Combine(ProjectDirectory, projectLibrary.Path));
                             description = projectResolver.GetDescription(library.Name, path, library, ProjectResolver);
-                            type = LibraryType.Project;
+                            type = LibraryDependencyTarget.Project;
                         }
                     }
                 }
@@ -586,13 +591,16 @@ namespace Microsoft.DotNet.ProjectModel
                         description = packageResolver.GetDescription(TargetFramework, packageEntry, library);
                     }
 
-                    type = LibraryType.Package;
+                    type = LibraryDependencyTarget.Package;
                 }
 
-                description = description ?? 
-                              UnresolvedDependencyProvider.GetDescription(
-                                new LibraryRange(library.Name, type),
-                                target.TargetFramework);
+                description = description ??
+                    UnresolvedDependencyProvider.GetDescription(
+                        new ProjectLibraryDependency
+                        {
+                            LibraryRange = new LibraryRange(library.Name, type)
+                        },
+                        target.TargetFramework);
 
                 libraries.Add(new LibraryKey(library.Name), description);
             }
@@ -653,26 +661,26 @@ namespace Microsoft.DotNet.ProjectModel
 
         private static LockFile ResolveLockFile(string projectDir)
         {
-            var projectLockJsonPath = Path.Combine(projectDir, LockFile.FileName);
+            var projectLockJsonPath = Path.Combine(projectDir, LockFileFormat.LockFileName);
             return File.Exists(projectLockJsonPath) ?
-                        LockFileReader.Read(Path.Combine(projectDir, LockFile.FileName), designTime: false) :
+                        new LockFileFormat().Read(Path.Combine(projectDir, LockFileFormat.LockFileName)) :
                         null;
         }
 
         private struct LibraryKey
         {
-            public LibraryKey(string name) : this(name, LibraryType.Unspecified)
+            public LibraryKey(string name) : this(name, null)
             {
             }
 
-            public LibraryKey(string name, LibraryType libraryType)
+            public LibraryKey(string name, LibraryType? libraryType)
             {
                 Name = name;
                 LibraryType = libraryType;
             }
 
             public string Name { get; }
-            public LibraryType LibraryType { get; }
+            public LibraryType? LibraryType { get; }
 
             public override bool Equals(object obj)
             {

@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Models
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
             return result;
         }
 
-        private static DependencyItem GetDependencyItem(LibraryRange dependency,
+        private static DependencyItem GetDependencyItem(LibraryDependency dependency,
                                                         IDictionary<string, LibraryExport> exportsLookup)
         {
             return new DependencyItem

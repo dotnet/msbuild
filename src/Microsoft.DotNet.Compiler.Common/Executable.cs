@@ -5,18 +5,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Files;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Files;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {

@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -13,9 +14,9 @@ namespace Microsoft.DotNet.ProjectModel
         public PackageDescription(
             string path,
             string hashPath,
-            LockFilePackageLibrary package,
+            LockFileLibrary package,
             LockFileTargetLibrary lockFileLibrary,
-            IEnumerable<LibraryRange> dependencies,
+            IEnumerable<ProjectLibraryDependency> dependencies,
             bool compatible,
             bool resolved)
             : base(
@@ -34,17 +35,19 @@ namespace Microsoft.DotNet.ProjectModel
 
         public string HashPath { get; }
 
-        public LockFilePackageLibrary PackageLibrary { get; }
+        public LockFileLibrary PackageLibrary { get; }
 
         public override IEnumerable<LockFileItem> RuntimeAssemblies => FilterPlaceholders(base.RuntimeAssemblies);
 
         public override IEnumerable<LockFileItem> CompileTimeAssemblies => FilterPlaceholders(base.CompileTimeAssemblies);
 
-        public bool HasCompileTimePlaceholder => base.CompileTimeAssemblies.Any() && base.CompileTimeAssemblies.All(a => PackageDependencyProvider.IsPlaceholderFile(a));
+        public bool HasCompileTimePlaceholder =>
+            base.CompileTimeAssemblies.Any() &&
+            base.CompileTimeAssemblies.All(a => PackageDependencyProvider.IsPlaceholderFile(a.Path));
 
         private static IEnumerable<LockFileItem> FilterPlaceholders(IEnumerable<LockFileItem> items)
         {
-            return items.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a));
+            return items.Where(a => !PackageDependencyProvider.IsPlaceholderFile(a.Path));
         }
     }
 }

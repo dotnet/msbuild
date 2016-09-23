@@ -8,9 +8,8 @@ using Microsoft.DotNet.ProjectModel;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json.Linq;
-using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Common;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
@@ -30,7 +29,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return ResolveProjectDependencies(projectContexts, ResolveXProjProjectDependencyNames(xproj));
         }
 
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(IEnumerable<ProjectContext> projectContexts, IEnumerable<string> preResolvedProjects=null)
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(
+            IEnumerable<ProjectContext> projectContexts,
+            IEnumerable<string> preResolvedProjects=null)
         {
             foreach(var projectContext in projectContexts)
             {
@@ -41,7 +42,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
         }
 
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, IEnumerable<string> preResolvedProjects=null)
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(
+            ProjectContext projectContext,
+            IEnumerable<string> preResolvedProjects=null)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 

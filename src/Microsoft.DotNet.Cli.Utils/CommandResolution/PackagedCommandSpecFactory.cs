@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Packaging;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

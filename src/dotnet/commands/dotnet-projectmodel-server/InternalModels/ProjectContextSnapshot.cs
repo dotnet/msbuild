@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel.Files;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Server.Helpers;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectModel.Server
 {

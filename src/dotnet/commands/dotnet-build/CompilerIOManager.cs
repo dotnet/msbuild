@@ -109,12 +109,7 @@ namespace Microsoft.DotNet.Tools.Build
                 throw new InvalidOperationException(errorMessage);
             }
 
-            inputs.Add(project.LockFile.LockFilePath);
-
-            if (project.LockFile.ExportFile != null)
-            {
-                inputs.Add(project.LockFile.ExportFile.ExportFilePath);
-            }
+            inputs.Add(project.LockFile.Path);
         }
 
 

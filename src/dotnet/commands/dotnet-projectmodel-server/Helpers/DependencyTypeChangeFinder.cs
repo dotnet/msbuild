@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Helpers
 {
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Helpers
 
         private static DiagnosticMessage Validate(LibraryDescription library,
                                                   HashSet<string> projectCandidates,
-                                                  Dictionary<string, LibraryRange> rootDependencies)
+                                                  Dictionary<string, ProjectLibraryDependency> rootDependencies)
         {
             if (!library.Resolved || projectCandidates == null)
             {
@@ -54,10 +54,10 @@ namespace Microsoft.DotNet.ProjectModel.Server.Helpers
                 return new DiagnosticMessage(
                     ErrorCodes.NU1010,
                     $"The type of dependency {library.Identity.Name} was changed.",
-                    libraryRange.SourceFilePath,
+                    string.Empty,
                     DiagnosticMessageSeverity.Error,
-                    libraryRange.SourceLine,
-                    libraryRange.SourceColumn,
+                    0,
+                    0,
                     library);
             }
 

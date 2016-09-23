@@ -10,7 +10,6 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
 using Microsoft.DotNet.ProjectModel.FileSystemGlobbing.Abstractions;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resources;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Pack;
@@ -20,6 +19,7 @@ using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using PackageBuilder = NuGet.Legacy.PackageBuilder;
 using NuGetConstants = NuGet.Legacy.Constants;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -316,7 +316,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     continue;
                 }
 
-                if (dependency.Target == LibraryType.ReferenceAssembly)
+                if (dependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference)
                 {
                     PackageBuilder.FrameworkAssemblies.Add(new FrameworkAssemblyReference(dependency.Name, new[] { context.TargetFramework }));
 
@@ -326,14 +326,14 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     VersionRange dependencyVersion = null;
 
-                    if (dependency.VersionRange == null ||
-                        dependency.VersionRange.IsFloating)
+                    if (dependency.LibraryRange.VersionRange == null ||
+                        dependency.LibraryRange.VersionRange.IsFloating)
                     {
                         dependencyVersion = new VersionRange(dependencyDescription.Identity.Version);
                     }
                     else
                     {
-                        dependencyVersion = dependency.VersionRange;
+                        dependencyVersion = dependency.LibraryRange.VersionRange;
                     }
 
                     Reporter.Verbose.WriteLine($"Adding dependency {dependency.Name.Yellow()} {VersionUtility.RenderVersion(dependencyVersion).Yellow()}");

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

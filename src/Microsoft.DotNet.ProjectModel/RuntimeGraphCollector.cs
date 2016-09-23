@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 using NuGet.RuntimeModel;
 
 namespace Microsoft.DotNet.ProjectModel

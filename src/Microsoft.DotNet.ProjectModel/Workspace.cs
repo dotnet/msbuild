@@ -6,9 +6,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -30,13 +30,13 @@ namespace Microsoft.DotNet.ProjectModel
                    = new ConcurrentDictionary<string, ProjectContextCollection>();
 
         private readonly ProjectReaderSettings _settings;
-        private readonly LockFileReader _lockFileReader;
+        private readonly LockFileFormat _lockFileReader;
         private readonly bool _designTime;
 
         protected Workspace(ProjectReaderSettings settings, bool designTime)
         {
             _settings = settings;
-            _lockFileReader = new LockFileReader();
+            _lockFileReader = new LockFileFormat();
             _designTime = designTime;
         }
 
@@ -153,19 +153,19 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 currentEntry.Reset();
 
-                if (!File.Exists(Path.Combine(projectDirectory, LockFile.FileName)))
+                if (!File.Exists(Path.Combine(projectDirectory, LockFileFormat.LockFileName)))
                 {
                     return currentEntry;
                 }
                 else
                 {
-                    currentEntry.FilePath = Path.Combine(projectDirectory, LockFile.FileName);
+                    currentEntry.FilePath = Path.Combine(projectDirectory, LockFileFormat.LockFileName);
 
                     using (var fs = ResilientFileStreamOpener.OpenFile(currentEntry.FilePath, retry: 2))
                     {
                         try
                         {
-                            currentEntry.Model = _lockFileReader.ReadLockFile(currentEntry.FilePath, fs, designTime: _designTime);
+                            currentEntry.Model = _lockFileReader.Read(fs, currentEntry.FilePath);
                             currentEntry.UpdateLastWriteTimeUtc();
                         }
                         catch (FileFormatException ex)
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.ProjectModel
                 currentEntry.ProjectFilePath = project.ProjectFilePath;
                 currentEntry.LastProjectFileWriteTimeUtc = File.GetLastWriteTimeUtc(currentEntry.ProjectFilePath);
 
-                var lockFilePath = Path.Combine(project.ProjectDirectory, LockFile.FileName);
+                var lockFilePath = Path.Combine(project.ProjectDirectory, LockFileFormat.LockFileName);
                 if (File.Exists(lockFilePath))
                 {
                     currentEntry.LockFilePath = lockFilePath;

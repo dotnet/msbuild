@@ -9,10 +9,10 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
 
 namespace Microsoft.Extensions.DependencyModel
 {
@@ -153,7 +153,7 @@ namespace Microsoft.Extensions.DependencyModel
             else
             {
                 IEnumerable<string> assemblies;
-                if (type == LibraryType.ReferenceAssembly)
+                if (type == LibraryType.Reference)
                 {
                     assemblies = ResolveReferenceAssembliesPath(export.CompilationAssemblies);
                 }

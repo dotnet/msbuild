@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -12,10 +12,10 @@ namespace Microsoft.DotNet.ProjectModel
         // Create an unresolved project description
         public ProjectDescription(string name, string path)
             : base(
-                  new LibraryIdentity(name, LibraryType.Project),
+                  new LibraryIdentity(name, null, LibraryType.Project),
                   string.Empty, // Projects don't have hashes
                   path,
-                  Enumerable.Empty<LibraryRange>(),
+                  Enumerable.Empty<ProjectLibraryDependency>(),
                   framework: null,
                   resolved: false,
                   compatible: false)
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ProjectModel
         public ProjectDescription(
             LibraryRange libraryRange,
             Project project,
-            IEnumerable<LibraryRange> dependencies,
+            IEnumerable<ProjectLibraryDependency> dependencies,
             TargetFrameworkInformation targetFrameworkInfo,
             bool resolved) :
                 base(

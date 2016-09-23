@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using NuGet.Frameworks;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using System.Linq;
 using System.Threading.Tasks;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.Tools.Build
 {

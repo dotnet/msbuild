@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -18,14 +19,14 @@ namespace Microsoft.DotNet.ProjectModel
         public MSBuildProjectDescription(
             string path,
             string msbuildProjectPath,
-            LockFileProjectLibrary projectLibrary,
+            LockFileLibrary projectLibrary,
             LockFileTargetLibrary lockFileLibrary,
             Project projectFile,
-            IEnumerable<LibraryRange> dependencies,
+            IEnumerable<ProjectLibraryDependency> dependencies,
             bool compatible,
             bool resolved)
             : base(
-                  new LibraryIdentity(projectLibrary.Name, projectLibrary.Version, LibraryType.MSBuildProject),
+                  new LibraryIdentity(projectLibrary.Name, projectLibrary.Version, LibraryType.Project),
                   string.Empty, //msbuild projects don't have hashes
                   path,
                   lockFileLibrary,
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.ProjectModel
             ProjectLibrary = projectLibrary;
         }
 
-        public LockFileProjectLibrary ProjectLibrary { get; }
+        public LockFileLibrary ProjectLibrary { get; }
 
         public string MSBuildProjectPath { get; set; }
 

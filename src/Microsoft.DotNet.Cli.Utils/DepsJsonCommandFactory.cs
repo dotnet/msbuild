@@ -3,9 +3,6 @@
 
 using System.Collections.Generic;
 using NuGet.Frameworks;
-using System.IO;
-using System;
-using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

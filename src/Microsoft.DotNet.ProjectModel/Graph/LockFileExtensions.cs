@@ -1,41 +1,22 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel.Graph
 {
-    public class LockFile
+    public static class LockFileExtensions
     {
         public static readonly int CurrentVersion = 2;
-        public static readonly string FileName = "project.lock.json";
 
-        public string LockFilePath { get; }
-
-        public int Version { get; set; }
-        public IList<ProjectFileDependencyGroup> ProjectFileDependencyGroups { get; set; } = new List<ProjectFileDependencyGroup>();
-        public IList<LockFilePackageLibrary> PackageLibraries { get; set; } = new List<LockFilePackageLibrary>();
-        public IList<LockFileProjectLibrary> ProjectLibraries { get; set; } = new List<LockFileProjectLibrary>();
-        public IList<LockFileTarget> Targets { get; set; } = new List<LockFileTarget>();
-        public ExportFile ExportFile { get; set; }
-        public IList<LockFilePackageFolder> PackageFolders { get; set; } = new List<LockFilePackageFolder>();
-
-        public LockFile(string lockFilePath)
-        {
-            LockFilePath = lockFilePath;
-        }
-
-        public bool IsValidForProject(Project project)
+        public static bool IsValidForProject(this LockFile lockFile, Project project)
         {
             string message;
-            return IsValidForProject(project, out message);
+            return lockFile.IsValidForProject(project, out message);
         }
 
-        public bool IsValidForProject(Project project, out string message)
+        public static bool IsValidForProject(this LockFile lockFile, Project project, out string message)
         {
-            if (Version != CurrentVersion)
+            if (lockFile.Version != CurrentVersion)
             {
                 message = $"The expected lock file version does not match the actual version";
                 return false;
@@ -46,12 +27,12 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             var actualTargetFrameworks = project.GetTargetFrameworks();
 
             // The lock file should contain dependencies for each framework plus dependencies shared by all frameworks
-            if (ProjectFileDependencyGroups.Count != actualTargetFrameworks.Count() + 1)
+            if (lockFile.ProjectFileDependencyGroups.Count != actualTargetFrameworks.Count() + 1)
             {
                 return false;
             }
 
-            foreach (var group in ProjectFileDependencyGroups)
+            foreach (var group in lockFile.ProjectFileDependencyGroups)
             {
                 IOrderedEnumerable<string> actualDependencies;
                 var expectedDependencies = group.Dependencies.OrderBy(x => x);
@@ -60,7 +41,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 if (group.FrameworkName == null)
                 {
                     actualDependencies = project.Dependencies
-                        .Select(d => d.ToLockFileDependencyGroupString())
+                        .Select(d => d.LibraryRange.ToLockFileDependencyGroupString())
                         .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
                 }
                 else
@@ -73,7 +54,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                     }
 
                     actualDependencies = framework.Dependencies
-                        .Select(d => d.ToLockFileDependencyGroupString())
+                        .Select(d => d.LibraryRange.ToLockFileDependencyGroupString())
                         .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
                 }
 
