@@ -1,0 +1,52 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.DotNet.Publish.Props  
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process to deploy web application projects.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ 
+  <!-- 
+  ***********************************************************************************************
+  Global Properties
+  ***********************************************************************************************
+  -->
+
+  <PropertyGroup>
+    <PublishTasksDir Condition=" '$(PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)tools\net46\</PublishTasksDir>
+    <CopyTargetsDir Condition=" '$(CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</CopyTargetsDir>
+    <ComputeTargetsDir Condition=" '$(ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</ComputeTargetsDir>
+    <PublishTargetsDir Condition=" '$(PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</PublishTargetsDir>
+    <PublishProfilesDir Condition=" '$(PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</PublishProfilesDir>
+
+    <!-- For website project we will always exclude debug symbols from publishing. This can be overridden in the .pubxml file. -->
+    <ExcludeGeneratedDebugSymbol Condition="'$(ExcludeGeneratedDebugSymbol)'=='' And '$(_WebProjectType)' == 'WebSite'">True</ExcludeGeneratedDebugSymbol>
+    <ExcludeGeneratedDebugSymbol Condition="'$(ExcludeGeneratedDebugSymbol)'=='' And '$(Configuration)' == 'Release'">True</ExcludeGeneratedDebugSymbol>
+    <ExcludeGeneratedDebugSymbol Condition="'$(ExcludeGeneratedDebugSymbol)'==''">False</ExcludeGeneratedDebugSymbol>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BaseIntermediateOutputPath)'=='' ">
+    <BaseIntermediateOutputPath >$(MSBuildProjectDirectory)\obj\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(IntermediateOutputPath)' == '' ">
+    <IntermediateOutputPath Condition=" '$(PlatformName)' == 'AnyCPU' Or '$(PlatformName)' == ''">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition=" '$(IntermediateOutputPath)' == '' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
+ </PropertyGroup>
+
+  <PropertyGroup>
+    <IntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(IntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
+    <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath($(IntermediateOutputPath)PublishTemp\))</PublishIntermediateOutputPath>
+  </PropertyGroup>
+  
+</Project>

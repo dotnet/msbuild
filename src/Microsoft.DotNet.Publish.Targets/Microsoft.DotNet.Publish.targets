@@ -1,0 +1,87 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.DotNet.Publish.targets  
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process to deploy web application projects.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.DotNet.Publish.Props" Condition="Exists('$(MSBuildThisFileDirectory)\..\Microsoft.DotNet.Publish.Props')"/>
+  <Import Project="$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets')"/>
+
+  <!--
+  ***********************************************************************************************
+  Import the Collection target
+  ***********************************************************************************************
+ -->
+  
+  <PropertyGroup>
+    <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">Core</PublishProjectType> 
+    <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</PublishProjectType>
+    <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</PublishProjectType>
+    <PublishProjectType Condition="'$(PublishProjectType)' == '' ">WebSite</PublishProjectType>
+  </PropertyGroup>
+
+  <Import Project="$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets" Condition="Exists('$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets')" />
+
+  <!--
+  ***********************************************************************************************
+  Import the PublishProfiles
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</PublishProfileRootFolder>
+    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</PublishProfileRootFolder>
+    <PublishProfile Condition="'$(PublishProfile)' ==''">DefaultProfile</PublishProfile>
+    <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
+    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
+    <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(PublishProfilesDir)$(PublishProfileName).pubxml</PublishProfileFullPath>
+
+    <!-- This is what get passed from the Visual Studio UI.-->
+    <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == ''">$(PublishProfileFullPath)</WebPublishProfileFile>
+  </PropertyGroup>
+
+  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)')" />
+
+  <!--
+  ***********************************************************************************************
+  Import the PublishProtocol target
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <PublishProtocol Condition="'$(PublishProtocol)' == ''">$(WebPublishMethod)</PublishProtocol>
+    <!-- For backward compat -->
+    <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
+  </PropertyGroup>
+  
+  <Import Project="$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets" Condition="Exists('$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets')"/>
+  
+  <!--
+  ***********************************************************************************************
+  TARGET : DotNetPublish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <DotNetPublishDependsOn>
+      $(DotNetPublishComputeFiles);
+      $(DotNetPublishCopyFiles);
+      $(DotNetPublishFiles);
+    </DotNetPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="DotNetPublish" 
+          DependsOnTargets="$(DotNetPublishDependsOn)" 
+          AfterTargets="Build" 
+          Condition=" '$(PublishOnBuild)' =='true' " />
+
+</Project>
