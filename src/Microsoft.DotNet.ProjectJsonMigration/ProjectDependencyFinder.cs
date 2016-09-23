@@ -14,6 +14,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ProjectDependencyFinder 
     {
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(IEnumerable<ProjectContext> projectContexts)
+        {
+            foreach(var projectContext in projectContexts)
+            {
+                foreach(var projectDependency in ResolveProjectDependencies(projectContext))
+                {
+                    yield return projectDependency;
+                }
+            }
+        }
+
         public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, HashSet<string> preResolvedProjects=null)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
@@ -54,6 +65,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var projectSearchPaths = new List<string>();
             projectSearchPaths.Add(projectDirectory);
+            projectSearchPaths.Add(Path.GetDirectoryName(projectDirectory));
 
             var globalPaths = GetGlobalPaths(projectDirectory);
             projectSearchPaths = projectSearchPaths.Union(globalPaths).ToList();

@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Cli;
 using System.Linq;
 using System.IO;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
@@ -22,6 +24,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         //     - Migrating Deprecated project.jsons
 
         private readonly IMigrationRule _ruleSet;
+        private readonly ProjectDependencyFinder _projectDependencyFinder = new ProjectDependencyFinder();
 
         public ProjectMigrator() : this(new DefaultMigrationRuleSet()) { }
 
@@ -30,9 +33,73 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             _ruleSet = ruleSet;
         }
 
-        public void Migrate(MigrationSettings migrationSettings)
+        public void Migrate(MigrationSettings rootSettings, bool skipProjectReferences = false)
+        {
+            if (rootSettings == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            MigrateHelper(rootSettings);
+
+            if (skipProjectReferences)
+            {
+                return;
+            }
+
+            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory);
+
+            foreach(var project in projectDependencies)
+            {
+                var projectDir = Path.GetDirectoryName(project.ProjectFilePath);
+                var settings = new MigrationSettings(projectDir,
+                                                     projectDir,
+                                                     rootSettings.SdkPackageVersion,
+                                                     rootSettings.MSBuildProjectTemplate);
+                MigrateHelper(settings);
+            }
+        }
+
+        private IEnumerable<ProjectDependency> ResolveTransitiveClosureProjectDependencies(string rootProject)
+        {
+            HashSet<ProjectDependency> projectsMap = new HashSet<ProjectDependency>(new ProjectDependencyComparer());
+            var projectContexts = ProjectContext.CreateContextForEachFramework(rootProject);
+            var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectContexts);
+            Queue<ProjectDependency> projectsQueue = new Queue<ProjectDependency>(projectDependencies);
+
+            while(projectsQueue.Count() != 0)
+            {
+                var projectDependency = projectsQueue.Dequeue();
+
+                if (projectsMap.Contains(projectDependency))
+                {
+                    continue;
+                }
+
+                projectsMap.Add(projectDependency);
+
+                projectContexts = ProjectContext.CreateContextForEachFramework(projectDependency.ProjectFilePath);
+                projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectContexts);
+
+                foreach(var project in projectDependencies)
+                {
+                    projectsQueue.Enqueue(project);
+                }
+            }
+
+            return projectsMap;
+        }
+
+        private void MigrateHelper(MigrationSettings migrationSettings)
         {
             var migrationRuleInputs = ComputeMigrationRuleInputs(migrationSettings);
+
+            if (IsMigrated(migrationSettings, migrationRuleInputs))
+            {
+                // TODO : Adding user-visible logging
+                return;
+            }
+
             VerifyInputs(migrationRuleInputs, migrationSettings);
 
             SetupOutputDirectory(migrationSettings.ProjectDirectory, migrationSettings.OutputDirectory);
@@ -144,6 +211,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
                 File.Copy(sourceFilePath, destinationFilePath);
             }
+        }
+
+        public bool IsMigrated(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
+        {
+            var outputName = Path.GetFileNameWithoutExtension(
+                migrationRuleInputs.DefaultProjectContext.GetOutputPaths("_").CompilationFiles.Assembly);
+
+            var outputProject = Path.Combine(migrationSettings.OutputDirectory, outputName + ".csproj");
+            return File.Exists(outputProject);
         }
 
     }

@@ -113,6 +113,48 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
         }
 
+        [Theory]
+        [InlineData("ProjectA", "ProjectA,ProjectB,ProjectC,ProjectD,ProjectE")]
+        [InlineData("ProjectB", "ProjectB,ProjectC,ProjectD,ProjectE")]
+        [InlineData("ProjectC", "ProjectC,ProjectD,ProjectE")]
+        [InlineData("ProjectD", "ProjectD")]
+        [InlineData("ProjectE", "ProjectE")]
+        public void It_migrates_root_project_and_references(string projectName, string expectedProjects)
+        {
+            var projectDirectory =
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.RefsTest").Path;
+
+            MigrateProject(Path.Combine(projectDirectory, projectName));
+
+            string[] migratedProjects = expectedProjects.Split(new char[] { ',' });
+            foreach(var migratedProject in migratedProjects)
+            {
+                var dirInfo = new DirectoryInfo(Path.Combine(projectDirectory, migratedProject));
+                var csproj = $"{migratedProject}.csproj";
+                dirInfo.Should().HaveFile(csproj);
+            }
+         }
+
+        [Theory]
+        [InlineData("ProjectA")]
+        [InlineData("ProjectB")]
+        [InlineData("ProjectC")]
+        [InlineData("ProjectD")]
+        [InlineData("ProjectE")]
+        public void It_migrates_root_project_and_skips_references(string projectName)
+        {
+            var projectDirectory =
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.SkipRefsTest").Path;
+
+            MigrateCommand.Run(new [] { "-p", Path.Combine(projectDirectory, projectName), "--skip-project-references" }).Should().Be(0);
+
+            var migratedProjects = Directory.EnumerateFiles(projectDirectory, "*.csproj", SearchOption.AllDirectories);
+            migratedProjects.Count().Should().Be(1, "Only the root project must be migrated");
+
+            var migratedProject = Path.GetFileName(migratedProjects.First());
+            migratedProject.Should().Be($"{projectName}.csproj");
+         }
+
         private MigratedBuildComparisonData GetDotnetNewComparisonData(string projectDirectory, string dotnetNewType)
         {
             DotnetNew(projectDirectory, dotnetNewType);
