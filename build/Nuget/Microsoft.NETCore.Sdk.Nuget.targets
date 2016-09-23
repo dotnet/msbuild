@@ -95,6 +95,13 @@
       <CopyLocalBuildFile>
         <RelativePath>build\%(RecursiveDir)</RelativePath>
       </CopyLocalBuildFile>
+
+      <CopyLocalBuildCrossTargetingFile Include="$(OutDir)buildCrossTargeting\**\*.*" />
+      <CopyLocalBuildCrossTargetingFile>
+        <RelativePath>buildCrossTargeting\%(RecursiveDir)</RelativePath>
+      </CopyLocalBuildCrossTargetingFile>
+
+      <CopyLocalBuildFile Include="@(CopyLocalBuildCrossTargetingFile)" />
     </ItemGroup>
 
     <Copy SourceFiles="%(Net46CopyLocalAssembly.FullFilePath)"
