@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void GetGoodSDKs()
         {
             try
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void GetGoodSDKs2()
         {
             try
