@@ -70,24 +70,5 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
                 .And
                 .HaveStdOutContaining("Hello World!");            
         }
-
-        [Fact]
-        public void ItFailsToRunAMSBuildProjectWhenTheSpecifiedFrameworkIsNotInTheProject()
-        {
-            var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName)
-                .WithLockFiles();
-
-            var testProjectDirectory = testInstance.TestRoot;
-
-            new Run3Command()
-                .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework my-framework")
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World!");
-        }
     }
 }
