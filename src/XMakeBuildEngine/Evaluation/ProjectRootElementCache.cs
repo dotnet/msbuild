@@ -437,6 +437,18 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Remove any entries from the dictionary that represent keys
+        /// that have been garbage collected.
+        /// </summary>
+        internal void ScavengeCollectedEntries()
+        {
+            lock (_locker)
+            {
+                _weakCache.Scavenge();
+            }
+        }
+
+        /// <summary>
         /// Forces a removal of a project root element from the weak cache if it is present.
         /// </summary>
         /// <param name="projectRootElement">The project root element to remove.</param>
