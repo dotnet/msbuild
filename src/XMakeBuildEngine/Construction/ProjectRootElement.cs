@@ -247,6 +247,11 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// See comments for <see cref="ProjectRootElementCache.SetImplicitReferencesToAutoReload"/> 
+        /// </summary>
+        internal bool AutoReloadFromDisk { get; set; }
+
+        /// <summary>
         /// Event raised after this project is renamed
         /// </summary>
         internal event RenameHandlerDelegate OnAfterProjectRename;

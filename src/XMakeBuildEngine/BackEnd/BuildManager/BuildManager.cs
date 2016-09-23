@@ -413,7 +413,7 @@ namespace Microsoft.Build.Execution
                         config.ResultsNodeId = Scheduler.InvalidNodeId;
                     }
 
-                    _buildParameters.ProjectRootElementCache.ScavengeCollectedEntries();
+                    _buildParameters.ProjectRootElementCache.SetImplicitReferencesToAutoReload();
                 }
 
                 // Set up the logging service.

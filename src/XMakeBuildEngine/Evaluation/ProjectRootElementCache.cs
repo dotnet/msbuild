@@ -208,7 +208,8 @@ namespace Microsoft.Build.Evaluation
                     projectRootElement = null;
                 }
 
-                if (projectRootElement != null && _autoReloadFromDisk)
+                if (projectRootElement != null &&
+                    (_autoReloadFromDisk || projectRootElement.AutoReloadFromDisk))
                 {
                     FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
 
@@ -437,13 +438,33 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Remove any entries from the dictionary that represent keys
-        /// that have been garbage collected.
+        /// Set any implicitly loaded entries in the cache to automatically reload if they have
+        /// changed on disk, and clean up any entries that have been garbage collected.
         /// </summary>
-        internal void ScavengeCollectedEntries()
+        /// <remarks>
+        /// Previously, implicit references were always discarded when a build started (in BuildManager.BeginBuild).
+        /// This resulted in a lot of reloading of shared .props and .targets files when loading projects in a large
+        /// solution (see https://github.com/Microsoft/msbuild/issues/1068).
+        /// So now we don't remove these entries from the cache.  In order to preserve the previous behavior, we
+        /// do need to reload them if they've changed on disk, so we set an AutoReloadFromDisk on each ProjectRootElement
+        /// that was not explicitly loaded.
+        /// </remarks>
+        internal void SetImplicitReferencesToAutoReload()
         {
             lock (_locker)
             {
+                foreach (string projectPath in _weakCache.Keys)
+                {
+                    ProjectRootElement rootElement;
+
+                    if (_weakCache.TryGetValue(projectPath, out rootElement))
+                    {
+                        if (!rootElement.IsExplicitlyLoaded)
+                        {
+                            rootElement.AutoReloadFromDisk = true;
+                        }
+                    }
+                }
                 _weakCache.Scavenge();
             }
         }
