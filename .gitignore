@@ -173,8 +173,9 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 
-# Workaround: See https://github.com/dotnet/roslyn-project-system/issues/292
-/src/Templates/ProjectTemplates/CSharp/.NETCore/ConsoleApplication/AssemblyInfo.cs
-
 # Ignore Generated project json template file 
 project.json.template
+
+# Ignore Generated project template files 
+Project.csproj
+Project.vbproj

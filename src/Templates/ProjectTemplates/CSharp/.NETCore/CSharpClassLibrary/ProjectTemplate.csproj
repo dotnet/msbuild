@@ -1,16 +1,29 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Temporarily simulate an inner build until cross-targeting support for VS is checked in. This needs to be 
+       above the import of the props because the SDK.props will only get imported if the TargetFramework is set.-->
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+  </PropertyGroup>
+  
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   
   <PropertyGroup>
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.4</TargetFrameworkVersion>
+    <TargetFrameworks>netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
     <EmbeddedResource Include="**\*.resx" />
-    <None Include="project.json" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library">
+      <Version>1.6</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Sdk">
+      <Version>$$buildversion$$</Version>
+    </PackageReference>
+  </ItemGroup>
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

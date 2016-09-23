@@ -16,8 +16,7 @@
     <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
   </TemplateData>
   <TemplateContent>
-    <Project File="ProjectTemplate.vbproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="project.json">project.json.template</ProjectItem>
+    <Project File="Project.vbproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.vb</ProjectItem>
     </Project>
   </TemplateContent>
