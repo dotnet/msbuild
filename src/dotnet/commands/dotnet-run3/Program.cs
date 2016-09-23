@@ -21,14 +21,22 @@ namespace Microsoft.DotNet.Tools.Run
             app.AllowArgumentSeparator = true;
             app.HelpOption("-h|--help");
 
-            CommandOption configuration = app.Option("-c|--configuration", "Configuration under which to build", CommandOptionType.SingleValue);
-            CommandOption project = app.Option("-p|--project", "The path to the project file to run (defaults to the current directory if there is only one project).", CommandOptionType.SingleValue);
+            CommandOption configuration = app.Option(
+                "-c|--configuration", "Configuration under which to build",
+                CommandOptionType.SingleValue);
+            CommandOption framework = app.Option(
+                "-f|--framework <FRAMEWORK>", "Compile a specific framework",
+                CommandOptionType.SingleValue);
+            CommandOption project = app.Option(
+                "-p|--project", "The path to the project file to run (defaults to the current directory if there is only one project).",
+                CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
                 Run3Command runCmd = new Run3Command();
 
                 runCmd.Configuration = configuration.Value();
+                runCmd.Framework = framework.Value();
                 runCmd.Project = project.Value();
                 runCmd.Args = app.RemainingArguments;
 

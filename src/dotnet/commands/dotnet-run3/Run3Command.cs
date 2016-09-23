@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Tools.Run
     public partial class Run3Command
     {
         public string Configuration { get; set; }
+        public string Framework { get; set; }
         public string Project { get; set; }
         public IReadOnlyList<string> Args { get; set; }
 
@@ -48,6 +49,11 @@ namespace Microsoft.DotNet.Tools.Run
                 buildArgs.Add($"/p:Configuration={Configuration}");
             }
 
+            if (!string.IsNullOrWhiteSpace(Framework))
+            {
+                buildArgs.Add($"/p:TargetFramework={Framework}");
+            }
+
             var buildResult = new MSBuildForwardingApp(buildArgs).Execute();
 
             if (buildResult != 0)
@@ -67,6 +73,11 @@ namespace Microsoft.DotNet.Tools.Run
             if (!string.IsNullOrWhiteSpace(Configuration))
             {
                 globalProperties.Add("Configuration", Configuration);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Framework))
+            {
+                globalProperties.Add("TargetFramework", Framework);
             }
 
             ProjectInstance projectInstance = new ProjectInstance(Project, globalProperties, null);
