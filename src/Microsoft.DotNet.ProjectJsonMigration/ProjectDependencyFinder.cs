@@ -61,13 +61,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(string projectJsonFilePath)
         {
-            var projectDirectory = Path.GetDirectoryName(projectJsonFilePath);
+            var projectRootDirectory = GetRootFromProjectJson(projectJsonFilePath);
 
             var projectSearchPaths = new List<string>();
-            projectSearchPaths.Add(projectDirectory);
-            projectSearchPaths.Add(Path.GetDirectoryName(projectDirectory));
+            projectSearchPaths.Add(projectRootDirectory);
 
-            var globalPaths = GetGlobalPaths(projectDirectory);
+            var globalPaths = GetGlobalPaths(projectRootDirectory);
             projectSearchPaths = projectSearchPaths.Union(globalPaths).ToList();
 
             var projects = new Dictionary<string, ProjectDependency>(StringComparer.Ordinal);
@@ -103,6 +102,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
 
             return projects;
+        }
+
+        /// <summary>
+        /// Finds the parent directory of the project.json.
+        /// </summary>
+        /// <param name="projectJsonPath">Full path to project.json.</param>
+        private static string GetRootFromProjectJson(string projectJsonPath)
+        {
+            if (!string.IsNullOrEmpty(projectJsonPath))
+            {
+                var file = new FileInfo(projectJsonPath);
+
+                // If for some reason we are at the root of the drive this will be null
+                // Use the file directory instead.
+                if (file.Directory.Parent == null)
+                {
+                    return file.Directory.FullName;
+                }
+                else
+                {
+                    return file.Directory.Parent.FullName;
+                }
+            }
+
+            return projectJsonPath;
         }
 
         /// <summary>
