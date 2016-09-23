@@ -969,11 +969,5 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-  <ItemGroup>
-    <FilesToSign Include="$(OutDir)\$(AssemblyName)$(TargetExt)">
-      <Authenticode>Microsoft</Authenticode>
-      <StrongName>StrongName</StrongName>
-    </FilesToSign>
-  </ItemGroup>
   <Import Project="..\dir.targets" />
 </Project>
