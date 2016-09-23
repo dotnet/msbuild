@@ -17,6 +17,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Xunit;
 
+using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
 
 namespace Microsoft.Build.UnitTests
@@ -1460,6 +1461,118 @@ namespace Microsoft.Build.UnitTests
             string[] result = content.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             return result;
+        }
+
+        /// <summary>
+        /// Used for file matching tests
+        /// MSBuild does not accept forward slashes on rooted paths, so those are returned unchanged
+        /// </summary>
+        internal static string ToForwardSlash(string path) =>
+            Path.IsPathRooted(path)
+                ? path
+                : path.ToSlash();
+
+        /// <summary>
+        /// Creates a new temp path
+        /// Sets all OS temp environment variables to the new path
+        /// 
+        /// Cleanup:
+        /// - restores OS temp environment variables
+        /// - deletes all files written to the new temp path
+        /// </summary>
+        internal class AlternativeTempPath : IDisposable
+        {
+            private const string TMP = "TMP";
+            private const string TMPDIR = "TMPDIR";
+            private const string TEMP = "TEMP";
+
+            private TempPaths _oldtempPaths;
+            private bool _disposed;
+
+            private string _path;
+            public string Path
+            {
+                get
+                {
+                    if (_disposed)
+                    {
+                        throw new ObjectDisposedException($"{nameof(AlternativeTempPath)}(\"{_path})\"");
+                    }
+
+                    return _path;
+                }
+
+                private set { _path = value; }
+            }
+
+            public AlternativeTempPath()
+            {
+                Path = System.IO.Path.GetFullPath($"TMP_{Guid.NewGuid()}");
+                Directory.CreateDirectory(_path);
+
+                _oldtempPaths = SetTempPath(_path);
+            }
+
+            public void Dispose()
+            {
+                Cleanup();
+                GC.SuppressFinalize(this);
+            }
+
+            private void Cleanup()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                SetTempPaths(_oldtempPaths);
+                FileUtilities.DeleteDirectoryNoThrow(Path, true);
+
+                _disposed = true;
+            }
+
+            ~AlternativeTempPath()
+            {
+                Cleanup();
+            }
+
+            private static TempPaths SetTempPaths(TempPaths tempPaths)
+            {
+                var oldTempPaths = GetTempPaths();
+
+                foreach (var key in oldTempPaths.Keys)
+                {
+                    Environment.SetEnvironmentVariable(key, tempPaths[key]);
+                }
+
+                return oldTempPaths;
+            }
+
+            private static TempPaths SetTempPath(string tempPath)
+            {
+                var oldTempPaths = GetTempPaths();
+
+                foreach (var key in oldTempPaths.Keys)
+                {
+                    Environment.SetEnvironmentVariable(key, tempPath);
+                }
+
+                return oldTempPaths;
+            }
+
+            private static TempPaths GetTempPaths()
+            {
+                var tempPaths = new TempPaths { [TMP] = Environment.GetEnvironmentVariable(TMP) };
+
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    tempPaths[TMPDIR] = Environment.GetEnvironmentVariable(TMPDIR);
+                    tempPaths[TEMP] = Environment.GetEnvironmentVariable(TEMP);
+                }
+
+                return tempPaths;
+            }
         }
     }
 }
