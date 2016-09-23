@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25512.0
+VisualStudioVersion = 15.0.25702.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Publishing.Tasks", "src\Microsoft.DotNet.Publishing.Tasks\Microsoft.DotNet.Publishing.Tasks.csproj", "{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}"
 EndProject
@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CollectTargets", "CollectTa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DeployTargets", "DeployTargets", "{3AF52BAD-605D-4DF2-A2BF-CD48E5A42FA2}"
 	ProjectSection(SolutionItems) = preProject
+		src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.Common.Publishing.targets = src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.Common.Publishing.targets
 		src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.FileSystem.Publishing.targets = src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.FileSystem.Publishing.targets
 		src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.FTP.Publishing.targets = src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.FTP.Publishing.targets
 		src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.Kudu.Publishing.targets = src\Microsoft.DotNet.Publishing.Targets\DeployTargets\Microsoft.Kudu.Publishing.targets

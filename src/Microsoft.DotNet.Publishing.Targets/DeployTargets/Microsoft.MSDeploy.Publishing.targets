@@ -76,6 +76,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </MsDeployDestinationProviderSetting>
     </ItemGroup>
 
+    <!-- Additional destination provider settings -->
+    <ItemGroup>
+      <MsDeployAdditionalDestinationProviderSettings Include="$(MSDeployEncryptProviderName)">
+        <Name>WebConfigEncryptProvider</Name>
+        <Value>$(MSDeployWebConfigEncryptProvider)</Value>
+      </MsDeployAdditionalDestinationProviderSettings>
+    </ItemGroup>
+
     <PropertyGroup>
       <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
       <MsDeployDoNotDeleteRule Condition="$(SkipExtraFilesOnServer) == 'true'">DoNotDeleteRule</MsDeployDoNotDeleteRule>
@@ -85,7 +93,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <AllowUntrustedCertificate Condition=" '$(AllowUntrustedCertificate)' == '' ">false</AllowUntrustedCertificate>
 
       <!-- UserAgent string sent to msdeploy -->
-      <BuildingInsideVisualStudio>false</BuildingInsideVisualStudio>
       <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
       <_MSDeployUserAgent>VS$(_MSDeployUserAgentSource)</_MSDeployUserAgent>
 
@@ -96,17 +103,39 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Destination="@(MsDeployDestinationProviderSetting)"
         EnableLink="$(PublishEnableLinks)"
         AllowUntrustedCertificate="$(AllowUntrustedCertificate)"
-        BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)"
         SkipExtraFilesOnServer="$(SkipExtraFilesOnServer)"
         SkipRuleItems="@(MsDeploySkipRules)"
         WhatIf="false"
         RetryAttempts="$(RetryAttemptsForDeployment)"
         EnableMSDeployBackup="$(EnableMSDeployBackup)"
+        AdditionalDestinationProviderOptions="@(MsDeployAdditionalDestinationProviderSettings)"
         UseChecksum="$(MSDeployUseChecksum)"
-        UserAgent="$(_MSDeployUserAgent)"
-        InvokedByPublish="true">
+        UserAgent="$(_MSDeployUserAgent)">
       <Output TaskParameter="Result" PropertyName="_PublishResult" />
     </VSMSDeploy>
+
+    <PropertyGroup>
+      <_EnableRuleList>$(MsDeployDoNotDeleteRule)</_EnableRuleList>
+      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(EnableMSDeployAppOffline)'=='true'">AppOffline</_EnableRuleList>
+      <_EnableRuleList Condition="'$(_EnableRuleList)'!='' and '$(EnableMSDeployAppOffline)'=='true'">$(_EnableRuleList);AppOffline</_EnableRuleList>
+      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(MSDeployEnableWebConfigEncryptRule)'=='true'">EncryptWebConfig</_EnableRuleList>
+      <_EnableRuleList Condition="'$(_EnableRuleList)'!='' and '$(MSDeployEnableWebConfigEncryptRule)'=='true'">$(_EnableRuleList);EncryptWebConfig</_EnableRuleList>
+    </PropertyGroup>
+    <MSdeploy
+          Condition="$(UseMsdeployExe)"
+          Verb="sync"
+          Source="@(MsDeploySourceProviderSetting)"
+          Destination="@(MsDeployDestinationProviderSetting)"
+          DisableLink="$(PublishDisableLinks)"
+          EnableLink="$(PublishEnableLinks)"
+          EnableRule="$(_EnableRuleList)"
+          AllowUntrusted="$(AllowUntrustedCertificate)"
+          SkipRuleItems="@(MsDeploySkipRules)"
+          RetryAttempts="$(RetryAttemptsForDeployment)"
+          AdditionalDestinationProviderOptions="@(MsDeployAdditionalDestinationProviderSettings)"
+          UseChecksum="$(MSDeployUseChecksum)"
+          UserAgent="$(_MSDeployUserAgent)"
+          ExePath="$(MSDeployPath)" />
   </Target>
 
 

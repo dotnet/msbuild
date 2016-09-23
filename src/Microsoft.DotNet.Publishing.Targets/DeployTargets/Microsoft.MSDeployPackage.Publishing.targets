@@ -1,15 +1,155 @@
 ﻿<!--
 ***********************************************************************************************
-Microsoft.MSDeployPackage.Publishing.targets
+Microsoft.MSDeployPackage.Publishing.targets 
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your web deploy projects from the command-line or the IDE.
 
-This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+This file defines the steps in the standard build process to deploy web application projects.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
+
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+  ***********************************************************************************************
+  Including the tasks
+  ***********************************************************************************************
+ -->
+  <UsingTask TaskName="MSDeploy" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(DotNetPublishingTasksDir)Microsoft.DotNet.Publishing.Tasks.dll"/>
+
+
+  <PropertyGroup>
+    <DotNetPublishFiles>
+      $(DotNetPublishFiles);
+      MSDeployPackagePublish;
+    </DotNetPublishFiles>
+  </PropertyGroup>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : MSDeployPackagePublish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <MSDeployPackagePublishDependsOn>
+      $(MSDeployPackagePublishDependsOn);
+    </MSDeployPackagePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="MSDeployPackagePublish" DependsOnTargets="$(MSDeployPackagePublishDependsOn)">
+
+    <ValidateParameter
+    ParameterName="DeployIisAppPath"
+    ParameterValue="$(DeployIisAppPath)"/>
+
+    <!-- Normalize service url such as convert a server name to format like https://<server>:8172/msdeploy.axd-->
+    <NormalizeServiceUrl ServiceUrl="$(MsDeployServiceUrl)" UseWMSVC="true" UseRemoteAgent="false">
+      <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />
+    </NormalizeServiceUrl>
+
+    <!--  Data Passed to MSDeploy -->
+    <ItemGroup>
+      <MsDeploySourceProviderSetting Include="IisApp">
+        <Path>$(PublishIntermediateOutputPath)</Path>
+      </MsDeploySourceProviderSetting>
+      <MsDeployDestinationProviderSetting Include="Package">
+        <Path>$(DesktopBuildPackageLocation)</Path>
+      </MsDeployDestinationProviderSetting>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
+      <MsDeployDoNotDeleteRule Condition="$(SkipExtraFilesOnServer) == 'true'">DoNotDeleteRule</MsDeployDoNotDeleteRule>
+      <_EnableRuleList>$(MsDeployDoNotDeleteRule)</_EnableRuleList>
+
+      <!-- UserAgent string sent to msdeploy -->
+      <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
+      <_MSDeployUserAgent>VS$(_MSDeployUserAgentSource)</_MSDeployUserAgent>
+
+    </PropertyGroup>
+
+    <VSMSDeploy Condition="!$(UseMsdeployExe)"
+       MSDeployVersionsToTry="$(_MSDeployVersionsToTry)"
+       Source="@(MsDeploySourceProviderSetting)"
+       Destination="@(MsDeployDestinationProviderSetting)"
+       DeploymentTraceLevel="$(PackageTraceLevel)"
+       DisableLink="$(PackageDisableLinks)"
+       EnableLink="$(PackageEnableLinks)"
+       DeclareParameterItems="@(_Package_MsDeployDeclareParameters)"
+       OptimisticParameterDefaultValue="$(EnableOptimisticParameterDefaultValue)"
+       ImportDeclareParametersItems="$(_VsPackageParametersFile)"
+       ReplaceRuleItems="@(MsDeployReplaceRules)"
+       RetryAttempts="$(RetryAttemptsForDeployment)">
+      <Output TaskParameter="Result" PropertyName="PackageResult" />
+    </VSMSDeploy>
+
+    <MSdeploy
+      Condition="$(UseMsdeployExe)"
+      Verb="sync"
+      Source="@(MsDeploySourceProviderSetting)"
+      Destination="@(MsDeployDestinationProviderSetting)"
+      DisableLink="$(PackageDisableLinks)"
+      EnableLink="$(PackageEnableLinks)"
+      DeclareParameterItems="@(_Package_MsDeployDeclareParameters)"
+      OptimisticParameterDefaultValue="$(EnableOptimisticParameterDefaultValue)"
+      ImportDeclareParametersItems="$(_VsPackageParametersFile)"
+      ReplaceRuleItems="@(MsDeployReplaceRules)"
+      RetryAttempts="$(RetryAttemptsForDeployment)"
+      ExePath="$(MSDeployPath)"
+      />
+  </Target>
+
+
+  <!--
+  ***********************************************************************************************
+  Item Definitions
+  ***********************************************************************************************
+ -->
+
+  <ItemDefinitionGroup>
+    <MsDeploySourceProviderSetting>
+      <Path></Path>
+      <ComputerName></ComputerName>
+      <!--<Wmsvc></Wmsvc>  Not supported yet-->
+      <UserName></UserName>
+      <Password></Password>
+      <EncryptPassword></EncryptPassword>
+      <IncludeAcls></IncludeAcls>
+      <authType></authType>
+      <prefetchPayload></prefetchPayload>
+    </MsDeploySourceProviderSetting>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <MsDeployDestinationProviderSetting>
+      <Path></Path>
+      <ComputerName></ComputerName>
+      <!--<Wmsvc></Wmsvc>  Not supported yet-->
+      <UserName></UserName>
+      <Password></Password>
+      <EncryptPassword></EncryptPassword>
+      <IncludeAcls></IncludeAcls>
+      <authType></authType>
+      <prefetchPayload></prefetchPayload>
+    </MsDeployDestinationProviderSetting>
+  </ItemDefinitionGroup>
+  <!--
+  DeploymentSkipRule(string skipAction, string objectName, string absolutePath, string XPath);-->
+  <ItemDefinitionGroup>
+    <MsDeploySkipRules>
+      <SkipAction></SkipAction>
+      <ObjectName></ObjectName>
+      <AbsolutePath></AbsolutePath>
+      <XPath></XPath>
+      <KeyAttribute></KeyAttribute>
+      <!--Source, Destination, Both(the default)-->
+      <Apply></Apply>
+    </MsDeploySkipRules>
+  </ItemDefinitionGroup>
 </Project>
