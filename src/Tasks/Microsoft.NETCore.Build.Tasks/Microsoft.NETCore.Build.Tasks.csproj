@@ -40,13 +40,16 @@
     <Compile Include="RuntimeConfig.cs" />
     <Compile Include="RuntimeConfigFramework.cs" />
     <Compile Include="RuntimeOptions.cs" />
+    <None Include="buildCrossTargeting\Microsoft.NETCore.Sdk.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="buildCrossTargeting\Microsoft.NETCore.Sdk.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.PreserveCompilationContext.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.GenerateAssemblyInfo.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\cross\Microsoft.NETCore.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.VisualBasic.props">
