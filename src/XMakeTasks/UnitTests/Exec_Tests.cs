@@ -44,15 +44,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoTempFileLeaks()
         {
-            string oldTmpPath = Environment.GetEnvironmentVariable("TMP");
-            var newTempPath = Path.GetFullPath(@"TempPathForNoTempFileLeaksTest");
-
-            try
+            using (var alternativeTemp = new Helpers.AlternativeTempPath())
             {
                 // This test counts files in TEMP. If it uses the system TEMP, some
                 // other process may interfere. Use a private TEMP instead.
-                Directory.CreateDirectory(newTempPath);
-                Environment.SetEnvironmentVariable("TMP", newTempPath);
+                var newTempPath = alternativeTemp.Path;
 
                 string tempPath = Path.GetTempPath();
                 Assert.StartsWith(newTempPath, tempPath);
@@ -74,11 +70,6 @@ namespace Microsoft.Build.UnitTests
 
                 // Ensure that no files linger in TEMP.
                 Assert.Empty(tempFiles);
-            }
-            finally
-            {
-                FileUtilities.DeleteDirectoryNoThrow(newTempPath, true);
-                Environment.SetEnvironmentVariable("TMP", oldTmpPath);
             }
         }
 
