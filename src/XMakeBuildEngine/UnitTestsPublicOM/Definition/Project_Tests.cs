@@ -2594,6 +2594,41 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceShouldReturnTheSameResultsIfProjectIsReevaluated()
+        {
+            var projectContents =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.foo`/>
+                    <B Include=`1.foo;2.foo` Exclude=`*.foo`/>
+                    <C Include=`2` Exclude=`*.bar`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+                Tuple.Create("B", Operation.Exclude, Provenance.Glob, 1)
+            };
+
+            // Create a project. The initial evaluation does not record the information needed for GetItemProvenance
+            var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
+
+            // Since GetItemProvenance does not have the required evaluator data (evaluated item elements), it internally reevaluates the project to collect it
+            var provenanceResult = project.GetItemProvenance("2.foo");
+            AssertProvenanceResult(expected, provenanceResult);
+
+            // Dirty the xml to force another reevaluation.
+            project.AddItem("new", "new value");
+            project.ReevaluateIfNecessary();
+
+            // Assert that provenance returns the same result and that no data duplication happened
+            provenanceResult = project.GetItemProvenance("2.foo");
+            AssertProvenanceResult(expected, provenanceResult);
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldHandleComplexGlobExclusion()
         {
             var project =
