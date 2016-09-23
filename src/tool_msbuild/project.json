@@ -10,11 +10,11 @@
     },
     "MSBuild": "0.1.0-preview-00039-160922",
     "Microsoft.Build.Targets": "0.1.0-preview-00039-160922",
-    "Microsoft.Net.Compilers.netcore": "2.0.0-beta6-60920-07",
-    "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60920-07",
+    "Microsoft.Net.Compilers.netcore": "2.0.0-beta6-60922-08",
+    "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
     "Microsoft.Cci": "4.0.0-rc3-24128-00",
     "Microsoft.Composition": "1.0.30",
-    "Microsoft.NuGet.Build.Tasks": "1.0.0-alpha-000003"
+    "Microsoft.NuGet.Build.Tasks": "1.0.0-alpha-000004"
   },
   "frameworks": {
     "netcoreapp1.0": {

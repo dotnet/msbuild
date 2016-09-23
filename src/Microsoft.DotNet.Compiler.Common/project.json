@@ -4,7 +4,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.CodeAnalysis.CSharp": "2.0.0-beta6-60920-07",
+    "Microsoft.CodeAnalysis.CSharp": "2.0.0-beta6-60922-08",
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
