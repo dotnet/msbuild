@@ -64,12 +64,12 @@ namespace Microsoft.Build.Shared
 
             var possibleLocations = new Func<BuildEnvironment>[]
             {
+                // Check explicit %MSBUILD_EXE_PATH% environment variable.
+                () => TryFromEnvironmentVariable(runningTests, runningInVisualStudio, visualStudioPath),
+
                 // See if we're running from MSBuild.exe
                 () => TryFromCurrentProcess(processNameCommandLine, runningTests, runningInVisualStudio, visualStudioPath),
                 () => TryFromCurrentProcess(processNameCurrentProcess, runningTests, runningInVisualStudio, visualStudioPath),
-
-                // Check explicit %MSBUILD_EXE_PATH% environment variable.
-                () => TryFromEnvironmentVariable(runningTests, runningInVisualStudio, visualStudioPath),
 
                 // Try from our current executing assembly (e.g. path to Microsoft.Build.dll)
                 () => TryFromFolder(Path.GetDirectoryName(executingAssembly), runningTests, runningInVisualStudio, visualStudioPath),
@@ -77,15 +77,15 @@ namespace Microsoft.Build.Shared
                 // Try based on the Visual Studio Root
                 ()=> TryFromFolder(msbuildFromVisualStudioRoot, runningTests, runningInVisualStudio, visualStudioPath),
 
-                // Try from the current directory
-                () => TryFromFolder(currentDirectory, runningTests, runningInVisualStudio, visualStudioPath),
-
 #if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
                 // Try the base directory that the assembly resolver uses to probe for assemblies.
                 // Under certain scenarios the assemblies are loaded from spurious locations like the NuGet package cache
                 // but the toolset files are copied to the app's directory via "contentFiles".
-                () => TryFromFolder(appContextBaseDirectory, runningTests, runningInVisualStudio, visualStudioPath)
+                () => TryFromFolder(appContextBaseDirectory, runningTests, runningInVisualStudio, visualStudioPath),
 #endif
+
+                // Try from the current directory
+                () => TryFromFolder(currentDirectory, runningTests, runningInVisualStudio, visualStudioPath),
             };
 
             foreach (var location in possibleLocations)
