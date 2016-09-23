@@ -14,7 +14,8 @@ namespace Microsoft.NETCore.Build.Tests
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
-        [Fact]
+        // This test needs to be run with restore3. Skipping this test until we can enable restore3 in the tests.
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/75")]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
