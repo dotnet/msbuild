@@ -97,11 +97,13 @@
       AccountKey="$(CloudDropAccessToken)"
       AccountName="$(CloudDropAccountName)"
       ContainerName="$(ContainerName)"
-      Items="@(CliVersionBadgeToUpload)" />
+      Items="@(CliVersionBadgeToUpload)"
+      Overwrite="$(OverwriteOnPublish)" />
 
     <SetBlobPropertiesBasedOnFileType
       AccountKey="$(CloudDropAccessToken)"
       AccountName="$(CloudDropAccountName)"
+      ContainerName="$(ContainerName)"
       Items="@(CliVersionBadgeToUpload)" />
   </Target>
 </Project>
