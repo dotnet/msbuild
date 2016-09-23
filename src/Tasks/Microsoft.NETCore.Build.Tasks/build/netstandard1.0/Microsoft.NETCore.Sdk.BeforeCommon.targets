@@ -13,9 +13,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->
   <PropertyGroup>
+
+    <!-- Since Microsoft.Common.targets hasn't be loaded yet, need to handle $(OutputPath) without a trailing slash -->
+    <_TempOutputPath>$(OutputPath)</_TempOutputPath>
+    <_TempOutputPath Condition="!HasTrailingSlash('$(_TempOutputPath)')">$(_TempOutputPath)\</_TempOutputPath>
+
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
-    <PublishDir Condition="'$(PublishDir)' == '' and '$(RuntimeIdentifier)' != ''">$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\</PublishDir>
-    <PublishDir Condition="'$(PublishDir)' == ''">$(OutputPath)$(PublishDirName)\</PublishDir>
+    <PublishDir Condition="'$(PublishDir)' == '' and '$(RuntimeIdentifier)' != ''">$(_TempOutputPath)$(RuntimeIdentifier)\$(PublishDirName)\</PublishDir>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(_TempOutputPath)$(PublishDirName)\</PublishDir>
   </PropertyGroup>
 
   <Import Condition="'$(TargetFramework)' != ''"
