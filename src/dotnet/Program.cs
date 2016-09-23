@@ -15,6 +15,8 @@ using Microsoft.DotNet.Tools.Build3;
 using Microsoft.DotNet.Tools.Compiler;
 using Microsoft.DotNet.Tools.Compiler.Csc;
 using Microsoft.DotNet.Tools.Help;
+using Microsoft.DotNet.Tools.Migrate;
+using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
 using Microsoft.DotNet.Tools.Pack3;
@@ -24,7 +26,6 @@ using Microsoft.DotNet.Tools.Restore3;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
-using Microsoft.DotNet.Tools.Migrate;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
