@@ -22,14 +22,28 @@ namespace Microsoft.DotNet.Tools.Publish3
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument("<PROJECT>",
-                "The MSBuild project file to publish. If a project file is not specified," +
-                " MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.");
+                "The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current" +
+                " working directory for a file that has a file extension that ends in `proj` and uses that file.");
 
-            CommandOption frameworkOption = app.Option("-f|--framework <FRAMEWORK>", "Target framework to publish for", CommandOptionType.SingleValue);
-            CommandOption runtimeOption = app.Option("-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to publish for", CommandOptionType.SingleValue);
-            CommandOption outputOption = app.Option("-o|--output <OUTPUT_DIR>", "Path in which to publish the app", CommandOptionType.SingleValue);
-            CommandOption configurationOption = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            CommandOption versionSuffixOption = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines the value for the $(VersionSuffix) property in the project", CommandOptionType.SingleValue);
+            CommandOption frameworkOption = app.Option(
+                "-f|--framework <FRAMEWORK>", "Target framework to publish for",
+                CommandOptionType.SingleValue);
+
+            CommandOption runtimeOption = app.Option(
+                "-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to publish for. The default is to publish a portable application.",
+                CommandOptionType.SingleValue);
+
+            CommandOption outputOption = app.Option(
+                "-o|--output <OUTPUT_DIR>", "Path in which to publish the app",
+                CommandOptionType.SingleValue);
+
+            CommandOption configurationOption = app.Option(
+                "-c|--configuration <CONFIGURATION>", "Configuration under which to build",
+                CommandOptionType.SingleValue);
+
+            CommandOption versionSuffixOption = app.Option(
+                "--version-suffix <VERSION_SUFFIX>", "Defines the value for the $(VersionSuffix) property in the project",
+                CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
