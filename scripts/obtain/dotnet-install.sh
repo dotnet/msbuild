@@ -295,8 +295,9 @@ get_latest_version_info() {
     local azure_channel=$2
     local normalized_architecture=$3
     
-    local osname=$(get_current_os_name)
-    
+    local osname
+    osname=$(get_current_os_name) || return 1
+
     local version_file_url=null
     if [ "$shared_runtime" = true ]; then
         version_file_url="$uncached_feed/$azure_channel/dnvm/latest.sharedfx.$osname.$normalized_architecture.version"
@@ -341,10 +342,11 @@ get_specific_version_from_version() {
     local azure_channel=$2
     local normalized_architecture=$3
     local version=$(to_lowercase $4)
-    
+
     case $version in
         latest)
-            local version_info="$(get_latest_version_info $azure_feed $azure_channel $normalized_architecture)"
+            local version_info
+	    version_info="$(get_latest_version_info $azure_feed $azure_channel $normalized_architecture)" || return 1
             say_verbose "get_specific_version_from_version: version_info=$version_info"
             echo "$version_info" | get_version_from_version_info
             return 0
@@ -373,7 +375,8 @@ construct_download_link() {
     local normalized_architecture=$3
     local specific_version=${4//[$'\t\r\n']}
     
-    local osname=$(get_current_os_name)
+    local osname
+    osname=$(get_current_os_name) || return 1
     
     local download_link=null
     if [ "$shared_runtime" = true ]; then
