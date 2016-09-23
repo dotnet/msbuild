@@ -24,8 +24,8 @@
             <Destination>CopyTargets</Destination>
         </NuGetContent>
 
-        <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\PublishProfiles\*.*">
-            <Destination>PublishProfiles</Destination>
+        <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\Profiles\*.*">
+            <Destination>Profiles</Destination>
         </NuGetContent>
 
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.props" />
