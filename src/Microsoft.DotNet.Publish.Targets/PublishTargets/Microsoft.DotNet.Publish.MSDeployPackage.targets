@@ -21,7 +21,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
   <UsingTask TaskName="MSDeploy" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
   <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
-  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
   <UsingTask TaskName="ValidateParameter" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
 
 
@@ -48,11 +47,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ValidateParameter
     ParameterName="DeployIisAppPath"
     ParameterValue="$(DeployIisAppPath)"/>
-
-    <!-- Normalize service url such as convert a server name to format like https://<server>:8172/msdeploy.axd-->
-    <NormalizeServiceUrl ServiceUrl="$(MsDeployServiceUrl)" UseWMSVC="true" UseRemoteAgent="false">
-      <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />
-    </NormalizeServiceUrl>
 
     <!--  Data Passed to MSDeploy -->
     <ItemGroup>
