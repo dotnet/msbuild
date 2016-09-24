@@ -124,6 +124,8 @@ namespace Microsoft.DotNet.Migration.Tests
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.RefsTest").Path;
 
+            FixUpProjectJsons(projectDirectory);
+
             MigrateProject(Path.Combine(projectDirectory, projectName));
 
             string[] migratedProjects = expectedProjects.Split(new char[] { ',' });
@@ -146,6 +148,8 @@ namespace Microsoft.DotNet.Migration.Tests
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.SkipRefsTest").Path;
 
+            FixUpProjectJsons(projectDirectory);
+
             MigrateCommand.Run(new [] { "-p", Path.Combine(projectDirectory, projectName), "--skip-project-references" }).Should().Be(0);
 
             var migratedProjects = Directory.EnumerateFiles(projectDirectory, "*.csproj", SearchOption.AllDirectories);
@@ -153,6 +157,17 @@ namespace Microsoft.DotNet.Migration.Tests
 
             var migratedProject = Path.GetFileName(migratedProjects.First());
             migratedProject.Should().Be($"{projectName}.csproj");
+         }
+
+         private void FixUpProjectJsons(string projectDirectory)
+         {
+             var pjs = Directory.EnumerateFiles(projectDirectory, "project.json.1", SearchOption.AllDirectories);
+
+             foreach(var pj in pjs)
+             {
+                 var newPj = pj.Replace("project.json.1", "project.json");
+                 File.Move(pj, newPj);
+             }
          }
 
         private MigratedBuildComparisonData GetDotnetNewComparisonData(string projectDirectory, string dotnetNewType)

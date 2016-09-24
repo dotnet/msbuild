@@ -10,6 +10,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
@@ -77,7 +78,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private IEnumerable<string> ResolveXProjProjectDependencyNames(ProjectRootElement xproj)
         {
             var xprojDependencies = ResolveXProjProjectDependencies(xproj).SelectMany(r => r.Includes());
-            return new HashSet<string>(xprojDependencies.Select(p => Path.GetFileNameWithoutExtension(p)));
+            return new HashSet<string>(xprojDependencies.Select(p => Path.GetFileNameWithoutExtension(
+                                                                          PathUtility.GetPathWithDirectorySeparator(p))));
         }
 
         internal IEnumerable<ProjectItemElement> ResolveXProjProjectDependencies(ProjectRootElement xproj)

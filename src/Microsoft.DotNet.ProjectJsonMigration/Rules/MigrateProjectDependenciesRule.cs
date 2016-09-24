@@ -31,7 +31,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             _projectDirectory = migrationSettings.ProjectDirectory;
 
             var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationRuleInputs);
-            var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
+            var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(
+                                                                                                                 PathUtility.GetPathWithDirectorySeparator(p))));
 
             AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
             MigrateProjectJsonProjectDependencies(
