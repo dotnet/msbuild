@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.Build.Tasks</name>
+    </assembly>
+    <members>
+        <member name="P:NuGet.Build.Tasks.GetPackageReferences.ProjectUniqueName">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetPackageReferences.TargetFrameworks">
+            <summary>
+            Target frameworks to apply this for. If empty this applies to all.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetPackageReferences.RestoreGraphItems">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectJsonPathTask.ProjectPath">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectJsonPathTask.ProjectJsonPath">
+            <summary>
+            Output path to project.json if it exists.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectReferences.ProjectUniqueName">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectReferences.TargetFrameworks">
+            <summary>
+            Target frameworks to apply this for. If empty this applies to all.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectReferences.RestoreGraphItems">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetTargetFrameworkItems.TargetFrameworksOutput">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.MSBuildLogger">
+            <summary>
+            TaskLoggingHelper -> ILogger
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.MSBuildTaskItem">
+            <summary>
+            TaskItem wrapper
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.RestoreTask">
+            <summary>
+            .NET Core compatible restore task for csproj + project.json.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreGraphItems">
+            <summary>
+            DG file entries
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreSources">
+            <summary>
+            NuGet sources, ; delimited
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreFallbackFolders">
+            <summary>
+            NuGet fallback folders
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestorePackagesPath">
+            <summary>
+            User packages folder
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreDisableParallel">
+            <summary>
+            Disable parallel project restores and downloads
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreConfigFile">
+            <summary>
+            NuGet.Config path
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreNoCache">
+            <summary>
+            Disable the web cache
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreIgnoreFailedSources">
+            <summary>
+            Ignore errors from package sources
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.Tasks.RestoreTask.GetNullForEmpty(System.String)">
+            <summary>
+            Convert empty strings to null
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.WriteRestoreGraphTask">
+            <summary>
+            Generate dg file output.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.WriteRestoreGraphTask.RestoreGraphItems">
+            <summary>
+            DG file entries
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.Tasks.WriteRestoreGraphTask.GetNullForEmpty(System.String)">
+            <summary>
+            Convert empty strings to null
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+    </members>
+</doc>

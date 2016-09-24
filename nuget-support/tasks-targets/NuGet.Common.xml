@@ -1,0 +1,437 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.Common</name>
+    </assembly>
+    <members>
+        <member name="T:NuGet.Common.ActivityCorrelationContext">
+            <summary>
+            Ambient context contains properties pertaining to a current activity.
+            Single activity engages multiple method calls at different layers.
+            Sometimes it's necessary to identify separate calls belonging to the same activity if shared state is needed.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.ActivityCorrelationContext.CorrelationId">
+            <summary>
+            Represents activity unique ID.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.ActivityCorrelationContext.Current">
+            <summary>
+            Returns ambient context value or global instance if not set earlier.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.ActivityCorrelationContext.StartNew">
+            <summary>
+            Instantiates activity context instance with new identifier. Updates ambient context value.
+            </summary>
+            <returns>New instance</returns>
+        </member>
+        <member name="T:NuGet.Common.AsyncLazy`1">
+            <summary>
+            Wrapper class representing shorter syntax of Lazy&lt;Task&lt;T&gt;&gt;"/>.
+            Useful when declaring a lazy async factory of value T.
+            </summary>
+            <typeparam name="T">Value type</typeparam>
+        </member>
+        <member name="T:NuGet.Common.AsyncLazy">
+            <summary>
+            Shortcuts to common Lazy&lt;Task&lt;T&gt;&gt; constructor calls
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.ClientVersionUtility.GetNuGetAssemblyVersion">
+            <summary>
+            Find the current NuGet client version from the assembly info as a string.
+            If no value can be found an InvalidOperationException will be thrown.
+            </summary>
+            <remarks>This can contain prerelease labels if AssemblyInformationalVersionAttribute exists.</remarks>
+        </member>
+        <member name="T:NuGet.Common.CryptoHashProvider">
+            <summary>
+            CryptoHashProvider helps calculate or verify hash based on SHA256 or SHA512 algorithms
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.CryptoHashProvider.SHA512HashAlgorithm">
+            <summary>
+            Server token used to represent that the hash being used is SHA 512
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.CryptoHashProvider.SHA256HashAlgorithm">
+            <summary>
+            Server token used to represent that the hash being used is SHA 256
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.CryptoHashProvider.#ctor">
+            <summary>
+            Creates an instance of CryptoHashProvider. Since the algorithm is not specified, SHA512 is assumed
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.CryptoHashProvider.#ctor(System.String)">
+            <summary>
+            Creates an instance of CryptoHashProvider using the hashAlgorithm
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.CryptoHashProvider.AllowOnlyFipsAlgorithms">
+            <summary>
+            Determines if we are to only allow Fips compliant algorithms.
+            </summary>
+            <remarks>
+            CryptoConfig.AllowOnlyFipsAlgorithm does not exist in Mono.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Common.CryptoHashProvider.CalculateHash(System.IO.Stream)">
+            <summary>
+            Calculates the hash for a given stream
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.CryptoHashProvider.CalculateHash(System.Byte[])">
+            <summary>
+            Calculates the hash for a byte array
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.CryptoHashProvider.VerifyHash(System.Byte[],System.Byte[])">
+            <summary>
+            Verifies the hash for the given data and hash
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.DatetimeUtility">
+            <summary>
+            static class to provide datetime common utility apis
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.DatetimeUtility.ToReadableTimeFormat(System.TimeSpan)">
+            <summary>
+            take timespan n return in appropriate unit like ms, or seconds, or minutes, or hours
+            </summary>
+            <param name="time">timespan</param>
+            <returns></returns>
+        </member>
+        <member name="T:NuGet.Common.ExceptionUtilities">
+            <summary>
+            For internal use only
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.NetworkProtocolUtility.ConfigureSupportedSslProtocols">
+            <summary>
+            This only has effect on .NET Framework (desktop). On .NET Core,
+            <see cref="T:System.Net.ServicePointManager"/> is not available. Additionally,
+            no API is available to configure the supported SSL protocols.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.Preprocessor">
+            <summary>
+            Simple token replacement system for content files.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.Strings">
+            <summary>
+               A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.ResourceManager">
+            <summary>
+               Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.Culture">
+            <summary>
+               Overrides the current thread's CurrentUICulture property for all
+               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.AbsolutePathRequired">
+            <summary>
+               Looks up a localized string similar to An absolute path is required: &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.ArgumentNullOrEmpty">
+            <summary>
+               Looks up a localized string similar to Argument cannot be null or empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.NoPackageFoldersFound">
+            <summary>
+               Looks up a localized string similar to At least one package folder path must be provided..
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.PackageFolderNotFound">
+            <summary>
+               Looks up a localized string similar to Package folder not found: &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.UnableToDetemineClientVersion">
+            <summary>
+               Looks up a localized string similar to Unable to determine the current NuGet client version..
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.UnauthorizedLockFail">
+            <summary>
+               Looks up a localized string similar to Unable to obtain lock file access on &apos;{0}&apos; for operations on &apos;{1}&apos;. This may mean that a different user or administator is holding this lock and that this process does not have permission to access it. If no other process is currently performing an operation on this file it may mean that an earlier NuGet process crashed and left an inaccessible lock file, in this case removing the file &apos;{0}&apos; will allow NuGet to continue..
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.UnsupportedHashAlgorithm">
+            <summary>
+               Looks up a localized string similar to Hash algorithm &apos;{0}&apos; is unsupported. Supported algorithms include: SHA512 and SHA256..
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.UriUtility.CreateSourceUri(System.String,System.UriKind)">
+            <summary>
+            Same as "new Uri" except that it can handle UNIX style paths that start with '/'
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.UriUtility.TryCreateSourceUri(System.String,System.UriKind)">
+            <summary>
+            Same as "Uri.TryCreate" except that it can handle UNIX style paths that start with '/'
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.UriUtility.UrlEncodeOdataParameter(System.String)">
+            <summary>
+            Provides Uri encoding for V2 servers in the same way that NuGet.Core.dll encoded urls.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.UriUtility.GetLocalPath(System.String)">
+            <summary>
+            Convert a file:// URI to a local path.
+            </summary>
+            <returns>If the input can be parsed this will return Uri.LocalPath, if the input 
+            is not a URI or fails to parse the original string will be returned.</returns>
+            <param name="localOrUriPath">Possible file:// URI path or local path.</param>
+        </member>
+        <member name="M:NuGet.Common.CollectorLogger.#ctor(NuGet.Common.ILogger)">
+            <summary>
+            Initializes an instance of the <see cref="T:NuGet.Common.CollectorLogger"/>, while still
+            delegating all log messages to the <param name="innerLogger" />.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.ExceptionLogger.ShowStack">
+            <summary>
+            Determines whether the full exception (including stack trace) should be displayed to
+            the user. In prerelease or dogfooding scenarios, it is useful to have a non-verbose
+            logging level but, in the case of an unhandled exception, print the full exception for
+            bug reporting.
+            </summary>
+            <returns>
+            True if the exception stack should be displayed to the user. False, otherwise.
+            </returns>
+        </member>
+        <member name="P:NuGet.Common.ICollectorLogger.Errors">
+            <summary>
+            Fetch all of the errors logged so far. This method is useful when error log messages
+            should be redisplayed after the initial log message is emitted.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.ILogger">
+            <summary>
+            A generic interface for logging.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.FileUtility">
+            <summary>
+            File operation helpers.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.FileUtility.Move(System.String,System.String)">
+            <summary>
+            Move a file with retries.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.FileUtility.Delete(System.String)">
+            <summary>
+            Delete a file with retries.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.INuGetPathContext">
+            <summary>
+            Common NuGet paths. These values may be overridden in NuGet.Config or by 
+            environment variables, resolving the paths here requires NuGet.Configuration.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.INuGetPathContext.UserPackageFolder">
+            <summary>
+            User package folder directory.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.INuGetPathContext.FallbackPackageFolders">
+            <summary>
+            Fallback package folder locations.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.INuGetPathContext.HttpCacheFolder">
+            <summary>
+            Http file cache.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.NuGetEnvironment.SpecialFolder">
+            <summary>
+            Since <see cref="T:System.Environment.SpecialFolder"/> is not available on .NET Core, we have to
+            make our own and re-implement the functionality. On .NET Framework, we can use the
+            built-in functionality.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.PathResolver.GetMatches``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.String},System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Returns a collection of files from the source that matches the wildcard.
+            </summary>
+            <param name="source">The collection of files to match.</param>
+            <param name="getPath">Function that returns the path to filter a package file </param>
+            <param name="wildcards">The wildcards to apply to match the path with.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Common.PathResolver.FilterPackageFiles``1(System.Collections.Generic.ICollection{``0},System.Func{``0,System.String},System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Removes files from the source that match any wildcard.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.PathResolver.IsWildcardSearch(System.String)">
+            <summary>
+            Returns true if the path contains any wildcard characters.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.PathUtility.GetStringComparerBasedOnOS">
+            <summary>
+            Returns OrdinalIgnoreCase windows and mac. Ordinal for linux.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Common.PathUtility.GetUniquePathsBasedOnOS(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Returns distinct orderd paths based on the file system case sensitivity.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.PathValidator.IsValidSource(System.String)">
+            <summary>
+            Validates that a source is a valid path or url.
+            </summary>
+            <param name="source">The path to validate.</param>
+            <returns>True if valid, False if invalid.</returns>
+        </member>
+        <member name="M:NuGet.Common.PathValidator.IsValidLocalPath(System.String)">
+            <summary>
+            Validates that path is properly formatted as a local path. 
+            </summary>
+            <remarks>
+            On Windows, a valid local path must starts with the drive letter.
+            Example: C:\, C:\path, C:\path\to\
+            Bad: C:\invalid\*\"\chars
+            </remarks>
+            <param name="path">The path to validate.</param>
+            <returns>True if valid, False if invalid.</returns>
+        </member>
+        <member name="M:NuGet.Common.PathValidator.IsValidUncPath(System.String)">
+            <summary>
+            Validates that path is properly formatted as an UNC path. 
+            </summary>
+            <remarks>
+            Example: \\server\share, \\server\share\path, \\server\share\path\to\
+            Bad: \\server\invalid\*\"\chars
+            </remarks>
+            <param name="path">The path to validate.</param>
+            <returns>True if valid, False if invalid.</returns>
+        </member>
+        <member name="M:NuGet.Common.PathValidator.IsValidUrl(System.String)">
+            <summary>
+            Validates that url is properly formatted as an URL based on .NET <see cref="T:System.Uri">Uri</see> class.
+            </summary>
+            <param name="url">The url to validate.</param>
+            <returns>True if valid, False if invalid.</returns>
+        </member>
+        <member name="F:NuGet.Common.ProjectJsonPathUtilities.ProjectConfigFileName">
+            <summary>
+            project.json
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.ProjectJsonPathUtilities.ProjectConfigFileEnding">
+            <summary>
+            .project.json
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.ProjectJsonPathUtilities.ProjectLockFileName">
+            <summary>
+            Lock file name
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.ProjectJsonPathUtilities.GetProjectConfigPath(System.String,System.String)">
+            <summary>
+            Finds the projectName.project.json in a directory. If no projectName.project.json exists
+            the default project.json path will be returned regardless of existance.
+            </summary>
+            <returns>Returns the full path to the project.json file.</returns>
+        </member>
+        <member name="M:NuGet.Common.ProjectJsonPathUtilities.GetProjectConfigWithProjectName(System.String)">
+            <summary>
+            Creates a projectName.project.json file name.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.ProjectJsonPathUtilities.GetProjectLockFileNameWithProjectName(System.String)">
+            <summary>
+            Creates a projectName.project.lock.json file name.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.ProjectJsonPathUtilities.GetLockFilePath(System.String)">
+            <summary>
+            Create the lock file path from the config file path.
+            If the config file includes a project name the 
+            lock file will include the name also.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.ProjectJsonPathUtilities.GetProjectNameFromConfigFileName(System.String)">
+            <summary>
+            Parses a projectName.project.json file name into a project name.
+            If there is no project name null will be returned.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.ProjectJsonPathUtilities.IsProjectConfig(System.String)">
+            <summary>
+            True if the file is a project.json or projectname.project.json file.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.Tokenizer">
+            <summary>
+            This class is used to parse string into tokens.    
+            There are two types of tokens: variables, e.g. "$variable$", or text. 
+            The dollar sign can be escaped using $$.
+            A variable contains only word characters.
+            
+            Examples:
+            - "a $b$ c" is parsed into 
+              {text, "a "}, {variable, "b"}, {text, " c"}.
+            - "a $$b$$ c" is parsed into
+              {text, "a $b$ c"}.
+            - "a $b$ $c" is parsed into
+              {text, "a "}, {variable, "b"}, {text, " $c"}.
+            - "a $b$$c$" is parsed into
+              {text, "a "}, {variable, "b"}, {variable, "c"}.
+            - "a $b c$d$" is parsed into 
+              {text, "a $b c"}, {variable, "d"} (because space is not a word character).
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.Tokenizer.Read">
+            <summary>
+            Gets the next token.
+            </summary>
+            <returns>The parsed token. Or null if no more tokens are available.</returns>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+    </members>
+</doc>

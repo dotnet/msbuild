@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.RuntimeModel</name>
+    </assembly>
+    <members>
+        <member name="M:NuGet.RuntimeModel.RuntimeDescription.Merge(NuGet.RuntimeModel.RuntimeDescription,NuGet.RuntimeModel.RuntimeDescription)">
+            <summary>
+            Merges the content of the other runtime description in to this runtime description
+            </summary>
+            <param name="other">The other description to merge in to this description</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.Merge(NuGet.RuntimeModel.RuntimeGraph,NuGet.RuntimeModel.RuntimeGraph)">
+            <summary>
+            Merges the content of the other runtime graph in to this runtime graph
+            </summary>
+            <param name="other">The other graph to merge in to this graph</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.AreCompatible(System.String,System.String)">
+            <summary>
+            Determines if two runtime identifiers are compatible, based on the import graph
+            </summary>
+            <param name="criteria">The criteria being tested</param>
+            <param name="provided">The value the criteria is being tested against</param>
+            <returns>
+            true if an asset for the runtime in <paramref name="provided" /> can be installed in a project
+            targetting <paramref name="criteria" />, false otherwise
+            </returns>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,308 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.Packaging.Core</name>
+    </assembly>
+    <members>
+        <member name="T:NuGet.Packaging.Core.ExtractPackageFileDelegate">
+            <summary>
+            Callback invoked to extract a package file.
+            </summary>
+            <param name="sourceFile">The path of the file in the package.</param>
+            <param name="targetPath">The path to write to.</param>
+            <param name="fileStream">The file <see cref="T:System.IO.Stream"/>.</param>
+            <returns>The file name if the file was written; otherwise <c>null</c>.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.INuspecCoreReader">
+            <summary>
+            A basic nuspec reader that understands ONLY the id, version, and min client version of a package.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetId">
+            <summary>
+            Package Id
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetVersion">
+            <summary>
+            Package Version
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetMinClientVersion">
+            <summary>
+            Minimum client version needed to consume the package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetIdentity">
+            <summary>
+            Id and Version of a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetMetadata">
+            <summary>
+            Package metadata in the nuspec
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.IPackageCoreReader">
+            <summary>
+            Basic package reader that provides the identity, min client version, and file access.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetIdentity">
+            <summary>
+            Identity of the package
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetMinClientVersion">
+            <summary>
+            Minimum client version needed to consume the package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetStream(System.String)">
+            <summary>
+            Returns a file stream from the package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetFiles">
+            <summary>
+            All files in the nupkg
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetFiles(System.String)">
+            <summary>
+            Files in a folder
+            </summary>
+            <param name="folder">Folder path</param>
+            <returns>A collection of files under specified folder</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetNuspec">
+            <summary>
+            Nuspec stream
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetNuspecFile">
+            <summary>
+            Nuspec path
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecCoreReader">
+            <summary>
+            A basic nuspec reader that understand id, version, and a flat list of dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.#ctor(System.IO.Stream)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Reads a nuspec from XML
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.GetDependencies">
+            <summary>
+            Returns a flat list of dependencies from a nuspec
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecCoreReaderBase">
+            <summary>
+            A very basic Nuspec reader that understands the Id, Version, PackageType, and MinClientVersion of a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.String)">
+            <summary>
+            Read a nuspec from a path.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.IO.Stream)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Reads a nuspec from XML
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetId">
+            <summary>
+            Id of the package
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetVersion">
+            <summary>
+            Version of the package
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMinClientVersion">
+            <summary>
+            The minimum client version this package supports.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.IsServiceable">
+            <summary>
+            Returns if the package is serviceable.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetDevelopmentDependency">
+            <summary>
+            The developmentDependency attribute
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMetadata">
+            <summary>
+            Nuspec Metadata
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMetadataValue(System.String)">
+            <summary>
+            Returns a nuspec metadata value or string.Empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.NuspecCoreReaderBase.MetadataValues">
+            <summary>
+            Indexed metadata values of the XML elements in the nuspec.
+            If duplicate keys exist only the first is used.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.NuspecCoreReaderBase.Xml">
+            <summary>
+            Raw XML doc
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecUtility">
+            <summary>
+            Until NuspecReader and Manifest are unified, this is a place to share implementations of
+            reading and parsing specific elements out of the .nuspec XML.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecUtility.GetPackageTypes(System.Xml.Linq.XElement,System.Boolean)">
+            <summary>
+            Gets the package types from a .nuspec metadata XML element.
+            </summary>
+            <param name="metadataNode">The metadata XML element.</param>
+            <param name="useMetadataNamespace">
+            Whether or not to use the metadata element's namespace when finding the package type
+            nodes. If false is specified, only the local names of the package type nodes are used
+            for comparison. If true is specified, the package type nodes must have the same
+            namespace as the metadata node.
+            </param>
+            <returns>
+            A list of package types. If no package types are found in the metadata node, an empty
+            list is returned.
+            </returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecUtility.IsServiceable(System.Xml.Linq.XElement)">
+            <summary>
+            Gets the value of serviceable element from a .nuspec metadata XML element.
+            </summary>
+            <param name="metadataNode">The metadata XML element.</param>
+            <returns>
+            true if the serviceable element is set in the .nuspec file as true, else false.
+            </returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackagingException">
+            <summary>
+            Generic packaging exception.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.Strings">
+            <summary>
+               A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.ResourceManager">
+            <summary>
+               Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.Culture">
+            <summary>
+               Overrides the current thread's CurrentUICulture property for all
+               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.InvalidPackageTypeVersion">
+            <summary>
+               Looks up a localized string similar to Nuspec file contains a package type with an invalid package version &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MissingMetadataNode">
+            <summary>
+               Looks up a localized string similar to Nuspec file does not contain the &apos;{0}&apos; node..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MissingNuspec">
+            <summary>
+               Looks up a localized string similar to Nuspec file does not exist in package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MissingPackageTypeName">
+            <summary>
+               Looks up a localized string similar to Nuspec file contains a package type that is missing the name attribute..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MultipleNuspecFiles">
+            <summary>
+               Looks up a localized string similar to Package contains multiple nuspec files..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MultiplePackageTypes">
+            <summary>
+               Looks up a localized string similar to Nuspec file contains multiple package types. Zero or one package type nodes are allowed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.StringCannotBeNullOrEmpty">
+            <summary>
+               Looks up a localized string similar to String argument &apos;{0}&apos; cannot be null or empty.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+    </members>
+</doc>

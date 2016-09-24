@@ -17,7 +17,12 @@ rm $MSBUILD_INSTALL_BIN_DIR/*xunit*
 # Add ImportBefore/ImportAfter files
 XBUILD_DIR=$MONO_PREFIX/lib/mono/xbuild
 mkdir -p $XBUILD_DIR/$MSBUILD_TOOLSVERSION
-cp -R $XBUILD_DIR/14.0/Imports $XBUILD_DIR/$MSBUILD_TOOLSVERSION
-cp -R $XBUILD_DIR/14.0/Microsoft.Common.targets $XBUILD_DIR/$MSBUILD_TOOLSVERSION
+#cp -R $XBUILD_DIR/14.0/Imports $XBUILD_DIR/$MSBUILD_TOOLSVERSION
+#cp -R $XBUILD_DIR/14.0/Microsoft.Common.targets $XBUILD_DIR/$MSBUILD_TOOLSVERSION
+
+cp -R nuget-support/tv/ $XBUILD_DIR/$MSBUILD_TOOLSVERSION
+cp -R nuget-support/tasks-targets/ $XBUILD_DIR/
+
+for f in $XBUILD_DIR/Microsoft/NuGet/*; do ln -s $f $XBUILD_DIR ; done
 
 cp msbuild-mono-deploy.in $MONO_PREFIX/bin/msbuild

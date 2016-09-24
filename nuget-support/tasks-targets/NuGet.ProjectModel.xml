@@ -1,0 +1,439 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.ProjectModel</name>
+    </assembly>
+    <members>
+        <member name="P:NuGet.ProjectModel.DependencyGraphSpec.Restore">
+            <summary>
+            Projects to restore.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.DependencyGraphSpec.Projects">
+            <summary>
+            All project specs.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.DependencyGraphSpec.Json">
+            <summary>
+            File json.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.DependencyGraphSpec.GetClosure(System.String)">
+            <summary>
+            Retrieve the full project closure including the root project itself.
+            </summary>
+        </member>
+        <member name="T:NuGet.ProjectModel.ExternalProjectReference">
+            <summary>
+            Represents a reference to a project produced by an external build system, such as msbuild.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.ExternalProjectReference.#ctor(System.String,NuGet.ProjectModel.PackageSpec,System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Represents a reference to a project produced by an external build system, such as msbuild.
+            </summary>
+            <param name="uniqueName">unique project name or full path</param>
+            <param name="packageSpec">project.json package spec.</param>
+            <param name="msbuildProjectPath">project file if one exists</param>
+            <param name="projectReferences">unique names of the referenced projects</param>
+        </member>
+        <member name="M:NuGet.ProjectModel.ExternalProjectReference.#ctor(System.String,NuGet.ProjectModel.PackageSpec,System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IReadOnlyDictionary{System.String,System.Collections.Generic.List{System.String}})">
+            <summary>
+            Represents a reference to a project produced by an external build system, such as msbuild.
+            </summary>
+            <param name="uniqueName">unique project name or full path</param>
+            <param name="packageSpec">project.json package spec.</param>
+            <param name="msbuildProjectPath">project file if one exists</param>
+            <param name="projectReferences">unique names of the referenced projects</param>
+        </member>
+        <member name="M:NuGet.ProjectModel.ExternalProjectReference.#ctor(System.String,System.String,System.String,System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Represents a reference to a project produced by an external build system, such as msbuild.
+            </summary>
+            <param name="uniqueName">unique project name or full path</param>
+            <param name="packageSpecPath">project.json file path or null if none exists</param>
+            <param name="msbuildProjectPath">project file if one exists</param>
+            <param name="projectReferences">unique names of the referenced projects</param>
+        </member>
+        <member name="M:NuGet.ProjectModel.ExternalProjectReference.#ctor(System.String,System.String,System.String,System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IReadOnlyDictionary{System.String,System.Collections.Generic.List{System.String}})">
+            <summary>
+            Represents a reference to a project produced by an external build system, such as msbuild.
+            </summary>
+            <param name="uniqueName">unique project name or full path</param>
+            <param name="packageSpecPath">project.json file path or null if none exists</param>
+            <param name="msbuildProjectPath">project file if one exists</param>
+            <param name="projectReferences">unique names of the referenced projects</param>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.UniqueName">
+            <summary>
+            Unique name of the external project
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.Properties">
+            <summary>
+            Additional properties from MSBuild
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.PackageSpec">
+            <summary>
+            The path to the project.json file representing the NuGet dependencies of the project
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.ExternalProjectReferences">
+            <summary>
+            A list of other external projects this project references. Uses the UniqueName.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.MSBuildProjectPath">
+            <summary>
+            Path to msbuild project file. Ex: xproj, csproj
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.PackageSpecPath">
+            <summary>
+            Path to project.json
+            </summary>
+            <remarks>This may be null for projects that do not contain project.json.</remarks>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.PackageSpecProjectName">
+            <summary>
+            Project name used for project.json
+            </summary>
+            <remarks>This may be null for projects that do not contain project.json.</remarks>
+        </member>
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.ProjectName">
+            <summary>
+            Project name from the package spec or msbuild file.
+            </summary>
+        </member>
+        <member name="T:NuGet.ProjectModel.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="T:NuGet.ProjectModel.IExternalProjectReferenceProvider">
+            <summary>
+            Provides external project reference closures.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.IExternalProjectReferenceProvider.GetReferences(System.String)">
+            <summary>
+            Get the full p2p closure from an msbuild project path.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.IExternalProjectReferenceProvider.GetEntryPoints">
+            <summary>
+            Returns all known entry points.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.JsonPackageSpecReader.GetPackageSpec(System.String,System.String)">
+            <summary>
+            Load and parse a project.json file
+            </summary>
+            <param name="name">project name</param>
+            <param name="packageSpecPath">file path</param>
+        </member>
+        <member name="T:NuGet.ProjectModel.PackageSpec">
+            <summary>
+            Represents the specification of a package that can be built.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.PackageSpec.RestoreMetadata">
+            <summary>
+            Additional MSBuild properties.
+            </summary>
+            <remarks>Optional. This is normally set for internal use only.</remarks>
+        </member>
+        <member name="P:NuGet.ProjectModel.PackageSpec.Properties">
+            <summary>
+            Gets a list of all properties found in the package spec, including
+            those not recognized by the parser.
+            </summary>
+        </member>
+        <member name="T:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider">
+            <summary>
+            Handles both external references and projects discovered through directories
+            If the type is set to external project directory discovery will be disabled.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider.GetPackageSpecResolver(System.String)">
+            <summary>
+            Get and cache the package spec resolver.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider.GetProjectNames(System.Collections.Generic.IEnumerable{NuGet.LibraryModel.LibraryDependency})">
+            <summary>
+            Filter dependencies down to only possible project references and return the names.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.#ctor(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            Create a resolver from a package spec. The spec path will be used to find the root
+            and global.json paths.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.#ctor(System.String)">
+            <summary>
+            Use a root path to find projects.
+            </summary>
+            <param name="rootPath">Parent directory of the directory containing project.json file.</param>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.FromPackageSpecPath(System.String)">
+            <summary>
+            Create a spec resolver from a project.json path.
+            This will automatically find the root path.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.PackageSpecResolver.RootPath">
+            <summary>
+            Root path used for resolving projects and global.json.
+            This is typically the parent directory of the project directory.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.Initialize(System.String)">
+            <summary>
+            Build the search path index.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.GetRootFromProjectJson(System.String)">
+            <summary>
+            Finds the parent directory of the project.json.
+            </summary>
+            <param name="projectJsonPath">Full path to project.json.</param>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.GetGlobalPaths(System.String)">
+            <summary>
+            Read paths from global.json.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.GetPotentialProjects(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Create the list of potential projects from the search paths.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecResolver.ResolveRootDirectory(System.String)">
+            <summary>
+            Find the nearest global.json file.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.OutputType">
+            <summary>
+            Restore behavior type.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectPath">
+            <summary>
+            MSBuild project file path.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectJsonPath">
+            <summary>
+            Full path to the project.json file if it exists.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.OutputPath">
+            <summary>
+            Assets file output path.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectName">
+            <summary>
+            Friendly project name.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectUniqueName">
+            <summary>
+            Name unique to the project across the solution.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.Sources">
+            <summary>
+            Package feed sources.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.PackagesPath">
+            <summary>
+            User packages folder path.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.FallbackFolders">
+            <summary>
+            Fallback folders.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectReferences">
+            <summary>
+            Project reference metadata. This will be added to the non-msbuild dependency reference in the package spec.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.OriginalTargetFrameworks">
+            <summary>
+            Original target frameworks strings. These are used to match msbuild conditionals to $(TargetFramework)
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreReference.ProjectUniqueName">
+            <summary>
+            Project unique name.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreReference.ProjectPath">
+            <summary>
+            Full path to the msbuild project file.
+            </summary>
+        </member>
+        <member name="F:NuGet.ProjectModel.RestoreOutputType.Unknown">
+            <summary>
+            Unknown
+            </summary>
+        </member>
+        <member name="F:NuGet.ProjectModel.RestoreOutputType.UAP">
+            <summary>
+            UAP style, project.lock.json is generated next to project.json
+            </summary>
+        </member>
+        <member name="F:NuGet.ProjectModel.RestoreOutputType.NETCore">
+            <summary>
+            MSBuild style, project.assets.json is generated in the RestoreOutputPath folder
+            </summary>
+        </member>
+        <member name="T:NuGet.ProjectModel.Strings">
+            <summary>
+               A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.ResourceManager">
+            <summary>
+               Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.Culture">
+            <summary>
+               Overrides the current thread's CurrentUICulture property for all
+               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.InvalidDependencyTarget">
+            <summary>
+               Looks up a localized string similar to Invalid dependency target value &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.InvalidPackageType">
+            <summary>
+               Looks up a localized string similar to The pack options package type must be a string or array of strings in &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.Log_ErrorReadingLockFile">
+            <summary>
+               Looks up a localized string similar to Error loading lock file &apos;{0}&apos; : {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.Log_ErrorReadingProjectJson">
+            <summary>
+               Looks up a localized string similar to Error reading &apos;{0}&apos; : {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.Log_ErrorReadingProjectJsonWithLocation">
+            <summary>
+               Looks up a localized string similar to Error reading &apos;{0}&apos; at line {1} column {2} : {3}.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.Log_InvalidImportFramework">
+            <summary>
+               Looks up a localized string similar to Imports contains an invalid framework: &apos;{0}&apos; in &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.MissingToolName">
+            <summary>
+               Looks up a localized string similar to Unable to resolve tool &apos;&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.MissingVersionOnDependency">
+            <summary>
+               Looks up a localized string similar to Package dependencies must specify a version range..
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.MissingVersionOnTool">
+            <summary>
+               Looks up a localized string similar to Tools must specify a version range..
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.TargetFrameworkInformation.Imports">
+            <summary>
+            A fallback PCL framework to use when no compatible items
+            were found for <see cref="P:NuGet.ProjectModel.TargetFrameworkInformation.FrameworkName"/>.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.TargetFrameworkInformation.Warn">
+            <summary>
+            Display warnings when the Imports framework is used.
+            </summary>
+        </member>
+        <member name="T:NuGet.ProjectModel.XProjUtility">
+            <summary>
+            Helpers for dealing with xproj
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.XProjUtility.IsMSBuildBasedProject(System.String)">
+            <summary>
+            Returns false for xproj and empty paths.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.XProjUtility.GetProjectReferences(System.String)">
+            <summary>
+            Returns the path to all referenced xprojs by using the package spec resolver.
+            This will return references for ALL TxMs. Filtering based on the nearest TxM
+            is needed to apply these results.
+            </summary>
+            <param name="filePath">Full path to the .xproj file.</param>
+        </member>
+        <member name="P:NuGet.ProjectModel.LockFileLibrary.Path">
+            <summary>
+            Relative path to the project.json file for projects
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.LockFileLibrary.MSBuildProject">
+            <summary>
+            Relative path to the msbuild project file. Ex: xproj, csproj
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.LockFileLibrary.Clone">
+            <summary>
+            Makes a deep clone of the lock file library.
+            </summary>
+            <returns>The cloned lock file library.</returns>
+        </member>
+        <member name="M:NuGet.ProjectModel.LockFileUtilities.GetLockFile(System.String,NuGet.Common.ILogger)">
+            <summary>
+            Returns the lockfile if it exists, otherwise null.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+    </members>
+</doc>
