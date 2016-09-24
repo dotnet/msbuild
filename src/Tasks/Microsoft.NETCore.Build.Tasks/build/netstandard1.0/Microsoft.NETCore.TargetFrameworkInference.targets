@@ -77,22 +77,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <!--
-     Apply the same defaults as common targets now since we're running before them, but need to respect defaults
-     in our override of intermediate and output paths below.
-   -->
-  <PropertyGroup>
-    <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
-    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
-    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
-    <ConfigurationName Condition="'$(ConfigurationName)' == ''">$(Configuration)</ConfigurationName>
-    <OutputPath Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj\</BaseIntermediateOutputPath>
-    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
-    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' != 'AnyCPU' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
-  </PropertyGroup>
-
-  <!--
     Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
     targets. However, we must leave OutputPath unset if it's not already as common targets use this to 
     detect an invalid configuration or platform.
