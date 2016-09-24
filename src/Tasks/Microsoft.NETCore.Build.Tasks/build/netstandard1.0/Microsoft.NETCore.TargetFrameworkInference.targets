@@ -64,7 +64,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Versions with no dots and up to 3 characters get leading 'v' and implicit dots between characters. -->
   <PropertyGroup Condition="'$(TargetFrameworkVersion)' == '' and '$(_ShortFrameworkVersion)' != ''">
     <TargetFrameworkVersion Condition="$(_ShortFrameworkVersion.Length) == 1">v$(_ShortFrameworkVersion[0]).0</TargetFrameworkVersion>
-    <TargetFrameworkVersion Condition="$(_ShortFrameworkVersion.Length) == 2">v$(_ShortFrameworkVersion[0]).$(_ShortFrameworkVersion[1])"</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="$(_ShortFrameworkVersion.Length) == 2">v$(_ShortFrameworkVersion[0]).$(_ShortFrameworkVersion[1])</TargetFrameworkVersion>
     <TargetFrameworkVersion Condition="$(_ShortFrameworkVersion.Length) == 3">v$(_ShortFrameworkVersion[0]).$(_ShortFrameworkVersion[1]).$(_ShortFrameworkVersion[2])</TargetFrameworkVersion>
   </PropertyGroup>
 
