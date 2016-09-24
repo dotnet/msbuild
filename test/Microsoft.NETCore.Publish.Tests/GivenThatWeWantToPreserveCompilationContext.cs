@@ -59,7 +59,7 @@ namespace Microsoft.NETCore.Publish.Tests
                 dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                 dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                dependencyContext.CompileLibraries.Count.Should().Be(114);
+                dependencyContext.CompileLibraries.Count.Should().Be(115);
             }
         }
     }
