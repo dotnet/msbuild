@@ -33,9 +33,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishTargets", "PublishTa
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.MSDeployPackage.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.MSDeployPackage.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Profiles", "Profiles", "{4D4E65AC-8234-4957-A12B-0A13F42C7AC8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishProfiles", "PublishProfiles", "{4D4E65AC-8234-4957-A12B-0A13F42C7AC8}"
 	ProjectSection(SolutionItems) = preProject
-		src\Microsoft.DotNet.Publish.Targets\Profiles\DefaultProfile.pubxml = src\Microsoft.DotNet.Publish.Targets\Profiles\DefaultProfile.pubxml
+		src\Microsoft.DotNet.Publish.Targets\PublishProfiles\DefaultProfile.pubxml = src\Microsoft.DotNet.Publish.Targets\PublishProfiles\DefaultProfile.pubxml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CopyTargets", "CopyTargets", "{7F7C477C-7965-43D2-A2D3-D93BFCE3C5C7}"

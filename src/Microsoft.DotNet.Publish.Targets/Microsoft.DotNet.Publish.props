@@ -25,7 +25,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CopyTargetsDir Condition=" '$(CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</CopyTargetsDir>
     <ComputeTargetsDir Condition=" '$(ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</ComputeTargetsDir>
     <PublishTargetsDir Condition=" '$(PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</PublishTargetsDir>
-    <PublishProfilesDir Condition=" '$(PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)Profiles\</PublishProfilesDir>
+    <PublishProfilesDir Condition=" '$(PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</PublishProfilesDir>
 
     <!-- For website project we will always exclude debug symbols from publishing. This can be overridden in the .pubxml file. -->
     <ExcludeGeneratedDebugSymbol Condition="'$(ExcludeGeneratedDebugSymbol)'=='' And '$(_WebProjectType)' == 'WebSite'">True</ExcludeGeneratedDebugSymbol>
