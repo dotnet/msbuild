@@ -26,12 +26,14 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.Common.targets
   file source=$(X86BinPath)Microsoft.Common.tasks
   file source=$(X86BinPath)Microsoft.CSharp.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.CSharp.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.CSharp.targets
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.props
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.NetFramework.props
   file source=$(X86BinPath)Microsoft.NetFramework.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.VisualBasic.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.targets
   file source=$(X86BinPath)MSBuild.rsp
   file source=$(X86BinPath)Workflow.targets
