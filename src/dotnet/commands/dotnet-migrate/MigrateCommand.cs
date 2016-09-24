@@ -13,21 +13,20 @@ namespace Microsoft.DotNet.Tools.Migrate
     public partial class MigrateCommand
     {
         private readonly string _templateFile;
-        private readonly string _outputDirectory;
         private readonly string _projectJson;
         private readonly string _sdkVersion;
         private readonly string _xprojFilePath;
+        private readonly bool _skipProjectReferences;
 
         private readonly TemporaryDotnetNewTemplateProject _temporaryDotnetNewProject;
 
-        public MigrateCommand(string templateFile, string outputDirectory, string projectJson, string sdkVersion, string xprojFilePath)
+        public MigrateCommand(string templateFile, string projectJson, string sdkVersion, string xprojFilePath, bool skipProjectReferences)
         {
             _templateFile = templateFile;
-            _outputDirectory = outputDirectory;
             _projectJson = projectJson;
             _sdkVersion = sdkVersion;
             _xprojFilePath = xprojFilePath;
-
+            _skipProjectReferences = skipProjectReferences;
             _temporaryDotnetNewProject = new TemporaryDotnetNewTemplateProject();
         }
 
@@ -40,14 +39,13 @@ namespace Microsoft.DotNet.Tools.Migrate
             var msBuildTemplate = _templateFile != null ?
                 ProjectRootElement.TryOpen(_templateFile) : _temporaryDotnetNewProject.MSBuildProject;
 
-            var outputDirectory = _outputDirectory ?? projectDirectory;
-            EnsureNotNull(outputDirectory, "Null output directory");
+            var outputDirectory = projectDirectory;
 
             var sdkVersion = _sdkVersion ?? new ProjectJsonParser(_temporaryDotnetNewProject.ProjectJson).SdkPackageVersion;
             EnsureNotNull(sdkVersion, "Null Sdk Version");
 
             var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate, _xprojFilePath);
-            new ProjectMigrator().Migrate(migrationSettings);
+            new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
 
             return 0;
         }

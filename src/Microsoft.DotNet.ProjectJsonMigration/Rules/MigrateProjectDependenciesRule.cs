@@ -30,8 +30,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             _projectDirectory = migrationSettings.ProjectDirectory;
 
-            var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationSettings, migrationRuleInputs);
-            var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
+            var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationRuleInputs);
+            var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(
+                                                                                                                 PathUtility.GetPathWithDirectorySeparator(p))));
 
             AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
             MigrateProjectJsonProjectDependencies(
@@ -40,22 +41,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 migrationRuleInputs.OutputMSBuildProject);
         }
 
-        private IEnumerable<string> MigrateXProjProjectDependencies(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
+        private IEnumerable<string> MigrateXProjProjectDependencies(MigrationRuleInputs migrationRuleInputs)
         {
-            var xproj = migrationRuleInputs.ProjectXproj;
-            if (xproj == null)
+            var csprojReferenceItems = _projectDependencyFinder.ResolveXProjProjectDependencies(migrationRuleInputs.ProjectXproj);
+
+            if (!csprojReferenceItems.Any())
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: No xproj file given.");
                 return Enumerable.Empty<string>();
             }
 
             var csprojTransformedReferences = new List<ProjectItemElement>();
-
-            var csprojReferenceItems = xproj.Items
-                .Where(i => i.ItemType == "ProjectReference")
-                .Where(p => 
-                    p.Includes().Any(
-                        include => string.Equals(Path.GetExtension(include), ".csproj", StringComparison.OrdinalIgnoreCase)));
 
             foreach (var csprojReferenceItem in csprojReferenceItems)
             {
@@ -71,8 +66,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
                 csprojTransformedReferences.Add(transformItem);
             }
-                
-            
+
             MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: Migrating {csprojTransformedReferences.Count()} xproj to csproj references");
 
             foreach (var csprojTransformedReference in csprojTransformedReferences)
@@ -91,7 +85,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             foreach (var projectContext in projectContexts)
             {
                 var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectContext, migratedXProjDependencyNames);
-                var projectExports = projectContext.CreateExporter("_").GetDependencies();
 
                 var projectDependencyTransformResults = projectDependencies.Select(p => ProjectDependencyTransform.Transform(p));
                 

@@ -3,18 +3,45 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectModel;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ProjectDependencyFinder 
     {
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, HashSet<string> preResolvedProjects=null)
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(string projectDir, string xprojFile = null)
+        {
+            var projectContexts = ProjectContext.CreateContextForEachFramework(projectDir);
+            xprojFile = xprojFile ?? FindXprojFile(projectDir);
+
+            ProjectRootElement xproj = null;
+            if (xprojFile != null)
+            {
+                xproj = ProjectRootElement.Open(xprojFile);
+            }
+
+            return ResolveProjectDependencies(projectContexts, ResolveXProjProjectDependencyNames(xproj));
+        }
+
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(IEnumerable<ProjectContext> projectContexts, IEnumerable<string> preResolvedProjects=null)
+        {
+            foreach(var projectContext in projectContexts)
+            {
+                foreach(var projectDependency in ResolveProjectDependencies(projectContext, preResolvedProjects))
+                {
+                    yield return projectDependency;
+                }
+            }
+        }
+
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, IEnumerable<string> preResolvedProjects=null)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 
@@ -48,14 +75,49 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projectDependencies;
         }
 
+        private IEnumerable<string> ResolveXProjProjectDependencyNames(ProjectRootElement xproj)
+        {
+            var xprojDependencies = ResolveXProjProjectDependencies(xproj).SelectMany(r => r.Includes());
+            return new HashSet<string>(xprojDependencies.Select(p => Path.GetFileNameWithoutExtension(
+                                                                          PathUtility.GetPathWithDirectorySeparator(p))));
+        }
+
+        internal IEnumerable<ProjectItemElement> ResolveXProjProjectDependencies(ProjectRootElement xproj)
+        {
+            if (xproj == null)
+            {
+                MigrationTrace.Instance.WriteLine($"{nameof(ProjectDependencyFinder)}: No xproj file given.");
+                return Enumerable.Empty<ProjectItemElement>();
+            }
+
+            return xproj.Items
+                        .Where(i => i.ItemType == "ProjectReference")
+                        .Where(p => p.Includes().Any(
+                                    include => string.Equals(Path.GetExtension(include), ".csproj", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        internal string FindXprojFile(string projectDirectory)
+        {
+            var allXprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj", SearchOption.TopDirectoryOnly);
+
+            if (allXprojFiles.Count() > 1)
+            {
+                MigrationErrorCodes
+                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
+                    .Throw();
+            }
+
+            return allXprojFiles.FirstOrDefault();
+        }
+
         private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(string projectJsonFilePath)
         {
-            var projectDirectory = Path.GetDirectoryName(projectJsonFilePath);
+            var projectRootDirectory = GetRootFromProjectJson(projectJsonFilePath);
 
             var projectSearchPaths = new List<string>();
-            projectSearchPaths.Add(projectDirectory);
+            projectSearchPaths.Add(projectRootDirectory);
 
-            var globalPaths = GetGlobalPaths(projectDirectory);
+            var globalPaths = GetGlobalPaths(projectRootDirectory);
             projectSearchPaths = projectSearchPaths.Union(globalPaths).ToList();
 
             var projects = new Dictionary<string, ProjectDependency>(StringComparer.Ordinal);
@@ -91,6 +153,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
 
             return projects;
+        }
+
+        /// <summary>
+        /// Finds the parent directory of the project.json.
+        /// </summary>
+        /// <param name="projectJsonPath">Full path to project.json.</param>
+        private static string GetRootFromProjectJson(string projectJsonPath)
+        {
+            if (!string.IsNullOrEmpty(projectJsonPath))
+            {
+                var file = new FileInfo(projectJsonPath);
+
+                // If for some reason we are at the root of the drive this will be null
+                // Use the file directory instead.
+                if (file.Directory.Parent == null)
+                {
+                    return file.Directory.FullName;
+                }
+                else
+                {
+                    return file.Directory.Parent.FullName;
+                }
+            }
+
+            return projectJsonPath;
         }
 
         /// <summary>
