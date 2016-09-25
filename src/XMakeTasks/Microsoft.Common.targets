@@ -115,7 +115,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
       Prepare to import project extensions which usually come from packages.  Package management systems will create a file at:
-          $(MSBuildProjectExtensionsPath)\$(MSBuildProjectFile).<SomethingUnique>.targets
+          $(MSBuildProjectExtensionsPath)\$(MSBuildProjectName).<SomethingUnique>.targets
           
         Each package management system should use a unique moniker to avoid collisions.  It is a wild-card import so the package
         management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
@@ -124,7 +124,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImportProjectExtensionTargets Condition="'$(ImportProjectExtensionTargets)' == ''">true</ImportProjectExtensionTargets>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.targets" Condition="'$(ImportProjectExtensionTargets)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
+  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectName).*.targets" Condition="'$(ImportProjectExtensionTargets)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
 
   <PropertyGroup>
     <ImportDirectoryBuildTargets Condition="'$(ImportDirectoryBuildTargets)' == ''">true</ImportDirectoryBuildTargets>
