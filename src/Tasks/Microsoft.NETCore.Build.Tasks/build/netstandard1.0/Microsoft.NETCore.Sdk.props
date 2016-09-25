@@ -78,7 +78,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
 
     <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/1046: Temporary bootstrapping mechanism before cross-targeting participation is extensible just as inner build is. -->
-    <CoreCrossTargetingTargetsPath>$(MSBuildThisFileDirectory)..\cross\Microsoft.NETCore.Sdk.targets</CoreCrossTargetingTargetsPath>
+    <CoreCrossTargetingTargetsPath>$(MSBuildThisFileDirectory)..\..\buildCrossTargeting\Microsoft.NETCore.Sdk.targets</CoreCrossTargetingTargetsPath>
     
     <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
