@@ -24,8 +24,10 @@ namespace Microsoft.NETCore.Publish.Tests
                 .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             testAsset.Restore(appProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
+            testAsset.Restore(libraryProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
 
