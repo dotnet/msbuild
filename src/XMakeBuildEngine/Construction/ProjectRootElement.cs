@@ -976,6 +976,16 @@ namespace Microsoft.Build.Construction
         /// Uses the specified project collection.
         /// May throw InvalidProjectFileException.
         /// </summary>
+        public static ProjectRootElement Create(XmlReader xmlReader, ProjectCollection projectCollection)
+        {
+            return Create(xmlReader, projectCollection, preserveFormatting: false);
+        }
+
+        /// <summary>
+        /// Initialize a ProjectRootElement instance from an XmlReader.
+        /// Uses the specified project collection.
+        /// May throw InvalidProjectFileException.
+        /// </summary>
         public static ProjectRootElement Create(XmlReader xmlReader, ProjectCollection projectCollection, bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
