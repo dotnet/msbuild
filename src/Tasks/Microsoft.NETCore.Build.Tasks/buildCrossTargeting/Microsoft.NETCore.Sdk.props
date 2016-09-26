@@ -11,6 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildThisFileDirectory)..\netstandard1.0\Microsoft.NETCore.Sdk.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\build\netstandard1.0\Microsoft.NETCore.Sdk.props" />
 
 </Project>
