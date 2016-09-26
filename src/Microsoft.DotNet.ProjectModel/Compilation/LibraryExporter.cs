@@ -212,13 +212,16 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var sourceCodeLanguage = _rootProject.Project.GetSourceCodeLanguage();
                 var languageGroups = library.ContentFiles.GroupBy(file => file.CodeLanguage);
+
                 var selectedGroup = languageGroups.FirstOrDefault(g => g.Key == sourceCodeLanguage) ??
+                                    languageGroups.FirstOrDefault(g => g.Key == "any") ??
                                     languageGroups.FirstOrDefault(g => g.Key == null);
                 if (selectedGroup != null)
                 {
                     foreach (var contentFile in selectedGroup)
                     {
                         if (contentFile.CodeLanguage != null &&
+                            contentFile.CodeLanguage != "any" &&
                             string.Compare(contentFile.CodeLanguage, sourceCodeLanguage, StringComparison.OrdinalIgnoreCase) != 0)
                         {
                             continue;

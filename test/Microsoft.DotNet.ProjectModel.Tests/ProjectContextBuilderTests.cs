@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
+using NuGet.ProjectModel;
 using Xunit;
 
 namespace Microsoft.DotNet.ProjectModel.Tests
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             // Initialize a test instance that we're going to clone. Make sure all properties are initialized here.
             var initialBuilder = new ProjectContextBuilder()
                 .WithProject(new Project())
-                .WithLockFile(new LockFile("abc"))
+                .WithLockFile(new LockFile())
                 .WithTargetFramework(FrameworkConstants.CommonFrameworks.NetStandard10)
                 .WithRuntimeIdentifiers(new[] { "win7-x64", "osx.10.10-x64" })
                 .WithRootDirectory("C:\\The\\Root")
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 .WithPackagesDirectory("D:\\My\\Awesome\\NuGet\\Packages")
                 .WithReferenceAssembliesPath("/these/are/the/reference/assemblies")
                 .WithProjectResolver(_ => new Project())
-                .WithLockFileResolver(_ => new LockFile("def"))
+                .WithLockFileResolver(_ => new LockFile())
                 .WithProjectReaderSettings(new ProjectReaderSettings());
 
             // Clone the builder

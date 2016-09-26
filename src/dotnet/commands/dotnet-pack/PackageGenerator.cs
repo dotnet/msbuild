@@ -124,7 +124,10 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (Project.PackOptions.PackInclude != null)
             {
-                var files = IncludeFilesResolver.GetIncludeFiles(Project.PackOptions.PackInclude, "/", diagnostics: packDiagnostics);
+                var files = IncludeFilesResolver.GetIncludeFiles(
+                    Project.PackOptions.PackInclude,
+                    "/",
+                    diagnostics: packDiagnostics);
                 PackageBuilder.Files.AddRange(GetPackageFiles(files, packDiagnostics));
             }
             else if (Project.Files.PackInclude != null && Project.Files.PackInclude.Any())
@@ -300,9 +303,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     continue;
                 }
-
+                
                 // TODO: Efficiency
-                var dependencyDescription = context.LibraryManager.GetLibraries().First(l => l.RequestedRanges.Contains(dependency));
+                var dependencyDescription =
+                    context.LibraryManager.GetLibraries().First(l => l.RequestedRanges.Contains(dependency));
 
                 // REVIEW: Can we get this far with unresolved dependencies
                 if (dependencyDescription == null || !dependencyDescription.Resolved)
@@ -318,7 +322,8 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 if (dependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference)
                 {
-                    PackageBuilder.FrameworkAssemblies.Add(new FrameworkAssemblyReference(dependency.Name, new[] { context.TargetFramework }));
+                    PackageBuilder.FrameworkAssemblies.Add(
+                        new FrameworkAssemblyReference(dependency.Name, new[] { context.TargetFramework }));
 
                     Reporter.Verbose.WriteLine($"Adding framework assembly {dependency.Name.Yellow()}");
                 }

@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             // The lock file should contain dependencies for each framework plus dependencies shared by all frameworks
             if (lockFile.ProjectFileDependencyGroups.Count != actualTargetFrameworks.Count() + 1)
             {
+                Console.WriteLine($"Different count; {lockFile.ProjectFileDependencyGroups.Count} != {actualTargetFrameworks.Count() + 1}");
                 return false;
             }
 
@@ -38,7 +39,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 var expectedDependencies = group.Dependencies.OrderBy(x => x);
 
                 // If the framework name is empty, the associated dependencies are shared by all frameworks
-                if (group.FrameworkName == null)
+                if (string.IsNullOrEmpty(group.FrameworkName))
                 {
                     actualDependencies = project.Dependencies
                         .Select(d => d.LibraryRange.ToLockFileDependencyGroupString())
@@ -47,7 +48,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 else
                 {
                     var framework = actualTargetFrameworks
-                        .FirstOrDefault(f => Equals(f.FrameworkName, group.FrameworkName));
+                        .FirstOrDefault(f => Equals(f.FrameworkName.DotNetFrameworkName, group.FrameworkName));
                     if (framework == null)
                     {
                         return false;
@@ -60,6 +61,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 
                 if (!actualDependencies.SequenceEqual(expectedDependencies))
                 {
+                    Console.WriteLine($"ActualDependencies don't match");
                     return false;
                 }
             }

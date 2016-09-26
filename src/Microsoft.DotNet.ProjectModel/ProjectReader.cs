@@ -278,7 +278,7 @@ namespace Microsoft.DotNet.ProjectModel
 
                     var dependencyValue = dependency.Value;
                     var dependencyTypeValue = LibraryDependencyType.Default;
-                    var target = isGacOrFrameworkReference ? LibraryDependencyTarget.Reference: LibraryDependencyTarget.None;
+                    var target = isGacOrFrameworkReference ? LibraryDependencyTarget.Reference : LibraryDependencyTarget.All;
                     string dependencyVersionAsString = null;
 
                     if (dependencyValue.Type == JTokenType.Object)
@@ -334,7 +334,10 @@ namespace Microsoft.DotNet.ProjectModel
                             dependency.Key,
                             dependencyVersionRange,
                             target),
-                        Type = dependencyTypeValue
+                        Type = dependencyTypeValue,
+                        SourceFilePath = projectPath,
+                        SourceLine = lineInfo.LineNumber,
+                        SourceColumn = lineInfo.LinePosition
                     });
                 }
             }

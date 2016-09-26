@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             if (!dependencies.Any(dep => string.Equals(dep.Name, dependencyName, StringComparison.OrdinalIgnoreCase)))
             {
                 dependencies.Add(new ProjectLibraryDependency {
-                    LibraryRange = new LibraryRange(dependencyName, LibraryDependencyTarget.All)
+                    LibraryRange = new LibraryRange(dependencyName, LibraryDependencyTarget.Reference)
                 });
             }
         }

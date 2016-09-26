@@ -2,12 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Configuration;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Xunit;
 
@@ -22,7 +23,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var provider = new PackageDependencyProvider(
                 NuGetPathContext.Create("/foo/packages"),
                 new FrameworkReferenceResolver("/foo/references"));
-            var package = new LockFilePackageLibrary();
+            var package = new LockFileLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
             package.Files.Add("lib/dotnet/_._");
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var provider = new PackageDependencyProvider(
                 NuGetPathContext.Create("/foo/packages"),
                 new FrameworkReferenceResolver("/foo/references"));
-            var package = new LockFilePackageLibrary();
+            var package = new LockFileLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0-Beta");
             package.Files.Add("lib/dotnet/_._");
@@ -80,7 +81,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var provider = new PackageDependencyProvider(
                 NuGetPathContext.Create("/foo/packages"),
                 new FrameworkReferenceResolver("/foo/references"));
-            var package = new LockFilePackageLibrary();
+            var package = new LockFileLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
             package.Files.Add("lib/dotnet/_._");
@@ -113,7 +114,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var provider = new PackageDependencyProvider(
                 NuGetPathContext.Create("/foo/packages"),
                 new FrameworkReferenceResolver("/foo/references"));
-            var package = new LockFilePackageLibrary();
+            var package = new LockFileLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
             package.Files.Add("lib/net46/_._");
@@ -143,7 +144,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var provider = new PackageDependencyProvider(
                 NuGetPathContext.Create("/foo/packages"),
                 new FrameworkReferenceResolver("/foo/references"));
-            var package = new LockFilePackageLibrary();
+            var package = new LockFileLibrary();
             package.Name = "Something";
             package.Version = NuGetVersion.Parse("1.0.0");
 

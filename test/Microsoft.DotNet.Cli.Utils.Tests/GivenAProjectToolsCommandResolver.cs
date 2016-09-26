@@ -1,15 +1,14 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
+using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Xunit;
 
@@ -208,7 +207,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new NuGetVersion("1.0.0"),
                 s_toolPackageFramework);
 
-            var lockFile = LockFileReader.Read(lockFilePath, designTime: false);
+            var lockFile = new LockFileFormat().Read(lockFilePath);
 
             var depsJsonFile = Path.Combine(
                 Path.GetDirectoryName(lockFilePath),

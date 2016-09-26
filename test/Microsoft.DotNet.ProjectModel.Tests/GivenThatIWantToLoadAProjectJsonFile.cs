@@ -1,19 +1,16 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
-using Microsoft.DotNet.ProjectModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using FluentAssertions;
 using NuGet.Versioning;
 using System.Linq;
-using NuGet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectModel.Tests
 {
@@ -727,7 +724,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             var dependency = project.Dependencies.First();
 
-            dependency.VersionRange.Should().BeNull();
+            dependency.LibraryRange.VersionRange.Should().BeNull();
         }
 
         [Fact]
@@ -742,8 +739,8 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             var dependency = project.Dependencies.First();
             dependency.Name.Should().Be(DependencyName);
-            dependency.VersionRange.Should().Be(_versionRange);
-            dependency.Target.Should().Be(LibraryType.Unspecified);
+            dependency.LibraryRange.VersionRange.Should().Be(_versionRange);
+            dependency.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.All);
             dependency.Type.Should().Be(LibraryDependencyType.Default);
             dependency.SourceFilePath.Should().Be(ProjectFilePath);
             dependency.SourceLine.Should().Be(3);
@@ -764,8 +761,8 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             var dependency = project.Dependencies.First();
             dependency.Name.Should().Be(DependencyName);
-            dependency.VersionRange.Should().Be(_versionRange);
-            dependency.Target.Should().Be(LibraryType.Unspecified);
+            dependency.LibraryRange.VersionRange.Should().Be(_versionRange);
+            dependency.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.All);
             dependency.Type.Should().Be(LibraryDependencyType.Default);
             dependency.SourceFilePath.Should().Be(ProjectFilePath);
             dependency.SourceLine.Should().Be(3);
@@ -801,7 +798,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var project = GetProject(json);
 
             var dependency = project.Dependencies.First();
-            dependency.Target.Should().Be(LibraryType.Unspecified);
+            dependency.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.None);
         }
 
         [Fact]
@@ -817,7 +814,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var project = GetProject(json);
 
             var dependency = project.Dependencies.First();
-            dependency.Target.Should().Be(LibraryType.Project);
+            dependency.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.Project);
         }
 
         [Fact]
@@ -889,7 +886,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             var tool = project.Tools.First();
 
-            tool.VersionRange.Should().BeNull();
+            tool.LibraryRange.VersionRange.Should().BeNull();
         }
 
         [Fact]
@@ -904,8 +901,8 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             var tool = project.Tools.First();
             tool.Name.Should().Be(ToolName);
-            tool.VersionRange.Should().Be(_versionRange);
-            tool.Target.Should().Be(LibraryType.Unspecified);
+            tool.LibraryRange.VersionRange.Should().Be(_versionRange);
+            tool.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.All);
             tool.Type.Should().Be(LibraryDependencyType.Default);
             tool.SourceFilePath.Should().Be(ProjectFilePath);
             tool.SourceLine.Should().Be(3);
@@ -926,8 +923,8 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
             var tool = project.Tools.First();
             tool.Name.Should().Be(ToolName);
-            tool.VersionRange.Should().Be(_versionRange);
-            tool.Target.Should().Be(LibraryType.Unspecified);
+            tool.LibraryRange.VersionRange.Should().Be(_versionRange);
+            tool.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.All);
             tool.Type.Should().Be(LibraryDependencyType.Default);
             tool.SourceFilePath.Should().Be(ProjectFilePath);
             tool.SourceLine.Should().Be(3);
@@ -963,7 +960,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var project = GetProject(json);
 
             var tool = project.Tools.First();
-            tool.Target.Should().Be(LibraryType.Unspecified);
+            tool.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.None);
         }
 
         [Fact]
@@ -979,7 +976,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var project = GetProject(json);
 
             var tool = project.Tools.First();
-            tool.Target.Should().Be(LibraryType.Project);
+            tool.LibraryRange.TypeConstraint.Should().Be(LibraryDependencyTarget.Project);
         }
 
         public Project GetProject(JObject json, ProjectReaderSettings settings = null)

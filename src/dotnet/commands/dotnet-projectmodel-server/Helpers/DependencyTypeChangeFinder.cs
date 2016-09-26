@@ -54,10 +54,10 @@ namespace Microsoft.DotNet.ProjectModel.Server.Helpers
                 return new DiagnosticMessage(
                     ErrorCodes.NU1010,
                     $"The type of dependency {library.Identity.Name} was changed.",
-                    string.Empty,
+                    libraryRange.SourceFilePath,
                     DiagnosticMessageSeverity.Error,
-                    0,
-                    0,
+                    libraryRange.SourceLine,
+                    libraryRange.SourceColumn,
                     library);
             }
 
