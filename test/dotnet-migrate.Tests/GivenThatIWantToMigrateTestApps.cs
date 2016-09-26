@@ -150,16 +150,25 @@ namespace Microsoft.DotNet.Migration.Tests
             VerifyMigration(Enumerable.Repeat(projectName, 1), projectDirectory);
          }
 
-         [Fact]
-         public void It_migrates_all_projects_in_given_directory()
+         [Theory]
+         [InlineData(true)]
+         [InlineData(false)]
+         public void It_migrates_all_projects_in_given_directory(bool skipRefs)
          {
-            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph").Path;
+            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"MigrateDirectory.SkipRefs.{skipRefs}").Path;
 
             FixUpProjectJsons(projectDirectory);
 
-            MigrateCommand.Run(new [] { projectDirectory, "--skip-project-references" }).Should().Be(0);
+            if (skipRefs)
+            {
+                MigrateCommand.Run(new [] { projectDirectory, "--skip-project-references" }).Should().Be(0);
+            }
+            else
+            {
+                MigrateCommand.Run(new [] { projectDirectory }).Should().Be(0);
+            }
 
-            string[] migratedProjects = new string[] { "ProjectA", "ProjectB", "ProjectC", "ProjectD", "ProjectE" };
+            string[] migratedProjects = new string[] { "ProjectA", "ProjectB", "ProjectC", "ProjectD", "ProjectE", "ProjectF", "ProjectG" };
             VerifyMigration(migratedProjects, projectDirectory);
          }
 

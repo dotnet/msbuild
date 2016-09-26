@@ -43,12 +43,11 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             foreach (var project in projectsToMigrate)
             {
-                Console.WriteLine($"START migrating project {project}..");
+                Console.WriteLine($"Migrating project {project}..");
                 var projectDirectory = Path.GetDirectoryName(project);
                 var outputDirectory = projectDirectory;
                 var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate, _xprojFilePath);
                 new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
-                Console.WriteLine($"END migrating project {project}.");
             }
 
             return 0;
@@ -71,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             else
             {
-                throw new Exception($"Invalid project argument - {projectArg}");
+                throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json file and a directory named '{projectArg}' doesn't exist.");
             }
         }
 
