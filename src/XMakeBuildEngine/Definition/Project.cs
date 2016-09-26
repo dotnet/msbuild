@@ -33,43 +33,6 @@ using System.Globalization;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Flags for controlling the project load.
-    /// </summary>
-    /// <remarks>
-    /// This is a "flags" enum, allowing future settings to be added
-    /// in an additive, non breaking fashion.
-    /// </remarks>
-    [Flags]
-    [SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "Public API.  'Default' is roughly equivalent to 'None'. ")]
-    public enum ProjectLoadSettings
-    {
-        /// <summary>
-        /// Normal load. This is the default.
-        /// </summary>
-        Default = 0,
-
-        /// <summary>
-        /// Ignore nonexistent targets files when evaluating the project
-        /// </summary>
-        IgnoreMissingImports = 1,
-
-        /// <summary>
-        /// Record imports including duplicate, but not circular, imports on the ImportsIncludingDuplicates property
-        /// </summary>
-        RecordDuplicateButNotCircularImports = 2,
-
-        /// <summary>
-        /// Throw an exception and stop the evaluation of a project if any circular imports are detected
-        /// </summary>
-        RejectCircularImports = 4,
-
-        /// <summary>
-        /// Record the item elements that got evaluated
-        /// </summary>
-        RecordEvaluatedItemElements = 8
-    }
-
-    /// <summary>
     /// Represents an evaluated project with design time semantics.
     /// Always backed by XML; can be built directly, or an instance can be cloned off to add virtual items/properties and build.
     /// Edits to this project always update the backing XML.
@@ -108,11 +71,6 @@ namespace Microsoft.Build.Evaluation
         /// Used such that even after unload and reload, the evaluation counter changes.
         /// </summary>
         private static int s_globalEvaluationCounter;
-
-        /// <summary>
-        /// Locking object.
-        /// </summary>
-        private static object s_locker = new Object();
 
         /// <summary>
         /// Backing data; stored in a nested class so it can be passed to the Evaluator to fill
@@ -170,12 +128,27 @@ namespace Microsoft.Build.Evaluation
         private RenameHandlerDelegate _renameHandler;
 
         /// <summary>
+        /// Default project template options (include all features).
+        /// </summary>
+        internal const NewProjectFileOptions DefaultNewProjectTemplateOptions = NewProjectFileOptions.IncludeAllOptions;
+
+        /// <summary>
         /// Construct an empty project, evaluating with the global project collection's
         /// global properties and default tools version.
         /// Project will be added to the global project collection when it is named.
         /// </summary>
         public Project()
-            : this(ProjectRootElement.Create(ProjectCollection.GlobalProjectCollection))
+            : this(DefaultNewProjectTemplateOptions)
+        {
+        }
+
+        /// <summary>
+        /// Construct an empty project, evaluating with the global project collection's
+        /// global properties and default tools version.
+        /// Project will be added to the global project collection when it is named.
+        /// </summary>
+        public Project(NewProjectFileOptions newProjectFileOptions)
+            : this(ProjectRootElement.Create(ProjectCollection.GlobalProjectCollection, newProjectFileOptions))
         {
         }
 
@@ -190,13 +163,34 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Construct an empty project, evaluating with the specified project collection's
+        /// global properties and default tools version.
+        /// Project will be added to the specified project collection when it is named.
+        /// </summary>
+        public Project(ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
+            : this(ProjectRootElement.Create(projectCollection, newProjectFileOptions), null, null, projectCollection)
+        {
+        }
+
+        /// <summary>
         /// Construct an empty project, evaluating with the specified project collection and
         /// the specified global properties and default tools version, either of which may be null.
         /// Project will be added to the specified project collection when it is named.
         /// </summary>
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
         public Project(IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection)
-            : this(ProjectRootElement.Create(projectCollection), globalProperties, toolsVersion, projectCollection)
+            : this(ProjectRootElement.Create(projectCollection, DefaultNewProjectTemplateOptions), globalProperties, toolsVersion, projectCollection)
+        {
+        }
+
+        /// <summary>
+        /// Construct an empty project, evaluating with the specified project collection and
+        /// the specified global properties and default tools version, either of which may be null.
+        /// Project will be added to the specified project collection when it is named.
+        /// </summary>
+        /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
+        public Project(IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
+            : this(ProjectRootElement.Create(projectCollection, newProjectFileOptions), globalProperties, toolsVersion, projectCollection)
         {
         }
 

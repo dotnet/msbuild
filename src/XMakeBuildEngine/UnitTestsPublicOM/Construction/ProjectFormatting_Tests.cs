@@ -3,11 +3,13 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -194,21 +196,20 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
         [Fact]
         public void ProjectAddItemFormatting_EmptyGroup()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+            string content = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <ItemGroup>
   </ItemGroup>
 </Project>");
-
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
             Project project = new Project(xml);
             project.AddItem("Compile", "Program.cs");
-            StringWriter writer = new StringWriter();
+            StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
-            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <ItemGroup>
     <Compile Include=""Program.cs"" />
@@ -457,6 +458,152 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
         void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
+        }
+
+        [Fact]
+        public void VerifyNamespaceRemainsWhenPresent()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj`>
+      <Project>{3699f81b-2d03-46c5-abd7-e88a4c946f28}</Project>
+    </ProjectReference>
+  </ItemGroup>
+</Project>");
+
+            VerifyFormattingPreserved(content);
+        }
+
+        [Fact]
+        public void VerifyNoNamespaceRemains()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj` />
+  </ItemGroup>
+</Project>");
+
+            VerifyFormattingPreserved(content);
+        }
+
+        [Fact]
+        public void DefaultProjectSaveContainsAllNewFileOptions()
+        {
+            // XML declaration tag, namespace, and tools version must be present by default.
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj`>
+      <metadata>value</metadata>
+    </ProjectReference>
+  </ItemGroup>
+</Project>");
+
+            Project project = new Project();
+            project.AddItem("ProjectReference", @"..\CLREXE\CLREXE.vcxproj",
+                new[] {new KeyValuePair<string, string>("metadata", "value")});
+            
+            StringWriter writer = new EncodingStringWriter();
+            project.Save(writer);
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void NewProjectSaveWithOptionsNone()
+        {
+            // When NewProjectFileOptions.None is specified, we should not have an XML declaration,
+            // tools version, or namespace in the project file.
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<Project>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj`>
+      <metadata>value</metadata>
+    </ProjectReference>
+  </ItemGroup>
+</Project>");
+
+            Project project = new Project(NewProjectFileOptions.None);
+            var item = project.AddItem("ProjectReference", @"..\CLREXE\CLREXE.vcxproj");
+            item[0].SetMetadataValue("metadata", "value");
+
+            StringWriter writer = new EncodingStringWriter();
+            project.Save(writer);
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ChangeItemTypeNoNamespace()
+        {
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<Project>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj` />
+  </ItemGroup>
+</Project>");
+
+            Project project = new Project(NewProjectFileOptions.None);
+            var item = project.AddItem("NotProjectReference", @"..\CLREXE\CLREXE.vcxproj");
+            item[0].ItemType = "ProjectReference";
+
+            StringWriter writer = new EncodingStringWriter();
+            project.Save(writer);
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ChangeItemTypeWithNamespace()
+        {
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=`1.0` encoding=`utf-16`?>
+<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj` />
+  </ItemGroup>
+</Project>");
+
+            Project project = new Project(NewProjectFileOptions.IncludeXmlNamespace);
+            var item = project.AddItem("NotProjectReference", @"..\CLREXE\CLREXE.vcxproj");
+            item[0].ItemType = "ProjectReference";
+
+            // StringWriter is UTF16 (will output xml declaration)
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ChangeItemTypeWithXmlHeader()
+        {
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=`..\CLREXE\CLREXE.vcxproj` />
+  </ItemGroup>
+</Project>");
+
+            Project project = new Project(NewProjectFileOptions.IncludeXmlDeclaration);
+            var item = project.AddItem("NotProjectReference", @"..\CLREXE\CLREXE.vcxproj");
+            item[0].ItemType = "ProjectReference";
+
+            // Should still output XML declaration even when using UTF8 (NewProjectFileOptions.IncludeXmlDeclaration
+            // was specified)
+            StringWriter writer = new EncodingStringWriter();
+            project.Save(writer);
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
         }
     }
 }

@@ -94,10 +94,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectValidNamespace(XmlElementWithLocation element)
         {
+            // If a namespace was specified it must be the default MSBuild namespace.
             if (element.Prefix.Length > 0 ||
-                !String.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
+                (!string.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace,
+                     StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(element.NamespaceURI)))
             {
-                ProjectErrorUtilities.ThrowInvalidProject(element.Location, "CustomNamespaceNotAllowedOnThisChildElement", element.Name, element.ParentNode.Name);
+                ProjectErrorUtilities.ThrowInvalidProject(element.Location,
+                    "CustomNamespaceNotAllowedOnThisChildElement", element.Name, element.ParentNode.Name);
             }
         }
 

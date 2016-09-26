@@ -12,6 +12,7 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
@@ -61,7 +62,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal(true, project.IsDirty);
 
-            StringWriter writer = new StringWriter();
+            StringWriter writer = new EncodingStringWriter();
             projectXml.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"

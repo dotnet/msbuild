@@ -3,21 +3,17 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-
 using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class MSBuildTask_Tests : IDisposable
+    public sealed class MSBuildTask_Tests : IDisposable
     {
         public MSBuildTask_Tests()
         {
@@ -1587,6 +1583,42 @@ namespace Microsoft.Build.UnitTests
                 <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>                  
                     <Target Name=`t`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`BUILD`>
+                            <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
+                        </MSBuild>
+                        <Message Text=`[@(out)]`/>
+                    </Target>	
+                </Project>
+                ");
+
+            try
+            {
+                Project project = new Project(projectFile2);
+                MockLogger logger = new MockLogger();
+
+                project.Build(logger);
+
+                logger.AssertLogContains("[foo.out]");
+            }
+            finally
+            {
+                File.Delete(projectFile1);
+                File.Delete(projectFile2);
+            }
+        }
+
+        [Fact]
+        public void ProjectFileWithoutNamespaceBuilds()
+        {
+            string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                <Project>
+                    <Target Name=`Build` Outputs=`foo.out` />
+                </Project>
+                ");
+
+            string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                <Project>                  
+                    <Target Name=`t`>
+                        <MSBuild Projects=`" + projectFile1 + @"` Targets=`Build`>
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
                         </MSBuild>
                         <Message Text=`[@(out)]`/>

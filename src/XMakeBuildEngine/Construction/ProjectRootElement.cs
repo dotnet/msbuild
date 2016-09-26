@@ -48,10 +48,11 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("{FullPath} #Children={Count} DefaultTargets={DefaultTargets} ToolsVersion={ToolsVersion} InitialTargets={InitialTargets} ExplicitlyLoaded={IsExplicitlyLoaded}")]
     public class ProjectRootElement : ProjectElementContainer
     {
-        /// <summary>
-        /// Constant for default (empty) project file.
-        /// </summary>
-        private const string EmptyProjectFileContent = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Project ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
+        /// Constants for default (empty) project file.
+        private const string EmptyProjectFileContent = "{0}<Project{1}{2}>\r\n</Project>";
+        private const string EmptyProjectFileXmlDeclaration = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
+        private const string EmptyProjectFileToolsVersion = " ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\"";
+        private const string EmptyProjectFileXmlNamespace = " xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\"";
 
         /// <summary>
         /// The singleton delegate that loads projects into the ProjectRootElement
@@ -104,13 +105,19 @@ namespace Microsoft.Build.Construction
         private Encoding _encoding;
 
         /// <summary>
+        /// XML namespace specified and used by this project file. If a namespace was not specified in the project file, this
+        /// value will be string.Empty.
+        /// </summary>
+        internal string XmlNamespace { get; set; }
+
+        /// <summary>
         /// The project file's location. It can be null if the project is not directly loaded from a file.
         /// </summary>
         private ElementLocation _projectFileLocation;
 
         /// <summary>
         /// The directory that the project is in. 
-        /// Essential for evaluting relative paths.
+        /// Essential for evaluating relative paths.
         /// If the project is not loaded from disk, returns the current-directory from 
         /// the time the project was loaded - this is the same behavior as Whidbey/Orcas.
         /// </summary>
@@ -177,7 +184,7 @@ namespace Microsoft.Build.Construction
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
         /// Leaves the project dirty, indicating there are unsaved changes.
         /// </summary>
-        private ProjectRootElement(ProjectRootElementCache projectRootElementCache)
+        private ProjectRootElement(ProjectRootElementCache projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, "projectRootElementCache");
 
@@ -189,8 +196,13 @@ namespace Microsoft.Build.Construction
 
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
+            
+            var emptryProjectFile = string.Format(EmptyProjectFileContent,
+                (projectFileOptions & NewProjectFileOptions.IncludeXmlDeclaration) != 0 ? EmptyProjectFileXmlDeclaration : string.Empty,
+                (projectFileOptions & NewProjectFileOptions.IncludeToolsVersion) != 0 ? EmptyProjectFileToolsVersion : string.Empty,
+                (projectFileOptions & NewProjectFileOptions.IncludeXmlNamespace) != 0 ? EmptyProjectFileXmlNamespace : string.Empty);
 
-            using (XmlReader xr = XmlReader.Create(new StringReader(ProjectRootElement.EmptyProjectFileContent), xrs))
+            using (XmlReader xr = XmlReader.Create(new StringReader(emptryProjectFile), xrs))
             {
                 document.Load(xr);
             }
@@ -689,7 +701,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                using (StringWriter stringWriter = new StringWriter(CultureInfo.InvariantCulture))
+                using (StringWriter stringWriter = new EncodingStringWriter(Encoding))
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(stringWriter))
                     {
@@ -923,7 +935,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create()
         {
-            return Create(ProjectCollection.GlobalProjectCollection);
+            return Create(ProjectCollection.GlobalProjectCollection, Project.DefaultNewProjectTemplateOptions);
+        }
+
+        public static ProjectRootElement Create(NewProjectFileOptions projectFileOptions)
+        {
+            return Create(ProjectCollection.GlobalProjectCollection, projectFileOptions);
         }
 
         /// <summary>
@@ -932,10 +949,16 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
-
             return Create(projectCollection.ProjectRootElementCache);
         }
+
+        public static ProjectRootElement Create(ProjectCollection projectCollection, NewProjectFileOptions projectFileOptions)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
+
+            return Create(projectCollection.ProjectRootElementCache, projectFileOptions);
+        }
+
 
         /// <summary>
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
@@ -943,7 +966,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(string path)
         {
-            return Create(path, ProjectCollection.GlobalProjectCollection);
+            return Create(path, ProjectCollection.GlobalProjectCollection, Project.DefaultNewProjectTemplateOptions);
+        }
+
+        public static ProjectRootElement Create(string path, NewProjectFileOptions newProjectFileOptions)
+        {
+            return Create(path, ProjectCollection.GlobalProjectCollection, newProjectFileOptions);
         }
 
         /// <summary>
@@ -952,10 +980,19 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(string path, ProjectCollection projectCollection)
         {
+            return Create(path, projectCollection, Project.DefaultNewProjectTemplateOptions);
+        }
+
+        /// <summary>
+        /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
+        /// Uses the specified project collection.
+        /// </summary>
+        public static ProjectRootElement Create(string path, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
 
-            ProjectRootElement projectRootElement = new ProjectRootElement(projectCollection.ProjectRootElementCache);
+            ProjectRootElement projectRootElement = new ProjectRootElement(projectCollection.ProjectRootElementCache, newProjectFileOptions);
             projectRootElement.FullPath = path;
 
             return projectRootElement;
@@ -1747,7 +1784,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectRootElement Create(ProjectRootElementCache projectRootElementCache)
         {
-            return new ProjectRootElement(projectRootElementCache);
+            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions);
+        }
+
+        internal static ProjectRootElement Create(ProjectRootElementCache projectRootElementCache, NewProjectFileOptions projectFileOptions)
+        {
+            return new ProjectRootElement(projectRootElementCache, projectFileOptions);
         }
 
         /// <summary>
@@ -1809,7 +1851,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal XmlElementWithLocation CreateElement(string name)
         {
-            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XMakeAttributes.defaultXmlNamespace);
+            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace);
         }
 
         /// <summary>

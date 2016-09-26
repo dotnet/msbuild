@@ -398,7 +398,7 @@ namespace Microsoft.Build.Construction
 
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
-            XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newItemType, XMakeAttributes.defaultXmlNamespace);
+            XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newItemType, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
         }
