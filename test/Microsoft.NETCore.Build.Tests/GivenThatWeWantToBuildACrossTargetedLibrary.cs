@@ -14,17 +14,15 @@ namespace Microsoft.NETCore.Build.Tests
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
-        // This test needs to be run with restore3. Skipping this test until we can enable restore3 in the tests.
-        // Skip the test until "https://github.com/dotnet/sdk/issues/75" is fixed.
-        // [Fact]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
-                .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            testAsset.Restore(libraryProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
             buildCommand
