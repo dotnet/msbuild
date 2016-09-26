@@ -57,6 +57,7 @@
       <NuspecProperties Include="licenseUrl=$(NuGetPackageLicenseUrl)"/>
       <NuspecProperties Include="projectUrl=$(NuGetPackageProjectUrl))"/>
       <NuspecProperties Include="iconUrl=$(NuGetPackageIconUrl)"/>
+      <NuspecProperties Include="targetMSBuildToolsVersion=$(TargetMSBuildToolsVersion)"/>
     </ItemGroup>
 
     <MakeDir Directories="$(PackagesOutDir)" />
