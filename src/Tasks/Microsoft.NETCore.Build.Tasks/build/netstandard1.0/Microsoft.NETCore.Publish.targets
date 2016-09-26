@@ -27,9 +27,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <ItemDefinitionGroup>
-    <ResolvedFilesToPublish>
+    <ResolvedFileToPublish>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </ResolvedFilesToPublish>
+    </ResolvedFileToPublish>
   </ItemDefinitionGroup>
 
   <Target Name="Publish"
@@ -83,24 +83,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _CopyResolvedFilesToPublishPreserveNewest
 
-    Copy _ResolvedFilesToPublishPreserveNewest items to the publish directory.
+    Copy _ResolvedFileToPublishPreserveNewest items to the publish directory.
     ============================================================
     -->
   <Target Name="_CopyResolvedFilesToPublishPreserveNewest"
           DependsOnTargets="_ComputeResolvedFilesToPublishTypes"
-          Inputs="@(_ResolvedFilesToPublishPreserveNewest)"
-          Outputs="@(_ResolvedFilesToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
+          Inputs="@(_ResolvedFileToPublishPreserveNewest)"
+          Outputs="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
 
     <!--
         Not using SkipUnchangedFiles="true" because the application may want to change
         one of these files and not have an incremental build replace it.
         -->
-    <Copy SourceFiles = "@(_ResolvedFilesToPublishPreserveNewest)"
-          DestinationFiles="$(PublishDir)%(_ResolvedFilesToPublishPreserveNewest.RelativePath)"
+    <Copy SourceFiles = "@(_ResolvedFileToPublishPreserveNewest)"
+          DestinationFiles="$(PublishDir)%(_ResolvedFileToPublishPreserveNewest.RelativePath)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)">
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
@@ -112,7 +113,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _CopyResolvedFilesToPublishAlways
 
-    Copy _ResolvedFilesToPublishAlways items to the publish directory.
+    Copy _ResolvedFileToPublishAlways items to the publish directory.
     ============================================================
     -->
   <Target Name="_CopyResolvedFilesToPublishAlways"
@@ -122,12 +123,13 @@ Copyright (c) .NET Foundation. All rights reserved.
         Not using SkipUnchangedFiles="true" because the application may want to change
         one of these files and not have an incremental build replace it.
         -->
-    <Copy SourceFiles = "@(_ResolvedFilesToPublishAlways)"
-          DestinationFiles="$(PublishDir)%(_ResolvedFilesToPublishAlways.RelativePath)"
+    <Copy SourceFiles = "@(_ResolvedFileToPublishAlways)"
+          DestinationFiles="$(PublishDir)%(_ResolvedFileToPublishAlways.RelativePath)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)">
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
@@ -139,16 +141,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _ComputeResolvedFilesToPublishTypes
 
-    Splits ResolvedFilesToPublish items into 'PreserveNewest' and 'Always' buckets.
+    Splits ResolvedFileToPublish items into 'PreserveNewest' and 'Always' buckets.
     ============================================================
     -->
   <Target Name="_ComputeResolvedFilesToPublishTypes">
     <ItemGroup>
-      <_ResolvedFilesToPublishPreserveNewest Include="@(ResolvedFilesToPublish)"
-                                             Condition="'%(ResolvedFilesToPublish.CopyToPublishDirectory)'=='PreserveNewest'" />
+      <_ResolvedFileToPublishPreserveNewest Include="@(ResolvedFileToPublish)"
+                                             Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='PreserveNewest'" />
 
-      <_ResolvedFilesToPublishAlways Include="@(ResolvedFilesToPublish)"
-                                     Condition="'%(ResolvedFilesToPublish.CopyToPublishDirectory)'=='Always'" />
+      <_ResolvedFileToPublishAlways Include="@(ResolvedFileToPublish)"
+                                     Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='Always'" />
     </ItemGroup>
   </Target>
 
@@ -171,26 +173,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <!-- Copy the build product (.dll or .exe). -->
-      <ResolvedFilesToPublish Include="@(IntermediateAssembly)"
+      <ResolvedFileToPublish Include="@(IntermediateAssembly)"
                               Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
         <RelativePath>@(IntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
 
       <!-- Copy the debug information file (.pdb), if any -->
-      <ResolvedFilesToPublish Include="@(_DebugSymbolsIntermediatePath)"
+      <ResolvedFileToPublish Include="@(_DebugSymbolsIntermediatePath)"
                               Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
 
       <!-- Copy satellite assemblies. -->
-      <ResolvedFilesToPublish Include="@(IntermediateSatelliteAssembliesWithTargetPath)">
+      <ResolvedFileToPublish Include="@(IntermediateSatelliteAssembliesWithTargetPath)">
         <RelativePath>%(IntermediateSatelliteAssembliesWithTargetPath.Culture)\%(Filename)%(Extension)</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
 
       <!-- Copy all the assemblies -->
-      <ResolvedFilesToPublish Include="@(ResolvedAssembliesToPublish)">
+      <ResolvedFileToPublish Include="@(ResolvedAssembliesToPublish)">
         <RelativePath>%(ResolvedAssembliesToPublish.DestinationSubPath)</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
     </ItemGroup>
 
   </Target>
@@ -237,15 +239,15 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="GetCopyToPublishDirectoryItems">
 
     <ItemGroup>
-      <ResolvedFilesToPublish Include="@(_SourceItemsToCopyToPublishDirectoryAlways)">
+      <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectoryAlways)">
         <RelativePath>%(_SourceItemsToCopyToPublishDirectoryAlways.TargetPath)</RelativePath>
         <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
 
-      <ResolvedFilesToPublish Include="@(_SourceItemsToCopyToPublishDirectory)">
+      <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectory)">
         <RelativePath>%(_SourceItemsToCopyToPublishDirectory.TargetPath)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
     </ItemGroup>
 
   </Target>
@@ -475,9 +477,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
 
-      <ResolvedFilesToPublish Condition="'%(ResolvedFilesToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
-        <RelativePath>$(AssemblyName)%(ResolvedFilesToPublish.Extension)</RelativePath>
-      </ResolvedFilesToPublish>
+      <ResolvedFileToPublish Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
+        <RelativePath>$(AssemblyName)%(ResolvedFileToPublish.Extension)</RelativePath>
+      </ResolvedFileToPublish>
 
     </ItemGroup>
 
