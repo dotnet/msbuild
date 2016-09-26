@@ -9,9 +9,9 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     sealed public class ProjectExtensionsTargetsImportTest : ProjectExtensionsImportTestBase
     {
-        protected override string CustomImportProjectPath => Path.Combine(ObjectModelHelpers.TempProjectDir, "obj", $"{Path.GetFileName(_projectRelativePath)}.custom.targets");
+        protected override string CustomImportProjectPath => Path.Combine(ObjectModelHelpers.TempProjectDir, "obj", $"{_projectName}.custom.targets");
 
-        protected override string ImportProjectPath => Path.Combine(Path.GetDirectoryName(_projectRelativePath), "obj", $"{Path.GetFileName(_projectRelativePath)}.custom.targets");
+        protected override string ImportProjectPath => Path.Combine(Path.GetDirectoryName(_projectRelativePath), "obj", $"{_projectName}.custom.targets");
 
         protected override string PropertyNameToEnableImport => "ImportProjectExtensionTargets";
 

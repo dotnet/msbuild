@@ -10,6 +10,7 @@ namespace Microsoft.Build.UnitTests
     public abstract class ProjectExtensionsImportTestBase : IDisposable
     {
         protected readonly string _projectRelativePath = Path.Combine("src", "foo", "foo.csproj");
+        protected readonly string _projectName = "foo";
 
         protected ProjectExtensionsImportTestBase()
         {
