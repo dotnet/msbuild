@@ -20,8 +20,12 @@ namespace Microsoft.DotNet.Tools.Migrate
             app.HandleResponseFiles = true;
             app.HelpOption("-h|--help");
 
+            CommandArgument projectArgument = app.Argument("<PROJECT_JSON/PROJECT_DIR>",
+                "The path to project.json file or a directory to migrate." +
+                " If a directory is specified, then it will recursively search for project.json files to migrate." +
+                " Defaults to current directory if nothing is specified.");
+
             CommandOption template = app.Option("-t|--template-file", "Base MSBuild template to use for migrated app. The default is the project included in dotnet new -t msbuild", CommandOptionType.SingleValue);
-            CommandOption project = app.Option("-p|--project", "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory", CommandOptionType.SingleValue);
             CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new -t msbuild", CommandOptionType.SingleValue);
             CommandOption xprojFile = app.Option("-x|--xproj-file", "The path to the xproj file to use. Required when there is more than one xproj in a project directory.", CommandOptionType.SingleValue);
             CommandOption skipProjectReferences = app.Option("-s|--skip-project-references", "Skip migrating project references. By default project references are migrated recursively", CommandOptionType.BoolValue);
@@ -30,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 MigrateCommand migrateCommand = new MigrateCommand(
                     template.Value(),
-                    project.Value(), 
+                    projectArgument.Value,
                     sdkVersion.Value(),
                     xprojFile.Value(),
                     skipProjectReferences.BoolValue.HasValue ? skipProjectReferences.BoolValue.Value : false);
