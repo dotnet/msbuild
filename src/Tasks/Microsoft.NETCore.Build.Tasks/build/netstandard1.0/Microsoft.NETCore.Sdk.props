@@ -58,6 +58,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core projects -->
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+
+    <!-- Exclude GAC, registry, output directory from search paths. -->
+    <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
+    <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
   </PropertyGroup>
 
   <!-- Shared properties between cross-targeting and inner build targets. -->
