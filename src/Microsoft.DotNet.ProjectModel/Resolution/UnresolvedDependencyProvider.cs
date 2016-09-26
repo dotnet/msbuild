@@ -15,13 +15,34 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 new LibraryIdentity(
                     libraryDependency.Name,
                     libraryDependency.LibraryRange.VersionRange?.MinVersion,
-                    LibraryType.Unresolved),
+                    libraryDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project ? LibraryType.Project : LibraryType.Unresolved),
                 hash: null,
                 path: null,
                 dependencies: Enumerable.Empty<ProjectLibraryDependency>(),
                 framework: targetFramework,
                 resolved: false,
                 compatible: true);
+        }
+
+        private static LibraryType GetLibraryTypeFromLibraryDependencyTarget(LibraryDependencyTarget target)
+        {
+            switch(target)
+            {
+                case LibraryDependencyTarget.Package:
+                    return LibraryType.Package;
+                case LibraryDependencyTarget.Project:
+                    return LibraryType.Project;
+                case LibraryDependencyTarget.Reference:
+                    return LibraryType.Reference;
+                case LibraryDependencyTarget.Assembly:
+                    return LibraryType.Assembly;
+                case LibraryDependencyTarget.ExternalProject:
+                    return LibraryType.ExternalProject;
+                case LibraryDependencyTarget.WinMD:
+                    return LibraryType.WinMD;
+                default:
+                    return LibraryType.Unresolved;
+            }
         }
     }
 }

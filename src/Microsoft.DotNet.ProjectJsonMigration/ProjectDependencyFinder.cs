@@ -60,6 +60,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
                 if (!possibleProjectDependencies.TryGetValue(projectExportName, out projectDependency))
                 {
+                    Console.WriteLine($"Don't have it: {projectExportName} {projectExport.Library.Identity.Type}");
                     if (projectExport.Library.Identity.Type.Equals(LibraryType.Project) 
                         && !preResolvedProjects.Contains(projectExportName))
                     {
