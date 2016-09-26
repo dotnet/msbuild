@@ -26,10 +26,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RenamePublishedHost Condition=" '$(RenamePublishedHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != ''">true</RenamePublishedHost>
   </PropertyGroup>
 
+  <ItemDefinitionGroup>
+    <ResolvedFileToPublish>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </ResolvedFileToPublish>
+  </ItemDefinitionGroup>
+
   <Target Name="Publish"
           DependsOnTargets="Build;
                             PrepareForPublish;
-                            CopyFilesToPublishDirectory;
+                            ComputeAndCopyFilesToPublishDirectory;
                             GeneratePublishDependencyFile;
                             GeneratePublishRuntimeConfigurationFile" />
 
@@ -53,22 +59,49 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+                                        ComputeAndCopyFilesToPublishDirectory
+
+    Computes the list of all files to copy to the publish directory and then publishes them.
+    ============================================================
+    -->
+  <Target Name="ComputeAndCopyFilesToPublishDirectory"
+          DependsOnTargets="ComputeFilesToPublish;
+                            CopyFilesToPublishDirectory" />
+
+  <!--
+    ============================================================
                                         CopyFilesToPublishDirectory
 
     Copy all build outputs, satellites and other necessary files to the publish directory.
     ============================================================
     -->
   <Target Name="CopyFilesToPublishDirectory"
-          DependsOnTargets="ComputeFilesToPublish;
-                            RenamePublishedHost;
-                            _CopySourceItemsToPublishDirectory">
+          DependsOnTargets="_CopyResolvedFilesToPublishPreserveNewest;
+                            _CopyResolvedFilesToPublishAlways" />
 
-    <Copy SourceFiles="@(ResolvedFilesToPublish)"
-          DestinationFiles="$(PublishDir)%(ResolvedFilesToPublish.RelativePath)"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+  <!--
+    ============================================================
+                                        _CopyResolvedFilesToPublishPreserveNewest
+
+    Copy _ResolvedFileToPublishPreserveNewest items to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_CopyResolvedFilesToPublishPreserveNewest"
+          DependsOnTargets="_ComputeResolvedFilesToPublishTypes"
+          Inputs="@(_ResolvedFileToPublishPreserveNewest)"
+          Outputs="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
+
+    <!--
+        Not using SkipUnchangedFiles="true" because the application may want to change
+        one of these files and not have an incremental build replace it.
+        -->
+    <Copy SourceFiles = "@(_ResolvedFileToPublishPreserveNewest)"
+          DestinationFiles="$(PublishDir)%(_ResolvedFileToPublishPreserveNewest.RelativePath)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)">
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
@@ -78,14 +111,60 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+                                        _CopyResolvedFilesToPublishAlways
+
+    Copy _ResolvedFileToPublishAlways items to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_CopyResolvedFilesToPublishAlways"
+          DependsOnTargets="_ComputeResolvedFilesToPublishTypes">
+
+    <!--
+        Not using SkipUnchangedFiles="true" because the application may want to change
+        one of these files and not have an incremental build replace it.
+        -->
+    <Copy SourceFiles = "@(_ResolvedFileToPublishAlways)"
+          DestinationFiles="$(PublishDir)%(_ResolvedFileToPublishAlways.RelativePath)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ComputeResolvedFilesToPublishTypes
+
+    Splits ResolvedFileToPublish items into 'PreserveNewest' and 'Always' buckets.
+    ============================================================
+    -->
+  <Target Name="_ComputeResolvedFilesToPublishTypes">
+    <ItemGroup>
+      <_ResolvedFileToPublishPreserveNewest Include="@(ResolvedFileToPublish)"
+                                             Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='PreserveNewest'" />
+
+      <_ResolvedFileToPublishAlways Include="@(ResolvedFileToPublish)"
+                                     Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='Always'" />
+    </ItemGroup>
+  </Target>
+
+
+  <!--
+    ============================================================
                                         ComputeFilesToPublish
 
     Gathers all the files that need to be copied to the publish directory.
     ============================================================
     -->
   <Target Name="ComputeFilesToPublish"
-          DependsOnTargets="_ComputeNetCorePublishAssets"
-          Returns="ResolvedFilesToPublish">
+          DependsOnTargets="_ComputeNetCorePublishAssets;
+                            _ComputeCopyToPublishDirectoryItems">
 
     <PropertyGroup>
       <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
@@ -94,26 +173,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <!-- Copy the build product (.dll or .exe). -->
-      <ResolvedFilesToPublish Include="@(IntermediateAssembly)"
+      <ResolvedFileToPublish Include="@(IntermediateAssembly)"
                               Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
         <RelativePath>@(IntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
 
       <!-- Copy the debug information file (.pdb), if any -->
-      <ResolvedFilesToPublish Include="@(_DebugSymbolsIntermediatePath)"
+      <ResolvedFileToPublish Include="@(_DebugSymbolsIntermediatePath)"
                               Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
 
       <!-- Copy satellite assemblies. -->
-      <ResolvedFilesToPublish Include="@(IntermediateSatelliteAssembliesWithTargetPath)">
+      <ResolvedFileToPublish Include="@(IntermediateSatelliteAssembliesWithTargetPath)">
         <RelativePath>%(IntermediateSatelliteAssembliesWithTargetPath.Culture)\%(Filename)%(Extension)</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
 
       <!-- Copy all the assemblies -->
-      <ResolvedFilesToPublish Include="@(ResolvedAssembliesToPublish)">
+      <ResolvedFileToPublish Include="@(ResolvedAssembliesToPublish)">
         <RelativePath>%(ResolvedAssembliesToPublish.DestinationSubPath)</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
     </ItemGroup>
 
   </Target>
@@ -153,13 +232,25 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        _CopySourceItemsToPublishDirectory
+                                        _ComputeCopyToPublishDirectoryItems
     ============================================================
     -->
-  <Target Name="_CopySourceItemsToPublishDirectory"
-          DependsOnTargets="GetCopyToPublishDirectoryItems;
-                            _CopyOutOfDateSourceItemsToPublishDirectory;
-                            _CopyOutOfDateSourceItemsToPublishDirectoryAlways"/>
+  <Target Name="_ComputeCopyToPublishDirectoryItems"
+          DependsOnTargets="GetCopyToPublishDirectoryItems">
+
+    <ItemGroup>
+      <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectoryAlways)">
+        <RelativePath>%(_SourceItemsToCopyToPublishDirectoryAlways.TargetPath)</RelativePath>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+
+      <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectory)">
+        <RelativePath>%(_SourceItemsToCopyToPublishDirectory.TargetPath)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+
+  </Target>
 
   <!--
     ============================================================
@@ -322,62 +413,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        _CopyOutOfDateSourceItemsToPublishDirectory
-
-    Copy files that have the CopyToPublishDirectory attribute set to 'PreserveNewest'.
-    ============================================================
-    -->
-  <Target Name="_CopyOutOfDateSourceItemsToPublishDirectory"
-          Condition=" '@(_SourceItemsToCopyToPublishDirectory)' != '' "
-          Inputs="@(_SourceItemsToCopyToPublishDirectory)"
-          Outputs="@(_SourceItemsToCopyToPublishDirectory->'$(PublishDir)%(TargetPath)')">
-
-    <!--
-        Not using SkipUnchangedFiles="true" because the application may want to change
-        one of these files and not have an incremental build replace it.
-        -->
-    <Copy SourceFiles = "@(_SourceItemsToCopyToPublishDirectory)"
-          DestinationFiles = "@(_SourceItemsToCopyToPublishDirectory->'$(PublishDir)%(TargetPath)')"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)">
-
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-
-    </Copy>
-
-  </Target>
-
-  <!--
-    ============================================================
-                                        _CopyOutOfDateSourceItemsToPublishDirectoryAlways
-
-    Copy files that have the CopyToPublishDirectory attribute set to 'Always'.
-    ============================================================
-    -->
-  <Target Name="_CopyOutOfDateSourceItemsToPublishDirectoryAlways"
-          Condition=" '@(_SourceItemsToCopyToPublishDirectoryAlways)' != '' ">
-
-    <!--
-        Not using SkipUnchangedFiles="true" because the application may want to change
-        one of these files and not have an incremental build replace it.
-        -->
-    <Copy SourceFiles = "@(_SourceItemsToCopyToPublishDirectoryAlways)"
-          DestinationFiles = "@(_SourceItemsToCopyToPublishDirectoryAlways->'$(PublishDir)%(TargetPath)')"
-          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-          Retries="$(CopyRetryCount)"
-          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-          UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)">
-
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-
-    </Copy>
-
-  </Target>
-
-  <!--
-    ============================================================
                                         GeneratePublishDependencyFile
 
     Generates the $(project).deps.json file for a published app
@@ -432,6 +467,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="RenamePublishedHost"
+          AfterTargets="ComputeFilesToPublish"
+          BeforeTargets="CopyFilesToPublishDirectory"
           Condition="'$(RenamePublishedHost)' == 'true'">
 
     <PropertyGroup>
@@ -441,9 +478,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
 
-      <ResolvedFilesToPublish Condition="'%(ResolvedFilesToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
-        <RelativePath>$(AssemblyName)%(ResolvedFilesToPublish.Extension)</RelativePath>
-      </ResolvedFilesToPublish>
+      <ResolvedFileToPublish Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
+        <RelativePath>$(AssemblyName)%(ResolvedFileToPublish.Extension)</RelativePath>
+      </ResolvedFileToPublish>
 
     </ItemGroup>
 
