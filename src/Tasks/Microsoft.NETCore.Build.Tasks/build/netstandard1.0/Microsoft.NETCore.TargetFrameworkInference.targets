@@ -50,7 +50,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Map short name to long name. See earlier comment for example of how to work with identifiers that are not recognized here. -->
-  <PropertyGroup Condition="$(TargetFrameworkIdentifier) == ''">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == ''">
     <TargetFrameworkIdentifier Condition="'$(_ShortFrameworkIdentifier)' == 'netstandard'">.NETStandard</TargetFrameworkIdentifier>
     <TargetFrameworkIdentifier Condition="'$(_ShortFrameworkIdentifier)' == 'netcoreapp'">.NETCoreApp</TargetFrameworkIdentifier>
     <TargetFrameworkIdentifier Condition="'$(_ShortFrameworkIdentifier)' == 'net'">.NETFramework</TargetFrameworkIdentifier>
@@ -69,7 +69,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Trigger an error if we're unable to infer the framework identifier and version. -->
-  <PropertyGroup Condition="$(TargetFrameworkIdentifier) == '' or $(TargetFrameworkVersion) == ''">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '' or '$(TargetFrameworkVersion)' == ''">
     <_UnsupportedTargetFrameworkError>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='$(TargetFramework)'. See comment in $(MSBuildThisFileFullPath) showing how to specify them explicitly.</_UnsupportedTargetFrameworkError>
   </PropertyGroup>
   <Target Name="_CheckForUnsupportedTargetFramework" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
