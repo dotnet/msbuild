@@ -33,20 +33,23 @@ namespace Microsoft.NETCore.Build.Tasks
         [Required]
         public string AssemblyVersion { get; set; }
 
+        [Required]
+        public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
+        
         public ITaskItem CompilerOptions { get; set; }
 
         public override bool Execute()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(AssemblyName, AssemblyVersion, AssemblySatelliteAssemblies);
 
             DependencyContext dependencyContext = new DependencyContextBuilder().Build(
-                projectName: AssemblyName,
-                projectVersion: AssemblyVersion,
-                compilationOptions: compilationOptions,
-                lockFile: lockFile,
-                framework: TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework),
-                runtime: RuntimeIdentifier);
+                mainProject,
+                compilationOptions,
+                lockFile,
+                TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework),
+                RuntimeIdentifier);
 
             var writer = new DependencyContextWriter();
             using (var fileStream = File.Create(DepsFilePath))

@@ -86,6 +86,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
+                      AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       CompilerOptions="@(DependencyFileCompilerOptions)" />
 

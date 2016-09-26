@@ -18,6 +18,16 @@
           }
         }
       },
+      "Microsoft.NETCore.App/1.0.0": {
+        "type": "package",
+        "dependencies": {},
+        "compile": {
+          "lib/netcoreapp1.0/_._": {}
+        },
+        "runtime": {
+          "lib/netcoreapp1.0/_._": {}
+        }
+      },
       "SharedContentA/1.0.0": {
         "type": "package",
         "contentFiles": {
@@ -60,6 +70,16 @@
         "dependencies": {},
         "native": {
           "runtimes/osx/native/libuv.dylib": {}
+        }
+      },
+      "Microsoft.NETCore.App/1.0.0": {
+        "type": "package",
+        "dependencies": {},
+        "compile": {
+          "lib/netcoreapp1.0/_._": {}
+        },
+        "runtime": {
+          "lib/netcoreapp1.0/_._": {}
         }
       },
       "SharedContentA/1.0.0": {
@@ -116,6 +136,18 @@
         "runtimes/win7-arm/native/libuv.dll",
         "runtimes/win7-x64/native/libuv.dll",
         "runtimes/win7-x86/native/libuv.dll"
+      ]
+    },
+    "Microsoft.NETCore.App/1.0.0": {
+      "sha512": "j0UkjdAh4B+7UltdTauJBpvEYn32UZVCfmbeGjDf6Gk6rj1WLE5kmPh4TDo1FqQCJH6qE+upy57SlrXqNOMy1A==",
+      "type": "package",
+      "path": "microsoft.netcore.app/1.0.0",
+      "files": [
+        "Microsoft.NETCore.App.1.0.0.nupkg.sha512",
+        "Microsoft.NETCore.App.nuspec",
+        "ThirdPartyNotices.txt",
+        "dotnet_library_license.txt",
+        "lib/netcoreapp1.0/_._"
       ]
     },
     "SharedContentA/1.0.0": {
