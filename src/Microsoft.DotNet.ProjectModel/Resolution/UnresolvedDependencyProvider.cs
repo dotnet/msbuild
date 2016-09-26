@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 new LibraryIdentity(
                     libraryDependency.Name,
                     libraryDependency.LibraryRange.VersionRange?.MinVersion,
-                    libraryDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project ? LibraryType.Project : LibraryType.Unresolved),
+                    GetLibraryTypeFromLibraryDependencyTarget(libraryDependency.LibraryRange.TypeConstraint)),
                 hash: null,
                 path: null,
                 dependencies: Enumerable.Empty<ProjectLibraryDependency>(),

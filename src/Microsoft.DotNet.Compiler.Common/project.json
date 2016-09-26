@@ -30,6 +30,9 @@
         },
         "System.Threading.Tasks": {
           "type": "build"
+        },
+        "System.Text.Encoding": {
+          "type": "build"
         }
       }
     },
