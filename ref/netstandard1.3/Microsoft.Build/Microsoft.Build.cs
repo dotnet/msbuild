@@ -271,7 +271,7 @@ namespace Microsoft.Build.Construction
         public static Microsoft.Build.Construction.ProjectRootElement Create(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader) { throw null; }
-        public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
         public Microsoft.Build.Construction.ProjectChooseElement CreateChooseElement() { throw null; }
         public Microsoft.Build.Construction.ProjectImportElement CreateImportElement(string project) { throw null; }
         public Microsoft.Build.Construction.ProjectImportGroupElement CreateImportGroupElement() { throw null; }
@@ -300,6 +300,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectRootElement DeepClone() { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
         public void Save() { }
         public void Save(System.IO.TextWriter writer) { }
         public void Save(string path) { }
@@ -462,8 +463,8 @@ namespace Microsoft.Build.Evaluation
 {
     public partial class GlobResult
     {
-        public GlobResult(Microsoft.Build.Construction.ProjectItemElement itemElement, string glob, System.Collections.Generic.ISet<string> excludes) { }
-        public System.Collections.Generic.ISet<string> Excludes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public GlobResult(Microsoft.Build.Construction.ProjectItemElement itemElement, string glob, System.Collections.Generic.IEnumerable<string> excludes) { }
+        public System.Collections.Generic.IEnumerable<string> Excludes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string Glob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectItemElement ItemElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
@@ -538,7 +539,6 @@ namespace Microsoft.Build.Evaluation
         public Microsoft.Build.Execution.ProjectInstance CreateProjectInstance(Microsoft.Build.Execution.ProjectInstanceSettings settings) { throw null; }
         public string ExpandString(string unexpandedValue) { throw null; }
         public System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs() { throw null; }
-        public System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs(Microsoft.Build.Evaluation.ProjectItem item) { throw null; }
         public System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs(string itemType) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Evaluation.ProjectItem item) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Evaluation.ProjectItemDefinition item) { throw null; }
@@ -697,6 +697,7 @@ namespace Microsoft.Build.Evaluation
         Default = 0,
         IgnoreMissingImports = 1,
         RecordDuplicateButNotCircularImports = 2,
+        RecordEvaluatedItemElements = 8,
         RejectCircularImports = 4,
     }
     [System.Diagnostics.DebuggerDisplayAttribute("{Name}={EvaluatedValue} [{_xml.Value}]")]

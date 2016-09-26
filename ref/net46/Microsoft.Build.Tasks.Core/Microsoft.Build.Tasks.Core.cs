@@ -615,6 +615,7 @@ namespace Microsoft.Build.Tasks
         public string TargetPlatformIdentifier { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public string TargetPlatformVersion { get { throw null; } set { } }
+        public bool WarnWhenNoSDKsFound { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public partial class GetReferenceAssemblyPaths : Microsoft.Build.Tasks.TaskExtension

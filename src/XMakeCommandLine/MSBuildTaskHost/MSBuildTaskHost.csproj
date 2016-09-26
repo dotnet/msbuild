@@ -3,6 +3,9 @@
   <PropertyGroup>
     <PlatformSpecificBuild>true</PlatformSpecificBuild>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>..\MSBuild.ico</ApplicationIcon>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -16,13 +19,11 @@
     <LargeAddressAware>true</LargeAddressAware>
     <ProjectGuid>{53733ECF-0D81-43DA-B602-2AE9417F614F}</ProjectGuid>
   </PropertyGroup>
-
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-
   <ItemGroup>
     <!-- Assemblies Files we depend on -->
     <Reference Include="System" />
@@ -34,7 +35,6 @@
       <SpecificVersion>true</SpecificVersion>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <!-- Source Files -->
     <Compile Include="..\..\Shared\BuildEnvironmentHelper.cs">
@@ -155,6 +155,7 @@
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
     <Compile Include="..\LogMessagePacket.cs">
       <Link>LogMessagePacket.cs</Link>
@@ -184,9 +185,7 @@
       <Link>OutOfProcTaskAppDomainWrapperStub.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
@@ -195,6 +194,9 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\MSBuild.ico" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -752,7 +752,7 @@ namespace Microsoft.Build.Evaluation
                 temporary.Add(metadatum);
             }
 
-            _directMetadata = (_directMetadata == null ? null : new PropertyDictionary<ProjectMetadata>(_directMetadata.Count));
+            _directMetadata = new PropertyDictionary<ProjectMetadata>(_directMetadata.Count);
 
             foreach (ProjectMetadata metadatum in temporary)
             {

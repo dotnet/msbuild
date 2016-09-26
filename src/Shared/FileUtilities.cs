@@ -52,6 +52,9 @@ namespace Microsoft.Build.Shared
             cacheDirectory = null;
         }
 
+        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+        internal static readonly StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
+
         /// <summary>
         /// Retrieves the MSBuild runtime cache directory
         /// </summary>
@@ -340,13 +343,11 @@ namespace Microsoft.Build.Shared
                                // is available here - we don't want managed apps mucking 
                                // with this for security reasons.
                             */
-                            if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(
-                                @"\\?\globalroot",
-                                StringComparison.OrdinalIgnoreCase) != -1)
-                            {
-                                finalFullPath = Path.GetFullPath(finalFullPath);
-                            }
-                        }
+                    if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(@"\\?\globalroot", PathComparison) != -1)
+                    {
+                        finalFullPath = Path.GetFullPath(finalFullPath);
+                    }
+                }
 
                         return finalFullPath;
                     }
@@ -550,13 +551,27 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool ComparePathsNoThrow(string first, string second, string currentDirectory)
         {
-            // todo: on xplat, figure out if file system is case sensitive or not
-            var stringComparison = StringComparison.OrdinalIgnoreCase;
 
-            var firstFullPath = GetFullPathNoThrow(first, currentDirectory);
-            var secondFullPath = GetFullPathNoThrow(second, currentDirectory);
+            // perf: try comparing the bare strings first
+            if (string.Equals(first, second, PathComparison))
+            {
+                return true;
+            }
 
-            return string.Equals(firstFullPath, secondFullPath, stringComparison);
+            var firstFullPath = NormalizePathForComparisonNoThrow(first, currentDirectory);
+            var secondFullPath = NormalizePathForComparisonNoThrow(second, currentDirectory);
+
+            return string.Equals(firstFullPath, secondFullPath, PathComparison);
+        }
+
+        /// <summary>
+        /// Normalizes a path for path comparison
+        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string, string)"/>
+        /// 
+        /// </summary>
+        internal static string NormalizePathForComparisonNoThrow(string path, string currentDirectory)
+        {
+            return GetFullPathNoThrow(path, currentDirectory).NormalizeForPathComparison();
         }
 
         /// <summary>
@@ -812,7 +827,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsSolutionFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".sln", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".sln", PathComparison));
         }
 
         /// <summary>
@@ -820,7 +835,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".vcproj", PathComparison));
         }
 
         /// <summary>
@@ -828,7 +843,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsMetaprojectFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".metaproj", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".metaproj", PathComparison));
         }
 
         /// <summary>
@@ -951,7 +966,38 @@ namespace Microsoft.Build.Shared
             return paths.Aggregate(root, Path.Combine);
         }
 
-        internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
+        internal static string TrimTrailingSlashes(this string s)
+        {
+            return s.TrimEnd('/', '\\');
+        }
+
+        /// <summary>
+        /// Replace all backward slashes to forward slashes
+        /// </summary>
+        internal static string ToSlash(this string s)
+        {
+            return s.Replace('\\', '/');
+        }
+
+        internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();
+
+        internal static bool PathsEqual(string path1, string path2)
+        {
+            var trim1 = path1.TrimTrailingSlashes();
+            var trim2 = path2.TrimTrailingSlashes();
+
+            if (string.Equals(trim1, trim2, PathComparison))
+            {
+                return true;
+            }
+
+            var slash1 = trim1.ToSlash();
+            var slash2 = trim2.ToSlash();
+
+            return string.Equals(slash1, slash2, PathComparison);
+        }
+		
+		internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
         {
             const int DefaultFileStreamBufferSize = 4096;
             FileMode mode = append ? FileMode.Append : FileMode.Create;

@@ -124,9 +124,8 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-#if RETAIL
-            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_IA64)
-                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_ARM))
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.IA64)
+                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.ARM))
             {
                 // The use of unsafe here is quite a bit faster than the regular
                 // mechanism in the BCL. This is because we can make assumptions
@@ -155,13 +154,11 @@ namespace Microsoft.Build.Collections
                 }
             }
             else
-#endif
             {
                 return String.Compare(compareToString, 0, constrainedString, start, lengthToCompare, StringComparison.OrdinalIgnoreCase) == 0;
             }
-#if RETAIL
+
             return true;
-#endif
         }
 
         /// <summary>
@@ -344,9 +341,9 @@ namespace Microsoft.Build.Collections
                     }
                 }
             }
-#if RETAIL
-            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_IA64)
-                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.Architecture_ARM))
+
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.IA64)
+                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.ARM))
             {
                 unsafe
                 {
@@ -397,7 +394,6 @@ namespace Microsoft.Build.Collections
                 }
             }
             else
-#endif
             {
                 return StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Substring(start, length));
             }

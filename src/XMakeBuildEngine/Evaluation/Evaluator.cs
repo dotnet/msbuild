@@ -1649,7 +1649,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (conditionResult)
                 {
-                    _data.EvaluatedItemElements.Add(itemElement);
+                    RecordEvaluatedItemElement(itemElement);
                 }
 
                 return;
@@ -1667,7 +1667,7 @@ namespace Microsoft.Build.Evaluation
 
         private void EvaluateItemElementUpdate(ProjectItemElement itemElement)
         {
-            _data.EvaluatedItemElements.Add(itemElement);
+            RecordEvaluatedItemElement(itemElement);
 
             var expandedItemSet =
                 new HashSet<string>(
@@ -1741,7 +1741,7 @@ namespace Microsoft.Build.Evaluation
             // FINALLY: Add the items to the project
             if (itemConditionResult && itemGroupConditionResult)
             {
-                _data.EvaluatedItemElements.Add(itemElement);
+                RecordEvaluatedItemElement(itemElement);
 
                 foreach (I item in items)
                 {
@@ -2204,6 +2204,11 @@ namespace Microsoft.Build.Evaluation
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
+            // If there are wildcards in the Import, a list of all the matches from all import search
+            // paths will be returned (union of all files that match).
+            var allProjects = new List<ProjectRootElement>();
+            bool containsWildcards = FileMatcher.HasWildcards(importElement.Project);
+
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
             // 2. 1 or more project files *found* but ignored (like circular, self imports)
@@ -2228,18 +2233,21 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                var newExpandedImportPath = importElement.Project;
-                newExpandedImportPath = newExpandedImportPath.Replace(extensionPropertyRefAsString, extensionPathExpanded);
-
+                var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
 
                 List<ProjectRootElement> projects;
-                var result = ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, newExpandedImportPath,
-                                        false, out projects);
+                var result = ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, newExpandedImportPath, false, out projects);
 
                 if (result == LoadImportsResult.ProjectsImported)
                 {
-                    return projects;
+                    // If we don't have a wildcard and we had a match, we're done.
+                    if (!containsWildcards)
+                    {
+                        return projects;
+                    }
+
+                    allProjects.AddRange(projects);
                 }
 
                 if (result == LoadImportsResult.FoundFilesToImportButIgnored)
@@ -2247,7 +2255,14 @@ namespace Microsoft.Build.Evaluation
                     // Circular, Self import cases are usually ignored
                     // Since we have a semi-success here, we stop looking at
                     // other paths
-                    return projects;
+
+                    // If we don't have a wildcard and we had a match, we're done.
+                    if (!containsWildcards)
+                    {
+                        return projects;
+                    }
+
+                    allProjects.AddRange(projects);
                 }
 
                 if (result == LoadImportsResult.TriedToImportButFileNotFound)
@@ -2260,12 +2275,14 @@ namespace Microsoft.Build.Evaluation
             // Found at least one project file for the Import, but no projects were loaded
             // atleastOneExactFilePathWasLookedAtAndNotFound would be false, eg, if the expression
             // was a wildcard and it resolved to zero files!
-            if (atleastOneExactFilePathWasLookedAtAndNotFound && (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
+            if (allProjects.Count == 0 &&
+                atleastOneExactFilePathWasLookedAtAndNotFound &&
+                (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
                 ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
             }
 
-            return new List<ProjectRootElement>();
+            return allProjects;
         }
 
         /// <summary>
@@ -2414,7 +2431,8 @@ namespace Microsoft.Build.Evaluation
                             _projectRootElementCache,
                             _buildEventContext,
                             explicitlyLoaded),
-                        explicitlyLoaded);
+                        explicitlyLoaded,
+                        preserveFormatting: false);
 
                     if (duplicateImport)
                     {
@@ -2611,6 +2629,14 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 return _data.Directory;
+            }
+        }
+
+        private void RecordEvaluatedItemElement(ProjectItemElement itemElement)
+        {
+            if (_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
+            {
+                _data.EvaluatedItemElements.Add(itemElement);
             }
         }
 

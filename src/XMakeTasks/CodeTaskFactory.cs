@@ -255,11 +255,6 @@ namespace Microsoft.Build.Tasks
 
             _sourceCode = taskContent.InnerText;
 
-            if (_log.HasLoggedErrors)
-            {
-                return false;
-            }
-
             if (_type == null)
             {
                 _type = "Fragment";

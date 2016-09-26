@@ -15,6 +15,7 @@ using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.UnitTests;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -152,25 +153,80 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>
                 ";
 
-            // Importing should stop at the first extension path where a project file is found
+            // Importing a wildcard will union all matching results from all fallback locations.
             string extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"),
-                                String.Format(extnTargetsFileContent, "FromExtn1"));
+                string.Format(extnTargetsFileContent, "FromExtn1"));
             string extnDir2 = GetNewExtensionsPathAndCreateFile("extensions2", Path.Combine("foo", "extn.proj"),
-                                String.Format(extnTargetsFileContent, "FromExtn2"));
+                string.Format(extnTargetsFileContent, "FromExtn2"));
 
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
 
-            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {extnDir1, Path.Combine("tmp", "nonexistant"), extnDir2},
-                                                    null,
-                                                    (p, l) => {
-                                                    Console.WriteLine (l.FullLog);
-                                                    Console.WriteLine ("checking FromExtn1");
-                                                        Assert.True(p.Build("FromExtn1"));
-                                                    Console.WriteLine ("checking FromExtn2");
-                                                        Assert.False(p.Build("FromExtn2"));
-                                                    Console.WriteLine ("checking logcontains");
-                                                        l.AssertLogContains(String.Format(MockLogger.GetString("TargetDoesNotExist"), "FromExtn2"));
-                                                    });
+            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath",
+                new[] {extnDir1, Path.Combine("tmp", "nonexistant"), extnDir2},
+                null,
+                (project, logger) =>
+                {
+                    Console.WriteLine(logger.FullLog);
+                    Console.WriteLine("checking FromExtn1");
+                    Assert.True(project.Build("FromExtn1"));
+                    Console.WriteLine("checking FromExtn2");
+                    Assert.True(project.Build("FromExtn2"));
+                    Console.WriteLine("checking logcontains");
+                    logger.AssertLogDoesntContain("MSB4057"); // Should not contain TargetDoesNotExist
+                });
+        }
+
+        [Fact]
+        public void ImportFromExtensionsPathWithWildCardAndSelfImport()
+        {
+            string mainTargetsFileContent = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Target Name='Main'>
+                        <Message Text='Running Main'/>
+                    </Target>
+
+                    <Import Project='$(MSBuildExtensionsPath)\circularwildcardtest\*.proj'/>
+                </Project>";
+
+            string extnTargetsFileContent = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Target Name='{0}'>
+                        <Message Text='Running {0}'/>
+                    </Target>
+                </Project>";
+
+            string extnTargetsFileContent2 = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Import Project='$(MSBuildExtensionsPath)\circularwildcardtest\*.proj'/>
+                    <Target Name='{0}'>
+                        <Message Text='Running {0}'/>
+                    </Target>
+                </Project>";
+
+            // Importing a wildcard will union all matching results from all fallback locations.
+            string extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("circularwildcardtest", "extn.proj"),
+                string.Format(extnTargetsFileContent, "FromExtn1"));
+            string extnDir2 = GetNewExtensionsPathAndCreateFile("extensions2", Path.Combine("circularwildcardtest", "extn.proj"),
+                string.Format(extnTargetsFileContent, "FromExtn2"));
+            string extnDir3 = GetNewExtensionsPathAndCreateFile("extensions3", Path.Combine("circularwildcardtest", "extn3.proj"),
+                string.Format(extnTargetsFileContent2, "FromExtn3"));
+
+            // Main project path is under "circularwildcardtest"
+            // Note: This project will try to be imported again and cause a warning (MSB4210). This test should ensure that the
+            // code does not stop looking in the fallback locations when this happens (extn3.proj should still be imported).
+            string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("extensions2", "circularwildcardtest", "main.proj"), mainTargetsFileContent);
+
+            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath",
+                new[] { extnDir1, extnDir2, extnDir3 },
+                null,
+                (project, logger) =>
+                {
+                    Console.WriteLine(logger.FullLog);
+                    Assert.True(project.Build("FromExtn1"));
+                    Assert.True(project.Build("FromExtn2"));
+                    Assert.True(project.Build("FromExtn3"));
+                    logger.AssertLogContains("MSB4210");
+                });
         }
 
         [Fact]
@@ -763,7 +819,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         string GetNewExtensionsPathAndCreateFile(string extnDirName, string relativeFilePath, string fileContents)
         {
-            var extnDir = Path.Combine(Path.GetTempPath(), extnDirName);
+            var extnDir = Path.Combine(ObjectModelHelpers.TempProjectDir, extnDirName);
             Directory.CreateDirectory(Path.Combine(extnDir, Path.GetDirectoryName(relativeFilePath)));
             File.WriteAllText(Path.Combine(extnDir, relativeFilePath), fileContents);
 

@@ -413,6 +413,17 @@ namespace Microsoft.Build.Evaluation
                 includeNullEntries, out isTransformExpression, elementLocation);
         }
 
+        internal bool ExpandExpressionCapture(
+            ExpressionShredder.ItemExpressionCapture expressionCapture,
+            IElementLocation elementLocation,
+            ExpanderOptions options,
+            bool includeNullEntries,
+            out bool isTransformExpression,
+            out IList<Tuple<string, I>> itemsFromCapture)
+        {
+            return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
+        }
+
         /// <summary>
         /// Returns true if the supplied string contains a valid property name
         /// </summary>
@@ -1621,7 +1632,9 @@ namespace Microsoft.Build.Evaluation
             {
                 ErrorUtilities.VerifyThrow(items != null, "Cannot expand items without providing items");
 
+                IList<T> result = null;
                 isTransformExpression = false;
+                bool brokeEarlyNonEmpty;
 
                 // If the incoming factory doesn't have an item type that it can use to 
                 // create items, it's our indication that the caller wants its items to have the type of the
@@ -1632,8 +1645,6 @@ namespace Microsoft.Build.Evaluation
                     itemFactory.ItemType = expressionCapture.ItemType;
                 }
 
-                IList<T> result = null;
-
                 if (expressionCapture.Separator != null)
                 {
                     // Reference contains a separator, for example @(Compile, ';').
@@ -1643,7 +1654,7 @@ namespace Microsoft.Build.Evaluation
                     string expandedItemVector;
                     using (var builder = new ReuseableStringBuilder())
                     {
-                        bool brokeEarlyNonEmpty = ExpandItemVectorMatchIntoStringBuilder(expander, expressionCapture, items, elementLocation, builder, options);
+                        brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, expressionCapture, items, elementLocation, builder, options);
 
                         if (brokeEarlyNonEmpty)
                         {
@@ -1665,62 +1676,31 @@ namespace Microsoft.Build.Evaluation
                     return result;
                 }
 
-                // No separator. Expand to a list of items
-                // 
-                // eg.,:
-                // expands @(Compile) to a set of items cloned from the items in the "Compile" list
-                // expands @(Compile->'%(foo)') to a set of items with the Include value of items in the "Compile" list.
-                if (expressionCapture.Captures != null)
+                IList<Tuple<string, S>> itemsFromCapture;
+                brokeEarlyNonEmpty = ExpandExpressionCapture(expander, expressionCapture, items, elementLocation /* including null items */, options, true, out isTransformExpression, out itemsFromCapture);
+
+                if (brokeEarlyNonEmpty)
                 {
-                    isTransformExpression = true;
+                    return null;
                 }
 
-                ICollection<S> itemsOfType = items.GetItems(expressionCapture.ItemType);
+                result = new List<T>(itemsFromCapture.Count);
 
-                // If there are no items of the given type, then bail out early
-                if (itemsOfType.Count == 0)
+                foreach (var itemTuple in itemsFromCapture)
                 {
-                    // .. but only if there isn't a function "Count()", since that will want to return something (zero) for an empty list
-                    if (expressionCapture.Captures == null || !expressionCapture.Captures.Any(capture => String.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)))
-                    {
-                        return new List<T>();
-                    }
-                }
+                    var itemSpec = itemTuple.Item1;
+                    var originalItem = itemTuple.Item2;
 
-                result = new List<T>(itemsOfType.Count);
-
-                if (!isTransformExpression)
-                {
-                    // No transform: expression is like @(Compile), so copy the items
-                    foreach (S item in itemsOfType)
-                    {
-                        if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
-                        {
-                            return null;
-                        }
-
-                        T newItem = itemFactory.CreateItem(item, elementLocation.File);
-
-                        result.Add(newItem);
-                    }
-
-                    return result;
-                }
-
-                Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
-
-                // iterate over our tranform chain, creating the final items from its results
-                foreach (Tuple<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemTupleEnumerator(itemsOfType)))
-                {
-                    if (itemTuple.Item1 != null && itemTuple.Item2 == null)
+                    if (itemSpec != null && originalItem == null)
                     {
                         // We have an itemspec, but no base item
-                        result.Add(itemFactory.CreateItem(itemTuple.Item1, elementLocation.File));
+                        result.Add(itemFactory.CreateItem(itemSpec, elementLocation.File));
                     }
-                    else if (itemTuple.Item1 != null && itemTuple.Item2 != null)
+                    else if (itemSpec != null && originalItem != null)
                     {
-                        // We have both an itemspec, and a base item
-                        result.Add(itemFactory.CreateItem(itemTuple.Item1, itemTuple.Item2, elementLocation.File));
+                        result.Add(itemSpec.Equals(originalItem.EvaluatedIncludeEscaped)
+                            ? itemFactory.CreateItem(originalItem, elementLocation.File) // itemspec came from direct item reference, no transforms
+                            : itemFactory.CreateItem(itemSpec, originalItem, elementLocation.File)); // itemspec came from a transform and is different from its original item
                     }
                     else if (includeNullEntries)
                     {
@@ -1730,6 +1710,100 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return result;
+            }
+
+            /// <summary>
+            /// Expands an expression capture into a list of items
+            /// If the capture uses a separator, then all the items are concatenated into one string using that separator.
+            /// 
+            /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
+            /// </summary>
+            /// 
+            /// <param name="itemsFromCapture">
+            /// List of items.
+            /// 
+            /// Item1 represents the item string, escaped
+            /// Item2 represents the original item.
+            /// 
+            /// Item1 differs from Item2's string when it is coming from a transform
+            /// 
+            /// </param>
+            internal static bool ExpandExpressionCapture<S>(
+                Expander<P, I> expander,
+                ExpressionShredder.ItemExpressionCapture expressionCapture,
+                IItemProvider<S> evaluatedItems,
+                IElementLocation elementLocation,
+                ExpanderOptions options,
+                bool includeNullEntries,
+                out bool isTransformExpression,
+                out IList<Tuple<string, S>> itemsFromCapture
+                )
+                where S : class, IItem
+            {
+                ErrorUtilities.VerifyThrow(evaluatedItems != null, "Cannot expand items without providing items");
+                // There's something wrong with the expression, and we ended up with a blank item type
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(expressionCapture.ItemType), elementLocation, "InvalidFunctionPropertyExpression");
+
+                isTransformExpression = false;
+
+                var itemsOfType = evaluatedItems.GetItems(expressionCapture.ItemType);
+
+                // If there are no items of the given type, then bail out early
+                if (itemsOfType.Count == 0)
+                {
+                    // .. but only if there isn't a function "Count()", since that will want to return something (zero) for an empty list
+                    if (expressionCapture.Captures == null ||
+                        !expressionCapture.Captures.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        itemsFromCapture = new List<Tuple<string, S>>();
+                        return false;
+                    }
+                }
+
+                if (expressionCapture.Captures != null)
+                {
+                    isTransformExpression = true;
+                }
+
+                itemsFromCapture = new List<Tuple<string, S>>(itemsOfType.Count);
+
+                if (!isTransformExpression)
+                {
+                    // No transform: expression is like @(Compile), so include the item spec without a transform base item
+                    foreach (S item in itemsOfType)
+                    {
+                        if ((item.EvaluatedIncludeEscaped.Length > 0) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
+                        {
+                            return true;
+                        }
+
+                        itemsFromCapture.Add(new Tuple<string, S>(item.EvaluatedIncludeEscaped, item));
+                    }
+                }
+                else
+                {
+                    Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
+
+                    // iterate over the tranform chain, creating the final items from its results
+                    foreach (Tuple<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemTupleEnumerator(itemsOfType)))
+                    {
+                        if (!string.IsNullOrEmpty(itemTuple.Item1) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
+                        {
+                            return true; // broke out early; result cannot be trusted
+                        }
+
+                        itemsFromCapture.Add(itemTuple);
+                    }
+                }
+
+                if (expressionCapture.Separator != null)
+                {
+                    var joinedItems = string.Join(expressionCapture.Separator, itemsFromCapture.Select(i => i.Item1));
+                    itemsFromCapture.Clear();
+                    itemsFromCapture.Add(new Tuple<string, S>(joinedItems, null));
+                }
+
+                return false; // did not break early
             }
 
             /// <summary>
@@ -1773,7 +1847,7 @@ namespace Microsoft.Build.Evaluation
                             builder.Append(expression, lastStringIndex, matches[i].Index - lastStringIndex);
                         }
 
-                        bool brokeEarlyNonEmpty = ExpandItemVectorMatchIntoStringBuilder(expander, matches[i], items, elementLocation, builder, options);
+                        bool brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, matches[i], items, elementLocation, builder, options);
 
                         if (brokeEarlyNonEmpty)
                         {
@@ -1837,68 +1911,29 @@ namespace Microsoft.Build.Evaluation
             /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
             /// </summary>
             /// <typeparam name="S">Type of source items</typeparam>
-            private static bool ExpandItemVectorMatchIntoStringBuilder<S>(Expander<P, I> expander, ExpressionShredder.ItemExpressionCapture match, IItemProvider<S> items, IElementLocation elementLocation, ReuseableStringBuilder builder, ExpanderOptions options)
+            private static bool ExpandExpressionCaptureIntoStringBuilder<S>(
+                Expander<P, I> expander,
+                ExpressionShredder.ItemExpressionCapture capture,
+                IItemProvider<S> evaluatedItems,
+                IElementLocation elementLocation,
+                ReuseableStringBuilder builder,
+                ExpanderOptions options
+                )
                 where S : class, IItem
             {
-                string itemType = match.ItemType;
-                string separator = (match.Separator != null) ? match.Separator : ";";
+                IList<Tuple<string, S>> itemsFromCapture;
+                bool throwaway;
+                var brokeEarlyNonEmpty = ExpandExpressionCapture(expander, capture, evaluatedItems, elementLocation /* including null items */, options, true, out throwaway, out itemsFromCapture);
 
-                // There's something wrong with the expression, and we ended up with a blank item type
-                ProjectErrorUtilities.VerifyThrowInvalidProject(!String.IsNullOrEmpty(itemType), elementLocation, "InvalidFunctionPropertyExpression");
-
-                ICollection<S> itemsOfType = items.GetItems(itemType);
-
-                // If there are no items of the given type, then bail out early
-                if (itemsOfType.Count == 0)
+                if (brokeEarlyNonEmpty)
                 {
-                    // .. but only if there isn't a function "Count()", since that will want to return something (zero) for an empty list
-                    if (match.Captures == null || !match.Captures.Any(capture => String.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)))
-                    {
-                        return false; // false because the result is reliable
-                    }
+                    return true;
                 }
 
-                if (match.Captures == null)
-                {
-                    foreach (S item in itemsOfType)
-                    {
-                        // No transform: expression is like @(Compile), so append the item spec
-                        if ((item.EvaluatedIncludeEscaped.Length > 0) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
-                        {
-                            return true;
-                        }
+                // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
+                builder.Append(string.Join(";", itemsFromCapture.Select(i => i.Item1)));
 
-                        builder.Append(item.EvaluatedIncludeEscaped);
-                        builder.Append(separator);
-                    }
-                }
-                else
-                {
-                    Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, match);
-
-                    // iterate over our tranform chain, creating the final items from its results
-                    foreach (Tuple<string, S> itemTuple in Transform(expander, true /* including null items */, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemTupleEnumerator(itemsOfType)))
-                    {
-                        if (itemTuple.Item1 != null && itemTuple.Item1.Length > 0 && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
-                        {
-                            return true; // broke out early; result cannot be trusted
-                        }
-                        else if (itemTuple.Item1 != null)
-                        {
-                            builder.Append(itemTuple.Item1);
-                        }
-
-                        builder.Append(separator);
-                    }
-                }
-
-                // Remove the extra separator
-                if (builder.Length > 0)
-                {
-                    builder.Remove(builder.Length - separator.Length, separator.Length);
-                }
-
-                return false; // did not break early
+                return false;
             }
 
             /// <summary>
@@ -3216,10 +3251,7 @@ namespace Microsoft.Build.Evaluation
                 if (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1")
                 {
                     // We didn't find the type, so go probing. First in System
-                    if (receiverType == null)
-                    {
-                        receiverType = GetTypeFromAssembly(typeName, "System");
-                    }
+                    receiverType = GetTypeFromAssembly(typeName, "System");
 
                     // Next in System.Core
                     if (receiverType == null)

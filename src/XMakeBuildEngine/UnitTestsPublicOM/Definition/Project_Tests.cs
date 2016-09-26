@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -22,7 +23,7 @@ using Microsoft.Build.Shared;
 using Task = System.Threading.Tasks.Task;
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock. 
 using ProvenanceResultTupleList = System.Collections.Generic.List<System.Tuple<string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int>>;
-using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Generic.HashSet<string>>>;
+using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Immutable.ImmutableHashSet<string>>>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -67,6 +68,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal(0, ProjectCollection.GlobalProjectCollection.GlobalProperties.Count);
         }
+
+        private static readonly string ProjectWithItemGroup =
+@"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+{0}
+                  </ItemGroup>
+                </Project>
+            ";
 
         /// <summary>
         /// Since when the project file is saved it may be intented we want to make sure the indent charachters do not affect the evaluation against empty. 
@@ -2457,6 +2466,35 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
+        [Fact]
+        public void GetItemProvenanceShouldReturnNothingWhenCalledWithEmptyOrNullArgs()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1;2;3`/>
+                    <B Include=`1;2;3` Exclude=`1;4`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList();
+
+            // by item value as empty string
+            AssertProvenanceResult(expected, project, "");
+            // by item value as null
+            AssertProvenanceResult(expected, project, null);
+
+            // by item value and type as empty string
+            AssertProvenanceResult(expected, project, "", "");
+            // by item value and type as null
+            AssertProvenanceResult(expected, project, null, null);
+
+            // by projectitem as null
+            AssertProvenanceResult(expected, project, null, -1);
+        }
+
         /// <summary>
         /// Import of string that evaluates to invalid path should cause InvalidProjectFileException
         /// </summary>
@@ -2556,6 +2594,41 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceShouldReturnTheSameResultsIfProjectIsReevaluated()
+        {
+            var projectContents =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.foo`/>
+                    <B Include=`1.foo;2.foo` Exclude=`*.foo`/>
+                    <C Include=`2` Exclude=`*.bar`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+                Tuple.Create("B", Operation.Exclude, Provenance.Glob, 1)
+            };
+
+            // Create a project. The initial evaluation does not record the information needed for GetItemProvenance
+            var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
+
+            // Since GetItemProvenance does not have the required evaluator data (evaluated item elements), it internally reevaluates the project to collect it
+            var provenanceResult = project.GetItemProvenance("2.foo");
+            AssertProvenanceResult(expected, provenanceResult);
+
+            // Dirty the xml to force another reevaluation.
+            project.AddItem("new", "new value");
+            project.ReevaluateIfNecessary();
+
+            // Assert that provenance returns the same result and that no data duplication happened
+            provenanceResult = project.GetItemProvenance("2.foo");
+            AssertProvenanceResult(expected, provenanceResult);
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldHandleComplexGlobExclusion()
         {
             var project =
@@ -2633,29 +2706,82 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             AssertProvenanceResult(expected, project, "1.foo", "B");
+            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistant");
         }
 
-        [Fact]
-        public void GetItemProvenanceByProjectItem()
+        public static IEnumerable<Object[]> GetItemProvenanceByProjectItemTestData
         {
-            var project =
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    <A Include=`*.foo;1.foo`/>
-                    <B Include=`1;2;3;*.foo` Exclude=`*.foo;1.foo`/>
-                    <B Include=`*.foo;1.foo`/>
-                    <C Include=`2;3` Exclude=`2`/>
-                  </ItemGroup>
-                </Project>
-            ";
-
-            var expected = new ProvenanceResultTupleList
+            get
             {
-                Tuple.Create("B", Operation.Exclude, Provenance.Glob | Provenance.StringLiteral, 2),
-                Tuple.Create("B", Operation.Include, Provenance.Glob | Provenance.StringLiteral, 2)
-            };
+                // Provenance for an item in the last element. Nothing matches
+                yield return new object[]
+                {
+                    @"
+                    <A Include=`a;b`/>
+                    <A Update=`a`/>
+                    <A Update=`b`/>
+                    <A Include=`a;b`/>
+                    ",
+                    "a",
+                    1, // item 'a' from last include
+                    new ProvenanceResultTupleList()
+                };
 
-            AssertProvenanceResult(expected, project, "1.foo", 1);
+                // Nothing matches
+                yield return new object[]
+                {
+                    @"
+                    <A Include=`a;b;c`/>
+                    <A Update=`c;*ab`/>
+                    <A Remove=`b`/>
+                    <A Include=`a`/>
+                    ",
+                    "a",
+                    0, // item 'a' from first include
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    @"
+                    <A Remove=`a`/>
+
+                    <A Include=`a;b;c`/>
+                    <A Update=`a`/>
+                    <A Update=`b`/>
+                    <B Update=`a`/>
+                    <A Remove=`b`/>
+
+                    <A Include=`a;b`/>
+                    <A Update=`a;a`/>
+                    <A Update=`b`/>
+                    <B Update=`a`/>
+                    <A Remove=`b`/>
+
+                    <A Include=`a`/>
+                    <A Update=`a;a*`/>
+                    <A Update=`b`/>
+                    <B Update=`a`/>
+                    <A Remove=`b`/>
+                    ",
+                    "a",
+                    1, // item 'a' from second include
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral, 2),
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 2)
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetItemProvenanceByProjectItemTestData))]
+        public void GetItemProvenanceByProjectItem(string items, string itemValue, int itemPosition, ProvenanceResultTupleList expected)
+        {
+            var formattedProject = string.Format(ProjectWithItemGroup, items);
+
+            AssertProvenanceResult(expected, formattedProject, itemValue, itemPosition);
         }
 
         [Fact]
@@ -2860,6 +2986,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceShouldWorkWithEscapedCharacters()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`a;%61;*%61*`/>
+                    <A Update=`a;%61;*%61*`/>
+                    <A Remove=`a;%61;*%61*`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.StringLiteral | Provenance.Glob, 3),
+                Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 3),
+                Tuple.Create("A", Operation.Remove, Provenance.StringLiteral | Provenance.Glob, 3)
+            };
+
+            AssertProvenanceResult(expected, project, "a");
+            AssertProvenanceResult(expected, project, "%61");
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldWorkWithUpdateElements()
         {
             var project =
@@ -2937,18 +3087,61 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetAllGlobsShouldNotFindGlobsIfInvokedWithEmptyOrNullArguments()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1;**` Exclude=`1;*;3`/>
+                    <A Include=`1;2;*` Exclude=`1;*;3`/>
+                    <B Include=`a;**;c` Exclude=`**`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList();
+
+            AssertGlobResult(expected, project, "");
+            AssertGlobResult(expected, project, null);
+        }
+
+        [Fact]
         public void GetAllGlobsShouldFindDirectlyReferencedGlobs()
         {
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
-                    <A Include=`*.a;1;*;2;**;` Exclude=`1;*;3`/>
+                    <A Include=`*.a;1;*;2;**;?a` Exclude=`1;*;3`/>
                     <B Include=`a;b;c` Exclude=`**`/>
                   </ItemGroup>
                 </Project>
                 ";
 
-            var expectedExcludes = new HashSet<string> { "1", "*", "3" };
+            var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
+            var expected = new GlobResultList
+            {
+                Tuple.Create("A", "*.a", expectedExcludes),
+                Tuple.Create("A", "*", expectedExcludes),
+                Tuple.Create("A", "**", expectedExcludes),
+                Tuple.Create("A", "?a", expectedExcludes)
+            };
+
+            AssertGlobResult(expected, project);
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldFindGlobsByItemType()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.a;1;*;2;**;` Exclude=`1;*;3`/>
+                    <B Include=`a;**;b;c;*` Exclude=`**`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
                 Tuple.Create("A", "*.a", expectedExcludes),
@@ -2956,7 +3149,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Tuple.Create("A", "**", expectedExcludes)
             };
 
-            AssertGlobResult(expected, project);
+            AssertGlobResult(expected, project, "A");
+            AssertGlobResult(new GlobResultList(), project, "NotExistant");
         }
 
         [Fact]
@@ -2975,7 +3169,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*", new HashSet<string> {"*"}),
+                Tuple.Create("A", "*", new[] {"*"}.ToImmutableHashSet()),
             };
 
             AssertGlobResult(expected, project);
@@ -2996,17 +3190,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*", new HashSet<string>()),
-                Tuple.Create("C", "**", new HashSet<string>()),
+                Tuple.Create("A", "*", ImmutableHashSet<string>.Empty),
+                Tuple.Create("C", "**", ImmutableHashSet<string>.Empty),
             };
 
             AssertGlobResult(expected, project);
         }
 
-        private void AssertGlobResult(GlobResultList expected, string project)
+        private static void AssertGlobResult(GlobResultList expected, string project)
         {
             var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();
+            AssertGlobResultsEqual(expected, globs);
+        }
 
+        private static void AssertGlobResult(GlobResultList expected, string project, string itemType)
+        {
+            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType) ;
             AssertGlobResultsEqual(expected, globs);
         }
 
@@ -3036,11 +3235,24 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static void AssertProvenanceResult(ProvenanceResultTupleList expected, string project, string itemValue, int position)
         {
-            var p = ObjectModelHelpers.CreateInMemoryProject(project);
-            var item = p.Items.Where(i => i.EvaluatedInclude.Equals(itemValue)).ElementAt(position);
+            Project p;
+            ProjectItem item;
+            GetProjectAndItemAtPosition(project, itemValue, position, out p, out item);
 
             var provenanceResult = p.GetItemProvenance(item);
             AssertProvenanceResult(expected, provenanceResult);
+        }
+
+        private static void GetProjectAndItemAtPosition(string project, string itemValue, int position, out Project p, out ProjectItem item)
+        {
+            p = ObjectModelHelpers.CreateInMemoryProject(project);
+
+            item = null;
+            if (!string.IsNullOrEmpty(itemValue))
+            {
+                var itemsOfValue = p.Items.Where(i => i.EvaluatedInclude.Equals(itemValue));
+                item = itemsOfValue.ElementAt(position);
+            }
         }
 
         private static void AssertProvenanceResult(ProvenanceResultTupleList expected, List<ProvenanceResult> actual)

@@ -227,6 +227,7 @@
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Definition\ToolsetLocalReader.cs" />
+    <Compile Include="Evaluation\ItemSpec.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.cs" />

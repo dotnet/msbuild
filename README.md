@@ -38,7 +38,10 @@ To get started on **Visual Studio 2015**:
 ## Building MSBuild in Unix (Mac & Linux)
 MSBuild's xplat branch allows MSBuild to be run on Unix Systems. Set-up instructions can be viewed on the wiki:   [Building Testing and Debugging on .Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
 
-## How to Engage, Contribute and Provide Feedback
+## Localization
+You can turn on localized builds via the `/p:LocalizedBuild=true` command line argument. For more information on localized builds and how to make contributions to MSBuild's translations, see our [localization wiki](https://github.com/Microsoft/msbuild/wiki/Localization)
+
+### How to Engage, Contribute and Provide Feedback
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.
@@ -52,7 +55,7 @@ Want to get more familiar with what's going on in the code?
 
 You are also encouraged to start a discussion by filing an issue or creating a gist.
 
-## MSBuild Components
+### MSBuild Components
 
 * **MSBuild**. [Microsoft.Build.CommandLine](https://msdn.microsoft.com/en-us/library/dd393574(v=vs.120).aspx)  is the entrypoint for the Microsoft Build Engine (MSBuild.exe).
 
@@ -64,6 +67,6 @@ You are also encouraged to start a discussion by filing an issue or creating a g
 
 * **Microsoft.Build.Utilities**. The [Microsoft.Build.Utilities](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities(v=vs.120).aspx) namespace provides helper classes that you can use to create your own MSBuild loggers and tasks.
 
-## License
+### License
 
 MSBuild is licensed under the [MIT license](LICENSE).

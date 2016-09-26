@@ -16,7 +16,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.Abstractions;
 
+using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
 
 namespace Microsoft.Build.UnitTests
@@ -133,24 +135,29 @@ namespace Microsoft.Build.UnitTests
             Assert.True(false, "Didn't throw " + exception.ToString());
         }
 
-        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
+        internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
-            Assert.Equal(expectedItems.Length, items.Count);
-
-            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
-
-            for (int i = 0; i < expectedItems.Length; i++)
+            string root = "";
+            try
             {
-                if(!normalizeSlashes)
+                string[] createdFiles;
+                string projectFile;
+                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
+
+                if (expectedMetadataPerItem == null)
                 {
-                    Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
                 }
                 else
                 {
-                    Assert.Equal(NormalizeSlashes(expectedItems[i]), NormalizeSlashes(items[i].EvaluatedInclude));
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem, normalizeSlashes);
                 }
-                
-                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteDirectory(root);
+                Directory.Delete(root);
             }
         }
 
@@ -178,6 +185,27 @@ namespace Microsoft.Build.UnitTests
             }
 
             AssertItems(expectedItems, items, metadata, normalizeSlashes);
+        }
+
+        public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
+        {
+            Assert.Equal(expectedItems.Length, items.Count);
+
+            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
+
+            for (int i = 0; i < expectedItems.Length; i++)
+            {
+                if (!normalizeSlashes)
+                {
+                    Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                }
+                else
+                {
+                    Assert.Equal(NormalizeSlashes(expectedItems[i]), NormalizeSlashes(items[i].EvaluatedInclude));
+                }
+
+                AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
+            }
         }
 
         /// <summary>
@@ -1109,7 +1137,7 @@ namespace Microsoft.Build.UnitTests
                 listTwo.Add(item);
             }
 
-            AssertCollectionsValueEqual<T>(listOne, listTwo);
+            AssertCollectionsValueEqual(listOne, listTwo);
         }
 
         /// <summary>
@@ -1360,8 +1388,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the expected content matches the actual content
         /// </summary>
-        private static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual)
+        internal static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, ITestOutputHelper testOutput = null)
         {
+            Action<string> LogLine = testOutput == null ? (Action<string>) Console.WriteLine : testOutput.WriteLine;
+
             string[] actualLines = SplitIntoLines(actual);
 
             if (ignoreFirstLineOfActual)
@@ -1386,7 +1416,7 @@ namespace Microsoft.Build.UnitTests
                 if (expectedLines[i] != actualLines[i])
                 {
                     expectedAndActualDontMatch = true;
-                    Console.WriteLine("<   " + expectedLines[i] + "\n>   " + actualLines[i] + "\n");
+                    LogLine("<   " + expectedLines[i] + "\n>   " + actualLines[i] + "\n");
                 }
             }
 
@@ -1400,15 +1430,15 @@ namespace Microsoft.Build.UnitTests
 
             if (actualLines.Length > expectedLines.Length)
             {
-                Console.WriteLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
-                Console.WriteLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
+                LogLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
+                LogLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
 
                 Assert.True(false, "Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
             }
             else if (actualLines.Length < expectedLines.Length)
             {
-                Console.WriteLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
-                Console.WriteLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
+                LogLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
+                LogLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
 
                 Assert.True(false, "Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
             }
@@ -1460,6 +1490,121 @@ namespace Microsoft.Build.UnitTests
             string[] result = content.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             return result;
+        }
+
+        /// <summary>
+        /// Used for file matching tests
+        /// MSBuild does not accept forward slashes on rooted paths, so those are returned unchanged
+        /// </summary>
+        internal static string ToForwardSlash(string path) =>
+            Path.IsPathRooted(path)
+                ? path
+                : path.ToSlash();
+
+        /// <summary>
+        /// Creates a new temp path
+        /// Sets all OS temp environment variables to the new path
+        /// 
+        /// Cleanup:
+        /// - restores OS temp environment variables
+        /// - deletes all files written to the new temp path
+        /// </summary>
+        internal class AlternativeTempPath : IDisposable
+        {
+            private const string TMP = "TMP";
+            private const string TMPDIR = "TMPDIR";
+            private const string TEMP = "TEMP";
+
+            private TempPaths _oldtempPaths;
+            private bool _disposed;
+
+            private string _path;
+            public string Path
+            {
+                get
+                {
+                    if (_disposed)
+                    {
+                        throw new ObjectDisposedException($"{nameof(AlternativeTempPath)}(\"{_path})\"");
+                    }
+
+                    return _path;
+                }
+
+                private set { _path = value; }
+            }
+
+            public AlternativeTempPath()
+            {
+                Path = System.IO.Path.GetFullPath($"TMP_{Guid.NewGuid()}");
+                Directory.CreateDirectory(_path);
+
+                _oldtempPaths = SetTempPath(_path);
+            }
+
+            public void Dispose()
+            {
+                Cleanup();
+                GC.SuppressFinalize(this);
+            }
+
+            private void Cleanup()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                SetTempPaths(_oldtempPaths);
+                FileUtilities.DeleteDirectoryNoThrow(Path, true);
+
+                _disposed = true;
+            }
+
+            ~AlternativeTempPath()
+            {
+                Cleanup();
+            }
+
+            private static TempPaths SetTempPaths(TempPaths tempPaths)
+            {
+                var oldTempPaths = GetTempPaths();
+
+                foreach (var key in oldTempPaths.Keys)
+                {
+                    Environment.SetEnvironmentVariable(key, tempPaths[key]);
+                }
+
+                return oldTempPaths;
+            }
+
+            private static TempPaths SetTempPath(string tempPath)
+            {
+                var oldTempPaths = GetTempPaths();
+
+                foreach (var key in oldTempPaths.Keys)
+                {
+                    Environment.SetEnvironmentVariable(key, tempPath);
+                }
+
+                return oldTempPaths;
+            }
+
+            private static TempPaths GetTempPaths()
+            {
+                var tempPaths = new TempPaths
+                {
+                    [TMP] = Environment.GetEnvironmentVariable(TMP),
+                    [TEMP] = Environment.GetEnvironmentVariable(TEMP)
+                };
+
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    tempPaths[TMPDIR] = Environment.GetEnvironmentVariable(TMPDIR);
+                }
+
+                return tempPaths;
+            }
         }
     }
 }

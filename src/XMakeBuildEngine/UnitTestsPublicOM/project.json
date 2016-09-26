@@ -4,7 +4,9 @@
     "xunit.core": "2.1.0",
     "xunit.extensibility.core": "2.1.0",
     "xunit.assert": "2.1.0",
-    "xunit.abstractions": "2.0.0"
+    "xunit.abstractions": "2.0.0",
+    "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09",
+    "System.Collections.Immutable": "1.2.0"
   },
   "frameworks": {
     "net46": {

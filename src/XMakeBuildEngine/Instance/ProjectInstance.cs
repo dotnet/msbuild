@@ -1754,7 +1754,7 @@ namespace Microsoft.Build.Execution
 
             // If the user didn't pass in a ToolsVersion, still try to make a best-effort guess as to whether
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
-            else if (toolsVersion == null)
+            else
             {
                 int solutionVersion;
                 int visualStudioVersion;
@@ -2133,7 +2133,8 @@ namespace Microsoft.Build.Execution
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
 
-            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded);
+            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded,
+                preserveFormatting: false);
             projectRootElement.DirectoryPath = Path.GetDirectoryName(projectFile);
             ProjectInstance instance = new ProjectInstance(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext);
             return new ProjectInstance[] { instance };

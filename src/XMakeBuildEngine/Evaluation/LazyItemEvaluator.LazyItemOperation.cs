@@ -1,15 +1,11 @@
-﻿using Microsoft.Build.Collections;
-using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using System.Collections.Immutable;
+using System.Linq;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -19,13 +15,8 @@ namespace Microsoft.Build.Evaluation
         {
             protected readonly ProjectItemElement _itemElement;
             protected readonly string _itemType;
-
-            //  If Item1 of tuplee is ItemOperationType.Expression, then Item2 is an ExpressionShredder.ItemExpressionCapture
-            //  Otherwise, Item2 is a string (representing either the value or the glob)
-            protected readonly ImmutableList<Tuple<ItemOperationType, object>> _operations;
-
+            protected readonly ItemSpec<P, I> _itemSpec;
             protected readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-
             protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
             protected readonly EvaluatorData _evaluatorData;
             protected readonly Expander<P, I> _expander;
@@ -34,19 +25,20 @@ namespace Microsoft.Build.Evaluation
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
 
-
             public LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
                 _itemType = builder.ItemType;
-                _operations = builder.Operations.ToImmutable();
+                _itemSpec = builder.ItemSpec;
                 _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
 
                 _lazyEvaluator = lazyEvaluator;
+
                 _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
+                _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
                 _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
 
-                _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
+                _itemSpec.Expander = _expander;
             }
 
             IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
@@ -232,48 +224,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             protected ICollection<I> SelectItemsMatchingItemSpec(ImmutableList<ItemData>.Builder listBuilder, IElementLocation elementLocation)
             {
-                //  TODO: Figure out case sensitivity on non-Windows OS's
-                HashSet<string> itemValuesToMatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                List<string> globsToMatch = new List<string>();
-
-                foreach (var operation in _operations)
-                {
-                    if (operation.Item1 == ItemOperationType.Expression)
-                    {
-                        //  TODO: consider optimizing the case where an item element removes all items of its
-                        //  item type, for example:
-                        //      <Compile Remove="@(Compile)" />
-                        //  In this case we could avoid evaluating previous versions of the list entirely
-                        bool throwaway;
-                        var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            (ExpressionShredder.ItemExpressionCapture)operation.Item2, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
-                            false /* do not include null expansion results */, out throwaway, elementLocation);
-
-                        foreach (var item in itemsFromExpression)
-                        {
-                            itemValuesToMatch.Add(item.EvaluatedInclude);
-                        }
-                    }
-                    else if (operation.Item1 == ItemOperationType.Value)
-                    {
-                        itemValuesToMatch.Add((string)operation.Item2);
-                    }
-                    else if (operation.Item1 == ItemOperationType.Glob)
-                    {
-                        string glob = (string)operation.Item2;
-                        globsToMatch.Add(glob);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(operation.Item1.ToString());
-                    }
-                }
-
-                var globbingMatcher = EngineFileUtilities.GetMatchTester(globsToMatch);
-
-                return listBuilder
-                    .Select(itemData => itemData.Item)
-                    .Where(item => itemValuesToMatch.Contains(item.EvaluatedInclude) || globbingMatcher(item.EvaluatedInclude))
+                return _itemSpec
+                    .FilterItems(listBuilder.Select(itemData => itemData.Item))
                     .ToImmutableHashSet();
             }
         }
