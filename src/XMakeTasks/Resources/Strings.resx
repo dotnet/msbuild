@@ -2607,7 +2607,7 @@
     <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
   </data>
   <data name="Copy.SameDestinationPath">
-    <value>MSB3892:Cannot copy multiple files to the same destination. SourceFiles {0} all have the same destination {1}</value>    
+    <value>MSB3892: Cannot copy multiple files to the same destination. SourceFiles {0} all have the same destination {1}</value>    
   </data>
   
   <!--

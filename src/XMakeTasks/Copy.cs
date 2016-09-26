@@ -421,12 +421,6 @@ namespace Microsoft.Build.Tasks
 
                 if (sameDestinationFiles.Any())
                 {
-                    for (int i = 0; i < _sourceFiles.Length; ++i)
-                    {
-                        // Copy meta-data from source to destinationFiles.
-                        _sourceFiles[i].CopyMetadataTo(_destinationFiles[i]);
-                    }
-
                     foreach (var item in sameDestinationFiles)
                     {
                         string logSource = "";
@@ -434,8 +428,7 @@ namespace Microsoft.Build.Tasks
 
                         foreach (var subitem in item)
                         {
-                            var originalPath = subitem.GetMetadata("OriginalItemSpec");
-                            subitem.SetMetadata("CopiedFrom", originalPath);
+                            var originalPath = subitem.GetMetadata("CopiedFrom");
                             logSource += '"' + originalPath;
 
                             logSource += !subitem.Equals(lastItem) ? "\"," : "\"";
@@ -590,6 +583,11 @@ namespace Microsoft.Build.Tasks
                     // Copy meta-data from source to destinationFolder.
                     _sourceFiles[i].CopyMetadataTo(_destinationFiles[i]);
                 }
+            }
+
+            for (int i = 0; i < _sourceFiles.Length; ++i)
+            {
+                _destinationFiles[i].SetMetadata("CopiedFrom", _sourceFiles[i].ItemSpec);
             }
 
             return true;
