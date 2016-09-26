@@ -5638,6 +5638,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MsAppxPackageTargets Condition="'$(MsAppxPackageTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\AppxPackage\Microsoft.AppXPackage.Targets</MsAppxPackageTargets>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <CommonMonoTargetsPath Condition="'$(CommonMonoTargetsPath)' == ''">Microsoft.Common.Mono.targets</CommonMonoTargetsPath>
+  </PropertyGroup>
+
+  <Import Project="$(CommonMonoTargetsPath)" Condition="'$(MSBuildRuntimeType)' == 'Mono'" />
+
   <Import Project="$(MsAppxPackageTargets)" Condition="'$(WindowsAppContainer)' == 'true' and Exists('$(MsAppxPackageTargets)')" />
 
   <!-- This import is temporary and will be removed once it is moved into the silverlight targets -->
