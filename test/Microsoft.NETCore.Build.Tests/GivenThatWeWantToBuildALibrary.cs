@@ -19,11 +19,10 @@ namespace Microsoft.NETCore.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
-                .WithSource();
+                .WithSource()
+                .Restore(relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            testAsset.Restore(libraryProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
             buildCommand
@@ -45,11 +44,10 @@ namespace Microsoft.NETCore.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
-                .WithSource();
+                .WithSource()
+                .Restore(relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            testAsset.Restore(libraryProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
             buildCommand

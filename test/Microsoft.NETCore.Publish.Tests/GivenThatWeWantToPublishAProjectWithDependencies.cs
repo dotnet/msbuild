@@ -25,9 +25,8 @@ namespace Microsoft.NETCore.Publish.Tests
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset("SimpleDependencies")
-                .WithSource();
-
-            simpleDependenciesAsset.Restore(simpleDependenciesAsset.TestRoot, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
+                .WithSource()
+                .Restore();
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
