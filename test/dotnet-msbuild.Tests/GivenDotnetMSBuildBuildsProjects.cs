@@ -5,7 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.Build3.Tests
+namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetMSBuildBuildsProjects : TestBase
     {

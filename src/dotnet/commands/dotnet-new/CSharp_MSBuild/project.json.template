@@ -3,7 +3,7 @@
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
-        "Microsoft.NETCore.Sdk": "1.0.0-alpha-20160914-1",
+        "Microsoft.NETCore.Sdk": "1.0.0-alpha-20160923-4",
         "Microsoft.NETCore.App": {
           "type": "platform",
           "version": "1.0.1"
