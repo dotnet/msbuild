@@ -5127,6 +5127,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     of additional attributes may be placed on an output/dependency item.
     ============================================================
     -->
+  <PropertyGroup>
+    <AllProjectOutputGroupsDependsOn></AllProjectOutputGroupsDependsOn>
+  </PropertyGroup>
+
   <Target
       Name="AllProjectOutputGroups"
       DependsOnTargets="
@@ -5136,7 +5140,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             SatelliteDllsProjectOutputGroup;
             SourceFilesProjectOutputGroup;
             ContentFilesProjectOutputGroup;
-            SGenFilesOutputGroup"/>
+            SGenFilesOutputGroup;
+            $(AllProjectOutputGroupsDependsOn)"/>
 
   <!--
     This is the key output for the BuiltProjectOutputGroup and is meant to be read directly from the IDE.
