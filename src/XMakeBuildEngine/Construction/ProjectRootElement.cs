@@ -197,12 +197,12 @@ namespace Microsoft.Build.Construction
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
             
-            var emptryProjectFile = string.Format(EmptyProjectFileContent,
+            var emptyProjectFile = string.Format(EmptyProjectFileContent,
                 (projectFileOptions & NewProjectFileOptions.IncludeXmlDeclaration) != 0 ? EmptyProjectFileXmlDeclaration : string.Empty,
                 (projectFileOptions & NewProjectFileOptions.IncludeToolsVersion) != 0 ? EmptyProjectFileToolsVersion : string.Empty,
                 (projectFileOptions & NewProjectFileOptions.IncludeXmlNamespace) != 0 ? EmptyProjectFileXmlNamespace : string.Empty);
 
-            using (XmlReader xr = XmlReader.Create(new StringReader(emptryProjectFile), xrs))
+            using (XmlReader xr = XmlReader.Create(new StringReader(emptyProjectFile), xrs))
             {
                 document.Load(xr);
             }

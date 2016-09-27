@@ -1595,7 +1595,7 @@ namespace Microsoft.Build.UnitTests
                 Project project = new Project(projectFile2);
                 MockLogger logger = new MockLogger();
 
-                project.Build(logger);
+                Assert.True(project.Build(logger));
 
                 logger.AssertLogContains("[foo.out]");
             }
@@ -1631,7 +1631,7 @@ namespace Microsoft.Build.UnitTests
                 Project project = new Project(projectFile2);
                 MockLogger logger = new MockLogger();
 
-                project.Build(logger);
+                Assert.True(project.Build(logger));
 
                 logger.AssertLogContains("[foo.out]");
             }

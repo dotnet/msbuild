@@ -162,9 +162,7 @@ namespace Microsoft.Build.Construction
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.LocalName == XMakeElements.project, element.Location, "UnrecognizedElement", element.Name);
 
             // If a namespace was specified it must be the default MSBuild namespace.
-            if (element.Prefix.Length > 0 ||
-                (!string.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace,
-                     StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(element.NamespaceURI)))
+            if (!ProjectXmlUtilities.VerifyValidProjectNamespace(element))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(element.Location, "ProjectMustBeInMSBuildXmlNamespace",
                     XMakeAttributes.defaultXmlNamespace);
