@@ -1234,12 +1234,15 @@ namespace Microsoft.Build.UnitTests
         /// Write the given <see cref="projectContents"/> in a new temp directory and create the given <see cref="files"/> relative to the project
         /// </summary>
         /// <returns>the path to the temp root directory that contains the project and files</returns>
-        internal static string CreateProjectInTempDirectoryWithFiles(string projectContents, string[] files, out string createdProjectFile, out string[] createdFiles)
+        internal static string CreateProjectInTempDirectoryWithFiles(string projectContents, string[] files, out string createdProjectFile, out string[] createdFiles, string relativePathFromRootToProject = ".")
         {
             var root = GetTempDirectoryWithGuid();
             Directory.CreateDirectory(root);
 
-            createdProjectFile = Path.Combine(root, "build.proj");
+            var projectDir = Path.Combine(root, relativePathFromRootToProject);
+            Directory.CreateDirectory(projectDir);
+
+            createdProjectFile = Path.Combine(projectDir, "build.proj");
             File.WriteAllText(createdProjectFile, ObjectModelHelpers.CleanupFileContents(projectContents));
 
             createdFiles = CreateFilesInDirectory(root, files);
