@@ -4,14 +4,21 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
     <OutputPath>bin\$(Configuration)\netcoreapp1.0</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <None Include="project.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.App">
+      <Version>1.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Sdk">
+      <Version>1.0.0-alpha-20160927-2</Version>
+    </PackageReference>
   </ItemGroup>
 
   <Import Project="$(MSBuildExtensionsPath)\Microsoft.CSharp.targets" />
