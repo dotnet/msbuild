@@ -241,8 +241,10 @@ namespace Microsoft.DotNet.Migration.Tests
             File.Delete(Path.Combine(projectDirectory, "project.lock.json"));
 
             MigrateProject(projectDirectory);
-            Restore(projectDirectory);
-            BuildMSBuild(projectDirectory, projectName);
+
+            DeleteXproj(projectDirectory);
+            Restore3(projectDirectory);
+            BuildMSBuild(projectDirectory);
 
             var msbuildBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
 

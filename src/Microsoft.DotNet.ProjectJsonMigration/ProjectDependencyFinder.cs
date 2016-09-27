@@ -5,15 +5,17 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Graph;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Microsoft.DotNet.Tools.Common;
+using NuGet.Frameworks;
 using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class ProjectDependencyFinder 
+    internal class ProjectDependencyFinder 
     {
         public IEnumerable<ProjectDependency> ResolveProjectDependencies(string projectDir, string xprojFile = null)
         {
@@ -41,10 +43,54 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 }
             }
         }
-
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(
-            ProjectContext projectContext,
+        public IEnumerable<ProjectDependency> ResolveProjectDependenciesForFramework(
+            Project project, 
+            NuGetFramework framework, 
             IEnumerable<string> preResolvedProjects=null)
+        {
+            preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
+
+            var possibleProjectDependencies = 
+                FindPossibleProjectDependencies(project.ProjectFilePath);
+
+            var projectDependencies = new List<ProjectDependency>();
+
+            IEnumerable<ProjectLibraryDependency> projectFileDependenciesForFramework;
+            if (framework == null)
+            {
+                projectFileDependenciesForFramework = project.Dependencies;
+            }
+            else
+            {
+                projectFileDependenciesForFramework = project.GetTargetFramework(framework).Dependencies;
+            }
+     
+            foreach (var projectFileDependency in projectFileDependenciesForFramework)
+            {
+                var dependencyName = projectFileDependency.Name;
+
+                ProjectDependency projectDependency;
+                if (!possibleProjectDependencies.TryGetValue(dependencyName, out projectDependency))
+                {
+                    if (projectFileDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project
+                        && !preResolvedProjects.Contains(dependencyName))
+                    {
+                        MigrationErrorCodes
+                            .MIGRATE1014($"Unresolved project dependency ({dependencyName})").Throw();
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                projectDependencies.Add(projectDependency);
+            }
+
+            return projectDependencies;
+        }
+
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, IEnumerable<string> preResolvedProjects=null)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 

@@ -40,14 +40,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 throw new ArgumentNullException();
             }
 
-            MigrateProject(rootSettings);
+            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory, rootSettings.ProjectXProjFilePath);
 
+            MigrateProject(rootSettings);
+            
             if (skipProjectReferences)
             {
                 return;
             }
-
-            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory, rootSettings.ProjectXProjFilePath);
 
             foreach(var project in projectDependencies)
             {

@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public ProjectPropertyGroupElement CommonPropertyGroup { get; }
         
-        public IEnumerable<ProjectContext> ProjectContexts { get; }
+        public List<ProjectContext> ProjectContexts { get; }
 
         public ProjectContext DefaultProjectContext
         {
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             ProjectRootElement projectXproj=null)
         {
             ProjectXproj = projectXproj;
-            ProjectContexts = projectContexts;
+            ProjectContexts = projectContexts.ToList();
             OutputMSBuildProject = outputMSBuildProject;
             CommonItemGroup = commonItemGroup;
             CommonPropertyGroup = commonPropertyGroup;
