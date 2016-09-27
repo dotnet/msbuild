@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(toolsets, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Dictionary<string, List<string>> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;
+            Dictionary<string, ProjectImportPathMatch> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;
 #if XPLAT
             if (NativeMethodsShared.IsWindows)
 #endif
@@ -587,15 +587,15 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
         }
 
-        private void CheckPathsTable(Dictionary<string, List<string>> pathsTable, string kind, string[] expectedPaths)
+        private void CheckPathsTable(Dictionary<string, ProjectImportPathMatch> pathsTable, string kind, string[] expectedPaths)
         {
             Assert.True(pathsTable.ContainsKey(kind));
             var paths = pathsTable[kind];
-            Assert.Equal(paths.Count, expectedPaths.Length);
+            Assert.Equal(paths.SearchPaths.Count, expectedPaths.Length);
 
-            for (int i = 0; i < paths.Count; i ++)
+            for (int i = 0; i < paths.SearchPaths.Count; i ++)
             {
-                Assert.Equal(paths[i], expectedPaths[i]);
+                Assert.Equal(paths.SearchPaths[i], expectedPaths[i]);
             }
         }
 

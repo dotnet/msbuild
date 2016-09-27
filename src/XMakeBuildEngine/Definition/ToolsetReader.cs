@@ -274,7 +274,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
         /// </summary>
-        protected abstract Dictionary<string, List<string>> GetProjectImportSearchPathsTable(string toolsVersion, string os);
+        protected abstract Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os);
 
         /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them

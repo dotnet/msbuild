@@ -49,7 +49,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Cached values of tools version -> project import search paths table
         /// </summary>
-        private readonly Dictionary<string, Dictionary<string, List<string>>> _projectImportSearchPathsCache;
+        private readonly Dictionary<string, Dictionary<string, ProjectImportPathMatch>> _projectImportSearchPathsCache;
 
         /// <summary>
         /// Default constructor
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration, "readApplicationConfiguration");
             _readApplicationConfiguration = readApplicationConfiguration;
-            _projectImportSearchPathsCache = new Dictionary<string, Dictionary<string, List<string>>>(StringComparer.OrdinalIgnoreCase);
+            _projectImportSearchPathsCache = new Dictionary<string, Dictionary<string, ProjectImportPathMatch>>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -195,9 +195,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a map of project property names / list of search paths for the specified toolsVersion and os
         /// </summary>
-        protected override Dictionary<string, List<string>> GetProjectImportSearchPathsTable(string toolsVersion, string os)
+        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
         {
-            Dictionary<string, List<string>> kindToPathsCache;
+            Dictionary<string, ProjectImportPathMatch> kindToPathsCache;
             var key = toolsVersion + ":" + os;
             if (_projectImportSearchPathsCache.TryGetValue(key, out kindToPathsCache))
             {
@@ -205,7 +205,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Read and populate the map
-            kindToPathsCache = new Dictionary<string, List<string>>();
+            kindToPathsCache = new Dictionary<string, ProjectImportPathMatch>();
             _projectImportSearchPathsCache[key] = kindToPathsCache;
 
             ToolsetElement toolsetElement = ConfigurationSection.Toolsets.GetElement(toolsVersion);
@@ -223,9 +223,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a list of the search paths for a given search path property collection
         /// </summary>
-        private Dictionary<string, List<string>> ComputeDistinctListOfSearchPaths(ToolsetElement.PropertyElementCollection propertyCollection)
+        private Dictionary<string, ProjectImportPathMatch> ComputeDistinctListOfSearchPaths(ToolsetElement.PropertyElementCollection propertyCollection)
         {
-            var pathsTable = new Dictionary<string, List<string>>();
+            var pathsTable = new Dictionary<string, ProjectImportPathMatch>();
 
             foreach (ToolsetElement.PropertyElement property in propertyCollection)
             {
@@ -239,7 +239,7 @@ namespace Microsoft.Build.Evaluation
                     property.Value.Split(new[] {_separatorForExtensionsPathSearchPaths},
                         StringSplitOptions.RemoveEmptyEntries).Distinct();
 
-                pathsTable.Add(property.Name, paths.ToList());
+                pathsTable.Add(property.Name, new ProjectImportPathMatch(property.Name, paths.ToList()));
             }
 
             return pathsTable;
