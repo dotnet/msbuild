@@ -14,7 +14,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.DotNet.Publish.Props" Condition="Exists('$(MSBuildThisFileDirectory)\..\Microsoft.DotNet.Publish.Props')"/>
   <Import Project="$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets')"/>
 
   <!--
@@ -32,6 +31,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets" Condition="Exists('$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets')" />
 
+
+  <!-- Extension points for BeforePublish and AfterPublish-->
+  <Target Name="BeforePublish" />
+  <Target Name="AfterPublish" />
+  
   <!--
   ***********************************************************************************************
   Import the PublishProfiles
@@ -71,17 +75,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   TARGET : DotNetPublish
   ***********************************************************************************************
  -->
+
   <PropertyGroup>
     <DotNetPublishDependsOn>
-      $(DotNetPublishComputeFiles);
-      $(DotNetPublishCopyFiles);
-      $(DotNetPublishFiles);
+      BeforePublish;
+      CorePublish;
+      AfterPublish;
     </DotNetPublishDependsOn>
   </PropertyGroup>
-
+  
   <Target Name="DotNetPublish" 
           DependsOnTargets="$(DotNetPublishDependsOn)" 
           AfterTargets="Build" 
           Condition=" '$(PublishOnBuild)' =='true' " />
+
+
+  <PropertyGroup>
+    <CorePublishDependsOn>
+      $(DotNetPublishComputeFiles);
+      $(DotNetPublishCopyFiles);
+      $(DotNetPublishFiles);
+    </CorePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CorePublish" 
+          DependsOnTargets="$(CorePublishDependsOn)"/>
+          
 
 </Project>

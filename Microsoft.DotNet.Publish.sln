@@ -16,7 +16,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ComputeTargets", "ComputeTargets", "{F38F8B8C-91BB-4126-BBF0-DED1645DB993}"
 	ProjectSection(SolutionItems) = preProject
 		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.ClassLibrary.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.ClassLibrary.ComputeFiles.targets
-		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Common.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Common.ComputeFiles.targets
 		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Console.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Console.ComputeFiles.targets
 		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Core.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Core.ComputeFiles.targets
 		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.WebApp.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.WebApp.ComputeFiles.targets
@@ -25,7 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ComputeTargets", "ComputeTa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishTargets", "PublishTargets", "{3AF52BAD-605D-4DF2-A2BF-CD48E5A42FA2}"
 	ProjectSection(SolutionItems) = preProject
-		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.Common.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.Common.targets
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FileSystem.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FileSystem.targets
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FTP.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FTP.targets
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.Kudu.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.Kudu.targets
@@ -47,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Publish.Pa
 	ProjectSection(ProjectDependencies) = postProject
 		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60} = {994A9D35-ED60-4000-B7A1-A7CDD71B0E60}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNetCore.Publish.Tasks", "src\Microsoft.DotNetCore.Publish.Tasks\Microsoft.DotNetCore.Publish.Tasks.csproj", "{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +80,14 @@ Global
 		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|Any CPU.Build.0 = Release|Any CPU
 		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|x86.ActiveCfg = Release|Any CPU
 		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|x86.Build.0 = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|x86.Build.0 = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|x86.ActiveCfg = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

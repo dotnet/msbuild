@@ -19,10 +19,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Including the tasks
   ***********************************************************************************************
  -->
-  <UsingTask TaskName="MSDeploy" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
-  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
-  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
-
+  <UsingTask TaskName="MSDeploy" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="RegexEscape" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(PublishTaskAssemblyFullPath)" />
 
   <PropertyGroup>
     <DotNetPublishFiles>
@@ -31,6 +34,102 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </DotNetPublishFiles>
   </PropertyGroup>
 
+
+  <PropertyGroup>
+    <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(DesktopBuildPackageLocation)))\</_destinationFolder>
+    <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(_destinationFolder)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
+    <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_ConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath)" />
+  </ItemGroup>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : PrepareForMsDeployPublish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <PrepareForMsDeployPublishDependsOn>
+      $(PrepareForMsDeployPublishDependsOn);
+    </PrepareForMsDeployPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="PrepareForMsDeployPublish" DependsOnTargets="$(PrepareForMsDeployPublishDependsOn)">
+    <MakeDir Directories="$(_destinationFolder)" Condition="!Exists('$(_destinationFolder)')" ContinueOnError="true"/>
+    <Delete Files="@(_ConfigFiles)" ContinueOnError="true" />
+    <Touch AlwaysCreate="true" Files="@(_ConfigFiles)" ContinueOnError="true" />
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : CreateManifestFiles
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <CreateManifestFilesDependsOn>
+      $(CreateManifestFilesDependsOn);
+    </CreateManifestFilesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CreateManifestFiles" DependsOnTargets="$(CreateManifestFilesDependsOn)">
+
+    <ItemGroup>
+      <MsDeploySourceManifest Remove="@(MsDeploySourceManifest)" />
+
+      <MsDeploySourceManifest Include="IisApp" >
+        <Path>$(PublishIntermediateOutputPath)</Path>
+      </MsDeploySourceManifest>
+    </ItemGroup>
+
+    <CreateManifestFile
+      Manifests="@(MsDeploySourceManifest)"
+      ManifestFile="$(_MsDeploySourceManifestPath)" />
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : CreateParameterFiles
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <CreateParameterFilesDependsOn>
+      $(CreateParameterFilesDependsOn);
+    </CreateParameterFilesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CreateParameterFiles" DependsOnTargets="$(CreateParameterFilesDependsOn)">
+
+    <!--Parameterize the default value of the Path-->
+    <RegexEscape Text="$(PublishIntermediateOutputPath)">
+      <Output TaskParameter="Result" PropertyName="_Escaped_PublishIntermediateOutputPath" />
+    </RegexEscape>
+
+    <ItemGroup>
+      <MsDeployDeclareParameters Remove="@(MsDeployDeclareParameters)" />
+
+      <MsDeployDeclareParameters Include="IIS Web Application Name" >
+        <Kind>ProviderPath</Kind>
+        <Scope>IisApp</Scope>
+        <Match>^$(_Escaped_PublishIntermediateOutputPath)$</Match>
+        <Description></Description>
+        <DefaultValue>$(DeployIisAppPath)</DefaultValue>
+        <Value>$(DeployIisAppPath)</Value>
+        <Tags>IisApp</Tags>
+        <Priority></Priority>
+        <ExcludeFromSetParameter>false</ExcludeFromSetParameter>
+      </MsDeployDeclareParameters>
+    </ItemGroup>
+
+    <CreateParameterFile
+      Parameters="@(MsDeployDeclareParameters)"
+      DeclareSetParameterFile="$(_MSDeployParametersFilePath)"
+      IncludeDefaultValue="True"
+      GenerateFileEvenIfEmpty="True" />
+
+  </Target>
+  
   <!--
   ***********************************************************************************************
   TARGET : MSDeployPackagePublish
@@ -39,6 +138,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSDeployPackagePublishDependsOn>
       $(MSDeployPackagePublishDependsOn);
+      PrepareForMsDeployPublish;
+      CreateManifestFiles;
+      CreateParameterFiles;
     </MSDeployPackagePublishDependsOn>
   </PropertyGroup>
 
@@ -48,20 +150,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ParameterName="DeployIisAppPath"
     ParameterValue="$(DeployIisAppPath)"/>
 
-    <!--  Data Passed to MSDeploy -->
-    <ItemGroup>
-      <MsDeploySourceProviderSetting Include="IisApp">
-        <Path>$(PublishIntermediateOutputPath)</Path>
-      </MsDeploySourceProviderSetting>
-      <MsDeployDestinationProviderSetting Include="Package">
-        <Path>$(DesktopBuildPackageLocation)</Path>
-      </MsDeployDestinationProviderSetting>
-    </ItemGroup>
-
     <PropertyGroup>
+      <MSDeployPublishSourceType>manifest</MSDeployPublishSourceType>
+      <MSDeployPublishSourceRoot>$(_MsDeploySourceManifestPath)</MSDeployPublishSourceRoot>
+
+      <!--Destination is alway a manifest-->
+      <MSDeployPublishDestinationType>Package</MSDeployPublishDestinationType>
+      <MSDeployPublishDestinationRoot>$(DesktopBuildPackageLocation)</MSDeployPublishDestinationRoot>
+      
       <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
       <MsDeployDoNotDeleteRule Condition="$(SkipExtraFilesOnServer) == 'true'">DoNotDeleteRule</MsDeployDoNotDeleteRule>
       <_EnableRuleList>$(MsDeployDoNotDeleteRule)</_EnableRuleList>
+
+      <PublishEnableLinks Condition="'$(PublishEnableLinks)' == ''"></PublishEnableLinks>
+      <PublishDisableLinks Condition="'$(PublishDisableLinks)' == ''">AppPoolExtension;ContentExtension;CertificateExtension</PublishDisableLinks>
 
       <!-- UserAgent string sent to msdeploy -->
       <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
@@ -69,16 +171,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </PropertyGroup>
 
+    <!--  Data Passed to MSDeploy -->
+    <ItemGroup>
+      <MsDeploySourceProviderSetting Remove="@(MsDeploySourceProviderSetting)" />
+      <MsDeploySourceProviderSetting Include="$(MSDeployPublishSourceType)">
+        <Path>$(MSDeployPublishSourceRoot)</Path>
+      </MsDeploySourceProviderSetting>
+
+      <MsDeployDestinationProviderSetting Remove="@(MsDeployDestinationProviderSetting)" />
+      <MsDeployDestinationProviderSetting Include="$(MSDeployPublishDestinationType)">
+        <Path>$(MSDeployPublishDestinationRoot)</Path>
+      </MsDeployDestinationProviderSetting>
+    </ItemGroup>
+
     <VSMSDeploy Condition="'$(UseMsdeployExe)' != 'true'"
        MSDeployVersionsToTry="$(_MSDeployVersionsToTry)"
        Source="@(MsDeploySourceProviderSetting)"
        Destination="@(MsDeployDestinationProviderSetting)"
        DeploymentTraceLevel="$(PackageTraceLevel)"
-       DisableLink="$(PackageDisableLinks)"
-       EnableLink="$(PackageEnableLinks)"
-       DeclareParameterItems="@(_Package_MsDeployDeclareParameters)"
-       OptimisticParameterDefaultValue="$(EnableOptimisticParameterDefaultValue)"
-       ImportDeclareParametersItems="$(_VsPackageParametersFile)"
+       DisableLink="$(PublishDisableLinks)"
+       EnableLink="$(PublishEnableLinks)"
+       ImportDeclareParametersItems="$(_MSDeployParametersFilePath)"
        ReplaceRuleItems="@(MsDeployReplaceRules)"
        RetryAttempts="$(RetryAttemptsForDeployment)">
       <Output TaskParameter="Result" PropertyName="PackageResult" />
@@ -89,11 +202,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Verb="sync"
       Source="@(MsDeploySourceProviderSetting)"
       Destination="@(MsDeployDestinationProviderSetting)"
-      DisableLink="$(PackageDisableLinks)"
-      EnableLink="$(PackageEnableLinks)"
-      DeclareParameterItems="@(_Package_MsDeployDeclareParameters)"
-      OptimisticParameterDefaultValue="$(EnableOptimisticParameterDefaultValue)"
-      ImportDeclareParametersItems="$(_VsPackageParametersFile)"
+      DisableLink="$(PublishDisableLinks)"
+      EnableLink="$(PublishEnableLinks)"
+      ImportDeclareParametersItems="$(_MSDeployParametersFilePath)"
       ReplaceRuleItems="@(MsDeployReplaceRules)"
       RetryAttempts="$(RetryAttemptsForDeployment)"
       ExePath="$(MSDeployPath)"
@@ -120,6 +231,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <prefetchPayload></prefetchPayload>
     </MsDeploySourceProviderSetting>
   </ItemDefinitionGroup>
+  
   <ItemDefinitionGroup>
     <MsDeployDestinationProviderSetting>
       <Path></Path>
@@ -133,6 +245,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <prefetchPayload></prefetchPayload>
     </MsDeployDestinationProviderSetting>
   </ItemDefinitionGroup>
+  
   <!--
   DeploymentSkipRule(string skipAction, string objectName, string absolutePath, string XPath);-->
   <ItemDefinitionGroup>
@@ -145,5 +258,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!--Source, Destination, Both(the default)-->
       <Apply></Apply>
     </MsDeploySkipRules>
+  </ItemDefinitionGroup>
+
+  <!-- AdditionalProviderSettings denote the additionProviderSetting need to be set in the manifest files-->
+  <ItemDefinitionGroup>
+    <MsDeploySourceManifest>
+      <Path>Unknown</Path>
+      <AdditionalProviderSettings></AdditionalProviderSettings>
+    </MsDeploySourceManifest>
   </ItemDefinitionGroup>
 </Project>
