@@ -1,6 +1,7 @@
 {
   "version": "15.1-preview5",
   "publicReleaseRefSpec": [
-    "^refs/heads/master$"
+    "^refs/heads/master$",
+    "refs/heads/xplat*"
   ]
 }
