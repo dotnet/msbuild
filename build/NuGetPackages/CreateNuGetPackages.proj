@@ -13,12 +13,6 @@
     <PackagesOutDir>$([System.IO.Path]::Combine($(PackagesBasePath), 'Packages'))</PackagesOutDir>
 
     <SkipVersionGeneration>true</SkipVersionGeneration>
-    <BaseVersion>15.1.0-preview</BaseVersion>
-    <BuildNumberMajor>$(RevisionNumber)</BuildNumberMajor>
-    <BuildNumberMinor>$([System.DateTime]::Now.ToString(`yMMdd`))</BuildNumberMinor>
-
-    <!-- The version for msbuild nuget packages. Used by packages.targets:AddNuGetPackageVersionMetadataToNuspecs -->
-    <PackageVersion>$(BaseVersion)-$(BuildNumberMajor)-$(BuildNumberMinor)</PackageVersion>
 
     <!-- Turn off the automated package generation in packages.targets:AddNuGetPackageVersionMetadataToNuspecs and use the above PackageVersion-->
     <DoNotGeneratePackageVersion>true</DoNotGeneratePackageVersion>
@@ -27,7 +21,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
-  <Import Project="$(ToolsDir)versioning.targets" Condition="Exists('$(ToolsDir)versioning.targets')" />
+  <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
   
   <ItemGroup>
     <Project Include="$(RepoRoot)\ref\net46\**\*.csproj">
@@ -48,10 +42,10 @@
     </TraversalBuildDependsOn>
   </PropertyGroup>
 
-  <Target Name="BuildPackagesEx" Inputs="%(NuSpecs.Identity);$(MSBuildThisFileFullPath)" Outputs="$(PackagesOutDir)\%(NuSpecs.Filename).$(PackageVersion).nupkg">
-    
+  <Target Name="BuildPackagesEx" DependsOnTargets="GetNuGetPackageVersion" Inputs="%(NuSpecs.Identity);$(MSBuildThisFileFullPath)" Outputs="$(PackagesOutDir)\%(NuSpecs.Filename).$(NuGetPackageVersion).nupkg">
+
     <ItemGroup>
-      <NuspecProperties Include="version=$(PackageVersion)"/>
+      <NuspecProperties Include="version=$(NuGetPackageVersion)"/>
       <NuspecProperties Include="@(NuSpecs->'id=%(Filename)')"/>
       <NuspecProperties Include="configuration=$(Configuration)"/>
       <NuspecProperties Include="licenseUrl=$(NuGetPackageLicenseUrl)"/>
@@ -66,11 +60,11 @@
       Nuspecs="@(NuSpecs->'%(FullPath)')"
       OutputDirectory="$(PackagesOutDir)"
       BaseDirectory="$(PackagesBasePath)"
-      PackageVersion="$(PackageVersion)"
+      PackageVersion="$(NuGetPackageVersion)"
       ExcludeEmptyDirectories="true"
       NuspecProperties="@(NuspecProperties)"/>
 
-    <Message Importance="High" Text="@(NuSpecs->'%(Filename)') NuGet Package -> $(PackagesOutDir)\@(NuSpecs->'%(Filename)').$(PackageVersion).nupkg" />
+    <Message Importance="High" Text="@(NuSpecs->'%(Filename)') NuGet Package -> $(PackagesOutDir)\@(NuSpecs->'%(Filename)').$(NuGetPackageVersion).nupkg" />
   </Target>
   
 </Project>

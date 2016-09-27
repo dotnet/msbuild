@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "xunit.runner.console": "2.1.0",
-    "Nerdbank.GitVersioning": "1.4.30",
+    "Nerdbank.GitVersioning": "1.5.46",
     "NuSpec.ReferenceGenerator": "1.4.2",
     "Microsoft.Net.Compilers": "2.0.0-beta3",
     "MicroBuild.Core": "0.2.0",
