@@ -82,6 +82,9 @@
     <DnuToolPath>$(DotnetToolCommand)</DnuToolPath>
     <DnuCoreRestoreCommand>&quot;$(DnuToolPath)&quot; restore</DnuCoreRestoreCommand>
     <DnuCoreRestoreCommand Condition="'$(OsEnvironment)'=='OSX'">ulimit -n 2500 ; $(DnuCoreRestoreCommand)</DnuCoreRestoreCommand>
+    
+    <!-- Temporary until everything supports lowercase package directory names -->
+    <DnuCoreRestoreCommand>$(DnuCoreRestoreCommand) --legacy-packages-directory</DnuCoreRestoreCommand>
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
     <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages $(PackagesDir)</DnuRestoreCommand>
