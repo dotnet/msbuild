@@ -14,8 +14,7 @@ namespace Microsoft.NETCore.Build.Tests
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
-        // Skip the test until "https://github.com/dotnet/sdk/issues/178" is fixed.
-        // [Fact]
+        [Fact]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
