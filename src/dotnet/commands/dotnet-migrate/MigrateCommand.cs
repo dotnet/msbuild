@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectModel;
 
@@ -37,8 +36,9 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             var msBuildTemplate = _templateFile != null ?
                 ProjectRootElement.TryOpen(_templateFile) : _temporaryDotnetNewProject.MSBuildProject;
+            
+            var sdkVersion = _sdkVersion ?? _temporaryDotnetNewProject.MSBuildProject.GetSdkVersion();
 
-            var sdkVersion = _sdkVersion ?? new ProjectJsonParser(_temporaryDotnetNewProject.ProjectJson).SdkPackageVersion;
             EnsureNotNull(sdkVersion, "Null Sdk Version");
 
             foreach (var project in projectsToMigrate)
