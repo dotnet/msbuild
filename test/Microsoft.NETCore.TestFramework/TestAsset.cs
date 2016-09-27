@@ -2,13 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.InternalAbstractions;
+using System.Xml.Linq;
 using Microsoft.NETCore.TestFramework.Assertions;
 using Microsoft.NETCore.TestFramework.Commands;
-using Newtonsoft.Json.Linq;
 using static Microsoft.NETCore.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NETCore.TestFramework
@@ -44,23 +42,27 @@ namespace Microsoft.NETCore.TestFramework
             var sourceFiles = Directory.GetFiles(_testAssetRoot, "*.*", SearchOption.AllDirectories)
                                   .Where(file =>
                                   {
-                                      return !IsLockFile(file) && !IsInBinOrObjFolder(file);
+                                      return !IsInBinOrObjFolder(file);
                                   });
 
             foreach (string srcFile in sourceFiles)
             {
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
                 // For project.json, we need to replace the version of the Microsoft.DotNet.Core.Sdk with the actual build version
-                if (System.IO.Path.GetFileName(srcFile).Equals("project.json"))
+                if (System.IO.Path.GetFileName(srcFile).EndsWith("proj"))
                 {
-                    var projectJson = JObject.Parse(File.ReadAllText(srcFile));
-                    var sdkDepNodes = GetDependencies(projectJson, "Microsoft.NETCore.Sdk");
-                    foreach (var dep in sdkDepNodes)
-                    {
-                        dep.Value = _buildVersion;
-                    }
+                    var project = XDocument.Load(srcFile);
 
-                    File.WriteAllText(destFile, projectJson.ToString());
+                    project
+                        .Descendants(XName.Get("PackageReference", "http://schemas.microsoft.com/developer/msbuild/2003"))
+                        .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NETCore.Sdk")
+                        ?.Element(XName.Get("Version", "http://schemas.microsoft.com/developer/msbuild/2003"))
+                        ?.SetValue(_buildVersion);
+
+                    using (var file = File.CreateText(destFile))
+                    {
+                        project.Save(file);
+                    }
                 }
                 else
                 {
@@ -69,40 +71,6 @@ namespace Microsoft.NETCore.TestFramework
             }
 
             return this;
-        }
-
-        // Temporary until PackageReferences are listed in the .csproj
-        public TestAsset AsSelfContained()
-        {
-            string projectJsonFilePath = System.IO.Path.Combine(TestRoot, "project.json");
-
-            var projectJson = JObject.Parse(File.ReadAllText(projectJsonFilePath));
-
-            RemoveTypePlatform(projectJson);
-            AddCurrentRuntime(projectJson);
-
-            File.WriteAllText(projectJsonFilePath, projectJson.ToString());
-
-            return this;
-        }
-
-        private static void AddCurrentRuntime(JObject projectJson)
-        {
-            var runtimesObject =
-                new JObject(
-                    new JProperty(RuntimeEnvironment.GetRuntimeIdentifier(), new JObject())
-                );
-
-            projectJson.Add("runtimes", runtimesObject);
-        }
-
-        private static void RemoveTypePlatform(JObject projectJson)
-        {
-            var netCoreAppDep = GetDependencies(projectJson, "Microsoft.NETCore.App").FirstOrDefault()?.Value as JObject;
-            if (netCoreAppDep != null && netCoreAppDep["type"]?.Value<string>() == "platform")
-            {
-                netCoreAppDep.Remove("type");
-            }
         }
 
         public TestAsset Restore(string relativePath = "", params string[] args)
@@ -115,12 +83,6 @@ namespace Microsoft.NETCore.TestFramework
             commandResult.Should().Pass();
 
             return this;
-        }
-
-        private bool IsLockFile(string file)
-        {
-            file = file.ToLower();
-            return file.EndsWith("project.lock.json");
         }
 
         private bool IsBinOrObjFolder(string directory)
@@ -144,17 +106,6 @@ namespace Microsoft.NETCore.TestFramework
             path = path.ToLower();
             return path.Contains(binFolderWithTrailingSlash)
                   || path.Contains(objFolderWithTrailingSlash);
-        }
-
-        private static IEnumerable<JProperty> GetDependencies(JObject projectJson, string dependencyName)
-        {
-            return projectJson
-                .Descendants()
-                .OfType<JProperty>()
-                .Where(p => p.Name.Equals("dependencies"))
-                .Descendants()
-                .OfType<JProperty>()
-                .Where(p => p.Name.Equals(dependencyName, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
