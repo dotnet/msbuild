@@ -207,7 +207,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Map of project import properties to their list of fall-back search paths
         /// </summary>
-        private Dictionary<string, List<string>> _propertySearchPathsTable;
+        private Dictionary<string, ProjectImportPathMatch> _propertySearchPathsTable;
 
         /// <summary>
         /// Constructor taking only tools version and a matching tools path
@@ -290,7 +290,8 @@ namespace Microsoft.Build.Evaluation
         /// Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.
         /// </param>
-        internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, List<string>> importSearchPathsTable = null)
+        /// <param name="importSearchPathsTable">Map of parameter name to <see cref="PropertyWithFallbackPaths"/> for use during Import.</param>
+        internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, ProjectImportPathMatch> importSearchPathsTable = null)
             : this(toolsVersion, toolsPath, environmentProperties, globalProperties, msbuildOverrideTasksPath, defaultOverrideToolsVersion)
         {
             if (_properties == null)
@@ -359,11 +360,11 @@ namespace Microsoft.Build.Evaluation
                 return ProjectImportPathMatch.None;
             }
 
-            foreach (var searchPath in _propertySearchPathsTable)
+            foreach (var searchPath in _propertySearchPathsTable.Values)
             {
-                if (expression.IndexOf($"$({searchPath.Key})", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (expression.IndexOf(searchPath.MsBuildPropertyFormat, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    return new ProjectImportPathMatch(searchPath.Key, searchPath.Value);
+                    return searchPath;
                 }
             }
 
@@ -572,7 +573,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Map of properties to their list of fall-back search paths
         /// </summary>
-        internal Dictionary<string, List<string>> ImportPropertySearchPathsTable => _propertySearchPathsTable;
+        internal Dictionary<string, ProjectImportPathMatch> ImportPropertySearchPathsTable => _propertySearchPathsTable;
 
         /// <summary>
         /// Function for serialization.
@@ -587,7 +588,7 @@ namespace Microsoft.Build.Evaluation
             translator.TranslateDictionary(ref _subToolsets, StringComparer.OrdinalIgnoreCase, SubToolset.FactoryForDeserialization);
             translator.Translate(ref _overrideTasksPath);
             translator.Translate(ref _defaultOverrideToolsVersion);
-            translator.TranslateDictionaryList(ref _propertySearchPathsTable, StringComparer.OrdinalIgnoreCase);
+            translator.TranslateDictionary(ref _propertySearchPathsTable, StringComparer.OrdinalIgnoreCase, ProjectImportPathMatch.FactoryForDeserialization);
         }
 
         /// <summary>
