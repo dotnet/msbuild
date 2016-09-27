@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Publish3.Tests
 
             new Publish3Command()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
+                .Execute("--framework netcoreapp1.0")
                 .Should()
                 .Pass();
 

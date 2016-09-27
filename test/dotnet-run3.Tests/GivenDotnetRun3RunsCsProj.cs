@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
 
             new Run3Command()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
                 .Should()
                 .Pass()
                 .And
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
 
             new Run3Command()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
                 .Should()
                 .Pass()
                 .And

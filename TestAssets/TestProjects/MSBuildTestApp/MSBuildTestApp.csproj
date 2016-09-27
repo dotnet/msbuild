@@ -5,7 +5,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
-    <OutputPath>bin\$(Configuration)\netcoreapp1.0</OutputPath>
+    <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
