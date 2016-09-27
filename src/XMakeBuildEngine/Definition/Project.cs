@@ -1085,8 +1085,7 @@ namespace Microsoft.Build.Evaluation
         /// </returns>
         public List<GlobResult> GetAllGlobs()
         {
-            ReevaluateForPostMortemAnalysisIfNecessary();
-            return GetAllGlobs(_data.EvaluatedItemElements);
+            return GetAllGlobs(GetEvaluatedItemElements());
         }
 
         /// <summary>
@@ -1100,8 +1099,7 @@ namespace Microsoft.Build.Evaluation
                 return new List<GlobResult>();
             }
 
-            ReevaluateForPostMortemAnalysisIfNecessary();
-            return GetAllGlobs(GetItemElementsByType(_data.EvaluatedItemElements, itemType));
+            return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(), itemType));
         }
 
         private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
@@ -1175,8 +1173,7 @@ namespace Microsoft.Build.Evaluation
         /// </returns>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch)
         {
-            ReevaluateForPostMortemAnalysisIfNecessary();
-            return GetItemProvenance(itemToMatch, _data.EvaluatedItemElements);
+            return GetItemProvenance(itemToMatch, GetEvaluatedItemElements());
         }
 
         /// <summary>
@@ -1186,8 +1183,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">The item type to constrain the search in</param>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType)
         {
-            ReevaluateForPostMortemAnalysisIfNecessary();
-            return GetItemProvenance(itemToMatch, GetItemElementsByType(_data.EvaluatedItemElements, itemType));
+            return GetItemProvenance(itemToMatch, GetItemElementsByType(GetEvaluatedItemElements(), itemType));
         }
 
         /// <summary>
@@ -1205,8 +1201,7 @@ namespace Microsoft.Build.Evaluation
                 return new List<ProvenanceResult>();
             }
 
-            ReevaluateForPostMortemAnalysisIfNecessary();
-            var itemElementsAbove = GetItemElementsThatMightAffectItem(_data.EvaluatedItemElements, item);
+            var itemElementsAbove = GetItemElementsThatMightAffectItem(GetEvaluatedItemElements(), item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
         }
@@ -1218,32 +1213,34 @@ namespace Microsoft.Build.Evaluation
         /// 
         /// Using this method avoids storing extra data in memory when its not needed.
         /// </summary>
-        private void ReevaluateForPostMortemAnalysisIfNecessary()
+        private List<ProjectItemElement> GetEvaluatedItemElements()
         {
-            if (_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
+            if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
             {
-                return;
+                _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
+                Reevaluate(LoggingService, _loadSettings);
             }
 
-            _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
-            Reevaluate(LoggingService, _loadSettings);
+            return _data.EvaluatedItemElements;
         }
 
         private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
         {
-            return evaluatedItemElements
+            var relevantElementsAfterInclude =  evaluatedItemElements
                 // Skip until we encounter the element that produced the item because
                 // there are no item operations that can affect future items
                 .SkipWhile((i => i != item.Xml))
-                // leave out the item element that produced the item
-                .Skip(1)
                 .Where(itemElement =>
+                    // items operations of different item types cannot affect each other
                     itemElement.ItemType.Equals(item.ItemType) &&
                     // other includes cannot affect the current item
                     itemElement.IncludeLocation == null &&
                     // any remove that matches this item will cause the ProjectItem to not be produced in the first place
                     // all other removes do not apply
                     itemElement.RemoveLocation == null);
+
+            // add the include operation that created the project item element
+            return new[] {item.Xml}.Concat(relevantElementsAfterInclude);
         }
 
         private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)

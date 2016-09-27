@@ -19,7 +19,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <!-- 
         We are doing a cross-targeting build if there is no list of target frameworks specified
         nor is there a current target framework being built individually. In that case, this import is
-        redirected to Microsoft.Common.CrossTargeting.targets.
+        redirected to Microsoft.CSharp.CrossTargeting.targets.
    -->
    <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
       <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
@@ -51,7 +51,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </When>
       <When Condition="'$(IsCrossTargetingBuild)' == 'true'">
          <PropertyGroup>
-            <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.Common.CrossTargeting.targets</CSharpTargetsPath>
+            <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.CrossTargeting.targets</CSharpTargetsPath>
           </PropertyGroup>
       </When>
       <Otherwise>

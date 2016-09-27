@@ -20,7 +20,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- 
        We are doing a cross-targeting build if there is no list of target frameworks specified
        nor is there a current target framework being built individually. In that case, this import is
-       redirected to Microsoft.Common.CrossTargeting.targets.
+       redirected to Microsoft.VisualBasic.CrossTargeting.targets.
    -->
    <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
       <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
@@ -52,7 +52,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </When>
     <When Condition="'$(IsCrossTargetingBuild)' == 'true'">
       <PropertyGroup>
-        <VisualBasicTargetsPath>$(MSBuildToolsPath)\Microsoft.Common.CrossTargeting.targets</VisualBasicTargetsPath>
+        <VisualBasicTargetsPath>$(MSBuildToolsPath)\Microsoft.VisualBasic.CrossTargeting.targets</VisualBasicTargetsPath>
       </PropertyGroup>
     </When>
     <Otherwise>

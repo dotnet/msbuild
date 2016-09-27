@@ -2717,14 +2717,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 yield return new object[]
                 {
                     @"
-                    <A Include=`a;b`/>
+                    <A Include=`a;b;a`/>
                     <A Update=`a`/>
                     <A Update=`b`/>
                     <A Include=`a;b`/>
                     ",
                     "a",
-                    1, // item 'a' from last include
+                    2, // item 'a' from last include
                     new ProvenanceResultTupleList()
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1)
+                    }
                 };
 
                 // Nothing matches
@@ -2734,11 +2737,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <A Include=`a;b;c`/>
                     <A Update=`c;*ab`/>
                     <A Remove=`b`/>
-                    <A Include=`a`/>
+                    <A Include=`a;a`/>
                     ",
                     "a",
                     0, // item 'a' from first include
                     new ProvenanceResultTupleList()
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1)
+                    }
                 };
 
                 yield return new object[]
@@ -2746,7 +2752,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     @"
                     <A Remove=`a`/>
 
-                    <A Include=`a;b;c`/>
+                    <A Include=`a;b;c;a`/>
                     <A Update=`a`/>
                     <A Update=`b`/>
                     <B Update=`a`/>
@@ -2758,16 +2764,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <B Update=`a`/>
                     <A Remove=`b`/>
 
-                    <A Include=`a`/>
+                    <A Include=`a;a`/>
                     <A Update=`a;a*`/>
                     <A Update=`b`/>
                     <B Update=`a`/>
                     <A Remove=`b`/>
                     ",
                     "a",
-                    1, // item 'a' from second include
+                    2, // item 'a' from second include
                     new ProvenanceResultTupleList
                     {
+                        Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
                         Tuple.Create("A", Operation.Update, Provenance.StringLiteral, 2),
                         Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 2)
                     }
@@ -2780,7 +2787,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void GetItemProvenanceByProjectItem(string items, string itemValue, int itemPosition, ProvenanceResultTupleList expected)
         {
             var formattedProject = string.Format(ProjectWithItemGroup, items);
-
             AssertProvenanceResult(expected, formattedProject, itemValue, itemPosition);
         }
 
