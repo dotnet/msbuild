@@ -30,8 +30,9 @@ namespace Microsoft.NETCore.Publish.Tests
 
             var publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
 
+            // Temporarily pass in the TFM to publish until https://github.com/dotnet/sdk/issues/175 is addressed
             publishCommand
-                .Execute()
+                .Execute("/p:TargetFramework=netcoreapp1.0")
                 .Should()
                 .Pass();
 

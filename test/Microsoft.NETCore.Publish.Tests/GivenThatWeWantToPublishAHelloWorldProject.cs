@@ -31,7 +31,8 @@ namespace Microsoft.NETCore.Publish.Tests
                 .Restore();
 
             var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
-            var publishResult = publishCommand.Execute();
+            // Temporarily pass in the TFM to publish until https://github.com/dotnet/sdk/issues/175 is addressed
+            var publishResult = publishCommand.Execute("/p:TargetFramework=netcoreapp1.0");
 
             publishResult.Should().Pass();
 

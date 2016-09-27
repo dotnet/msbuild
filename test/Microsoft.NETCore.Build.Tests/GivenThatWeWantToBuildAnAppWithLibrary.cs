@@ -36,7 +36,7 @@ namespace Microsoft.NETCore.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",

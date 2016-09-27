@@ -28,9 +28,10 @@ namespace Microsoft.NETCore.Publish.Tests
                 .WithSource()
                 .Restore();
 
+            // Temporarily pass in the TFM to publish until https://github.com/dotnet/sdk/issues/175 is addressed
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
-                .Execute()
+                .Execute("/p:TargetFramework=netcoreapp1.0")
                 .Should()
                 .Pass();
 

@@ -26,9 +26,9 @@ namespace Microsoft.NETCore.TestFramework.Commands
             return command.Execute();
         }
 
-        public DirectoryInfo GetOutputDirectory()
+        public DirectoryInfo GetOutputDirectory(string targetFramework)
         {
-            string output = Path.Combine(ProjectRootPath, "bin", "Debug");
+            string output = Path.Combine(ProjectRootPath, "bin", "Debug", targetFramework);
             return new DirectoryInfo(output);
         }
     }
