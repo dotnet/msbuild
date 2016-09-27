@@ -2173,9 +2173,8 @@ namespace Microsoft.Build.Evaluation
         internal bool ItemElementRequiresSplitting(ProjectItemElement itemElement)
         {
             var hasCharactersThatRequireSplitting = FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(itemElement.Include);
-            var hasMoreThanOneItem = Items.Count(i => i.Xml == itemElement) > 1;
 
-            return hasCharactersThatRequireSplitting && hasMoreThanOneItem;
+            return hasCharactersThatRequireSplitting;
         }
 
         /// <summary>
