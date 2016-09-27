@@ -112,9 +112,8 @@ namespace Microsoft.Build.Shared
             }
 
             // don't write an XML declaration unless the project already has one or has non-default encoding
-            _writeXmlDeclaration =
-                ((projectRootElementDeclaration != null) ||
-                ((_documentEncoding != Encoding.UTF8) && (_documentEncoding != null)));
+            _writeXmlDeclaration = (projectRootElementDeclaration != null) ||
+                                   (_documentEncoding != null && !Equals(_documentEncoding, Encoding.UTF8));
         }
 
         /// <summary>
@@ -166,12 +165,25 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        /// <summary>
+        /// Override method in order to omit the xml declaration tag in certain cases. The tag will be written if:
+        ///  - The tag was present in the file/stream loaded.
+        ///  - The Encoding is specified and not default (UTF8)
+        /// </summary>
+        public override void WriteStartDocument()
+        {
+            if (_writeXmlDeclaration)
+            {
+                base.WriteStartDocument();
+            }
+        }
+
         #endregion
 
         // indicates whether an XML declaration e.g. <?xml version="1.0"?> will be written at the start of the project
         private bool _writeXmlDeclaration;
 
         // encoding of the document, if specified when constructing
-        private Encoding _documentEncoding = null;
+        private readonly Encoding _documentEncoding;
     }
 }

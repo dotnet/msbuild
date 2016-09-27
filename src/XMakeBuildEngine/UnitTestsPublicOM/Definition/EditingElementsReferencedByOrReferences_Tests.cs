@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>";
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             IEnumerable<ProjectItem> items = project.GetItems("I");
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>";
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>";
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </I>
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </I>
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             item1 = project.GetItems("I").Where(i => i.EvaluatedInclude == "X").First();
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     <I Include=""Y"" />
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             item1 = project.GetItems("I").Where(i => i.EvaluatedInclude == "X").First();
@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </I>
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             item = project.GetItems("I").First();
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </PropertyGroup>
 </Project>";
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>

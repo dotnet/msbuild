@@ -492,19 +492,32 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Normalizes all the whitespace in an Xml document so that two documents that
+        /// Normalizes all the whitespace in an xml string so that two documents that
         /// differ only in whitespace can be easily compared to each other for sameness.
         /// </summary>
-        /// <param name="xmldoc"></param>
-        /// <returns></returns>
-        static internal string NormalizeXmlWhitespace(XmlDocument xmldoc)
+        internal static string NormalizeXmlWhitespace(string xml)
         {
+            XmlDocument xmldoc = new XmlDocument();
+            xmldoc.LoadXml(xml);
+
             // Normalize all the whitespace by writing the Xml document out to a 
             // string, with PreserveWhitespace=false.
             xmldoc.PreserveWhitespace = false;
-            StringWriter stringWriter = new StringWriter();
-            xmldoc.Save(stringWriter);
-            return stringWriter.ToString();
+
+            StringBuilder sb = new StringBuilder(xml.Length);
+            var writerSettings = new XmlWriterSettings
+            {
+                OmitXmlDeclaration = true,
+                Encoding = Encoding.UTF8,
+                Indent = true
+            };
+
+            using (var writer = XmlWriter.Create(sb, writerSettings))
+            {
+                xmldoc.WriteTo(writer);
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -683,9 +696,7 @@ namespace Microsoft.Build.UnitTests
             string newActualProjectContents = project.Xml.RawXml;
 
             // Replace single-quotes with double-quotes, and normalize whitespace.
-            XmlDocument xmldoc = new XmlDocument();
-            xmldoc.LoadXml(ObjectModelHelpers.CleanupFileContents(newExpectedProjectContents));
-            newExpectedProjectContents = ObjectModelHelpers.NormalizeXmlWhitespace(xmldoc);
+            newExpectedProjectContents = NormalizeXmlWhitespace(CleanupFileContents(newExpectedProjectContents));
 
             // Compare the actual XML with the expected XML.
             Console.WriteLine("================================= EXPECTED ===========================================");
@@ -1189,9 +1200,9 @@ namespace Microsoft.Build.UnitTests
         internal static void CompareProjectXml(string newExpectedProjectContents, string newActualProjectContents)
         {
             // Replace single-quotes with double-quotes, and normalize whitespace.
-            XmlDocument xmldoc = new XmlDocument();
-            xmldoc.LoadXml(ObjectModelHelpers.CleanupFileContents(newExpectedProjectContents));
-            newExpectedProjectContents = ObjectModelHelpers.NormalizeXmlWhitespace(xmldoc);
+            newExpectedProjectContents =
+                ObjectModelHelpers.NormalizeXmlWhitespace(
+                    ObjectModelHelpers.CleanupFileContents(newExpectedProjectContents));
 
             // Compare the actual XML with the expected XML.
             if (newExpectedProjectContents != newActualProjectContents)
@@ -1217,9 +1228,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the saved project content matches the provided content
         /// </summary>
-        internal static void VerifyAssertProjectContent(string expected, ProjectRootElement project)
+        internal static void VerifyAssertProjectContent(string expected, ProjectRootElement project, bool ignoreFirstLineOfActual = true)
         {
-            VerifyAssertLineByLine(expected, project.RawXml, true /* ignoreFirstLineOfActual */);
+            VerifyAssertLineByLine(expected, project.RawXml, ignoreFirstLineOfActual);
         }
 
         /// <summary>
