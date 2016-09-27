@@ -11,6 +11,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup>
+    <MicrosoftNETCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../tools/</MicrosoftNETCoreBuildTasksDirectoryRoot>
+    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</MicrosoftNETCoreBuildTasksTFM>
+    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MicrosoftNETCoreBuildTasksTFM)' == ''">net46</MicrosoftNETCoreBuildTasksTFM>
+    <MicrosoftNETCoreBuildTasksDirectory>$(MicrosoftNETCoreBuildTasksDirectoryRoot)$(MicrosoftNETCoreBuildTasksTFM)/</MicrosoftNETCoreBuildTasksDirectory>
+    <MicrosoftNETCoreBuildTasksAssembly>$(MicrosoftNETCoreBuildTasksDirectory)Microsoft.NETCore.Build.Tasks.dll</MicrosoftNETCoreBuildTasksAssembly>
+  </PropertyGroup>
+
   <ImportGroup>
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
   </ImportGroup>
@@ -28,13 +36,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
-  <PropertyGroup>
-    <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
-              properties to any folder that exists to skip the GetReferenceAssemblyPaths task (not target) and
-              to prevent it from outputting a warning (MSB3644).
-          -->
-    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
-    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
+  <PropertyGroup Condition="'$(DisableStandardFrameworkResolution)' == ''">
+     <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</DisableStandardFrameworkResolution>
+     <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</DisableStandardFrameworkResolution>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -86,6 +90,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
+                      AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       CompilerOptions="@(DependencyFileCompilerOptions)" />
 
@@ -199,9 +204,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GenerateSatelliteAssemblies>
   </Target>
 
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets')" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets')" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.PreserveCompilationContext.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NETCore.PreserveCompilationContext.targets')" />
+  <Import Project="$(MSBuildThisFileDirecotry)Microsoft.NETCore.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.GenerateAssemblyInfo.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Publish.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.PreserveCompilationContext.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
 </Project>

@@ -20,7 +20,7 @@ namespace Microsoft.NETCore.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .Restore(relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -45,7 +45,7 @@ namespace Microsoft.NETCore.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .Restore(relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 

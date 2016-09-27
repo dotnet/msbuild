@@ -105,10 +105,12 @@ namespace Microsoft.NETCore.TestFramework
             }
         }
 
-        public TestAsset Restore(params string[] args)
+        public TestAsset Restore(string relativePath = "", params string[] args)
         {
-            var restoreCommand = new RestoreCommand(Stage0MSBuild, TestRoot);
-            var commandResult = restoreCommand.Execute(args);
+            var commandResult = new RestoreCommand(Stage0MSBuild, System.IO.Path.Combine(TestRoot, relativePath))
+                .AddSourcesFromCurrentConfig()
+                .AddSource(RepoInfo.PackagesPath)
+                .Execute(args);
 
             commandResult.Should().Pass();
 

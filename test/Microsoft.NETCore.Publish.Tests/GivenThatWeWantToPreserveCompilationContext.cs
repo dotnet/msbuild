@@ -21,8 +21,10 @@ namespace Microsoft.NETCore.Publish.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CompilationContext", "PreserveCompilationContext")
-                .WithSource()
-                .Restore("--fallbacksource", $"{RepoInfo.PackagesPath}");
+                .WithSource();
+
+            testAsset.Restore("TestApp");
+            testAsset.Restore("TestLibrary");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
@@ -59,7 +61,7 @@ namespace Microsoft.NETCore.Publish.Tests
                 dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                 dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                dependencyContext.CompileLibraries.Count.Should().Be(115);
+                dependencyContext.CompileLibraries.Count.Should().Be(116);
             }
         }
     }
