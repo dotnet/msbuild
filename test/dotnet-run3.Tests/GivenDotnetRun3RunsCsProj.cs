@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
                 .Should()
                 .Pass();
 
+            //TODO: https://github.com/dotnet/sdk/issues/187 - remove framework from below.
             new Run3Command()
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
@@ -53,6 +54,7 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
                 .Should()
                 .Pass();
 
+            //TODO: https://github.com/dotnet/sdk/issues/187 - remove framework from below.
             new Run3Command()
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
