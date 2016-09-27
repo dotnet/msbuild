@@ -42,6 +42,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             // If a NuGet dependency is supposed to provide assemblies but there is no assembly compatible with
             // current target framework, we should mark this dependency as unresolved
             var containsAssembly = package.Files
+                .Select(f => f.Replace('/', Path.DirectorySeparatorChar))
                 .Any(x => x.StartsWith($"ref{Path.DirectorySeparatorChar}") ||
                     x.StartsWith($"lib{Path.DirectorySeparatorChar}"));
 
@@ -50,7 +51,8 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 targetLibrary.RuntimeAssemblies.Any() ||
                 !containsAssembly;
 
-            var dependencies = new List<ProjectLibraryDependency>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
+            var dependencies = 
+                new List<ProjectLibraryDependency>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary, targetFramework);
 
             var path = _packagePathResolver?.GetPackageDirectory(package.Name, package.Version);
