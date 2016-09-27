@@ -65,7 +65,7 @@ namespace Microsoft.Build.Shared
 #if !FEATURE_ASSEMBLY_LOADFROM
         static TypeLoader()
         {
-            s_coreClrAssemblyLoader = CoreClrAssemblyLoader.CreateAndSetDefault();
+            s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
         }
 #endif
 

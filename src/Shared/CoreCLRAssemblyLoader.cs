@@ -30,18 +30,6 @@ namespace Microsoft.Build.Shared
 
         private static readonly string[] _extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
 
-        /// <summary>
-        /// Creates a new instance of <see cref="CoreClrAssemblyLoader" />,
-        /// sets that instance to be the default <see cref="AssemblyLoadContext" />,
-        /// and returns that instance. Throws if the Default is already set or the
-        /// binding model is already locked.
-        /// </summary>
-        public static CoreClrAssemblyLoader CreateAndSetDefault()
-        {
-            var assemblyLoader = new CoreClrAssemblyLoader();
-            return assemblyLoader;
-        }
-
         public void AddDependencyLocation(string fullPath)
         {
             if (fullPath == null)
