@@ -663,26 +663,138 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
+        // exclude matches include; file is next to project file
         [InlineData(ItemWithIncludeAndExclude,
-            @"**\*",
-            "foo",
-            new[]
+            @"a", // include item
+            @"", //path relative from projectFile. Empty string if current directory
+
+            @"a", //exclude item
+            "", //path relative from projectFile. Empty string if current directory
+
+            new[] //files relative to this test's root directory. The project is one level deeper than the root.
             {
-                "foo",
-                @"a\foo",
-                @"a\a\foo",
-                @"a\b\foo",
+                @"project\a",
             },
+            false // whether the include survives the exclude (true) or not (false)
+            )]
+        // exclude matches include; file is below the project file
+        [InlineData(ItemWithIncludeAndExclude,
+            @"a",
+            @"dir",
+
+            @"a",
+            "dir",
+
             new[]
             {
-                @"a\a\foo",
-                @"a\b\foo",
-                @"a\foo",
-                "build.proj"
-            })]
-        public void IncludeShouldPreserveUserSlashes(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+                @"project\dir\a",
+            },
+            false
+            )]
+        // exclude matches include; file is above the project file
+        [InlineData(ItemWithIncludeAndExclude,
+            @"a",
+            @"..",
+
+            @"a",
+            "..",
+
+            new[]
+            {
+                @"a",
+            },
+            false
+            )]
+        // exclude does not match include; file is next to project file; exclude points above the project file
+        [InlineData(ItemWithIncludeAndExclude,
+            "a",
+            "",
+
+            "a",
+            "..",
+
+            new[]
+            {
+                "a",
+            },
+            true
+            )]
+        // exclude does not match include; file is below the project file; exclude points next to the project file
+        [InlineData(ItemWithIncludeAndExclude,
+            "a",
+            "dir",
+
+            "a",
+            "",
+
+            new[]
+            {
+                @"project\dir\a",
+            },
+            true
+            )]
+        // exclude does not match include; file is above the project file; exclude points next to the project file
+        [InlineData(ItemWithIncludeAndExclude,
+            "a",
+            "..",
+
+            "a",
+            "",
+
+            new[]
+            {
+                "a",
+            },
+            true
+            )]
+        public void IncludeAndExcludeWorkWithRelativeAndAbsolutePaths(
+            string projectContents,
+            string includeItem,
+            string includeRelativePath,
+            string excludeItem,
+            string excludeRelativePath,
+            string[] inputFiles,
+            bool includeSurvivesExclude)
         {
-            //TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
+            Func<bool, string, string, string, string> adjustFilePath = (isAbsolute, testRoot, relativeFragmentFromRootToFile, file) =>
+                isAbsolute
+                    ? Path.GetFullPath(Path.Combine(testRoot, relativeFragmentFromRootToFile, file))
+                    : Path.Combine(relativeFragmentFromRootToFile, file);
+
+            Action<bool, bool> runTest = (includeIsAbsolute, excludeIsAbsolute) =>
+            {
+                var testRoot = "";
+                try
+                {
+                    string[] createdFiles;
+                    string projectFile;
+
+                    // projectContents is incomplete because we do not yet know the test directory paths
+                    testRoot = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles, "project");
+
+                    var projectFileDir = Path.GetDirectoryName(projectFile);
+
+                    var include = adjustFilePath(includeIsAbsolute, projectFileDir, includeRelativePath, includeItem);
+                    var exclude = adjustFilePath(excludeIsAbsolute, projectFileDir, excludeRelativePath, excludeItem);
+
+                    // includes and exclude may be absolute, so we can only format the project after we have the test directory paths
+                    var formattedProject = string.Format(projectContents, include, exclude);
+                    File.WriteAllText(projectFile, formattedProject);
+
+                    var expectedInclude = includeSurvivesExclude ? new[] {include} : new string[0];
+
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
+                }
+                finally
+                {
+                    ObjectModelHelpers.DeleteDirectory(testRoot);
+                    Directory.Delete(testRoot);
+                }
+            };
+
+            runTest(true, false);
+            runTest(false, true);
+            runTest(true, true);
         }
 
         /// <summary>
