@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared
     {
         private readonly Dictionary<string, Assembly> _pathsToAssemblies = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Assembly> _namesToAssemblies = new Dictionary<string, Assembly>();
-        private readonly List<string> _dependencyPaths = new List<string>();
+        private readonly HashSet<string> _dependencyPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly object _guard = new object();
 
         private static readonly string[] _extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
