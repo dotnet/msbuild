@@ -8,8 +8,8 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "MSBuild": "0.1.0-preview-00039-160922",
-    "Microsoft.Build.Targets": "0.1.0-preview-00039-160922",
+    "MSBuild": "0.1.0-preview-00041-160927",
+    "Microsoft.Build.Targets": "0.1.0-preview-00041-160927",
     "Microsoft.Net.Compilers.netcore": "2.0.0-beta6-60922-08",
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
     "Microsoft.Cci": "4.0.0-rc3-24128-00",
