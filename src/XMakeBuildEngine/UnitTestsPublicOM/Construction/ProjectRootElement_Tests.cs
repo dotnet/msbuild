@@ -700,7 +700,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Verifies that the Save method saves an otherwise unmodified project
         /// with a specified file encoding.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/799")]
+        [Fact]
         public void SaveUnmodifiedWithNewEncoding()
         {
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
@@ -1238,7 +1238,10 @@ Project(""{";
 
             project = ProjectRootElement.Open(projectFullPath, new ProjectCollection());
 
-            Assert.Equal(encoding, project.Encoding);
+            // It's ok for the read Encoding to differ in fields like DecoderFallback,
+            // so a pure equality check here is too much.
+            Assert.Equal(encoding.CodePage, project.Encoding.CodePage);
+            Assert.Equal(encoding.EncodingName, project.Encoding.EncodingName);
         }
 
         /// <summary>
