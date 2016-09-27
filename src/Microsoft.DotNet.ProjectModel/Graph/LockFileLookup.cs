@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Graph
@@ -10,28 +12,32 @@ namespace Microsoft.DotNet.ProjectModel.Graph
     public class LockFileLookup
     {
         // REVIEW: Case sensitivity?
-        private readonly Dictionary<Tuple<string, NuGetVersion>, LockFilePackageLibrary> _packages;
-        private readonly Dictionary<string, LockFileProjectLibrary> _projects;
+        private readonly Dictionary<Tuple<string, NuGetVersion>, LockFileLibrary> _packages;
+        private readonly Dictionary<string, LockFileLibrary> _projects;
 
         public LockFileLookup(LockFile lockFile)
         {
-            _packages = new Dictionary<Tuple<string, NuGetVersion>, LockFilePackageLibrary>();
-            _projects = new Dictionary<string, LockFileProjectLibrary>();
+            _packages = new Dictionary<Tuple<string, NuGetVersion>, LockFileLibrary>();
+            _projects = new Dictionary<string, LockFileLibrary>();
 
-            foreach (var library in lockFile.PackageLibraries)
+            foreach (var library in lockFile.Libraries)
             {
-                _packages[Tuple.Create(library.Name, library.Version)] = library;
-            }
+                var libraryType = LibraryType.Parse(library.Type);
 
-            foreach (var libary in lockFile.ProjectLibraries)
-            {
-                _projects[libary.Name] = libary;
+                if (libraryType == LibraryType.Package)
+                {
+                    _packages[Tuple.Create(library.Name, library.Version)] = library;
+                }
+                if (libraryType == LibraryType.Project)
+                {
+                    _projects[library.Name] = library;
+                }
             }
         }
 
-        public LockFileProjectLibrary GetProject(string name)
+        public LockFileLibrary GetProject(string name)
         {
-            LockFileProjectLibrary project;
+            LockFileLibrary project;
             if (_projects.TryGetValue(name, out project))
             {
                 return project;
@@ -40,9 +46,9 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             return null;
         }
 
-        public LockFilePackageLibrary GetPackage(string id, NuGetVersion version)
+        public LockFileLibrary GetPackage(string id, NuGetVersion version)
         {
-            LockFilePackageLibrary package;
+            LockFileLibrary package;
             if (_packages.TryGetValue(Tuple.Create(id, version), out package))
             {
                 return package;

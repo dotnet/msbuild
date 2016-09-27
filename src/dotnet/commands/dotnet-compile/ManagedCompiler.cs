@@ -7,15 +7,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -131,7 +129,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     StringComparer.OrdinalIgnoreCase);
                 var buildExclusionList = context.GetTypeBuildExclusionList(exportsLookup);
                 var filteredExports = allExports
-                    .Where(e => e.Library.Identity.Type.Equals(LibraryType.ReferenceAssembly) ||
+                    .Where(e => e.Library.Identity.Type.Equals(LibraryType.Reference) ||
                         !buildExclusionList.Contains(e.Library.Identity.Name));
 
                 var dependencyContext = new DependencyContextBuilder().Build(compilationOptions,

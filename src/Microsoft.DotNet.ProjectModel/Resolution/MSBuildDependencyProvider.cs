@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel.Resolution
 {
@@ -22,7 +23,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         }
 
         public MSBuildProjectDescription GetDescription(NuGetFramework targetFramework,
-                                                        LockFileProjectLibrary projectLibrary,
+                                                        LockFileLibrary projectLibrary,
                                                         LockFileTargetLibrary targetLibrary,
                                                         bool isDesignTime)
         {
@@ -33,7 +34,8 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                              targetLibrary.RuntimeAssemblies.Any() ||
                              isDesignTime;
 
-            var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
+            var dependencies = new List<ProjectLibraryDependency>(
+                targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary, targetFramework);
 
             var msbuildProjectFilePath = GetMSBuildProjectFilePath(projectLibrary);
@@ -56,7 +58,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             return msbuildPackageDescription;
         }
 
-        private string GetMSBuildProjectFilePath(LockFileProjectLibrary projectLibrary)
+        private string GetMSBuildProjectFilePath(LockFileLibrary projectLibrary)
         {
             if (_rootProject == null)
             {
@@ -70,17 +72,16 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         }
 
         private void PopulateDependencies(
-            List<LibraryRange> dependencies,
+            List<ProjectLibraryDependency> dependencies,
             LockFileTargetLibrary targetLibrary,
             NuGetFramework targetFramework)
         {
             foreach (var dependency in targetLibrary.Dependencies)
             {
-                dependencies.Add(new LibraryRange(
-                    dependency.Id,
-                    dependency.VersionRange,
-                    LibraryType.Unspecified,
-                    LibraryDependencyType.Default));
+                dependencies.Add(new ProjectLibraryDependency
+                {
+                    LibraryRange = new LibraryRange(dependency.Id, dependency.VersionRange, LibraryDependencyTarget.All)
+                });
             }
 
             if (!targetFramework.IsPackageBased)
@@ -88,15 +89,15 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 // Only add framework assemblies for non-package based frameworks.
                 foreach (var frameworkAssembly in targetLibrary.FrameworkAssemblies)
                 {
-                    dependencies.Add(new LibraryRange(
-                        frameworkAssembly,
-                        LibraryType.ReferenceAssembly,
-                        LibraryDependencyType.Default));
+                    dependencies.Add(new ProjectLibraryDependency
+                    {
+                        LibraryRange = new LibraryRange(frameworkAssembly, LibraryDependencyTarget.Reference)
+                    });
                 }
             }
         }
 
-        public static bool IsMSBuildProjectLibrary(LockFileProjectLibrary projectLibrary)
+        public static bool IsMSBuildProjectLibrary(LockFileLibrary projectLibrary)
         {
             var msbuildProjectPath = projectLibrary.MSBuildProject;
             if (msbuildProjectPath == null)

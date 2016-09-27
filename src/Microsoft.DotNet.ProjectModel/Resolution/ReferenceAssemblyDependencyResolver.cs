@@ -3,10 +3,8 @@
 
 using System;
 using System.Linq;
-using System.Runtime.Versioning;
-using Microsoft.DotNet.ProjectModel.Graph;
-using NuGet;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Resolution
@@ -20,15 +18,15 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
         private FrameworkReferenceResolver FrameworkResolver { get; set; }
 
-        public LibraryDescription GetDescription(LibraryRange libraryRange, NuGetFramework targetFramework)
+        public LibraryDescription GetDescription(ProjectLibraryDependency libraryDependency, NuGetFramework targetFramework)
         {
-            if (!LibraryType.ReferenceAssembly.CanSatisfyConstraint(libraryRange.Target))
+            if (!libraryDependency.LibraryRange.TypeConstraintAllows(LibraryDependencyTarget.Reference))
             {
                 return null;
             }
 
-            var name = libraryRange.Name;
-            var version = libraryRange.VersionRange?.MinVersion;
+            var name = libraryDependency.Name;
+            var version = libraryDependency.LibraryRange.VersionRange?.MinVersion;
 
             string path;
             Version assemblyVersion;
@@ -39,10 +37,10 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             }
 
             return new LibraryDescription(
-                new LibraryIdentity(libraryRange.Name, new NuGetVersion(assemblyVersion), LibraryType.ReferenceAssembly),
+                new LibraryIdentity(libraryDependency.Name, new NuGetVersion(assemblyVersion), LibraryType.Reference),
                 string.Empty, // Framework assemblies don't have hashes
                 path,
-                Enumerable.Empty<LibraryRange>(),
+                Enumerable.Empty<ProjectLibraryDependency>(),
                 targetFramework,
                 resolved: true,
                 compatible: true);

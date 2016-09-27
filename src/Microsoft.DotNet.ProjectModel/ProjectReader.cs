@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Files;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel
@@ -157,8 +157,8 @@ namespace Microsoft.DotNet.ProjectModel
             // REVIEW: Move this to the dependencies node?
             project.EmbedInteropTypes = rawProject.Value<bool>("embedInteropTypes");
 
-            project.Dependencies = new List<LibraryRange>();
-            project.Tools = new List<LibraryRange>();
+            project.Dependencies = new List<ProjectLibraryDependency>();
+            project.Tools = new List<ProjectLibraryDependency>();
 
             // Project files
             project.Files = new ProjectFilesCollection(rawProject, project.ProjectDirectory, project.ProjectFilePath);
@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private static void PopulateDependencies(
             string projectPath,
-            IList<LibraryRange> results,
+            IList<ProjectLibraryDependency> results,
             JObject settings,
             string propertyName,
             bool isGacOrFrameworkReference)
@@ -278,8 +278,8 @@ namespace Microsoft.DotNet.ProjectModel
 
                     var dependencyValue = dependency.Value;
                     var dependencyTypeValue = LibraryDependencyType.Default;
+                    var target = isGacOrFrameworkReference ? LibraryDependencyTarget.Reference : LibraryDependencyTarget.All;
                     string dependencyVersionAsString = null;
-                    LibraryType target = isGacOrFrameworkReference ? LibraryType.ReferenceAssembly : LibraryType.Unspecified;
 
                     if (dependencyValue.Type == JTokenType.Object)
                     {
@@ -289,18 +289,14 @@ namespace Microsoft.DotNet.ProjectModel
                         var type = dependencyValue.Value<string>("type");
                         if (type != null)
                         {
-                            dependencyTypeValue = LibraryDependencyType.Parse(type);
+                            dependencyTypeValue = LibraryDependencyType.Parse(new [] { type });
                         }
 
                         // Read the target if specified
                         if (!isGacOrFrameworkReference)
                         {
-                            LibraryType parsedTarget;
                             var targetStr = dependencyValue.Value<string>("target");
-                            if (!string.IsNullOrEmpty(targetStr) && LibraryType.TryParse(targetStr, out parsedTarget))
-                            {
-                                target = parsedTarget;
-                            }
+                            target = LibraryDependencyTargetUtils.Parse(targetStr);
                         }
                     }
                     else if (dependencyValue.Type == JTokenType.String)
@@ -332,14 +328,17 @@ namespace Microsoft.DotNet.ProjectModel
                     }
 
                     var lineInfo = (IJsonLineInfo)dependencyValue;
-                    results.Add(new LibraryRange(
-                        dependency.Key,
-                        dependencyVersionRange,
-                        target,
-                        dependencyTypeValue,
-                        projectPath,
-                        lineInfo.LineNumber,
-                        lineInfo.LinePosition));
+                    results.Add(new ProjectLibraryDependency
+                    {
+                        LibraryRange = new LibraryRange(
+                            dependency.Key,
+                            dependencyVersionRange,
+                            target),
+                        Type = dependencyTypeValue,
+                        SourceFilePath = projectPath,
+                        SourceLine = lineInfo.LineNumber,
+                        SourceColumn = lineInfo.LinePosition
+                    });
                 }
             }
         }
@@ -352,7 +351,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             project._defaultTargetFrameworkConfiguration = new TargetFrameworkInformation
             {
-                Dependencies = new List<LibraryRange>()
+                Dependencies = new List<ProjectLibraryDependency>()
             };
 
             // Add default configurations
@@ -470,13 +469,13 @@ namespace Microsoft.DotNet.ProjectModel
             var targetFrameworkInformation = new TargetFrameworkInformation
             {
                 FrameworkName = frameworkName,
-                Dependencies = new List<LibraryRange>(),
+                Dependencies = new List<ProjectLibraryDependency>(),
                 CompilerOptions = compilerOptions,
                 Line = lineInfo.LineNumber,
                 Column = lineInfo.LinePosition
             };
 
-            var frameworkDependencies = new List<LibraryRange>();
+            var frameworkDependencies = new List<ProjectLibraryDependency>();
 
             PopulateDependencies(
                 project.ProjectFilePath,
@@ -485,7 +484,7 @@ namespace Microsoft.DotNet.ProjectModel
                 "dependencies",
                 isGacOrFrameworkReference: false);
 
-            var frameworkAssemblies = new List<LibraryRange>();
+            var frameworkAssemblies = new List<ProjectLibraryDependency>();
             PopulateDependencies(
                 project.ProjectFilePath,
                 frameworkAssemblies,

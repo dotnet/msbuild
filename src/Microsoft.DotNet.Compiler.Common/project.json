@@ -13,7 +13,8 @@
     },
     "Microsoft.DotNet.Files": {
       "target": "project"
-    }
+    },
+    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.16"
   },
   "frameworks": {
     "net451": {
@@ -28,6 +29,9 @@
           "type": "build"
         },
         "System.Threading.Tasks": {
+          "type": "build"
+        },
+        "System.Text.Encoding": {
           "type": "build"
         }
       }

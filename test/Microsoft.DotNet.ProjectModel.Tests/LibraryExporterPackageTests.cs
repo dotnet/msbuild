@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +8,8 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 using FluentAssertions;
 using Xunit;
 
@@ -21,15 +22,15 @@ namespace Microsoft.DotNet.ProjectModel.Tests
 
         private PackageDescription CreateDescription(
             LockFileTargetLibrary target = null,
-            LockFilePackageLibrary package = null,
+            LockFileLibrary package = null,
             string hashPath = null)
         {
             return new PackageDescription(
                 PackagePath,
                 hashPath ?? HashPath,
-                package ?? new LockFilePackageLibrary(),
+                package ?? new LockFileLibrary(),
                 target ?? new LockFileTargetLibrary(),
-                new List<LibraryRange>(), compatible: true, resolved: true);
+                new List<ProjectLibraryDependency>(), compatible: true, resolved: true);
         }
 
         [Fact]
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     NativeLibraries = new List<LockFileItem>()
                     {
-                        { new LockFileItem() { Path = "lib/Native.so" } }
+                        { new LockFileItem("lib/Native.so") }
                     }
                 });
 
@@ -62,7 +63,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     CompileTimeAssemblies = new List<LockFileItem>()
                     {
-                        { new LockFileItem() { Path = "ref/Native.dll" } }
+                        { new LockFileItem("ref/Native.dll") }
                     }
                 });
 
@@ -84,7 +85,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     RuntimeAssemblies = new List<LockFileItem>()
                     {
-                        { new LockFileItem() { Path = "ref/Native.dll" } }
+                        { new LockFileItem("ref/Native.dll") }
                     }
                 });
 
@@ -135,13 +136,17 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void ExportsPackageResourceAssemblies()
         {
+            var enUsResource = new LockFileItem("resources/en-US/Res.dll");
+            enUsResource.Properties.Add("locale", "en-US");
+            var ruRuResource = new LockFileItem("resources/ru-RU/Res.dll");
+            ruRuResource.Properties.Add("locale", "ru-RU");
             var description = CreateDescription(
                 new LockFileTargetLibrary()
                 {
                     ResourceAssemblies = new List<LockFileItem>()
-                    {
-                        new LockFileItem("resources/en-US/Res.dll", new Dictionary<string, string>() { { "locale", "en-US"} }),
-                        new LockFileItem("resources/ru-RU/Res.dll", new Dictionary<string, string>() { { "locale", "ru-RU" } }),
+                    {                        
+                        enUsResource,
+                        ruRuResource
                     }
                 });
 
@@ -163,14 +168,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
         [Fact]
         public void ExportsSources()
         {
-            var description = CreateDescription(
-               package: new LockFilePackageLibrary()
-               {
-                   Files = new List<string>()
-                   {
-                      Path.Combine("shared", "file.cs")
-                   }
-               });
+            var lockFileLibrary = new LockFileLibrary();
+            lockFileLibrary.Files.Add(Path.Combine("shared", "file.cs"));
+            var description = CreateDescription(package: lockFileLibrary);
 
             var result = ExportSingle(description);
             result.SourceReferences.Should().HaveCount(1);
@@ -190,10 +190,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     ContentFiles = new List<LockFileContentFile>()
                     {
-                        new LockFileContentFile()
+                        new LockFileContentFile(Path.Combine("content", "file.txt"))
                         {
                             CopyToOutput = true,
-                            Path = Path.Combine("content", "file.txt"),
                             OutputPath = Path.Combine("Out","Path.txt"),
                             PPOutputPath = "something"
                         }
@@ -218,10 +217,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     ContentFiles = new List<LockFileContentFile>()
                     {
-                        new LockFileContentFile()
+                        new LockFileContentFile(Path.Combine("content", "file.txt"))
                         {
                             BuildAction = BuildAction.EmbeddedResource,
-                            Path = Path.Combine("content", "file.txt"),
                             PPOutputPath = "something"
                         }
                     }
@@ -244,10 +242,9 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     ContentFiles = new List<LockFileContentFile>()
                     {
-                        new LockFileContentFile()
+                        new LockFileContentFile(Path.Combine("content", "file.cs"))
                         {
                             BuildAction = BuildAction.Compile,
-                            Path = Path.Combine("content", "file.cs"),
                             PPOutputPath = "something"
                         }
                     }
@@ -272,24 +269,21 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     ContentFiles = new List<LockFileContentFile>()
                     {
-                            new LockFileContentFile()
+                            new LockFileContentFile(Path.Combine("content", "file.cs"))
                             {
                                 BuildAction = BuildAction.Compile,
-                                Path = Path.Combine("content", "file.cs"),
                                 PPOutputPath = "something",
                                 CodeLanguage = "cs"
                             },
-                            new LockFileContentFile()
+                            new LockFileContentFile(Path.Combine("content", "file.vb"))
                             {
                                 BuildAction = BuildAction.Compile,
-                                Path = Path.Combine("content", "file.vb"),
                                 PPOutputPath = "something",
                                 CodeLanguage = "vb"
                             },
-                            new LockFileContentFile()
+                            new LockFileContentFile(Path.Combine("content", "file.any"))
                             {
                                 BuildAction = BuildAction.Compile,
-                                Path = Path.Combine("content", "file.any"),
                                 PPOutputPath = "something",
                             }
                     }
@@ -312,17 +306,15 @@ namespace Microsoft.DotNet.ProjectModel.Tests
                 {
                     ContentFiles = new List<LockFileContentFile>()
                     {
-                            new LockFileContentFile()
+                            new LockFileContentFile(Path.Combine("content", "file.vb"))
                             {
                                 BuildAction = BuildAction.Compile,
-                                Path = Path.Combine("content", "file.vb"),
                                 PPOutputPath = "something",
                                 CodeLanguage = "vb"
                             },
-                            new LockFileContentFile()
+                            new LockFileContentFile(Path.Combine("content", "file.any"))
                             {
                                 BuildAction = BuildAction.Compile,
-                                Path = Path.Combine("content", "file.any"),
                                 PPOutputPath = "something",
                             }
                     }
@@ -351,7 +343,7 @@ namespace Microsoft.DotNet.ProjectModel.Tests
             var rootProjectDescription = new ProjectDescription(
                 new LibraryRange(),
                 rootProject,
-                new LibraryRange[] { },
+                new ProjectLibraryDependency[] { },
                 new TargetFrameworkInformation(),
                 true);
 

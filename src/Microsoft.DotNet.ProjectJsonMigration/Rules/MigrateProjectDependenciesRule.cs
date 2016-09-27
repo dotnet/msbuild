@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 

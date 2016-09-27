@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel
@@ -11,7 +10,7 @@ namespace Microsoft.DotNet.ProjectModel
     {
         public NuGetFramework FrameworkName { get; set; }
 
-        public IReadOnlyList<LibraryRange> Dependencies { get; set; }
+        public IReadOnlyList<ProjectLibraryDependency> Dependencies { get; set; }
 
         public CommonCompilerOptions CompilerOptions { get; set; }
 

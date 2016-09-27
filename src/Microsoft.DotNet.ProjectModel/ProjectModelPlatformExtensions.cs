@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -23,12 +23,15 @@ namespace Microsoft.DotNet.ProjectModel
             return exclusionList;
         }
 
-        private static void CollectDependencies(IDictionary<string, LibraryExport> exports, IEnumerable<LibraryRange> dependencies, HashSet<string> exclusionList)
+        private static void CollectDependencies(
+            IDictionary<string, LibraryExport> exports,
+            IEnumerable<LibraryDependency> dependencies,
+            HashSet<string> exclusionList)
         {
             foreach (var dependency in dependencies)
             {
                 var export = exports[dependency.Name];
-                if (export.Library.Identity.Version.Equals(dependency.VersionRange.MinVersion))
+                if (export.Library.Identity.Version.Equals(dependency.LibraryRange.VersionRange.MinVersion))
                 {
                     exclusionList.Add(export.Library.Identity.Name);
                     CollectDependencies(exports, export.Library.Dependencies, exclusionList);
@@ -52,7 +55,10 @@ namespace Microsoft.DotNet.ProjectModel
             return exclusionList;
         }
 
-        private static void CollectNonBuildDependencies(IDictionary<string, LibraryExport> exports, IEnumerable<LibraryRange> dependencies, HashSet<string> acceptedExports)
+        private static void CollectNonBuildDependencies(
+            IDictionary<string, LibraryExport> exports,
+            IEnumerable<LibraryDependency> dependencies,
+            HashSet<string> acceptedExports)
         {
             foreach (var dependency in dependencies)
             {

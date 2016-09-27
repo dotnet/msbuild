@@ -3,16 +3,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation.Preprocessor;
 using Microsoft.DotNet.ProjectModel.Files;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Compiler;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel.Compilation
 {
@@ -63,14 +63,14 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         /// <returns></returns>
         public IEnumerable<LibraryExport> GetDependencies()
         {
-            return GetDependencies(LibraryType.Unspecified);
+            return GetDependencies(null);
         }
 
         /// <summary>
         /// Gets all exports required by the project, of the specified <see cref="LibraryType"/>, NOT including the project itself
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<LibraryExport> GetDependencies(LibraryType type)
+        public IEnumerable<LibraryExport> GetDependencies(LibraryType? type)
         {
             // Export all but the main project
             return ExportLibraries(library =>
@@ -177,7 +177,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             }
 
             var libraryType = library.Identity.Type;
-            if (Equals(LibraryType.Package, libraryType) || Equals(LibraryType.MSBuildProject, libraryType))
+            if (library is TargetLibraryWithAssets)
             {
                 return ExportPackage((TargetLibraryWithAssets)library);
             }
@@ -212,13 +212,16 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var sourceCodeLanguage = _rootProject.Project.GetSourceCodeLanguage();
                 var languageGroups = library.ContentFiles.GroupBy(file => file.CodeLanguage);
+
                 var selectedGroup = languageGroups.FirstOrDefault(g => g.Key == sourceCodeLanguage) ??
+                                    languageGroups.FirstOrDefault(g => g.Key == "any") ??
                                     languageGroups.FirstOrDefault(g => g.Key == null);
                 if (selectedGroup != null)
                 {
                     foreach (var contentFile in selectedGroup)
                     {
                         if (contentFile.CodeLanguage != null &&
+                            contentFile.CodeLanguage != "any" &&
                             string.Compare(contentFile.CodeLanguage, sourceCodeLanguage, StringComparison.OrdinalIgnoreCase) != 0)
                         {
                             continue;
@@ -403,6 +406,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             return package
                 .PackageLibrary
                 .Files
+                .Select(f => PathUtility.GetPathWithDirectorySeparator(f))
                 .Where(path => path.StartsWith("shared" + Path.DirectorySeparatorChar))
                 .Select(path => LibraryAsset.CreateFromRelativePath(package.Path, path));
         }
@@ -412,11 +416,13 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             var analyzers = package
                 .PackageLibrary
                 .Files
+                .Select(f => PathUtility.GetPathWithDirectorySeparator(f))
                 .Where(path => path.StartsWith("analyzers" + Path.DirectorySeparatorChar) &&
                                path.EndsWith(".dll"));
 
 
             var analyzerRefs = new List<AnalyzerReference>();
+
             // See https://docs.nuget.org/create/analyzers-conventions for the analyzer
             // NuGet specification
             foreach (var analyzer in analyzers)
@@ -499,9 +505,9 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             }
         }
 
-        private static bool LibraryIsOfType(LibraryType type, LibraryDescription library)
+        private static bool LibraryIsOfType(LibraryType? type, LibraryDescription library)
         {
-            return type.Equals(LibraryType.Unspecified) || // No type filter was requested
+            return type == null || // No type filter was requested
                    library.Identity.Type.Equals(type);     // OR, library type matches requested type
         }
     }

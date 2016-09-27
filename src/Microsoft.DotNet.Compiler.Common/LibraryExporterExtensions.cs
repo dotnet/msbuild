@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.DotNet.ProjectModel.Graph;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
@@ -15,8 +14,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         public static IEnumerable<LibraryExport> GetAllProjectTypeDependencies(this LibraryExporter exporter)
         {
             return
-                exporter.GetDependencies(LibraryType.Project)
-                    .Concat(exporter.GetDependencies(LibraryType.MSBuildProject));
+                exporter.GetDependencies(LibraryType.Project);
         }
 
         public static void CopyTo(this IEnumerable<LibraryAsset> assets, string destinationPath)

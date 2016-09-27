@@ -10,7 +10,6 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
 using Microsoft.DotNet.ProjectModel.FileSystemGlobbing.Abstractions;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resources;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Pack;
@@ -20,6 +19,7 @@ using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using PackageBuilder = NuGet.Legacy.PackageBuilder;
 using NuGetConstants = NuGet.Legacy.Constants;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -124,7 +124,10 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (Project.PackOptions.PackInclude != null)
             {
-                var files = IncludeFilesResolver.GetIncludeFiles(Project.PackOptions.PackInclude, "/", diagnostics: packDiagnostics);
+                var files = IncludeFilesResolver.GetIncludeFiles(
+                    Project.PackOptions.PackInclude,
+                    "/",
+                    diagnostics: packDiagnostics);
                 PackageBuilder.Files.AddRange(GetPackageFiles(files, packDiagnostics));
             }
             else if (Project.Files.PackInclude != null && Project.Files.PackInclude.Any())
@@ -300,9 +303,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     continue;
                 }
-
+                
                 // TODO: Efficiency
-                var dependencyDescription = context.LibraryManager.GetLibraries().First(l => l.RequestedRanges.Contains(dependency));
+                var dependencyDescription =
+                    context.LibraryManager.GetLibraries().First(l => l.RequestedRanges.Contains(dependency));
 
                 // REVIEW: Can we get this far with unresolved dependencies
                 if (dependencyDescription == null || !dependencyDescription.Resolved)
@@ -316,9 +320,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                     continue;
                 }
 
-                if (dependency.Target == LibraryType.ReferenceAssembly)
+                if (dependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference)
                 {
-                    PackageBuilder.FrameworkAssemblies.Add(new FrameworkAssemblyReference(dependency.Name, new[] { context.TargetFramework }));
+                    PackageBuilder.FrameworkAssemblies.Add(
+                        new FrameworkAssemblyReference(dependency.Name, new[] { context.TargetFramework }));
 
                     Reporter.Verbose.WriteLine($"Adding framework assembly {dependency.Name.Yellow()}");
                 }
@@ -326,14 +331,14 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     VersionRange dependencyVersion = null;
 
-                    if (dependency.VersionRange == null ||
-                        dependency.VersionRange.IsFloating)
+                    if (dependency.LibraryRange.VersionRange == null ||
+                        dependency.LibraryRange.VersionRange.IsFloating)
                     {
                         dependencyVersion = new VersionRange(dependencyDescription.Identity.Version);
                     }
                     else
                     {
-                        dependencyVersion = dependency.VersionRange;
+                        dependencyVersion = dependency.LibraryRange.VersionRange;
                     }
 
                     Reporter.Verbose.WriteLine($"Adding dependency {dependency.Name.Yellow()} {VersionUtility.RenderVersion(dependencyVersion).Yellow()}");

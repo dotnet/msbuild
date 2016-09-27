@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Packaging;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -50,7 +51,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var packageDirectory = new VersionFolderPathResolver(nugetPackagesRoot)
                 .GetInstallPath(toolLibrary.Name, toolLibrary.Version);
 
-            var filePath = Path.Combine(packageDirectory, runtimeAssembly.Path);
+            var filePath = Path.Combine(packageDirectory, PathUtility.GetPathWithDirectorySeparator(runtimeAssembly.Path));
 
             return filePath;
         }

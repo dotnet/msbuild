@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel.Resolution
 {
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             var project = _resolveProject(Path.GetDirectoryName(path));
             if (project != null)
             {
-                return GetDescription(targetLibrary.TargetFramework, project, targetLibrary);
+                return GetDescription(NuGetFramework.Parse(targetLibrary.Framework), project, targetLibrary);
             }
             else
             {
@@ -44,7 +45,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         {
             // This never returns null
             var targetFrameworkInfo = project.GetTargetFramework(targetFramework);
-            var dependencies = new List<LibraryRange>(targetFrameworkInfo.Dependencies);
+            var dependencies = new List<ProjectLibraryDependency>(targetFrameworkInfo.Dependencies);
 
             // Add all of the project's dependencies
             dependencies.AddRange(project.Dependencies);
@@ -72,7 +73,9 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                     StringComparer.OrdinalIgnoreCase);
 
                 // Remove all non-framework dependencies that don't appear in the lock file entry
-                dependencies.RemoveAll(m => !lockFileDependencies.ContainsKey(m.Name) && m.Target != LibraryType.ReferenceAssembly);
+                dependencies.RemoveAll(m =>
+                    !lockFileDependencies.ContainsKey(m.Name) &&
+                    m.LibraryRange.TypeConstraint != LibraryDependencyTarget.Reference);
             }
 
             // Mark the library as unresolved if there were specified frameworks
@@ -80,18 +83,20 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             bool unresolved = targetFrameworkInfo.FrameworkName == null;
 
             return new ProjectDescription(
-                new LibraryRange(project.Name, LibraryType.Unspecified),
+                new LibraryRange(project.Name, LibraryDependencyTarget.All),
                 project,
                 dependencies,
                 targetFrameworkInfo,
                 !unresolved);
         }
 
-        private static void AddIfMissing(List<LibraryRange> dependencies, string dependencyName)
+        private static void AddIfMissing(List<ProjectLibraryDependency> dependencies, string dependencyName)
         {
             if (!dependencies.Any(dep => string.Equals(dep.Name, dependencyName, StringComparison.OrdinalIgnoreCase)))
             {
-                dependencies.Add(new LibraryRange(dependencyName, LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
+                dependencies.Add(new ProjectLibraryDependency {
+                    LibraryRange = new LibraryRange(dependencyName, LibraryDependencyTarget.Reference)
+                });
             }
         }
     }
