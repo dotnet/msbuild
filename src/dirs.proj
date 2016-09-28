@@ -31,40 +31,4 @@
   <Import Project="$(ToolsDir)BuildVersion.targets" Condition="Exists('$(ToolsDir)BuildVersion.targets')" />
   <Import Project="$(ToolsDir)versioning.targets" Condition="Exists('$(ToolsDir)versioning.targets')" />
 
-  <PropertyGroup>
-    <SkipVersionGeneration>true</SkipVersionGeneration>
-    <BaseVersion>0.1.0-preview</BaseVersion>
-    <BuildNumberMajor>$(RevisionNumber)</BuildNumberMajor>
-    <BuildNumberMinor>$([System.DateTime]::Now.ToString(`yMMdd`))</BuildNumberMinor>
-
-    <!-- The version for msbuild nuget packages. Used by packages.targets:AddNuGetPackageVersionMetadataToNuspecs -->
-    <PackageVersion>$(BaseVersion)-$(BuildNumberMajor)-$(BuildNumberMinor)</PackageVersion>
-
-    <!-- Turn off the automated package generation in packages.targets:AddNuGetPackageVersionMetadataToNuspecs and use the above PackageVersion-->
-    <DoNotGeneratePackageVersion>true</DoNotGeneratePackageVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <!-- Used by packages.targets:BuildPackages to inject properties into the nuspec-->
-    <NuspecProperties Include="version=$(PackageVersion)"/>
-    <NuspecProperties Include="targetmsbuildtoolsversion=$(TargetMSBuildToolsVersion)"/>
-  </ItemGroup>
-
-  <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
-
-  <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
-    <TraversalBuildDependsOn>
-      $(TraversalBuildDependsOn);
-      BuildPackages;
-    </TraversalBuildDependsOn>
-  </PropertyGroup>
-
-  <!-- Workaround to remove items from PackagesNuSpecFiles (defined in packages.targets). This ItemGroup
-       is defined with a wildcard Include and no way to override. -->
-  <Target Name="RemovePackages" BeforeTargets="BuildPackages" Condition="$(FullFrameworkBuild) != 'true'" >
-    <ItemGroup>
-        <PackagesNuSpecFiles Remove="$(SourceDir)nuget\Microsoft.Build.Engine.nuspec;$(SourceDir)nuget\Microsoft.Build.Conversion.Core.nuspec" />
-    </ItemGroup>
-  </Target>
-
 </Project>
