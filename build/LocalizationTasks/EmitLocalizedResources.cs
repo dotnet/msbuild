@@ -114,8 +114,7 @@ namespace Microsoft.Build.LocalizationTasks
 
         private static string GetCultureCodeFromPath(string localizedResourcePath)
         {
-            return Path.GetExtension(Path.GetFileNameWithoutExtension(localizedResourcePath)).Substring(1);
-                // remove the . at the beginning
+            return Path.GetExtension(Path.GetFileNameWithoutExtension(localizedResourcePath)).Substring(1); // remove the . at the beginning
         }
     }
 }

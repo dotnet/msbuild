@@ -21,6 +21,11 @@
      <DebugSymbols Condition="'$(UseRoslynCompilers)' == 'true'">false</DebugSymbols>
   </PropertyGroup>
 
+  <!-- Localization switches -->
+  <PropertyGroup>
+    <LocalizationBuildAssetsRequired Condition="'$(LocalizedBuild)' == 'true' or '$(SyncXlf)' == 'true'">true</LocalizationBuildAssetsRequired>
+  </PropertyGroup>
+
    <!-- Common repo directories -->
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>

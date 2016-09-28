@@ -2,7 +2,8 @@
   <Import Project="dir.props" />
 
   <ItemGroup>
-    <Project Include="LocalizationTasks\Microsoft.Build.LocalizationTasks.csproj" />
+    <Project Include="LocalizationTasks\Microsoft.Build.LocalizationTasks.csproj"
+             Condition="'$(LocalizationBuildAssetsRequired)' == 'true'" />
   </ItemGroup>
 
   <Import Project="..\dir.traversal.targets" />
