@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
@@ -94,13 +95,14 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             var toolLibrary = GetToolLibraryForContext(projectContext, commandName);
+            var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(projectContext.PackagesDirectory);
 
             return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                         toolLibrary,
                         commandName,
                         commandArguments,
                         allowedExtensions,
-                        projectContext.PackagesDirectory,
+                        normalizedNugetPackagesRoot,
                         s_commandResolutionStrategy,
                         depsFilePath,
                         runtimeConfigPath);
