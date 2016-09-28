@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var propertyGroup = migrationRuleInputs.CommonPropertyGroup;
 
             CleanExistingProperties(csproj);
+            CleanExistingPackageReferences(csproj);
 
             _transformApplicator.Execute(
                 FrameworksTransform.Transform(migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
