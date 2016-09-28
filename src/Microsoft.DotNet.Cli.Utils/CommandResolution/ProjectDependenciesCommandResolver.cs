@@ -95,14 +95,14 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             var toolLibrary = GetToolLibraryForContext(projectContext, commandName);
-            var nugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(projectContext.PackagesDirectory);
+            var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(projectContext.PackagesDirectory);
 
             return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                         toolLibrary,
                         commandName,
                         commandArguments,
                         allowedExtensions,
-                        nugetPackagesRoot,
+                        normalizedNugetPackagesRoot,
                         s_commandResolutionStrategy,
                         depsFilePath,
                         runtimeConfigPath);

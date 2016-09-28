@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             ProjectContext projectContext)
         {
-            var nugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(projectContext.PackagesDirectory);
+            var nugetPackagesRoot = projectContext.PackagesDirectory;
 
             var lockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
 
@@ -112,12 +112,14 @@ namespace Microsoft.DotNet.Cli.Utils
             var depsFileRoot = Path.GetDirectoryName(lockFile.Path);
             var depsFilePath = GetToolDepsFilePath(toolLibraryRange, lockFile, depsFileRoot);
 
+            var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(nugetPackagesRoot);
+
             return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                     toolLibrary,
                     commandName,
                     args,
                     _allowedCommandExtensions,
-                    projectContext.PackagesDirectory,
+                    normalizedNugetPackagesRoot,
                     s_commandResolutionStrategy,
                     depsFilePath,
                     null);
