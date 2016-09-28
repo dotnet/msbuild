@@ -8,6 +8,7 @@ if /i "%1"=="--target" set TARGET=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--host" set HOST=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--bootstrap-only" set BOOTSTRAP_ONLY=true&& shift && goto parseArguments
 if /i "%1"=="--localized-build" set LOCALIZED_BUILD=true&& shift && goto parseArguments
+if /i "%1"=="--sync-xlf" set SYNC_XLF=true&& shift && goto parseArguments
 
 :: Unknown parameters
 goto :usage
@@ -64,6 +65,11 @@ if "%LOCALIZED_BUILD%"=="true" (
     set LOCALIZED_BUILD_ARGUMENT="/p:LocalizedBuild=true"
 )
 
+set SYNC_XLF_ARGUMENT=
+if "%SYNC_XLF%"=="true" (
+    set SYNC_XLF_ARGUMENT="/p:SyncXlf=true"
+)
+
 :: Restore build tools
 call %~dp0init-tools.cmd
 
@@ -71,7 +77,7 @@ echo.
 echo ** Rebuilding MSBuild with downloaded binaries
 
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build.log
-call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT%
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT% %SYNC_XLF_ARGUMENT%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -142,6 +148,7 @@ echo   --target ^<target^>              CoreCLR or Desktop ^(default: Desktop^)
 echo   --host ^<host^>                  CoreCLR or Desktop ^(default: Desktop^)
 echo   --bootstrap-only                 Do not rebuild msbuild with local binaries
 echo   --localized-build                Do a localized build
+echo   --sync-xlf                       Synchronize xlf files from resx files
 exit /b 1
 
 :error
