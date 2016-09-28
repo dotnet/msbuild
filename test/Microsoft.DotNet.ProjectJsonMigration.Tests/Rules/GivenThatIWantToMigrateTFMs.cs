@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_Single_TFM_project_does_not_Populate_TargetFrameworks()
+        public void Migrating_Single_TFM_project_Populates_TargetFrameworks()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
             Console.WriteLine(mockProj.RawXml);
 
-            mockProj.Properties.Count(p => p.Name == "TargetFrameworks").Should().Be(0);
+            mockProj.Properties.Count(p => p.Name == "TargetFrameworks").Should().Be(1);
         }
     }
 }
