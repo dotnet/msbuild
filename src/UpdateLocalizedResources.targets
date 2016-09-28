@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="UpdateXlf" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
-  <UsingTask AssemblyFile="$(DeploymentDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="SaveXlfToResx"/>
-  <UsingTask AssemblyFile="$(DeploymentDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="UpdateXlfFromResx"/>
-  <UsingTask AssemblyFile="$(DeploymentDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="EmitLocalizedResources"/>
+  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="SaveXlfToResx"/>
+  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="UpdateXlfFromResx"/>
+  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="EmitLocalizedResources"/>
 
   <!-- Emit the localized EmbeddedResource items before the common targets start using them -->
   <Target Name="EmitLocalizedResources"
