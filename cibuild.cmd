@@ -7,6 +7,7 @@ if /i "%1"=="--scope" set SCOPE=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--target" set TARGET=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--host" set HOST=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--bootstrap-only" set BOOTSTRAP_ONLY=true&& shift && goto parseArguments
+if /i "%1"=="--localized-build" set LOCALIZED_BUILD=true&& shift && goto parseArguments
 
 :: Unknown parameters
 goto :usage
@@ -58,6 +59,11 @@ if /i "%HOST%"=="CoreCLR" (
     goto :error
 )
 
+set LOCALIZED_BUILD_ARGUMENT=
+if "%LOCALIZED_BUILD%"=="true" (
+    set LOCALIZED_BUILD_ARGUMENT="/p:LocalizedBuild=true"
+)
+
 :: Restore build tools
 call %~dp0init-tools.cmd
 
@@ -65,7 +71,7 @@ echo.
 echo ** Rebuilding MSBuild with downloaded binaries
 
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build.log
-call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true"
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -113,7 +119,7 @@ if /i "%TARGET%"=="CoreCLR" (
 echo.
 echo ** Rebuilding MSBuild with locally built binaries
 
-call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION%
+call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -134,7 +140,8 @@ echo Options
 echo   --scope ^<scope^>                Scope of the build ^(Compile / Test^)
 echo   --target ^<target^>              CoreCLR or Desktop ^(default: Desktop^)
 echo   --host ^<host^>                  CoreCLR or Desktop ^(default: Desktop^)
-echo   --bootstrap-only               Do not rebuild msbuild with local binaries
+echo   --bootstrap-only                 Do not rebuild msbuild with local binaries
+echo   --localized-build                Do a localized build
 exit /b 1
 
 :error

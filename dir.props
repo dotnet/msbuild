@@ -359,9 +359,13 @@
   <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
-    <BaseOutputPath>$(BinDir)</BaseOutputPath>
-    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
-    <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+    <BaseOutputPath Condition="$(BaseOutputPath) == ''">$(BinDir)</BaseOutputPath>
+
+    <RelativeOutputPathWithConfig>$(Configuration)$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
+    <RelativeOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
+
+    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath),$(RelativeOutputPathWithConfig)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+
     <OutputPath>$([System.IO.Path]::Combine($(BaseOutputPathWithConfig),"Output"))$([System.IO.Path]::DirectorySeparatorChar)</OutputPath>
 
     <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
@@ -380,5 +384,8 @@
     <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
 
     <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+
+    <!-- Output path for helper tasks that we build for our own build process (e.g. localization tasks). Tasks should be imported from this property -->
+    <BuildBinDir>$([System.IO.Path]::Combine($(ProjectDir), "build", "bin", $(RelativeOutputPathWithConfig), "Output"))$([System.IO.Path]::DirectorySeparatorChar)</BuildBinDir>
   </PropertyGroup>
 </Project>
