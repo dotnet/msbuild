@@ -8,6 +8,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
@@ -429,6 +430,24 @@ namespace Microsoft.Build.Construction
                 //  TODO: What if there are multiple elements with the same name?  That shouldn't be allowed for elements
                 //      expressed as attributes.
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
+
+                if (XmlElement.HasChildNodes)
+                {
+                    bool allWhitespace = true;
+                    foreach (XmlNode childXml in XmlElement.ChildNodes)
+                    {
+                        if (childXml.NodeType != XmlNodeType.Whitespace)
+                        {
+                            allWhitespace = false;
+                            break;
+                        }
+                    }
+
+                    if (allWhitespace)
+                    {
+                        XmlElement.IsEmpty = true;
+                    }
+                }
             }
             else
             {

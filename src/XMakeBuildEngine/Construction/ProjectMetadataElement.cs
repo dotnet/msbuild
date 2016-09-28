@@ -48,6 +48,14 @@ namespace Microsoft.Build.Construction
             set { ChangeName(value); }
         }
 
+        //  Add a new property with the same name here because this attribute should be public for ProjectMetadataElement,
+        //  but internal for ProjectElement, because we don't want it to be settable for arbintrary elements.
+        public new bool ExpressedAsAttribute
+        {
+            get { return base.ExpressedAsAttribute; }
+            set { base.ExpressedAsAttribute = value; }
+        }
+
         /// <summary>
         /// Gets or sets the unevaluated value. 
         /// Returns empty string if it is not present.

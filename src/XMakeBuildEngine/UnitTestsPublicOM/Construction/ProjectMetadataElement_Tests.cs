@@ -12,6 +12,9 @@ using Microsoft.Build.Construction;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using System.Linq;
+using Microsoft.Build.Evaluation;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -20,6 +23,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// </summary>
     public class ProjectMetadataElement_Tests
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public ProjectMetadataElement_Tests(ITestOutputHelper testOutput)
+        {
+            _testOutput = testOutput;
+        }
+
         /// <summary>
         /// Read simple metadatum
         /// </summary>
@@ -242,6 +252,233 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
         }
 
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i1 Include='i' m1='v1' />
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i' m1='v1' />
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void ReadMetadataAsAttribute(string project)
+        {
+            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
+
+            var items = Helpers.MakeList(itemGroup.Items);
+
+            Assert.Equal(1, items.Count);
+            Assert.Equal(1, items[0].Metadata.Count);
+
+            var metadata = items[0].Metadata.First();
+            Assert.Equal("m1", metadata.Name);
+            Assert.Equal("v1", metadata.Value);
+            Assert.True(metadata.ExpressedAsAttribute);
+        }
+
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                        <ItemGroup>
+                            <i1 Include='i'>
+                              <m1>v1</m1>
+                            </i1>
+                        </ItemGroup>
+                    </Project>",
+                @"
+                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <ItemGroup>
+                            <i1 Include=`i` m1=`v1` />
+                        </ItemGroup>
+                    </Project>")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i'>
+                                  <m1>v1</m1>
+                                </i1>
+                            </ItemGroup>
+                        </Target>
+                    </Project>",
+                @"
+                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <Target Name=`t`>
+                            <ItemGroup>
+                                <i1 Include=`i` m1=`v1` />
+                            </ItemGroup>
+                        </Target>
+                    </Project>")]
+        public void ChangeMetadataToAttribute(string projectContents, string updatedProject)
+        {
+            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectContents)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
+            
+            var project = new Project(projectElement);
+
+            var items = Helpers.MakeList(itemGroup.Items);
+
+            Assert.Equal(1, items.Count);
+            Assert.Equal(1, items[0].Metadata.Count);
+
+            var metadata = items[0].Metadata.First();
+            Assert.Equal("m1", metadata.Name);
+            Assert.Equal("v1", metadata.Value);
+            Assert.False(metadata.ExpressedAsAttribute);
+
+            metadata.ExpressedAsAttribute = true;
+
+            Assert.True(project.IsDirty);
+            Assert.True(metadata.ExpressedAsAttribute);
+
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
+                ObjectModelHelpers.CleanupFileContents(updatedProject);
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                        <ItemGroup>
+                            <i1 Include='i' m1='v1' />
+                        </ItemGroup>
+                    </Project>",
+                    @"
+                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <ItemGroup>
+                            <i1 Include=`i`>
+                              <m1>v1</m1>
+                            </i1>
+                        </ItemGroup>
+                    </Project>")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i' m1='v1' />
+                            </ItemGroup>
+                        </Target>
+                    </Project>",
+                    @"
+                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <Target Name=`t`>
+                            <ItemGroup>
+                                <i1 Include=`i`>
+                                  <m1>v1</m1>
+                                </i1>
+                            </ItemGroup>
+                        </Target>
+                    </Project>")]
+        public void ChangeAttributeToMetadata(string projectContents, string updatedProject)
+        {
+            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectContents)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
+
+            var project = new Project(projectElement);
+
+            var items = Helpers.MakeList(itemGroup.Items);
+
+            Assert.Equal(1, items.Count);
+            Assert.Equal(1, items[0].Metadata.Count);
+
+            var metadata = items[0].Metadata.First();
+            Assert.Equal("m1", metadata.Name);
+            Assert.Equal("v1", metadata.Value);
+            Assert.True(metadata.ExpressedAsAttribute);
+
+            metadata.ExpressedAsAttribute = false;
+
+            Assert.False(metadata.ExpressedAsAttribute);
+            Assert.True(project.IsDirty);
+
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
+                ObjectModelHelpers.CleanupFileContents(updatedProject);
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                        <ItemGroup>
+                            <i1 Include='i' />
+                        </ItemGroup>
+                    </Project>",
+        @"
+                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <ItemGroup>
+                            <i1 Include=`i` m1=`v1` />
+                        </ItemGroup>
+                    </Project>")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i' />
+                            </ItemGroup>
+                        </Target>
+                    </Project>",
+        @"
+                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <Target Name=`t`>
+                            <ItemGroup>
+                                <i1 Include=`i` m1=`v1` />
+                            </ItemGroup>
+                        </Target>
+                    </Project>")]
+        public void AddMetadataAsAttribute(string projectContents, string updatedProject)
+        {
+            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectContents)),
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
+
+            var project = new Project(projectElement);
+
+            var items = Helpers.MakeList(itemGroup.Items);
+
+            Assert.Equal(1, items.Count);
+            Assert.Equal(0, items[0].Metadata.Count);
+
+            var metadata = items[0].AddMetadata("m1", "v1", true);
+
+            Assert.Equal("m1", metadata.Name);
+            Assert.Equal("v1", metadata.Value);
+            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.True(project.IsDirty);
+
+            StringWriter writer = new StringWriter();
+            project.Save(writer);
+
+            string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
+                ObjectModelHelpers.CleanupFileContents(updatedProject);
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
         /// <summary>
         /// Helper to get a ProjectMetadataElement for a simple metadatum
         /// </summary>
@@ -262,6 +499,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemElement item = Helpers.GetFirst(itemGroup.Items);
             ProjectMetadataElement metadata = Helpers.GetFirst(item.Metadata);
             return metadata;
+        }
+
+        void VerifyAssertLineByLine(string expected, string actual)
+        {
+            Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
         }
     }
 }
