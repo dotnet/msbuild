@@ -31,6 +31,8 @@
   <files>
     <file src="_._" target="lib\netstandard1.3" />
     <file src="Microsoft.Common.CrossTargeting.targets" target="runtimes\any\native" />
+    <file src="Microsoft.CSharp.CrossTargeting.targets" target="runtimes\any\native" />
+    <file src="Microsoft.VisualBasic.CrossTargeting.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.targets" target="runtimes\any\native" />
     <file src="Microsoft.CSharp.CurrentVersion.targets" target="runtimes\any\native" />
