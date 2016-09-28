@@ -3,7 +3,7 @@
 
   <ItemGroup>
     <Project Include="LocalizationTasks\Microsoft.Build.LocalizationTasks.csproj"
-             Condition="'$(FullFrameworkBuild)' == 'true' and '$(LocalizedBuild)' == 'true'" />
+             Condition="'$(FullFrameworkBuild)' == 'true' and '$(LocalizationBuildAssetsRequired)' == 'true'" />
   </ItemGroup>
 
   <Import Project="..\dir.traversal.targets" />

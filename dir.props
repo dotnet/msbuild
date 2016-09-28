@@ -22,6 +22,11 @@
     <IncludeNuGetImports Condition="'$(IncludeNuGetImports)' == ''">false</IncludeNuGetImports>
   </PropertyGroup>
 
+  <!-- Localization switches -->
+  <PropertyGroup>
+    <LocalizationBuildAssetsRequired Condition="'$(LocalizedBuild)' == 'true' or '$(SyncXlf)' == 'true'">true</LocalizationBuildAssetsRequired>
+  </PropertyGroup>
+
   <PropertyGroup>
     <SerializeProjects>false</SerializeProjects>
   </PropertyGroup>
