@@ -808,6 +808,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Quoted path
+        /// </summary>
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/624")]
+#else
+        [Fact]
+#endif
+        public void GetCommandLineQuotedExe()
+        {
+            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
+            Assert.True(File.Exists(_pathToArbitraryBogusFile));
+
+            bool successfulExit;
+            string output = RunnerUtilities.ExecMSBuild('"' + RunnerUtilities.PathToCurrentlyRunningMsBuildExe + '"', msbuildParameters, out successfulExit);
+            Assert.False(successfulExit);
+
+            Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// On path
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
