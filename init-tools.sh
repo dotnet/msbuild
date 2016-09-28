@@ -14,7 +14,8 @@ __PROJECT_JSON_PATH=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION
 __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
 __PROJECT_JSON_CONTENTS="{ \"dependencies\": { \"Microsoft.DotNet.BuildTools\": \"$__BUILD_TOOLS_PACKAGE_VERSION\" }, \"frameworks\": { \"netcoreapp1.0\": { } } }"
 __INIT_TOOLS_DONE_MARKER=$__PROJECT_JSON_PATH/done
-
+# Temporarily set until build tools is updated to support the new all lowercase package directories
+export __INIT_TOOLS_RESTORE_ARGS=--legacy-packages-directory
 # Extended version of platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
 get_current_linux_name() {
     # Detect Distro
@@ -111,8 +112,8 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
 
     if [ ! -e $__BUILD_TOOLS_PATH ]; then
         echo "Restoring BuildTools version $__BUILD_TOOLS_PACKAGE_VERSION..."
-        echo "Running: $__DOTNET_CMD restore \"$__PROJECT_JSON_FILE\" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE" >> $__init_tools_log
-        $__DOTNET_CMD restore "$__PROJECT_JSON_FILE" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE >> $__init_tools_log
+        echo "Running: $__DOTNET_CMD restore \"$__PROJECT_JSON_FILE\" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE $__INIT_TOOLS_RESTORE_ARGS" >> $__init_tools_log
+        $__DOTNET_CMD restore "$__PROJECT_JSON_FILE" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE $__INIT_TOOLS_RESTORE_ARGS >> $__init_tools_log
         if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."1>&2; fi
     fi
 
@@ -121,13 +122,6 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
     $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR >> $__init_tools_log
     if [ "$?" != "0" ]; then
         echo "ERROR: An error occured when trying to initialize the tools. Please check '$__init_tools_log' for more details."1>&2
-        exit 1
-    fi
-
-    echo "Updating CLI NuGet Frameworks map..."
-    cp $__TOOLRUNTIME_DIR/NuGet.Frameworks.dll $__TOOLRUNTIME_DIR/dotnetcli/sdk/$__DOTNET_TOOLS_VERSION >> $__init_tools_log
-    if [ "$?" != "0" ]; then
-        echo "ERROR: An error occured when updating Nuget for CLI . Please check '$__init_tools_log' for more details."1>&2
         exit 1
     fi
 

@@ -69,14 +69,6 @@ if not [%INIT_TOOLS_ERRORLEVEL%]==[0] (
   exit /b %INIT_TOOLS_ERRORLEVEL%
 )
 
-echo Updating CLI NuGet Frameworks map...
-robocopy "%TOOLRUNTIME_DIR%" "%TOOLRUNTIME_DIR%\dotnetcli\sdk\%DOTNET_VERSION%" NuGet.Frameworks.dll /XO >> "%INIT_TOOLS_LOG%"
-set UPDATE_CLI_ERRORLEVEL=%ERRORLEVEL%
-if %UPDATE_CLI_ERRORLEVEL% GTR 1 (
-  echo ERROR: Failed to update Nuget for CLI {Error level %UPDATE_CLI_ERRORLEVEL%}. Please check '%INIT_TOOLS_LOG%' for more details. 1>&2
-  exit /b %UPDATE_CLI_ERRORLEVEL%
-)
-
 :: Create sempahore file
 echo Done initializing tools.
 echo Init-Tools.cmd completed for BuildTools Version: %BUILDTOOLS_VERSION% > "%BUILD_TOOLS_SEMAPHORE%"
