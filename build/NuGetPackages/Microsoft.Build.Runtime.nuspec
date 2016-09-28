@@ -43,6 +43,7 @@
     <file src="$configuration$\Output\Microsoft.Common.props" target="contentFiles\any\net46\$targetMSBuildToolsVersion$\" />
     <file src="$configuration$\Output\Microsoft.Common.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.Common.tasks" target="contentFiles\any\net46\" />
+    <file src="$configuration$\Output\Microsoft.CSharp.CrossTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.CSharp.CurrentVersion.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.CSharp.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.Data.Entity.targets" target="contentFiles\any\net46\" />
@@ -51,6 +52,7 @@
     <file src="$configuration$\Output\Microsoft.NETFramework.props" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.NETFramework.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.ServiceModel.targets" target="contentFiles\any\net46\" />
+    <file src="$configuration$\Output\Microsoft.VisualBasic.CrossTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.VisualBasic.CurrentVersion.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.VisualBasic.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.VisualStudioVersion.v11.Common.props" target="contentFiles\any\net46\" />
@@ -72,12 +74,14 @@
     <file src="$configuration$-NetCore\Output\Microsoft.Common.props" target="contentFiles\any\netcoreapp1.0\$targetMSBuildToolsVersion$\" />
     <file src="$configuration$-NetCore\Output\Microsoft.Common.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.Common.tasks" target="contentFiles\any\netcoreapp1.0\" />
+    <file src="$configuration$-NetCore\Output\Microsoft.CSharp.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.CSharp.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.CSharp.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.CurrentVersion.props" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.props" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.targets" target="contentFiles\any\netcoreapp1.0\" />
+    <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.targets" target="contentFiles\any\netcoreapp1.0\" />
     <file src="$configuration$-NetCore\Output\Microsoft.VisualStudioVersion.v11.Common.props" target="contentFiles\any\netcoreapp1.0\" />
