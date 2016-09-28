@@ -49,7 +49,7 @@
       <NuspecProperties Include="@(NuSpecs->'id=%(Filename)')"/>
       <NuspecProperties Include="configuration=$(Configuration)"/>
       <NuspecProperties Include="licenseUrl=$(NuGetPackageLicenseUrl)"/>
-      <NuspecProperties Include="projectUrl=$(NuGetPackageProjectUrl))"/>
+      <NuspecProperties Include="projectUrl=$(NuGetPackageProjectUrl)"/>
       <NuspecProperties Include="iconUrl=$(NuGetPackageIconUrl)"/>
       <NuspecProperties Include="targetMSBuildToolsVersion=$(TargetMSBuildToolsVersion)"/>
     </ItemGroup>
