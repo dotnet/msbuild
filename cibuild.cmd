@@ -71,7 +71,7 @@ echo.
 echo ** Rebuilding MSBuild with downloaded binaries
 
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build.log
-call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT%
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
