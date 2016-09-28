@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
@@ -95,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             ProjectContext projectContext)
         {
-            var nugetPackagesRoot = projectContext.PackagesDirectory;
+            var nugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(projectContext.PackagesDirectory);
 
             var lockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
 
