@@ -271,6 +271,7 @@ namespace Microsoft.Build.Construction
         public static Microsoft.Build.Construction.ProjectRootElement Create(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
         public Microsoft.Build.Construction.ProjectChooseElement CreateChooseElement() { throw null; }
         public Microsoft.Build.Construction.ProjectImportElement CreateImportElement(string project) { throw null; }
