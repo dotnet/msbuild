@@ -994,6 +994,7 @@ namespace Microsoft.Build.UnitTests
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/1112
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
         {
             string directory = null;
@@ -1039,6 +1040,7 @@ namespace Microsoft.Build.UnitTests
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/1112
         public void ProjectDirectoryIsMSBuildExeDirectory()
         {
             string directory = null;
