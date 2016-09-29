@@ -29,6 +29,9 @@ namespace Microsoft.DotNet.Migration.Tests
         public void It_migrates_apps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
+
+            CleanBinObj(projectDirectory);
+
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
 
             var outputsIdentical =
@@ -100,7 +103,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
-            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, Path.GetFileNameWithoutExtension(projectName));
 
             var outputsIdentical =
                 outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
@@ -260,7 +263,10 @@ namespace Microsoft.DotNet.Migration.Tests
 
             foreach (var dir in dirs)
             {
-                Directory.Delete(dir, true);
+                if(Directory.Exists(dir))
+                {
+                    Directory.Delete(dir, true);
+                }
             }
         }
 
