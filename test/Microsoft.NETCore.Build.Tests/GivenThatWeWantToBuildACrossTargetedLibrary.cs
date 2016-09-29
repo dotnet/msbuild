@@ -14,15 +14,15 @@ namespace Microsoft.NETCore.Build.Tests
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
+        [Fact]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
-                .WithSource();
+                .WithSource()
+                .Restore("TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            testAsset.Restore(libraryProjectDirectory, $"/p:RestoreFallbackFolders={RepoInfo.PackagesPath}");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
             buildCommand
@@ -30,7 +30,7 @@ namespace Microsoft.NETCore.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "netstandard1.4/TestLibrary.dll",
                 "netstandard1.4/TestLibrary.pdb",

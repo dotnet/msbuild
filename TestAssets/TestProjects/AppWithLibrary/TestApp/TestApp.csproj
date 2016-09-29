@@ -8,16 +8,22 @@
     <AssemblyTitle>Test AssemblyTitle</AssemblyTitle>
     <Copyright>Copyright (c) Test Authors</Copyright>
     <OutputType>Exe</OutputType>
-    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
-    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
-    <None Include="project.json" />
+    <Compile Include="**\*.cs" />
+    <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.App">
+      <Version>1.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Sdk">
+      <Version>0.0</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
