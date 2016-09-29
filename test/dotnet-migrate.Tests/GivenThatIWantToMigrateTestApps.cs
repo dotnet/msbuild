@@ -129,12 +129,7 @@ namespace Microsoft.DotNet.Migration.Tests
             MigrateProject(Path.Combine(projectDirectory, projectName));
 
             string[] migratedProjects = expectedProjects.Split(new char[] { ',' });
-            foreach(var migratedProject in migratedProjects)
-            {
-                var dirInfo = new DirectoryInfo(Path.Combine(projectDirectory, migratedProject));
-                var csproj = $"{migratedProject}.csproj";
-                dirInfo.Should().HaveFile(csproj);
-            }
+            VerifyMigration(migratedProjects, projectDirectory);
          }
 
         [Theory]
@@ -150,13 +145,45 @@ namespace Microsoft.DotNet.Migration.Tests
 
             FixUpProjectJsons(projectDirectory);
 
-            MigrateCommand.Run(new [] { "-p", Path.Combine(projectDirectory, projectName), "--skip-project-references" }).Should().Be(0);
+            MigrateCommand.Run(new [] { Path.Combine(projectDirectory, projectName), "--skip-project-references" }).Should().Be(0);
 
-            var migratedProjects = Directory.EnumerateFiles(projectDirectory, "*.csproj", SearchOption.AllDirectories);
-            migratedProjects.Count().Should().Be(1, "Only the root project must be migrated");
+            VerifyMigration(Enumerable.Repeat(projectName, 1), projectDirectory);
+         }
 
-            var migratedProject = Path.GetFileName(migratedProjects.First());
-            migratedProject.Should().Be($"{projectName}.csproj");
+         [Theory]
+         [InlineData(true)]
+         [InlineData(false)]
+         public void It_migrates_all_projects_in_given_directory(bool skipRefs)
+         {
+            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"MigrateDirectory.SkipRefs.{skipRefs}").Path;
+
+            FixUpProjectJsons(projectDirectory);
+
+            if (skipRefs)
+            {
+                MigrateCommand.Run(new [] { projectDirectory, "--skip-project-references" }).Should().Be(0);
+            }
+            else
+            {
+                MigrateCommand.Run(new [] { projectDirectory }).Should().Be(0);
+            }
+
+            string[] migratedProjects = new string[] { "ProjectA", "ProjectB", "ProjectC", "ProjectD", "ProjectE", "ProjectF", "ProjectG" };
+            VerifyMigration(migratedProjects, projectDirectory);
+         }
+
+         [Fact]
+         public void It_migrates_given_project_json()
+         {
+            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph").Path;
+
+            FixUpProjectJsons(projectDirectory);
+
+            var project = Path.Combine(projectDirectory, "ProjectA", "project.json");
+            MigrateCommand.Run(new [] { project }).Should().Be(0);
+
+            string[] migratedProjects = new string[] { "ProjectA", "ProjectB", "ProjectC", "ProjectD", "ProjectE" };
+            VerifyMigration(migratedProjects, projectDirectory);
          }
 
          private void FixUpProjectJsons(string projectDirectory)
@@ -168,6 +195,13 @@ namespace Microsoft.DotNet.Migration.Tests
                  var newPj = pj.Replace("project.json.1", "project.json");
                  File.Move(pj, newPj);
              }
+         }
+
+         private void VerifyMigration(IEnumerable<string> expectedProjects, string rootDir)
+         {
+             var migratedProjects = Directory.EnumerateFiles(rootDir, "*.csproj", SearchOption.AllDirectories)
+                                            .Select(s => Path.GetFileNameWithoutExtension(s));
+             migratedProjects.Should().BeEquivalentTo(expectedProjects);
          }
 
         private MigratedBuildComparisonData GetDotnetNewComparisonData(string projectDirectory, string dotnetNewType)
@@ -241,7 +275,7 @@ namespace Microsoft.DotNet.Migration.Tests
         private void MigrateProject(string projectDirectory)
         {
             var result =
-                MigrateCommand.Run(new [] { "-p", projectDirectory });
+                MigrateCommand.Run(new [] { projectDirectory });
 
             result.Should().Be(0);
         }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli;
@@ -13,17 +14,17 @@ namespace Microsoft.DotNet.Tools.Migrate
     public partial class MigrateCommand
     {
         private readonly string _templateFile;
-        private readonly string _projectJson;
+        private readonly string _projectArg;
         private readonly string _sdkVersion;
         private readonly string _xprojFilePath;
         private readonly bool _skipProjectReferences;
 
         private readonly TemporaryDotnetNewTemplateProject _temporaryDotnetNewProject;
 
-        public MigrateCommand(string templateFile, string projectJson, string sdkVersion, string xprojFilePath, bool skipProjectReferences)
+        public MigrateCommand(string templateFile, string projectArg, string sdkVersion, string xprojFilePath, bool skipProjectReferences)
         {
             _templateFile = templateFile;
-            _projectJson = projectJson;
+            _projectArg = projectArg ?? Directory.GetCurrentDirectory();
             _sdkVersion = sdkVersion;
             _xprojFilePath = xprojFilePath;
             _skipProjectReferences = skipProjectReferences;
@@ -32,22 +33,45 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         public int Execute()
         {
-            var project = GetProjectJsonPath(_projectJson) ?? GetProjectJsonPath(Directory.GetCurrentDirectory());
-            EnsureNotNull(project, "Unable to find project.json");
-            var projectDirectory = Path.GetDirectoryName(project);
+            var projectsToMigrate = GetProjectsToMigrate(_projectArg);
 
             var msBuildTemplate = _templateFile != null ?
                 ProjectRootElement.TryOpen(_templateFile) : _temporaryDotnetNewProject.MSBuildProject;
 
-            var outputDirectory = projectDirectory;
-
             var sdkVersion = _sdkVersion ?? new ProjectJsonParser(_temporaryDotnetNewProject.ProjectJson).SdkPackageVersion;
             EnsureNotNull(sdkVersion, "Null Sdk Version");
 
-            var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate, _xprojFilePath);
-            new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
+            foreach (var project in projectsToMigrate)
+            {
+                Console.WriteLine($"Migrating project {project}..");
+                var projectDirectory = Path.GetDirectoryName(project);
+                var outputDirectory = projectDirectory;
+                var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate, _xprojFilePath);
+                new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
+            }
 
             return 0;
+        }
+
+        private IEnumerable<string> GetProjectsToMigrate(string projectArg)
+        {
+            if (projectArg.EndsWith(Project.FileName))
+            {
+                yield return GetProjectJsonPath(projectArg);
+            }
+            else if (Directory.Exists(projectArg))
+            {
+                var projects = Directory.EnumerateFiles(projectArg, Project.FileName, SearchOption.AllDirectories);
+
+                foreach(var project in projects)
+                {
+                    yield return GetProjectJsonPath(project);
+                }
+            }
+            else
+            {
+                throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json file and a directory named '{projectArg}' doesn't exist.");
+            }
         }
 
         private void EnsureNotNull(string variable, string message)
@@ -60,11 +84,6 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         private string GetProjectJsonPath(string projectJson)
         {
-            if (projectJson == null)
-            {
-                return null;
-            }
-
             projectJson = ProjectPathHelper.NormalizeProjectFilePath(projectJson);
 
             if (File.Exists(projectJson))
