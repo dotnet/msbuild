@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata minClientVersion="2.8.1">
+    <id>Microsoft.Build.Targets</id>
+    <version>$version$</version>
+    <title>MSBuild APIs</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</licenseUrl>
+    <projectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</projectUrl>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
+    <summary>MSBuild APIs</summary>
+    <description>
+      This package includes APIs that support writing MSBuild tasks.
+      NOTE: This package is deprecated.  Please move to the Microsoft.Build.Runtime 15.1.X package available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
+    </description>
+    <releaseNotes>
+      NOTE: This package is deprecated.  Please move to the Microsoft.Build.Runtime 15.1.X package available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
+    </releaseNotes>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <dependencies>
+      <group targetFramework="netstandard1.3">
+        <dependency id="Microsoft.Build.Framework" version="$version$" />
+        <dependency id="Microsoft.Build" version="$version$" />
+        <dependency id="Microsoft.Build.Utilities.Core" version="$version$" />
+        <dependency id="Microsoft.Build.Tasks.Core" version="$version$" />
+        <dependency id="MSBuild" />
+      </group>
+    </dependencies>
+    <contentFiles>
+      <files include="any/any/**/*.*" buildAction="None" copyToOutput="true" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="_._" target="lib\netstandard1.3" />
+    <file src="Microsoft.Common.CrossTargeting.targets" target="runtimes\any\native" />
+    <file src="Microsoft.CSharp.CrossTargeting.targets" target="runtimes\any\native" />
+    <file src="Microsoft.VisualBasic.CrossTargeting.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Common.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Common.targets" target="runtimes\any\native" />
+    <file src="Microsoft.CSharp.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.CSharp.targets" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.targets" target="runtimes\any\native" />
+    <file src="Microsoft.VisualBasic.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.VisualBasic.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Common.overridetasks" target="runtimes\any\native" />
+    <file src="Microsoft.Common.props" target="contentFiles\any\any\Extensions\$targetmsbuildtoolsversion$\" />
+    <file src="Microsoft.Common.tasks" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.CurrentVersion.props" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.props" target="runtimes\any\native" />
+    <file src="Microsoft.VisualStudioVersion.v11.Common.props" target="runtimes\any\native" />
+    <file src="Microsoft.VisualStudioVersion.v12.Common.props" target="runtimes\any\native" />
+    <file src="Microsoft.VisualStudioVersion.v14.Common.props" target="runtimes\any\native" />
+
+    <!-- Shim targets should only be included for full-framework deployments. -->
+    <!-- Until there is a distinction in the package, leaving them commented out here.
+    <file src="Microsoft.Data.Entity.targets" target="runtimes\any\native" />
+    <file src="Microsoft.ServiceModel.targets" target="runtimes\any\native" />
+    <file src="Microsoft.WinFx.targets" target="runtimes\any\native" />
+    <file src="Microsoft.WorkflowBuildExtensions.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Xaml.targets" target="runtimes\any\native" />
+    <file src="Workflow.Targets" target="runtimes\any\native" />
+    <file src="Workflow.VisualBasic.Targets" target="runtimes\any\native" /> -->
+  </files>
+</package>
