@@ -68,7 +68,7 @@
       "exclude": "compile"
     },
 
-    "Microsoft.Build": "0.1.0-preview-00042-160927",
+    "Microsoft.Build": "0.1.0-preview-00043-160929",
 
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
   },
