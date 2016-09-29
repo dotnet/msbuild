@@ -103,6 +103,15 @@
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
   </PropertyGroup>
 
+  <!-- Copy the "_._" file to the output directory, which is used by the NuSpecs to indicate an empty folder -->
+  <ItemGroup>
+    <None Include="$(SourceDir)\nuget\_._">
+      <Link>_._</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+  </ItemGroup>
+
   <!-- Set default Configuration and Platform -->
   <PropertyGroup Condition="'$(Configuration)' ==''">
     <Configuration Condition="'$(OS)' == 'Windows_NT'">Debug</Configuration>
