@@ -71,6 +71,7 @@ namespace Microsoft.Build.Construction
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "Value");
                 Microsoft.Build.Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
+                Parent?.UpdateElementValue(this);
                 MarkDirty("Set metadata Value {0}", value);
             }
         }

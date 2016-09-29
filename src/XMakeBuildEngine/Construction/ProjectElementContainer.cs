@@ -420,34 +420,52 @@ namespace Microsoft.Build.Construction
             return clone;
         }
 
+        private void SetElementAsAttributeValue(ProjectElement child)
+        {
+            //  Assumes that child.ExpressedAsAttribute is true
+
+            string value = Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(child.XmlElement);
+            ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
+
+            if (XmlElement.HasChildNodes)
+            {
+                bool allWhitespace = true;
+                foreach (XmlNode childXml in XmlElement.ChildNodes)
+                {
+                    if (childXml.NodeType != XmlNodeType.Whitespace)
+                    {
+                        allWhitespace = false;
+                        break;
+                    }
+                }
+
+                if (allWhitespace)
+                {
+                    XmlElement.IsEmpty = true;
+                }
+            }
+        }
+
+        //  If child "element" is actually represented as an attribute, update the value there
+        internal void UpdateElementValue(ProjectElement child)
+        {
+            if (child.ExpressedAsAttribute)
+            {
+                SetElementAsAttributeValue(child);
+            }
+        }
+
         internal void AddToXml(ProjectElement child)
         {
             if (child.ExpressedAsAttribute)
             {
-                string value = Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(child.XmlElement);
+                //  Assume that the name of the child has already been validated to conform with rules in XmlUtilities.VerifyThrowArgumentValidElementName
 
-                //  TODO: Do we need special handling for namespaces for the name, or for names with colons in them?
-                //  TODO: What if there are multiple elements with the same name?  That shouldn't be allowed for elements
-                //      expressed as attributes.
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
+                //  Make sure we're not trying to add multiple attributes with the same name
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!XmlElement.HasAttribute(child.XmlElement.Name),
+                    XmlElement.Location, "InvalidChildElementDueToDuplication", child.XmlElement.Name, ElementName);
 
-                if (XmlElement.HasChildNodes)
-                {
-                    bool allWhitespace = true;
-                    foreach (XmlNode childXml in XmlElement.ChildNodes)
-                    {
-                        if (childXml.NodeType != XmlNodeType.Whitespace)
-                        {
-                            allWhitespace = false;
-                            break;
-                        }
-                    }
-
-                    if (allWhitespace)
-                    {
-                        XmlElement.IsEmpty = true;
-                    }
-                }
+                SetElementAsAttributeValue(child);
             }
             else
             {
