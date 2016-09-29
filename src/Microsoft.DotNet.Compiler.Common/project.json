@@ -14,7 +14,7 @@
     "Microsoft.DotNet.Files": {
       "target": "project"
     },
-    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.16"
+    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.17"
   },
   "frameworks": {
     "net451": {
