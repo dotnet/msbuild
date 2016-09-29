@@ -13,7 +13,11 @@
     <summary>MSBuild APIs</summary>
     <description>
       This package includes APIs that support writing MSBuild tasks.
+      NOTE: This package is deprecated.  Please move to the Microsoft.Build.Runtime 15.1.X package available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
     </description>
+    <releaseNotes>
+      NOTE: This package is deprecated.  Please move to the Microsoft.Build.Runtime 15.1.X package available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
+    </releaseNotes>
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
       <group targetFramework="netstandard1.3">
