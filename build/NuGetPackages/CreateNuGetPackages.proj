@@ -24,15 +24,7 @@
   <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
   
   <ItemGroup>
-    <Project Include="$(RepoRoot)\ref\net46\**\*.csproj">
-      <Properties>Configuration=$(Configuration)</Properties>
-    </Project>
-    <Project Include="$(RepoRoot)\ref\netstandard1.3\**\*.csproj">
-      <Properties>Configuration=$(Configuration)-NetCore</Properties>
-    </Project>
-
     <NuSpecs Include="*.nuspec" />
-
   </ItemGroup>
 
   <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
