@@ -209,7 +209,8 @@ namespace Microsoft.DotNet.Cli
         {
             HelpCommand.PrintVersionHeader();
 
-            var commitSha = GetCommitSha() ?? "N/A";
+            DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
+            var commitSha = versionFile.CommitSha ?? "N/A";
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Product Information:");
             Reporter.Output.WriteLine($" Version:            {Product.Version}");
@@ -219,7 +220,9 @@ namespace Microsoft.DotNet.Cli
             Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
             Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
-            Reporter.Output.WriteLine($" RID:         {RuntimeEnvironment.GetRuntimeIdentifier()}");
+            
+            // report the BuildRid instead of the current RID, so the user knows which RID they should put in their "runtimes" section.
+            Reporter.Output.WriteLine($" RID:         {versionFile.BuildRid ?? RuntimeEnvironment.GetRuntimeIdentifier()}");
         }
 
         private static bool IsArg(string candidate, string longName)
@@ -230,18 +233,6 @@ namespace Microsoft.DotNet.Cli
         private static bool IsArg(string candidate, string shortName, string longName)
         {
             return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
-        }
-
-        private static string GetCommitSha()
-        {
-            var versionFile = DotnetFiles.VersionFile;
-
-            if (File.Exists(versionFile))
-            {
-                return File.ReadLines(versionFile).FirstOrDefault()?.Substring(0, 10);
-            }
-
-            return null;
         }
     }
 }

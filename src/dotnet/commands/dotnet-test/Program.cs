@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Test
                 var projectPath = GetProjectPath(dotnetTestParams.ProjectPath);
                 var runtimeIdentifiers = !string.IsNullOrEmpty(dotnetTestParams.Runtime) ?
                     new[] { dotnetTestParams.Runtime } :
-                    RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();
+                    DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers();
                 var exitCode = 0;
 
                 // Create a workspace

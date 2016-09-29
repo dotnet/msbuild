@@ -2,6 +2,7 @@
   "version": "1.0.0-preview2-*",
   "buildOptions": {
     "emitEntryPoint": true,
+    "keyFile": "../../tools/Key.snk",
     "embed": {
       "include": [
         "commands/dotnet-new/CSharp_Console.zip",
