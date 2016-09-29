@@ -93,15 +93,12 @@
     <Compile Include="MetadataKeys.cs" />
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="webbuild\netstandard1.0\en-us\web.general.browseobject.xaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Include="webbuild\netstandard1.0\Microsoft.NETCore.Web.props">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="webbuild\netstandard1.0\Microsoft.NETCore.Sdk.Web.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="webbuild\netstandard1.0\Microsoft.NETCore.Web.targets">
+    <None Include="webbuild\netstandard1.0\Microsoft.NETCore.Sdk.Web.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,6 +1,6 @@
-<!--
+﻿<!--
 ***********************************************************************************************
-Microsoft.NETCore.Web.props
+Microsoft.NETCore.Sdk.Web.props
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it

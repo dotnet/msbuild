@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.25728.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CAEE03D-60F1-4E77-B25B-9CD8757E1F09}"
 	ProjectSection(SolutionItems) = preProject
@@ -38,7 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{78DFB5BC-0BE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpWebTemplatesSetup", "src\Templates\CSharpWebTemplatesSetup\CSharpWebTemplatesSetup.csproj", "{8D1B6233-3DE7-4554-8C8E-F649BDF918FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emptyweb", "src\Templates\ProjectTemplates\CSharp\Web\EmptyWeb\EmptyWeb.csproj", "{2B564EBF-C589-46CA-B98B-C2EC4EB9C255}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmptyWeb", "src\Templates\ProjectTemplates\CSharp\Web\EmptyWeb\EmptyWeb.csproj", "{2B564EBF-C589-46CA-B98B-C2EC4EB9C255}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
