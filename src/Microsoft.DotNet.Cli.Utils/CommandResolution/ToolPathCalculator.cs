@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 GetBaseToolPath(packageId),
                 version.ToNormalizedString().ToLowerInvariant(),
                 framework.GetShortFolderName(),
-                "project.lock.json");
+                "project.assets.json");
         }
 
         private string GetBaseToolPath(string packageId)
