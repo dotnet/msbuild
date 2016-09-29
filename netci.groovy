@@ -38,7 +38,15 @@ def project = GithubProject
                 case 'Windows_NT':
                     newJob.with{
                         steps{
-                            batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && cibuild.cmd --target ${runtime} --localized-build")
+                            
+                            def windowsScript = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && cibuild.cmd --target ${runtime}"
+                            
+                            // only Desktop support localized builds 
+                            if (runtime == "Desktop") {
+                                windowsScript += " --localized-build"
+                            }
+
+                            batchFile(windowsScript)
                         }
 
                         skipTestsWhenResultsNotFound = false
