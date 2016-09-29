@@ -3,6 +3,10 @@
 
 using System;
 
+#if DESKTOP
+using System.Windows.Forms;
+#endif
+
 namespace TestLibrary
 {
     public static class Helper
@@ -18,7 +22,11 @@ namespace TestLibrary
 
         public static void SayHi()
         {
+#if DESKTOP
+            MessageBox.Show("Hello there!");
+#else            
             Console.WriteLine("Hello there!");
+#endif        
         }
     }
 }

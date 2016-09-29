@@ -32,9 +32,9 @@ namespace Microsoft.NETCore.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                "netstandard1.4/TestLibrary.dll",
-                "netstandard1.4/TestLibrary.pdb",
-                "netstandard1.4/TestLibrary.deps.json",
+                "net45/TestLibrary.dll",
+                "net45/TestLibrary.pdb",
+                "net45/TestLibrary.deps.json",
                 "netstandard1.5/TestLibrary.dll",
                 "netstandard1.5/TestLibrary.pdb",
                 "netstandard1.5/TestLibrary.deps.json"
