@@ -95,6 +95,9 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\EncodingStringWriter.cs">
+      <Link>SharedUtilities\EncodingStringWriter.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -224,8 +227,10 @@
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Definition\NewProjectFileOptions.cs" />
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
+    <Compile Include="Definition\ProjectLoadSettings.cs" />
     <Compile Include="Definition\ToolsetLocalReader.cs" />
     <Compile Include="Evaluation\ItemSpec.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
@@ -713,14 +718,11 @@
     </Compile>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
-
     <!-- Resource Files -->
-
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-
     <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>

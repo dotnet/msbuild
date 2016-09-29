@@ -295,13 +295,6 @@ namespace Microsoft.Build.BackEnd
             where T : class, INodePacketTranslatable;
 
         /// <summary>
-        /// Translates a dictionary of type { string, List {string} }
-        /// </summary>
-        /// <param name="dictionary">The dictionary to be translated.</param>
-        /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
-        void TranslateDictionaryList(ref Dictionary<string, List<string>> dictionary, IEqualityComparer<string> comparer);
-
-        /// <summary>
         /// Translates the boolean that says whether this value is null or not
         /// </summary>
         /// <param name="value">The object to test.</param>

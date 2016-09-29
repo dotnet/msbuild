@@ -125,7 +125,7 @@ namespace Microsoft.Build.Construction
                         return;
                     }
 
-                    idElement = XmlDocument.CreateElement(name, XMakeAttributes.defaultXmlNamespace);
+                    idElement = XmlDocument.CreateElement(name, XmlElement.NamespaceURI);
                     XmlElement.AppendChild(idElement);
                 }
 

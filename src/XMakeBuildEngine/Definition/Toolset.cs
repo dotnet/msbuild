@@ -208,7 +208,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Map of project import properties to their list of fall-back search paths
         /// </summary>
-        private Dictionary<string, List<string>> _propertySearchPathsTable;
+        private Dictionary<string, ProjectImportPathMatch> _propertySearchPathsTable;
 
         /// <summary>
         /// Constructor taking only tools version and a matching tools path
@@ -297,13 +297,8 @@ namespace Microsoft.Build.Evaluation
         /// Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.
         /// </param>
-        /// <param name="environmentProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the environment properties.</param>
-        /// <param name="globalProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the global properties.</param>
-        /// <param name="subToolsets">The set of sub-toolsets to add to this toolset</param>
-        /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
-        /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
-        /// <param name="importSearchPathsTable">Map of project import properties to their list of fall-back search paths.</param>
-        internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, List<string>> importSearchPathsTable = null)
+        /// <param name="importSearchPathsTable">Map of parameter name to <see cref="PropertyWithFallbackPaths"/> for use during Import.</param>
+        internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, ProjectImportPathMatch> importSearchPathsTable = null)
             : this(toolsVersion, toolsPath, environmentProperties, globalProperties, msbuildOverrideTasksPath, defaultOverrideToolsVersion)
         {
             if (_properties == null)
@@ -374,11 +369,11 @@ namespace Microsoft.Build.Evaluation
                 return ProjectImportPathMatch.None;
             }
 
-            foreach (var searchPath in _propertySearchPathsTable)
+            foreach (var searchPath in _propertySearchPathsTable.Values)
             {
-                if (expression.IndexOf($"$({searchPath.Key})", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (expression.IndexOf(searchPath.MsBuildPropertyFormat, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    return new ProjectImportPathMatch(searchPath.Key, searchPath.Value);
+                    return searchPath;
                 }
             }
 
@@ -596,7 +591,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Map of properties to their list of fall-back search paths
         /// </summary>
-        internal Dictionary<string, List<string>> ImportPropertySearchPathsTable => _propertySearchPathsTable;
+        internal Dictionary<string, ProjectImportPathMatch> ImportPropertySearchPathsTable => _propertySearchPathsTable;
 
         /// <summary>
         /// Map of MSBuildExtensionsPath properties to their list of fallback search paths
@@ -619,7 +614,7 @@ namespace Microsoft.Build.Evaluation
             translator.TranslateDictionary(ref _subToolsets, StringComparer.OrdinalIgnoreCase, SubToolset.FactoryForDeserialization);
             translator.Translate(ref _overrideTasksPath);
             translator.Translate(ref _defaultOverrideToolsVersion);
-            translator.TranslateDictionaryList(ref _propertySearchPathsTable, StringComparer.OrdinalIgnoreCase);
+            translator.TranslateDictionary(ref _propertySearchPathsTable, StringComparer.OrdinalIgnoreCase, ProjectImportPathMatch.FactoryForDeserialization);
         }
 
         /// <summary>

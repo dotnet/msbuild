@@ -340,7 +340,7 @@ namespace Microsoft.Build.Construction
             }
 
             // Ensure the element name itself matches.
-            this.ReplaceElement(XmlUtilities.RenameXmlElement(this.XmlElement, element.XmlElement.Name, XMakeAttributes.defaultXmlNamespace));
+            this.ReplaceElement(XmlUtilities.RenameXmlElement(this.XmlElement, element.XmlElement.Name, XmlElement.NamespaceURI));
 
             // Copy over the attributes from the template element.
             foreach (XmlAttribute attribute in element.XmlElement.Attributes)
