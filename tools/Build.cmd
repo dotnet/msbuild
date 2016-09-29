@@ -1,4 +1,8 @@
 @echo off
 
 call %~dp0\EnsurePublishEnv.cmd
-msbuild %PublishRoot%\dirs.proj /p:configuration=Release
+
+copy \\aspnetci\share\tools\Microsoft.Web.MsBuildTasks2.dll %PublishTools% /y
+copy \\aspnetci\share\tools\7za.exe %PublishTools% /y
+
+msbuild %PublishRoot%\dirs.proj /p:configuration=Release /t:Build;Sign
