@@ -10,17 +10,22 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         public static IEnumerable<string> InferCurrentRuntimeIdentifiers()
         {
-            // On non-Windows machines, the CLI may be used on a newer version of a supported OS
-            // and the current RID may not be available in the runtime.* NuGet packages, yet.
-            // so fallback to the RID that was used to build the CLI - which will have the correct
-            // runtime.* NuGet packages available.
             IEnumerable<string> fallbackIdentifiers = null;
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+
+            // If the machine's RID isn't supported by the shared framework (i.e. the CLI
+            // is being used on a newer version of an OS), add the RID that the CLI was built 
+            // with as a fallback.  The RID the CLI was built with will have the correct 
+            // runtime.* NuGet packages available.
+            // For example, when a user is using osx.10.12, but we only support osx.10.10 and 
+            // osx.10.11, the project.json "runtimes" section cannot contain osx.10.12, since
+            // that RID isn't contained in the runtime graph - users will get a restore error.
+            FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
+            if (!fxDepsFile.IsCurrentRuntimeSupported())
             {
                 string buildRid = DotnetFiles.VersionFileObject.BuildRid;
                 if (!string.IsNullOrEmpty(buildRid))
                 {
-                    fallbackIdentifiers = new string[] { DotnetFiles.VersionFileObject.BuildRid };
+                    fallbackIdentifiers = new string[] { buildRid };
                 }
             }
 

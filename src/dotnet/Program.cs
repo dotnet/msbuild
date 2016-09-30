@@ -220,9 +220,7 @@ namespace Microsoft.DotNet.Cli
             Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
             Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
-            
-            // report the BuildRid instead of the current RID, so the user knows which RID they should put in their "runtimes" section.
-            Reporter.Output.WriteLine($" RID:         {versionFile.BuildRid ?? RuntimeEnvironment.GetRuntimeIdentifier()}");
+            Reporter.Output.WriteLine($" RID:         {GetDisplayRid(versionFile)}");
         }
 
         private static bool IsArg(string candidate, string longName)
@@ -233,6 +231,19 @@ namespace Microsoft.DotNet.Cli
         private static bool IsArg(string candidate, string shortName, string longName)
         {
             return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
+        }
+
+        private static string GetDisplayRid(DotnetVersionFile versionFile)
+        {
+            FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
+
+            string currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
+
+            // if the current RID isn't supported by the shared framework, display the RID the CLI was 
+            // built with instead, so the user knows which RID they should put in their "runtimes" section.
+            return fxDepsFile.IsRuntimeSupported(currentRid) ?
+                currentRid :
+                versionFile.BuildRid;
         }
     }
 }
