@@ -44,7 +44,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Compile Remove="wwwroot\**\*.cs" />
-    <EmbeddedResource Remove="wwwroot\**\*.cs" />
+    <EmbeddedResource Remove="wwwroot\**\*.resx" />
   </ItemGroup>
 
   <!-- Well known web content globbing patterns -->
