@@ -1,14 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.MSBuild;
 
 namespace Microsoft.DotNet.Tools.Publish3
 {
-    public class Publish3Command
+    public partial class Publish3Command
     {
         public static int Run(string[] args)
         {
@@ -47,43 +45,17 @@ namespace Microsoft.DotNet.Tools.Publish3
 
             app.OnExecute(() =>
             {
-                List<string> msbuildArgs = new List<string>();
+                Publish3Command publish = new Publish3Command();
 
-                if (!string.IsNullOrEmpty(projectArgument.Value))
-                {
-                    msbuildArgs.Add(projectArgument.Value);
-                }
+                publish.ProjectPath = projectArgument.Value;
+                publish.Framework = frameworkOption.Value();
+                publish.Runtime = runtimeOption.Value();
+                publish.OutputPath = outputOption.Value();
+                publish.Configuration = configurationOption.Value();
+                publish.VersionSuffix = versionSuffixOption.Value();
+                publish.ExtraMSBuildArguments = app.RemainingArguments;
 
-                msbuildArgs.Add("/t:Publish");
-
-                if (frameworkOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
-                }
-
-                if (runtimeOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:RuntimeIdentifier={runtimeOption.Value()}");
-                }
-
-                if (outputOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:PublishDir={outputOption.Value()}");
-                }
-
-                if (configurationOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:Configuration={configurationOption.Value()}");
-                }
-
-                if (versionSuffixOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:VersionSuffix={versionSuffixOption.Value()}");
-                }
-
-                msbuildArgs.AddRange(app.RemainingArguments);
-
-                return new MSBuildForwardingApp(msbuildArgs).Execute();
+                return publish.Execute();
             });
 
             return app.Execute(args);
