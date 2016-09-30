@@ -2,7 +2,12 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PlatformSpecificBuild>true</PlatformSpecificBuild>
-    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == '' and ('$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore')">v1.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
+    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <NoStdLib>true</NoStdLib>
+    <NoWarn>$(NoWarn);1701</NoWarn>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -249,4 +254,16 @@
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="..\dir.targets" />
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
+            properties to any folder that exists to skip the GetReferenceAssemblyPaths task (not target) and
+            to prevent it from outputting a warning (MSB3644).
+        -->
+    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
+    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
+
+    <!-- MSBuild thinks all EXEs need binding redirects, not so for CoreCLR! -->
+    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+  </PropertyGroup>
 </Project>
