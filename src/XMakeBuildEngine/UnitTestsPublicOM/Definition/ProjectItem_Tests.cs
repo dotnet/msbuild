@@ -763,15 +763,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Action<bool, bool> runTest = (includeIsAbsolute, excludeIsAbsolute) =>
             {
-                var testRoot = "";
-                try
+                using (var testProject = new Helpers.TestProjectWithFiles(projectContents, inputFiles, "project"))
                 {
-                    string[] createdFiles;
-                    string projectFile;
-
-                    // projectContents is incomplete because we do not yet know the test directory paths
-                    testRoot = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles, "project");
-
+                    var projectFile = testProject.ProjectFile;
                     var projectFileDir = Path.GetDirectoryName(projectFile);
 
                     var include = adjustFilePath(includeIsAbsolute, projectFileDir, includeRelativePath, includeItem);
@@ -781,14 +775,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     var formattedProject = string.Format(projectContents, include, exclude);
                     File.WriteAllText(projectFile, formattedProject);
 
-                    var expectedInclude = includeSurvivesExclude ? new[] {include} : new string[0];
+                    var expectedInclude = includeSurvivesExclude ? new[] { include } : new string[0];
 
                     ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
-                }
-                finally
-                {
-                    ObjectModelHelpers.DeleteDirectory(testRoot);
-                    Directory.Delete(testRoot);
                 }
             };
 
@@ -2035,46 +2024,37 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void UpdateShouldBeAbleToContainGlobs()
         {
-            string rootDir = null;
+            var content = @"<i Include='*.foo'>
+                                <m1>m1_contents</m1>
+                                <m2>m2_contents</m2>
+                            </i>
+                            <i Update='*bar*foo'>
+                                <m1>updated</m1>
+                                <m2></m2>
+                                <m3>added</m3>
+                            </i>";
 
-            try
+            var items = GetItemsFromFragmentWithGlobs(content, "a.foo", "b.foo", "bar1.foo", "bar2.foo");
+
+            Assert.Equal(4, items.Count);
+
+            var expectedInitialMetadata = new Dictionary<string, string>
             {
-                var content = @"<i Include='*.foo'>
-                                    <m1>m1_contents</m1>
-                                    <m2>m2_contents</m2>
-                                </i>
-                                <i Update='*bar*foo'>
-                                    <m1>updated</m1>
-                                    <m2></m2>
-                                    <m3>added</m3>
-                                </i>";
+                {"m1", "m1_contents"},
+                {"m2", "m2_contents"},
+            };
 
-                var items = GetItemsFromFragmentWithGlobs(out rootDir, content, "a.foo", "b.foo", "bar1.foo", "bar2.foo");
-
-                Assert.Equal(4, items.Count);
-
-                var expectedInitialMetadata = new Dictionary<string, string>
-                {
-                    {"m1", "m1_contents"},
-                    {"m2", "m2_contents"},
-                };
-
-                var expectedUpdatedMetadata = new Dictionary<string, string>
-                {
-                    {"m1", "updated"},
-                    {"m2", ""},
-                    {"m3", "added"},
-                };
-
-                ObjectModelHelpers.AssertItemHasMetadata(expectedInitialMetadata, items[0]);
-                ObjectModelHelpers.AssertItemHasMetadata(expectedInitialMetadata, items[1]);
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatedMetadata, items[2]);
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatedMetadata, items[3]);
-            }
-            finally
+            var expectedUpdatedMetadata = new Dictionary<string, string>
             {
-                ObjectModelHelpers.DeleteDirectory(rootDir);
-            }
+                {"m1", "updated"},
+                {"m2", ""},
+                {"m3", "added"},
+            };
+
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitialMetadata, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitialMetadata, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatedMetadata, items[2]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatedMetadata, items[3]);
         }
 
         [Fact]
@@ -2315,15 +2295,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        private static List<ProjectItem> GetItemsFromFragmentWithGlobs(out string rootDir, string itemGroupFragment, params string[] globFiles)
+        private static List<ProjectItem> GetItemsFromFragmentWithGlobs(string itemGroupFragment, params string[] globFiles)
         {
             var formattedProjectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment);
 
-            string projectFile;
-            string[] createdFiles;
-            rootDir = Helpers.CreateProjectInTempDirectoryWithFiles(formattedProjectContents, globFiles, out projectFile, out createdFiles);
+            List<ProjectItem> itemsFromFragmentWithGlobs;
 
-            return Helpers.MakeList(new Project(projectFile).GetItems("i"));
+            using (var testProject = new Helpers.TestProjectWithFiles(formattedProjectContents, globFiles))
+            {
+                itemsFromFragmentWithGlobs = Helpers.MakeList(new Project(testProject.ProjectFile).GetItems("i"));
+            }
+
+            return itemsFromFragmentWithGlobs;
         }
 
         /// <summary>

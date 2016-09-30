@@ -136,27 +136,17 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
-            string root = "";
-            try
-            {
-                string[] createdFiles;
-                string projectFile;
-                root = Helpers.CreateProjectInTempDirectoryWithFiles(projectContents, inputFiles, out projectFile, out createdFiles);
 
+            using (var testProject = new Helpers.TestProjectWithFiles(projectContents, inputFiles))
+            {
                 if (expectedMetadataPerItem == null)
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(testProject.ProjectFile).Items.ToList(), expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
                 }
                 else
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList(), expectedMetadataPerItem, normalizeSlashes);
+                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(testProject.ProjectFile).Items.ToList(), expectedMetadataPerItem, normalizeSlashes);
                 }
-
-            }
-            finally
-            {
-                ObjectModelHelpers.DeleteDirectory(root);
-                Directory.Delete(root);
             }
         }
 
@@ -1506,5 +1496,86 @@ namespace Microsoft.Build.UnitTests
             Path.IsPathRooted(path)
                 ? path
                 : path.ToSlash();
+
+        internal class TestProjectWithFiles : IDisposable
+        {
+            private bool _disposed;
+
+            private readonly string _testRoot;
+            private readonly string[] _createdFiles;
+            private readonly string _projectFile;
+
+            public string TestRoot
+            {
+                get
+                {
+                    ThrowIfDisposed();
+                    return _testRoot;
+                }
+            }
+
+            public string[] CreatedFiles
+            {
+                get
+                {
+                    ThrowIfDisposed();
+                    return _createdFiles;
+                }
+            }
+
+            public string ProjectFile
+            {
+                get
+                {
+                    ThrowIfDisposed();
+                    return _projectFile;
+                }
+            }
+
+            public TestProjectWithFiles(string projectContents, string[] files, string relativePathFromRootToProject)
+            {
+                string createdProjectFile;
+                string[] createdFiles;
+                _testRoot = CreateProjectInTempDirectoryWithFiles(projectContents, files, out createdProjectFile, out createdFiles, relativePathFromRootToProject);
+
+                _createdFiles = createdFiles;
+                _projectFile = createdProjectFile;
+            }
+
+            public TestProjectWithFiles(string projectContents, string[] files) : this(projectContents, files, ".")
+            {
+            }
+
+            private void ThrowIfDisposed()
+            {
+                if (_disposed)
+                {
+                    throw new ObjectDisposedException($"{nameof(TestProjectWithFiles)}({TestRoot}) was disposed");
+                }
+            }
+
+            public void Dispose()
+            {
+                Cleanup();
+                GC.SuppressFinalize(this);
+            }
+
+            private void Cleanup()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                FileUtilities.DeleteDirectoryNoThrow(TestRoot, true);
+
+                _disposed = true;
+            }
+
+            ~TestProjectWithFiles()
+            {
+                Cleanup();
+            }
+        }
     }
 }

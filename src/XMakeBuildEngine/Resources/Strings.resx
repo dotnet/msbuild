@@ -1426,6 +1426,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_CannotRemoveMetadataOriginatingFromItemDefinition">
     <value>Cannot remove the metadata named "{0}" as it originates from an item definition, rather than being directly defined on this item.</value>
   </data>
+  <data name="OM_CannotSplitItemElementWhenSplittingIsDisabled">
+    <value>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</value>
+  </data>
   <data name="OM_ProjectIsNoLongerActive">
     <value>The project cannot be used as it is no longer loaded into a project collection.</value>
   </data>
