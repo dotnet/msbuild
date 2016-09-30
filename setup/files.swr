@@ -44,6 +44,10 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
 
+folder InstallDir:\MSBuild\15.0\MSBuild
+  file source=$(X86BinPath)Microsoft.Build.Core.xsd
+  file source=$(X86BinPath)Microsoft.Build.CommonTypes.xsd
+
 folder InstallDir:\MSBuild\15.0\Bin\cs
   file source=$(X86BinPath)cs\Microsoft.Build.resources.dll vs.file.ngen=yes
   file source=$(X86BinPath)cs\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
@@ -165,6 +169,10 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
 
+folder InstallDir:\MSBuild\15.0\Bin\amd64\MSBuild
+  file source=$(X86BinPath)Microsoft.Build.Core.xsd
+  file source=$(X86BinPath)Microsoft.Build.CommonTypes.xsd
+
 folder InstallDir:\MSBuild\15.0\Bin\amd64\cs
   file source=$(X64BinPath)cs\Microsoft.Build.resources.dll vs.file.ngen=yes
   file source=$(X64BinPath)cs\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
@@ -255,3 +263,5 @@ folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)XMakeBuildEngine\Microsoft.Build.pkgdef
   file source=$(SourceDir)XmakeTasks\Microsoft.Build.Tasks.Core.pkgdef
   file source=$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef
+  file source=$(SourceDir)XMakeConversion\Microsoft.Build.Conversion.Core.pkgdef
+  file source=$(SourceDir)OrcasEngine\Microsoft.Build.Engine.pkgdef
