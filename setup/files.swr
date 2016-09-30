@@ -10,7 +10,9 @@ folder InstallDir:\MSBuild\15.0
   file source=$(X86BinPath)Microsoft.VisualStudioVersion.v15.Common.props
 
 folder InstallDir:\MSBuild\15.0\Bin
+  file source=$(X86BinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngen=yes
+  file source=$(X86BinPath)Microsoft.Build.Engine.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngen=yes
@@ -139,7 +141,9 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X64BinPath)MSBuild.exe.config
   file source=$(X64BinPath)MSBuildTaskHost.exe.config
 
+  file source=$(X86BinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngen=yes
+  file source=$(X86BinPath)Microsoft.Build.Engine.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngen=yes
