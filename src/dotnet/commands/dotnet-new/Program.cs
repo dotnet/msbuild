@@ -94,10 +94,12 @@ namespace Microsoft.DotNet.Tools.New
         private static void ReplaceProjectJsonTemplateValues(string projectDirectory)
         {
             string projectJsonFile = Path.Combine(projectDirectory, "project.json");
+            string projectJsonTemplateFile = Path.Combine(projectDirectory, "project.json.template");
 
-            File.Move(
-                Path.Combine(projectDirectory, "project.json.template"),
-                projectJsonFile);
+            if(File.Exists(projectJsonTemplateFile))
+            {
+                File.Move(projectJsonTemplateFile, projectJsonFile);
+            }
         }
 
         private static void ReplaceFileTemplateNames(string projectDirectory)

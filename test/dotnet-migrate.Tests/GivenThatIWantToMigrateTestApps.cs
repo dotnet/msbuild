@@ -29,7 +29,10 @@ namespace Microsoft.DotNet.Migration.Tests
         public void It_migrates_apps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
-            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
+
+            CleanBinObj(projectDirectory);
+
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
 
             var outputsIdentical =
                 outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
@@ -79,7 +82,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
-            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
 
             var outputsIdentical =
                 outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
@@ -100,7 +103,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
-            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, Path.GetFileNameWithoutExtension(projectName));
 
             var outputsIdentical =
                 outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
@@ -210,7 +213,8 @@ namespace Microsoft.DotNet.Migration.Tests
             File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(projectDirectory, "NuGet.Config"));
             Restore(projectDirectory);
 
-            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
+            var outputComparisonData =
+                BuildProjectJsonMigrateBuildMSBuild(projectDirectory, Path.GetFileNameWithoutExtension(projectDirectory));
             return outputComparisonData;
         }
 
@@ -227,7 +231,7 @@ namespace Microsoft.DotNet.Migration.Tests
             }
         }
 
-        private MigratedBuildComparisonData BuildProjectJsonMigrateBuildMSBuild(string projectDirectory)
+        private MigratedBuildComparisonData BuildProjectJsonMigrateBuildMSBuild(string projectDirectory, string projectName)
         {
             BuildProjectJson(projectDirectory);
             var projectJsonBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
@@ -238,7 +242,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             MigrateProject(projectDirectory);
             Restore(projectDirectory);
-            BuildMSBuild(projectDirectory);
+            BuildMSBuild(projectDirectory, projectName);
 
             var msbuildBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
 
@@ -259,7 +263,10 @@ namespace Microsoft.DotNet.Migration.Tests
 
             foreach (var dir in dirs)
             {
-                Directory.Delete(dir, true);
+                if(Directory.Exists(dir))
+                {
+                    Directory.Delete(dir, true);
+                }
             }
         }
 
@@ -297,13 +304,22 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Pass();
         }
 
-        private string BuildMSBuild(string projectDirectory, string configuration="Debug")
+        private void Restore3(string projectDirectory, string projectName)
+        {
+            new Restore3Command()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"{projectName}.csproj")
+                .Should()
+                .Pass();
+        }
+
+        private string BuildMSBuild(string projectDirectory, string projectName, string configuration="Debug")
         {
             DeleteXproj(projectDirectory);
 
             var result = new Build3Command()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"/p:Configuration={configuration}");
+                .ExecuteWithCapturedOutput($"{projectName}.csproj /p:Configuration={configuration}");
 
             result
                 .Should()

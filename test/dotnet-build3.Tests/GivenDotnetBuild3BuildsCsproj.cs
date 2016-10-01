@@ -16,10 +16,15 @@ namespace Microsoft.DotNet.Cli.Build3.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName)
-                .WithLockFiles();
+                .CreateTestInstance(testAppName);
 
             var testProjectDirectory = testInstance.TestRoot;
+
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
 
             new Build3Command()
                 .WithWorkingDirectory(testProjectDirectory)

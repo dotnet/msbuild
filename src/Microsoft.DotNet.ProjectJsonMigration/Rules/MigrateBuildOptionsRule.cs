@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         // TODO: https://github.com/dotnet/sdk/issues/67
         private AddPropertyTransform<CommonCompilerOptions> XmlDocTransformFilePath =>
             new AddPropertyTransform<CommonCompilerOptions>("DocumentationFile",
-                @"$(OutputPath)\$(AssemblyName).xml",
+                @"$(OutputPath)\$(TargetFramework)\$(AssemblyName).xml",
                 compilerOptions => compilerOptions.GenerateXmlDocumentation != null && compilerOptions.GenerateXmlDocumentation.Value);
 
         private AddPropertyTransform<CommonCompilerOptions> OutputNameTransform =>

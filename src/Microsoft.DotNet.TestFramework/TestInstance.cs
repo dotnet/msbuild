@@ -66,6 +66,8 @@ namespace Microsoft.DotNet.TestFramework
             foreach (string lockFile in Directory.GetFiles(_testAssetRoot, "project.lock.json", SearchOption.AllDirectories))
             {
                 string destinationLockFile = lockFile.Replace(_testAssetRoot, Path);
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destinationLockFile));
+
                 File.Copy(lockFile, destinationLockFile, true);
             }
 

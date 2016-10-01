@@ -16,14 +16,19 @@ namespace Microsoft.DotNet.Cli.Publish3.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName)
-                .WithLockFiles();
+                .CreateTestInstance(testAppName);
 
             var testProjectDirectory = testInstance.TestRoot;
 
-            new Publish3Command()
+            new Restore3Command()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
+                .Should()
+                .Pass();
+
+            new Publish3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--framework netcoreapp1.0")
                 .Should()
                 .Pass();
 

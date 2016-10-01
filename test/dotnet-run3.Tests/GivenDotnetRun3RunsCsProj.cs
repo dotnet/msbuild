@@ -13,10 +13,15 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName)
-                .WithLockFiles();
+                .CreateTestInstance(testAppName);
 
             var testProjectDirectory = testInstance.TestRoot;
+
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
 
             new Build3Command()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -24,9 +29,10 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
                 .Should()
                 .Pass();
 
+            //TODO: https://github.com/dotnet/sdk/issues/187 - remove framework from below.
             new Run3Command()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
                 .Should()
                 .Pass()
                 .And
@@ -38,14 +44,20 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName)
-                .WithLockFiles();
+                .CreateTestInstance(testAppName);
 
             var testProjectDirectory = testInstance.TestRoot;
 
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            //TODO: https://github.com/dotnet/sdk/issues/187 - remove framework from below.
             new Run3Command()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
                 .Should()
                 .Pass()
                 .And
@@ -57,10 +69,15 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName)
-                .WithLockFiles();
+                .CreateTestInstance(testAppName);
 
             var testProjectDirectory = testInstance.TestRoot;
+
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
 
             new Run3Command()
                 .WithWorkingDirectory(testProjectDirectory)
