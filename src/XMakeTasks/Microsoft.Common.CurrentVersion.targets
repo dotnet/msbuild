@@ -5296,6 +5296,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Convert intermediate items into final items; this way we can get the full path for each item. -->
     <ItemGroup>
       <SatelliteDllsProjectOutputGroupOutput Include="@(SatelliteDllsProjectOutputGroupOutputIntermediate->'%(FullPath)')">
+        <FinalOutputPath>$(TargetDir)%(SatelliteDllsProjectOutputGroupOutputIntermediate.TargetPath)</FinalOutputPath>
         <!-- For compatibility with 2.0 -->
         <OriginalItemSpec>%(SatelliteDllsProjectOutputGroupOutputIntermediate.Identity)</OriginalItemSpec>
       </SatelliteDllsProjectOutputGroupOutput>
