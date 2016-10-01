@@ -34,8 +34,8 @@ namespace Microsoft.Build.Conversion
         }
 
         // assembly resources
-        private static readonly ResourceManager resources = new ResourceManager("Microsoft.Build.Conversion.Strings", Assembly.GetExecutingAssembly());
+        private static readonly ResourceManager resources = new ResourceManager("Microsoft.Build.Conversion.Core.Strings", Assembly.GetExecutingAssembly());
         // shared resources
-        private static readonly ResourceManager sharedResources = new ResourceManager("Microsoft.Build.Conversion.Strings.shared", Assembly.GetExecutingAssembly());
+        private static readonly ResourceManager sharedResources = new ResourceManager("Microsoft.Build.Conversion.Core.Strings.shared", Assembly.GetExecutingAssembly());
     }
 }
