@@ -11,6 +11,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.Construction;
@@ -2537,6 +2538,32 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceResultsShouldBeInItemElementOrder()
+        {
+            var itemElements = Environment.ProcessorCount * 5;
+            var expected = new ProvenanceResultTupleList();
+
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    {0}
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < itemElements; i++)
+            {
+                sb.AppendLine($"<i_{i} Include=\"a\"/>");
+                expected.Add(Tuple.Create($"i_{i}", Operation.Include, Provenance.StringLiteral, 1));
+            }
+
+            project = string.Format(project, sb);
+
+            AssertProvenanceResult(expected, project, "a");
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldReturnTheSameResultsIfProjectIsReevaluated()
         {
             var projectContents =
@@ -3052,6 +3079,32 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             AssertGlobResult(expected, project, "");
             AssertGlobResult(expected, project, null);
+        }
+
+        [Fact]
+        public void GetAllGlobsResultsShouldBeInItemElementOrder()
+        {
+            var itemElements = Environment.ProcessorCount * 5;
+            var expected = new GlobResultList();
+
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    {0}
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < itemElements; i++)
+            {
+                sb.AppendLine($"<i_{i} Include=\"*\"/>");
+                expected.Add(Tuple.Create($"i_{i}", "*", ImmutableHashSet<string>.Empty));
+            }
+
+            project = string.Format(project, sb);
+
+            AssertGlobResult(expected, project);
         }
 
         [Fact]

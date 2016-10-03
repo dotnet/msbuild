@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -1105,7 +1106,11 @@ namespace Microsoft.Build.Evaluation
 
         private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
         {
-            return projectItemElements.SelectMany(GetAllGlobs).ToList();
+            return projectItemElements
+                .AsParallel()
+                .AsOrdered()
+                .SelectMany(GetAllGlobs)
+                .ToList();
         }
 
         private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
@@ -1257,9 +1262,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             return
-                projectItemElements.Select(i => ComputeProvenanceResult(itemToMatch, i))
-                    .Where(r => r != null)
-                    .ToList();
+                projectItemElements
+                .AsParallel()
+                .AsOrdered()
+                .Select(i => ComputeProvenanceResult(itemToMatch, i))
+                .Where(r => r != null)
+                .ToList();
         }
 
         private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
