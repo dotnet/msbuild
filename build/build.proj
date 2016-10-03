@@ -41,9 +41,7 @@
              Properties="$(CommonMSBuildGlobalProperties)"
              />
   </Target>
-  
-
-  
+    
   <Target Name="RebuildSolution">
 
     <Message Text="Rebuilding %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
