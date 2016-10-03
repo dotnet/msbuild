@@ -536,6 +536,7 @@ namespace Microsoft.Build.Evaluation
         public bool SkipEvaluation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string SubToolsetVersion { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.ProjectTargetInstance> Targets { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public bool ThrowInsteadOfSplittingItemElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string ToolsVersion { get { throw null; } }
         public Microsoft.Build.Construction.ProjectRootElement Xml { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Collections.Generic.IList<Microsoft.Build.Evaluation.ProjectItem> AddItem(string itemType, string unevaluatedInclude) { throw null; }

@@ -11,6 +11,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore\*.targets"
+          Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore')"/>
+
+  <Import Project="$(CustomBeforeMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonCrossTargetingTargets)')"/>
+
   <!--
   ============================================================
                                        DispatchToInnerBuilds
@@ -99,15 +107,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This will import NuGet restore targets, which is a special case separate from the package -> project extension 
     mechanism below. For obvious reasons,  we need restore to work before any package assets are available.
 
-    TODO: https://github.com/Microsoft/msbuild/issues/1061: This needs to be generalized with less coupling to nuget, 
-          but we can't blindly import everything in Microsoft.Common.targets\ImportAfter as some things will not be
-          prepared to be inserted in to a cross-targeting build 
+    TODO: https://github.com/Microsoft/msbuild/issues/1061: This is now generalized with less coupling to nuget, 
+          but this codepath should remain as a compat shim until NuGet and the CLI use the CrossTargeting imports.
   -->
   <PropertyGroup>
     <ImportByWildcardAfterMicrosoftCommonTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonTargets>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*.NuGet.*.targets" 
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*.NuGet.*.targets"
           Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
+
+  <Import Project="$(CustomAfterMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomAfterMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomAfterMicrosoftCommonCrossTargetingTargets)')"/>
+
+  <!--
+    Allow extensions like NuGet restore to work before any package assets are available.
+  -->
+  <PropertyGroup>
+    <ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter\*.targets" 
+          Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter')"/>
 
   <!--
     Import project extensions which usually come from packages.  Package management systems will create a file at:

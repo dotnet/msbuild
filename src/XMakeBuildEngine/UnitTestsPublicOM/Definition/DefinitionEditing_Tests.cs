@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -24,6 +25,125 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// </summary>
     public class DefinitionEditing_Tests
     {
+        public delegate void SetupProject(Project p);
+
+        public static IEnumerable<object[]> ItemElementsThatRequireSplitting
+        {
+            get
+            {
+                // explode on semicolon separated literals
+                yield return new object[]
+                {
+                    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                        <ItemGroup>
+                          <i Include=""i1;i2"">
+                            {0}
+                          </i>
+                        </ItemGroup>
+                      </Project>",
+                    0, // operate on first item
+                    null // project setup that should be performed afte the project is loaded. Used to simulate items coming from globs
+                };
+                // explode on item coming from property with one item
+                yield return new object[]
+                {
+                    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                        <PropertyGroup>
+                          <p>i1</p>
+                        </PropertyGroup>
+                        <ItemGroup>
+                          <i Include=""$(p)"" >
+                            {0}
+                          </i>
+                        </ItemGroup>
+                      </Project>",
+                    0,
+                    null
+                };
+                // explode on item coming from property with multiple items
+                yield return new object[]
+                {
+                    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                        <PropertyGroup>
+                          <p>i1;i2</p>
+                        </PropertyGroup>
+                        <ItemGroup>
+                          <i Include=""$(p)"" >
+                            {0}
+                          </i>
+                        </ItemGroup>
+                      </Project>",
+                    0,
+                    null
+                };
+                // explode on item coming from item refence with one item
+                yield return new object[]
+                {
+                    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                        <ItemGroup>
+                          <a Include=""i1"" />
+                          <i Include=""@(a)"" >
+                            {0}
+                          </i>
+                        </ItemGroup>
+                      </Project>",
+                    1, // operate on the second item. It is produced by the second item element
+                    null
+                };
+                // explode on item coming from item refence with multiple items
+                yield return new object[]
+                {
+                    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                        <ItemGroup>
+                          <a Include=""i1;i2"" />
+                          <i Include=""@(a)"" >
+                            {0}
+                          </i>
+                        </ItemGroup>
+                      </Project>",
+                    2, // operate on the third item. It is produced by the second item element
+                    null
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> ItemElementsWithGlobsThatRequireSplitting
+        {
+            get
+            {
+                // explode on item coming from glob that expands to one item
+                yield return new object[]
+                {
+                    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                        <ItemGroup>
+                          <a Include=""*.foo"">
+                            {0}
+                          </a>
+                        </ItemGroup>
+                      </Project>",
+                    0,
+                    new SetupProject(p => { p.AddItem("a", "1.foo"); })
+                };
+                // explode on item coming from glob that expands to multiple items
+                yield return new object[]
+                {
+                    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                        <ItemGroup>
+                          <a Include=""*.foo"">
+                            {0}
+                          </a>
+                        </ItemGroup>
+                      </Project>",
+                    0,
+                    new SetupProject(p =>
+                    {
+                        p.AddItem("a", "1.foo");
+                        p.AddItem("a", "2.foo");
+                    })
+                };
+            }
+        }
+
         /// <summary>
         /// Add an item to an empty project
         /// </summary>
@@ -1044,6 +1164,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
+        [Theory]
+        [MemberData(nameof(ItemElementsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        public void RenameThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
+        {
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo");});
+        }
+
         /// <summary>
         /// Change an item type.
         /// </summary>
@@ -1167,6 +1295,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(2, Helpers.MakeList(itemGroupElement.Items).Count);
             Assert.Equal(true, object.ReferenceEquals(itemGroupElement, item.Xml.Parent));
             Assert.Equal(true, object.ReferenceEquals(itemGroupElement, Helpers.GetFirst(project.GetItems("i")).Xml.Parent));
+        }
+
+        [Theory]
+        [MemberData(nameof(ItemElementsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        public void ChangeItemTypeThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
+        {
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.ItemType = "foo"; });
         }
 
         /// <summary>
@@ -1319,6 +1455,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(false, result); // false as it was not in the regular items collection
             itemsIgnoringCondition = Helpers.MakeList(project.GetItemsIgnoringCondition("i"));
             Assert.Equal(0, itemsIgnoringCondition.Count);
+        }
+
+        [Theory]
+        [MemberData(nameof(ItemElementsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        public void RemoveItemThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
+        {
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItem(i); });
+        }
+        
+        [Theory]
+        [MemberData(nameof(ItemElementsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        public void RemoveItemsThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
+        {
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new [] {i}); });
         }
 
         /// <summary>
@@ -1517,6 +1669,66 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
+        [Theory]
+        [MemberData(nameof(ItemElementsThatRequireSplitting))]
+        public void RemoveMetadataThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
+        {
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.RemoveMetadata("bar"); }, "bar");
+        }
+
+        [Theory]
+        // explode on item coming from glob that expands to one item
+        [InlineData(
+            @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                <ItemGroup>
+                    <a Include=""*.foo"">
+                      {0}
+                    </a>
+                </ItemGroup>
+              </Project>",
+            0, // operate on first item
+            new[] // files that should be captured by the glob
+            {
+                "a.foo"
+            }
+            )]
+        // explode on item coming from glob that expands to multiple items
+        [InlineData(
+            @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                <ItemGroup>
+                    <a Include=""*.foo"">
+                      {0}
+                    </a>
+                </ItemGroup>
+              </Project>",
+            0,
+            new[]
+            {
+                "a.foo",
+                "b.foo"
+            }
+            )]
+        public void RemoveMetadataThrowsWhenItemElementSplittingIsDisabledAndItemComesFromGlob(string projectContents, int itemIndex, string[] files)
+        {
+            using (var testProject = new Helpers.TestProjectWithFiles(projectContents, files))
+            {
+                var projectFile = testProject.ProjectFile;
+
+                AssertDisabledItemSplitting(
+                    projectContents,
+                    itemIndex,
+                    null,
+                    (p, i) => { i.RemoveMetadata("bar"); },
+                    "bar",
+                    p =>
+                    {
+                        File.WriteAllText(projectFile, p);
+                        return new Project(projectFile);
+                    });
+            }
+        }
+
         /// <summary>
         /// Setting an evaluated metadatum after its XML's parent has been removed should
         /// fail.
@@ -1549,6 +1761,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
+        [Theory]
+        [MemberData(nameof(ItemElementsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        public void SetMetadataThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
+        {
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.SetMetadataValue("foo", "bar"); });
+        }
+
         /// <summary>
         /// After removing an appropriate item group's XML without reevaluation an item is added;
         /// it should go in a new one
@@ -2376,6 +2597,42 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        private static void AssertDisabledItemSplitting(string projectContents, int itemIndex, SetupProject setupProject, Action<Project, ProjectItem> itemOperation, string metadataToInsert = "", Func<string, Project> projectProvider = null)
+        {
+            var metadataElement = string.IsNullOrEmpty(metadataToInsert)
+                ? ""
+                : $"<{metadataToInsert}>metadata</{metadataToInsert}>";
+
+            projectContents = string.Format(projectContents, metadataElement);
+            projectContents = ObjectModelHelpers.CleanupFileContents(projectContents);
+
+            Project project;
+
+            if (projectProvider != null)
+            {
+                project = projectProvider(projectContents);
+            }
+            else
+            {
+                var content = XmlReader.Create(new StringReader(projectContents));
+                project = new Project(content);
+
+                setupProject?.Invoke(project);
+                project.ReevaluateIfNecessary();
+            }
+
+            project.ThrowInsteadOfSplittingItemElement = true;
+            
+            var initialXml = project.Xml.RawXml;
+            var item = project.Items.ElementAt(itemIndex);
+
+            var ex = Assert.Throws(typeof(InvalidOperationException), () => itemOperation(project, item));
+            
+            Assert.Matches("The requested operation needs to split the item element at location .* into individual elements but item element splitting is disabled with .*", ex.Message);
+            Assert.False(project.IsDirty, "project should not be dirty after item splitting threw exception");
+            Assert.Equal(initialXml, project.Xml.RawXml);
         }
     }
 }

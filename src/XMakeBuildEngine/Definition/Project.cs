@@ -164,6 +164,23 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Certain item operations split the item element in multiple elements if the include
+        /// contains globs, references to items or properties, or multiple item values.
+        ///
+        /// The items operations that may expand item elements are:
+        /// - <see cref="RemoveItem"/>
+        /// - <see cref="RemoveItems"/>
+        /// - <see cref="ProjectItem.ChangeItemType"/>
+        /// - <see cref="ProjectItem.Rename"/>
+        /// - <see cref="ProjectItem.RemoveMetadata"/>
+        /// - <see cref="ProjectItem.SetMetadataValue"/>
+        /// 
+        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
+        /// instead of expanding the item element. 
+        /// </summary>
+        public bool ThrowInsteadOfSplittingItemElement { get; set; }
+
+        /// <summary>
         /// Construct an empty project, evaluating with the specified project collection's
         /// global properties and default tools version.
         /// Project will be added to the specified project collection when it is named.
@@ -2136,10 +2153,12 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal bool SplitItemElementIfNecessary(ProjectItemElement itemElement)
         {
-            if (!FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(itemElement.Include))
+            if (!ItemElementRequiresSplitting(itemElement))
             {
                 return false;
             }
+
+            ErrorUtilities.VerifyThrowInvalidOperation(!ThrowInsteadOfSplittingItemElement, "OM_CannotSplitItemElementWhenSplittingIsDisabled", itemElement.Location, $"{nameof(Project)}.{nameof(ThrowInsteadOfSplittingItemElement)}");
 
             List<ProjectItem> relevantItems = new List<ProjectItem>();
 
@@ -2151,11 +2170,6 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            if (relevantItems.Count <= 1)
-            {
-                return false;
-            }
-
             foreach (ProjectItem item in relevantItems)
             {
                 item.SplitOwnItemElement();
@@ -2164,6 +2178,13 @@ namespace Microsoft.Build.Evaluation
             itemElement.Parent.RemoveChild(itemElement);
 
             return true;
+        }
+
+        internal bool ItemElementRequiresSplitting(ProjectItemElement itemElement)
+        {
+            var hasCharactersThatRequireSplitting = FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(itemElement.Include);
+
+            return hasCharactersThatRequireSplitting;
         }
 
         /// <summary>
