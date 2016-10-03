@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Publish3.Tests
         [Fact]
         public void ItPublishesARunnableSelfContainedApp()
         {
-            var testAppName = "MSBuildTestAppPackageRefs";
+            var testAppName = "MSBuildTestApp";
             var testInstance = TestAssetsManager
                 .CreateTestInstance(testAppName);
 
