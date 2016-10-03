@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using System.Linq;
 using NuGet.Frameworks;
@@ -28,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Test
             var projectPath = GetProjectPath(dotnetTestParams.ProjectOrAssemblyPath);
             var runtimeIdentifiers = !string.IsNullOrEmpty(dotnetTestParams.Runtime)
                 ? new[] {dotnetTestParams.Runtime}
-                : RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();
+                : DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers();
             var exitCode = 0;
 
             // Create a workspace
