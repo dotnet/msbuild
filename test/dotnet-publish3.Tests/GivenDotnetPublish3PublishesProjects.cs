@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -37,6 +39,35 @@ namespace Microsoft.DotNet.Cli.Publish3.Tests
 
             new TestCommand("dotnet")
                 .ExecuteWithCapturedOutput(outputDll)
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
+        public void ItPublishesARunnableSelfContainedApp()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssetsManager
+                .CreateTestInstance(testAppName);
+
+            var testProjectDirectory = testInstance.TestRoot;
+            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+
+            new Publish3Command()
+                .WithFramework("netcoreapp1.0")
+                .WithRuntime(rid)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var outputProgram = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}");
+
+            new TestCommand(outputProgram)
+                .ExecuteWithCapturedOutput()
                 .Should()
                 .Pass()
                 .And
