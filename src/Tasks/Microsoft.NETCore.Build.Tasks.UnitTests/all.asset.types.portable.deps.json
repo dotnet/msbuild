@@ -1,0 +1,84 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v1.0",
+    "signature": "92c4a7720ef26003e081a02c73de57101baa7210"
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v1.0": {
+      "all.asset.types/1.0.0": {
+        "dependencies": {
+          "Libuv": "1.9.0",
+          "SharedContentA": "1.0.0",
+          "System.Runtime.Analyzers": "1.1.0",
+          "System.Spatial": "5.7.0"
+        },
+        "runtime": {
+          "all.asset.types.dll": {}
+        }
+      },
+      "libuv/1.9.0": {
+        "runtimeTargets": {
+          "runtimes/osx/native/libuv.dylib": {
+            "rid": "osx",
+            "assetType": "native"
+          },
+          "runtimes/win7-x64/native/libuv.dll": {
+            "rid": "win7-x64",
+            "assetType": "native"
+          }
+        }
+      },
+      "sharedcontenta/1.0.0": {},
+      "system.runtime.analyzers/1.1.0": {},
+      "system.spatial/5.7.0": {
+        "runtime": {
+          "lib/portable-net45+wp8+win8+wpa/System.Spatial.dll": {}
+        },
+        "resources": {
+          "lib/portable-net45+wp8+win8+wpa/de/System.Spatial.resources.dll": {
+            "locale": "de"
+          },
+          "lib/portable-net45+wp8+win8+wpa/zh-Hant/System.Spatial.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "all.asset.types/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "libuv/1.9.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-9Q7AaqtQhS8JDSIvRBt6ODSLWDBI4c8YxNxyCQemWebBFUtBbc6M5Vi5Gz1ZyIUlTW3rZK9bIr5gnVyv0z7a2Q==",
+      "path": "libuv/1.9.0",
+      "hashPath": "libuv.1.9.0.nupkg.sha512"
+    },
+    "sharedcontenta/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-N/xIU1u1s/O5f2352Ucuw2IdEYTrzvy+BrRIZJVHlRrccSCZesRktT1FDXU1alPulgHVXcAlga7BTVlaaReM7Q==",
+      "path": "sharedcontenta/1.0.0",
+      "hashPath": "sharedcontenta.1.0.0.nupkg.sha512"
+    },
+    "system.runtime.analyzers/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7XAHfxh0/c2WFS7s8zB2U9Imlhhbe9slaY/0Fo8b+tymQHWkE2oIEEn9E9Cf1HjwRs7NlsYlo4vFd+88lDVOPw==",
+      "path": "system.runtime.analyzers/1.1.0",
+      "hashPath": "system.runtime.analyzers.1.1.0.nupkg.sha512"
+    },
+    "system.spatial/5.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JHcy5NeYHzX6+AiUZcu+yB0Wc+foNk/37YmeMJTXOQ+fVbipfBKLz2y8njpjhi//1gJS/fAQhcS6KHNLDtwjcQ==",
+      "path": "system.spatial/5.7.0",
+      "hashPath": "system.spatial.5.7.0.nupkg.sha512"
+    }
+  }
+}

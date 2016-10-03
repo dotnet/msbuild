@@ -49,9 +49,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       Don't copy a compilation assembly if it's also a runtime assembly. There is no need to copy the same
       assembly to the 'refs' folder, if it is already in the publish directory.
       -->
-      <ResolvedFilesToPublish Include="@(ReferencePath)" Exclude="@(ResolvedAssembliesToPublish->'%(FullPath)')">
+      <ResolvedFileToPublish Include="@(ReferencePath)" Exclude="@(ResolvedAssembliesToPublish->'%(FullPath)')">
         <RelativePath>$(RefAssembliesFolderName)\%(Filename)%(Extension)</RelativePath>
-      </ResolvedFilesToPublish>
+      </ResolvedFileToPublish>
     </ItemGroup>
 
   </Target>

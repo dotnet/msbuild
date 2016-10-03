@@ -70,5 +70,16 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             return libraries.Where(e => !exclusionList.Contains(e.Name));
         }
+
+        public static IEnumerable<IGrouping<string, LockFileRuntimeTarget>> GetRuntimeTargetsGroups(
+            this LockFileTargetLibrary library, 
+            string assetType)
+        {
+            return library.RuntimeTargets
+                .FilterPlaceHolderFiles()
+                .Cast<LockFileRuntimeTarget>()
+                .Where(t => string.Equals(t.AssetType, assetType, StringComparison.OrdinalIgnoreCase))
+                .GroupBy(t => t.Runtime);
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace Microsoft.NETCore.TestFramework.Commands
         private Command CreateCommand(params string[] args)
         {
             var newArgs = args.ToList();
-            newArgs.Insert(0, $"build3");
+            newArgs.Insert(0, $"msbuild");
 
             return Command.Create(DotNetHostPath, newArgs);
         }

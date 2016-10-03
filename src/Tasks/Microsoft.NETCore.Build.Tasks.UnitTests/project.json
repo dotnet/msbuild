@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.7",
+    "NuGet.ProjectModel": "3.6.0-beta.1.msbuild.16",
     "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000933",
     "Microsoft.Build.Framework": "0.1.0-preview-00028-160627",
     "Microsoft.Build.Utilities.Core": "0.1.0-preview-00028-160627",
