@@ -19,9 +19,6 @@ namespace Microsoft.DotNet.Cli.Utils
         private static readonly CommandResolutionStrategy s_commandResolutionStrategy =
             CommandResolutionStrategy.ProjectToolsPackage;
 
-        private static readonly string s_currentRuntimeIdentifier = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
-
-
         private List<string> _allowedCommandExtensions;
         private IPackagedCommandSpecFactory _packagedCommandSpecFactory;
 

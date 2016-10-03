@@ -11,8 +11,6 @@ namespace Microsoft.DotNet.Tools.Restore
 {
     public partial class RestoreCommand
     {
-        private static readonly string DefaultRid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
-
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);

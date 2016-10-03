@@ -262,7 +262,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Generate .version file
             var version = buildVersion.NuGetVersion;
-            var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
+            var buildRid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}{buildRid}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(sdkOutputDirectory, ".version"), content);
 
             if(generateNugetPackagesArchive)

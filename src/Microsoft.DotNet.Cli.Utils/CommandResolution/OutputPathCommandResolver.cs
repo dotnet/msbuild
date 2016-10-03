@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var projectContext = ProjectContext.Create(
                 projectRootPath,
                 framework,
-                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
+                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers());
 
             if (projectContext.RuntimeIdentifier == null)
             {

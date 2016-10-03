@@ -8,8 +8,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>e5ed47ef-bf25-4da9-a7fe-290c642cbf0f</ProjectGuid>
     <RootNamespace>Microsoft.DotNet.Configurer</RootNamespace>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
