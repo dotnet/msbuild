@@ -220,7 +220,10 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             File.WriteAllText(depsJsonFile, "temp");
 
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
-            projectToolsCommandResolver.GenerateDepsJsonFile(lockFile, depsJsonFile);
+            projectToolsCommandResolver.GenerateDepsJsonFile(lockFile, depsJsonFile, new LockFileTargetLibrary {
+                Name = "dotnet-portable",
+                Version = new NuGetVersion("1.0.0")
+            });
 
             File.ReadAllText(depsJsonFile).Should().Be("temp");
             File.Delete(depsJsonFile);
