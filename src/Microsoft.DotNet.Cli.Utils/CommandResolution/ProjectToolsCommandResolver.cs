@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 using FileFormatException = Microsoft.DotNet.ProjectModel.FileFormatException;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -52,31 +53,25 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             string projectDirectory)
         {
-            var projectContext = GetProjectContextFromDirectoryForFirstTarget(projectDirectory);
-
-            if (projectContext == null)
-            {
-                return null;
-            }
-
-            var toolsLibraries = projectContext.ProjectFile.Tools.OrEmptyIfNull();
+            var lockFile = new LockFileFormat().Read(Path.Combine(projectDirectory, LockFileFormat.LockFileName));
+            var tools = lockFile.Tools.Where(t => t.Name.Contains(".NETCoreApp")).SelectMany(t => t.Libraries);
 
             return ResolveCommandSpecFromAllToolLibraries(
-                toolsLibraries,
+                tools,
                 commandName,
                 args,
-                projectContext);
+                lockFile);
         }
 
         private CommandSpec ResolveCommandSpecFromAllToolLibraries(
-            IEnumerable<LibraryDependency> toolsLibraries,
+            IEnumerable<LockFileTargetLibrary> toolsLibraries,
             string commandName,
             IEnumerable<string> args,
-            ProjectContext projectContext)
+            LockFile lockFile)
         {
             foreach (var toolLibrary in toolsLibraries)
             {
-                var commandSpec = ResolveCommandSpecFromToolLibrary(toolLibrary.LibraryRange, commandName, args, projectContext);
+                var commandSpec = ResolveCommandSpecFromToolLibrary(toolLibrary, commandName, args, lockFile);
 
                 if (commandSpec != null)
                 {
@@ -88,17 +83,18 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private CommandSpec ResolveCommandSpecFromToolLibrary(
-            LibraryRange toolLibraryRange,
+            LockFileTargetLibrary toolLibraryRange,
             string commandName,
             IEnumerable<string> args,
-            ProjectContext projectContext)
+            LockFile lockFile)
         {
-            var nugetPackagesRoot = projectContext.PackagesDirectory;
+            var nugetPackagesRoot = lockFile.PackageFolders.First().Path;
 
-            var lockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
+            var toolLockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
 
-            var toolLibrary = lockFile.Targets
-                .FirstOrDefault(t => t.TargetFramework.GetShortFolderName().Equals(s_toolPackageFramework.GetShortFolderName()))
+            var toolLibrary = toolLockFile.Targets
+                .FirstOrDefault(
+                    t => t.TargetFramework.GetShortFolderName().Equals(s_toolPackageFramework.GetShortFolderName()))
                 ?.Libraries.FirstOrDefault(l => l.Name == toolLibraryRange.Name);
 
             if (toolLibrary == null)
@@ -106,8 +102,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var depsFileRoot = Path.GetDirectoryName(lockFile.Path);
-            var depsFilePath = GetToolDepsFilePath(toolLibraryRange, lockFile, depsFileRoot);
+            var depsFileRoot = Path.GetDirectoryName(toolLockFile.Path);
+            var depsFilePath = GetToolDepsFilePath(toolLibraryRange, toolLockFile, depsFileRoot);
 
             var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(nugetPackagesRoot);
 
@@ -123,7 +119,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private LockFile GetToolLockFile(
-            LibraryRange toolLibrary,
+            LockFileTargetLibrary toolLibrary,
             string nugetPackagesRoot)
         {
             var lockFilePath = GetToolLockFilePath(toolLibrary, nugetPackagesRoot);
@@ -148,14 +144,14 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private string GetToolLockFilePath(
-            LibraryRange toolLibrary,
+            LockFileTargetLibrary toolLibrary,
             string nugetPackagesRoot)
         {
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
 
             return toolPathCalculator.GetBestLockFilePath(
                 toolLibrary.Name,
-                toolLibrary.VersionRange,
+                new VersionRange(toolLibrary.Version),
                 s_toolPackageFramework);
         }
 
@@ -177,7 +173,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private string GetToolDepsFilePath(
-            LibraryRange toolLibrary,
+            LockFileTargetLibrary toolLibrary,
             LockFile toolLockFile,
             string depsPathRoot)
         {
