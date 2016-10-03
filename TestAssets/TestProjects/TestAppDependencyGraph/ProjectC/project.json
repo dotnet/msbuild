@@ -10,9 +10,19 @@
     ]
   },
   "dependencies": {
-    "ProjectG": {
+    "ProjectD": {
       "target": "project",
       "version": "1.0.0-*"
+    },
+    "ProjectE": {
+      "target": "project",
+      "version": "1.0.0-*"
+    },
+    "CsprojLibrary1": {
+      "target": "project"
+    },
+    "CsprojLibrary2": {
+      "target": "project"
     },
     "NETStandard.Library": "1.6.0"
   },
