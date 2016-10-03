@@ -181,42 +181,37 @@ namespace Microsoft.DotNet.Cli.Utils
                 depsPathRoot,
                 toolLibrary.Name + FileNameSuffixes.DepsJson);
 
-            EnsureToolJsonDepsFileExists(toolLockFile, depsJsonPath);
+            EnsureToolJsonDepsFileExists(toolLockFile, depsJsonPath, toolLibrary);
 
             return depsJsonPath;
         }
 
         private void EnsureToolJsonDepsFileExists(
             LockFile toolLockFile,
-            string depsPath)
+            string depsPath,
+            LockFileTargetLibrary toolLibrary)
         {
             if (!File.Exists(depsPath))
             {
-                GenerateDepsJsonFile(toolLockFile, depsPath);
+                GenerateDepsJsonFile(toolLockFile, depsPath, toolLibrary);
             }
         }
 
         // Need to unit test this, so public
         public void GenerateDepsJsonFile(
             LockFile toolLockFile,
-            string depsPath)
+            string depsPath,
+            LockFileTargetLibrary toolLibrary)
         {
             Reporter.Verbose.WriteLine($"Generating deps.json at: {depsPath}");
 
-            var projectContext = new ProjectContextBuilder()
-                .WithLockFile(toolLockFile)
-                .WithTargetFramework(s_toolPackageFramework.ToString())
-                .Build();
-
-            var exporter = projectContext.CreateExporter(Constants.DefaultConfiguration);
+            var singleProjectInfo = new SingleProjectInfo(
+                toolLibrary.Name,
+                toolLibrary.Version.ToFullString(),
+                Enumerable.Empty<ResourceAssemblyInfo>());
 
             var dependencyContext = new DependencyContextBuilder()
-                .Build(null,
-                    null,
-                    exporter.GetAllExports(),
-                    true,
-                    s_toolPackageFramework,
-                    string.Empty);
+                .Build(singleProjectInfo, null, toolLockFile, s_toolPackageFramework, null);
 
             var tempDepsFile = Path.GetTempFileName();
             using (var fileStream = File.Open(tempDepsFile, FileMode.Open, FileAccess.Write))
