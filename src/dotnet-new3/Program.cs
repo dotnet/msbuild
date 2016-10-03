@@ -107,8 +107,11 @@ namespace dotnet_new3
                     return 0;
                 }
 
+                //TODO: determine the locale, pass it to the host constructor
+                string locale = string.Empty;
+
                 string aliasName = alias.HasValue() ? alias.Value() : null;
-                ITemplateEngineHost host = new DotNetNew3TemplateEngineHost();
+                ITemplateEngineHost host = new DotNetNew3TemplateEngineHost(locale);
 
                 string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
 

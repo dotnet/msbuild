@@ -9,15 +9,19 @@ namespace dotnet_new3
     {
         private IReadOnlyDictionary<string, string> _HostDefaults { get; }
 
-        public DotNetNew3TemplateEngineHost()
+        public DotNetNew3TemplateEngineHost(string locale)
         {
+            Locale = locale;
             _HostDefaults = new Dictionary<string, string>();
         }
 
-        public DotNetNew3TemplateEngineHost(Dictionary<string, string> defaults)
+        public DotNetNew3TemplateEngineHost(string locale, Dictionary<string, string> defaults)
         {
+            Locale = locale;
             _HostDefaults = defaults;
         }
+
+        public string Locale { get; private set; }
 
         public void LogMessage(string message)
         {
