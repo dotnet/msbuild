@@ -109,9 +109,9 @@ namespace dotnet_new3
 
                 //TODO: determine the locale, pass it to the host constructor
                 string locale = string.Empty;
+                //ITemplateEngineHost host = new DotNetNew3TemplateEngineHost(locale);
 
                 string aliasName = alias.HasValue() ? alias.Value() : null;
-                ITemplateEngineHost host = new DotNetNew3TemplateEngineHost(locale);
 
                 string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
 
@@ -180,7 +180,7 @@ namespace dotnet_new3
                     return 0;
                 }
 
-                if (await TemplateCreator.Instantiate(host, template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
+                if (await TemplateCreator.Instantiate(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
                 {
                     ListTemplates(template);
                     return -1;
