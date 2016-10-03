@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Utils
             // osx.10.11, the project.json "runtimes" section cannot contain osx.10.12, since
             // that RID isn't contained in the runtime graph - users will get a restore error.
             FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
-            if (!fxDepsFile.IsCurrentRuntimeSupported())
+            if (!fxDepsFile.SupportsCurrentRuntime())
             {
                 string buildRid = DotnetFiles.VersionFileObject.BuildRid;
                 if (!string.IsNullOrEmpty(buildRid))

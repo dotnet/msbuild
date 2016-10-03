@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _depsFilePath = Muxer.GetDataFromAppDomain("FX_DEPS_FILE");
         }
 
-        public bool IsCurrentRuntimeSupported()
+        public bool SupportsCurrentRuntime()
         {
             return IsRuntimeSupported(RuntimeEnvironment.GetRuntimeIdentifier());
         }
