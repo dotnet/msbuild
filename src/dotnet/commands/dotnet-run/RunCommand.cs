@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Run
                 .EnsureValid(Project)
                 .FrameworkOnlyContexts;
 
-            var rids = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();
+            var rids = DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers();
 
             ProjectContext frameworkContext;
             if (Framework == null)
