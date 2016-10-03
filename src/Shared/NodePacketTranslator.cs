@@ -498,32 +498,6 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-
-            /// <summary>
-            /// Translates a dictionary of type { string, List {string} }
-            /// </summary>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
-            public void TranslateDictionaryList(ref Dictionary<string, List<string>> dictionary, IEqualityComparer<string> comparer)
-            {
-                if (!TranslateNullable(dictionary))
-                {
-                    return;
-                }
-
-                int count = _reader.ReadInt32();
-                dictionary = new Dictionary<string, List<string>>(count, comparer);
-
-                for (int i = 0; i < count; i++)
-                {
-                    string key = null;
-                    Translate(ref key);
-                    List<string> value = null;
-                    Translate(ref value);
-                    dictionary[key] = value;
-                }
-            }
-
             /// <summary>
             /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
             /// </summary>
@@ -1021,30 +995,6 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref key);
                     T value = pair.Value;
                     Translate(ref value, valueFactory);
-                }
-            }
-
-            /// <summary>
-            /// Translates a dictionary of type { string, List {string} }
-            /// </summary>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
-            public void TranslateDictionaryList(ref Dictionary<string, List<string>> dictionary, IEqualityComparer<string> comparer)
-            {
-                if (!TranslateNullable(dictionary))
-                {
-                    return;
-                }
-
-                int count = dictionary.Count;
-                _writer.Write(count);
-
-                foreach (KeyValuePair<string, List<string>> pair in dictionary)
-                {
-                    string key = pair.Key;
-                    Translate(ref key);
-                    List<string> value = pair.Value;
-                    Translate(ref value);
                 }
             }
 

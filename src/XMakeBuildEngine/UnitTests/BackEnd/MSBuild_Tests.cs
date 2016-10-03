@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class MSBuildTask_Tests : IDisposable
+    public sealed class MSBuildTask_Tests : IDisposable
     {
         public MSBuildTask_Tests()
         {
@@ -1602,7 +1602,43 @@ namespace Microsoft.Build.UnitTests
                 Project project = new Project(projectFile2);
                 MockLogger logger = new MockLogger();
 
-                project.Build(logger);
+                Assert.True(project.Build(logger));
+
+                logger.AssertLogContains("[foo.out]");
+            }
+            finally
+            {
+                File.Delete(projectFile1);
+                File.Delete(projectFile2);
+            }
+        }
+
+        [Fact]
+        public void ProjectFileWithoutNamespaceBuilds()
+        {
+            string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                <Project>
+                    <Target Name=`Build` Outputs=`foo.out` />
+                </Project>
+                ");
+
+            string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                <Project>                  
+                    <Target Name=`t`>
+                        <MSBuild Projects=`" + projectFile1 + @"` Targets=`Build`>
+                            <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
+                        </MSBuild>
+                        <Message Text=`[@(out)]`/>
+                    </Target>	
+                </Project>
+                ");
+
+            try
+            {
+                Project project = new Project(projectFile2);
+                MockLogger logger = new MockLogger();
+
+                Assert.True(project.Build(logger));
 
                 logger.AssertLogContains("[foo.out]");
             }

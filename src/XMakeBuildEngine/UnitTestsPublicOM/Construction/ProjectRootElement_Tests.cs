@@ -205,6 +205,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
            );
         }
+
         /// <summary>
         /// Valid Xml, invalid namespace on the root
         /// </summary>
@@ -213,14 +214,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string content = @"
-                    <Project xmlns='XXX'/>
-                ";
-
+                var content = @"<Project xmlns='XXX'/>";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Invalid root tag
         /// </summary>

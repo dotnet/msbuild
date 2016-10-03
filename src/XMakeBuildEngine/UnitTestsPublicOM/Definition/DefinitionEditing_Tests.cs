@@ -630,7 +630,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>");
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
@@ -665,7 +665,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>");
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
@@ -909,7 +909,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>");
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
@@ -1223,7 +1223,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>");
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
@@ -1821,7 +1821,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>");
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
 

@@ -267,9 +267,13 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectTargetElement AddTarget(string name) { throw null; }
         public Microsoft.Build.Construction.ProjectUsingTaskElement AddUsingTask(string name, string assemblyFile, string assemblyName) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create() { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Create(Microsoft.Build.Evaluation.NewProjectFileOptions projectFileOptions) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Create(Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Evaluation.NewProjectFileOptions projectFileOptions) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(string path) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Create(string path, Microsoft.Build.Evaluation.NewProjectFileOptions newProjectFileOptions) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Create(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Evaluation.NewProjectFileOptions newProjectFileOptions) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Create(System.Xml.XmlReader xmlReader, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
@@ -469,6 +473,15 @@ namespace Microsoft.Build.Evaluation
         public string Glob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectItemElement ItemElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
+    [System.FlagsAttribute]
+    public enum NewProjectFileOptions
+    {
+        IncludeAllOptions = -1,
+        IncludeToolsVersion = 2,
+        IncludeXmlDeclaration = 1,
+        IncludeXmlNamespace = 4,
+        None = 0,
+    }
     public enum Operation
     {
         Exclude = 1,
@@ -485,8 +498,11 @@ namespace Microsoft.Build.Evaluation
         public Project(Microsoft.Build.Construction.ProjectRootElement xml, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public Project(Microsoft.Build.Construction.ProjectRootElement xml, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Evaluation.ProjectLoadSettings loadSettings) { }
         public Project(Microsoft.Build.Construction.ProjectRootElement xml, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Evaluation.ProjectLoadSettings loadSettings) { }
+        public Project(Microsoft.Build.Evaluation.NewProjectFileOptions newProjectFileOptions) { }
         public Project(Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
+        public Project(Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Evaluation.NewProjectFileOptions newProjectFileOptions) { }
         public Project(System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
+        public Project(System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Evaluation.NewProjectFileOptions newProjectFileOptions) { }
         public Project(string projectFile) { }
         public Project(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion) { }
         public Project(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }

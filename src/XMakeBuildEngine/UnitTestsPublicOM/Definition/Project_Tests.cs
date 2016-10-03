@@ -14,6 +14,7 @@ using System.Linq;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.OM.UnitTests.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -2123,7 +2124,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.RemoveItems(project.GetItems("j").Take(2));
             Assert.Equal(3, project.Items.Count());
 
-            StringWriter writer = new StringWriter();
+            StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
             string projectExpectedContents = ObjectModelHelpers.CleanupFileContents(@"

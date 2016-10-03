@@ -161,9 +161,15 @@ namespace Microsoft.Build.Construction
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.Name != XMakeElements.visualStudioProject, element.Location, "ProjectUpgradeNeeded", _project.FullPath);
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.LocalName == XMakeElements.project, element.Location, "UnrecognizedElement", element.Name);
 
-            if (element.Prefix.Length > 0 || !String.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
+            // If a namespace was specified it must be the default MSBuild namespace.
+            if (!ProjectXmlUtilities.VerifyValidProjectNamespace(element))
             {
-                ProjectErrorUtilities.ThrowInvalidProject(element.Location, "ProjectMustBeInMSBuildXmlNamespace", XMakeAttributes.defaultXmlNamespace);
+                ProjectErrorUtilities.ThrowInvalidProject(element.Location, "ProjectMustBeInMSBuildXmlNamespace",
+                    XMakeAttributes.defaultXmlNamespace);
+            }
+            else
+            {
+                _project.XmlNamespace = element.NamespaceURI;
             }
 
             ParseProjectElement(element);
