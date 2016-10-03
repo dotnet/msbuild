@@ -2838,6 +2838,34 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        // As a perf optimization, GetItemProvenance always appends Inconclusive when property references are present, even if the property does not contribute any item that matches the provenance call
+        // Item references do not append Inconclusive when they do not contribute matching items.
+        public void GetItemProvenanceShouldReturnInconclusiveWhenIndirectPropertyDoesNotMatch()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1`/>
+                    <B Include=`a;$(P)`/>
+                    <C Include=`a;@(A)`/>
+                  </ItemGroup>
+
+                  <PropertyGroup>
+                    <P></P>  
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Include, Provenance.StringLiteral | Provenance.Inconclusive, 1),
+                Tuple.Create("C", Operation.Include, Provenance.StringLiteral, 1)
+            };
+
+            AssertProvenanceResult(expected, project, "a");
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldRespectItemConditions()
         {
             var project =
