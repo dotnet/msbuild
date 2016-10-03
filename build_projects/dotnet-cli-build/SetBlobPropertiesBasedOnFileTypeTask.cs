@@ -19,15 +19,18 @@ namespace Microsoft.DotNet.Cli.Build
         public string AccountKey { get; set; }
 
         [Required]
+        public string ContainerName { get; set; }
+
+        [Required]
         public ITaskItem[] Items { get; set; }
 
         private AzurePublisher AzurePublisherTool
         {
             get
             {
-                if(_azurePublisher == null)
+                if (_azurePublisher == null)
                 {
-                    _azurePublisher = new AzurePublisher(AccountName, AccountKey);
+                    _azurePublisher = new AzurePublisher(AccountName, AccountKey, ContainerName);
                 }
 
                 return _azurePublisher;
@@ -42,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Build
                 return false;
             }
 
-            foreach(var item in Items)
+            foreach (var item in Items)
             {
                 string relativeBlobPath = item.GetMetadata("RelativeBlobPath");
                 if (string.IsNullOrEmpty(relativeBlobPath))
@@ -53,7 +56,7 @@ namespace Microsoft.DotNet.Cli.Build
                 }
 
                 AzurePublisherTool.SetBlobPropertiesBasedOnFileType(relativeBlobPath);
-            }            
+            }
 
             return true;
         }
