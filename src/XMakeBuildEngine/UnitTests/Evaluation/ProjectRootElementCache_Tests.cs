@@ -87,20 +87,21 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/282")]
+#else
+        [Fact]
+#endif
+
         public void AddEntryStrongReference()
         {
-            if (NativeMethodsShared.IsMono)
-            {
-                return; // "Mono has conservative GC, does not collect everything immediately"
-            }
-
-            ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
+            string projectPath = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
+            ProjectRootElement projectRootElement = ProjectRootElement.Create(projectPath);
 
             projectRootElement = null;
             GC.Collect();
 
-            projectRootElement = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true, false);
+            projectRootElement = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get(projectPath, (p, c) => { throw new InvalidOperationException(); }, true, false);
 
             Assert.NotNull(projectRootElement);
 
@@ -108,8 +109,8 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             projectRootElement = null;
             GC.Collect();
 
-            Assert.Null(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet("c:\\foo"));
-        }
+            Assert.Null(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(projectPath));
+        }   
 
         /// <summary>
         /// Cache should not return a ProjectRootElement if the file it was loaded from has since changed -
