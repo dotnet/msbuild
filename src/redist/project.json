@@ -28,7 +28,8 @@
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
     "System.Runtime.Serialization.Xml": "4.1.1",
     "NuGet.Build.Tasks": "3.6.0-beta.1.msbuild.17",
-    "Microsoft.TestPlatform.CLI": "15.0.0-preview-20160915-01"
+    "Microsoft.TestPlatform.CLI": "15.0.0-preview-20161003-01",
+    "Microsoft.TestPlatform.Build": "15.0.0-preview-20160928-07"
   },
   "frameworks": {
     "netcoreapp1.0": {

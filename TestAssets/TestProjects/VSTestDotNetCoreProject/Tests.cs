@@ -2,6 +2,14 @@
 
 namespace TestNamespace
 {
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+
+        }
+    }
+
     [TestClass]
     public class VSTestTests
     {
@@ -9,11 +17,11 @@ namespace TestNamespace
         public void VSTestPassTest()
         {
         }
-		
-		[TestMethod]
+
+        [TestMethod]
         public void VSTestFailTest()
         {
-			Assert.Fail();
+            Assert.Fail();
         }
     }
 }

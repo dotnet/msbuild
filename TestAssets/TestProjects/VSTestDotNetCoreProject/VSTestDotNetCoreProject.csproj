@@ -3,23 +3,35 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
-    <OutputPath>bin\$(Configuration)\netcoreapp1.0</OutputPath>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+    <OutputPath>bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <None Include="project.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.App">
+      <Version>1.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Sdk">
+      <Version>1.0.0-alpha-20160930-1</Version>
+    </PackageReference>
+	<PackageReference Include="MSTest.TestFramework">
+      <Version>1.0.4-preview</Version>
+    </PackageReference>
+	<PackageReference Include="MSTest.TestAdapter">
+      <Version>1.1.3-preview</Version>
+    </PackageReference>
+	<PackageReference Include="Microsoft.TestPlatform.TestHost">
+      <Version>15.0.0-preview-20160928-07</Version>
+    </PackageReference>
+	<PackageReference Include="Microsoft.TestPlatform.ObjectModel">
+      <Version>15.0.0-preview-20160928-07</Version>
+    </PackageReference>
   </ItemGroup>
 
   <Import Project="$(MSBuildExtensionsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
-    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testadapter\1.0.3-preview\build\_common\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testadapter\1.0.3-preview\build\dotnet\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testadapter\1.0.3-preview\build\_common\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testframework\1.0.1-preview\lib\dotnet\Microsoft.VisualStudio.TestPlatform.TestFramework.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testframework\1.0.1-preview\lib\dotnet\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
-  </Target>
 </Project>
