@@ -7,7 +7,7 @@ using System.Linq;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.CommandResolution
 {
     internal static class LockFileTargetExtensions
     {

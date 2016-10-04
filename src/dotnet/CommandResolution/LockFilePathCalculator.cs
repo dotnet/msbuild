@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Execution;
+using System.Linq;
+using Microsoft.Build.Evaluation;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.CommandResolution
 {
     internal class LockFilePathCalculator
     {
@@ -19,12 +21,21 @@ namespace Microsoft.DotNet.Cli.Utils
         private string ResolveLockFilePathUsingCSProj(string projectDirectory)
         {
             string csProjPath = GetCSProjPath(projectDirectory);
-            if(csProjPath != null)
+            if(csProjPath == null)
             {
-                ProjectInstance projectInstance = new ProjectInstance(csProjPath, null, null);
+                return null;
             }
 
-            return null;
+            var globalProperties = new Dictionary<string, string>()
+            {
+                { "MSBuildExtensionsPath", AppContext.BaseDirectory }
+            };
+
+            Project project = new Project(csProjPath, globalProperties, null);
+            // TODO: This is temporary. We should use ProjectLockFile property, but for some reason, it is coming up as project.lock.json
+            // instead of the path to project.assets.json.
+            var lockFilePath = project.AllEvaluatedProperties.FirstOrDefault(p => p.Name.Equals("BaseIntermediateOutputPath")).EvaluatedValue;
+            return Path.Combine(lockFilePath, "project.assets.json");
         }
 
         private string ReturnProjectLockJson(string projectDirectory)

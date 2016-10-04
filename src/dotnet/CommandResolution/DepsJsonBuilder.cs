@@ -12,13 +12,13 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.CommandResolution
 {
-    internal class DependencyContextBuilder
+    internal class DepsJsonBuilder
     {
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
 
-        public DependencyContextBuilder()
+        public DepsJsonBuilder()
         {
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(path: null);

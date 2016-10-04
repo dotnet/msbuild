@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
@@ -11,7 +12,7 @@ using NuGet.ProjectModel;
 using NuGet.Versioning;
 using FileFormatException = Microsoft.DotNet.ProjectModel.FileFormatException;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.CommandResolution
 {
     public class ProjectToolsCommandResolver : ICommandResolver
     {
@@ -52,7 +53,8 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             string projectDirectory)
         {
-            var lockFile = new LockFileFormat().Read(Path.Combine(projectDirectory, LockFileFormat.LockFileName));
+            var lockFilePathCalculator = new LockFilePathCalculator();
+            var lockFile = new LockFileFormat().Read(lockFilePathCalculator.GetLockFilePath(projectDirectory));
             var tools = lockFile.Tools.Where(t => t.Name.Contains(".NETCoreApp")).SelectMany(t => t.Libraries);
 
             return ResolveCommandSpecFromAllToolLibraries(
@@ -209,7 +211,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 toolLibrary.Version.ToFullString(),
                 Enumerable.Empty<ResourceAssemblyInfo>());
 
-            var dependencyContext = new DependencyContextBuilder()
+            var dependencyContext = new DepsJsonBuilder()
                 .Build(singleProjectInfo, null, toolLockFile, s_toolPackageFramework, null);
 
             var tempDepsFile = Path.GetTempFileName();

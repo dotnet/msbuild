@@ -5,9 +5,28 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal static class CommandResolver
+    internal class CommandResolver
     {
         public static CommandSpec TryResolveCommandSpec(
+            string commandName,
+            IEnumerable<string> args,
+            NuGetFramework framework = null,
+            string configuration = Constants.DefaultConfiguration,
+            string outputPath = null,
+            string applicationName = null)
+        {
+            return TryResolveCommandSpec(
+                new DefaultCommandResolverPolicy(),
+                commandName,
+                args,
+                framework,
+                configuration,
+                outputPath,
+                applicationName);
+        }
+
+        public static CommandSpec TryResolveCommandSpec(
+            ICommandResolverPolicy commandResolverPolicy,
             string commandName,
             IEnumerable<string> args,
             NuGetFramework framework = null,
@@ -26,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 ApplicationName = applicationName
             };
 
-            var defaultCommandResolver = DefaultCommandResolverPolicy.Create();
+            var defaultCommandResolver = commandResolverPolicy.CreateCommandResolver();
 
             return defaultCommandResolver.Resolve(commandResolverArgs);
         }
