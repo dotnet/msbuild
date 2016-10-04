@@ -48,7 +48,10 @@ namespace Microsoft.DotNet.Migration.Tests
         public void It_migrates_dotnet_new_console_with_identical_outputs()
         {
             var projectDirectory = Path.Combine(AppContext.BaseDirectory, "newconsoletest");
-            Directory.Delete(projectDirectory, true);
+            if (Directory.Exists(projectDirectory))
+            {
+                Directory.Delete(projectDirectory, true);
+            }
             Directory.CreateDirectory(projectDirectory);
 
             var outputComparisonData = GetDotnetNewComparisonData(projectDirectory, "console");
