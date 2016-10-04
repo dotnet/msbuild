@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}"
 EndProject
@@ -19,6 +19,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27-BA35-44B2-AC57-E54551791C64}"
 	ProjectSection(SolutionItems) = preProject
 		build\build.proj = build\build.proj
+		build\DependencyVersions.props = build\DependencyVersions.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{13EE1E3C-D7F4-48D3-87AE-94CBCCF574E9}"

@@ -42,4 +42,6 @@
     <!-- Assembly signing isn't supported by non-Windows MSBuild. Disable until supported. See #55 (https://github.com/dotnet/sdk/issues/55) -->
     <SignAssembly Condition="'$(SignAssembly)'=='' AND '$(OS)'=='Windows_NT'">true</SignAssembly>
   </PropertyGroup>
+
+  <Import Project="build\DependencyVersions.props" />
 </Project>

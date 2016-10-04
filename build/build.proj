@@ -29,6 +29,14 @@
     <Exec Command="$(DotNetTool) restore src test --legacy-packages-directory --verbosity Minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
+
+    <ItemGroup>
+      <ProjectToRestore3 Include="src\Tasks\Microsoft.NETCore.Build.Tasks\Microsoft.NETCore.Build.Tasks.csproj" />
+    </ItemGroup>
+
+    <Exec Command="$(DotNetTool) restore3 %(ProjectToRestore3.Identity) /v:minimal /p:SkipInvalidConfigurations=true"
+          WorkingDirectory="$(RepositoryRootDirectory)"
+          />
   </Target>
 
   <Target Name="BuildSolution">
