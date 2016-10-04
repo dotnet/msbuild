@@ -202,7 +202,7 @@
 
       <!-- Generate .version file -->
       <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
-                        Lines="$(CommitHash);$(SdkVersion)"
+                        Lines="$(CommitHash);$(SdkVersion);$(Rid)"
                         Overwrite="true" />
 
       <ItemGroup>
