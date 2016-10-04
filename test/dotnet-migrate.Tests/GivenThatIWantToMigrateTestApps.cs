@@ -16,6 +16,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Migrate;
 using Build3Command = Microsoft.DotNet.Tools.Test.Utilities.Build3Command;
 using BuildCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildCommand;
+using System.Runtime.Loader;
 
 namespace Microsoft.DotNet.Migration.Tests
 {
@@ -26,7 +27,6 @@ namespace Microsoft.DotNet.Migration.Tests
         // https://github.com/dotnet/sdk/issues/73 [InlineData("TestAppWithLibrary/TestApp", false)]
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
-        [InlineData("TestAppWithSigning")]
         public void It_migrates_apps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
@@ -43,6 +43,25 @@ namespace Microsoft.DotNet.Migration.Tests
             }
             outputsIdentical.Should().BeTrue();
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
+        }
+
+        public void It_migrates_signed_apps(string projectName)
+        {
+            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppWithSigning", callingMethod: "i").WithLockFiles().Path;
+
+            CleanBinObj(projectDirectory);
+
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
+
+            var outputsIdentical =
+                outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
+            if (!outputsIdentical)
+            {
+                OutputDiagnostics(outputComparisonData);
+            }
+            outputsIdentical.Should().BeTrue();
+            VerifyAllMSBuildOutputsRunnable(projectDirectory);
+            VerifyAllMSBuildOutputsAreSigned(projectDirectory);
         }
 
         [Fact]
@@ -235,6 +254,21 @@ namespace Microsoft.DotNet.Migration.Tests
             foreach (var dll in runnableDlls)
             {
                 new TestCommand("dotnet").ExecuteWithCapturedOutput(dll).Should().Pass();
+            }
+        }
+
+        private void VerifyAllMSBuildOutputsAreSigned(string projectDirectory)
+        {
+            var dllFileName = Path.GetFileName(projectDirectory) + ".dll";
+
+            var runnableDlls = Directory.EnumerateFiles(Path.Combine(projectDirectory, "bin"), dllFileName,
+                SearchOption.AllDirectories);
+
+            foreach (var dll in runnableDlls)
+            {
+                var assemblyName = AssemblyLoadContext.GetAssemblyName(dll);
+                var token = assemblyName.GetPublicKeyToken();
+                token.Should().NotBeNullOrEmpty();
             }
         }
 
