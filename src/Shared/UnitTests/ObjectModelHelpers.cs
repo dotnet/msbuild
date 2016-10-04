@@ -581,41 +581,28 @@ namespace Microsoft.Build.UnitTests
             string toolsVersion /* may be null */
             )
         {
-            // Anonymous in-memory projects use the current directory for $(MSBuildProjectDirectory).
-            // We need to set the directory to something reasonable.
-            string originalDir = Directory.GetCurrentDirectory();
-            try
+            XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
+
+            Project project = new Project
+                (
+                XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
+                null,
+                toolsVersion,
+                projectCollection
+                );
+
+            Guid guid = Guid.NewGuid();
+            project.FullPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
+            project.ReevaluateIfNecessary();
+
+            if (logger != null)
             {
-#if FEATURE_SPECIAL_FOLDERS
-                Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-#endif
-
-                XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
-
-                Project project = new Project
-                    (
-                    XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
-                    null,
-                    toolsVersion,
-                    projectCollection
-                    );
-
-                Guid guid = Guid.NewGuid();
-                project.FullPath = Path.Combine(Path.GetTempPath(), "Temporary" + guid.ToString("N") + ".csproj");
-                project.ReevaluateIfNecessary();
-
-                if (logger != null)
-                {
-                    project.ProjectCollection.RegisterLogger(logger);
-                }
-
-                return project;
+                project.ProjectCollection.RegisterLogger(logger);
             }
-            finally
-            {
-                Directory.SetCurrentDirectory(originalDir);
-            }
+
+            return project;
         }
+
         /// <summary>
         /// Creates a project in memory and builds the default targets.  The build is
         /// expected to succeed.

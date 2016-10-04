@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                EscapingInProjectsHelper.CleanupWeirdoFiles();
+                ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
 
@@ -361,7 +361,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                EscapingInProjectsHelper.CleanupWeirdoFiles();
+                ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
 
@@ -423,7 +423,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                EscapingInProjectsHelper.CleanupWeirdoFiles();
+                ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
 
@@ -697,7 +697,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                EscapingInProjectsHelper.CleanupWeirdoFiles();
+                ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
 
@@ -735,7 +735,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                EscapingInProjectsHelper.CleanupWeirdoFiles();
+                ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
 #endif
@@ -1777,27 +1777,12 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// </summary>
         internal static void CreateThreeWeirdoFiles()
         {
-            CleanupWeirdoFiles();
-
-            string tempPath = Path.GetTempPath();
+            ObjectModelHelpers.DeleteTempProjectDirectory();
 
             // Create 3 files in the temp path -- a.weirdo, b.weirdo, and c.weirdo.
-            File.WriteAllText(Path.Combine(tempPath, "a.weirdo"), String.Empty);
-            File.WriteAllText(Path.Combine(tempPath, "b.weirdo"), String.Empty);
-            File.WriteAllText(Path.Combine(tempPath, "c.weirdo"), String.Empty);
-        }
-
-        /// <summary>
-        /// Delete all *.weirdo files from the temp directory.
-        /// </summary>
-        internal static void CleanupWeirdoFiles()
-        {
-            // Delete all *.weirdo files from the temp path.
-            string[] filesEndingWithWeirdo = Directory.GetFiles(Path.GetTempPath(), "*.weirdo");
-            foreach (string fileEndingWithWeirdo in filesEndingWithWeirdo)
-            {
-                File.Delete(fileEndingWithWeirdo);
-            }
+            File.WriteAllText(Path.Combine(ObjectModelHelpers.TempProjectDir, "a.weirdo"), String.Empty);
+            File.WriteAllText(Path.Combine(ObjectModelHelpers.TempProjectDir, "b.weirdo"), String.Empty);
+            File.WriteAllText(Path.Combine(ObjectModelHelpers.TempProjectDir, "c.weirdo"), String.Empty);
         }
 
         /// <summary>
