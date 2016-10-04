@@ -3,16 +3,25 @@
 <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.4;netstandard1.5</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.5</TargetFrameworks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
-    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
+    <Compile Include="**\*.cs" />
+    <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>  
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
     <PackageReference Include="NETStandard.Library">
       <Version>1.6.0</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.Sdk">
       <Version>0.0</Version>
     </PackageReference>

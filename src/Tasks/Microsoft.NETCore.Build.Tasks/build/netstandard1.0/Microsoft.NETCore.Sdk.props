@@ -50,9 +50,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- all references (even the StdLib) come from packages -->
     <NoStdLib>true</NoStdLib>
 
-    <!-- force the compiler to always emit .dll for .NET Core projects, even if $(OutputType) == 'exe' -->
-    <TargetExt>.dll</TargetExt>
-
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
 

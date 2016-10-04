@@ -34,6 +34,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Condition="'$(TargetFramework)' != ''"
         Project="$(MSBuildThisFileDirectory)Microsoft.NETCore.TargetFrameworkInference.targets" />
 
+  <!-- Force .dll extension for .NETCoreApp projects even if output type is exe. -->
+  <PropertyGroup>
+    <TargetExt Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">.dll</TargetExt>
+  </PropertyGroup>
+
   <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->
   <PropertyGroup>
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
