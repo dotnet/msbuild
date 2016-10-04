@@ -56,6 +56,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> HaveFilesMatching(string expectedFilesSearchPattern, SearchOption searchOption)
+        {
+            var matchingFileExists = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Any();
+            Execute.Assertion.ForCondition(matchingFileExists == true)
+                .FailWith("Expected directory {0} to contain files matching {1}, but no matching file exists.",
+                    _dirInfo.FullName, expectedFilesSearchPattern);
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> NotHaveFiles(IEnumerable<string> expectedFiles)
         {
             foreach (var expectedFile in expectedFiles)
@@ -63,6 +72,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 NotHaveFile(expectedFile);
             }
 
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotHaveFilesMatching(string expectedFilesSearchPattern, SearchOption searchOption)
+        {
+            var matchingFileCount = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Count();
+            Execute.Assertion.ForCondition(matchingFileCount == 0)
+                .FailWith("Found {0} files that should not exist in directory {1}. No file matching {2} should exist.",
+                    matchingFileCount, _dirInfo.FullName, expectedFilesSearchPattern);
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 

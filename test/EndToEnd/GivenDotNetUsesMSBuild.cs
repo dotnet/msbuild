@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -9,7 +10,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
     public class GivenDotNetUsesMSBuild : TestBase
     {
         [Fact]
-        public void ItCanNewRestoreBuildRunMSBuildProject()
+        public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             using (DisposableDirectory directory = Temp.CreateDirectory())
             {
@@ -41,6 +42,17 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                     .Pass()
                     .And
                     .HaveStdOutContaining("Hello World!");
+
+                var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
+                binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
+
+                new Clean3Command()
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
             }
         }
 
