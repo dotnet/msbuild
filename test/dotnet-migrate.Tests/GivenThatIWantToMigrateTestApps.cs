@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Migration.Tests
         // https://github.com/dotnet/sdk/issues/73 [InlineData("TestAppWithLibrary/TestApp", false)]
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
+        [InlineData("TestAppWithSigning")]
         public void It_migrates_apps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
