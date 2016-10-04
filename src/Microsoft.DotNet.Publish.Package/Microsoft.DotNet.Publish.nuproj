@@ -11,26 +11,33 @@
         <NuGetContent Include="$(AspNetTargetRoot)\bin\$(Configuration)\Microsoft.DotNet.Publish.Tasks.dll" >
             <Destination>tools\net46</Destination>
         </NuGetContent>
+      
+        <NuGetContent Include="$(AspNetTargetRoot)\bin\$(Configuration)\Microsoft.DotNetCore.Publish.Tasks.dll" >
+          <Destination>tools\netcoreapp1.0</Destination>
+        </NuGetContent>
 
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\ComputeTargets\*.*">
-            <Destination>ComputeTargets</Destination>
+            <Destination>build\netstandard1.0\ComputeTargets</Destination>
         </NuGetContent>
 
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\PublishTargets\*.*">
-            <Destination>PublishTargets</Destination>
+            <Destination>build\netstandard1.0\PublishTargets</Destination>
         </NuGetContent>
 
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\CopyTargets\*.*">
-            <Destination>CopyTargets</Destination>
+            <Destination>build\netstandard1.0\CopyTargets</Destination>
         </NuGetContent>
 
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\PublishProfiles\*.*">
-            <Destination>PublishProfiles</Destination>
+            <Destination>build\netstandard1.0\PublishProfiles</Destination>
         </NuGetContent>
 
-        <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.props" />
+        <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.props" >
+            <Destination>build\netstandard1.0</Destination>
+        </NuGetContent>
+      
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.targets">
-            <Destination>build</Destination>
+            <Destination>build\netstandard1.0</Destination>
         </NuGetContent>
     </ItemGroup>
     <Import Project="$(AspNetTargetRoot)tools\NuGet\NuGetProj.targets"/>

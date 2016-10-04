@@ -21,7 +21,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
 
   <PropertyGroup>
-    <PublishTasksDir Condition=" '$(PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)tools\net46\</PublishTasksDir>
+
+    <PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</PublishTaskFramework>
+    <PublishTaskFramework Condition=" '$(PublishTaskFramework)' == ''">net46</PublishTaskFramework>
+    
+    <PublishTasksDir Condition=" '$(PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(PublishTaskFramework)\</PublishTasksDir>
+    <PublishTaskAssemblyFullPath Condition=" '$(PublishTaskAssemblyFullPath)'=='' ">$(PublishTasksDir)\Microsoft.DotNet$(MSBuildRuntimeType).Publish.Tasks.dll</PublishTaskAssemblyFullPath>
     <CopyTargetsDir Condition=" '$(CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</CopyTargetsDir>
     <ComputeTargetsDir Condition=" '$(ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</ComputeTargetsDir>
     <PublishTargetsDir Condition=" '$(PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</PublishTargetsDir>
@@ -46,7 +51,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <IntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(IntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)</IntermediateOutputPath>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
-    <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath($(IntermediateOutputPath)PublishTemp\))</PublishIntermediateOutputPath>
+    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(IntermediateOutputPath)PublishTemp\))</PublishIntermediateTempPath>
+    <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath($(IntermediateOutputPath)PublishTemp\PublishOutput\))</PublishIntermediateOutputPath>
   </PropertyGroup>
   
 </Project>

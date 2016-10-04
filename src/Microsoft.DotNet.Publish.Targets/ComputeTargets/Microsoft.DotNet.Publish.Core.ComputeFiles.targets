@@ -13,19 +13,41 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <UsingTask TaskName="WebConfigTransform" AssemblyFile="$(PublishTasksDir)Microsoft.DotNet.Publish.Tasks.dll"/>
+  <UsingTask TaskName="TransformWebConfig" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
 
   <PropertyGroup>
     <DotNetPublishComputeFiles>
-      Publish;
       $(DotNetPublishComputeFiles);
+      PrepareForPublish;
+      Publish;
       ComputeFilesFromPublishDir;
     </DotNetPublishComputeFiles>
   </PropertyGroup>
 
+  <!--***************************************************************-->
+  <!-- Target PrepareForPublish                               -->
+  <!--***************************************************************-->
+  <PropertyGroup>
+    <PrepareForPublishDependsOn>
+      $(PrepareForPublishDependsOn);
+    </PrepareForPublishDependsOn>
+  </PropertyGroup>
+  
+  <Target Name="PrepareForPublish">
+    
+    <PropertyGroup>
+      <PublishDir>$([System.IO.Path]::GetTempPath())\PublishTemp\</PublishDir>
+      <PublishFramework Condition="'$(PublishFramework)' == ''">netcoreapp1.0</PublishFramework>
+      <Configuration>$(LastUsedBuildConfiguration)</Configuration>
+    </PropertyGroup>
+  
+    <RemoveDir Condition="Exists('$(PublishDir)')" Directories="$(PublishDir)" ContinueOnError="true"/>
+    <RemoveDir Condition="Exists('$(PublishIntermediateTempPath)')" Directories="$(PublishIntermediateTempPath)" ContinueOnError="true" />
+  </Target>
+  
 
   <!--***************************************************************-->
-  <!-- Task ComputeFilesFromPublishDir                               -->
+  <!-- Target ComputeFilesFromPublishDir                               -->
   <!--***************************************************************-->
   <PropertyGroup>
     <ComputeFilesFromPublishDirDependsOn>
@@ -37,13 +59,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         DependsOnTargets="$(ComputeFilesFromPublishDirDependsOn)"
         Condition="'$(PublishDir)' != ''">
 
-  <!-- Currently the publish target does not transform the web.config, Hence adding the logic here to transform the web.config from project path -->
-    <WebConfigTransform
-    ProjectDirectory="$(MSBuildProjectDirectory)"
-    PublishDir="$(PublishDir)"
-    AssemblyName="$(AssemblyName)"
-    IsPortableApp="true"
-    />
+    <PropertyGroup>
+      <_ProjectCapability>@(ProjectCapability)</_ProjectCapability>
+      <_isWebProject Condition="$(_ProjectCapability.Contains('DotNetCoreWeb'))">true</_isWebProject>
+      <_IsPortable Condition=" '$(_IsPortable)' == '' ">true</_IsPortable>
+      <_TransformWebConfigForAzure Condition=" '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
+    </PropertyGroup>
+
+    <TransformWebConfig
+        Condition="'$(_isWebProject)' == 'true'"
+        TargetPath="$(TargetPath)"
+        PublishDir="$(PublishDir)"
+        IsPortable="$(_IsPortable)"
+        IsAzure="$(_TransformWebConfigForAzure)" />
 
     <ItemGroup>
       <_PublishDirFiles
@@ -60,7 +88,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <DotNetPublishFiles Include="@(_publishDirFilesWithMetadata)" />
     </ItemGroup>
-
   </Target>
 
 </Project>

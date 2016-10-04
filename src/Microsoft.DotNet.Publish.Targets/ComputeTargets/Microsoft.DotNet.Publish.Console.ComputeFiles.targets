@@ -29,6 +29,70 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </DotNetPublishComputeFiles>
   </PropertyGroup>
 
-  <Import Project="Microsoft.DotNet.Publish.Common.ComputeFiles.targets" Condition="Exists('Microsoft.DotNet.Publish.Common.ComputeFiles.targets')"/>
+  <!--***************************************************************-->
+  <!-- Target ComputeFilesFromOutDir                     -->
+  <!--***************************************************************-->
+  <PropertyGroup>
+    <ComputeFilesFromOutDirDependsOn>
+      $(ComputeFilesFromOutDirDependsOn);
+    </ComputeFilesFromOutDirDependsOn>
+  </PropertyGroup>
+
+  <Target Name="ComputeFilesFromOutDir"
+          DependsOnTargets="$(ComputeFilesFromOutDirDependsOn)"
+          Condition="'$(OutDir)' != ''">
+
+    <ItemGroup>
+      <_OutDirFiles
+        Include="$(OutDir)**\*.*"
+        Exclude="$(OutDir)PublishOutput\**\*.*">
+      </_OutDirFiles>
+    </ItemGroup>
+
+    <CreateItem
+      Include="@(_OutDirFiles)"
+      AdditionalMetadata="DestinationRelativePath=$(ComputeFilesFromOutDirPrefix)%(RecursiveDir)%(Filename)%(Extension)">
+      <Output TaskParameter="Include" ItemName="_OutDirFilesWithMetadata"/>
+    </CreateItem>
+
+    <ItemGroup>
+      <DotNetPublishFiles Include="@(_OutDirFilesWithMetadata)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!--***************************************************************-->
+  <!-- Target ComputeFilesFromContent                     -->
+  <!--***************************************************************-->
+  <PropertyGroup>
+    <ComputeFilesFromContentDependsOn>
+      $(ComputeFilesFromContentDependsOn);
+    </ComputeFilesFromContentDependsOn>
+  </PropertyGroup>
+
+  <Target Name="ComputeFilesFromContent"
+          DependsOnTargets="$(ComputeFilesFromContentDependsOn)"
+          Condition="'@(Content)' != ''">
+
+    <CreateItem
+      Include="@(Content)"
+      AdditionalMetadata="DestinationRelativePath=$(ComputeFilesFromContentPrefix)%(Identity)">
+      <Output TaskParameter="Include" ItemName="_ContentFilesWithMetadata"/>
+    </CreateItem>
+
+    <ItemGroup>
+      <DotNetPublishFiles Include="@(_ContentFilesWithMetadata)" />
+    </ItemGroup>
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- This will ensure that all values have the required metadata -->
+  <!--********************************************************************-->
+  <ItemDefinitionGroup>
+    <DotNetPublishFiles>
+      <DestinationRelativePath></DestinationRelativePath>
+      <Exclude>False</Exclude>
+    </DotNetPublishFiles>
+  </ItemDefinitionGroup>
   
 </Project>
