@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_throws_when_migrating_a_deprecated_projectJson()
+        public void It_has_error_when_migrating_a_deprecated_projectJson()
         {
             var testProjectDirectory =
                 TestAssetsManager.CreateTestInstance("TestLibraryWithDeprecatedProjectFile", callingMethod: "z")
@@ -47,16 +47,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, "1.0.0", mockProj);
 
             var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
-            Action migrateAction = () => projectMigrator.Migrate(testSettings);
+            var report = projectMigrator.Migrate(testSettings);
 
-            migrateAction.ShouldThrow<Exception>().Where(
-                e => e.Message.Contains("MIGRATE1011::Deprecated Project:")
-                     && e.Message.Contains("The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead. (line: 6, file:")
-                     && e.Message.Contains("The 'compilationOptions' option is deprecated. Use 'buildOptions' instead. (line: 3, file:"));
+            var projectReport = report.ProjectMigrationReports.First();
+
+            var errorMessage = projectReport.Errors.First().GetFormattedErrorMessage();
+            errorMessage.Should().Contain("MIGRATE1011::Deprecated Project:");
+            errorMessage.Should().Contain("The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead. (line: 6, file:");
+            errorMessage.Should().Contain("The 'compilationOptions' option is deprecated. Use 'buildOptions' instead. (line: 3, file:");
         }
 
         [Fact]
-        public void It_throws_when_migrating_a_non_csharp_app()
+        public void It_has_error_when_migrating_a_non_csharp_app()
         {
             var testProjectDirectory =
                 TestAssetsManager.CreateTestInstance("FSharpTestProjects/TestApp", callingMethod: "z")
@@ -66,10 +68,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, "1.0.0", mockProj);
 
             var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
-            Action migrateAction = () => projectMigrator.Migrate(testSettings);
+            var report = projectMigrator.Migrate(testSettings);
+            var projectReport = report.ProjectMigrationReports.First();
 
-            migrateAction.ShouldThrow<Exception>().Where(
-                e => e.Message.Contains("MIGRATE20013::Non-Csharp App: Cannot migrate project"));
+            var errorMessage = projectReport.Errors.First().GetFormattedErrorMessage();
+            errorMessage.Should().Contain("MIGRATE20013::Non-Csharp App: Cannot migrate project");
         }
 
         private IEnumerable<string> EnumerateFilesWithRelativePath(string testProjectDirectory)

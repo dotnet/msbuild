@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectModel;
 
@@ -18,10 +20,19 @@ namespace Microsoft.DotNet.Tools.Migrate
         private readonly string _sdkVersion;
         private readonly string _xprojFilePath;
         private readonly bool _skipProjectReferences;
+        private readonly string _reportFile;
+        private readonly bool _reportFormatJson;
 
         private readonly TemporaryDotnetNewTemplateProject _temporaryDotnetNewProject;
 
-        public MigrateCommand(string templateFile, string projectArg, string sdkVersion, string xprojFilePath, bool skipProjectReferences)
+        public MigrateCommand(
+            string templateFile, 
+            string projectArg, 
+            string sdkVersion, 
+            string xprojFilePath, 
+            string reportFile, 
+            bool skipProjectReferences, 
+            bool reportFormatJson)
         {
             _templateFile = templateFile;
             _projectArg = projectArg ?? Directory.GetCurrentDirectory();
@@ -29,6 +40,8 @@ namespace Microsoft.DotNet.Tools.Migrate
             _xprojFilePath = xprojFilePath;
             _skipProjectReferences = skipProjectReferences;
             _temporaryDotnetNewProject = new TemporaryDotnetNewTemplateProject();
+            _reportFile = reportFile;
+            _reportFormatJson = reportFormatJson;
         }
 
         public int Execute()
@@ -42,16 +55,133 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             EnsureNotNull(sdkVersion, "Null Sdk Version");
 
+            MigrationReport migrationReport = null;
+
             foreach (var project in projectsToMigrate)
             {
-                Console.WriteLine($"Migrating project {project}..");
                 var projectDirectory = Path.GetDirectoryName(project);
                 var outputDirectory = projectDirectory;
                 var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate, _xprojFilePath);
-                new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
+                var projectMigrationReport = new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
+
+                if (migrationReport == null)
+                {
+                    migrationReport = projectMigrationReport;
+                }
+                else
+                {
+                    migrationReport = migrationReport.Merge(projectMigrationReport);
+                }
             }
 
-            return 0;
+            WriteReport(migrationReport);
+
+            return migrationReport.FailedProjectsCount;
+        }
+
+        private void WriteReport(MigrationReport migrationReport)
+        {
+
+            if (!string.IsNullOrEmpty(_reportFile))
+            {
+                using (var outputTextWriter = GetReportFileOutputTextWriter())
+                {
+                    outputTextWriter.Write(GetReportContent(migrationReport));
+                }
+            }
+
+            WriteReportToStdOut(migrationReport);
+        }
+
+        private void WriteReportToStdOut(MigrationReport migrationReport)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var projectMigrationReport in migrationReport.ProjectMigrationReports)
+            {
+                var errorContent = GetProjectReportErrorContent(projectMigrationReport, colored: true);
+                var successContent = GetProjectReportSuccessContent(projectMigrationReport, colored: true);
+                if (!string.IsNullOrEmpty(errorContent))
+                {
+                    Reporter.Error.WriteLine(errorContent);
+                }
+                else
+                {
+                    Reporter.Output.WriteLine(successContent);
+                }
+            }
+
+            Reporter.Output.WriteLine(GetReportSummary(migrationReport));
+        }
+
+        private string GetReportContent(MigrationReport migrationReport, bool colored = false)
+        {
+            if (_reportFormatJson)
+            {
+                return Newtonsoft.Json.JsonConvert.SerializeObject(migrationReport);
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var projectMigrationReport in migrationReport.ProjectMigrationReports)
+            {
+                var errorContent = GetProjectReportErrorContent(projectMigrationReport, colored: colored);
+                var successContent = GetProjectReportSuccessContent(projectMigrationReport, colored: colored);
+                if (!string.IsNullOrEmpty(errorContent))
+                {
+                    sb.AppendLine(errorContent);
+                }
+                else
+                {
+                    sb.AppendLine(successContent);
+                }
+            }
+
+            sb.AppendLine(GetReportSummary(migrationReport));
+
+            return sb.ToString();
+        }
+
+        private string GetReportSummary(MigrationReport migrationReport)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("Summary");
+            sb.AppendLine($"Total Projects: {migrationReport.MigratedProjectsCount}");
+            sb.AppendLine($"Succeeded Projects: {migrationReport.SucceededProjectsCount}");
+            sb.AppendLine($"Failed Projects: {migrationReport.FailedProjectsCount}");
+
+            return sb.ToString();
+        }
+
+        private string GetProjectReportSuccessContent(ProjectMigrationReport projectMigrationReport, bool colored)
+        {
+            Func<string, string> GreenIfColored = (str) => colored ? str.Green() : str;
+            return GreenIfColored($"Project {projectMigrationReport.ProjectName} migration succeeded ({projectMigrationReport.ProjectDirectory})");
+        }
+
+        private string GetProjectReportErrorContent(ProjectMigrationReport projectMigrationReport, bool colored)
+        {
+            StringBuilder sb = new StringBuilder();
+            Func<string, string> RedIfColored = (str) => colored ? str.Red() : str;
+
+            if (projectMigrationReport.Errors.Any())
+            {
+
+                sb.AppendLine(RedIfColored($"Project {projectMigrationReport.ProjectName} migration failed ({projectMigrationReport.ProjectDirectory})"));
+
+                foreach (var error in projectMigrationReport.Errors.Select(e => e.GetFormattedErrorMessage()))
+                {
+                    sb.AppendLine(RedIfColored(error));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private TextWriter GetReportFileOutputTextWriter()
+        {
+            return File.CreateText(_reportFile);
         }
 
         private IEnumerable<string> GetProjectsToMigrate(string projectArg)
