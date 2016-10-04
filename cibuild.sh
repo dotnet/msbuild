@@ -77,7 +77,7 @@ PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
 TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.2/mono_msbuild_bootstrap_5e01f07.zip"
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
-HOME_DEFAULT="/tmp/msbuild-CI-home"
+HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
 
 BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build.log"
 LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build.log"
