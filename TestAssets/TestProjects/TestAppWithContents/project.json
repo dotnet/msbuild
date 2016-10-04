@@ -9,7 +9,7 @@
           "include": "testcontentfile2.txt"
         },
         "out/": {
-          "include": ["project.json", "Program.cs"],
+          "include": ["Program.cs"],
           "exclude": ["Program.cs"],
           "includeFiles": ["Program.cs"],
           "excludeFiles": ["Program.cs"]

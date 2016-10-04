@@ -16,13 +16,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ProjectMigrator
     {
-        // TODO: Migrate PackOptions
-        // TODO: Migrate Multi-TFM projects
-        // TODO: Tests
-        // TODO: Out of Scope
-        //     - Globs that resolve to directories: /some/path/**/somedir
-        //     - Migrating Deprecated project.jsons
-
         private readonly IMigrationRule _ruleSet;
         private readonly ProjectDependencyFinder _projectDependencyFinder = new ProjectDependencyFinder();
 
@@ -39,15 +32,33 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             {
                 throw new ArgumentNullException();
             }
+            Exception exc = null;
+            IEnumerable<ProjectDependency> projectDependencies = null;
+
+            try
+            {
+                projectDependencies = ResolveTransitiveClosureProjectDependencies(
+                    rootSettings.ProjectDirectory, 
+                    rootSettings.ProjectXProjFilePath);
+            }
+            catch (Exception e)
+            {
+                exc = e;
+            }
+
+            // Verify up front so we can prefer these errors over an unresolved project dependency
+            VerifyInputs(ComputeMigrationRuleInputs(rootSettings), rootSettings);
+            if (exc != null)
+            {
+                throw exc;
+            }
 
             MigrateProject(rootSettings);
-
+            
             if (skipProjectReferences)
             {
                 return;
             }
-
-            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory, rootSettings.ProjectXProjFilePath);
 
             foreach(var project in projectDependencies)
             {
@@ -57,6 +68,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                                                      rootSettings.SdkPackageVersion,
                                                      rootSettings.MSBuildProjectTemplate);
                 MigrateProject(settings);
+            }
+        }
+
+        private void DeleteProjectJsons(MigrationSettings rootsettings, IEnumerable<ProjectDependency> projectDependencies)
+        {
+            try
+            {
+                File.Delete(Path.Combine(rootsettings.ProjectDirectory, "project.json"));
+            } catch {} 
+
+            foreach (var projectDependency in projectDependencies)
+            {
+                try 
+                {
+                    File.Delete(projectDependency.ProjectFilePath);
+                } catch { }
             }
         }
 
