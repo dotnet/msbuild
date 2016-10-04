@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private AddPropertyTransform<CommonCompilerOptions>[] KeyFileTransforms
             => new []
             {
-                new AddPropertyTransform<CommonCompilerOptions>("AssemblyOriginatorKeyFile",
+                new AddPropertyTransform<CommonCompilerOptions>("KeyFile",
                     compilerOptions => compilerOptions.KeyFile,
                     compilerOptions => !string.IsNullOrEmpty(compilerOptions.KeyFile)),
                 new AddPropertyTransform<CommonCompilerOptions>("SignAssembly",
