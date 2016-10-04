@@ -7,7 +7,6 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Frameworks;
-using NuGet.LibraryModel;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using FileFormatException = Microsoft.DotNet.ProjectModel.FileFormatException;
