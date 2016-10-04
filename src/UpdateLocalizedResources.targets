@@ -69,7 +69,9 @@
           BeforeTargets="$(PrepareResourcesDependsOn);PrepareResources">
 
     <ItemGroup>
-      <NeutralResources Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.resx'"/> 
+      <NeutralResources Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.resx'">
+        <IsShared>$([System.String]::Copy('%(Filename)').StartsWith('Strings.shared.'))</IsShared>
+      </NeutralResources> 
     </ItemGroup>
 
     <EmitLocalizedResources 
@@ -82,6 +84,13 @@
       <Output TaskParameter="ResolvedLocalizedResxResources" ItemName="LocalizedResxResources" />
 
     </EmitLocalizedResources>
+
+    <ItemGroup>
+      <XlfFiles>
+        <IsShared>$([System.String]::Copy('%(Filename)').StartsWith('Strings.shared.'))</IsShared>
+      </XlfFiles>
+    </ItemGroup>
+
   </Target>
 
   <Target Name="SyncXlf"
@@ -89,10 +98,19 @@
           DependsOnTargets="EmitLocalizedResources" 
           Condition="$(SyncXlf) == 'true' and $(IsTestProject) != 'true'">
     
+    <!-- only one project should update the shared resources. Otherwise races happen -->
+    <ItemGroup>
+      <XlfFilesToSync Include="@(XlfFiles)"/>
+      <XlfFilesToSync
+        Remove="@(XlfFilesToSync)"
+        Condition="'$(AssemblyName)' != 'MSBuild' and '%(XlfFilesToSync.IsShared)' == 'True'"
+        />
+    </ItemGroup>
+
     <UpdateXlfFromResx
       Condition="%(Identity) != ''"
       ResxPath="%(NeutralResx)"
-      XlfPath="@(XlfFiles)"
+      XlfPath="@(XlfFilesToSync)"
     />
 
   </Target>
