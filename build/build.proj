@@ -34,6 +34,7 @@
       <ProjectToRestore3 Include="src\Tasks\Microsoft.NETCore.Build.Tasks\Microsoft.NETCore.Build.Tasks.csproj" />
     </ItemGroup>
 
+    <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true -->
     <Exec Command="$(DotNetTool) restore3 %(ProjectToRestore3.Identity) /v:minimal /p:SkipInvalidConfigurations=true"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
