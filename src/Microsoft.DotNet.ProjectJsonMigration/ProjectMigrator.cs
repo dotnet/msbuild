@@ -16,13 +16,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ProjectMigrator
     {
-        // TODO: Migrate PackOptions
-        // TODO: Migrate Multi-TFM projects
-        // TODO: Tests
-        // TODO: Out of Scope
-        //     - Globs that resolve to directories: /some/path/**/somedir
-        //     - Migrating Deprecated project.jsons
-
         private readonly IMigrationRule _ruleSet;
         private readonly ProjectDependencyFinder _projectDependencyFinder = new ProjectDependencyFinder();
 
@@ -39,8 +32,26 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             {
                 throw new ArgumentNullException();
             }
+            Exception exc = null;
+            IEnumerable<ProjectDependency> projectDependencies = null;
 
-            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory, rootSettings.ProjectXProjFilePath);
+            try
+            {
+                projectDependencies = ResolveTransitiveClosureProjectDependencies(
+                    rootSettings.ProjectDirectory, 
+                    rootSettings.ProjectXProjFilePath);
+            }
+            catch (Exception e)
+            {
+                exc = e;
+            }
+
+            // Verify up front so we can prefer these errors over an unresolved project dependency
+            VerifyInputs(ComputeMigrationRuleInputs(rootSettings), rootSettings);
+            if (exc != null)
+            {
+                throw exc;
+            }
 
             MigrateProject(rootSettings);
             
