@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="build\netstandard1.0\Microsoft.NETCore.Sdk.props" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{DF7D2697-B3B4-45C2-8297-27245F528A99}</ProjectGuid>
@@ -11,13 +10,30 @@
     <RootNamespace>Microsoft.NETCore.Build.Tasks</RootNamespace>
     <AssemblyName>Microsoft.NETCore.Build.Tasks</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.3</TargetFrameworkVersion>
+    <TargetFrameworks>netstandard1.3</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
-    <ResolveNuGetPackages>true</ResolveNuGetPackages>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.Sdk">
+      <Version>$(SdkStage0Version)</Version>
+    </PackageReference>
+    <PackageReference Include="NuGet.ProjectModel">
+      <Version>$(NuGetVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel">
+      <Version>$(CoreSetupVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Framework">
+      <Version>$(MsBuildPackagesVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Utilities.Core">
+      <Version>$(MsBuildPackagesVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
+      <Version>$(RoslynVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="NugetContentAssetPreprocessor.cs" />
     <Compile Include="IContentAssetPreprocessor.cs" />
@@ -84,7 +100,6 @@
     <None Include="build\netstandard1.0\Microsoft.PackageDependencyResolution.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="project.json" />
     <Compile Include="DependencyContextBuilder.cs" />
     <Compile Include="GenerateDepsFile.cs" />
     <Compile Include="GenerateRuntimeConfigurationFiles.cs" />
@@ -104,5 +119,4 @@
   </ItemGroup>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="build\netstandard1.0\Microsoft.NETCore.Sdk.targets" />
 </Project>

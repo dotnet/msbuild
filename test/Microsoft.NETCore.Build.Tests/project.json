@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "Microsoft.NETCore.Sdk": "1.0.0-alpha-20160930-2",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-003121",
     "FluentAssertions": "4.0.0",
     "System.Diagnostics.FileVersionInfo":  "4.0.0",

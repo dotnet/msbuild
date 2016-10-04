@@ -2,11 +2,6 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Target Name="LayoutSdkPackage">
-    <PropertyGroup>
-      <CoreSetupVersion>1.0.1-beta-000933</CoreSetupVersion>
-      <NuGetVersion>3.6.0-beta.1.msbuild.16</NuGetVersion>
-    </PropertyGroup>
-    
     <ItemGroup>
       <NuGetCopyLocalAssembly Include="NuGet.ProjectModel" />
       <NuGetCopyLocalAssembly Include="NuGet.DependencyResolver.Core" />
