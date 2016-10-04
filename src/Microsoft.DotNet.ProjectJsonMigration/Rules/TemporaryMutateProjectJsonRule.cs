@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var sourceProjectFile = Path.Combine(migrationSettings.ProjectDirectory, "project.json");
 
             var renamedProjectFile = Path.Combine(migrationSettings.ProjectDirectory, "project.migrated.json");
-            File.Move(sourceProjectFile, renamedProjectFile);
+            File.Copy(sourceProjectFile, renamedProjectFile);
             sourceProjectFile = renamedProjectFile;
         }
     }

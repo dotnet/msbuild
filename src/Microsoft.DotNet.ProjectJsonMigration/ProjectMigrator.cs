@@ -60,6 +60,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
         }
 
+        private void DeleteProjectJsons(MigrationSettings rootsettings, IEnumerable<ProjectDependency> projectDependencies)
+        {
+            try
+            {
+                File.Delete(Path.Combine(rootsettings.ProjectDirectory, "project.json"));
+            } catch {} 
+
+            foreach (var projectDependency in projectDependencies)
+            {
+                try 
+                {
+                    File.Delete(projectDependency.ProjectFilePath);
+                } catch { }
+            }
+        }
+
         private IEnumerable<ProjectDependency> ResolveTransitiveClosureProjectDependencies(string rootProject, string xprojFile)
         {
             HashSet<ProjectDependency> projectsMap = new HashSet<ProjectDependency>(new ProjectDependencyComparer());

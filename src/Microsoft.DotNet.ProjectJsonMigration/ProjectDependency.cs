@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public ProjectDependency(string name, string projectFilePath)
         {
             Name = name;
-            ProjectFilePath = projectFilePath;
+            ProjectFilePath = System.IO.Path.GetFullPath(projectFilePath);
         }
     }
 }

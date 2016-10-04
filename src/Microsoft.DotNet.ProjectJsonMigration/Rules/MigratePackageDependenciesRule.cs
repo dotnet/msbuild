@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
@@ -38,11 +39,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var targetFrameworks = project.GetTargetFrameworks();
 
             // Inject Sdk dependency
-            PackageDependencyInfoTransform.Transform(new PackageDependencyInfo
-                {
-                    Name = ConstantPackageNames.CSdkPackageName,
-                    Version = migrationSettings.SdkPackageVersion
-                });
+            _transformApplicator.Execute(
+                PackageDependencyInfoTransform.Transform(
+                    new PackageDependencyInfo
+                    {
+                        Name = ConstantPackageNames.CSdkPackageName,
+                        Version = migrationSettings.SdkPackageVersion
+                    }), migrationRuleInputs.CommonItemGroup);
             
             // Migrate Direct Deps first
             MigrateDependencies(
@@ -51,16 +54,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 null, 
                 project.Dependencies,
                 migrationRuleInputs.ProjectXproj);
-
+            
+            MigrationTrace.Instance.WriteLine($"Migrating {targetFrameworks.Count()} target frameworks");
             foreach (var targetFramework in targetFrameworks)
             {
+                MigrationTrace.Instance.WriteLine($"Migrating framework {targetFramework.FrameworkName.GetShortFolderName()}");
+                
                 MigrateImports(migrationRuleInputs.CommonItemGroup, targetFramework);
 
                 MigrateDependencies(
                     project,
                     migrationRuleInputs.OutputMSBuildProject,
                     targetFramework.FrameworkName, 
-                    project.Dependencies,
+                    targetFramework.Dependencies,
                     migrationRuleInputs.ProjectXproj); 
             }
         }
@@ -104,6 +110,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var packageDependency in packageDependencies)
             {    
+                MigrationTrace.Instance.WriteLine(packageDependency.Name);
                 AddItemTransform<ProjectLibraryDependency> transform;
 
                 if (packageDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference)
@@ -124,7 +131,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                         transform = transform.WithMetadata("PrivateAssets", metadataValue);
                     }
                     
-                    // TODO: include/exclude
                     if (packageDependency.IncludeType != LibraryIncludeFlags.All)
                     {
                         var metadataValue = ReadLibraryIncludeFlags(packageDependency.IncludeType);
@@ -210,7 +216,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             "PackageTargetFallback",
             t => $"$(PackageTargetFallback);{string.Join(";", t.Imports)}",
             t => "",
-            t => t.Imports.Any());
+            t => t.Imports.OrEmptyIfNull().Any());
 
         private class PackageDependencyInfo
         {

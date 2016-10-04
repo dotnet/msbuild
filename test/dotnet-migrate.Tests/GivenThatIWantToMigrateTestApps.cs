@@ -47,7 +47,10 @@ namespace Microsoft.DotNet.Migration.Tests
         [Fact]
         public void It_migrates_dotnet_new_console_with_identical_outputs()
         {
-            var projectDirectory = Temp.CreateDirectory().Path;
+            var projectDirectory = Path.Combine(AppContext.BaseDirectory, "newconsoletest");
+            Directory.Delete(projectDirectory, true);
+            Directory.CreateDirectory(projectDirectory);
+
             var outputComparisonData = GetDotnetNewComparisonData(projectDirectory, "console");
 
             var outputsIdentical =
@@ -60,7 +63,7 @@ namespace Microsoft.DotNet.Migration.Tests
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4299")]
         public void It_migrates_dotnet_new_web_with_outputs_containing_project_json_outputs()
         {
             var projectDirectory = Temp.CreateDirectory().Path;
@@ -214,7 +217,7 @@ namespace Microsoft.DotNet.Migration.Tests
             Restore(projectDirectory);
 
             var outputComparisonData =
-                BuildProjectJsonMigrateBuildMSBuild(projectDirectory, Path.GetFileNameWithoutExtension(projectDirectory));
+                BuildProjectJsonMigrateBuildMSBuild(projectDirectory);
             return outputComparisonData;
         }
 
@@ -231,7 +234,7 @@ namespace Microsoft.DotNet.Migration.Tests
             }
         }
 
-        private MigratedBuildComparisonData BuildProjectJsonMigrateBuildMSBuild(string projectDirectory, string projectName)
+        private MigratedBuildComparisonData BuildProjectJsonMigrateBuildMSBuild(string projectDirectory, string projectName=null)
         {
             BuildProjectJson(projectDirectory);
             var projectJsonBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
@@ -243,8 +246,8 @@ namespace Microsoft.DotNet.Migration.Tests
             MigrateProject(projectDirectory);
 
             DeleteXproj(projectDirectory);
-            Restore3(projectDirectory);
-            BuildMSBuild(projectDirectory);
+            Restore3(projectDirectory, projectName);
+            BuildMSBuild(projectDirectory, projectName);
 
             var msbuildBuildOutputs = new HashSet<string>(CollectBuildOutputs(projectDirectory));
 
@@ -306,22 +309,37 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Pass();
         }
 
-        private void Restore3(string projectDirectory, string projectName)
+        private void Restore3(string projectDirectory, string projectName=null)
         {
-            new Restore3Command()
-                .WithWorkingDirectory(projectDirectory)
-                .Execute($"{projectName}.csproj")
+            var command = new Restore3Command()
+                .WithWorkingDirectory(projectDirectory);
+
+            if (projectName != null)
+            {
+                command.Execute($"{projectName}.csproj")
                 .Should()
                 .Pass();
+            }
+            else
+            {
+                command.Execute()
+                    .Should()
+                    .Pass(); 
+            }      
         }
 
         private string BuildMSBuild(string projectDirectory, string projectName, string configuration="Debug")
         {
+            if (projectName != null)
+            {
+                projectName = projectName + ".csproj";
+            }
+
             DeleteXproj(projectDirectory);
 
             var result = new Build3Command()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"{projectName}.csproj /p:Configuration={configuration}");
+                .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
 
             result
                 .Should()
