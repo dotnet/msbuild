@@ -14,7 +14,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets')"/>
+  <Import Project="$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets') And '$(PublishOnBuild)' == 'true'"/>
 
   <!--
   ***********************************************************************************************
@@ -29,7 +29,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishProjectType Condition="'$(PublishProjectType)' == '' ">WebSite</PublishProjectType>
   </PropertyGroup>
 
-  <Import Project="$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets" Condition="Exists('$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets')" />
+  <Import Project="$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets" Condition="Exists('$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets') And '$(PublishOnBuild)' == 'true'" />
 
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -54,7 +54,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == ''">$(PublishProfileFullPath)</WebPublishProfileFile>
   </PropertyGroup>
 
-  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)')" />
+  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)') And '$(PublishOnBuild)' == 'true'" />
 
   <!--
   ***********************************************************************************************
@@ -68,7 +68,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
   </PropertyGroup>
   
-  <Import Project="$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets" Condition="Exists('$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets')"/>
+  <Import Project="$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets" Condition="Exists('$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets') And '$(PublishOnBuild)' == 'true'"/>
   
   <!--
   ***********************************************************************************************
@@ -87,7 +87,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="DotNetPublish" 
           DependsOnTargets="$(DotNetPublishDependsOn)" 
           AfterTargets="Build" 
-          Condition=" '$(PublishOnBuild)' =='true' " />
+          Condition=" '$(PublishOnBuild)' == 'true' " />
 
 
   <PropertyGroup>
@@ -99,7 +99,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Target Name="CorePublish" 
+          Condition=" '$(PublishOnBuild)' == 'true' "
           DependsOnTargets="$(CorePublishDependsOn)"/>
-          
 
 </Project>
