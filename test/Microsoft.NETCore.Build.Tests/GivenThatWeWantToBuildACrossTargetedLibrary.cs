@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.NETCore.TestFramework;
 using Microsoft.NETCore.TestFramework.Assertions;
 using Microsoft.NETCore.TestFramework.Commands;
@@ -15,14 +16,14 @@ namespace Microsoft.NETCore.Build.Tests
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
         [Fact]
-        public void It_builds_the_library_successfully()
+        public void It_builds_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
                 .WithSource()
-                .Restore("TestLibrary");
+                .Restore("NetStandardAndNetCoreApp");
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "NetStandardAndNetCoreApp");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
             buildCommand
@@ -32,12 +33,46 @@ namespace Microsoft.NETCore.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                "net45/TestLibrary.dll",
-                "net45/TestLibrary.pdb",
-                "net45/TestLibrary.deps.json",
-                "netstandard1.5/TestLibrary.dll",
-                "netstandard1.5/TestLibrary.pdb",
-                "netstandard1.5/TestLibrary.deps.json"
+                "netcoreapp1.0/NetStandardAndNetCoreApp.dll",
+                "netcoreapp1.0/NetStandardAndNetCoreApp.pdb",
+                "netcoreapp1.0/NetStandardAndNetCoreApp.runtimeconfig.json",
+                "netcoreapp1.0/NetStandardAndNetCoreApp.runtimeconfig.dev.json",
+                "netcoreapp1.0/NetStandardAndNetCoreApp.deps.json",
+                "netstandard1.5/NetStandardAndNetCoreApp.dll",
+                "netstandard1.5/NetStandardAndNetCoreApp.pdb",
+                "netstandard1.5/NetStandardAndNetCoreApp.deps.json"
+            }, SearchOption.AllDirectories);
+        }
+
+        [Fact]
+        public void It_builds_desktop_library_successfully_on_all_platforms()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("CrossTargeting")
+                .WithSource()
+                .Restore("DesktopAndNetStandard");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "DesktopAndNetStandard");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "net45/DesktopAndNetStandard.dll",
+                "net45/DesktopAndNetStandard.pdb",
+                "net45/DesktopAndNetStandard.deps.json",
+                "netstandard1.5/DesktopAndNetStandard.dll",
+                "netstandard1.5/DesktopAndNetStandard.pdb",
+                "netstandard1.5/DesktopAndNetStandard.deps.json"
             }, SearchOption.AllDirectories);
         }
     }
