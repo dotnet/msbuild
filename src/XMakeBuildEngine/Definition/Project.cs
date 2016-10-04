@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -1105,7 +1106,11 @@ namespace Microsoft.Build.Evaluation
 
         private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
         {
-            return projectItemElements.SelectMany(GetAllGlobs).ToList();
+            return projectItemElements
+                .AsParallel()
+                .AsOrdered()
+                .SelectMany(GetAllGlobs)
+                .ToList();
         }
 
         private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
@@ -1257,9 +1262,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             return
-                projectItemElements.Select(i => ComputeProvenanceResult(itemToMatch, i))
-                    .Where(r => r != null)
-                    .ToList();
+                projectItemElements
+                .AsParallel()
+                .AsOrdered()
+                .Select(i => ComputeProvenanceResult(itemToMatch, i))
+                .Where(r => r != null)
+                .ToList();
         }
 
         private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
@@ -1272,7 +1280,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 Provenance provenance;
-                var matchOccurrences = ItemMatchesInSpecCompareViaExpander(itemToMatch, itemSpec, elementLocation, _data.Expander, out provenance);
+                var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, _data.Expander, out provenance);
                 var result = matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
 
                 return result?.Item2 > 0
@@ -1314,7 +1322,7 @@ namespace Microsoft.Build.Evaluation
         /// 
         /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
         /// </summary>
-        private int ItemMatchesInSpecCompareViaExpander(string itemToMatch, string itemSpec, IElementLocation elementLocation, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
+        private int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
         {
             if (string.IsNullOrEmpty(itemSpec))
             {
@@ -1322,31 +1330,20 @@ namespace Microsoft.Build.Evaluation
                 return 0;
             }
 
-            // look into the itemspec as if it were expanded by the Expander
-            Provenance provenanceFromExpandedProperties;
-            var itemSpecWithExpandedProperties = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: true);
-            var expandedMatches = ItemMatchesInSpec(itemToMatch, itemSpecWithExpandedProperties, out provenanceFromExpandedProperties);
+            // expand the properties
+            var expandedItemSpec = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: true);
+            var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
 
-            // look into the raw itemspec
-            Provenance provenanceFromNonExpandedProperties;
-            var itemSpecWithoutExpandedProperties = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: false);
-            var nonExpandedMatches = ItemMatchesInSpec(itemToMatch, itemSpecWithoutExpandedProperties, out provenanceFromNonExpandedProperties);
-
-            if (expandedMatches > nonExpandedMatches)
+            // Result is inconclusive if properties are present
+            if (itemSpec.Contains("$("))
             {
-                // return the number of occurences when properties are expanded to get the correct occurence count
+                provenance |= Provenance.Inconclusive;
+            }
 
-                provenance = Provenance.Inconclusive | provenanceFromExpandedProperties;
-                return expandedMatches;
-            }
-            else
-            {
-                provenance = provenanceFromNonExpandedProperties;
-                return nonExpandedMatches;
-            }
+            return numberOfMatches;
         }
 
-        private int ItemMatchesInSpec(string itemToMatch, ItemSpec<ProjectProperty, ProjectItem> itemSpec, out Provenance provenance)
+        private int ItemMatchesInItemSpec(string itemToMatch, ItemSpec<ProjectProperty, ProjectItem> itemSpec, out Provenance provenance)
         {
             provenance = Provenance.Undefined;
 

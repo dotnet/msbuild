@@ -11,6 +11,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.Construction;
@@ -2537,6 +2538,32 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceResultsShouldBeInItemElementOrder()
+        {
+            var itemElements = Environment.ProcessorCount * 5;
+            var expected = new ProvenanceResultTupleList();
+
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    {0}
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < itemElements; i++)
+            {
+                sb.AppendLine($"<i_{i} Include=\"a\"/>");
+                expected.Add(Tuple.Create($"i_{i}", Operation.Include, Provenance.StringLiteral, 1));
+            }
+
+            project = string.Format(project, sb);
+
+            AssertProvenanceResult(expected, project, "a");
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldReturnTheSameResultsIfProjectIsReevaluated()
         {
             var projectContents =
@@ -2811,6 +2838,34 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        // As a perf optimization, GetItemProvenance always appends Inconclusive when property references are present, even if the property does not contribute any item that matches the provenance call
+        // Item references do not append Inconclusive when they do not contribute matching items.
+        public void GetItemProvenanceShouldReturnInconclusiveWhenIndirectPropertyDoesNotMatch()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1`/>
+                    <B Include=`a;$(P)`/>
+                    <C Include=`a;@(A)`/>
+                  </ItemGroup>
+
+                  <PropertyGroup>
+                    <P></P>  
+                  </PropertyGroup>
+                </Project>
+                ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Include, Provenance.StringLiteral | Provenance.Inconclusive, 1),
+                Tuple.Create("C", Operation.Include, Provenance.StringLiteral, 1)
+            };
+
+            AssertProvenanceResult(expected, project, "a");
+        }
+
+        [Fact]
         public void GetItemProvenanceShouldRespectItemConditions()
         {
             var project =
@@ -3052,6 +3107,32 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             AssertGlobResult(expected, project, "");
             AssertGlobResult(expected, project, null);
+        }
+
+        [Fact]
+        public void GetAllGlobsResultsShouldBeInItemElementOrder()
+        {
+            var itemElements = Environment.ProcessorCount * 5;
+            var expected = new GlobResultList();
+
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    {0}
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < itemElements; i++)
+            {
+                sb.AppendLine($"<i_{i} Include=\"*\"/>");
+                expected.Add(Tuple.Create($"i_{i}", "*", ImmutableHashSet<string>.Empty));
+            }
+
+            project = string.Format(project, sb);
+
+            AssertGlobResult(expected, project);
         }
 
         [Fact]
