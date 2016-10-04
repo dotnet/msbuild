@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "NETStandard.Library": "1.6.0",
-    "Microsoft.NETCore.Sdk": "1.0.0-alpha-20160930-2",
-    "Microsoft.Build.Framework": "0.1.0-preview-00028-160627",
-    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00028-160627"
+    "Microsoft.NETCore.Sdk": "1.0.0-alpha-*",
+    "Microsoft.Build.Framework": "15.1.298-preview5",
+    "Microsoft.Build.Utilities.Core": "15.1.298-preview5"
   },
 
   "frameworks": {

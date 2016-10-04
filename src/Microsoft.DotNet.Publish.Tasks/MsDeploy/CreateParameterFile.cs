@@ -313,7 +313,7 @@ namespace Microsoft.DotNet.Publish.Tasks.MsDeploy
                     System.Uri sourceUri = new System.Uri(ex.SourceUri);
                     succeeded = false;
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
                     succeeded = false;
                 }
