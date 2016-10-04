@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectModel;
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                 Console.WriteLine($"Migrating project {project}..");
                 var projectDirectory = Path.GetDirectoryName(project);
                 var outputDirectory = projectDirectory;
-                var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate, _xprojFilePath);
+                var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate.DeepClone(), _xprojFilePath);
                 new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
             }
 
@@ -55,22 +56,33 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         private IEnumerable<string> GetProjectsToMigrate(string projectArg)
         {
-            if (projectArg.EndsWith(Project.FileName))
+            IEnumerable<string> projects = null;
+
+            if (projectArg.EndsWith(Project.FileName, StringComparison.OrdinalIgnoreCase))
             {
-                yield return GetProjectJsonPath(projectArg);
+                projects = Enumerable.Repeat(projectArg, 1);
+            }
+            else if (projectArg.EndsWith(GlobalSettings.FileName, StringComparison.OrdinalIgnoreCase))
+            {
+                projects =  GetProjectsFromGlobalJson(projectArg);
             }
             else if (Directory.Exists(projectArg))
             {
-                var projects = Directory.EnumerateFiles(projectArg, Project.FileName, SearchOption.AllDirectories);
-
-                foreach(var project in projects)
-                {
-                    yield return GetProjectJsonPath(project);
-                }
+                projects = Directory.EnumerateFiles(projectArg, Project.FileName, SearchOption.AllDirectories);
             }
             else
             {
-                throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json file and a directory named '{projectArg}' doesn't exist.");
+                throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json or a global.json file and a directory named '{projectArg}' doesn't exist.");
+            }
+
+            if (!projects.Any())
+            {
+                throw new Exception($"Invalid project argument - Unable to find any projects in global.json or directory '{projectArg}'");
+            }
+
+            foreach(var project in projects)
+            {
+                yield return GetProjectJsonPath(project);
             }
         }
 
@@ -92,6 +104,36 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
 
             throw new Exception($"Unable to find project file at {projectJson}");
+        }
+
+        private IEnumerable<string> GetProjectsFromGlobalJson(string globalJson)
+        {
+            if (!File.Exists(globalJson))
+            {
+                throw new Exception($"Unable to find global settings file at {globalJson}");
+            }
+
+            var searchPaths = ProjectDependencyFinder.GetGlobalPaths(Path.GetDirectoryName(globalJson));
+
+            foreach (var searchPath in searchPaths)
+            {
+                var directory = new DirectoryInfo(searchPath);
+
+                if (!directory.Exists)
+                {
+                    continue;
+                }
+
+                foreach (var projectDirectory in directory.EnumerateDirectories())
+                {
+                    var projectFilePath = Path.Combine(projectDirectory.FullName, "project.json");
+
+                    if (File.Exists(projectFilePath))
+                    {
+                        yield return projectFilePath;
+                    }
+                }
+            }
         }
     }
 }

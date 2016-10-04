@@ -26,10 +26,14 @@ namespace Microsoft.DotNet.Tools.Migrate
             app.HandleResponseFiles = true;
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<PROJECT_JSON/PROJECT_DIR>",
-                "The path to project.json file or a directory to migrate." +
-                " If a directory is specified, then it will recursively search for project.json files to migrate." +
-                " Defaults to current directory if nothing is specified.");
+            CommandArgument projectArgument = app.Argument("<PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR>",
+                "The path to " + Environment.NewLine +
+                " - a project.json file to migrate." + Environment.NewLine +
+                "or" + Environment.NewLine +
+                " - a global.json file, it will migrate the folders specified in global.json." + Environment.NewLine +
+                "or" + Environment.NewLine +
+                " - a directory to migrate, it will recursively search for project.json files to migrate." + Environment.NewLine +
+                "Defaults to current directory if nothing is specified.");
 
             CommandOption template = app.Option("-t|--template-file", "Base MSBuild template to use for migrated app. The default is the project included in dotnet new -t msbuild", CommandOptionType.SingleValue);
             CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new -t msbuild", CommandOptionType.SingleValue);

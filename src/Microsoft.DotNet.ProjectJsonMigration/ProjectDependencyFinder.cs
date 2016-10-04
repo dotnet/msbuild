@@ -269,7 +269,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projects;
         }
 
-        private static List<string> GetGlobalPaths(string rootPath)
+        public static List<string> GetGlobalPaths(string rootPath)
         {
             var paths = new List<string>();
 
