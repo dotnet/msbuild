@@ -208,7 +208,7 @@ case $host in
         ;;
 esac
 
-BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
+BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
 setHome
 
@@ -216,7 +216,7 @@ restoreBuildTools
 
 echo
 echo "** Rebuilding MSBuild with downloaded binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
 
 if [[ $BOOTSTRAP_ONLY = true ]]; then
     exit $?
@@ -229,4 +229,4 @@ runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUIL
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "$BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
