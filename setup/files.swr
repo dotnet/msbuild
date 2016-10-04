@@ -10,7 +10,9 @@ folder InstallDir:\MSBuild\15.0
   file source=$(X86BinPath)Microsoft.VisualStudioVersion.v15.Common.props
 
 folder InstallDir:\MSBuild\15.0\Bin
+  file source=$(X86BinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngen=yes
+  file source=$(X86BinPath)Microsoft.Build.Engine.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngen=yes
@@ -43,6 +45,10 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.ServiceModel.targets
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
+
+folder InstallDir:\MSBuild\15.0\MSBuild
+  file source=$(X86BinPath)Microsoft.Build.Core.xsd
+  file source=$(X86BinPath)Microsoft.Build.CommonTypes.xsd
 
 folder InstallDir:\MSBuild\15.0\Bin\cs
   file source=$(X86BinPath)cs\Microsoft.Build.resources.dll vs.file.ngen=yes
@@ -135,7 +141,9 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X64BinPath)MSBuild.exe.config
   file source=$(X64BinPath)MSBuildTaskHost.exe.config
 
+  file source=$(X86BinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngen=yes
+  file source=$(X86BinPath)Microsoft.Build.Engine.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngen=yes
@@ -164,6 +172,10 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)Microsoft.ServiceModel.targets
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
+
+folder InstallDir:\MSBuild\15.0\Bin\amd64\MSBuild
+  file source=$(X86BinPath)Microsoft.Build.Core.xsd
+  file source=$(X86BinPath)Microsoft.Build.CommonTypes.xsd
 
 folder InstallDir:\MSBuild\15.0\Bin\amd64\cs
   file source=$(X64BinPath)cs\Microsoft.Build.resources.dll vs.file.ngen=yes
@@ -255,3 +267,5 @@ folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)XMakeBuildEngine\Microsoft.Build.pkgdef
   file source=$(SourceDir)XmakeTasks\Microsoft.Build.Tasks.Core.pkgdef
   file source=$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef
+  file source=$(SourceDir)XMakeConversion\Microsoft.Build.Conversion.Core.pkgdef
+  file source=$(SourceDir)OrcasEngine\Microsoft.Build.Engine.pkgdef
