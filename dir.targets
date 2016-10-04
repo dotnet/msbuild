@@ -44,6 +44,12 @@
     <XunitOptions Condition="'$(OS)'=='Windows_NT' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(JENKINS_URL)' != ''">
+    <!-- Properties for when the tests are running in Jenkins -->
+    <XunitOptions Condition="'$(NetCoreBuild)' == 'true'">$(XunitOptions) -showprogress</XunitOptions>
+    <XunitOptions Condition="'$(NetCoreBuild)' != 'true'">$(XunitOptions) -verbose</XunitOptions>
+  </PropertyGroup>
+
   <Target Name="CopyBuildOutputToDeploymentDirectories"
           Condition="'$(CopyBuildOutputToDeploymentDirectories)' != 'false'">
     <ItemGroup>
