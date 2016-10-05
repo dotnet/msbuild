@@ -2,8 +2,13 @@ using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class DefaultCommandResolverPolicy
+    public class DefaultCommandResolverPolicy : ICommandResolverPolicy
     {
+        public CompositeCommandResolver CreateCommandResolver()
+        {
+            return Create();
+        }
+
         public static CompositeCommandResolver Create()
         {
             var environment = new EnvironmentProvider();
@@ -37,7 +42,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
             compositeCommandResolver.AddCommandResolver(new MuxerCommandResolver());
             compositeCommandResolver.AddCommandResolver(new RootedCommandResolver());
-            compositeCommandResolver.AddCommandResolver(new ProjectToolsCommandResolver(packagedCommandSpecFactory));
             compositeCommandResolver.AddCommandResolver(new AppBaseDllCommandResolver());
             compositeCommandResolver.AddCommandResolver(
                 new AppBaseCommandResolver(environment, platformCommandSpecFactory));

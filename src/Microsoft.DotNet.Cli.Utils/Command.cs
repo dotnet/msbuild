@@ -63,7 +63,28 @@ namespace Microsoft.DotNet.Cli.Utils
             string outputPath = null,
             string applicationName  = null)
         {
-            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, 
+            return Create(
+                new DefaultCommandResolverPolicy(),
+                commandName,
+                args,
+                framework,
+                configuration,
+                outputPath,
+                applicationName);
+        }
+
+        public static Command Create(
+            ICommandResolverPolicy commandResolverPolicy,
+            string commandName,
+            IEnumerable<string> args,
+            NuGetFramework framework = null,
+            string configuration = Constants.DefaultConfiguration,
+            string outputPath = null,
+            string applicationName  = null)
+        {
+            var commandSpec = CommandResolver.TryResolveCommandSpec(
+                commandResolverPolicy,
+                commandName,
                 args, 
                 framework, 
                 configuration: configuration,

@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ToolsCanAccessDependencyContextProperly()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("DependencyContextFromTool");
+            var testInstance = TestAssetsManager.CreateTestInstance("DependencyContextFromTool").WithLockFiles();
 
             var appDirectory = testInstance.Path;
 

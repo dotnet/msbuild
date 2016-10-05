@@ -4,6 +4,8 @@
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.CommandResolution;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -12,7 +14,7 @@ using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.Utils.Tests
+namespace Microsoft.DotNet.Tests
 {
     public class GivenAProjectToolsCommandResolver : TestBase
     {
@@ -220,7 +222,10 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             File.WriteAllText(depsJsonFile, "temp");
 
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
-            projectToolsCommandResolver.GenerateDepsJsonFile(lockFile, depsJsonFile);
+            projectToolsCommandResolver.GenerateDepsJsonFile(
+                lockFile,
+                depsJsonFile,
+                new SingleProjectInfo("dotnet-portable", "1.0.0", Enumerable.Empty<ResourceAssemblyInfo>()));
 
             File.ReadAllText(depsJsonFile).Should().Be("temp");
             File.Delete(depsJsonFile);
