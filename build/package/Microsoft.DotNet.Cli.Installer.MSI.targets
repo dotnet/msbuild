@@ -18,9 +18,12 @@
 
         <SdkGenerateMsiPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatemsi.ps1</SdkGenerateMsiPowershellScript>
         <SdkGenerateBundlePowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatebundle.ps1</SdkGenerateBundlePowershellScript>
+        <SdkGenerateNupkgPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatenupkg.ps1</SdkGenerateNupkgPowershellScript>
 
         <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
         <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
+        <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
+        <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(NugetVersion).nupkg</SdkInstallerNupkgFile>
       </PropertyGroup>
 
       <!-- Consumed By Publish -->
@@ -113,6 +116,21 @@
                       '$(Architecture)'" />
     </Target>
 
+    <Target Name="GenerateSdkNupkg"
+            DependsOnTargets="Init;Layout;MsiTargetsSetupInputOutputs;GenerateSdkBundle"
+            Condition=" '$(OS)' == 'Windows_NT'"
+            Inputs="$(CombinedFrameworkSdkHostInstallerFile);
+                    $(SdkInstallerNuspecFile);
+                    $(SdkGenerateNupkgPowershellScript)"
+            Outputs="$(SdkInstallerNupkgFile)">
+
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
+                      '$(CombinedFrameworkSdkHostInstallerFile)'
+                      '$(NugetVersion)'
+                      '$(SdkInstallerNuspecFile)'
+                      '$(SdkInstallerNupkgFile)'" />
+    </Target>
+
     <Target Name="TestSdkMsi"
             Inputs="$(SdkInstallerFile)"
             Outputs="$(SdkMsiTestedSentinel)"
@@ -137,6 +155,7 @@
                             AcquireWix;
                             GenerateSdkMsi;
                             GenerateSdkBundle;
+                            GenerateSdkNupkg;
                             TestSdkMsi"
           Condition=" '$(OS)' == 'Windows_NT'" />
 
