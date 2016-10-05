@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigrateRootOptionsRule(),
             new MigrateTFMRule(),
             new MigrateBuildOptionsRule(),
+            new MigrateJsonPropertiesRule(),
             new MigratePackOptionsRule(),
             new MigrateRuntimeOptionsRule(),
             new MigratePublishOptionsRule(),
