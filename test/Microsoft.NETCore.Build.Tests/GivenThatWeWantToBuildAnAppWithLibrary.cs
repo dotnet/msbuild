@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -36,7 +37,7 @@ namespace Microsoft.NETCore.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",
@@ -80,6 +81,57 @@ namespace Microsoft.NETCore.Build.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
+            }
+        }
+
+        [Fact]
+        public void It_generates_satellite_assemblies()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("KitchenSink")
+                .WithSource();
+
+            testAsset.Restore("TestApp");
+            testAsset.Restore("TestLibrary");
+
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDir = buildCommand.GetOutputDirectory("netcoreapp1.0");
+
+            var commandResult = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDir.FullName, "TestApp.dll") })
+                .CaptureStdOut()
+                .Execute();
+
+            commandResult.Should().Pass();
+
+            Dictionary<string, string> cultureValueMap = new Dictionary<string, string>()
+            {
+                {"", "Welcome to .Net!"},
+                {"da", "Velkommen til .Net!"},
+                {"de", "Willkommen in .Net!"},
+                {"fr", "Bienvenue à .Net!"}
+            };
+
+            foreach (var cultureValuePair in cultureValueMap)
+            {
+                var culture = cultureValuePair.Key;
+                var val = cultureValuePair.Value;
+
+                if (culture != "")
+                {
+                    var cultureDir = new DirectoryInfo(Path.Combine(outputDir.FullName, culture));
+                    cultureDir.Should().Exist();
+                    cultureDir.Should().HaveFile("TestApp.resources.dll");
+                    cultureDir.Should().HaveFile("TestLibrary.resources.dll");
+                }
+
+                commandResult.Should().HaveStdOutContaining(val);
             }
         }
     }

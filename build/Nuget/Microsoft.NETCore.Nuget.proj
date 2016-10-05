@@ -23,7 +23,7 @@
 
   <Target Name="Build"
           DependsOnTargets="LogOutput;
-                            CleanNuGetCache;
+                            InvalidateNuGetCache;
                             @(NuSpec->'%(LayoutTargetName)')"
           Inputs="@(NuSpec);@(PackageAssets)"
           Outputs="@(NuSpec->'%(NuPkgOutput)')">
@@ -42,11 +42,15 @@
     <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; --verbosity quiet --base-path &quot;$(OutDir.TrimEnd('\'))&quot; --output-directory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" />
   </Target>
 
-  <!-- Clean the packages that we are building from the cache everytime we build a new one.
-       This ensures we are always testing/restoring against the newly built version. 
+  <!-- Invalidate the packages that we are building from the cache every time we build a new one.
+       This ensures we are always testing/restoring against the newly built version.
+       We can't just delete the whole folder since we are using a previous version of Microsoft.NETCore.Sdk.
+       The Build.Tasks.dll is getting loaded up during the build, and it can't be deleted.
        -->
-  <Target Name="CleanNuGetCache">
-    <RemoveDir Directories="$(NuGet_Packages)\%(NuSpec.FileName)" />
+  <Target Name="InvalidateNuGetCache">
+    <!-- Ensure the sha512 files are deleted, which will invalidate all the cache entries, even if the RemoveDir fails -->
+    <Delete Files="$(NuGet_Packages)\%(NuSpec.FileName)\**\*.sha512" />
+    <RemoveDir ContinueOnError="true" Directories="$(NuGet_Packages)\%(NuSpec.FileName)" />
   </Target>
 
   <Target Name="Clean">

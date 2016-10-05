@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <NuSpec Include="Microsoft.NETCore.Web.nuspec">
+    <NuSpec Include="Microsoft.NETCore.Sdk.Web.nuspec">
       <NuPkgOutput>$(NuGetOutDir)%(FileName).$(Version).nupkg</NuPkgOutput>
       <NuGetArguments>--version "$(Version)"</NuGetArguments>
       <LayoutTargetName>LayoutWebPackage</LayoutTargetName>
@@ -59,6 +59,6 @@
     <Message Importance="High" Text="%(NuSpec.Identity) -> %(NuSpec.NuPkgOutput)'" />
   </Target>
   
-  <Import Project="Microsoft.NETCore.Web.Nuget.targets" />
+  <Import Project="Microsoft.NETCore.Sdk.Web.Nuget.targets" />
 
 </Project>

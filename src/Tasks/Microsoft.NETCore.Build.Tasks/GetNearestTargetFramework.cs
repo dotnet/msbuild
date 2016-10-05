@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             // in a condition that compares against $(TargetFramework).
             int indexOfNearestFramework = possibleNuGetFrameworks.IndexOf(nearestNuGetFramework);
             NearestTargetFramework = PossibleTargetFrameworks[indexOfNearestFramework];
-            return Log.HasLoggedErrors;
+            return !Log.HasLoggedErrors;
         }
 
         private NuGetFramework ParseFramework(string name)

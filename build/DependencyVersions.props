@@ -1,0 +1,15 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="OutDir;Configuration">
+  <!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
+  <!-- This file is imported by all projects at the beginning of the project files -->
+
+  <PropertyGroup>
+    <!-- SdkStage0Version is the version of the Microsoft.NETCore.Sdk we use to build ourselves -->
+    <SdkStage0Version>1.0.0-alpha-20160930-2</SdkStage0Version>
+    
+    <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
+    <CoreSetupVersion>1.0.1-beta-000933</CoreSetupVersion>
+    <NuGetVersion>3.6.0-beta.1.msbuild.16</NuGetVersion>
+    <RoslynVersion>2.0.0-beta6-60922-08</RoslynVersion>
+  </PropertyGroup>
+  
+</Project>
