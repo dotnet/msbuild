@@ -11,6 +11,12 @@ namespace Microsoft.DotNet.Tools.Migrate
     {
         public static int Run(string[] args)
         {
+
+            // IMPORTANT:
+            // When updating the command line args for dotnet-migrate, we need to update the in-VS caller of dotnet migrate as well.
+            // It is located at dotnet/roslyn-project-system:
+            //     src/Microsoft.VisualStudio.ProjectSystem.CSharp.VS/ProjectSystem/VS/Xproj/MigrateXprojFactory.cs
+
             DebugHelper.HandleDebugSwitch(ref args);
 
             CommandLineApplication app = new CommandLineApplication();
