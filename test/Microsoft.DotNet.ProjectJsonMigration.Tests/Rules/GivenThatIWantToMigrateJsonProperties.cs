@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
-    public class GivenThatIWantToMigrateProperties : TestBase
+    public class GivenThatIWantToMigrateJsonProperties : TestBase
     {
         [Fact]
         public void It_does_not_migrate_missing_props()
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
             return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
             {
-                new MigratePropertiesRule()
+                new MigrateJsonPropertiesRule()
             }, project, testDirectory);
         }
     }

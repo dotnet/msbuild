@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigrateRootOptionsRule(),
             new MigrateTFMRule(),
             new MigrateBuildOptionsRule(),
+            new MigrateJsonPropertiesRule(),
             new MigratePackOptionsRule(),
             new MigrateRuntimeOptionsRule(),
             new MigratePublishOptionsRule(),
@@ -19,7 +20,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigratePackageDependenciesAndToolsRule(),
             new MigrateConfigurationsRule(),
             new MigrateScriptsRule(),
-            new MigratePropertiesRule(),
             new WorkaroundOptionsRule(),
             new SaveOutputProjectRule()
         };

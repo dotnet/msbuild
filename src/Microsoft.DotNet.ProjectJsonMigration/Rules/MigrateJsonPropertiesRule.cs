@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigratePropertiesRule : IMigrationRule
+    public class MigrateJsonPropertiesRule : IMigrationRule
     {
         private Dictionary<string, ConditionalTransform<JToken, ProjectPropertyElement>> _propertyMappings
             = new Dictionary<string, ConditionalTransform<JToken, ProjectPropertyElement>>
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private readonly ITransformApplicator _transformApplicator;
 
-        public MigratePropertiesRule(ITransformApplicator transformApplicator = null)
+        public MigrateJsonPropertiesRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
         }
