@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                 Console.WriteLine($"Migrating project {project}..");
                 var projectDirectory = Path.GetDirectoryName(project);
                 var outputDirectory = projectDirectory;
-                var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate.DeepClone(), _xprojFilePath);
+                var migrationSettings = new MigrationSettings(projectDirectory, outputDirectory, sdkVersion, msBuildTemplate, _xprojFilePath);
                 new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
             }
 

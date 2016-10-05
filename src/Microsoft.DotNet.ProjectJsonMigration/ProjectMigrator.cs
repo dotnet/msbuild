@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var settings = new MigrationSettings(projectDir,
                                                      projectDir,
                                                      rootSettings.SdkPackageVersion,
-                                                     tempMSBuildProjectTemplate.DeepClone());
+                                                     tempMSBuildProjectTemplate);
                 MigrateProject(settings);
             }
         }

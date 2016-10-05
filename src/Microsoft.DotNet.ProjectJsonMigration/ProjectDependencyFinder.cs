@@ -15,7 +15,7 @@ using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class ProjectDependencyFinder
+    internal class ProjectDependencyFinder
     {
         public IEnumerable<ProjectDependency> ResolveProjectDependencies(string projectDir, string xprojFile = null)
         {
@@ -71,10 +71,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var dependencyName = projectFileDependency.Name;
 
                 ProjectDependency projectDependency;
+
+                if (preResolvedProjects.Contains(dependencyName))
+                {
+                    continue;
+                }
+
                 if (!possibleProjectDependencies.TryGetValue(dependencyName, out projectDependency))
                 {
-                    if (projectFileDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project
-                        && !preResolvedProjects.Contains(dependencyName))
+                    if (projectFileDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project)
                     {
                         MigrationErrorCodes
                             .MIGRATE1014($"Unresolved project dependency ({dependencyName})").Throw();
@@ -269,7 +274,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projects;
         }
 
-        public static List<string> GetGlobalPaths(string rootPath)
+        internal static List<string> GetGlobalPaths(string rootPath)
         {
             var paths = new List<string>();
 
@@ -352,7 +357,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     var projects = settings["projects"];
                     var dependencies = settings["dependencies"] as JObject;
 
-                    globalSettings.ProjectPaths = projects == null ? new string[] { } : projects.Select(a => a.Value<string>()).ToArray(); ;
+                    globalSettings.ProjectPaths = projects == null ? new string[] { } :
+                                                                     projects.Select(a => a.Value<string>()).ToArray();
                     globalSettings.PackagesPath = settings.Value<string>("packages");
                     globalSettings.FilePath = globalJsonPath;
                 }
