@@ -103,8 +103,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         // assembly resources
-        private static readonly ResourceManager resources = new ResourceManager("Microsoft.Build.Engine.Resources.Strings", Assembly.GetExecutingAssembly());
+        private static readonly ResourceManager resources = new ResourceManager("Microsoft.Build.Engine.Strings", Assembly.GetExecutingAssembly());
         // shared resources
-        private static readonly ResourceManager sharedResources = new ResourceManager("Microsoft.Build.Engine.Resources.Strings.shared", Assembly.GetExecutingAssembly());
+        private static readonly ResourceManager sharedResources = new ResourceManager("Microsoft.Build.Engine.Strings.shared", Assembly.GetExecutingAssembly());
     }
 }
