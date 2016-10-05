@@ -16,13 +16,13 @@ using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigratePackageDependenciesRule : IMigrationRule
+    public class MigratePackageDependenciesAndToolsRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
         private readonly  ProjectDependencyFinder _projectDependencyFinder;
         private string _projectDirectory;
 
-        public MigratePackageDependenciesRule(ITransformApplicator transformApplicator = null)
+        public MigratePackageDependenciesAndToolsRule(ITransformApplicator transformApplicator = null)
         {
             _transformApplicator = transformApplicator ?? new TransformApplicator();
             _projectDependencyFinder = new ProjectDependencyFinder();
@@ -69,6 +69,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     targetFramework.Dependencies,
                     migrationRuleInputs.ProjectXproj); 
             }
+
+            // Tools
+            MigrateTools(project, migrationRuleInputs.OutputMSBuildProject);
         }
 
         private void MigrateImports(ProjectItemGroupElement commonItemGroup, TargetFrameworkInformation targetFramework)
@@ -90,6 +93,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 var parent = packageRef.Parent;
                 packageRef.Parent.RemoveChild(packageRef);
                 parent.RemoveIfEmpty();
+            }
+        }
+
+        private void MigrateTools(
+            Project project,
+            ProjectRootElement output)
+        {
+            if (project.Tools == null || !project.Tools.Any())
+            {
+                return;
+            }
+
+            var itemGroup = output.AddItemGroup();
+
+            foreach (var tool in project.Tools)
+            {
+                _transformApplicator.Execute(ToolTransform.Transform(tool), itemGroup);
             }
         }
 
@@ -211,6 +231,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             dep => "",
             dep => true)
             .WithMetadata("Version", r => r.Version);
+
+        private AddItemTransform<ProjectLibraryDependency> ToolTransform => new AddItemTransform<ProjectLibraryDependency>(
+            "DotNetCliToolsReference",
+            dep => dep.Name,
+            dep => "",
+            dep => true)
+            .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
 
         private AddItemTransform<TargetFrameworkInformation> ImportsTransformation => new AddItemTransform<TargetFrameworkInformation>(
             "PackageTargetFallback",
