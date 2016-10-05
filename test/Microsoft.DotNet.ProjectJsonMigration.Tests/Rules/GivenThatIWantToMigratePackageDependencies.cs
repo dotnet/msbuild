@@ -38,7 +38,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
             
-            Console.WriteLine(mockProj.RawXml);
             EmitsToolReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview"), Tuple.Create("BPackage", "1.0.0"));            
         }
 
