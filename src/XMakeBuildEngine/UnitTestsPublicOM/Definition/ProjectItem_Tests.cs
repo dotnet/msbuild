@@ -519,7 +519,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
            new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
            new[] { "aab", @"dir\abb" })]
         // items as files: include with non-escaped glob does not match exclude with escaped wildcard character.
-        // The exclude is treated as a literal and only matches against non-glob include fragments (i.e., against values and item references)
+        // The exclude is treated as a literal and only matches against non-glob include fragments (i.e., against values and item references). %2A is *
         [InlineData(ItemWithIncludeAndExclude,
             @"**\a*b;**\a%2Axb",
             @"**\a%2Axb",

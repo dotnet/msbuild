@@ -2538,6 +2538,33 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceGlobMatchesItselfAsGlob()
+        {
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`ab*cd`/>
+                    <B Include=`tx?yz`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+            };
+
+            AssertProvenanceResult(expected, project, "ab*cd");
+
+            expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("B", Operation.Include, Provenance.Glob, 1),
+            };
+
+            AssertProvenanceResult(expected, project, "tx?yz");
+        }
+
+        [Fact]
         public void GetItemProvenanceResultsShouldBeInItemElementOrder()
         {
             var itemElements = Environment.ProcessorCount * 5;
@@ -2941,7 +2968,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
-                    <A Include=`|:/\?*`/>
+                    <A Include=`|:/\`/>
                   </ItemGroup>
                 </Project>
                 ";
@@ -2949,6 +2976,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var expected = new ProvenanceResultTupleList();
 
             AssertProvenanceResult(expected, project, @"?:/*\|");
+
+            expected.Add(Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1));
+
+            AssertProvenanceResult(expected, project, @"|:/\");
         }
 
         [Fact]
