@@ -136,4 +136,8 @@
     <BuildBinDir>$(ProjectDir)build\bin\$(Platform)\$(OS)\$(Configuration)</BuildBinDir>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
+  </PropertyGroup>
+
 </Project>
