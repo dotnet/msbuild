@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         private readonly string _propertyValue;
         private readonly Func<T,string> _propertyValueFunc;
 
+        private string _msbuildCondition = null;
+
         public AddPropertyTransform(string propertyName, string propertyValue, Func<T,bool> condition)
             : base(condition)
         {
@@ -28,13 +30,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             _propertyValueFunc = propertyValueFunc;
         }
 
+        public AddPropertyTransform<T> WithMSBuildCondition(string condition)
+        {
+            _msbuildCondition = condition;
+            return this;
+        }
+
         public override ProjectPropertyElement ConditionallyTransform(T source)
         {
             string propertyValue = GetPropertyValue(source);
 
             var property = _propertyObjectGenerator.CreatePropertyElement(PropertyName);
             property.Value = propertyValue;
-
+            
+            if (!string.IsNullOrEmpty(_msbuildCondition))
+            {
+                property.Condition = _msbuildCondition;
+            }
+            
             return property;
         }
 
