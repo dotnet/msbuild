@@ -15,10 +15,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
   <PropertyGroup>
-    <DotNetPublishFiles>
-      $(DotNetPublishFiles);
+    <_DotNetPublishFiles>
+      $(_DotNetPublishFiles);
       FileSystemPublish;
-    </DotNetPublishFiles>
+    </_DotNetPublishFiles>
   </PropertyGroup>
 
   <!--

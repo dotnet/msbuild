@@ -15,17 +15,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.DotNet.Publish.Ta
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ComputeTargets", "ComputeTargets", "{F38F8B8C-91BB-4126-BBF0-DED1645DB993}"
 	ProjectSection(SolutionItems) = preProject
-		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.ClassLibrary.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.ClassLibrary.ComputeFiles.targets
 		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Console.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Console.ComputeFiles.targets
 		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Core.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.Core.ComputeFiles.targets
 		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.WebApp.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.WebApp.ComputeFiles.targets
-		src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.WebSite.ComputeFiles.targets = src\Microsoft.DotNet.Publish.Targets\ComputeTargets\Microsoft.DotNet.Publish.WebSite.ComputeFiles.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishTargets", "PublishTargets", "{3AF52BAD-605D-4DF2-A2BF-CD48E5A42FA2}"
 	ProjectSection(SolutionItems) = preProject
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FileSystem.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FileSystem.targets
-		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FTP.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.FTP.targets
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.Kudu.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.Kudu.targets
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.MSDeploy.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.MSDeploy.targets
 		src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.MSDeployPackage.targets = src\Microsoft.DotNet.Publish.Targets\PublishTargets\Microsoft.DotNet.Publish.MSDeployPackage.targets

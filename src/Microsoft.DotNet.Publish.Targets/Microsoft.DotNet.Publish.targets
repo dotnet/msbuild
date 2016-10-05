@@ -14,7 +14,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets') And '$(PublishOnBuild)' == 'true'"/>
+  <Import Project="$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets')"/>
 
   <!--
   ***********************************************************************************************
@@ -23,13 +23,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
   
   <PropertyGroup>
-    <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">Core</PublishProjectType> 
-    <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</PublishProjectType>
-    <PublishProjectType Condition="'$(PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</PublishProjectType>
-    <PublishProjectType Condition="'$(PublishProjectType)' == '' ">WebSite</PublishProjectType>
+    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">Core</_PublishProjectType> 
+    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</_PublishProjectType>
+    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</_PublishProjectType>
+    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>
   </PropertyGroup>
 
-  <Import Project="$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets" Condition="Exists('$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(PublishProjectType).ComputeFiles.targets') And '$(PublishOnBuild)' == 'true'" />
+  <Import Project="$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(_PublishProjectType).ComputeFiles.targets" Condition="Exists('$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(_PublishProjectType).ComputeFiles.targets')" />
 
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -54,7 +54,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == ''">$(PublishProfileFullPath)</WebPublishProfileFile>
   </PropertyGroup>
 
-  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)') And '$(PublishOnBuild)' == 'true'" />
+  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)')" />
 
   <!--
   ***********************************************************************************************
@@ -68,7 +68,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
   </PropertyGroup>
   
-  <Import Project="$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets" Condition="Exists('$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets') And '$(PublishOnBuild)' == 'true'"/>
+  <Import Project="$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets" Condition="Exists('$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets')"/>
   
   <!--
   ***********************************************************************************************
@@ -92,14 +92,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <CorePublishDependsOn>
-      $(DotNetPublishComputeFiles);
-      $(DotNetPublishCopyFiles);
-      $(DotNetPublishFiles);
+      $(_DotNetPublishComputeFiles);
+      $(_DotNetPublishCopyFiles);
+      $(_DotNetPublishFiles);
     </CorePublishDependsOn>
   </PropertyGroup>
 
   <Target Name="CorePublish" 
-          Condition=" '$(PublishOnBuild)' == 'true' "
           DependsOnTargets="$(CorePublishDependsOn)"/>
 
 </Project>

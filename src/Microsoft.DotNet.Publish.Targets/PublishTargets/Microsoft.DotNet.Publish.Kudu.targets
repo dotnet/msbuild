@@ -19,10 +19,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 
   <PropertyGroup>
-    <DotNetPublishFiles>
-      $(DotNetPublishFiles);
+    <_DotNetPublishFiles>
+      $(_DotNetPublishFiles);
       KuduPublish;
-      </DotNetPublishFiles>
+    </_DotNetPublishFiles>
   </PropertyGroup>
 
   <!--

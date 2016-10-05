@@ -14,27 +14,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <DotNetPublishCopyFiles>
-      $(DotNetPublishCopyFiles);
-      RemoveExcludeFiles;
-      DeletePublishIntermediateOutputPath;
-      CopyFilesToPublishIntermediateOutputPath;
-    </DotNetPublishCopyFiles>
+    <_DotNetPublishCopyFiles>
+      $(_DotNetPublishCopyFiles);
+      _RemoveExcludeFiles;
+      _DeletePublishIntermediateOutputPath;
+      _CopyFilesToPublishIntermediateOutputPath;
+    </_DotNetPublishCopyFiles>
   </PropertyGroup>
 
 
   <!--********************************************************************-->
-  <!-- Target RemoveExcludeFiles -->
+  <!-- Target _RemoveExcludeFiles -->
   <!--********************************************************************-->
 
   <PropertyGroup>
-    <RemoveExcludeFilesDependsOn>
-      $(RemoveExcludeFilesDependsOn);
-    </RemoveExcludeFilesDependsOn>
+    <_RemoveExcludeFilesDependsOn>
+      $(_RemoveExcludeFilesDependsOn);
+    </_RemoveExcludeFilesDependsOn>
   </PropertyGroup>
 
-  <Target Name="RemoveExcludeFiles"
-          DependsOnTargets="$(RemoveExcludeFilesDependsOn)" >
+  <Target Name="_RemoveExcludeFiles"
+          DependsOnTargets="$(_RemoveExcludeFilesDependsOn)" >
     
     <ItemGroup>
       <DotNetPublishFiles Remove="@(DotNetPublishFiles)"  Condition="'%(Exclude)' == 'true'" />
@@ -43,17 +43,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <!--********************************************************************-->
-  <!-- Target DeletePublishIntermediateOutputPath -->
+  <!-- Target _DeletePublishIntermediateOutputPath -->
   <!--********************************************************************-->
 
   <PropertyGroup>
-    <DeletePublishIntermediateOutputPathDependsOn>
-      $(DeletePublishIntermediateOutputPathDependsOn);
-    </DeletePublishIntermediateOutputPathDependsOn>
+    <_DeletePublishIntermediateOutputPathDependsOn>
+      $(_DeletePublishIntermediateOutputPathDependsOn);
+    </_DeletePublishIntermediateOutputPathDependsOn>
   </PropertyGroup>
 
-  <Target Name="DeletePublishIntermediateOutputPath"
-          DependsOnTargets="$(DeletePublishIntermediateOutputPathDependsOn)" >
+  <Target Name="_DeletePublishIntermediateOutputPath"
+          DependsOnTargets="$(_DeletePublishIntermediateOutputPathDependsOn)" >
 
     <!-- Remove all the files from the temp directory first-->
     <ItemGroup>
@@ -71,13 +71,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Target CopyAllFilesToPublishIntermediateOutputPath -->
   <!--********************************************************************-->
   <PropertyGroup>
-    <CopyFilesToPublishIntermediateOutputPathDependsOn>
-      $(CopyFilesToPublishIntermediateOutputPathDependsOn);
-      </CopyFilesToPublishIntermediateOutputPathDependsOn>
+    <_CopyFilesToPublishIntermediateOutputPathDependsOn>
+      $(_CopyFilesToPublishIntermediateOutputPathDependsOn);
+      </_CopyFilesToPublishIntermediateOutputPathDependsOn>
   </PropertyGroup>
 
-  <Target Name="CopyFilesToPublishIntermediateOutputPath"
-        DependsOnTargets="$(CopyFilesToPublishIntermediateOutputPathDependsOn)"
+  <Target Name="_CopyFilesToPublishIntermediateOutputPath"
+        DependsOnTargets="$(_CopyFilesToPublishIntermediateOutputPathDependsOn)"
         Inputs="@(DotNetPublishFiles)"
         Outputs="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)$(DotNetPublishFilesRelativePath)')">
     

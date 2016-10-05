@@ -14,29 +14,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <ComputeFilesFromOutDirPrefix Condition="'$(ComputeFilesFromOutDirPrefix)' == ''">bin\</ComputeFilesFromOutDirPrefix>
-    <ComputeFilesFromContentPrefix Condition="'$(ComputeFilesFromContentPrefix)' == ''"></ComputeFilesFromContentPrefix>
+    <_ComputeFilesFromOutDirPrefix Condition="'$(_ComputeFilesFromOutDirPrefix)' == ''">bin\</_ComputeFilesFromOutDirPrefix>
+    <_ComputeFilesFromContentPrefix Condition="'$(_ComputeFilesFromContentPrefix)' == ''"></_ComputeFilesFromContentPrefix>
   </PropertyGroup>
 
   <PropertyGroup>
-    <DotNetPublishComputeFiles>
-      $(DotNetPublishComputeFiles);
-      ComputeFilesFromOutDir;
-      ComputeFilesFromContent;
-    </DotNetPublishComputeFiles>
+    <_DotNetPublishComputeFiles>
+      $(_DotNetPublishComputeFiles);
+      _ComputeFilesFromOutDir;
+      _ComputeFilesFromContent;
+    </_DotNetPublishComputeFiles>
   </PropertyGroup>
 
   <!--***************************************************************-->
-  <!-- Target ComputeFilesFromOutDir                     -->
+  <!-- Target _ComputeFilesFromOutDir                     -->
   <!--***************************************************************-->
   <PropertyGroup>
-    <ComputeFilesFromOutDirDependsOn>
-      $(ComputeFilesFromOutDirDependsOn);
-    </ComputeFilesFromOutDirDependsOn>
+    <_ComputeFilesFromOutDirDependsOn>
+      $(_ComputeFilesFromOutDirDependsOn);
+    </_ComputeFilesFromOutDirDependsOn>
   </PropertyGroup>
 
-  <Target Name="ComputeFilesFromOutDir"
-          DependsOnTargets="$(ComputeFilesFromOutDirDependsOn)"
+  <Target Name="_ComputeFilesFromOutDir"
+          DependsOnTargets="$(_ComputeFilesFromOutDirDependsOn)"
           Condition="'$(OutDir)' != ''">
 
     <ItemGroup>
@@ -48,7 +48,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <CreateItem
       Include="@(_OutDirFiles)"
-      AdditionalMetadata="DestinationRelativePath=$(ComputeFilesFromOutDirPrefix)%(RecursiveDir)%(Filename)%(Extension)">
+      AdditionalMetadata="DestinationRelativePath=$(_ComputeFilesFromOutDirPrefix)%(RecursiveDir)%(Filename)%(Extension)">
       <Output TaskParameter="Include" ItemName="_OutDirFilesWithMetadata"/>
     </CreateItem>
 
@@ -59,21 +59,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <!--***************************************************************-->
-  <!-- Target ComputeFilesFromContent                     -->
+  <!-- Target _ComputeFilesFromContent                     -->
   <!--***************************************************************-->
   <PropertyGroup>
-    <ComputeFilesFromContentDependsOn>
-      $(ComputeFilesFromContentDependsOn);
-    </ComputeFilesFromContentDependsOn>
+    <_ComputeFilesFromContentDependsOn>
+      $(_ComputeFilesFromContentDependsOn);
+    </_ComputeFilesFromContentDependsOn>
   </PropertyGroup>
 
-  <Target Name="ComputeFilesFromContent"
-          DependsOnTargets="$(ComputeFilesFromContentDependsOn)"
+  <Target Name="_ComputeFilesFromContent"
+          DependsOnTargets="$(_ComputeFilesFromContentDependsOn)"
           Condition="'@(Content)' != ''">
 
     <CreateItem
       Include="@(Content)"
-      AdditionalMetadata="DestinationRelativePath=$(ComputeFilesFromContentPrefix)%(Identity)">
+      AdditionalMetadata="DestinationRelativePath=$(_ComputeFilesFromContentPrefix)%(Identity)">
       <Output TaskParameter="Include" ItemName="_ContentFilesWithMetadata"/>
     </CreateItem>
 

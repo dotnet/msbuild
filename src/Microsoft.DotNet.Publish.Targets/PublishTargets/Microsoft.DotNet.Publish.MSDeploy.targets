@@ -28,10 +28,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(PublishTaskAssemblyFullPath)" />
 
   <PropertyGroup>
-    <DotNetPublishFiles>
-      $(DotNetPublishFiles);
+    <_DotNetPublishFiles>
+      $(_DotNetPublishFiles);
       MSDeployPublish;
-    </DotNetPublishFiles>
+    </_DotNetPublishFiles>
   </PropertyGroup>
 
 

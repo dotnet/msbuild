@@ -16,24 +16,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="TransformWebConfig" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
 
   <PropertyGroup>
-    <DotNetPublishComputeFiles>
-      $(DotNetPublishComputeFiles);
-      PrepareForPublish;
+    <_DotNetPublishComputeFiles>
+      $(_DotNetPublishComputeFiles);
+      _PrepareForDotNetPublish;
       Publish;
-      ComputeFilesFromPublishDir;
-    </DotNetPublishComputeFiles>
+      _ComputeFilesFromPublishDir;
+    </_DotNetPublishComputeFiles>
   </PropertyGroup>
 
   <!--***************************************************************-->
-  <!-- Target PrepareForPublish                               -->
+  <!-- Target _PrepareForDotNetPublish                               -->
   <!--***************************************************************-->
   <PropertyGroup>
-    <PrepareForPublishDependsOn>
-      $(PrepareForPublishDependsOn);
-    </PrepareForPublishDependsOn>
+    <_PrepareForDotNetPublishDependsOn>
+      $(_PrepareForDotNetPublishDependsOn);
+    </_PrepareForDotNetPublishDependsOn>
   </PropertyGroup>
   
-  <Target Name="PrepareForPublish">
+  <Target Name="_PrepareForDotNetPublish">
     
     <PropertyGroup>
       <PublishDir>$([System.IO.Path]::GetTempPath())\PublishTemp\</PublishDir>
@@ -47,27 +47,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
 
   <!--***************************************************************-->
-  <!-- Target ComputeFilesFromPublishDir                               -->
+  <!-- Target _ComputeFilesFromPublishDir                               -->
   <!--***************************************************************-->
   <PropertyGroup>
-    <ComputeFilesFromPublishDirDependsOn>
-      $(ComputeFilesFromPublishDirDependsOn);
-    </ComputeFilesFromPublishDirDependsOn>
+    <_ComputeFilesFromPublishDirDependsOn>
+      $(_ComputeFilesFromPublishDirDependsOn);
+    </_ComputeFilesFromPublishDirDependsOn>
   </PropertyGroup>
   
-  <Target Name="ComputeFilesFromPublishDir"
-        DependsOnTargets="$(ComputeFilesFromPublishDirDependsOn)"
+  <Target Name="_ComputeFilesFromPublishDir"
+        DependsOnTargets="$(_ComputeFilesFromPublishDirDependsOn)"
         Condition="'$(PublishDir)' != ''">
 
     <PropertyGroup>
       <_ProjectCapability>@(ProjectCapability)</_ProjectCapability>
-      <_isWebProject Condition="$(_ProjectCapability.Contains('DotNetCoreWeb'))">true</_isWebProject>
+      <_IsWebProject Condition="$(_ProjectCapability.Contains('DotNetCoreWeb'))">true</_IsWebProject>
       <_IsPortable Condition=" '$(_IsPortable)' == '' ">true</_IsPortable>
       <_TransformWebConfigForAzure Condition=" '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
     </PropertyGroup>
 
     <TransformWebConfig
-        Condition="'$(_isWebProject)' == 'true'"
+        Condition="'$(_IsWebProject)' == 'true'"
         TargetPath="$(TargetPath)"
         PublishDir="$(PublishDir)"
         IsPortable="$(_IsPortable)"
