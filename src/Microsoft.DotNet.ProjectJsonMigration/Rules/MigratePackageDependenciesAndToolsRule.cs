@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             .WithMetadata("Version", r => r.Version);
 
         private AddItemTransform<ProjectLibraryDependency> ToolTransform => new AddItemTransform<ProjectLibraryDependency>(
-            "DotNetCliToolsReference",
+            "DotNetCliToolReference",
             dep => dep.Name,
             dep => "",
             dep => true)
