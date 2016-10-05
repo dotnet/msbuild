@@ -13,6 +13,7 @@ namespace Microsoft.NETCore.Build.Tasks
     {
         private readonly LockFile _lockFile;
         private readonly IPackageResolver _packageResolver;
+        private IEnumerable<string> _privateAssetPackageIds;
 
         public PublishAssembliesResolver(LockFile lockFile, IPackageResolver packageResolver)
         {
@@ -20,15 +21,19 @@ namespace Microsoft.NETCore.Build.Tasks
             _packageResolver = packageResolver;
         }
 
+        public PublishAssembliesResolver WithPrivateAssets(IEnumerable<string> privateAssetPackageIds)
+        {
+            _privateAssetPackageIds = privateAssetPackageIds;
+            return this;
+        }
+
         public IEnumerable<ResolvedFile> Resolve(NuGetFramework framework, string runtime)
         {
-            LockFileTarget lockFileTarget = _lockFile.GetTarget(framework, runtime);
-
-            ProjectContext projectContext = lockFileTarget.CreateProjectContext();
+            ProjectContext projectContext = _lockFile.CreateProjectContext(framework, runtime);
 
             List<ResolvedFile> results = new List<ResolvedFile>();
 
-            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries())
+            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_privateAssetPackageIds))
             {
                 string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
 

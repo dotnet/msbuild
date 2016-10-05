@@ -23,6 +23,7 @@
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GivenWeNeedLockFileExtensions.cs" />
     <Compile Include="GivenACompilationOptionsConverter.cs" />
     <Compile Include="GivenAProduceContentsAssetsTask.cs" />
     <Compile Include="GivenAResolvePackageDependenciesTask.cs" />
@@ -50,6 +51,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="LockFiles\all.asset.types.project.lock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="LockFiles\dependencies.withgraphs.project.lock.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="LockFiles\dotnet.new.project.lock.json">

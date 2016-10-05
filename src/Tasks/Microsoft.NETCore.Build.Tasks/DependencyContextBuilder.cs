@@ -17,11 +17,18 @@ namespace Microsoft.NETCore.Build.Tasks
     public class DependencyContextBuilder
     {
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
+        private IEnumerable<string> _privateAssetPackageIds;
 
         public DependencyContextBuilder()
         {
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(path: null);
+        }
+
+        public DependencyContextBuilder WithPrivateAssets(IEnumerable<string> privateAssetPackageIds)
+        {
+            _privateAssetPackageIds = privateAssetPackageIds;
+            return this;
         }
 
         public DependencyContext Build(
@@ -33,13 +40,11 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             bool includeCompilationLibraries = compilationOptions != null;
 
-            LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
-
-            ProjectContext projectContext = lockFileTarget.CreateProjectContext();
-            IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.GetRuntimeLibraries();
+            ProjectContext projectContext = lockFile.CreateProjectContext(framework, runtime);
+            IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.GetRuntimeLibraries(_privateAssetPackageIds);
             IEnumerable<LockFileTargetLibrary> compilationExports =
                 includeCompilationLibraries ?
-                    projectContext.GetCompileLibraries() :
+                    projectContext.GetCompileLibraries(_privateAssetPackageIds) :
                     Enumerable.Empty<LockFileTargetLibrary>();
 
             var dependencyLookup = compilationExports
@@ -54,8 +59,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
             RuntimeLibrary projectRuntimeLibrary = GetProjectRuntimeLibrary(
                 mainProjectInfo,
-                lockFile,
-                lockFileTarget,
+                projectContext,
                 dependencyLookup);
             IEnumerable<RuntimeLibrary> runtimeLibraries =
                 new[] { projectRuntimeLibrary }
@@ -66,8 +70,7 @@ namespace Microsoft.NETCore.Build.Tasks
             {
                 CompilationLibrary projectCompilationLibrary = GetProjectCompilationLibrary(
                     mainProjectInfo,
-                    lockFile,
-                    lockFileTarget,
+                    projectContext,
                     dependencyLookup);
                 compilationLibraries =
                     new[] { projectCompilationLibrary }
@@ -111,25 +114,13 @@ namespace Microsoft.NETCore.Build.Tasks
         }
 
         private List<Dependency> GetProjectDependencies(
-            LockFile lockFile,
-            LockFileTarget lockFileTarget,
+            ProjectContext projectContext,
             Dictionary<string, Dependency> dependencyLookup)
         {
-
             List<Dependency> dependencies = new List<Dependency>();
 
-            IEnumerable<ProjectFileDependencyGroup> projectFileDependencies = lockFile
-                .ProjectFileDependencyGroups
-                .Where(dg => dg.FrameworkName == string.Empty ||
-                             dg.FrameworkName == lockFileTarget.TargetFramework.DotNetFrameworkName);
-
-            foreach (string projectFileDependency in projectFileDependencies.SelectMany(dg => dg.Dependencies))
+            foreach (string dependencyName in projectContext.GetTopLevelDependencies())
             {
-                int separatorIndex = projectFileDependency.IndexOf(' ');
-                string dependencyName = separatorIndex > 0 ?
-                    projectFileDependency.Substring(0, separatorIndex) :
-                    projectFileDependency;
-
                 Dependency dependency;
                 if (dependencyLookup.TryGetValue(dependencyName, out dependency))
                 {
@@ -142,14 +133,13 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private RuntimeLibrary GetProjectRuntimeLibrary(
             SingleProjectInfo projectInfo,
-            LockFile lockFile,
-            LockFileTarget lockFileTarget,
+            ProjectContext projectContext,
             Dictionary<string, Dependency> dependencyLookup)
         {
 
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.GetOutputName()) };
 
-            List<Dependency> dependencies = GetProjectDependencies(lockFile, lockFileTarget, dependencyLookup);
+            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
 
             ResourceAssembly[] resourceAssemblies = projectInfo
                 .ResourceAssemblies
@@ -170,11 +160,10 @@ namespace Microsoft.NETCore.Build.Tasks
 
         private CompilationLibrary GetProjectCompilationLibrary(
             SingleProjectInfo projectInfo,
-            LockFile lockFile,
-            LockFileTarget lockFileTarget,
+            ProjectContext projectContext,
             Dictionary<string, Dependency> dependencyLookup)
         {
-            List<Dependency> dependencies = GetProjectDependencies(lockFile, lockFileTarget, dependencyLookup);
+            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
 
             return new CompilationLibrary(
                 type: "project",

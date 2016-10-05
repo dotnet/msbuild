@@ -35,6 +35,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PackageReferenceConverter.cs" />
     <Compile Include="NugetContentAssetPreprocessor.cs" />
     <Compile Include="IContentAssetPreprocessor.cs" />
     <Compile Include="ProduceContentAssets.cs" />
@@ -51,7 +52,7 @@
     <Compile Include="IPackageResolver.cs" />
     <Compile Include="ResolvedFile.cs" />
     <Compile Include="PublishAssembliesResolver.cs" />
-    <Compile Include="LockFileTargetExtensions.cs" />
+    <Compile Include="LockFileExtensions.cs" />
     <Compile Include="ResolvePublishAssemblies.cs" />
     <Compile Include="DependencyType.cs" />
     <Compile Include="PreprocessPackageDependenciesDesignTime.cs" />

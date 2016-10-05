@@ -217,12 +217,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
-  <Target Name="RunResolvePublishAssemblies">
+  <Target Name="RunResolvePublishAssemblies"
+          DependsOnTargets="ComputePrivateAssetsPackageReferences">
 
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               LockFilePath="$(ProjectLockFile)"
                               TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
-                              RuntimeIdentifier="$(RuntimeIdentifier)">
+                              RuntimeIdentifier="$(RuntimeIdentifier)"
+                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)">
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
 
@@ -420,6 +422,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="GeneratePublishDependencyFile"
+          DependsOnTargets="ComputePrivateAssetsPackageReferences"
           Condition="'$(GenerateDependencyFile)' == 'true'">
 
     <PropertyGroup>
@@ -433,9 +436,33 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
-                      CompilerOptions="@(DependencyFileCompilerOptions)" />
+                      CompilerOptions="@(DependencyFileCompilerOptions)"
+                      PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)" />
 
   </Target>
+
+  <!--
+    ============================================================
+                                        ComputePrivateAssetsPackageReferences
+
+    Builds up the @(PrivateAssetsPackageReference) item by looking for @(PackageReference) items with 
+    <PrivateAssets> metadata.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <ComputePrivateAssetsPackageReferences Condition="'$(ComputePrivateAssetsPackageReferences)' == ''">true</ComputePrivateAssetsPackageReferences>
+  </PropertyGroup>
+
+  <Target Name="ComputePrivateAssetsPackageReferences"
+          Condition="'$(ComputePrivateAssetsPackageReferences)' == 'true'">
+
+    <ItemGroup>
+      <PrivateAssetsPackageReference Include="@(PackageReference)"
+                                     Condition="'%(PackageReference.PrivateAssets)' == 'All'" />
+    </ItemGroup>
+
+  </Target>
+
 
   <!--
     ============================================================

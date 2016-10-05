@@ -10,18 +10,23 @@ namespace Microsoft.NETCore.Build.Tasks
 {
     internal class ProjectContext
     {
+        private readonly LockFile _lockFile;
         private readonly LockFileTarget _lockFileTarget;
 
         public bool IsPortable { get; }
 
-        public ProjectContext(LockFileTarget lockFileTarget)
+        public LockFile LockFile => _lockFile;
+        public LockFileTarget LockFileTarget => _lockFileTarget;
+
+        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget)
         {
+            _lockFile = lockFile;
             _lockFileTarget = lockFileTarget;
 
             IsPortable = _lockFileTarget.IsPortable();
         }
 
-        public IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries()
+        public IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries(IEnumerable<string> privateAssetPackageIds)
         {
             IEnumerable<LockFileTargetLibrary> runtimeLibraries = _lockFileTarget.Libraries;
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
@@ -34,16 +39,46 @@ namespace Microsoft.NETCore.Build.Tasks
                 allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(libraryLookup));
             }
 
-            // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
+            if (privateAssetPackageIds?.Any() == true)
+            {
+                HashSet<string> privateAssetsExclusionList =
+                    LockFileExtensions.GetPrivateAssetsExclusionList(
+                        _lockFile,
+                        _lockFileTarget,
+                        privateAssetPackageIds,
+                        libraryLookup);
+
+                allExclusionList.UnionWith(privateAssetsExclusionList);
+            }
 
             return runtimeLibraries.Filter(allExclusionList).ToArray();
         }
 
-        public IEnumerable<LockFileTargetLibrary> GetCompileLibraries()
+        public IEnumerable<LockFileTargetLibrary> GetCompileLibraries(IEnumerable<string> compilePrivateAssetPackageIds)
         {
-            // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
+            IEnumerable<LockFileTargetLibrary> compileLibraries = _lockFileTarget.Libraries;
 
-            return _lockFileTarget.Libraries;
+            if (compilePrivateAssetPackageIds?.Any() == true)
+            {
+                Dictionary<string, LockFileTargetLibrary> libraryLookup =
+                    compileLibraries.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
+
+                HashSet<string> privateAssetsExclusionList =
+                    LockFileExtensions.GetPrivateAssetsExclusionList(
+                        _lockFile,
+                        _lockFileTarget,
+                        compilePrivateAssetPackageIds,
+                        libraryLookup);
+
+                compileLibraries = compileLibraries.Filter(privateAssetsExclusionList);
+            }
+
+            return compileLibraries.ToArray();
+        }
+
+        public IEnumerable<string> GetTopLevelDependencies()
+        {
+            return LockFileExtensions.GetTopLevelDependencies(LockFile, LockFileTarget);
         }
     }
 }
