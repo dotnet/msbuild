@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.CommandResolution
 
         public IEnumerable<SingleProjectInfo> GetTools()
         {
-            var toolsReferences = _project.AllEvaluatedItems.Where(i => i.ItemType.Equals("DotNetCliToolsReference"));
+            var toolsReferences = _project.AllEvaluatedItems.Where(i => i.ItemType.Equals("DotNetCliToolReference"));
             var tools = toolsReferences.Select(t => new SingleProjectInfo(
                 t.EvaluatedInclude,
                 t.GetMetadataValue("Version"),

@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 var packageVersion = toolSpec.Item2;
 
                 var items = mockProj.Items
-                    .Where(i => i.ItemType == "DotNetCliToolsReference")
+                    .Where(i => i.ItemType == "DotNetCliToolReference")
                     .Where(i => i.Include == packageName)
                     .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
 
