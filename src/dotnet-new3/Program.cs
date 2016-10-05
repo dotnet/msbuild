@@ -37,6 +37,8 @@ namespace dotnet_new3
             CommandOption skipUpdateCheck = app.Option("--skip-update-check", "Don't check for updates.", CommandOptionType.NoValue);
             CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
+            CommandOption localizationFile = app.Option("-t|--translation", "The localization file to use", CommandOptionType.SingleValue);
+
             app.OnExecute(async () =>
             {
                 bool reinitFlag = app.RemainingArguments.Any(x => x == "--debug:reinit");
@@ -180,7 +182,7 @@ namespace dotnet_new3
                     return 0;
                 }
 
-                if (await TemplateCreator.Instantiate(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
+                if (await TemplateCreator.Instantiate(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue(), localizationFile.Value()) == -1)
                 {
                     ListTemplates(template);
                     return -1;
