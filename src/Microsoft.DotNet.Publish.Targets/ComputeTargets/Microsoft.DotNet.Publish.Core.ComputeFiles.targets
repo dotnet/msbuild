@@ -13,7 +13,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <UsingTask TaskName="TransformWebConfig" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="TransformWebConfig" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
 
   <PropertyGroup>
     <_DotNetPublishComputeFiles>
@@ -37,12 +37,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     
     <PropertyGroup>
       <PublishDir>$([System.IO.Path]::GetTempPath())\PublishTemp\</PublishDir>
-      <PublishFramework Condition="'$(PublishFramework)' == ''">netcoreapp1.0</PublishFramework>
-      <Configuration>$(LastUsedBuildConfiguration)</Configuration>
+      <TargetFramework>$(PublishFramework)</TargetFramework>
+      <RuntimeIdentifier>$(PublishRuntime)</RuntimeIdentifier>
+      <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
-  
-    <RemoveDir Condition="Exists('$(PublishDir)')" Directories="$(PublishDir)" ContinueOnError="true"/>
-    <RemoveDir Condition="Exists('$(PublishIntermediateTempPath)')" Directories="$(PublishIntermediateTempPath)" ContinueOnError="true" />
   </Target>
   
 

@@ -12,7 +12,7 @@
             <Destination>tools\net46</Destination>
         </NuGetContent>
       
-        <NuGetContent Include="$(AspNetTargetRoot)\bin\$(Configuration)\Microsoft.DotNetCore.Publish.Tasks.dll" >
+        <NuGetContent Include="$(AspNetTargetRoot)\bin\$(Configuration)\netstandard1.3\Microsoft.DotNetCore.Publish.Tasks.dll" >
           <Destination>tools\netcoreapp1.0</Destination>
         </NuGetContent>
 
@@ -30,10 +30,6 @@
 
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\PublishProfiles\*.*">
             <Destination>build\netstandard1.0\PublishProfiles</Destination>
-        </NuGetContent>
-
-        <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.props" >
-            <Destination>build\netstandard1.0</Destination>
         </NuGetContent>
       
         <NuGetContent Include="$(AspNetTargetSource)\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.targets">

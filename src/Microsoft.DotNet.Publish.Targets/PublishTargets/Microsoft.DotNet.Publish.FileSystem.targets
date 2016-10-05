@@ -52,7 +52,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="GatherPublishIntermediateOutputPathFiles">
     <ItemGroup>
-      <_PublishIntermediateOutputPathFiles Include="$(PublishIntermediateOutputPath)\**\*.*" />
+      <_PublishIntermediateOutputPathFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
     </ItemGroup>
   </Target>
 </Project>

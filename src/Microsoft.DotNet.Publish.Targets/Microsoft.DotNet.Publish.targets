@@ -14,11 +14,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets')"/>
+  <PropertyGroup>
+    <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</_PublishTaskFramework>
+    <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
+
+    <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
+    <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.DotNet$(MSBuildRuntimeType).Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
+    <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
+    <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
+    <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
+    <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
+  </PropertyGroup>
+
+  <Import Project="$(_CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets" Condition="Exists('$(_CopyTargetsDir)Microsoft.DotNet.Publish.CopyFiles.targets')"/>
 
   <!--
   ***********************************************************************************************
-  Import the Collection target
+  Import the Compute target
   ***********************************************************************************************
  -->
   
@@ -29,7 +41,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>
   </PropertyGroup>
 
-  <Import Project="$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(_PublishProjectType).ComputeFiles.targets" Condition="Exists('$(ComputeTargetsDir)Microsoft.DotNet.Publish.$(_PublishProjectType).ComputeFiles.targets')" />
+  <Import Project="$(_ComputeTargetsDir)Microsoft.DotNet.Publish.$(_PublishProjectType).ComputeFiles.targets" Condition="Exists('$(_ComputeTargetsDir)Microsoft.DotNet.Publish.$(_PublishProjectType).ComputeFiles.targets')" />
 
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -43,12 +55,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
 
   <PropertyGroup>
-    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</PublishProfileRootFolder>
-    <PublishProfileRootFolder Condition="'$(PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</PublishProfileRootFolder>
+    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</_PublishProfileRootFolder>
+    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</_PublishProfileRootFolder>
     <PublishProfile Condition="'$(PublishProfile)' ==''">DefaultProfile</PublishProfile>
     <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
-    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
-    <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(PublishProfilesDir)$(PublishProfileName).pubxml</PublishProfileFullPath>
+    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
+    <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(_PublishProfilesDir)$(PublishProfileName).pubxml</PublishProfileFullPath>
 
     <!-- This is what get passed from the Visual Studio UI.-->
     <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == ''">$(PublishProfileFullPath)</WebPublishProfileFile>
@@ -58,17 +70,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ***********************************************************************************************
-  Import the PublishProtocol target
+  Import the _PublishProtocol target
   ***********************************************************************************************
  -->
 
   <PropertyGroup>
-    <PublishProtocol Condition="'$(PublishProtocol)' == ''">$(WebPublishMethod)</PublishProtocol>
+    <_PublishProtocol Condition="'$(_PublishProtocol)' == ''">$(WebPublishMethod)</_PublishProtocol>
     <!-- For backward compat -->
-    <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
+    <_PublishProtocol Condition="'$(_PublishProtocol)' == 'Package'">MSDeployPackage</_PublishProtocol>
   </PropertyGroup>
   
-  <Import Project="$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets" Condition="Exists('$(PublishTargetsDir)Microsoft.DotNet.Publish.$(PublishProtocol).targets')"/>
+  <Import Project="$(_PublishTargetsDir)Microsoft.DotNet.Publish.$(_PublishProtocol).targets" Condition="Exists('$(_PublishTargetsDir)Microsoft.DotNet.Publish.$(_PublishProtocol).targets')"/>
+
+  <!--
+  ***********************************************************************************************
+  Set the publish properties based on PublishProfile properties
+  ***********************************************************************************************
+ -->
+  
+  <PropertyGroup>
+    <PublishConfiguration Condition ="'$(PublishConfiguration)' == ''">$(LastUsedBuildConfiguration)</PublishConfiguration>
+    <PublishConfiguration Condition="'$(PublishConfiguration)' == ''">$(Configuration)</PublishConfiguration>
+    <_PublishConfigurationPath Condition="'$(_PublishConfigurationPath)' == ''">$(PublishConfiguration)\</_PublishConfigurationPath>
+
+    <PublishFramework Condition="'$(PublishFramework)' == '' And '$(_PublishProjectType)' == 'Core' ">$(TargetFramework)</PublishFramework>
+    <PublishFramework Condition="'$(PublishFramework)' == '' And '$(_PublishProjectType)' == 'Core' ">netcoreapp1.0</PublishFramework>
+    <_PublishFrameworkPath Condition="'$(_PublishFrameworkPath)' == '' And '$(_PublishProjectType)' == 'Core' ">$(PublishFramework)\</_PublishFrameworkPath>
+    
+    <BaseIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
+    
+    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)PublishTemp\))</PublishIntermediateTempPath> 
+    <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)PublishOutput\</PublishIntermediateOutputPath>
+  </PropertyGroup>
+  
   
   <!--
   ***********************************************************************************************
