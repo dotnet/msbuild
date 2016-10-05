@@ -1,73 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="UpdateXlf" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
-  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="SaveXlfToResx"/>
-  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="UpdateXlfFromResx"/>
-  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" Condition="$(LocalizedBuild) == 'true'" TaskName="EmitLocalizedResources"/>
+  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" TaskName="SaveXlfToResx"/>
+  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" TaskName="UpdateXlfFromResx"/>
+  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" TaskName="EmitLocalizedResources"/>
 
-  <!-- Emit the localized EmbeddedResource items before the common targets start using them -->
-  <Target Name="EmitLocalizedResources"
-          BeforeTargets="$(PrepareResourceNamesDependsOn);PrepareResourceNames">
+  <Target Name="AddLocalizedResxFilesToEmbeddedResource"
+          BeforeTargets="$(PrepareResourcesDependsOn);PrepareResources"
+          DependsOnTargets="SyncXlf;GenerateLocalizedResxResourcesFromXlf;AddEnglishResxFilesToEmbeddedResource"
+          Condition="'$(LocalizedBuild)' == 'true'">
+
     <ItemGroup>
-      <NeutralResources Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.resx'"/> 
+      <!-- The depending targets generate and materialize localized resx files in @(LocalizedResxResources) -->
+      <EmbeddedResource Include="@(LocalizedResxResources)"/>
     </ItemGroup>
-
-    <EmitLocalizedResources 
-      NeutralResources="@(NeutralResources)"
-      AssemblyName="$(AssemblyName)"
-      LocalizedResxRoot="$(IntermediateOutputPath)"
-      RelativePathToXlfRoot=".\xlf\">
-
-      <Output TaskParameter="ResolvedXlfResources" ItemName="XlfFiles" />
-      <Output TaskParameter="ResolvedLocalizedResxResources" ItemName="EmbeddedResource" />
-
-    </EmitLocalizedResources>
   </Target>
 
-  <!-- The default english resources do not have corresponding xlf files. Simply copy them and add en in the name 
-       Can't have english xlf (for uniformity) because the xlf sync code only updates the <source> tags, not the <target> targ.
-       That would cause the english xlf files to become out of date
-
-       This target needs to run after EmitLocalizedResource, otherwise the copied intermediary files would leak into NeutralResource
-  -->
-  <Target Name="UpdateLocalizedResxForEnglishResx"
-          BeforeTargets="$(PrepareResourceNamesDependsOn);PrepareResourceNames"
-          AfterTargets="EmitLocalizedResources">
-
-      <ItemGroup>
-        <EnglishResources Include="@(NeutralResources -> '$(IntermediateOutputPath)%(Filename).en%(Extension)')"/>
-      </ItemGroup>
-
-      <Copy
-        SourceFiles="@(NeutralResources)"
-        DestinationFiles="@(EnglishResources)"
-      />
-
-      <ItemGroup>
-        <EmbeddedResource Include="@(EnglishResources)">
-          <LogicalName>$(AssemblyName).%(FileName).resources</LogicalName>
-        </EmbeddedResource>
-      </ItemGroup>      
-
-  </Target>
-
-  <Target Name="UpdateXlf"
-          BeforeTargets="CoreResGen"
-          AfterTargets="SplitResourcesByCulture"
-          DependsOnTargets="EmitLocalizedResources;UpdateLocalizedResxForEnglishResx" 
-          Condition="$(LocalizedBuild) == 'true' and $(IsTestProject) != 'true'">
-    
-    <UpdateXlfFromResx
-      Condition="%(Identity) != ''"
-      ResxPath="%(NeutralResx)"
-      XlfPath="@(XlfFiles)"
-    />
-
-  </Target>
-
-  <Target Name="ConvertXlfToLocalizedResx"
-          AfterTargets="UpdateXlf"
-          BeforeTargets="CoreResGen">
+  <!-- Materialize the contents of the localized resx files from their corresponding xlf files -->
+  <Target Name="GenerateLocalizedResxResourcesFromXlf"
+          DependsOnTargets="EmitLocalizedResources" >
 
     <SaveXlfToResx
       Condition="%(Identity) != ''"
@@ -79,7 +30,92 @@
 
   </Target>
 
-    <!-- Copy paste and modify OpenSourceSign from sign.targets because it only signs the main assembly 
+  <!-- The default english resources do not have corresponding xlf files. Simply copy them and add en in the name 
+       Can't have english xlf (for uniformity) because the xlf sync code only updates the <source> tags, not the <target> targ.
+       That would cause the english xlf files to become out of date
+
+       This target needs to run after EmitLocalizedResource, otherwise the copied intermediary files would leak into NeutralResource
+  -->
+  <Target Name="AddEnglishResxFilesToEmbeddedResource"
+          DependsOnTargets="EmitLocalizedResources">
+
+      <ItemGroup>
+        <EnglishResources Include="@(NeutralResources -> '$(IntermediateOutputPath)%(Filename).en%(Extension)')"/>
+      </ItemGroup>
+
+      <Copy
+        SourceFiles="@(NeutralResources)"
+        DestinationFiles="@(EnglishResources)"
+      />
+
+      <ItemGroup>
+        <LocalizedResxResources Include="@(EnglishResources)">
+          <LogicalName>$(AssemblyName).%(FileName).resources</LogicalName>
+        </LocalizedResxResources>
+      </ItemGroup>      
+
+  </Target>
+
+  <!-- 
+    [IN]
+    @(EmbeddedResource)
+
+    [OUT]
+    @(NeutralResources) - base resources that contain the English strings
+    @(XlfFiles) - Location of xlf files relative to their companion neutral resource
+    @(LocalizedResxResources) - Location of generated resx files. Each xlf file will generate one or more localized resx file
+  -->
+  <Target Name="EmitLocalizedResources"
+          BeforeTargets="$(PrepareResourcesDependsOn);PrepareResources">
+
+    <ItemGroup>
+      <NeutralResources Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.resx'">
+        <IsShared>$([System.String]::Copy('%(Filename)').StartsWith('Strings.shared.'))</IsShared>
+      </NeutralResources> 
+    </ItemGroup>
+
+    <EmitLocalizedResources 
+      NeutralResources="@(NeutralResources)"
+      AssemblyName="$(AssemblyName)"
+      LocalizedResxRoot="$(IntermediateOutputPath)"
+      RelativePathToXlfRoot=".\xlf\">
+
+      <Output TaskParameter="ResolvedXlfResources" ItemName="XlfFiles" />
+      <Output TaskParameter="ResolvedLocalizedResxResources" ItemName="LocalizedResxResources" />
+
+    </EmitLocalizedResources>
+
+    <ItemGroup>
+      <XlfFiles>
+        <IsShared>$([System.String]::Copy('%(Filename)').StartsWith('Strings.shared.'))</IsShared>
+      </XlfFiles>
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="SyncXlf"
+          BeforeTargets="Build"
+          DependsOnTargets="EmitLocalizedResources" 
+          Condition="$(SyncXlf) == 'true' and $(IsTestProject) != 'true'">
+    
+    <!-- only one project should update the shared resources. Otherwise races happen -->
+    <ItemGroup>
+      <XlfFilesToSync Include="@(XlfFiles)"/>
+      <XlfFilesToSync
+        Remove="@(XlfFilesToSync)"
+        Condition="'$(AssemblyName)' != 'MSBuild' and '%(XlfFilesToSync.IsShared)' == 'True'"
+        />
+    </ItemGroup>
+
+    <UpdateXlfFromResx
+      Condition="%(Identity) != ''"
+      ResxPath="%(NeutralResx)"
+      XlfPath="@(XlfFilesToSync)"
+    />
+
+  </Target>
+
+  <!-- Copy paste and modify OpenSourceSign from sign.targets because it only signs the main assembly 
   and provides no extension mechanism to add more assemblies to it
   
   If satellite assemblies do not get their delay sign bit switched off, the main assemblies won't load them
