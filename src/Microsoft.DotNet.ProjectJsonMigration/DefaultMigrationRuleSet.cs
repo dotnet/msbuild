@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigrateRuntimeOptionsRule(),
             new MigratePublishOptionsRule(),
             new MigrateProjectDependenciesRule(),
-            new MigratePackageDependenciesRule(),
+            new MigratePackageDependenciesAndToolsRule(),
             new MigrateConfigurationsRule(),
             new MigrateScriptsRule(),
             new WorkaroundOptionsRule(),

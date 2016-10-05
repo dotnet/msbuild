@@ -23,10 +23,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""BPackage"" : ""1.0.0""
                     }
                 }");
-
-            Console.WriteLine(mockProj.RawXml);
             
             EmitsPackageReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview", ""), Tuple.Create("BPackage", "1.0.0", ""));            
+        }
+
+        [Fact]
+        public void It_migrates_Tools()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""tools"": {
+                        ""APackage"" : ""1.0.0-preview"",
+                        ""BPackage"" : ""1.0.0""
+                    }
+                }");
+            
+            Console.WriteLine(mockProj.RawXml);
+            EmitsToolReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview"), Tuple.Create("BPackage", "1.0.0"));            
         }
 
         private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
@@ -47,12 +60,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             }
         }
 
+        private void EmitsToolReferences(ProjectRootElement mockProj, params Tuple<string, string>[] toolSpecs)
+        {
+            foreach (var toolSpec in toolSpecs)
+            {
+                var packageName = toolSpec.Item1;
+                var packageVersion = toolSpec.Item2;
+
+                var items = mockProj.Items
+                    .Where(i => i.ItemType == "DotNetCliToolsReference")
+                    .Where(i => i.Include == packageName)
+                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
+
+                items.Should().HaveCount(1);
+            }
+        }
+
         private ProjectRootElement RunPackageDependenciesRuleOnPj(string s, string testDirectory = null)
         {
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
             return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
             {
-                new MigratePackageDependenciesRule()
+                new MigratePackageDependenciesAndToolsRule()
             }, s, testDirectory);
         }
     }
