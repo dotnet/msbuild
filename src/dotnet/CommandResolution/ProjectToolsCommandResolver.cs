@@ -53,19 +53,19 @@ namespace Microsoft.DotNet.Cli.CommandResolution
             IEnumerable<string> args,
             string projectDirectory)
         {
-            var lockFilePathCalculator = new LockFilePathCalculator();
-            var lockFile = new LockFileFormat().Read(lockFilePathCalculator.GetLockFilePath(projectDirectory));
-            var tools = lockFile.Tools.Where(t => t.Name.Contains(".NETCoreApp")).SelectMany(t => t.Libraries);
+            var projectFactory = new ProjectFactory();
+            var project = projectFactory.GetProject(projectDirectory);
+            var tools = project.GetTools();
 
             return ResolveCommandSpecFromAllToolLibraries(
                 tools,
                 commandName,
                 args,
-                lockFile);
+                project.GetLockFile());
         }
 
         private CommandSpec ResolveCommandSpecFromAllToolLibraries(
-            IEnumerable<LockFileTargetLibrary> toolsLibraries,
+            IEnumerable<SingleProjectInfo> toolsLibraries,
             string commandName,
             IEnumerable<string> args,
             LockFile lockFile)
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Cli.CommandResolution
         }
 
         private CommandSpec ResolveCommandSpecFromToolLibrary(
-            LockFileTargetLibrary toolLibraryRange,
+            SingleProjectInfo toolLibraryRange,
             string commandName,
             IEnumerable<string> args,
             LockFile lockFile)
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.CommandResolution
         }
 
         private LockFile GetToolLockFile(
-            LockFileTargetLibrary toolLibrary,
+            SingleProjectInfo toolLibrary,
             string nugetPackagesRoot)
         {
             var lockFilePath = GetToolLockFilePath(toolLibrary, nugetPackagesRoot);
@@ -145,36 +145,19 @@ namespace Microsoft.DotNet.Cli.CommandResolution
         }
 
         private string GetToolLockFilePath(
-            LockFileTargetLibrary toolLibrary,
+            SingleProjectInfo toolLibrary,
             string nugetPackagesRoot)
         {
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
 
             return toolPathCalculator.GetBestLockFilePath(
                 toolLibrary.Name,
-                new VersionRange(toolLibrary.Version),
+                new VersionRange(new NuGetVersion(toolLibrary.Version)),
                 s_toolPackageFramework);
         }
 
-        private ProjectContext GetProjectContextFromDirectoryForFirstTarget(string projectRootPath)
-        {
-            if (projectRootPath == null)
-            {
-                return null;
-            }
-
-            if (!File.Exists(Path.Combine(projectRootPath, Project.FileName)))
-            {
-                return null;
-            }
-
-            var projectContext = ProjectContext.CreateContextForEachTarget(projectRootPath).FirstOrDefault();
-
-            return projectContext;
-        }
-
         private string GetToolDepsFilePath(
-            LockFileTargetLibrary toolLibrary,
+            SingleProjectInfo toolLibrary,
             LockFile toolLockFile,
             string depsPathRoot)
         {
@@ -190,7 +173,7 @@ namespace Microsoft.DotNet.Cli.CommandResolution
         private void EnsureToolJsonDepsFileExists(
             LockFile toolLockFile,
             string depsPath,
-            LockFileTargetLibrary toolLibrary)
+            SingleProjectInfo toolLibrary)
         {
             if (!File.Exists(depsPath))
             {
@@ -199,20 +182,15 @@ namespace Microsoft.DotNet.Cli.CommandResolution
         }
 
         // Need to unit test this, so public
-        public void GenerateDepsJsonFile(
+        internal void GenerateDepsJsonFile(
             LockFile toolLockFile,
             string depsPath,
-            LockFileTargetLibrary toolLibrary)
+            SingleProjectInfo toolLibrary)
         {
             Reporter.Verbose.WriteLine($"Generating deps.json at: {depsPath}");
 
-            var singleProjectInfo = new SingleProjectInfo(
-                toolLibrary.Name,
-                toolLibrary.Version.ToFullString(),
-                Enumerable.Empty<ResourceAssemblyInfo>());
-
             var dependencyContext = new DepsJsonBuilder()
-                .Build(singleProjectInfo, null, toolLockFile, s_toolPackageFramework, null);
+                .Build(toolLibrary, null, toolLockFile, s_toolPackageFramework, null);
 
             var tempDepsFile = Path.GetTempFileName();
             using (var fileStream = File.Open(tempDepsFile, FileMode.Open, FileAccess.Write))
