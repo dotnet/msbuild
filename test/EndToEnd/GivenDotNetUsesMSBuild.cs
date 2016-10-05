@@ -63,7 +63,9 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .WithWorkingDirectory(testInstance.TestRoot)
                 .ExecuteWithCapturedOutput("portable")
                 .Should()
-                .Pass();
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello Portable World!");;
         }
     }
 }

@@ -10,19 +10,19 @@ namespace Microsoft.DotNet.Cli.CommandResolution
     {
         public IProject GetProject(string projectDirectory)
         {
-            return GetCsProjProject(projectDirectory) ??
+            return GetMSBuildProj(projectDirectory) ??
                 GetProjectJsonProject(projectDirectory);
         }
 
-        private IProject GetCsProjProject(string projectDirectory)
+        private IProject GetMSBuildProj(string projectDirectory)
         {
-            string csProjPath = GetCSProjPath(projectDirectory);
-            if(csProjPath == null)
+            string msBuildProjectPath = GetMSBuildProjPath(projectDirectory);
+            if(msBuildProjectPath == null)
             {
                 return null;
             }
 
-            return new CSProjProject(csProjPath);
+            return new MSBuildProject(msBuildProjectPath);
         }
 
         private IProject GetProjectJsonProject(string projectDirectory)
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.CommandResolution
             return new ProjectJsonProject(projectDirectory);
         }
 
-        private string GetCSProjPath(string projectDirectory)
+        private string GetMSBuildProjPath(string projectDirectory)
         {
             string[] projectFiles = Directory.GetFiles(projectDirectory, "*.*proj");
 

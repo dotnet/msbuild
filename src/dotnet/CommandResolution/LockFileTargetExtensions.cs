@@ -54,15 +54,11 @@ namespace Microsoft.DotNet.Cli.CommandResolution
                 allExclusionList.UnionWith(lockFileTarget.GetPlatformExclusionList(libraryLookup));
             }
 
-            // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
-
             return runtimeLibraries.Filter(allExclusionList).ToArray();
         }
 
         public static IEnumerable<LockFileTargetLibrary> GetCompileLibraries(this LockFileTarget lockFileTarget)
         {
-            // TODO: exclude "type: build" dependencies during publish - https://github.com/dotnet/sdk/issues/42
-
             return lockFileTarget.Libraries;
         }
 

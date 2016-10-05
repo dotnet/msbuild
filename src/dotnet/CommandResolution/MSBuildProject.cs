@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,18 +10,18 @@ using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.CommandResolution
 {
-    internal class CSProjProject : IProject
+    internal class MSBuildProject : IProject
     {
         private Project _project;
 
-        public CSProjProject(string csProjPath)
+        public MSBuildProject(string msBuildProjectPath)
         {
             var globalProperties = new Dictionary<string, string>()
             {
                { "MSBuildExtensionsPath", AppContext.BaseDirectory }
             };
 
-            _project = new Project(csProjPath, globalProperties, null);
+            _project = new Project(msBuildProjectPath, globalProperties, null);
         }
 
         public LockFile GetLockFile()
