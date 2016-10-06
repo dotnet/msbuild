@@ -20,10 +20,4 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildExtensionsPath)\NuGet.targets</NuGetRestoreTargets>
   </PropertyGroup>
   <Import Condition="Exists('$(NuGetRestoreTargets)')" Project="$(NuGetRestoreTargets)" />
-
-  <!-- Import Microsoft.TestPlatform.targets for Test3 -->
-  <PropertyGroup>
-    <VSTestTargets Condition="'$(VSTestTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.TestPlatform.targets</VSTestTargets>
-  </PropertyGroup>
-  <Import Condition="Exists('$(VSTestTargets)')" Project="$(VSTestTargets)" />
 </Project>
