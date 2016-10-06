@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25702.0
+VisualStudioVersion = 15.0.25804.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Publish.Tasks", "src\Microsoft.DotNet.Publish.Tasks\Microsoft.DotNet.Publish.Tasks.csproj", "{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}"
 EndProject
@@ -9,7 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Publish.Ta
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.DotNet.Publish.Targets", "Microsoft.DotNet.Publish.Targets", "{6BAE8914-1C33-4C8E-9EED-71581DF8F1D6}"
 	ProjectSection(SolutionItems) = preProject
-		src\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.props = src\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.props
 		src\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.targets = src\Microsoft.DotNet.Publish.Targets\Microsoft.DotNet.Publish.targets
 	EndProjectSection
 EndProject
@@ -43,7 +42,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Publish.Pa
 		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60} = {994A9D35-ED60-4000-B7A1-A7CDD71B0E60}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNetCore.Publish.Tasks", "src\Microsoft.DotNetCore.Publish.Tasks\Microsoft.DotNetCore.Publish.Tasks.csproj", "{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNetCore.Publish.Tasks", "src\Microsoft.DotNetCore.Publish.Tasks\Microsoft.DotNetCore.Publish.Tasks.csproj", "{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

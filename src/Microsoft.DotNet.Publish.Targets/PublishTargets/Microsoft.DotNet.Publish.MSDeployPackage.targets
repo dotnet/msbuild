@@ -19,13 +19,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Including the tasks
   ***********************************************************************************************
  -->
-  <UsingTask TaskName="MSDeploy" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
-  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
-  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
-  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
-  <UsingTask TaskName="RegexEscape" AssemblyFile="$(PublishTaskAssemblyFullPath)"/>
-  <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(PublishTaskAssemblyFullPath)" />
-  <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="MSDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="RegexEscape" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
 
   <PropertyGroup>
     <_DotNetPublishFiles>
