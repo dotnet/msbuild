@@ -4,11 +4,11 @@
 
   <PropertyGroup>
     <!-- SdkStage0Version is the version of the Microsoft.NETCore.Sdk we use to build ourselves -->
-    <SdkStage0Version>1.0.0-alpha-20160930-2</SdkStage0Version>
+    <SdkStage0Version>1.0.0-alpha-20161006-3</SdkStage0Version>
     
     <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
     <CoreSetupVersion>1.0.1-beta-000933</CoreSetupVersion>
-    <NuGetVersion>3.6.0-beta.1.msbuild.16</NuGetVersion>
+    <NuGetVersion>3.6.0-rc-1954</NuGetVersion>
     <RoslynVersion>2.0.0-beta6-60922-08</RoslynVersion>
   </PropertyGroup>
   

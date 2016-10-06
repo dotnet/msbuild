@@ -1,4 +1,15 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 
+    https://github.com/dotnet/sdk/issues/210
+  
+    Temporarily simulate an inner build until web projects work correctly with cross-targeting. 
+    This needs to be above the import of the props because the SDK.props will only get imported 
+    if the TargetFramework is set.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
 
   <PropertyGroup>

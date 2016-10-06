@@ -45,7 +45,7 @@ namespace Microsoft.NETCore.Build.Tests
         }
 
         [Fact]
-        public void It_builds_desktop_library_successfully_on_all_platforms()
+        public void It_builds_desktop_library_successfully_on_windows()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
