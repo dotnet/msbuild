@@ -1,7 +1,7 @@
 use vs
 
 package name=Microsoft.VisualStudio.Templates.VisualBasic.NetCore
-        version=2.0.0.0
+        version=$(Version)
         vs.package.type=vsix
         vs.package.vsixId=A40894B6-B035-4BFE-A674-2FF0C582C971
         vs.package.installSize=32768

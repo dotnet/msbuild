@@ -1,0 +1,12 @@
+{
+    sign: [
+        {
+            "certificate": "VsixSHA2",
+            "strongName": null,
+            "values": [
+                "Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsix",
+                "Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsix"
+            ]
+        }
+    ]
+}

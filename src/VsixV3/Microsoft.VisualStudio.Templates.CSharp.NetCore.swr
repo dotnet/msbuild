@@ -1,7 +1,7 @@
 use vs
 
 package name=Microsoft.VisualStudio.Templates.CSharp.NetCore
-        version=2.0.0.0
+        version=$(Version)
         vs.package.type=vsix
         vs.package.vsixId=A45AB8EC-B6A9-439E-9473-CB6C62C0C09D
         vs.package.installSize=32768
