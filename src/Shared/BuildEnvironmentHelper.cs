@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Shared
 {
@@ -51,15 +51,7 @@ namespace Microsoft.Build.Shared
 
             // Check to see if we're running inside of Visual Studio
             bool runningInVisualStudio;
-            var visualStudioPath = FindVisualStudio(
-                new[] {processNameCommandLine, processNameCurrentProcess},
-                out runningInVisualStudio);
-
-            string msbuildFromVisualStudioRoot = null;
-            if (!string.IsNullOrEmpty(visualStudioPath))
-            {
-                msbuildFromVisualStudioRoot = FileUtilities.CombinePaths(visualStudioPath, "MSBuild", "15.0", "Bin");
-            }
+            var visualStudioPath = GetVisualStudioPath(out runningInVisualStudio);
 
             var possibleLocations = new Func<BuildEnvironment>[]
             {
@@ -74,7 +66,7 @@ namespace Microsoft.Build.Shared
                 () => TryFromFolder(Path.GetDirectoryName(executingAssembly), runningTests, runningInVisualStudio, visualStudioPath),
 
                 // Try based on the Visual Studio Root
-                ()=> TryFromFolder(msbuildFromVisualStudioRoot, runningTests, runningInVisualStudio, visualStudioPath),
+                ()=> TryFromVisualStudioRoot(visualStudioPath, runningTests, runningInVisualStudio),
 
                 // Try from the current directory
                 () => TryFromFolder(currentDirectory, runningTests, runningInVisualStudio, visualStudioPath)
@@ -89,6 +81,14 @@ namespace Microsoft.Build.Shared
 
             ErrorUtilities.ThrowInvalidOperation("Shared.CanNotFindValidMSBuildLocation");
             return null; // Not reachable
+        }
+
+        private static BuildEnvironment TryFromVisualStudioRoot(string visualStudioPath, bool runningTests, bool runningInVisualStudio)
+        {
+            if (string.IsNullOrEmpty(visualStudioPath)) return null;
+
+            var msbuildFromVisualStudioRoot = FileUtilities.CombinePaths(visualStudioPath, "MSBuild", "15.0", "Bin");
+            return TryFromFolder(msbuildFromVisualStudioRoot, runningTests, runningInVisualStudio, visualStudioPath);
         }
 
         private static BuildEnvironment TryFromCurrentProcess(string runningProcess, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
@@ -143,25 +143,43 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Look for Visual Studio
         /// </summary>
-        /// <param name="processNames">Name(s) of Visual Studio processes.</param>
         /// <param name="runningInVisualStudio">True if running in Visual Studio</param>
         /// <returns>Path to Visual Studio install root.</returns>
-        private static string FindVisualStudio(string[] processNames, out bool runningInVisualStudio)
+        private static string GetVisualStudioPath(out bool runningInVisualStudio)
         {
-            runningInVisualStudio = false;
+            var processNameCommandLine = s_getProcessFromCommandLine();
+            var processNameCurrentProcess = s_getProcessFromRunningProcess();
 
             // Check to see if we're running inside of Visual Studio
-            foreach (var process in processNames)
+            runningInVisualStudio = IsProcessInList(processNameCommandLine, s_visualStudioProcess) ||
+                                    IsProcessInList(processNameCurrentProcess, s_visualStudioProcess);
+
+            // Define the order in which we will look for Visual Studio. Stop when the first instance
+            // is found.
+            var possibleLocations = new Func<string>[]
             {
-                if (IsProcessInList(process, s_visualStudioProcess))
-                {
-                    runningInVisualStudio = true;
+                () => TryGetVsFromProcess(processNameCommandLine),
+                () => TryGetVsFromProcess(processNameCurrentProcess),
+                () => TryGetVsFromEnvironment(),
+                () => TryGetVsFromInstalled(),
+                () => TryGetVsFromMSBuildLocation(processNameCommandLine),
+                () => TryGetVsFromMSBuildLocation(processNameCurrentProcess)
+            };
 
-                    // This assumes running from VS\Common7\IDE\<process>.exe.
-                    return FileUtilities.GetFolderAbove(process, 3);
-                }
-            }
+            return possibleLocations.Select(location => location()).FirstOrDefault(path => path != null);
+        }
 
+        private static string TryGetVsFromProcess(string process)
+        {
+            // Check to see if we're running inside of Visual Studio
+            // This assumes running from VS\Common7\IDE\<process>.exe.
+            return IsProcessInList(process, s_visualStudioProcess)
+                ? FileUtilities.GetFolderAbove(process, 3)
+                : null;
+        }
+
+        private static string TryGetVsFromEnvironment()
+        {
             // VSInstallDir is set from the Developer Command Prompt
             var vsInstallDir = Environment.GetEnvironmentVariable("VSINSTALLDIR");
             var vsVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -174,31 +192,45 @@ namespace Microsoft.Build.Shared
                 return vsInstallDir;
             }
 
+            return null;
+        }
+
+        private static string TryGetVsFromInstalled()
+        {
+            var instances = s_getVisualStudioInstances();
+            Version v = new Version("15.0");
+
+            // Get the first instance of Visual Studio that matches our Major/Minor compatible version
+            return instances.FirstOrDefault(
+                i => i.Version.Major == v.Major && i.Version.Minor == v.Minor && Directory.Exists(i.Path))?.Path;
+        }
+
+        private static string TryGetVsFromMSBuildLocation(string process)
+        {
             // Check assuming we're running in VS\MSBuild\15.0\Bin\MSBuild.exe
-            foreach (var process in processNames)
+
+            if (IsProcessInList(process, s_msBuildProcess))
             {
-                if (IsProcessInList(process, s_msBuildProcess))
+                var vsPath = FileUtilities.GetFolderAbove(process, 4);
+                var devEnv = FileUtilities.CombinePaths(vsPath, "Common7", "IDE", "devenv.exe");
+
+                // Make sure VS is actually there before we suggest this root.
+                if (File.Exists(devEnv))
                 {
-                    var vsPath = FileUtilities.GetFolderAbove(process, 4);
-                    var devEnv = FileUtilities.CombinePaths(vsPath, "Common7", "IDE", "devenv.exe");
+                    return vsPath;
+                }
 
-                    // Make sure VS is actually there before we suggest this root.
-                    if (File.Exists(devEnv))
-                    {
-                        return vsPath;
-                    }
+                // VS\MSBuild\15.0\Bin\amd64\MSBuild.exe
+                var vsPath64 = FileUtilities.GetFolderAbove(process, 5);
+                var devEnv64 = FileUtilities.CombinePaths(vsPath64, "Common7", "IDE", "devenv.exe");
 
-                    // VS\MSBuild\15.0\Bin\amd64\MSBuild.exe
-                    var vsPath64 = FileUtilities.GetFolderAbove(process, 5);
-                    var devEnv64 = FileUtilities.CombinePaths(vsPath64, "Common7", "IDE", "devenv.exe");
-
-                    // Make sure VS is actually there before we suggest this root.
-                    if (File.Exists(devEnv64))
-                    {
-                        return vsPath64;
-                    }
+                // Make sure VS is actually there before we suggest this root.
+                if (File.Exists(devEnv64))
+                {
+                    return vsPath64;
                 }
             }
+
 
             return null;
         }
@@ -239,12 +271,14 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void ResetInstance_ForUnitTestsOnly(Func<string> getProcessFromCommandLine = null,
             Func<string> getProcessFromRunningProcess = null, Func<string> getExecutingAssmblyPath = null,
-            Func<string> getCurrentDirectory = null)
+            Func<string> getCurrentDirectory = null,
+            Func<IEnumerable<VisualStudioInstance>> getVisualStudioInstances = null)
         {
             s_getProcessFromCommandLine = getProcessFromCommandLine ?? GetProcessFromCommandLine;
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssmblyPath = getExecutingAssmblyPath ?? GetExecutingAssmblyPath;
             s_getCurrentDirectory = getCurrentDirectory ?? GetCurrentDirectory;
+            s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
 
             BuildEnvironmentHelperSingleton.s_instance = Initialize();
         }
@@ -253,6 +287,7 @@ namespace Microsoft.Build.Shared
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssmblyPath = GetExecutingAssmblyPath;
         private static Func<string> s_getCurrentDirectory = GetCurrentDirectory;
+        private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
 
         private static class BuildEnvironmentHelperSingleton
         {
