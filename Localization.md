@@ -38,6 +38,6 @@
 - before pinging the loc team, we sync the xlf files on a dev machine and commit the changes
 - this will be the ONLY time we sync xlf files and commit the changes. Otherwise, if we commit xlfs while the loc team is translating (between their checkout and merged PR), we might get races and loose resource updates.
 
-## Contributing better translation
+## Contributing a better translation
 - send a PR with an updated `<target>` element of the xlf resource (do not include other non-localization changes)
 - we will notify the localization team, which will then take over and review the PR
