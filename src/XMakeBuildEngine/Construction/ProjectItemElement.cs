@@ -348,6 +348,15 @@ namespace Microsoft.Build.Construction
             return AddMetadata(name, unevaluatedValue, false);
         }
 
+        /// <summary>
+        /// Convenience method to add a piece of metadata to this item.
+        /// Adds after any existing metadata. Does not modify any existing metadata.
+        /// </summary>
+        /// <param name="name">The name of the metadata to add</param>
+        /// <param name="unevaluatedValue">The value of the metadata to add</param>
+        /// <param name="expressAsAttribute">If true, then the metadata will be expressed as an attribute instead of a child element, for example
+        /// &lt;Reference Include="Libary.dll" HintPath="..\lib\Library.dll" Private="True" /&gt;
+        /// </param>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, "name");

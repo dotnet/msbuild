@@ -303,8 +303,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectItemElement ParseProjectItemElement(XmlElementWithLocation element, ProjectItemGroupElement parent)
         {
-            
-
             bool belowTarget = parent.Parent is ProjectTargetElement;
 
             string itemType = element.Name;
@@ -363,7 +361,7 @@ namespace Microsoft.Build.Construction
                 bool isKnownAttribute;
                 bool isValidMetadataNameInAttribute;
 
-                CheckMetadataName(attribute.Name, out isKnownAttribute, out isValidMetadataNameInAttribute);
+                CheckMetadataAsAttributeName(attribute.Name, out isKnownAttribute, out isValidMetadataNameInAttribute);
 
                 if (!isKnownAttribute && !isValidMetadataNameInAttribute)
                 {
@@ -389,7 +387,7 @@ namespace Microsoft.Build.Construction
             return item;
         }
 
-        private void CheckMetadataName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
+        private void CheckMetadataAsAttributeName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
         {
             if (!XmlUtilities.IsValidElementName(name))
             {
@@ -416,7 +414,7 @@ namespace Microsoft.Build.Construction
                 }
             }
 
-            //  Resorve attributes starting with underscores in case we need to add more built-in attributes later
+            //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
             if (name[0] == '_')
             {
                 isKnownAttribute = false;

@@ -91,16 +91,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void ReadInvalidNameAsAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string content = @"
+            string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
-                            <i Include='i1' "+ "\u03A3" + @"='v1' />
+                            <i Include='i1' " + "\u03A3" + @"='v1' />
                         </ItemGroup>
                     </Project>
                 ";
 
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
@@ -517,6 +517,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 Include='i'>
                               <m1>v1</m1>
                             </i1>
+                        </ItemGroup>
+                    </Project>",
+                @"
+                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <ItemGroup>
+                            <i1 Include=`i` m1=`v1` />
+                        </ItemGroup>
+                    </Project>")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                        <ItemGroup>
+                            <i1 Include='i'><m1>v1</m1></i1>
                         </ItemGroup>
                     </Project>",
                 @"

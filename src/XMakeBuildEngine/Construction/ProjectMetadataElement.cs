@@ -49,7 +49,14 @@ namespace Microsoft.Build.Construction
         }
 
         //  Add a new property with the same name here because this attribute should be public for ProjectMetadataElement,
-        //  but internal for ProjectElement, because we don't want it to be settable for arbintrary elements.
+        //  but internal for ProjectElement, because we don't want it to be settable for arbitrary elements.
+        /// <summary>
+        /// Gets or sets whether this piece of metadata is expressed as an attribute.
+        /// </summary>
+        /// <remarks>
+        /// If true, then the metadata will be expressed as an attribute instead of a child element, for example
+        /// &lt;Reference Include="Libary.dll" HintPath="..\lib\Library.dll" Private="True" /&gt;
+        /// </remarks>
         public new bool ExpressedAsAttribute
         {
             get { return base.ExpressedAsAttribute; }

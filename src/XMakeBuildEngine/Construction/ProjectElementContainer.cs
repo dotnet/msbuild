@@ -423,30 +423,18 @@ namespace Microsoft.Build.Construction
         private void SetElementAsAttributeValue(ProjectElement child)
         {
             //  Assumes that child.ExpressedAsAttribute is true
+            Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
+                nameof(child.ExpressedAsAttribute) + " property of child is true");
 
             string value = Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(child.XmlElement);
             ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
-
-            if (XmlElement.HasChildNodes)
-            {
-                bool allWhitespace = true;
-                foreach (XmlNode childXml in XmlElement.ChildNodes)
-                {
-                    if (childXml.NodeType != XmlNodeType.Whitespace)
-                    {
-                        allWhitespace = false;
-                        break;
-                    }
-                }
-
-                if (allWhitespace)
-                {
-                    XmlElement.IsEmpty = true;
-                }
-            }
         }
 
-        //  If child "element" is actually represented as an attribute, update the value there
+        //  
+        /// <summary>
+        /// If child "element" is actually represented as an attribute, update the value in the corresponding Xml attribute
+        /// </summary>
+        /// <param name="child">A child element which might be represented as an attribute</param>
         internal void UpdateElementValue(ProjectElement child)
         {
             if (child.ExpressedAsAttribute)
@@ -455,6 +443,16 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        /// <summary>
+        /// Adds a ProjectElement to the Xml tree
+        /// </summary>
+        /// <param name="child">A child to add to the Xml tree, which has already been added to the ProjectElement tree</param>
+        /// <remarks>
+        /// The MSBuild construction APIs keep a tree of ProjectElements and a parallel Xml tree which consists of
+        /// objects from System.Xml.  This is a helper method which adds an XmlElement or Xml attribute to the Xml
+        /// tree after the corresponding ProjectElement has been added to the construction API tree, and fixes up
+        /// whitespace as necessary.
+        /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
             if (child.ExpressedAsAttribute)
@@ -469,14 +467,19 @@ namespace Microsoft.Build.Construction
             }
             else
             {
+                //  We want to add the XmlElement to the same position in the child list as the corresponding ProjectElement.
+                //  Depending on whether the child ProjectElement has a PreviousSibling or a NextSibling, we may need to
+                //  use the InsertAfter, InsertBefore, or AppendChild methods to add it in the right place.
+                //
+                //  Also, if PreserveWhitespace is true, then the elements we add won't automatically get indented, so
+                //  we try to match the surrounding formatting.
                 if (child.PreviousSibling != null)
                 {
                     //  Add after previous sibling
                     XmlElement.InsertAfter(child.XmlElement, child.PreviousSibling.XmlElement);
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
-                        //  So try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
+                        //  Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
                         //  after, and inserting the same whitespace between the previous node and the one we added
                         if (child.PreviousSibling.XmlElement.PreviousSibling != null &&
                             child.PreviousSibling.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
@@ -493,8 +496,7 @@ namespace Microsoft.Build.Construction
 
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
-                        //  So try to match the surrounding formatting by by checking the whitespace that precedes where we inserted
+                        //  Try to match the surrounding formatting by by checking the whitespace that precedes where we inserted
                         //  the new node, and inserting the same whitespace between the node we added and the one after it.
                         if (child.XmlElement.PreviousSibling != null &&
                             child.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
@@ -511,8 +513,7 @@ namespace Microsoft.Build.Construction
 
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
-                        //  So try to match the surrounding formatting and add one indentation level
+                        //  Try to match the surrounding formatting and add one indentation level
                         if (XmlElement.FirstChild.NodeType == XmlNodeType.Whitespace)
                         {
                             //  This container had a whitespace node, which should generally be a newline and the indent
@@ -563,6 +564,19 @@ namespace Microsoft.Build.Construction
                     if (previousSibling != null && previousSibling.NodeType == XmlNodeType.Whitespace)
                     {
                         XmlElement.RemoveChild(previousSibling);
+                    }
+
+                    //  If we removed the last non-whitespace child node, set IsEmpty to true so that we get:
+                    //      <ItemName />
+                    //  instead of:
+                    //      <ItemName>
+                    //      </ItemName>
+                    if (XmlElement.HasChildNodes)
+                    {
+                        if (XmlElement.ChildNodes.Cast<XmlNode>().All(c => c.NodeType == XmlNodeType.Whitespace))
+                        {
+                            XmlElement.IsEmpty = true;
+                        }
                     }
                 }
             }
