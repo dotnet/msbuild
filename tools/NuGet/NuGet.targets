@@ -27,7 +27,8 @@
         
         <!-- Commands -->
         <RestoreCommand>$(NuGetCommand) restore "$(SolutionPath)" -source "$(PackageSources)"  -NonInteractive -Verbosity Quiet</RestoreCommand>
-        <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -p Configuration=$(Configuration) -o "$(PackageOutputDir)" -symbols</BuildCommand>
+        <Date>$([System.DateTime]::Now.ToString(yyyyMMdd))</Date>
+        <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -p Configuration=$(Configuration) -o "$(PackageOutputDir)" -symbols -properties Date=$(Date)</BuildCommand>
 
         <!-- Make the build depend on restore packages -->
         <BuildDependsOn Condition="$(BuildPackage) == 'true'">

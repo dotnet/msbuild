@@ -1,0 +1,97 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.25804.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks", "src\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj", "{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks.Tests", "test\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj", "{66964EC2-712A-451A-AB4F-33F18D8F54F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.NET.Sdk.Publish.Targets", "Microsoft.NET.Sdk.Publish.Targets", "{6BAE8914-1C33-4C8E-9EED-71581DF8F1D6}"
+	ProjectSection(SolutionItems) = preProject
+		src\Microsoft.NET.Sdk.Publish.Targets\Microsoft.NET.Sdk.Publish.targets = src\Microsoft.NET.Sdk.Publish.Targets\Microsoft.NET.Sdk.Publish.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ComputeTargets", "ComputeTargets", "{F38F8B8C-91BB-4126-BBF0-DED1645DB993}"
+	ProjectSection(SolutionItems) = preProject
+		src\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Console.ComputeFiles.targets = src\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Console.ComputeFiles.targets
+		src\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Core.ComputeFiles.targets = src\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Core.ComputeFiles.targets
+		src\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.WebApp.ComputeFiles.targets = src\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.WebApp.ComputeFiles.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishTargets", "PublishTargets", "{3AF52BAD-605D-4DF2-A2BF-CD48E5A42FA2}"
+	ProjectSection(SolutionItems) = preProject
+		src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.FileSystem.targets = src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.FileSystem.targets
+		src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Kudu.targets = src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Kudu.targets
+		src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeploy.targets = src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeploy.targets
+		src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeployPackage.targets = src\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeployPackage.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishProfiles", "PublishProfiles", "{4D4E65AC-8234-4957-A12B-0A13F42C7AC8}"
+	ProjectSection(SolutionItems) = preProject
+		src\Microsoft.NET.Sdk.Publish.Targets\PublishProfiles\DefaultProfile.pubxml = src\Microsoft.NET.Sdk.Publish.Targets\PublishProfiles\DefaultProfile.pubxml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CopyTargets", "CopyTargets", "{7F7C477C-7965-43D2-A2D3-D93BFCE3C5C7}"
+	ProjectSection(SolutionItems) = preProject
+		src\Microsoft.NET.Sdk.Publish.Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets = src\Microsoft.NET.Sdk.Publish.Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Package", "src\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj", "{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}"
+	ProjectSection(ProjectDependencies) = postProject
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60} = {994A9D35-ED60-4000-B7A1-A7CDD71B0E60}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NetCore.Sdk.Publish.Tasks", "src\Microsoft.NETCore.Sdk.Publish.Tasks\Microsoft.NETCore.Sdk.Publish.Tasks.csproj", "{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|x86.Build.0 = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|x86.ActiveCfg = Release|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|x86.Build.0 = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|x86.Build.0 = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|x86.ActiveCfg = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|x86.Build.0 = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|x86.Build.0 = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|x86.ActiveCfg = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|x86.Build.0 = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Debug|x86.Build.0 = Debug|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|x86.ActiveCfg = Release|Any CPU
+		{17E4DF9B-AE67-4ADA-842A-D6776AD6BE96}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F38F8B8C-91BB-4126-BBF0-DED1645DB993} = {6BAE8914-1C33-4C8E-9EED-71581DF8F1D6}
+		{3AF52BAD-605D-4DF2-A2BF-CD48E5A42FA2} = {6BAE8914-1C33-4C8E-9EED-71581DF8F1D6}
+		{4D4E65AC-8234-4957-A12B-0A13F42C7AC8} = {6BAE8914-1C33-4C8E-9EED-71581DF8F1D6}
+		{7F7C477C-7965-43D2-A2D3-D93BFCE3C5C7} = {6BAE8914-1C33-4C8E-9EED-71581DF8F1D6}
+	EndGlobalSection
+EndGlobal
