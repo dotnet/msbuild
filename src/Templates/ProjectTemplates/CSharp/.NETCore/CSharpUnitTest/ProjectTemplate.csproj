@@ -19,7 +19,7 @@
       <Version>$$buildversion$$</Version>
     </PackageReference>
   <PackageReference Include="Microsoft.TestPlatform.TestHost">
-      <Version>15.0.0</Version>
+      <Version>15.0.0-preview-20161005-01</Version>
     </PackageReference>
   <PackageReference Include="MSTest.TestAdapter">
       <Version>1.1.2-preview</Version>
