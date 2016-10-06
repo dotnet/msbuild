@@ -244,6 +244,68 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
            );
         }
+
+        [Fact]
+        public void SetNameIllegalAsAttribute()
+        {
+            ProjectMetadataElement metadatum = GetMetadataXml();
+            metadatum.ExpressedAsAttribute = true;
+
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {                
+                metadatum.Name = "Include";
+            }
+           );
+        }
+
+
+        [Fact]
+        public void SetExpressedAsAttributeIllegalName()
+        {
+            ProjectMetadataElement metadatum = GetMetadataXml();
+            metadatum.Name = "Include";
+
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                metadatum.ExpressedAsAttribute = true;
+            }
+           );
+        }
+
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemGroup>
+                            <i1 Include='i' />
+                        </ItemGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
+                            <ItemGroup>
+                                <i1 Include='i' />
+                            </ItemGroup>
+                        </Target>
+                    </Project>
+                ")]
+        public void AddMetadataAsAttributeIllegalName(string project)
+        {
+            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
+
+            var items = Helpers.MakeList(itemGroup.Items);
+
+            Assert.Equal(1, items.Count);
+
+            var item = items.First();
+
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                item.AddMetadata("Include", "v1", true);
+            });
+        }
+
         /// <summary>
         /// Set metadatum value to empty
         /// </summary>

@@ -362,6 +362,11 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowArgumentLength(name, "name");
             ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, "unevaluatedValue");
 
+            if (expressAsAttribute)
+            {
+                ProjectMetadataElement.ValidateValidMetadataAsAttributeName(name, this.ElementName, this.Location);
+            }
+
             ProjectMetadataElement metadata = ContainingProject.CreateMetadataElement(name);
             metadata.Value = unevaluatedValue;
             metadata.ExpressedAsAttribute = expressAsAttribute;

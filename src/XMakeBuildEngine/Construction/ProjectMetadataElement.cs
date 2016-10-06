@@ -60,7 +60,14 @@ namespace Microsoft.Build.Construction
         public new bool ExpressedAsAttribute
         {
             get { return base.ExpressedAsAttribute; }
-            set { base.ExpressedAsAttribute = value; }
+            set
+            {
+                if (value)
+                {
+                    ValidateValidMetadataAsAttributeName(this.Name, Parent?.ElementName ?? "null" , Parent?.Location);
+                }
+                base.ExpressedAsAttribute = value;
+            }
         }
 
         /// <summary>
@@ -110,11 +117,29 @@ namespace Microsoft.Build.Construction
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
             ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newName] == null, "CannotModifyReservedItemMetadata", newName);
 
+            if (ExpressedAsAttribute)
+            {
+                ValidateValidMetadataAsAttributeName(newName, Parent.ElementName, Parent.Location);
+            }
+
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
             XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newName, XMakeAttributes.defaultXmlNamespace);
 
             ReplaceElement(newElement);
+        }
+
+        internal static void ValidateValidMetadataAsAttributeName(string name, string parentName, IElementLocation parentLocation)
+        {
+            bool isKnownAttribute;
+            bool isValidMetadataNameInAttribute;
+
+            ProjectParser.CheckMetadataAsAttributeName(name, out isKnownAttribute, out isValidMetadataNameInAttribute);
+
+            if (isKnownAttribute || !isValidMetadataNameInAttribute)
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(parentLocation, "InvalidMetadataAsAttribute", name, parentName);
+            }
         }
 
         /// <summary>

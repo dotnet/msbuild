@@ -430,7 +430,6 @@ namespace Microsoft.Build.Construction
             ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
         }
 
-        //  
         /// <summary>
         /// If child "element" is actually represented as an attribute, update the value in the corresponding Xml attribute
         /// </summary>

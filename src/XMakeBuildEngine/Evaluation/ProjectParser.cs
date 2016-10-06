@@ -387,7 +387,7 @@ namespace Microsoft.Build.Construction
             return item;
         }
 
-        private void CheckMetadataAsAttributeName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
+        internal static void CheckMetadataAsAttributeName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
         {
             if (!XmlUtilities.IsValidElementName(name))
             {
