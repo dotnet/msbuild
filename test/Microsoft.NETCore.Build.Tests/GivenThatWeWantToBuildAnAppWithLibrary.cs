@@ -19,7 +19,7 @@ namespace Microsoft.NETCore.Build.Tests
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
-        //[Fact]
+        [Fact]
         public void It_builds_the_project_successfully()
         {
             var testAsset = _testAssetsManager
@@ -84,7 +84,7 @@ namespace Microsoft.NETCore.Build.Tests
             }
         }
 
-        //[Fact]
+        [Fact]
         public void It_generates_satellite_assemblies()
         {
             var testAsset = _testAssetsManager

@@ -14,7 +14,7 @@ namespace Microsoft.NETCore.Build.Tests
     {
         private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
 
-       //[Fact]
+       [Fact]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
@@ -39,7 +39,7 @@ namespace Microsoft.NETCore.Build.Tests
             });
         }
 
-       //[Fact]
+       [Fact]
         public void It_builds_the_library_twice_in_a_row()
         {
             var testAsset = _testAssetsManager
