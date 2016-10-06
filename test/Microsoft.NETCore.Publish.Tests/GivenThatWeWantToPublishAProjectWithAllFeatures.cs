@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using FluentAssertions;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.NETCore.TestFramework;
 using Microsoft.NETCore.TestFramework.Assertions;
 using Microsoft.NETCore.TestFramework.Commands;
@@ -43,6 +46,8 @@ namespace Microsoft.NETCore.Publish.Tests
                 "TestApp.runtimeconfig.json",
                 "TestLibrary.dll",
                 "TestLibrary.pdb",
+                "Newtonsoft.Json.dll",
+                "System.Runtime.Serialization.Primitives.dll",
                 "CompileCopyToOutput.cs",
                 "Resource1.resx",
                 "ContentAlways.txt",
@@ -60,6 +65,20 @@ namespace Microsoft.NETCore.Publish.Tests
                 cultureDir.Should().Exist();
                 cultureDir.Should().HaveFile("TestApp.resources.dll");
                 cultureDir.Should().HaveFile("TestLibrary.resources.dll");
+            }
+
+            // Ensure Newtonsoft.Json doesn't get excluded from the deps.json file.
+            // TestLibrary has a hard dependency on Newtonsoft.Json.
+            // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
+            // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
+            using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
+            {
+                var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+                dependencyContext
+                    .RuntimeLibraries
+                    .FirstOrDefault(l => l.Name == "newtonsoft.json")
+                    .Should()
+                    .NotBeNull();
             }
         }
     }

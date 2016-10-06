@@ -12,29 +12,26 @@ using Xunit;
 
 namespace Microsoft.NETCore.Build.Tasks.UnitTests
 {
-    public class GivenWeNeedLockFileExtensions
+    public class GivenAProjectContext
     {
-        private static MethodInfo s_GetPrivateAssetsExclusionListMethod = typeof(GenerateDepsFile)
-            .GetTypeInfo()
-            .Assembly
-            .GetType("Microsoft.NETCore.Build.Tasks.LockFileExtensions")
-            .GetMethod("GetPrivateAssetsExclusionList");
-
         [Fact]
         public void ItComputesPrivateAssetsExclusionList()
         {
             LockFile lockFile = TestLockFiles.GetLockFile("dependencies.withgraphs");
-            LockFileTarget lockFileTarget = lockFile.GetTarget(FrameworkConstants.CommonFrameworks.NetStandard16, null);
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+               "/usr/Path",
+               FrameworkConstants.CommonFrameworks.NetStandard16,
+               null);
+
             IEnumerable<string> privateAssetPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };
             IDictionary<string, LockFileTargetLibrary> libraryLookup =
-                lockFileTarget
+                projectContext
+                    .LockFileTarget
                     .Libraries
                     .ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
 
-            HashSet<string> exclusionList = (HashSet<string>)
-                s_GetPrivateAssetsExclusionListMethod.Invoke(
-                    null,
-                    new object[] { lockFile, lockFileTarget, privateAssetPackageIds, libraryLookup });
+            HashSet<string> exclusionList =
+                projectContext.GetPrivateAssetsExclusionList(privateAssetPackageIds, libraryLookup);
             
             HashSet<string> expectedExclusions = new HashSet<string>()
             {

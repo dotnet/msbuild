@@ -40,7 +40,7 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             bool includeCompilationLibraries = compilationOptions != null;
 
-            ProjectContext projectContext = lockFile.CreateProjectContext(framework, runtime);
+            ProjectContext projectContext = lockFile.CreateProjectContext(mainProjectInfo.ProjectPath, framework, runtime);
             IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.GetRuntimeLibraries(_privateAssetPackageIds);
             IEnumerable<LockFileTargetLibrary> compilationExports =
                 includeCompilationLibraries ?

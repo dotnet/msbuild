@@ -10,13 +10,17 @@ using NuGet.ProjectModel;
 
 namespace Microsoft.NETCore.Build.Tasks
 {
-    internal static class LockFileExtensions
+    public static class LockFileExtensions
     {
-        public static ProjectContext CreateProjectContext(this LockFile lockFile, NuGetFramework framework, string runtime)
+        public static ProjectContext CreateProjectContext(
+            this LockFile lockFile, 
+            string projectPath, 
+            NuGetFramework framework, 
+            string runtime)
         {
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
 
-            return new ProjectContext(lockFile, lockFileTarget);
+            return new ProjectContext(projectPath, lockFile, lockFileTarget);
         }
 
         public static bool IsPortable(this LockFileTarget lockFileTarget)
@@ -65,91 +69,6 @@ namespace Microsoft.NETCore.Build.Tasks
                     }
                 }
             }
-        }
-
-        public static HashSet<string> GetPrivateAssetsExclusionList(
-            LockFile lockFile,
-            LockFileTarget lockFileTarget,
-            IEnumerable<string> privateAssetPackageIds,
-            IDictionary<string, LockFileTargetLibrary> libraryLookup)
-        {
-            var nonPrivateAssets = new HashSet<string>();
-
-            var nonPrivateAssetsToSearch = new Stack<string>();
-            var privateAssetsToSearch = new Stack<string>();
-
-            // Start with the top-level dependencies, and put them into "private" or "non-private" buckets
-            var privateAssetPackagesLookup = new HashSet<string>(privateAssetPackageIds);
-            foreach (var topLevelDependency in GetTopLevelDependencies(lockFile, lockFileTarget))
-            {
-                if (!privateAssetPackagesLookup.Contains(topLevelDependency))
-                {
-                    nonPrivateAssetsToSearch.Push(topLevelDependency);
-                    nonPrivateAssets.Add(topLevelDependency);
-                }
-                else
-                {
-                    privateAssetsToSearch.Push(topLevelDependency);
-                }
-            }
-
-            LockFileTargetLibrary library;
-            string libraryName;
-
-            // Walk all the non-private assets' dependencies and mark them as non-private
-            while (nonPrivateAssetsToSearch.Count > 0)
-            {
-                libraryName = nonPrivateAssetsToSearch.Pop();
-                library = libraryLookup[libraryName];
-
-                foreach (var dependency in library.Dependencies)
-                {
-                    if (!nonPrivateAssets.Contains(dependency.Id))
-                    {
-                        nonPrivateAssetsToSearch.Push(dependency.Id);
-                        nonPrivateAssets.Add(dependency.Id);
-                    }
-                }
-            }
-
-            // Go through assets marked private and their dependencies
-            // For libraries not marked as non-private, mark them down as private
-            var privateAssetsToExclude = new HashSet<string>();
-            while (privateAssetsToSearch.Count > 0)
-            {
-                libraryName = privateAssetsToSearch.Pop();
-                library = libraryLookup[libraryName];
-
-                privateAssetsToExclude.Add(libraryName);
-
-                foreach (var dependency in library.Dependencies)
-                {
-                    if (!nonPrivateAssets.Contains(dependency.Id))
-                    {
-                        privateAssetsToSearch.Push(dependency.Id);
-                    }
-                }
-            }
-
-            return privateAssetsToExclude;
-        }
-
-        public static IEnumerable<string> GetTopLevelDependencies(
-            LockFile lockFile, 
-            LockFileTarget lockFileTarget)
-        {
-            return lockFile
-                .ProjectFileDependencyGroups
-                .Where(dg => dg.FrameworkName == string.Empty ||
-                             dg.FrameworkName == lockFileTarget.TargetFramework.DotNetFrameworkName)
-                .SelectMany(g => g.Dependencies)
-                .Select(projectFileDependency =>
-                {
-                    int separatorIndex = projectFileDependency.IndexOf(' ');
-                    return separatorIndex > 0 ?
-                        projectFileDependency.Substring(0, separatorIndex) :
-                        projectFileDependency;
-                });
         }
 
         public static IEnumerable<LockFileTargetLibrary> Filter(

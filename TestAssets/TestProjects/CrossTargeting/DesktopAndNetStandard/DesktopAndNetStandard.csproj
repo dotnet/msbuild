@@ -24,6 +24,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.Sdk">
       <Version>0.0</Version>
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -429,7 +429,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_PublishDepsFilePath Condition=" '$(_PublishDepsFilePath)' == '' ">$(PublishDir)$(_ProjectDepsFileName)</_PublishDepsFilePath>
     </PropertyGroup>
 
-    <GenerateDepsFile LockFilePath="$(ProjectLockFile)"
+    <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
+                      LockFilePath="$(ProjectLockFile)"
                       DepsFilePath="$(_PublishDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"

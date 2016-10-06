@@ -47,10 +47,12 @@ namespace Microsoft.NETCore.Build.Tasks
             NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
             IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
 
+            ProjectContext projectContext = lockFile.CreateProjectContext(ProjectPath, framework, RuntimeIdentifier);
+
             IEnumerable<ResolvedFile> resolvedAssemblies = 
-                new PublishAssembliesResolver(lockFile, new NuGetPackageResolver(nugetPathContext))
+                new PublishAssembliesResolver(new NuGetPackageResolver(nugetPathContext))
                     .WithPrivateAssets(privateAssetsPackageIds)
-                    .Resolve(framework, RuntimeIdentifier);
+                    .Resolve(projectContext);
 
             foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)
             {

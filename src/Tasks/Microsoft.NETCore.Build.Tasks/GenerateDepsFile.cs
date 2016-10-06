@@ -18,6 +18,9 @@ namespace Microsoft.NETCore.Build.Tasks
     public class GenerateDepsFile : Task
     {
         [Required]
+        public string ProjectPath { get; set; }
+
+        [Required]
         public string LockFilePath { get; set; }
 
         [Required]
@@ -45,7 +48,7 @@ namespace Microsoft.NETCore.Build.Tasks
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
-            SingleProjectInfo mainProject = SingleProjectInfo.Create(AssemblyName, AssemblyVersion, AssemblySatelliteAssemblies);
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(ProjectPath, AssemblyName, AssemblyVersion, AssemblySatelliteAssemblies);
             IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
 
             DependencyContext dependencyContext = new DependencyContextBuilder()

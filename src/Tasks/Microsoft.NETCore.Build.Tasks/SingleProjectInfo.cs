@@ -8,19 +8,21 @@ namespace Microsoft.NETCore.Build.Tasks
 {
     public class SingleProjectInfo
     {
+        public string ProjectPath { get; }
         public string Name { get; }
         public string Version { get; }
 
         public IEnumerable<ResourceAssemblyInfo> ResourceAssemblies { get; }
 
-        private SingleProjectInfo(string name, string version, IEnumerable<ResourceAssemblyInfo> resourceAssemblies)
+        private SingleProjectInfo(string projectPath, string name, string version, IEnumerable<ResourceAssemblyInfo> resourceAssemblies)
         {
+            ProjectPath = projectPath;
             Name = name;
             Version = version;
             ResourceAssemblies = resourceAssemblies;
         }
 
-        public static SingleProjectInfo Create(string name, string version, ITaskItem[] satelliteAssemblies)
+        public static SingleProjectInfo Create(string projectPath, string name, string version, ITaskItem[] satelliteAssemblies)
         {
             List<ResourceAssemblyInfo> resourceAssemblies = new List<ResourceAssemblyInfo>();
 
@@ -32,7 +34,7 @@ namespace Microsoft.NETCore.Build.Tasks
                 resourceAssemblies.Add(new ResourceAssemblyInfo(culture, relativePath));
             }
 
-            return new SingleProjectInfo(name, version, resourceAssemblies);
+            return new SingleProjectInfo(projectPath, name, version, resourceAssemblies);
         }
 
         public string GetOutputName()
