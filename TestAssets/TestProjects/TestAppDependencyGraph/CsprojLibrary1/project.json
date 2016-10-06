@@ -1,0 +1,11 @@
+{
+  "dependencies": {},
+  "frameworks": {
+    "netstandard1.5": {
+      "dependencies": {
+        "Microsoft.NETCore.Sdk": "1.0.0-alpha-20160923-4",
+        "NETStandard.Library": "1.6.0"
+      }
+    }
+  }
+}

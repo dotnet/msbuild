@@ -16,13 +16,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ProjectMigrator
     {
-        // TODO: Migrate PackOptions
-        // TODO: Migrate Multi-TFM projects
-        // TODO: Tests
-        // TODO: Out of Scope
-        //     - Globs that resolve to directories: /some/path/**/somedir
-        //     - Migrating Deprecated project.jsons
-
         private readonly IMigrationRule _ruleSet;
         private readonly ProjectDependencyFinder _projectDependencyFinder = new ProjectDependencyFinder();
 
@@ -39,6 +32,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             {
                 throw new ArgumentNullException();
             }
+            Exception exc = null;
+            IEnumerable<ProjectDependency> projectDependencies = null;
+
+            var tempMSBuildProjectTemplate = rootSettings.MSBuildProjectTemplate.DeepClone();
+
+            try
+            {
+                projectDependencies = ResolveTransitiveClosureProjectDependencies(
+                    rootSettings.ProjectDirectory, 
+                    rootSettings.ProjectXProjFilePath);
+            }
+            catch (Exception e)
+            {
+                exc = e;
+            }
+
+            // Verify up front so we can prefer these errors over an unresolved project dependency
+            VerifyInputs(ComputeMigrationRuleInputs(rootSettings), rootSettings);
+            if (exc != null)
+            {
+                throw exc;
+            }
 
             MigrateProject(rootSettings);
 
@@ -47,16 +62,30 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 return;
             }
 
-            var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory, rootSettings.ProjectXProjFilePath);
-
             foreach(var project in projectDependencies)
             {
                 var projectDir = Path.GetDirectoryName(project.ProjectFilePath);
                 var settings = new MigrationSettings(projectDir,
                                                      projectDir,
                                                      rootSettings.SdkPackageVersion,
-                                                     rootSettings.MSBuildProjectTemplate);
+                                                     tempMSBuildProjectTemplate);
                 MigrateProject(settings);
+            }
+        }
+
+        private void DeleteProjectJsons(MigrationSettings rootsettings, IEnumerable<ProjectDependency> projectDependencies)
+        {
+            try
+            {
+                File.Delete(Path.Combine(rootsettings.ProjectDirectory, "project.json"));
+            } catch {} 
+
+            foreach (var projectDependency in projectDependencies)
+            {
+                try 
+                {
+                    File.Delete(projectDependency.ProjectFilePath);
+                } catch { }
             }
         }
 
@@ -66,7 +95,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(rootProject, xprojFile);
             Queue<ProjectDependency> projectsQueue = new Queue<ProjectDependency>(projectDependencies);
 
-            while(projectsQueue.Count() != 0)
+            while (projectsQueue.Count() != 0)
             {
                 var projectDependency = projectsQueue.Dequeue();
 
@@ -80,7 +109,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var projectDir = Path.GetDirectoryName(projectDependency.ProjectFilePath);
                 projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectDir);
 
-                foreach(var project in projectDependencies)
+                foreach (var project in projectDependencies)
                 {
                     projectsQueue.Enqueue(project);
                 }
@@ -111,7 +140,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             var projectContexts = ProjectContext.CreateContextForEachFramework(migrationSettings.ProjectDirectory);
             var xprojFile = migrationSettings.ProjectXProjFilePath ?? _projectDependencyFinder.FindXprojFile(migrationSettings.ProjectDirectory);
-            
+
             ProjectRootElement xproj = null;
             if (xprojFile != null)
             {

@@ -22,5 +22,7 @@ namespace Microsoft.DotNet.ProjectModel
         public string WrappedProject { get; set; }
 
         public string AssemblyPath { get; set; }
+
+        public IEnumerable<string> Imports { get; set; }
     }
 }

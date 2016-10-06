@@ -414,7 +414,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 contexts.Where(c => Equals(c.TargetFramework, framework));
 
             var rids = string.IsNullOrEmpty(runtime) ?
-                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers() :
+                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers() :
                 new[] { runtime };
 
             return contexts.Select(c => Workspace.GetRuntimeContext(c, rids));

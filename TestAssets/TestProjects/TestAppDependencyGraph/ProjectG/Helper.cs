@@ -5,7 +5,7 @@ using System;
 
 namespace TestLibrary
 {
-    public static class ProjectE
+    public static class ProjectG
     {
         public static string GetMessage()
         {

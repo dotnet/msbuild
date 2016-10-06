@@ -22,42 +22,44 @@ namespace Microsoft.DotNet.Cli.Build
             Sdk,
         }
 
-        private const string s_dotnetBlobRootUrl = "https://dotnetcli.blob.core.windows.net/" + s_dotnetBlobContainerName;
         private const string s_dotnetBlobContainerName = "dotnet";
 
         private string _connectionString { get; set; }
+        private string _containerName { get; set; }
         private CloudBlobContainer _blobContainer { get; set; }
 
-        public AzurePublisher()
+        public AzurePublisher(string containerName = s_dotnetBlobContainerName)
         {
             _connectionString = EnvVars.EnsureVariable("CONNECTION_STRING").Trim('"');
-            _blobContainer = GetDotnetBlobContainer(_connectionString);
+            _containerName = containerName;
+            _blobContainer = GetDotnetBlobContainer(_connectionString, containerName);
         }
 
-        public AzurePublisher(string accountName, string accountKey)
+        public AzurePublisher(string accountName, string accountKey, string containerName = s_dotnetBlobContainerName)
         {
-            _blobContainer = GetDotnetBlobContainer(accountName, accountKey);
+            _containerName = containerName;
+            _blobContainer = GetDotnetBlobContainer(accountName, accountKey, containerName);
         }
 
-        private CloudBlobContainer GetDotnetBlobContainer(string connectionString)
+        private CloudBlobContainer GetDotnetBlobContainer(string connectionString, string containerName)
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
             
-            return GetDotnetBlobContainer(storageAccount);
+            return GetDotnetBlobContainer(storageAccount, containerName);
         }
 
-        private CloudBlobContainer GetDotnetBlobContainer(string accountName, string accountKey)
+        private CloudBlobContainer GetDotnetBlobContainer(string accountName, string accountKey, string containerName)
         {
             var storageCredentials = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(storageCredentials, true);
-            return GetDotnetBlobContainer(storageAccount);
+            return GetDotnetBlobContainer(storageAccount, containerName);
         }
 
-        private CloudBlobContainer GetDotnetBlobContainer(CloudStorageAccount storageAccount)
+        private CloudBlobContainer GetDotnetBlobContainer(CloudStorageAccount storageAccount, string containerName)
         {
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             
-            return blobClient.GetContainerReference(s_dotnetBlobContainerName);
+            return blobClient.GetContainerReference(containerName);
         }
 
         public string UploadFile(string file, Product product, string version)
@@ -126,7 +128,7 @@ namespace Microsoft.DotNet.Cli.Build
             BlobContinuationToken continuationToken = new BlobContinuationToken();
 
             var blobFiles = blobDir.ListBlobsSegmentedAsync(continuationToken).Result;
-            return blobFiles.Results.Select(bf => bf.Uri.PathAndQuery.Replace($"/{s_dotnetBlobContainerName}/", string.Empty));
+            return blobFiles.Results.Select(bf => bf.Uri.PathAndQuery.Replace($"/{_containerName}/", string.Empty));
         }
 
         public string AcquireLeaseOnBlob(
@@ -219,35 +221,9 @@ namespace Microsoft.DotNet.Cli.Build
             _blobContainer.GetBlockBlobReference(path).DeleteAsync().Wait();
         }
 
-        public static string CalculateFullUrlForFile(string file, Product product, string version)
-        {
-            return $"{s_dotnetBlobRootUrl}/{CalculateRelativePathForFile(file, product, version)}";
-        }
-
         private static string CalculateRelativePathForFile(string file, Product product, string version)
         {
             return $"{product}/{version}/{Path.GetFileName(file)}";
-        }
-
-        public static async Task DownloadFile(string blobFilePath, string localDownloadPath)
-        {
-            var blobUrl = $"{s_dotnetBlobRootUrl}/{blobFilePath}";
-
-            using (var client = new HttpClient())
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, blobUrl);
-                var sendTask = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                var response = sendTask.Result.EnsureSuccessStatusCode();
-
-                var httpStream = await response.Content.ReadAsStreamAsync();
-
-                using (var fileStream = File.Create(localDownloadPath))
-                using (var reader = new StreamReader(httpStream))
-                {
-                    httpStream.CopyTo(fileStream);
-                    fileStream.Flush();
-                }
-            }
         }
     }
 }

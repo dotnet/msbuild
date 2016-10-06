@@ -16,8 +16,8 @@
    <SchemaVersion>2.0</SchemaVersion>
  </PropertyGroup>
  <ItemGroup>
-   <ProjectReference Include="..\..\ClassLibrary1\ClassLibrary1.csproj" />
-   <ProjectReference Include="..\..\ClassLibrary2\ClassLibrary2.csproj" />
+   <ProjectReference Include="..\CsprojLibrary1\CsprojLibrary1.csproj" />
+   <ProjectReference Include="..\CsprojLibrary2\CsprojLibrary2.csproj" />
  </ItemGroup>
  <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

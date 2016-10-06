@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.DotNet.Cli.CommandResolution;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -190,7 +191,12 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
-                CommandResult result = Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.NetStandardApp15)
+                var projectToolsCommandResolver = new ProjectToolsCommandResolverPolicy();
+                CommandResult result = Command.Create(
+                        projectToolsCommandResolver,
+                        "dotnet-" + command,
+                        appArgs,
+                        FrameworkConstants.CommonFrameworks.NetStandardApp15)
                     .Execute();
                 exitCode = result.ExitCode;
             }
@@ -240,7 +246,8 @@ namespace Microsoft.DotNet.Cli
         {
             HelpCommand.PrintVersionHeader();
 
-            var commitSha = GetCommitSha() ?? "N/A";
+            DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
+            var commitSha = versionFile.CommitSha ?? "N/A";
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Product Information:");
             Reporter.Output.WriteLine($" Version:            {Product.Version}");
@@ -250,7 +257,7 @@ namespace Microsoft.DotNet.Cli
             Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
             Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
-            Reporter.Output.WriteLine($" RID:         {RuntimeEnvironment.GetRuntimeIdentifier()}");
+            Reporter.Output.WriteLine($" RID:         {GetDisplayRid(versionFile)}");
         }
 
         private static bool IsArg(string candidate, string longName)
@@ -263,16 +270,17 @@ namespace Microsoft.DotNet.Cli
             return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
         }
 
-        private static string GetCommitSha()
+        private static string GetDisplayRid(DotnetVersionFile versionFile)
         {
-            var versionFile = DotnetFiles.VersionFile;
+            FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
 
-            if (File.Exists(versionFile))
-            {
-                return File.ReadLines(versionFile).FirstOrDefault()?.Substring(0, 10);
-            }
+            string currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
 
-            return null;
+            // if the current RID isn't supported by the shared framework, display the RID the CLI was 
+            // built with instead, so the user knows which RID they should put in their "runtimes" section.
+            return fxDepsFile.IsRuntimeSupported(currentRid) ?
+                currentRid :
+                versionFile.BuildRid;
         }
     }
 }

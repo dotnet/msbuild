@@ -11,7 +11,7 @@ namespace TestApp
         public static int Main(string[] args)
         {
             Console.WriteLine("This string came from ProjectA");
-            return 100;
+            return 0;
         }
     }
 }

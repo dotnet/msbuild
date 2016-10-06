@@ -278,6 +278,11 @@ namespace Microsoft.DotNet.ProjectModel
 
                     var dependencyValue = dependency.Value;
                     var dependencyTypeValue = LibraryDependencyType.Default;
+                    
+                    var dependencyIncludeFlagsValue = LibraryIncludeFlags.All;
+                    var dependencyExcludeFlagsValue = LibraryIncludeFlags.None;
+                    var suppressParentFlagsValue = LibraryIncludeFlagUtils.DefaultSuppressParent;
+
                     var target = isGacOrFrameworkReference ? LibraryDependencyTarget.Reference : LibraryDependencyTarget.All;
                     string dependencyVersionAsString = null;
 
@@ -297,6 +302,23 @@ namespace Microsoft.DotNet.ProjectModel
                         {
                             var targetStr = dependencyValue.Value<string>("target");
                             target = LibraryDependencyTargetUtils.Parse(targetStr);
+                        }
+                        
+                        IEnumerable<string> strings;
+                        if (TryGetStringEnumerable(dependencyValue["include"], out strings))
+                        {
+                            dependencyIncludeFlagsValue = LibraryIncludeFlagUtils.GetFlags(strings);
+                        }
+
+                        if (TryGetStringEnumerable(dependencyValue["exclude"], out strings))
+                        {
+                            dependencyExcludeFlagsValue = LibraryIncludeFlagUtils.GetFlags(strings);
+                        }
+
+                        if (TryGetStringEnumerable(dependencyValue["suppressParent"], out strings))
+                        {
+                            // This overrides any settings that came from the type property.
+                            suppressParentFlagsValue = LibraryIncludeFlagUtils.GetFlags(strings);
                         }
                     }
                     else if (dependencyValue.Type == JTokenType.String)
@@ -327,6 +349,9 @@ namespace Microsoft.DotNet.ProjectModel
                         }
                     }
 
+                    // the dependency flags are: Include flags - Exclude flags
+                    var includeFlags = dependencyIncludeFlagsValue & ~dependencyExcludeFlagsValue;
+
                     var lineInfo = (IJsonLineInfo)dependencyValue;
                     results.Add(new ProjectLibraryDependency
                     {
@@ -335,6 +360,8 @@ namespace Microsoft.DotNet.ProjectModel
                             dependencyVersionRange,
                             target),
                         Type = dependencyTypeValue,
+                        IncludeType = includeFlags,
+                        SuppressParent = suppressParentFlagsValue,
                         SourceFilePath = projectPath,
                         SourceLine = lineInfo.LineNumber,
                         SourceColumn = lineInfo.LinePosition
@@ -472,7 +499,8 @@ namespace Microsoft.DotNet.ProjectModel
                 Dependencies = new List<ProjectLibraryDependency>(),
                 CompilerOptions = compilerOptions,
                 Line = lineInfo.LineNumber,
-                Column = lineInfo.LinePosition
+                Column = lineInfo.LinePosition,
+                Imports = GetImports(frameworkValue)
             };
 
             var frameworkDependencies = new List<ProjectLibraryDependency>();
@@ -506,6 +534,26 @@ namespace Microsoft.DotNet.ProjectModel
             project._targetFrameworks[frameworkName] = targetFrameworkInformation;
 
             return true;
+        }
+
+        private IEnumerable<string> GetImports(JObject frameworkValue)
+        {
+            var prop = frameworkValue.Property("imports");
+            if (prop == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            if (prop.Type == JTokenType.Array)
+            {
+                return prop.Value<IEnumerable<string>>();
+            }
+            else if (prop.Type == JTokenType.String)
+            {
+                return new [] { prop.Value<string>() };
+            }
+
+            return null;
         }
 
         private static CommonCompilerOptions GetCompilationOptions(JObject rawObject, Project project)
@@ -818,6 +866,30 @@ namespace Microsoft.DotNet.ProjectModel
                     DiagnosticMessageSeverity.Warning,
                     lineInfo.LineNumber,
                     lineInfo.LinePosition));
+        }
+
+        private static bool TryGetStringEnumerable(JToken token, out IEnumerable<string> result)
+        {
+            IEnumerable<string> values;
+            if (token == null)
+            {
+                result = null;
+                return false;
+            }
+            else if (token.Type == JTokenType.String)
+            {
+                values = new[]
+                    {
+                        token.Value<string>()
+                    };
+            }
+            else
+            {
+                values = token.Value<string[]>();
+            }
+            result = values
+                .SelectMany(value => value.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
+            return true;
         }
     }
 }

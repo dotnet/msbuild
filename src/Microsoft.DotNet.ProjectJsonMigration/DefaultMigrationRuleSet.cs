@@ -12,14 +12,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigrateRootOptionsRule(),
             new MigrateTFMRule(),
             new MigrateBuildOptionsRule(),
+            new MigrateJsonPropertiesRule(),
             new MigratePackOptionsRule(),
             new MigrateRuntimeOptionsRule(),
             new MigratePublishOptionsRule(),
             new MigrateProjectDependenciesRule(),
+            new MigratePackageDependenciesAndToolsRule(),
             new MigrateConfigurationsRule(),
             new MigrateScriptsRule(),
-            new TemporaryMutateProjectJsonRule(),
-            new WorkaroundOptionsRule(),
             new SaveOutputProjectRule()
         };
 

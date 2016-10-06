@@ -10,10 +10,10 @@
     ]
   },
   "dependencies": {
-    "ClassLibrary2": {
+    "CsprojLibrary2": {
       "target": "project"
     },
-    "ClassLibrary3": {
+    "CsprojLibrary3": {
       "target": "project"
     },
     "NETStandard.Library": "1.6.0"

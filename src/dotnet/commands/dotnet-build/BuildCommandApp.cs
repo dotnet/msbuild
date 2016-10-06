@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var rids = new List<string>();
             if (string.IsNullOrEmpty(RuntimeValue))
             {
-                return RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers();
+                return DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers();
             }
             else
             {

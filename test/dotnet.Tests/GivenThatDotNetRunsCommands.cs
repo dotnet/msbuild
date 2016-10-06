@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tests
                 .HaveFile("project.lock.json");
 
             new DotnetCommand()
+                .WithWorkingDirectory(testInstance.TestRoot)
                 .ExecuteWithCapturedOutput("crash")
                 .Should()
                 .Fail()

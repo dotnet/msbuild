@@ -43,5 +43,29 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                     .HaveStdOutContaining("Hello World!");
             }
         }
+
+        [Fact]
+        public void ItCanRunToolsInACSProj()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssetsManager
+                .CreateTestInstance(testAppName);
+
+            var testProjectDirectory = testInstance.TestRoot;
+
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DotnetCommand()
+                .WithWorkingDirectory(testInstance.TestRoot)
+                .ExecuteWithCapturedOutput("portable")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello Portable World!");;
+        }
     }
 }

@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "keyFile": "./key.snk"
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "version": "1.0.1",
+      "type": "platform"
+      },
+  },
+  "frameworks": {
+    "netcoreapp1.0": {}
+  }
+}

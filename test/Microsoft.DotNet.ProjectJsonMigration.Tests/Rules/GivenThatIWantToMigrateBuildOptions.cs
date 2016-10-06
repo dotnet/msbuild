@@ -249,11 +249,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            mockProj.Properties.Count(p => p.Name == "AssemblyOriginatorKeyFile").Should().Be(1);
-            mockProj.Properties.First(p => p.Name == "AssemblyOriginatorKeyFile").Value.Should().Be("../keyfile.snk");
+            mockProj.Properties.Count(p => p.Name == "KeyOriginatorFile").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "KeyOriginatorFile").Value.Should().Be("../keyfile.snk");
 
             mockProj.Properties.Count(p => p.Name == "SignAssembly").Should().Be(1);
             mockProj.Properties.First(p => p.Name == "SignAssembly").Value.Should().Be("true");
+            mockProj.Properties.First(p => p.Name == "SignAssembly").Condition.Should().Be(" '$(OS)' == 'Windows_NT' ");
+
+            mockProj.Properties.Count(p => p.Name == "PublicSign").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "PublicSign").Value.Should().Be("true");
+            mockProj.Properties.First(p => p.Name == "PublicSign").Condition.Should().Be(" '$(OS)' != 'Windows_NT' ");
         }
 
         [Fact]

@@ -11,6 +11,12 @@ namespace Microsoft.DotNet.Tools.Migrate
     {
         public static int Run(string[] args)
         {
+
+            // IMPORTANT:
+            // When updating the command line args for dotnet-migrate, we need to update the in-VS caller of dotnet migrate as well.
+            // It is located at dotnet/roslyn-project-system:
+            //     src/Microsoft.VisualStudio.ProjectSystem.CSharp.VS/ProjectSystem/VS/Xproj/MigrateXprojFactory.cs
+
             DebugHelper.HandleDebugSwitch(ref args);
 
             CommandLineApplication app = new CommandLineApplication();
@@ -20,10 +26,15 @@ namespace Microsoft.DotNet.Tools.Migrate
             app.HandleResponseFiles = true;
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<PROJECT_JSON/PROJECT_DIR>",
-                "The path to project.json file or a directory to migrate." +
-                " If a directory is specified, then it will recursively search for project.json files to migrate." +
-                " Defaults to current directory if nothing is specified.");
+            CommandArgument projectArgument = app.Argument("<PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR>",
+                string.Join(Environment.NewLine,
+                "The path to ",
+                " - a project.json file to migrate.",
+                "or",
+                " - a global.json file, it will migrate the folders specified in global.json.",
+                "or",
+                " - a directory to migrate, it will recursively search for project.json files to migrate.",
+                "Defaults to current directory if nothing is specified."));
 
             CommandOption template = app.Option("-t|--template-file", "Base MSBuild template to use for migrated app. The default is the project included in dotnet new -t msbuild", CommandOptionType.SingleValue);
             CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new -t msbuild", CommandOptionType.SingleValue);

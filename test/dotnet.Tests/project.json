@@ -43,6 +43,7 @@
     ]
   },
   "buildOptions": {
+    "keyFile": "../../tools/Key.snk",
     "copyToOutput": {
       "include": [
         "../../TestAssets/TestProjects/AppWithDependencyOnToolWithOutputName/**/*",

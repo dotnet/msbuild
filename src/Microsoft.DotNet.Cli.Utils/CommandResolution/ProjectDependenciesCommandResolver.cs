@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return ProjectContext.Create(
                 projectRootPath,
                 framework,
-                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
+                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers());
 
         }
 
