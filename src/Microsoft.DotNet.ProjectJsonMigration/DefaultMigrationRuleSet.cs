@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigratePackageDependenciesAndToolsRule(),
             new MigrateConfigurationsRule(),
             new MigrateScriptsRule(),
-            new WorkaroundOptionsRule(),
             new SaveOutputProjectRule()
         };
 
