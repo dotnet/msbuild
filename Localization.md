@@ -17,7 +17,6 @@
 - if you need to add / remove / update a resource, only do so in the neutral resource. xlf files get automatically updated during localized builds.
 
 ## What a localized build does
-- updates xlf files from their corresponding neutral resx
 - converts xlf files to localized resx files
 - the localized resx files are generated into the `$(IntermediaryOutputPath)`
 - produces satellite assemblies for each language
@@ -30,10 +29,14 @@
   - to replace the test string with a string of your own choice, use `build /t:build /p:LocalizedBuild=true;LocalizedTestBuild=true;LocalizedTestString=foo`
   - testing does not work with the English satellite assemblies because they are directly copied from the neutral resources and do not have corresponding xlf files
 
+## Syncing the XLF files from their corresponding neutral resx files
+- `build /t:build /p:SyncXlf=true` syncs the xlf files but does not do a localized build
+- can be called in tandem with a localized build: `build /t:build /p:LocalizedBuild=true /p:SyncXlf=true`
+
 ## Process for interacting with the localization team
 - 2-3 weeks before a VS release the MSBuild team needs to ping the Microsoft localization team to update the xlf files with the latest changes in the neutral resources
-- before pinging the loc team, we do a localized build and commit the xlf changes
-- this will be the ONLY time we do localized builds and commit xlf changes. Otherwise, if we commit xlfs while the loc team is translating (between their checkout and merged PR), we might get races and loose resource updates.
+- before pinging the loc team, we sync the xlf files on a dev machine and commit the changes
+- this will be the ONLY time we sync xlf files and commit the changes. Otherwise, if we commit xlfs while the loc team is translating (between their checkout and merged PR), we might get races and loose resource updates.
 
 ## Contributing better translation
 - send a PR with an updated `<target>` element of the xlf resource (do not include other non-localization changes)
