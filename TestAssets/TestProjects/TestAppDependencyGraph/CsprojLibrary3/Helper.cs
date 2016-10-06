@@ -5,11 +5,11 @@ using System;
 
 namespace TestLibrary
 {
-    public static class ProjectG
+    public static class ProjectC
     {
         public static string GetMessage()
         {
-            return "This string came from ProjectG";
+            return "This string came from CsprojLibrary3";
         }
     }
 }

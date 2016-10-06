@@ -15,7 +15,7 @@ using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    internal class ProjectDependencyFinder 
+    internal class ProjectDependencyFinder
     {
         public IEnumerable<ProjectDependency> ResolveProjectDependencies(string projectDir, string xprojFile = null)
         {
@@ -33,16 +33,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public IEnumerable<ProjectDependency> ResolveProjectDependencies(
             IEnumerable<ProjectContext> projectContexts,
-            IEnumerable<string> preResolvedProjects=null)
+            IEnumerable<string> preResolvedProjects = null)
         {
-            foreach(var projectContext in projectContexts)
+            foreach (var projectContext in projectContexts)
             {
-                foreach(var projectDependency in ResolveProjectDependencies(projectContext, preResolvedProjects))
+                foreach (var projectDependency in ResolveProjectDependencies(projectContext, preResolvedProjects))
                 {
                     yield return projectDependency;
                 }
             }
         }
+
         public IEnumerable<ProjectDependency> ResolveProjectDependenciesForFramework(
             Project project, 
             NuGetFramework framework, 
@@ -70,10 +71,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var dependencyName = projectFileDependency.Name;
 
                 ProjectDependency projectDependency;
+
+                if (preResolvedProjects.Contains(dependencyName))
+                {
+                    continue;
+                }
+
                 if (!possibleProjectDependencies.TryGetValue(dependencyName, out projectDependency))
                 {
-                    if (projectFileDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project
-                        && !preResolvedProjects.Contains(dependencyName))
+                    if (projectFileDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project)
                     {
                         MigrationErrorCodes
                             .MIGRATE1014($"Unresolved project dependency ({dependencyName})").Throw();
@@ -95,7 +101,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 
             var projectExports = projectContext.CreateExporter("_").GetDependencies();
-            var possibleProjectDependencies = 
+            var possibleProjectDependencies =
                 FindPossibleProjectDependencies(projectContext.ProjectFile.ProjectFilePath);
 
             var projectDependencies = new List<ProjectDependency>();
@@ -104,10 +110,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var projectExportName = projectExport.Library.Identity.Name;
                 ProjectDependency projectDependency;
 
+                if (preResolvedProjects.Contains(projectExportName))
+                {
+                    continue;
+                }
+
                 if (!possibleProjectDependencies.TryGetValue(projectExportName, out projectDependency))
                 {
-                    if (projectExport.Library.Identity.Type.Equals(LibraryType.Project) 
-                        && !preResolvedProjects.Contains(projectExportName))
+                    if (projectExport.Library.Identity.Type.Equals(LibraryType.Project))
                     {
                         MigrationErrorCodes
                             .MIGRATE1014($"Unresolved project dependency ({projectExportName})").Throw();
@@ -264,7 +274,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projects;
         }
 
-        private static List<string> GetGlobalPaths(string rootPath)
+        internal static List<string> GetGlobalPaths(string rootPath)
         {
             var paths = new List<string>();
 
@@ -347,7 +357,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     var projects = settings["projects"];
                     var dependencies = settings["dependencies"] as JObject;
 
-                    globalSettings.ProjectPaths = projects == null ? new string[] { } : projects.Select(a => a.Value<string>()).ToArray();;
+                    globalSettings.ProjectPaths = projects == null ? new string[] { } :
+                                                                     projects.Select(a => a.Value<string>()).ToArray();
                     globalSettings.PackagesPath = settings.Value<string>("packages");
                     globalSettings.FilePath = globalJsonPath;
                 }

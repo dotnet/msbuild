@@ -10,7 +10,9 @@ namespace TestApp
     {
         public static int Main(string[] args)
         {
-            Console.WriteLine("This string came from ProjectA");
+            Console.WriteLine("This string came from ProjectH");
+            string helperStr = TestLibrary.ProjectI.GetMessage();
+            Console.WriteLine(helperStr);
             return 0;
         }
     }

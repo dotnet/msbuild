@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             ProjectDirectory = projectDirectory;
             OutputDirectory = outputDirectory;
             SdkPackageVersion = sdkPackageVersion;
-            MSBuildProjectTemplate = msBuildProjectTemplate;
+            MSBuildProjectTemplate = msBuildProjectTemplate != null ? msBuildProjectTemplate.DeepClone() : null;
             ProjectXProjFilePath = projectXprojFilePath;
         }
     }
