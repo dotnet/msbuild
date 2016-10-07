@@ -10,8 +10,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
     {
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
-            var outputName = Path.GetFileNameWithoutExtension(
-                migrationRuleInputs.DefaultProjectContext.GetOutputPaths("_").CompilationFiles.Assembly);
+            var outputName = migrationRuleInputs.DefaultProjectContext.GetProjectName();
 
             var outputProject = Path.Combine(migrationSettings.OutputDirectory, outputName + ".csproj");
 

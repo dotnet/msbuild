@@ -7,6 +7,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class MigrationException : Exception 
     { 
-        public MigrationException(string message) : base(message) { }
+        public MigrationError Error { get; }
+        public MigrationException(MigrationError error, string message) : base(message) 
+        { 
+            Error = error;
+        }
     }
 }

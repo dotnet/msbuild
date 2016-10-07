@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public void Throw()
         {
-            throw new MigrationException(GetFormattedErrorMessage());
+            throw new MigrationException(this, GetFormattedErrorMessage());
         }
 
         public string GetFormattedErrorMessage()
