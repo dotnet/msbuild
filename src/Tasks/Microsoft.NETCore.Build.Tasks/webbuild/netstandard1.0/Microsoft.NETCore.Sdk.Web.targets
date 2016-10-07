@@ -31,7 +31,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!-- Globbing patterns to include relevant files to web projects -->
-  
+
   <!-- Core web globbing patterns -->
   <ItemGroup>
     <Content Include="wwwroot\**">
@@ -44,7 +44,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="**\web.debug.config" Exclude="wwwroot\**\web.debug.config"/>
-	  <Content Include="**\web.release.config" Exclude="wwwroot\**\web.release.config"/>
+    <Content Include="**\web.release.config" Exclude="wwwroot\**\web.release.config"/>
     <Compile Remove="wwwroot\**\*.cs"/>
     <EmbeddedResource Remove="wwwroot\**\*.resx"/>
   </ItemGroup>
@@ -84,14 +84,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Include="**\*.mdwn" Exclude="wwwroot\**\*.mdwn">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    
+
     <!-- Styles -->
     <Content Include="**\*.css" Exclude="wwwroot\**\*.css">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="**\*.less" Exclude="wwwroot\**\*.less"/>
     <Content Include="**\*.sass" Exclude="wwwroot\**\*.sass"/>
-    
+
     <!-- Images -->
     <Content Include="**\*.png" Exclude="wwwroot\**\*.png">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -105,13 +105,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Include="**\*.svgz" Exclude="wwwroot\**\*.svgz">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-	
-	  <!-- Exclusions -->
+
+    <!-- Exclusions -->
     <Content Remove="bin\**"/>
-	  <Content Remove="wwwroot\bin\**"/>
-	  <Content Remove="obj\**"/>
-	  <Content Remove="node_modules\**"/>
-	  <Content Remove="jspm_modules\**"/>  	
+    <Content Remove="wwwroot\bin\**"/>
+    <Content Remove="obj\**"/>
+    <Content Remove="node_modules\**"/>
+    <Content Remove="jspm_modules\**"/>
   </ItemGroup>
-  
+
 </Project>
