@@ -83,6 +83,9 @@
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.BeforeCommon.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.Common.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\netstandard1.0\Microsoft.NETCore.Sdk.CSharp.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

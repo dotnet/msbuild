@@ -11,13 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MicrosoftNETCoreBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)../../tools/</MicrosoftNETCoreBuildTasksDirectoryRoot>
-    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</MicrosoftNETCoreBuildTasksTFM>
-    <MicrosoftNETCoreBuildTasksTFM Condition=" '$(MicrosoftNETCoreBuildTasksTFM)' == ''">net46</MicrosoftNETCoreBuildTasksTFM>
-    <MicrosoftNETCoreBuildTasksDirectory>$(MicrosoftNETCoreBuildTasksDirectoryRoot)$(MicrosoftNETCoreBuildTasksTFM)/</MicrosoftNETCoreBuildTasksDirectory>
-    <MicrosoftNETCoreBuildTasksAssembly>$(MicrosoftNETCoreBuildTasksDirectory)Microsoft.NETCore.Build.Tasks.dll</MicrosoftNETCoreBuildTasksAssembly>
-  </PropertyGroup>
+  <Import Project="Microsoft.NETCore.Sdk.Common.targets" />
 
   <ImportGroup>
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
@@ -37,22 +31,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETCoreBuildTasksAssembly)" />
 
   <PropertyGroup Condition="'$(DisableStandardFrameworkResolution)' == ''">
-     <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</DisableStandardFrameworkResolution>
-     <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</DisableStandardFrameworkResolution>
+    <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</DisableStandardFrameworkResolution>
+    <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</DisableStandardFrameworkResolution>
   </PropertyGroup>
 
   <PropertyGroup>
     <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(OutputType)' == 'exe' ">true</GenerateRuntimeConfigurationFiles>
     <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
-
-    <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
-    <VersionSuffix Condition=" '$(VersionSuffix)' == '' "></VersionSuffix>
-    <Version Condition=" '$(Version)' == '' and '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
-    <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
-
-    <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
-    <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
-    <NeutralLanguage Condition="'$(NeutralLanguage)' == ''">en</NeutralLanguage>
     <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
   </PropertyGroup>
 
