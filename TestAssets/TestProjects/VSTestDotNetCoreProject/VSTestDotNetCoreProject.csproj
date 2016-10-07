@@ -33,7 +33,7 @@
     <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testadapter\1.0.3-preview\build\_common\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
     <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testadapter\1.0.3-preview\build\dotnet\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
     <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testadapter\1.0.3-preview\build\_common\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testframework\1.0.1-preview\lib\dotnet\Microsoft.VisualStudio.TestPlatform.TestFramework.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testframework\1.0.1-preview\lib\dotnet\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
+    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testframework\1.0.4-preview\lib\dotnet\Microsoft.VisualStudio.TestPlatform.TestFramework.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
+    <Copy SourceFiles="$(NuGetPackageRoot)\mstest.testframework\1.0.4-preview\lib\dotnet\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll" DestinationFolder="$(OutputPath)"  SkipUnchangedFiles="true"/>
   </Target>
 </Project>
