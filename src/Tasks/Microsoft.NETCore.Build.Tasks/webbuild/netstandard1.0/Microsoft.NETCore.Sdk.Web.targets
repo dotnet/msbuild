@@ -43,14 +43,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Include="**\web.config">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Compile Remove="wwwroot\**\*.cs" />
-    <EmbeddedResource Remove="wwwroot\**\*.resx" />
+    <Compile Remove="wwwroot\**\*.cs"/>
+    <EmbeddedResource Remove="wwwroot\**\*.resx"/>
   </ItemGroup>
 
   <!-- Well known web content globbing patterns -->
   <ItemGroup>
     <!-- Scripts and configuration -->
-    <Content Include="**\*.json" Exclude="wwwroot\**\*.json" />
+    <Content Include="**\*.json" Exclude="wwwroot\**\*.json"/>
     <Content Include="**\*.js" Exclude="wwwroot\**\*.js">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
@@ -61,7 +61,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="**\*.coffee" Exclude="wwwroot\**\*.coffee"/>
-    <Content Include="**\*.iced" Exclude="wwwroot\**\*.iced" />
+    <Content Include="**\*.iced" Exclude="wwwroot\**\*.iced"/>
 
     <!-- Markup -->
     <Content Include="**\*.htm" Exclude="wwwroot\**\*.htm">
@@ -87,8 +87,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Include="**\*.css" Exclude="wwwroot\**\*.css">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="**\*.less" Exclude="wwwroot\**\*.less" />
-    <Content Include="**\*.sass" Exclude="wwwroot\**\*.sass" />
+    <Content Include="**\*.less" Exclude="wwwroot\**\*.less"/>
+    <Content Include="**\*.sass" Exclude="wwwroot\**\*.sass"/>
     
     <!-- Images -->
     <Content Include="**\*.png" Exclude="wwwroot\**\*.png">
@@ -105,11 +105,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Content>
 	
 	<!-- Exclusions -->
-    <Content Remove="bin\**" />
-	<Content Remove="wwwroot\bin\**" />
-	<Content Remove="obj\**" />
-	<Content Remove="node_modules\**" />
-	<Content Remove="jspm_modules\**" />  	
+    <Content Remove="bin\**"/>
+	<Content Remove="wwwroot\bin\**"/>
+	<Content Remove="obj\**"/>
+	<Content Remove="node_modules\**"/>
+	<Content Remove="jspm_modules\**"/>  	
   </ItemGroup>
   
 </Project>
