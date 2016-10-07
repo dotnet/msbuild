@@ -44,7 +44,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="**\web.debug.config" Exclude="wwwroot\**\web.debug.config"/>
-	<Content Include="**\web.release.config" Exclude="wwwroot\**\web.release.config"/>
+	  <Content Include="**\web.release.config" Exclude="wwwroot\**\web.release.config"/>
     <Compile Remove="wwwroot\**\*.cs"/>
     <EmbeddedResource Remove="wwwroot\**\*.resx"/>
   </ItemGroup>
@@ -106,12 +106,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
 	
-	<!-- Exclusions -->
+	  <!-- Exclusions -->
     <Content Remove="bin\**"/>
-	<Content Remove="wwwroot\bin\**"/>
-	<Content Remove="obj\**"/>
-	<Content Remove="node_modules\**"/>
-	<Content Remove="jspm_modules\**"/>  	
+	  <Content Remove="wwwroot\bin\**"/>
+	  <Content Remove="obj\**"/>
+	  <Content Remove="node_modules\**"/>
+	  <Content Remove="jspm_modules\**"/>  	
   </ItemGroup>
   
 </Project>
