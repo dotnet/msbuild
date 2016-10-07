@@ -38,8 +38,28 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
-        public static BuildEnvironment Instance => BuildEnvironmentHelperSingleton.s_instance;
-        
+        public static BuildEnvironment Instance
+        {
+            get
+            {
+                try
+                {
+                    return BuildEnvironmentHelperSingleton.s_instance;
+                }
+                catch (TypeInitializationException e)
+                {
+                    if (e.InnerException != null)
+                    {
+                        // Throw the error that caused the TypeInitializationException.
+                        // (likely InvalidOperationException)
+                        throw e.InnerException;
+                    }
+
+                    throw;
+                }
+            }
+        }
+
         /// <summary>
         /// Find the location of MSBuild.exe based on the current environment.
         /// </summary>
@@ -299,6 +319,11 @@ namespace Microsoft.Build.Shared
 
         private static class BuildEnvironmentHelperSingleton
         {
+            // Explicit static constructor to tell C# compiler
+            // not to mark type as beforefieldinit
+            static BuildEnvironmentHelperSingleton()
+            { }
+
             public static BuildEnvironment s_instance = Initialize();
         }
     }
