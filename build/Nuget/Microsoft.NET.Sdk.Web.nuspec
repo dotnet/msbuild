@@ -11,11 +11,11 @@
     <authors>dotnet</authors>
     <projectUrl>http://dot.net</projectUrl>
     <dependencies>
-	  <dependency id="Microsoft.NET.Sdk" version="$version$" />
-	</dependencies>	
+      <dependency id="Microsoft.NET.Sdk" version="$version$" />
+      <dependency id="Microsoft.NET.Sdk.Publish" version="1.0.0-alpha-20161006" />
+    </dependencies>
   </metadata>
   <files>
     <file src="WebPackagesLayout\**" />
   </files>
-
 </package>
