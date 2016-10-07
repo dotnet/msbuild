@@ -10,8 +10,8 @@
     <UseVisualStudioVersion>true</UseVisualStudioVersion>
   </PropertyGroup>
 
-  <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.props" />
-  <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
+  <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.props" />
+  <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
 
   <Target Name="BeforeBuild">
     <MSBuild Projects="Microsoft.VisualStudio.Templates.VisualBasic.NetCore.swixproj" Targets="Build" />

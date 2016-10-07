@@ -11,7 +11,7 @@
     <UseVisualStudioVersion>true</UseVisualStudioVersion>
   </PropertyGroup>
 
-  <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.props" />
+  <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.props" />
 
   <PropertyGroup>
     <PackagePreprocessorDefinitions>$(PackagePreprocessorDefinitions);Version=$(ProjectSystemVsixVersion);OutputPath=$(OutDir);LicenseUri=http://www.microsoft.com</PackagePreprocessorDefinitions>
@@ -23,5 +23,5 @@
     <Package Include="Microsoft.VisualStudio.Templates.CSharp.NetCore.swr" />
   </ItemGroup>
 
-  <Import Project="$(NuGetPackageRoot)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
+  <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
 </Project>

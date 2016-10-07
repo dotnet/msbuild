@@ -3,19 +3,11 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
 
   <PropertyGroup>
+    <MicroBuildVersion>0.2.0</MicroBuildVersion>
+
     <CopyVsixManifestToOutput>false</CopyVsixManifestToOutput>
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <MicroBuildVersion>0.2.0</MicroBuildVersion>
-  
-    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(NuGet_Packages)</NuGetPackageRoot>
-    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == '' and
-                                 '$(OS)' == 'Windows_NT'">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
-    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == '' and
-                                 '$(OS)' != 'Windows_NT'">$(HOME)\.nuget\packages\</NuGetPackageRoot>
   </PropertyGroup>
 
 </Project>
