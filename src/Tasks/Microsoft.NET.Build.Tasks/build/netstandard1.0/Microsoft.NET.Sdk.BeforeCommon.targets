@@ -41,24 +41,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Default settings for .NET Core and .NET Standard build logic -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == 'true'">
-    <DebugType Condition="'$(DebugType)' == ''">portable</DebugType>
     <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == ''">true</AutoUnifyAssemblyReferences>
     <DesignTimeAutoUnify Condition="'$(DesignTimeAutoUnify)' == ''">true</DesignTimeAutoUnify>
 
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
-
-    <!-- all references (even the StdLib) come from packages -->
-    <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
 
     <!-- Force .dll extension for .NETCoreApp and .NETStandard projects even if output type is exe. -->
     <TargetExt Condition="'$(TargetExt)' == ''">.dll</TargetExt>
 
     <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core and .NETStandard projects -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">false</CopyLocalLockFileAssemblies>
-
-    <!-- Exclude GAC, registry, output directory from search paths. -->
-    <AssemblySearchPaths Condition="'$(AssemblySearchPaths)' == ''">{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
-    <DesignTimeAssemblySearchPaths Condition="'$(DesignTimeAssemblySearchPaths)' == ''">$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
   </PropertyGroup>
 
   <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->

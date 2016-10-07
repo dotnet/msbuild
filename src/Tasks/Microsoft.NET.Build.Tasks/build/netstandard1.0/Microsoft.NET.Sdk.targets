@@ -30,9 +30,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-  <PropertyGroup Condition="'$(DisableStandardFrameworkResolution)' == ''">
-    <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</DisableStandardFrameworkResolution>
-    <DisableStandardFrameworkResolution Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</DisableStandardFrameworkResolution>
+  <PropertyGroup>
+    <DisableStandardFrameworkResolution Condition="'$(DisableStandardFrameworkResolution)' == ''">$(_IsNETCoreOrNETStandard)</DisableStandardFrameworkResolution>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -41,8 +41,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Default settings for all projects built with this Sdk package -->
   <PropertyGroup>
+    <DebugType>portable</DebugType>
+
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
+
+    <!-- Exclude GAC, registry, output directory from search paths. -->
+    <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
+    <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
   </PropertyGroup>
 
   <!-- Temporary hacks to work around bugs -->

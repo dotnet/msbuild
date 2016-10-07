@@ -18,6 +18,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_TargetFrameworkDirectories />
     <FrameworkPathOverride />
     <TargetFrameworkDirectory />
+
+    <!-- all references (even the StdLib) come from packages -->
+    <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
   </PropertyGroup>
 
 </Project>
