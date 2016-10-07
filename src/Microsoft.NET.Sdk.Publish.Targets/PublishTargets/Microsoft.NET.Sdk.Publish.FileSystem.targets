@@ -29,30 +29,41 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <FileSystemPublishDependsOn>
       $(FileSystemPublishDependsOn);
-      GatherPublishIntermediateOutputPathFiles;
+      _DeleteDestinationFilesIfSpecified;
+      _GatherFilesFromPublishIntermediateOutputPath;
     </FileSystemPublishDependsOn>
   </PropertyGroup>
 
   <Target Name="FileSystemPublish" 
           DependsOnTargets="$(FileSystemPublishDependsOn)"
           Inputs="@(_PublishIntermediateOutputPathFiles)"
-          Outputs="@(_PublishIntermediateOutputPathFiles ->'$(PublishUrl)\%(RecursiveDir)%(Filename)%(Extension)')">
-
-    <Delete 
-      Files="$(PublishUrl)" 
-      Condition="'$(DeleteExistingFiles)' == 'true'" 
-      />
+          Outputs="@(_PublishIntermediateOutputPathFiles ->'$(PublishUrl)%(RecursiveDir)%(Filename)%(Extension)')">
 
     <Copy
         SourceFiles="@(_PublishIntermediateOutputPathFiles)"
-        DestinationFiles="@(_PublishIntermediateOutputPathFiles ->'$(PublishUrl)\%(RecursiveDir)%(Filename)%(Extension)')"
-    />
+        DestinationFiles="@(_PublishIntermediateOutputPathFiles ->'$(PublishUrl)%(RecursiveDir)%(Filename)%(Extension)')" />
+    
   </Target>
 
 
-  <Target Name="GatherPublishIntermediateOutputPathFiles">
+  <Target Name="_DeleteDestinationFilesIfSpecified">
+    <PropertyGroup>
+      <PublishUrl Condition="'$(PublishUrl)' != '' And !HasTrailingSlash('$(PublishUrl)')">$(PublishUrl)\</PublishUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_DestinationFiles Include="$(PublishUrl)**\*" />
+    </ItemGroup>
+
+    <Delete
+      Files="@(_DestinationFiles)"
+      Condition="'$(DeleteExistingFiles)' == 'true'" />
+  </Target>
+
+  <Target Name="_GatherFilesFromPublishIntermediateOutputPath">
     <ItemGroup>
       <_PublishIntermediateOutputPathFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
     </ItemGroup>
   </Target>
+  
 </Project>

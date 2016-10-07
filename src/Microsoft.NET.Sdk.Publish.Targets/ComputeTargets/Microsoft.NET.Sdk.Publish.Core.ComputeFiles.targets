@@ -41,6 +41,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <RuntimeIdentifier>$(PublishRuntime)</RuntimeIdentifier>
       <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
+
+
+    <!-- Remove all the files from the temp directory first-->
+    <ItemGroup>
+      <_PublishDirTempFiles Include="$(PublishDir)**\*.*" />
+    </ItemGroup>
+
+    <Delete Files="@(_PublishDirTempFiles)" />
+    <MakeDir Directories="$(PublishDir)" Condition="!Exists('$(PublishDir)')"/>
+    
   </Target>
   
 
