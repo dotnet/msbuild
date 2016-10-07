@@ -23,7 +23,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.Sdk">
+    <PackageReference Include="Microsoft.NET.Sdk">
       <Version>0.0.0</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>

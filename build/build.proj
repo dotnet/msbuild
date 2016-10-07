@@ -13,13 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
-    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
-    <SolutionFile Include="$(RepositoryRootDirectory)core-sdk-web-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
+    <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
+    <SolutionFile Include="$(RepositoryRootDirectory)sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
+    <SolutionFile Include="$(RepositoryRootDirectory)sdk-web-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
 
-    <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
-    <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
-    <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Web.Nuget.proj" />
+    <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
+    <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NET.Nuget.proj" />
+    <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NET.Web.Nuget.proj" />
 
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsmanproj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
@@ -34,7 +34,7 @@
           />
 
     <ItemGroup>
-      <ProjectToRestore3 Include="src\Tasks\Microsoft.NETCore.Build.Tasks\Microsoft.NETCore.Build.Tasks.csproj" />
+      <ProjectToRestore3 Include="src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
     </ItemGroup>
 
     <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true -->

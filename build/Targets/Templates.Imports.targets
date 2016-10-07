@@ -9,7 +9,7 @@
     </Copy>
   </Target>
   
-  <!-- Project templates reference the Microsoft.NETCore.Sdk package produced in this project.
+  <!-- Project templates reference the Microsoft.NET.Sdk package produced in this project.
        The following Custom Inline Task and Target write version number associated with this build
        into the project json template associated with the project template.
     -->

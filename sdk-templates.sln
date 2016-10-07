@@ -1,0 +1,111 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.25630.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CAEE03D-60F1-4E77-B25B-9CD8757E1F09}"
+	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
+		build.ps1 = build.ps1
+		Common.props = Common.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27-BA35-44B2-AC57-E54551791C64}"
+	ProjectSection(SolutionItems) = preProject
+		build\build.proj = build\build.proj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signing", "Signing", "{385C3C61-B7FC-4447-A88D-6D018B7CE5E4}"
+	ProjectSection(SolutionItems) = preProject
+		build\Signing\Microsoft.NET.Signing.proj = build\Signing\Microsoft.NET.Signing.proj
+		build\Signing\SignToolConfig.json = build\Signing\SignToolConfig.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{0C1312C0-0A29-4EB2-8294-6D1C54D78F61}"
+	ProjectSection(SolutionItems) = preProject
+		build\Targets\ProducesNoOutput.Imports.props = build\Targets\ProducesNoOutput.Imports.props
+		build\Targets\ProducesNoOutput.Settings.props = build\Targets\ProducesNoOutput.Settings.props
+		build\Targets\Templates.Imports.targets = build\Targets\Templates.Imports.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{C86A71A6-9D35-436B-BBC5-0940041410F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectTemplates", "ProjectTemplates", "{1F16979A-2572-444B-9DD7-51D4289309DA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSharp", "CSharp", "{82D4E69F-8B61-4CC3-8AF1-11D02AAE99CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".NETCore", ".NETCore", "{57C097FA-72EB-4AB9-8E72-58ACDEB0F4A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTemplatesSetup", "src\Templates\CSharpTemplatesSetup\CSharpTemplatesSetup.csproj", "{F535071D-F755-403A-AB63-468A0F547702}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpConsoleApplication", "src\Templates\ProjectTemplates\CSharp\.NETCore\CSharpConsoleApplication\CSharpConsoleApplication.csproj", "{0C52951F-4EEF-4F2F-B587-0BCF6004C459}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpClassLibrary", "src\Templates\ProjectTemplates\CSharp\.NETCore\CSharpClassLibrary\CSharpClassLibrary.csproj", "{A103C9A3-C76C-4A48-B67C-695FD1CB2F15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpUnitTest", "src\Templates\ProjectTemplates\CSharp\.NETCore\CSharpUnitTest\CSharpUnitTest.csproj", "{876EB265-3820-466B-8329-DA26B91A5C7A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VisualBasic", "VisualBasic", "{98132BF6-2450-4753-B4E9-878F468E60BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".NETCore", ".NETCore", "{E281FDCB-10B7-403C-84D4-EE4FF92845B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasicConsoleApplication", "src\Templates\ProjectTemplates\VisualBasic\.NETCore\VisualBasicConsoleApplication\VisualBasicConsoleApplication.csproj", "{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasicTemplatesSetup", "src\Templates\VisualBasicTemplatesSetup\VisualBasicTemplatesSetup.csproj", "{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualBasicClassLibrary", "src\Templates\ProjectTemplates\VisualBasic\.NETCore\VisualBasicClassLibrary\VisualBasicClassLibrary.csproj", "{DCDD8266-D269-46BD-B563-E4D4B811A5B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F535071D-F755-403A-AB63-468A0F547702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F535071D-F755-403A-AB63-468A0F547702}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F535071D-F755-403A-AB63-468A0F547702}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F535071D-F755-403A-AB63-468A0F547702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C52951F-4EEF-4F2F-B587-0BCF6004C459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C52951F-4EEF-4F2F-B587-0BCF6004C459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C52951F-4EEF-4F2F-B587-0BCF6004C459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C52951F-4EEF-4F2F-B587-0BCF6004C459}.Release|Any CPU.Build.0 = Release|Any CPU
+		{876EB265-3820-466B-8329-DA26B91A5C7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{876EB265-3820-466B-8329-DA26B91A5C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{876EB265-3820-466B-8329-DA26B91A5C7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{876EB265-3820-466B-8329-DA26B91A5C7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A103C9A3-C76C-4A48-B67C-695FD1CB2F15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A103C9A3-C76C-4A48-B67C-695FD1CB2F15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A103C9A3-C76C-4A48-B67C-695FD1CB2F15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A103C9A3-C76C-4A48-B67C-695FD1CB2F15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{385C3C61-B7FC-4447-A88D-6D018B7CE5E4} = {50A89C27-BA35-44B2-AC57-E54551791C64}
+		{0C1312C0-0A29-4EB2-8294-6D1C54D78F61} = {50A89C27-BA35-44B2-AC57-E54551791C64}
+		{1F16979A-2572-444B-9DD7-51D4289309DA} = {C86A71A6-9D35-436B-BBC5-0940041410F1}
+		{82D4E69F-8B61-4CC3-8AF1-11D02AAE99CF} = {1F16979A-2572-444B-9DD7-51D4289309DA}
+		{57C097FA-72EB-4AB9-8E72-58ACDEB0F4A8} = {82D4E69F-8B61-4CC3-8AF1-11D02AAE99CF}
+		{F535071D-F755-403A-AB63-468A0F547702} = {C86A71A6-9D35-436B-BBC5-0940041410F1}
+		{0C52951F-4EEF-4F2F-B587-0BCF6004C459} = {57C097FA-72EB-4AB9-8E72-58ACDEB0F4A8}
+		{A103C9A3-C76C-4A48-B67C-695FD1CB2F15} = {57C097FA-72EB-4AB9-8E72-58ACDEB0F4A8}
+		{876EB265-3820-466B-8329-DA26B91A5C7A} = {57C097FA-72EB-4AB9-8E72-58ACDEB0F4A8}
+		{98132BF6-2450-4753-B4E9-878F468E60BB} = {1F16979A-2572-444B-9DD7-51D4289309DA}
+		{E281FDCB-10B7-403C-84D4-EE4FF92845B9} = {98132BF6-2450-4753-B4E9-878F468E60BB}
+		{622C1D9E-A9E1-422D-83DF-CE5CE0AAAF51} = {E281FDCB-10B7-403C-84D4-EE4FF92845B9}
+		{2A82D3FA-4EBE-425C-A3C7-3DC207591E53} = {C86A71A6-9D35-436B-BBC5-0940041410F1}
+		{DCDD8266-D269-46BD-B563-E4D4B811A5B1} = {E281FDCB-10B7-403C-84D4-EE4FF92845B9}
+	EndGlobalSection
+EndGlobal
