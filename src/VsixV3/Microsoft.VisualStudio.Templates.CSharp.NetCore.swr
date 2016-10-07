@@ -1,0 +1,15 @@
+use vs
+
+package name=Microsoft.VisualStudio.Templates.CSharp.NetCore
+        version=$(Version)
+        vs.package.type=vsix
+        vs.package.vsixId=A45AB8EC-B6A9-439E-9473-CB6C62C0C09D
+        vs.package.installSize=32768
+
+vs.localizedResources
+  vs.localizedResource language=en-us
+                       title="Microsoft VisualStudio ProjectSystem CSharp Templates"
+                       description="ProjectSystem CSharp Templates"
+
+vs.payloads
+  vs.payload source=$(OutputPath)\Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsix

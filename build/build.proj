@@ -20,6 +20,9 @@
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NETCore.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Nuget.proj" />
     <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NETCore.Web.Nuget.proj" />
+
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsmanproj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
   </ItemGroup>
 
   <Target Name="RestorePackages">
@@ -62,7 +65,7 @@
              />
   </Target>
 
-  <Target Name="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
+  <Target Name="SignPackages">
 
     <MSBuild BuildInParallel="true"
              Projects="@(SigningProjectFile)"
@@ -101,6 +104,21 @@
              />
   </Target>
 
+  <Target Name="BuildModernVsixPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' == 'true'">
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Build"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
+             />
+  </Target>
+
+  <Target Name="RebuildModernVsixPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' == 'true'">
+
+    <MSBuild Projects="@(VsManProjectFile)"
+             Targets="Rebuild"
+             Condition="'$(RunningInMicroBuild)' == 'true'"
+             />
+  </Target>
+
   <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
 
     <ItemGroup>
@@ -131,7 +149,7 @@
 
   </Target>
 
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;Test" />
-  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;Test" />
+  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;BuildModernVsixPackages;Test" />
+  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;RebuildModernVsixPackages;Test" />
 
 </Project>

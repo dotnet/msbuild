@@ -32,6 +32,15 @@
     <BuildNumberPart2>$(BuildNumber.Split('-')[1].PadLeft(2,'0'))</BuildNumberPart2>
     <VsixVersion Condition="'$(VsixVersion)' == ''">$(VersionPrefix).$(BuildNumberPart1)$(BuildNumberPart2)</VsixVersion>
 
+    <!-- Unfortunately we have already shipped template manifests with version 2.0.0.0 (matching
+         the version for the NETCore Project System.) Changing this version to match $(VsixVersion) 
+         which is 1.0.0.xxx may create upgrade problems for users doing B2B or Preview 5 upgrades. 
+         Introducing a version variable that continues the 2.0.0.xxx scheme but uses the right build 
+         number. This conforms to the dependencies specified in the ManagedDesktop workload [2.0.0.0,3.0.0.0).
+         We can get rid of this, and references to it, when we bump NETCore SDK version to 2.0.0.
+      -->
+    <ProjectSystemVsixVersion Condition="'$(ProjectSystemVsixVersion)' == ''">2.0.0.$(BuildNumberPart1)$(BuildNumberPart2)</ProjectSystemVsixVersion>
+
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
 

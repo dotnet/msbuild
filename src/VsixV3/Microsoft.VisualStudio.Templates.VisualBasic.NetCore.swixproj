@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\build\Targets\VsixV3.Settings.props" />
+
+  <PropertyGroup>
+    <OutputArchitecture>neutral</OutputArchitecture>
+    <OutputLocalized>false</OutputLocalized>
+    <OutputType>manifest</OutputType>
+    <IsPackage>true</IsPackage>
+    <OutputName>Microsoft.VisualStudio.Templates.VisualBasic.NetCore</OutputName>
+    <UseVisualStudioVersion>true</UseVisualStudioVersion>
+  </PropertyGroup>
+
+  <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.props" />
+
+  <PropertyGroup>
+    <PackagePreprocessorDefinitions>$(PackagePreprocessorDefinitions);Version=$(ProjectSystemVsixVersion);OutputPath=$(OutDir);LicenseUri=http://www.microsoft.com</PackagePreprocessorDefinitions>
+    <OutputPath>$(OutDir)\VsixV3</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Package Include="Microsoft.VisualStudio.Templates.VisualBasic.NetCore.swr" />
+  </ItemGroup>
+
+  <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
+</Project>
