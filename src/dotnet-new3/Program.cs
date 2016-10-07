@@ -308,6 +308,8 @@ namespace dotnet_new3
 
             TemplateCache.WriteTemplateCaches();
 
+            TemplateCache.WriteTemplateCaches();
+
             if (!quiet)
             {
                 ListTemplates(new CommandArgument());
