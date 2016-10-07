@@ -35,6 +35,7 @@
         <dependency id="System.IO.FileSystem.Primitives" version="4.0.1" />
         <dependency id="System.IO.Pipes" version="4.0.0" />
         <dependency id="System.Linq" version="4.1.0" />
+        <dependency id="System.Linq.Parallel" version="4.0.1" />
         <dependency id="System.ObjectModel" version="4.0.12" />
         <dependency id="System.Reflection" version="4.1.0" />
         <dependency id="System.Reflection.Extensions" version="4.0.1" />

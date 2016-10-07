@@ -584,6 +584,12 @@ namespace Microsoft.Build.Shared
         {
             var fullPath = fileSpec;
 
+            // file is invalid, return early to avoid triggering an exception
+            if (IsInvalidPath(fullPath))
+            {
+                return fullPath;
+            }
+
             try
             {
                 fullPath = GetFullPath(fileSpec, currentDirectory);
@@ -593,6 +599,18 @@ namespace Microsoft.Build.Shared
             }
 
             return fullPath;
+        }
+
+        private static bool IsInvalidPath(string path)
+        {
+            if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                return true;
+            }
+
+            var filename = Path.GetFileName(path);
+
+            return filename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0;
         }
 
         /// <summary>

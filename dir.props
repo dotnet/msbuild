@@ -25,6 +25,9 @@
   <!-- Localization switches -->
   <PropertyGroup>
     <LocalizationBuildAssetsRequired Condition="'$(LocalizedBuild)' == 'true' or '$(SyncXlf)' == 'true'">true</LocalizationBuildAssetsRequired>
+
+    <!-- Syncing xlf files in parallel leads to races because of the shared resources under /Shared/Resources/xlf -->
+    <BuildInParallel Condition="'$(SyncXlf)' == 'true'">false</BuildInParallel>
   </PropertyGroup>
 
   <PropertyGroup>

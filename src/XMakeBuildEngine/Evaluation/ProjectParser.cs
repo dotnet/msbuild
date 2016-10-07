@@ -41,7 +41,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attribute list for item
         /// </summary>
-        private readonly static string[] s_validAttributesOnItem = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update };
+        private readonly static string[] s_knownAttributesOnItem = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update };
 
         /// <summary>
         /// Valid attributes on import element
@@ -309,8 +309,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectItemElement ParseProjectItemElement(XmlElementWithLocation element, ProjectItemGroupElement parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnItem);
-
             bool belowTarget = parent.Parent is ProjectTargetElement;
 
             string itemType = element.Name;
@@ -364,6 +362,27 @@ namespace Microsoft.Build.Construction
 
             ProjectItemElement item = new ProjectItemElement(element, parent, _project);
 
+            foreach (XmlAttributeWithLocation attribute in element.Attributes)
+            {
+                bool isKnownAttribute;
+                bool isValidMetadataNameInAttribute;
+
+                CheckMetadataAsAttributeName(attribute.Name, out isKnownAttribute, out isValidMetadataNameInAttribute);
+
+                if (!isKnownAttribute && !isValidMetadataNameInAttribute)
+                {
+                    ProjectXmlUtilities.ThrowProjectInvalidAttribute(attribute);
+                }
+                else if (isValidMetadataNameInAttribute)
+                {
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    metadatum.ExpressedAsAttribute = true;
+                    metadatum.Parent = item;
+
+                    item.AppendParentedChildNoChecks(metadatum);
+                }
+            }
+
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
                 ProjectMetadataElement metadatum = ParseProjectMetadataElement(childElement, item);
@@ -372,6 +391,53 @@ namespace Microsoft.Build.Construction
             }
 
             return item;
+        }
+
+        internal static void CheckMetadataAsAttributeName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
+        {
+            if (!XmlUtilities.IsValidElementName(name))
+            {
+                isKnownAttribute = false;
+                isValidMetadataNameInAttribute = false;
+                return;
+            }
+
+            for (int i = 0; i < s_knownAttributesOnItem.Length; i++)
+            {
+                //  Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
+                //  error instead of unexpected behavior
+                if (name == s_knownAttributesOnItem[i])
+                {
+                    isKnownAttribute = true;
+                    isValidMetadataNameInAttribute = false;
+                    return;
+                }
+                else if (name.Equals(s_knownAttributesOnItem[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    isKnownAttribute = false;
+                    isValidMetadataNameInAttribute = false;
+                    return;
+                }
+            }
+
+            //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
+            if (name[0] == '_')
+            {
+                isKnownAttribute = false;
+                isValidMetadataNameInAttribute = false;
+                return;
+            }
+
+            if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
+                XMakeElements.IllegalItemPropertyNames[name] != null)
+            {
+                isKnownAttribute = false;
+                isValidMetadataNameInAttribute = false;
+                return;
+            }
+
+            isKnownAttribute = false;
+            isValidMetadataNameInAttribute = true;
         }
 
         /// <summary>

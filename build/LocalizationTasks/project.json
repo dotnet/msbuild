@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "fmdev.XliffParser": "0.4.0"
+    "fmdev.XliffParser": "0.5.1",
+    "fmdev.ResX": "0.1.1"
   },
   "frameworks": {
     "net46": { }

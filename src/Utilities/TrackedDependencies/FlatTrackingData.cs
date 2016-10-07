@@ -251,6 +251,28 @@ namespace Microsoft.Build.Utilities
             InternalConstruct(null, tlogFiles, tlogFilesToIgnore, false, missingFileTimeUtc, excludedInputPaths);
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="tlogFiles">The .tlog files to interpret</param>
+        /// <param name="tlogFilesToIgnore">The .tlog files to ignore</param>
+        /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
+        /// <param name="excludedInputPaths">The set of paths that contain files that are to be ignored during up to date check, including any subdirectories.</param>
+        /// <param name="sharedLastWriteTimeUtcCache">Cache to be used for all timestamp/exists comparisons, which can be shared between multiple FlatTrackingData instances.</param>
+        /// <param name="treatRootMarkersAsEntries">Add root markers as inputs.</param>
+        public FlatTrackingData(ITaskItem[] tlogFiles, ITaskItem[] tlogFilesToIgnore, DateTime missingFileTimeUtc, string[] excludedInputPaths, IDictionary<string, DateTime> sharedLastWriteTimeUtcCache, bool treatRootMarkersAsEntries)
+        {
+            _treatRootMarkersAsEntries = treatRootMarkersAsEntries;
+
+            if (sharedLastWriteTimeUtcCache != null)
+            {
+                _lastWriteTimeUtcCache = sharedLastWriteTimeUtcCache;
+            }
+
+            InternalConstruct(null, tlogFiles, tlogFilesToIgnore, false, missingFileTimeUtc, excludedInputPaths);
+        }
+
+
 
         /// <summary>
         /// Constructor
@@ -467,7 +489,7 @@ namespace Microsoft.Build.Utilities
                                 tlogEntry = tlog.ReadLine();
                                 continue;
                             }
-                            else if (tlogEntry[0] == '^' && TreatRootMarkersAsEntries) // This is a rooting record, and we should keep it
+                            else if (tlogEntry[0] == '^' && TreatRootMarkersAsEntries && tlogEntry.IndexOf('|') < 0) // This is a rooting non composite record, and we should keep it
                             {
                                 tlogEntry = tlogEntry.Substring(1);
 

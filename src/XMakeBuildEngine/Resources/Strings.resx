@@ -695,7 +695,7 @@
     <value>Done Building Project "{0}" (default targets) -- FAILED.</value>
   </data>
   <data name="ProjectMustBeInMSBuildXmlNamespace" UESanitized="false" Visibility="Public">
-    <value>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namspace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</value>
+    <value>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</value>
     <comment>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</comment>
   </data>
@@ -1161,6 +1161,14 @@
     <value>MSB4173: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is invalid because a child element with that name already exists</value>
     <comment>{StrBegin="MSB4173: "}</comment>
   </data>
+  <data name="InvalidAttributeDueToDuplication" UESanitized="false" Visibility="Public">
+    <value>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</value>
+    <comment>{StrBegin="MSB4227: "}</comment>
+  </data>
+  <data name="InvalidMetadataAsAttribute" UESanitized="false" Visibility="Public">
+    <value>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</value>
+    <comment>{StrBegin="MSB4228: "}</comment>
+  </data>
   <data name="UnrecognizedParentElement" UESanitized="true" Visibility="Public">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -1551,7 +1559,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4227.
+        Next message code should be MSB4229.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
