@@ -39,26 +39,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
 
-  <!-- Default settings for .NET Core build logic -->
+  <!-- Default settings for all projects built with this Sdk package -->
   <PropertyGroup>
-    <DebugType>portable</DebugType>
-    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
-    <DesignTimeAutoUnify>true</DesignTimeAutoUnify>
-    
-    <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
-
-    <!-- all references (even the StdLib) come from packages -->
-    <NoStdLib>true</NoStdLib>
-
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
-
-    <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core projects -->
-    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
-
-    <!-- Exclude GAC, registry, output directory from search paths. -->
-    <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
-    <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
   </PropertyGroup>
 
   <!-- Temporary hacks to work around bugs -->
@@ -72,7 +56,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
   </PropertyGroup>
-  
+
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
 </Project>
