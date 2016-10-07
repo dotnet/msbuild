@@ -4,7 +4,7 @@
             "certificate": "Microsoft402",
             "strongName": "MsSharedLib72",
             "values": [
-                "Microsoft.NETCore.Build.Tasks.dll"
+                "Microsoft.NET.Build.Tasks.dll"
             ]
         }
     ]

@@ -3,7 +3,7 @@
   <!-- This file is imported by all projects at the beginning of the project files -->
 
   <PropertyGroup>
-    <!-- SdkStage0Version is the version of the Microsoft.NETCore.Sdk we use to build ourselves -->
+    <!-- SdkStage0Version is the version of the Microsoft.NET.Sdk we use to build ourselves -->
     <SdkStage0Version>1.0.0-alpha-20161006-3</SdkStage0Version>
     
     <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>

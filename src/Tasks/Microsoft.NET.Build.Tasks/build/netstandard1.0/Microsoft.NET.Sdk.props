@@ -1,0 +1,78 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <!-- User-facing configuration-agnostic defaults -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform>AnyCPU</Platform>
+    <FileAlignment>512</FileAlignment>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!-- User-facing configuration-specific defaults -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+
+  <!-- Default settings for .NET Core build logic -->
+  <PropertyGroup>
+    <DebugType>portable</DebugType>
+    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+    <DesignTimeAutoUnify>true</DesignTimeAutoUnify>
+    
+    <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
+
+    <!-- all references (even the StdLib) come from packages -->
+    <NoStdLib>true</NoStdLib>
+
+    <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+
+    <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core projects -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+
+    <!-- Exclude GAC, registry, output directory from search paths. -->
+    <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
+    <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
+  </PropertyGroup>
+
+  <!-- Temporary hacks to work around bugs -->
+  <PropertyGroup>
+    <!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
+    <NoLogo>true</NoLogo>
+
+    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
+    <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
+
+    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
+    <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
+  </PropertyGroup>
+  
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
+</Project>

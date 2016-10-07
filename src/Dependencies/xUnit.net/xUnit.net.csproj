@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\..\build\Targets\ProducesNoOutput.Settings.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\Tasks\Microsoft.NETCore.Build.Tasks\build\netstandard1.0\Microsoft.NETCore.Sdk.props" />
+  <Import Project="..\..\Tasks\Microsoft.NET.Build.Tasks\build\netstandard1.0\Microsoft.NET.Sdk.props" />
   <PropertyGroup>
     <ProjectGuid>{94F9B889-635A-48A7-A0CB-BAE5D6C9A91A}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -16,7 +16,7 @@
     </None>
   </ItemGroup>
   <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.props" />
-  <Import Project="..\..\Tasks\Microsoft.NETCore.Build.Tasks\build\netstandard1.0\Microsoft.NETCore.Sdk.targets" />
+  <Import Project="..\..\Tasks\Microsoft.NET.Build.Tasks\build\netstandard1.0\Microsoft.NET.Sdk.targets" />
 
   <Target Name="AfterBuild">
     <PropertyGroup>

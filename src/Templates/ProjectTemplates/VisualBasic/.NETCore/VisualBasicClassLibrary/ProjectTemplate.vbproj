@@ -14,7 +14,7 @@
     <PackageReference Include="NETStandard.Library">
       <Version>1.6</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.NETCore.Sdk">
+    <PackageReference Include="Microsoft.NET.Sdk">
       <Version>$$buildversion$$</Version>
     </PackageReference>
   </ItemGroup>

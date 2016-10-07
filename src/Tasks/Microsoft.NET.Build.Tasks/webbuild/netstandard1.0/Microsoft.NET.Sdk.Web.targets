@@ -1,0 +1,117 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Web.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildWebPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebPath>
+    <ActualLangName Condition="Exists('$(MSBuildWebPath)$(LangName)')">$(LangName)</ActualLangName>
+    <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
+  </PropertyGroup>
+
+  <!-- Web project capability that enables web features for .NET core project -->
+  <ItemGroup>
+    <ProjectCapability Include="DotNetCoreWeb" />
+  </ItemGroup>
+
+  <!-- Web specific properties -->
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildWebPath)$(ActualLangName)\GeneralBrowseObject.xaml"
+                        Condition="Exists('$(MSBuildWebPath)$(ActualLangName)\GeneralBrowseObject.xaml')">
+      <Context>BrowseObject</Context>
+    </PropertyPageSchema>
+  </ItemGroup>
+
+  <!-- Globbing patterns to include relevant files to web projects -->
+
+  <!-- Core web globbing patterns -->
+  <ItemGroup>
+    <Content Include="wwwroot\**">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.cshtml" Exclude="wwwroot\**\*.cshtml">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\web.config" Exclude="wwwroot\**\web.config">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\web.debug.config" Exclude="wwwroot\**\web.debug.config"/>
+    <Content Include="**\web.release.config" Exclude="wwwroot\**\web.release.config"/>
+    <Compile Remove="wwwroot\**\*.cs"/>
+    <EmbeddedResource Remove="wwwroot\**\*.resx"/>
+  </ItemGroup>
+
+  <!-- Well known web content globbing patterns -->
+  <ItemGroup>
+    <!-- Scripts and configuration -->
+    <Content Include="**\*.json" Exclude="wwwroot\**\*.json"/>
+    <Content Include="**\*.js" Exclude="wwwroot\**\*.js">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.jsx" Exclude="wwwroot\**\*.jsx">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.map" Exclude="wwwroot\**\*.map">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.coffee" Exclude="wwwroot\**\*.coffee"/>
+    <Content Include="**\*.iced" Exclude="wwwroot\**\*.iced"/>
+
+    <!-- Markup -->
+    <Content Include="**\*.htm" Exclude="wwwroot\**\*.htm">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.html" Exclude="wwwroot\**\*.html">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.md" Exclude="wwwroot\**\*.md">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.mdown" Exclude="wwwroot\**\*.mdown">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.markdown" Exclude="wwwroot\**\*.markdown">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.mdwn" Exclude="wwwroot\**\*.mdwn">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+
+    <!-- Styles -->
+    <Content Include="**\*.css" Exclude="wwwroot\**\*.css">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.less" Exclude="wwwroot\**\*.less"/>
+    <Content Include="**\*.sass" Exclude="wwwroot\**\*.sass"/>
+
+    <!-- Images -->
+    <Content Include="**\*.png" Exclude="wwwroot\**\*.png">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.jpg" Exclude="wwwroot\**\*.jpg">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.svg" Exclude="wwwroot\**\*.svg">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="**\*.svgz" Exclude="wwwroot\**\*.svgz">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+
+    <!-- Exclusions -->
+    <Content Remove="bin\**"/>
+    <Content Remove="wwwroot\bin\**"/>
+    <Content Remove="obj\**"/>
+    <Content Remove="node_modules\**"/>
+    <Content Remove="jspm_modules\**"/>
+  </ItemGroup>
+
+</Project>
