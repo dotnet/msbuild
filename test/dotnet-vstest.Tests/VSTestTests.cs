@@ -22,6 +22,12 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
 
             string testProjectDirectory = testInstance.TestRoot;
 
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
             // Build project DotNetCoreTestProject
             new Build3Command()
                 .WithWorkingDirectory(testProjectDirectory)
