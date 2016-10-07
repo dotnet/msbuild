@@ -37,12 +37,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Include="wwwroot\**">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="**\*.cshtml">
+    <Content Include="**\*.cshtml" Exclude="wwwroot\**\*.cshtml">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="**\web.config">
+    <Content Include="**\web.config" Exclude="wwwroot\**\web.config">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Content Include="**\web.debug.config" Exclude="wwwroot\**\web.debug.config"/>
+	<Content Include="**\web.release.config" Exclude="wwwroot\**\web.release.config"/>
     <Compile Remove="wwwroot\**\*.cs"/>
     <EmbeddedResource Remove="wwwroot\**\*.resx"/>
   </ItemGroup>
