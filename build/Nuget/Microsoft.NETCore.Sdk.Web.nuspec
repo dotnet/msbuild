@@ -13,6 +13,9 @@
     <dependencies>
 	  <dependency id="Microsoft.NETCore.Sdk" version="$version$" />
 	</dependencies>	
+    <dependencies>
+	  <dependency id="Microsoft.NET.Sdk.Publish" version="1.0.0-alpha-20161006" />
+	</dependencies>		
   </metadata>
   <files>
     <file src="WebPackagesLayout\**" />
