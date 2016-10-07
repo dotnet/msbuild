@@ -19,12 +19,7 @@
     "tool_nuget": "1.0.0-preview3-*",
     "tool_msbuild": "1.0.0-preview3-*",
 
-    "MSBuild": "0.1.0-preview-00043-160929",
-    "Microsoft.Build.Framework": "0.1.0-preview-00043-160929",
-    "Microsoft.Build.Tasks.Core": "0.1.0-preview-00043-160929",
-    "Microsoft.Build.Utilities.Core": "0.1.0-preview-00043-160929",
-    "Microsoft.Build.Targets": "0.1.0-preview-00043-160929",
-    "Microsoft.Build": "0.1.0-preview-00043-160929",
+    "Microsoft.Build.Runtime": "15.1.298-preview5",
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
     "System.Runtime.Serialization.Xml": "4.1.1",
     "NuGet.Build.Tasks": "3.6.0-rc-1954",
