@@ -17,6 +17,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Sdk">
       <Version>$$buildversion$$</Version>
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   <PackageReference Include="Microsoft.TestPlatform.TestHost">
       <Version>15.0.0-preview-20161005-01</Version>

@@ -17,6 +17,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Sdk">
       <Version>$$buildversion$$</Version>
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
