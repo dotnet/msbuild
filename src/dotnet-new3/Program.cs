@@ -37,10 +37,16 @@ namespace dotnet_new3
             CommandOption skipUpdateCheck = app.Option("--skip-update-check", "Don't check for updates.", CommandOptionType.NoValue);
             CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
-            CommandOption localizationFile = app.Option("-t|--translation", "The localization file to use", CommandOptionType.SingleValue);
+            CommandOption localeOption = app.Option("--locale", "The locale to use", CommandOptionType.SingleValue);
 
             app.OnExecute(async () =>
             {
+                //TODO: properly determine the locale, pass it to the host constructor
+                // specifying on the command line is probaby not the ultimate answer.
+                // Regardless, the locale should get set before anything else happens.
+                string locale = localeOption.HasValue() ? localeOption.Value() : "en_US";
+                EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(locale);
+
                 bool reinitFlag = app.RemainingArguments.Any(x => x == "--debug:reinit");
 
                 if (reinitFlag)
@@ -48,11 +54,13 @@ namespace dotnet_new3
                     Paths.User.FirstRunCookie.Delete();
                 }
 
+                // Note: this leaves things in a weird state. Might be related to the localized caches.
+                // not sure, need to look into it.
                 if (reinitFlag || app.RemainingArguments.Any(x => x == "--debug:reset-config"))
                 {
                     Paths.User.AliasesFile.Delete();
                     Paths.User.SettingsFile.Delete();
-                    Paths.User.TemplateCacheFile.Delete();
+                    TemplateCache.DeleteAllLocaleCacheFiles();
                     return 0;
                 }
 
@@ -109,80 +117,15 @@ namespace dotnet_new3
                     return 0;
                 }
 
-                //TODO: determine the locale, pass it to the host constructor
-                string locale = string.Empty;
-                //ITemplateEngineHost host = new DotNetNew3TemplateEngineHost(locale);
-
-                string aliasName = alias.HasValue() ? alias.Value() : null;
-
-                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
-
                 if (help.HasValue())
                 {
-                    IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(template.Value);
-
-                    if (templates.Count > 1)
-                    {
-                        ListTemplates(template);
-                        return -1;
-                    }
-
-                    ITemplateInfo tmplt = templates.First();
-
-                    Reporter.Output.WriteLine(tmplt.Name);
-                    if (!string.IsNullOrWhiteSpace(tmplt.Author))
-                    {
-                        Reporter.Output.WriteLine($"Author: {tmplt.Author}");
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(tmplt.Description))
-                    {
-                        Reporter.Output.WriteLine($"Description: {tmplt.Description}");
-                    }
-
-                    ITemplate realTmplt = SettingsLoader.LoadTemplate(tmplt);
-                    IParameterSet allParams = realTmplt.Generator.GetParametersForTemplate(realTmplt);
-
-                    Reporter.Output.WriteLine($"Parameters: {tmplt.Description}");
-
-                    bool anyParams = false;
-                    foreach (ITemplateParameter parameter in allParams.ParameterDefinitions.OrderBy(x => x.Priority))
-                    {
-                        if (parameter.Priority == TemplateParameterPriority.Implicit)
-                        {
-                            continue;
-                        }
-
-                        anyParams = true;
-                        Reporter.Output.WriteLine($"    --{parameter.Name} ({parameter.DataType ?? "string"} - {parameter.Priority})");
-                        Reporter.Output.WriteLine($"    {parameter.Documentation}");
-
-                        if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase))
-                        {
-                            Reporter.Output.WriteLine($"    Allowed values:");
-                            foreach (string choice in parameter.Choices)
-                            {
-                                Reporter.Output.WriteLine($"        {choice}");
-                            }
-                        }
-
-                        if (!string.IsNullOrEmpty(parameter.DefaultValue))
-                        {
-                            Reporter.Output.WriteLine($"    Default: {parameter.DefaultValue}");
-                        }
-
-                        Reporter.Output.WriteLine(" ");
-                    }
-
-                    if (!anyParams)
-                    {
-                        Reporter.Output.WriteLine("    (No Parameters)");
-                    }
-
-                    return 0;
+                    return DisplayHelp(template);
                 }
 
-                if (await TemplateCreator.Instantiate(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue(), localizationFile.Value()) == -1)
+                string aliasName = alias.HasValue() ? alias.Value() : null;
+                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+
+                if (await TemplateCreator.Instantiate(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
                 {
                     ListTemplates(template);
                     return -1;
@@ -358,6 +301,8 @@ namespace dotnet_new3
 
             NuGetUtil.InstallPackage(toInstall, quiet);
 
+            TemplateCache.WriteTemplateCaches();
+
             if (!quiet)
             {
                 ListTemplates(new CommandArgument());
@@ -400,6 +345,71 @@ namespace dotnet_new3
                 {"Type", x => x.GetType().FullName},
                 {"Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
+        }
+
+        private static int DisplayHelp(CommandArgument template)
+        {
+            IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(template.Value);
+
+            if (templates.Count > 1)
+            {
+                ListTemplates(template);
+                return -1;
+            }
+
+            ITemplateInfo tmplt = templates.First();
+
+            Reporter.Output.WriteLine(tmplt.Name);
+            if (!string.IsNullOrWhiteSpace(tmplt.Author))
+            {
+                Reporter.Output.WriteLine($"Author: {tmplt.Author}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(tmplt.Description))
+            {
+                Reporter.Output.WriteLine($"Description: {tmplt.Description}");
+            }
+
+            ITemplate realTmplt = SettingsLoader.LoadTemplate(tmplt);
+            IParameterSet allParams = realTmplt.Generator.GetParametersForTemplate(realTmplt);
+
+            Reporter.Output.WriteLine($"Parameters: {tmplt.Description}");
+
+            bool anyParams = false;
+            foreach (ITemplateParameter parameter in allParams.ParameterDefinitions.OrderBy(x => x.Priority))
+            {
+                if (parameter.Priority == TemplateParameterPriority.Implicit)
+                {
+                    continue;
+                }
+
+                anyParams = true;
+                Reporter.Output.WriteLine($"    --{parameter.Name} ({parameter.DataType ?? "string"} - {parameter.Priority})");
+                Reporter.Output.WriteLine($"    {parameter.Documentation}");
+
+                if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase))
+                {
+                    Reporter.Output.WriteLine($"    Allowed values:");
+                    foreach (string choice in parameter.Choices)
+                    {
+                        Reporter.Output.WriteLine($"        {choice}");
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(parameter.DefaultValue))
+                {
+                    Reporter.Output.WriteLine($"    Default: {parameter.DefaultValue}");
+                }
+
+                Reporter.Output.WriteLine(" ");
+            }
+
+            if (!anyParams)
+            {
+                Reporter.Output.WriteLine("    (No Parameters)");
+            }
+
+            return 0;
         }
     }
 
