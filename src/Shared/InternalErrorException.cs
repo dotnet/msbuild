@@ -133,7 +133,7 @@ namespace Microsoft.Build.Shared
         private static bool RunningTests()
         {
             // Copied logic from BuildEnvironmentHelper. Removed reference for single use due
-            // to additional dependencies.
+            // to additional dependencies. Update both if needed.
             string[] testRunners =
             {
                 "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER", "VSTESTHOST", "QTAGENT32",

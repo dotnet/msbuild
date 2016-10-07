@@ -11,6 +11,14 @@ namespace Microsoft.Build.Shared
 {
     internal class BuildEnvironmentHelper
     {
+        // Since this class is added as 'link' to shared source in multiple projects,
+        // MSBuildConstants.CurrentVisualStudioVersion is not available in all of them.
+        private const string CurrentVisualStudioVersion = "15.0";
+
+        // MSBuildConstants.CurrentToolsVersion
+        private const string CurrentToolsVersion = "15.0";
+
+        // Duplicated in InternalErrorException.cs. Update both when changing.
         private static readonly string[] s_testRunners =
         {
             "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER",
@@ -87,7 +95,7 @@ namespace Microsoft.Build.Shared
         {
             if (string.IsNullOrEmpty(visualStudioPath)) return null;
 
-            var msbuildFromVisualStudioRoot = FileUtilities.CombinePaths(visualStudioPath, "MSBuild", "15.0", "Bin");
+            var msbuildFromVisualStudioRoot = FileUtilities.CombinePaths(visualStudioPath, "MSBuild", CurrentToolsVersion, "Bin");
             return TryFromFolder(msbuildFromVisualStudioRoot, runningTests, runningInVisualStudio, visualStudioPath);
         }
 
@@ -166,7 +174,7 @@ namespace Microsoft.Build.Shared
                 () => TryGetVsFromMSBuildLocation(processNameCurrentProcess)
             };
 
-            return possibleLocations.Select(location => location()).FirstOrDefault(path => path != null);
+            return possibleLocations.Select(location => location()).FirstOrDefault(path => !string.IsNullOrEmpty(path));
         }
 
         private static string TryGetVsFromProcess(string process)
@@ -186,7 +194,7 @@ namespace Microsoft.Build.Shared
 
             if (!string.IsNullOrEmpty(vsInstallDir) &&
                 !string.IsNullOrEmpty(vsVersion) &&
-                vsVersion == "15.0" &&
+                vsVersion == CurrentVisualStudioVersion &&
                 Directory.Exists(vsInstallDir))
             {
                 return vsInstallDir;
@@ -198,7 +206,7 @@ namespace Microsoft.Build.Shared
         private static string TryGetVsFromInstalled()
         {
             var instances = s_getVisualStudioInstances();
-            Version v = new Version("15.0");
+            Version v = new Version(CurrentVisualStudioVersion);
 
             // Get the first instance of Visual Studio that matches our Major/Minor compatible version
             return instances.FirstOrDefault(
