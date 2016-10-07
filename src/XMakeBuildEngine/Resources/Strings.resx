@@ -1161,6 +1161,14 @@
     <value>MSB4173: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is invalid because a child element with that name already exists</value>
     <comment>{StrBegin="MSB4173: "}</comment>
   </data>
+  <data name="InvalidAttributeDueToDuplication" UESanitized="false" Visibility="Public">
+    <value>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</value>
+    <comment>{StrBegin="MSB4227: "}</comment>
+  </data>
+  <data name="InvalidMetadataAsAttribute" UESanitized="false" Visibility="Public">
+    <value>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</value>
+    <comment>{StrBegin="MSB4228: "}</comment>
+  </data>
   <data name="UnrecognizedParentElement" UESanitized="true" Visibility="Public">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -1540,7 +1548,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4227.
+        Next message code should be MSB4229.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
