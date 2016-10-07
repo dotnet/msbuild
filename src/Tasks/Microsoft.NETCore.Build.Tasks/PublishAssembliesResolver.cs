@@ -11,24 +11,25 @@ namespace Microsoft.NETCore.Build.Tasks
 {
     public class PublishAssembliesResolver
     {
-        private readonly LockFile _lockFile;
         private readonly IPackageResolver _packageResolver;
+        private IEnumerable<string> _privateAssetPackageIds;
 
-        public PublishAssembliesResolver(LockFile lockFile, IPackageResolver packageResolver)
+        public PublishAssembliesResolver(IPackageResolver packageResolver)
         {
-            _lockFile = lockFile;
             _packageResolver = packageResolver;
         }
 
-        public IEnumerable<ResolvedFile> Resolve(NuGetFramework framework, string runtime)
+        public PublishAssembliesResolver WithPrivateAssets(IEnumerable<string> privateAssetPackageIds)
         {
-            LockFileTarget lockFileTarget = _lockFile.GetTarget(framework, runtime);
+            _privateAssetPackageIds = privateAssetPackageIds;
+            return this;
+        }
 
-            ProjectContext projectContext = lockFileTarget.CreateProjectContext();
-
+        public IEnumerable<ResolvedFile> Resolve(ProjectContext projectContext)
+        {
             List<ResolvedFile> results = new List<ResolvedFile>();
 
-            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries())
+            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_privateAssetPackageIds))
             {
                 string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
 

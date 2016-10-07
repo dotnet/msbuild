@@ -48,8 +48,19 @@
     <PackageReference Include="Microsoft.NETCore.App">
       <Version>1.0.1</Version>
     </PackageReference>
+	<!-- 
+	  The TestLibrary has a hard dependency on Newtonsoft.Json.
+	  The TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel.
+	  Microsoft.Extensions.DependencyModel depends on Newtonsoft.Json.
+	  Testing that Newtonsoft.Json doesn't get excluded since a P2P reference has a hard dependency on it.
+	-->
+	<PackageReference Include="Microsoft.Extensions.DependencyModel">
+      <Version>1.0.0</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Sdk">
       <Version>0.0</Version>
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

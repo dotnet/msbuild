@@ -4,16 +4,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NETCore.Build.Tasks
 {
-    internal static class LockFileTargetExtensions
+    public static class LockFileExtensions
     {
-        public static ProjectContext CreateProjectContext(this LockFileTarget lockFileTarget)
+        public static ProjectContext CreateProjectContext(
+            this LockFile lockFile, 
+            string projectPath, 
+            NuGetFramework framework, 
+            string runtime)
         {
-            return new ProjectContext(lockFileTarget);
+            LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
+
+            return new ProjectContext(projectPath, lockFile, lockFileTarget);
         }
 
         public static bool IsPortable(this LockFileTarget lockFileTarget)

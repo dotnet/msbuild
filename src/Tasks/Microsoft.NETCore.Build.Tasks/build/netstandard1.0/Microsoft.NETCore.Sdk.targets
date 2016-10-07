@@ -85,7 +85,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="$(ProjectLockFile)"
           Outputs="$(_ProjectDepsFilePath)">
 
-    <GenerateDepsFile LockFilePath="$(ProjectLockFile)"
+    <!-- 
+    Explicitly not passing any PrivateAssets information during 'Build', since these dependencies
+    should be included during 'Build'.  They are only excluded on 'Publish'.
+    -->
+    <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
+                      LockFilePath="$(ProjectLockFile)"
                       DepsFilePath="$(_ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"

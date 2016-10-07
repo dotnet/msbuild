@@ -29,6 +29,8 @@ namespace Microsoft.NETCore.Build.Tasks
 
         public string RuntimeIdentifier { get; set; }
 
+        public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
+
         /// <summary>
         /// All the assemblies to publish.
         /// </summary>
@@ -43,10 +45,14 @@ namespace Microsoft.NETCore.Build.Tasks
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
             NuGetFramework framework = TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework);
             NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
+            IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
+
+            ProjectContext projectContext = lockFile.CreateProjectContext(ProjectPath, framework, RuntimeIdentifier);
 
             IEnumerable<ResolvedFile> resolvedAssemblies = 
-                new PublishAssembliesResolver(lockFile, new NuGetPackageResolver(nugetPathContext))
-                    .Resolve(framework, RuntimeIdentifier);
+                new PublishAssembliesResolver(new NuGetPackageResolver(nugetPathContext))
+                    .WithPrivateAssets(privateAssetsPackageIds)
+                    .Resolve(projectContext);
 
             foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)
             {

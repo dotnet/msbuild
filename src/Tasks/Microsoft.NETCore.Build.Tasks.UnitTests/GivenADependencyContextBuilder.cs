@@ -32,6 +32,7 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         {
             LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
             SingleProjectInfo mainProject = SingleProjectInfo.Create(
+                "/usr/Path",
                 mainProjectName,
                 mainProjectVersion,
                 satelliteAssemblies ?? new ITaskItem[] { });

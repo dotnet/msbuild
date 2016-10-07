@@ -21,11 +21,13 @@ namespace Microsoft.NETCore.Build.Tasks.UnitTests
         public void ItResolvesAssembliesFromProjectLockFiles(string projectName, string runtime, object[] expectedResolvedFiles)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(projectName);
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                "/usr/Path",
+                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                runtime);
 
-            IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(lockFile, new MockPackageResolver())
-                .Resolve(
-                    FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                    runtime);
+            IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())
+                .Resolve(projectContext);
 
             resolvedFiles
                 .Should()
