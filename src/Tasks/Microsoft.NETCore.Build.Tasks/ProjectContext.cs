@@ -77,44 +77,45 @@ namespace Microsoft.NETCore.Build.Tasks
 
         public IEnumerable<string> GetTopLevelDependencies()
         {
-            IEnumerable<string> projectFileDependencyNames = LockFile
+            Dictionary<string, LockFileLibrary> libraryLookup =
+                LockFile.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+
+            return LockFile
                 .ProjectFileDependencyGroups
                 .Where(dg => dg.FrameworkName == string.Empty ||
                              dg.FrameworkName == LockFileTarget.TargetFramework.DotNetFrameworkName)
                 .SelectMany(g => g.Dependencies)
                 .Select(projectFileDependency =>
                 {
-                    int separatorIndex = projectFileDependency.IndexOf(' ');
-                    return separatorIndex > 0 ?
-                        projectFileDependency.Substring(0, separatorIndex) :
-                        projectFileDependency;
-                })
-                .ToArray();
-
-            Dictionary<string, LockFileLibrary> libraryLookup =
-                LockFile.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
-
-            List<string> topLevelDependencies = new List<string>();
-            foreach (string projectFileDependencyName in projectFileDependencyNames)
-            {
-                if (libraryLookup.ContainsKey(projectFileDependencyName))
-                {
-                    topLevelDependencies.Add(projectFileDependencyName);
-                }
-                else
-                {
-                    string libraryName = FindLibraryName(projectFileDependencyName);
-                    if (!string.IsNullOrEmpty(libraryName))
+                    string libraryName = null;
+                    int pathSeparatorIndex = projectFileDependency.IndexOfAny(new[] { '/', '\\' });
+                    if (pathSeparatorIndex != -1)
                     {
-                        topLevelDependencies.Add(libraryName);
+                        // if projectFileDependency contains a path separator, then it isn't a valid
+                        // library name.  Check to see if it is an MSBuild project
+                        libraryName = FindMSBuildProjectLibraryName(projectFileDependency);
                     }
-                }
-            }
 
-            return topLevelDependencies;
+                    if (string.IsNullOrEmpty(libraryName))
+                    {
+                        int separatorIndex = projectFileDependency.IndexOf(' ');
+                        libraryName = separatorIndex > 0 ?
+                            projectFileDependency.Substring(0, separatorIndex) :
+                            projectFileDependency;
+                    }
+
+                    if (!string.IsNullOrEmpty(libraryName) && libraryLookup.ContainsKey(libraryName))
+                    {
+                        return libraryName;
+                    }
+
+                    return null;
+                })
+                .Where(libraryName => libraryName != null)
+                .ToArray();
         }
 
-        private string FindLibraryName(string projectFileDependencyName)
+        private string FindMSBuildProjectLibraryName(string projectPath)
         {
             foreach (var library in LockFile.Libraries)
             {
@@ -124,7 +125,7 @@ namespace Microsoft.NETCore.Build.Tasks
                         Path.GetDirectoryName(_projectPath),
                         library.MSBuildProject));
 
-                    if (string.Equals(fullDependencyProjectPath, projectFileDependencyName, StringComparison.Ordinal))
+                    if (fullDependencyProjectPath == projectPath)
                     {
                         return library.Name;
                     }
@@ -138,13 +139,13 @@ namespace Microsoft.NETCore.Build.Tasks
             IEnumerable<string> privateAssetPackageIds,
             IDictionary<string, LockFileTargetLibrary> libraryLookup)
         {
-            var nonPrivateAssets = new HashSet<string>();
+            var nonPrivateAssets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             var nonPrivateAssetsToSearch = new Stack<string>();
             var privateAssetsToSearch = new Stack<string>();
 
             // Start with the top-level dependencies, and put them into "private" or "non-private" buckets
-            var privateAssetPackagesLookup = new HashSet<string>(privateAssetPackageIds);
+            var privateAssetPackagesLookup = new HashSet<string>(privateAssetPackageIds, StringComparer.OrdinalIgnoreCase);
             foreach (var topLevelDependency in GetTopLevelDependencies())
             {
                 if (!privateAssetPackagesLookup.Contains(topLevelDependency))
@@ -180,7 +181,7 @@ namespace Microsoft.NETCore.Build.Tasks
 
             // Go through assets marked private and their dependencies
             // For libraries not marked as non-private, mark them down as private
-            var privateAssetsToExclude = new HashSet<string>();
+            var privateAssetsToExclude = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             while (privateAssetsToSearch.Count > 0)
             {
                 libraryName = privateAssetsToSearch.Pop();
