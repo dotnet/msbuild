@@ -11,17 +11,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Web project capability that enables web features for .NET core project -->
-  <ItemGroup>
-    <ProjectCapability Include="DotNetCoreWeb" />
-  </ItemGroup>
-
   <PropertyGroup>
     <MSBuildWebPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebPath>
     <ActualLangName Condition="Exists('$(MSBuildWebPath)$(LangName)')">$(LangName)</ActualLangName>
     <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
-    <_ProjectCapability>@(ProjectCapability)</_ProjectCapability>
   </PropertyGroup>
+
+  <!-- Web project capability that enables web features for .NET core project -->
+  <ItemGroup>
+    <ProjectCapability Include="DotNetCoreWeb" />
+  </ItemGroup>
 
   <!-- Web specific properties -->
   <ItemGroup>
