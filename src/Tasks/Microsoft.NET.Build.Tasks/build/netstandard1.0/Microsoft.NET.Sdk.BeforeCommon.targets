@@ -34,9 +34,23 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Condition="'$(TargetFramework)' != ''"
         Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
 
-  <!-- Force .dll extension for .NETCoreApp projects even if output type is exe. -->
-  <PropertyGroup>
-    <TargetExt Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">.dll</TargetExt>
+  <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == ''">
+    <_IsNETCoreOrNETStandard Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</_IsNETCoreOrNETStandard>
+    <_IsNETCoreOrNETStandard Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</_IsNETCoreOrNETStandard>
+  </PropertyGroup>
+
+  <!-- Default settings for .NET Core and .NET Standard build logic -->
+  <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == 'true'">
+    <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == ''">true</AutoUnifyAssemblyReferences>
+    <DesignTimeAutoUnify Condition="'$(DesignTimeAutoUnify)' == ''">true</DesignTimeAutoUnify>
+
+    <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
+
+    <!-- Force .dll extension for .NETCoreApp and .NETStandard projects even if output type is exe. -->
+    <TargetExt Condition="'$(TargetExt)' == ''">.dll</TargetExt>
+
+    <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core and .NETStandard projects -->
+    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">false</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->

@@ -13,7 +13,6 @@
     <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
-    <Reference Include="mscorlib" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>  
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
