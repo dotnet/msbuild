@@ -47,6 +47,8 @@
 .PARAMETER AzureFeed
     Default: https://dotnetcli.azureedge.net/dotnet
     This parameter should not be usually changed by user. It allows to change URL for the Azure feed used by this installer.
+.PARAMETER Proxy
+    If set, the installer will use the proxy when making web requests
 #>
 [cmdletbinding()]
 param(
@@ -59,7 +61,8 @@ param(
    [switch]$DryRun,
    [switch]$NoPath,
    [string]$AzureFeed="https://dotnetcli.azureedge.net/dotnet",
-   [string]$UncachedFeed="https://dotnetcli.blob.core.windows.net/dotnet"
+   [string]$UncachedFeed="https://dotnetcli.blob.core.windows.net/dotnet",
+   [string]$ProxyAddress
 )
 
 Set-StrictMode -Version Latest
@@ -133,7 +136,12 @@ function GetHTTPResponse([Uri] $Uri)
     try {
         # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
         Load-Assembly -Assembly System.Net.Http
-        $HttpClient = New-Object System.Net.Http.HttpClient
+        $HttpClientHandler = New-Object System.Net.Http.HttpClientHandler
+        if($ProxyAddress){
+            $HttpClientHandler.Proxy =  New-Object System.Net.WebProxy -Property @{Address=$ProxyAddress}
+        }
+
+        $HttpClient = New-Object System.Net.Http.HttpClient -ArgumentList $HttpClientHandler
         $Response = $HttpClient.GetAsync($Uri).Result
         if (($Response -eq $null) -or (-not ($Response.IsSuccessStatusCode)))
         {
