@@ -8,6 +8,8 @@
     <OutputPath>$(OutDir)\VsixV3</OutputPath>
     <IsPackage>true</IsPackage>
     <UseVisualStudioVersion>true</UseVisualStudioVersion>
+    <FinalizeValidate>false</FinalizeValidate>
+    <ValidateManifest>false</ValidateManifest>
   </PropertyGroup>
 
   <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.props" />
@@ -20,4 +22,6 @@
   <ItemGroup>
     <MergeManifest Include="$(OutputPath)\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.json" />
   </ItemGroup>
+
+  <Target Name="ValidateManifest" />
 </Project>
