@@ -11,16 +11,17 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MSBuildWebPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebPath>
-    <ActualLangName Condition="Exists('$(MSBuildWebPath)$(LangName)')">$(LangName)</ActualLangName>
-    <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
-  </PropertyGroup>
-
   <!-- Web project capability that enables web features for .NET core project -->
   <ItemGroup>
     <ProjectCapability Include="DotNetCoreWeb" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <MSBuildWebPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebPath>
+    <ActualLangName Condition="Exists('$(MSBuildWebPath)$(LangName)')">$(LangName)</ActualLangName>
+    <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
+    <_ProjectCapability>@(ProjectCapability)</_ProjectCapability>
+  </PropertyGroup>
 
   <!-- Web specific properties -->
   <ItemGroup>
@@ -48,6 +49,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Compile Remove="wwwroot\**\*.cs"/>
     <EmbeddedResource Remove="wwwroot\**\*.resx"/>
   </ItemGroup>
+
+  <!-- Publishing configuration files -->
+  <Choose>
+    <When Condition="'$(MSBuildProjectExtension)' =='.csproj'">
+      <ItemGroup>
+        <None Include="Properties\PublishProfiles\**\*.pubxml"/>
+        <None Include="Properties\PublishProfiles\**\*.ps1"/>
+        <None Include="Properties\PublishProfiles\**\*.psm1"/>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <None Include="My Project\PublishProfiles\**\*.pubxml"/>
+        <None Include="My Project\PublishProfiles\**\*.ps1"/>
+        <None Include="My Project\PublishProfiles\**\*.psm1"/>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 
   <!-- Well known web content globbing patterns -->
   <ItemGroup>
