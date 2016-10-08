@@ -49,6 +49,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EmbeddedResource Remove="wwwroot\**\*.resx"/>
   </ItemGroup>
 
+  <!-- Publishing configuration files -->
+  <Choose>
+    <When Condition="'$(MSBuildProjectExtension)' =='.csproj'">
+      <ItemGroup>
+        <None Include="Properties\PublishProfiles\**\*.pubxml"/>
+        <None Include="Properties\PublishProfiles\**\*.ps1"/>
+        <None Include="Properties\PublishProfiles\**\*.psm1"/>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <None Include="My Project\PublishProfiles\**\*.pubxml"/>
+        <None Include="My Project\PublishProfiles\**\*.ps1"/>
+        <None Include="My Project\PublishProfiles\**\*.psm1"/>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
   <!-- Well known web content globbing patterns -->
   <ItemGroup>
     <!-- Scripts and configuration -->
