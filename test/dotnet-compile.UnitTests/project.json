@@ -4,8 +4,12 @@
     "keyFile": "../../tools/Key.snk",
     "copyToOutput": {
       "include": [
-        "../../TestAssets/TestProjects/TestAppWithLibrary/**/*"
-      ]
+        "../../TestAssets/TestProjects/TestAppWithLibrary/**/*",
+        "../../artifacts/*/stage2/sdk/*/.version"
+      ],
+      "mappings": {
+        ".version": "../../artifacts/*/stage2/sdk/*/.version"
+      }
     }
   },
   "dependencies": {

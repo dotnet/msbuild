@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -196,7 +197,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             TestProject = Path.Combine(TestDirectory, "project.json");
             OutputDirectory = Path.Combine(TestDirectory, s_outputdirName);
 
-            Rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+            Rid = DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
         }
 
         private static void SetupStaticTestProject()

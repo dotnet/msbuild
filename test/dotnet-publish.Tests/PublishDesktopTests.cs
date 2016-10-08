@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -54,7 +55,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [InlineData("KestrelDesktop", "http://localhost:20207", "win7-x86", "libuv.dll", false)]
         public async Task DesktopApp_WithKestrel_WorksWhenPublished(string project, string url, string runtime, string libuvName, bool forceRunnable)
         {
-            var runnable = forceRunnable || string.IsNullOrEmpty(runtime) || (RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier().Contains(runtime));
+            var runnable = forceRunnable ||
+                string.IsNullOrEmpty(runtime) ||
+                (DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier().Contains(runtime));
 
             var testInstance = GetTestInstance()
                 .WithLockFiles();

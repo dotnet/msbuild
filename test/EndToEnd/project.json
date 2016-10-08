@@ -1,6 +1,7 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
+    "keyFile": "../../tools/Key.snk",
     "emitEntryPoint": true
   },
   "dependencies": {

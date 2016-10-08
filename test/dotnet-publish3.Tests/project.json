@@ -1,5 +1,16 @@
 {
   "version": "1.0.0-*",
+  "buildOptions": {
+    "keyFile": "../../tools/Key.snk",    
+    "copyToOutput": {
+      "include": [
+        "../../artifacts/*/stage2/sdk/*/.version"
+      ],
+      "mappings": {
+        ".version": "../../artifacts/*/stage2/sdk/*/.version"
+      }
+    }
+  },
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",

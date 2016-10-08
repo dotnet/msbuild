@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -58,11 +59,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 {
                     new object[] { "1", "", "", "", "" },
                     new object[] { "2", "netcoreapp1.0", "", "", "" },
-                    new object[] { "3", "", RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier(), "", "" },
+                    new object[] { "3", "", DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier(), "", "" },
                     new object[] { "4", "", "", "Release", "" },
                     new object[] { "5", "", "", "", "some/dir"},
                     new object[] { "6", "", "", "", "some/dir/with spaces" },
-                    new object[] { "7", "netcoreapp1.0", RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
+                    new object[] { "7", "netcoreapp1.0", DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
                 };
             }
         }
@@ -221,7 +222,10 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
             publishCommand.GetOutputDirectory().Delete(true);
 
-            publishCommand = new PublishCommand(lesserTestProject, "netcoreapp1.0", RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier());
+            publishCommand = new PublishCommand(
+                lesserTestProject,
+                "netcoreapp1.0",
+                DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier());
             publishCommand.Execute().Should().Pass();
 
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");

@@ -13,7 +13,7 @@ namespace StreamForwarderTests
 {
     public class StreamForwarderTests : TestBase
     {
-        private static readonly string s_rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+        private static readonly string s_rid = DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
 
         public static void Main()
         {
