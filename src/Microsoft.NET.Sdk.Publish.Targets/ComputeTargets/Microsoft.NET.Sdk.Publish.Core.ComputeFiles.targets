@@ -68,8 +68,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Condition="'$(PublishDir)' != ''">
 
     <PropertyGroup>
-      <_ProjectCapability>@(ProjectCapability)</_ProjectCapability>
-      <_IsWebProject Condition="$(_ProjectCapability.Contains('DotNetCoreWeb'))">true</_IsWebProject>
+      <_IsWebProject Condition="%(ProjectCapability.Identity) == 'DotNetCore'">true</_IsWebProject>
       <_IsPortable Condition=" '$(_IsPortable)' == '' ">true</_IsPortable>
       <_TransformWebConfigForAzure Condition=" '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
     </PropertyGroup>

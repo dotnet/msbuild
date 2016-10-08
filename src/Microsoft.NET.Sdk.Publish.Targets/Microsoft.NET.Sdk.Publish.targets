@@ -58,18 +58,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
 
   <PropertyGroup>
-    
     <!--  Properties for identifying the project types -->
-    
     <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">Core</_PublishProjectType>
     <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</_PublishProjectType>
     <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</_PublishProjectType>
     <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>
 
     <!-- Properties for identifying the Publish Protocol -->
-    <_PublishProtocol Condition="'$(_PublishProtocol)' == ''">$(WebPublishMethod)</_PublishProtocol>
+    <PublishProtocol Condition="'$(PublishProtocol)' == ''">$(WebPublishMethod)</PublishProtocol>
     <!-- For backward compat -->
-    <_PublishProtocol Condition="'$(_PublishProtocol)' == 'Package'">MSDeployPackage</_PublishProtocol>
+    <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
     
     <!-- Properties setting the publish intermediate paths -->
     <PublishConfiguration Condition ="'$(PublishConfiguration)' == ''">$(LastUsedBuildConfiguration)</PublishConfiguration>
@@ -95,7 +93,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.$(_PublishProjectType).ComputeFiles.targets" Condition="Exists('$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.$(_PublishProjectType).ComputeFiles.targets')" />
 
-
   <!--
   ***********************************************************************************************
   Import the Copy target
@@ -110,9 +107,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   ***********************************************************************************************
  -->
   
-  <Import Project="$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(_PublishProtocol).targets" Condition="Exists('$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(_PublishProtocol).targets')"/>
-
-  
+  <Import Project="$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets" Condition="Exists('$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets')"/>
   
   <!--
   ***********************************************************************************************
