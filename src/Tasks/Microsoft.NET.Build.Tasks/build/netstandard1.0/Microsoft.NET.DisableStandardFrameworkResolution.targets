@@ -20,7 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetFrameworkDirectory />
 
     <!-- all references (even the StdLib) come from packages -->
-    <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
+    <NoStdLib>true</NoStdLib>
   </PropertyGroup>
 
 </Project>
