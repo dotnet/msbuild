@@ -6,7 +6,7 @@
     <Icon Package="{164B10B9-B200-11D0-8C61-00A0C91E29D5}" ID="4500" />
     <ProjectType>VisualBasic</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
-    <SortOrder>21</SortOrder>
+    <SortOrder>15</SortOrder>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <TemplateID>Microsoft.VisualBasic.NETCore.ClassLibrary</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>

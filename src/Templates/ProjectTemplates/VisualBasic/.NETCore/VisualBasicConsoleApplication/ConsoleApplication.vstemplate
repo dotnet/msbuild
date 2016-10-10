@@ -6,12 +6,12 @@
     <Icon>ConsoleApplication.png</Icon>
     <ProjectType>VisualBasic</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
-    <SortOrder>1</SortOrder>
+    <SortOrder>13</SortOrder>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <TemplateID>Microsoft.VisualBasic.NETCore.ConsoleApplication</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
     <CreateInPlace>true</CreateInPlace>
-    <DefaultName>ConsoleApplication</DefaultName>
+    <DefaultName>ConsoleApp</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
     <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
   </TemplateData>

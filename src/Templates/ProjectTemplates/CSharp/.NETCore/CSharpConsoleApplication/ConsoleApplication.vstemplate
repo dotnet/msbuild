@@ -11,7 +11,7 @@
     <TemplateID>Microsoft.CSharp.NETCore.ConsoleApplication</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
     <CreateInPlace>true</CreateInPlace>
-    <DefaultName>ConsoleApplication</DefaultName>
+    <DefaultName>ConsoleApp</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
     <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
   </TemplateData>
