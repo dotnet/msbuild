@@ -82,9 +82,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             return this;
         }
 
-        public AddItemTransform<T> WithMetadata(string metadataName, Func<T, string> metadataValueFunc, Func<T, bool> writeMetadataFunc = null)
+        public AddItemTransform<T> WithMetadata(
+            string metadataName, 
+            Func<T, string> metadataValueFunc, 
+            Func<T, bool> writeMetadataConditionFunc = null)
         {
-            _metadata.Add(new ItemMetadataValue<T>(metadataName, metadataValueFunc, writeMetadataFunc));
+            _metadata.Add(new ItemMetadataValue<T>(metadataName, metadataValueFunc, writeMetadataConditionFunc));
             return this;
         }
 
