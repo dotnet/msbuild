@@ -1098,7 +1098,14 @@ namespace Microsoft.Build.Utilities
 
                     if (!manifest.ReadError)
                     {
-                        contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path);
+                        if (manifest.VersionedContent)
+                        {
+                            contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path, manifest.PlatformVersion);
+                        }
+                        else
+                        {
+                            contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path);
+                        }
                     }
                 }
             }
@@ -1118,6 +1125,18 @@ namespace Microsoft.Build.Utilities
         /// <returns>List of matching WinMDs</returns>
         internal static string[] GetApiContractReferences(IEnumerable<ApiContract> apiContracts, string targetPlatformSdkRoot)
         {
+            return GetApiContractReferences(apiContracts, targetPlatformSdkRoot, String.Empty);
+        }
+
+        /// <summary>
+        /// Return the WinMD paths referenced by the given api contracts and target sdk root
+        /// </summary>
+        /// <param name="apiContracts">The API contract definitions</param>
+        /// <param name="targetPlatformSdkRoot">The root of the target platform SDK</param>
+        /// <param name="targetPlatformSdkVersion">The version of the target platform SDK</param>
+        /// <returns>List of matching WinMDs</returns>
+        internal static string[] GetApiContractReferences(IEnumerable<ApiContract> apiContracts, string targetPlatformSdkRoot, string targetPlatformSdkVersion)
+        {
             if (apiContracts == null)
             {
                 return new string[] { };
@@ -1125,7 +1144,7 @@ namespace Microsoft.Build.Utilities
 
             List<string> contractWinMDs = new List<string>();
 
-            string referencesRoot = Path.Combine(targetPlatformSdkRoot, referencesFolderName);
+            string referencesRoot = Path.Combine(targetPlatformSdkRoot, referencesFolderName, targetPlatformSdkVersion);
 
             foreach (ApiContract contract in apiContracts)
             {
