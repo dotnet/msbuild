@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     transform = PackageDependencyTransform();
                     if (packageDependency.Type == LibraryDependencyType.Build)
                     {
-                        transform = transform.WithMetadata("PrivateAssets", "all");
+                        transform = transform.WithMetadata("PrivateAssets", "All");
                     }
                     else if (packageDependency.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent)
                     {
