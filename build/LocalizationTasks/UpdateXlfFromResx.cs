@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using xlflib;
+using XliffParser;
 
 namespace Microsoft.Build.LocalizationTasks
 {
@@ -16,13 +16,13 @@ namespace Microsoft.Build.LocalizationTasks
         public override bool Execute()
         {
             var xlfDocument = new XlfDocument(XlfPath);
-            Tuple<int, int, int> result = xlfDocument.UpdateFromResX(ResxPath);
+            var result = xlfDocument.Update(ResxPath, "updated", "new");
 
             Log.LogMessage(MessageImportance.Low,
                 "Update results:" +
-                $"\n\t{result.Item1} resources updated" +
-                $"\n\t{result.Item2} resources added" +
-                $"\n\t{result.Item3} resources deleted");
+                $"\n\t{result.UpdatedItems} resources updated" +
+                $"\n\t{result.AddedItems} resources added" +
+                $"\n\t{result.RemovedItems} resources deleted");
 
             xlfDocument.Save();
 

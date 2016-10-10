@@ -145,6 +145,7 @@ namespace Microsoft.Build.Construction
         public string Update { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation UpdateLocation { get { throw null; } }
         public Microsoft.Build.Construction.ProjectMetadataElement AddMetadata(string name, string unevaluatedValue) { throw null; }
+        public Microsoft.Build.Construction.ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute) { throw null; }
         public override void CopyFrom(Microsoft.Build.Construction.ProjectElement element) { }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
     }
@@ -162,6 +163,7 @@ namespace Microsoft.Build.Construction
     public partial class ProjectMetadataElement : Microsoft.Build.Construction.ProjectElement
     {
         internal ProjectMetadataElement() { }
+        public bool ExpressedAsAttribute { get { throw null; } set { } }
         public string Name { get { throw null; } set { } }
         public string Value { get { throw null; } set { } }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }

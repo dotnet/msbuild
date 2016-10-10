@@ -46,7 +46,7 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
 
-folder InstallDir:\MSBuild\15.0\MSBuild
+folder InstallDir:\MSBuild\15.0\Bin\MSBuild
   file source=$(X86BinPath)Microsoft.Build.Core.xsd
   file source=$(X86BinPath)Microsoft.Build.CommonTypes.xsd
 

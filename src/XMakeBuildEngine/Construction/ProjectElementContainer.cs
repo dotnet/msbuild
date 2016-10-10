@@ -8,6 +8,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
@@ -15,6 +16,7 @@ using Microsoft.Build.Shared;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Internal;
 using System.Reflection;
 
 namespace Microsoft.Build.Construction
@@ -172,19 +174,7 @@ namespace Microsoft.Build.Construction
                 child.NextSibling.PreviousSibling = child;
             }
 
-            XmlElement.InsertAfter(child.XmlElement, reference.XmlElement);
-            if (XmlDocument.PreserveWhitespace)
-            {
-                //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
-                //  So try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
-                //  after, and inserting the same whitespace between the previous node and the one we added
-                if (reference.XmlElement.PreviousSibling != null &&
-                    reference.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
-                {
-                    var newWhitespaceNode = XmlDocument.CreateWhitespace(reference.XmlElement.PreviousSibling.Value);
-                    XmlElement.InsertAfter(newWhitespaceNode, reference.XmlElement);
-                }
-            }
+            AddToXml(child);
 
             _count++;
             MarkDirty("Insert element {0}", child.ElementName);
@@ -234,20 +224,7 @@ namespace Microsoft.Build.Construction
                 child.PreviousSibling.NextSibling = child;
             }
 
-            XmlElement.InsertBefore(child.XmlElement, reference.XmlElement);
-
-            if (XmlDocument.PreserveWhitespace)
-            {
-                //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
-                //  So try to match the surrounding formatting by by checking the whitespace that precedes where we inserted
-                //  the new node, and inserting the same whitespace between the node we added and the one after it.
-                if (child.XmlElement.PreviousSibling != null &&
-                    child.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
-                {
-                    var newWhitespaceNode = XmlDocument.CreateWhitespace(child.XmlElement.PreviousSibling.Value);
-                    XmlElement.InsertBefore(newWhitespaceNode, reference.XmlElement);
-                }
-            }
+            AddToXml(child);
 
             _count++;
             MarkDirty("Insert element {0}", child.ElementName);
@@ -333,19 +310,7 @@ namespace Microsoft.Build.Construction
                 LastChild = child.PreviousSibling;
             }
 
-            var previousSibling = child.XmlElement.PreviousSibling;
-
-            XmlElement.RemoveChild(child.XmlElement);
-
-            if (XmlDocument.PreserveWhitespace)
-            {
-                //  If we are trying to preserve formatting of the file, then also remove any whitespace
-                //  that came before the node we removed.
-                if (previousSibling != null && previousSibling.NodeType == XmlNodeType.Whitespace)
-                {
-                    XmlElement.RemoveChild(previousSibling);
-                }
-            }
+            RemoveFromXml(child);
 
             _count--;
             MarkDirty("Remove element {0}", child.ElementName);
@@ -456,6 +421,167 @@ namespace Microsoft.Build.Construction
             return clone;
         }
 
+        private void SetElementAsAttributeValue(ProjectElement child)
+        {
+            //  Assumes that child.ExpressedAsAttribute is true
+            Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
+                nameof(child.ExpressedAsAttribute) + " property of child is true");
+
+            string value = Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(child.XmlElement);
+            ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
+        }
+
+        /// <summary>
+        /// If child "element" is actually represented as an attribute, update the value in the corresponding Xml attribute
+        /// </summary>
+        /// <param name="child">A child element which might be represented as an attribute</param>
+        internal void UpdateElementValue(ProjectElement child)
+        {
+            if (child.ExpressedAsAttribute)
+            {
+                SetElementAsAttributeValue(child);
+            }
+        }
+
+        /// <summary>
+        /// Adds a ProjectElement to the Xml tree
+        /// </summary>
+        /// <param name="child">A child to add to the Xml tree, which has already been added to the ProjectElement tree</param>
+        /// <remarks>
+        /// The MSBuild construction APIs keep a tree of ProjectElements and a parallel Xml tree which consists of
+        /// objects from System.Xml.  This is a helper method which adds an XmlElement or Xml attribute to the Xml
+        /// tree after the corresponding ProjectElement has been added to the construction API tree, and fixes up
+        /// whitespace as necessary.
+        /// </remarks>
+        internal void AddToXml(ProjectElement child)
+        {
+            if (child.ExpressedAsAttribute)
+            {
+                //  Assume that the name of the child has already been validated to conform with rules in XmlUtilities.VerifyThrowArgumentValidElementName
+
+                //  Make sure we're not trying to add multiple attributes with the same name
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!XmlElement.HasAttribute(child.XmlElement.Name),
+                    XmlElement.Location, "InvalidChildElementDueToDuplication", child.XmlElement.Name, ElementName);
+
+                SetElementAsAttributeValue(child);
+            }
+            else
+            {
+                //  We want to add the XmlElement to the same position in the child list as the corresponding ProjectElement.
+                //  Depending on whether the child ProjectElement has a PreviousSibling or a NextSibling, we may need to
+                //  use the InsertAfter, InsertBefore, or AppendChild methods to add it in the right place.
+                //
+                //  Also, if PreserveWhitespace is true, then the elements we add won't automatically get indented, so
+                //  we try to match the surrounding formatting.
+                if (child.PreviousSibling != null)
+                {
+                    //  Add after previous sibling
+                    XmlElement.InsertAfter(child.XmlElement, child.PreviousSibling.XmlElement);
+                    if (XmlDocument.PreserveWhitespace)
+                    {
+                        //  Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
+                        //  after, and inserting the same whitespace between the previous node and the one we added
+                        if (child.PreviousSibling.XmlElement.PreviousSibling != null &&
+                            child.PreviousSibling.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        {
+                            var newWhitespaceNode = XmlDocument.CreateWhitespace(child.PreviousSibling.XmlElement.PreviousSibling.Value);
+                            XmlElement.InsertAfter(newWhitespaceNode, child.PreviousSibling.XmlElement);
+                        }
+                    }
+                }
+                else if (child.NextSibling != null)
+                {
+                    //  Add as first child
+                    XmlElement.InsertBefore(child.XmlElement, child.NextSibling.XmlElement);
+
+                    if (XmlDocument.PreserveWhitespace)
+                    {
+                        //  Try to match the surrounding formatting by by checking the whitespace that precedes where we inserted
+                        //  the new node, and inserting the same whitespace between the node we added and the one after it.
+                        if (child.XmlElement.PreviousSibling != null &&
+                            child.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        {
+                            var newWhitespaceNode = XmlDocument.CreateWhitespace(child.XmlElement.PreviousSibling.Value);
+                            XmlElement.InsertBefore(newWhitespaceNode, child.NextSibling.XmlElement);
+                        }
+                    }
+                }
+                else
+                {
+                    //  Add as only child
+                    XmlElement.AppendChild(child.XmlElement);
+
+                    if (XmlDocument.PreserveWhitespace)
+                    {
+                        //  Try to match the surrounding formatting and add one indentation level
+                        if (XmlElement.FirstChild.NodeType == XmlNodeType.Whitespace)
+                        {
+                            //  This container had a whitespace node, which should generally be a newline and the indent
+                            //  before the closing tag.  So we add the default indentation to it so the child will now be indented
+                            //  further, and then create a new whitespace node after the child so the closing tag will be on
+                            //  a new line with the same indentation.
+                            //  If the whitespace we end up copying isn't actually (newline + indentation) like we expect, then it
+                            //  should still be OK to copy it, as we'll still be trying to match the surrounding formatting.
+                            string whitespace = XmlElement.FirstChild.Value;
+                            XmlElement.FirstChild.Value = whitespace + DEFAULT_INDENT;
+                            var newWhitespaceNode = XmlDocument.CreateWhitespace(whitespace);
+                            XmlElement.InsertAfter(newWhitespaceNode, child.XmlElement);
+                        }
+                        else if (XmlElement.PreviousSibling != null &&
+                                 XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        {
+                            //  This container didn't have any whitespace in it.  This probably means it didn't have separate open
+                            //  and close tags.  So add a whitespace node before the new child with additional indentation over the
+                            //  container's indentation, and add a whitespace node with the same level of indentation as the container
+                            //  after the new child so the closing tag will be indented properly.
+                            string parentWhitespace = XmlElement.PreviousSibling.Value;
+                            var indentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace + DEFAULT_INDENT);
+                            XmlElement.InsertBefore(indentedWhitespaceNode, child.XmlElement);
+                            var unindentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace);
+                            XmlElement.InsertAfter(unindentedWhitespaceNode, child.XmlElement);
+                        }
+                    }
+                }
+            }
+        }
+
+        internal void RemoveFromXml(ProjectElement child)
+        {
+            if (child.ExpressedAsAttribute)
+            {
+                XmlElement.RemoveAttribute(child.XmlElement.Name);
+            }
+            else
+            {
+                var previousSibling = child.XmlElement.PreviousSibling;
+
+                XmlElement.RemoveChild(child.XmlElement);
+
+                if (XmlDocument.PreserveWhitespace)
+                {
+                    //  If we are trying to preserve formatting of the file, then also remove any whitespace
+                    //  that came before the node we removed.
+                    if (previousSibling != null && previousSibling.NodeType == XmlNodeType.Whitespace)
+                    {
+                        XmlElement.RemoveChild(previousSibling);
+                    }
+
+                    //  If we removed the last non-whitespace child node, set IsEmpty to true so that we get:
+                    //      <ItemName />
+                    //  instead of:
+                    //      <ItemName>
+                    //      </ItemName>
+                    if (XmlElement.HasChildNodes)
+                    {
+                        if (XmlElement.ChildNodes.Cast<XmlNode>().All(c => c.NodeType == XmlNodeType.Whitespace))
+                        {
+                            XmlElement.IsEmpty = true;
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Sets the first child in this container
         /// </summary>
@@ -475,39 +601,7 @@ namespace Microsoft.Build.Construction
             child.PreviousSibling = null;
             child.NextSibling = null;
 
-            XmlElement.AppendChild(child.XmlElement);
-
-            if (XmlDocument.PreserveWhitespace)
-            {
-                //  If we are trying to preserve formatting of the file, then the new node won't automatically be indented.
-                //  So try to match the surrounding formatting and add one indentation level
-                if (XmlElement.FirstChild.NodeType == XmlNodeType.Whitespace)
-                {
-                    //  This container had a whitespace node, which should generally be a newline and the indent
-                    //  before the closing tag.  So we add the default indentation to it so the child will now be indented
-                    //  further, and then create a new whitespace node after the child so the closing tag will be on
-                    //  a new line with the same indentation.
-                    //  If the whitespace we end up copying isn't actually (newline + indentation) like we expect, then it
-                    //  should still be OK to copy it, as we'll still be trying to match the surrounding formatting.
-                    string whitespace = XmlElement.FirstChild.Value;
-                    XmlElement.FirstChild.Value = whitespace + DEFAULT_INDENT;
-                    var newWhitespaceNode = XmlDocument.CreateWhitespace(whitespace);
-                    XmlElement.InsertAfter(newWhitespaceNode, child.XmlElement);
-                }
-                else if (XmlElement.PreviousSibling != null &&
-                         XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
-                {
-                    //  This container didn't have any whitespace in it.  This probably means it didn't have separate open
-                    //  and close tags.  So add a whitespace node before the new child with additional indentation over the
-                    //  container's indentation, and add a whitespace node with the same level of indentation as the container
-                    //  after the new child so the closing tag will be indented properly.
-                    string parentWhitespace = XmlElement.PreviousSibling.Value;
-                    var indentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace + DEFAULT_INDENT);
-                    XmlElement.InsertBefore(indentedWhitespaceNode, child.XmlElement);
-                    var unindentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace);
-                    XmlElement.InsertAfter(unindentedWhitespaceNode, child.XmlElement);
-                }
-            }
+            AddToXml(child);
 
             _count++;
             MarkDirty("Add child element named '{0}'", child.ElementName);

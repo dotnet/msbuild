@@ -10,7 +10,6 @@
     <AssemblyName>Microsoft.Build.Engine</AssemblyName>
     <RootNamespace>Microsoft.Build.Engine</RootNamespace>
     <NoWarn>$(NoWarn);618</NoWarn>
-    <DoNotLocalizeProject>true</DoNotLocalizeProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -199,13 +198,20 @@
     <Compile Include="Shared\XMakeAttributes.cs" />
     <Compile Include="Shared\XMakeElements.cs" />
     <Compile Include="Shared\XmlUtilities.cs" />
+
+    <!-- Resource Files -->
+
     <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Shared\Strings.shared.resx">
-      <LogicalName>$(AssemblyName).Resources.Strings.shared.resources</LogicalName>
+
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    
     <!-- Assemblies Files we depend on -->
     <Reference Include="System" />
     <Reference Include="System.Data" />
