@@ -178,8 +178,8 @@
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
-        <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
-        <target state="translated">Nie można użyć twardego linku w celu skopiowania „{0}” do „{1}”. W zamian zostanie skopiowany plik. {2}</target>
+        <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
+        <target state="updated">Nie można użyć twardego linku w celu skopiowania „{0}” do „{1}”. W zamian zostanie skopiowany plik. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.NeedsDestination">
@@ -2840,9 +2840,9 @@
         <note>{StrBegin="MSB3784: "} TargetPlatformVersion and TargetPlatformIdentifier root are property names and should not be localized</note>
       </trans-unit>
       <trans-unit id="GetInstalledSDKs.NoSDksFound">
-        <source>MSB3785: No SDKs were found. SDKReference items will not be resolved. If your application requires these references there may be compilation errors.</source>
-        <target state="translated">MSB3785: Nie znaleziono żadnych zestawów SDK. Odwołania do zestawów SDK nie będą rozpoznawane. Jeśli aplikacja wymaga takich odwołań, mogą wystąpić błędy kompilacji.</target>
-        <note>{StrBegin="MSB3785: "} "SDKReference" referrs to SDKReference items in the project file and should not be localized.</note>
+        <source>MSB3785: No SDKs were found for TargetPlatform = {0} v{1}. SDKReference items will not be resolved. If your application requires these references there may be compilation errors.</source>
+        <target state="updated">MSB3785: Nie znaleziono żadnych zestawów SDK. Odwołania do zestawów SDK nie będą rozpoznawane. Jeśli aplikacja wymaga takich odwołań, mogą wystąpić błędy kompilacji.</target>
+        <note>{StrBegin="MSB3785: "} "SDKReference" refers to SDKReference items in the project file and should not be localized.</note>
       </trans-unit>
       <trans-unit id="GetInstalledSDKs.CouldNotGetSDKList">
         <source>MSB3786: There was a problem retrieving the installed SDKs on the machine. {0}</source>
@@ -2963,6 +2963,21 @@
         <source>MSB3871: Shared projects cannot be built on their own.  Please either build a project that references this project, or build the entire solution.</source>
         <target state="translated">MSB3871: Nie można samodzielnie kompilować projektów udostępnionych.  Skompiluj projekt odwołujący się do tego projektu lub skompiluj całe rozwiązanie.</target>
         <note>{StrBegin="MSB3871: "}</note>
+      </trans-unit>
+      <trans-unit id="Copy.SymbolicLinkComment">
+        <source>Creating symbolic link to copy "{0}" to "{1}".</source>
+        <target state="new">Creating symbolic link to copy "{0}" to "{1}".</target>
+        <note>LOCALIZATION: {0} and {1} are paths.</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
+        <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
+        <target state="new">The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="Copy.ExactlyOneTypeOfLink">
+        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
+        <target state="new">MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>
