@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -57,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             var runnable = forceRunnable ||
                 string.IsNullOrEmpty(runtime) ||
-                (DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier().Contains(runtime));
+                (DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier().Contains(runtime));
 
             var testInstance = GetTestInstance()
                 .WithLockFiles();

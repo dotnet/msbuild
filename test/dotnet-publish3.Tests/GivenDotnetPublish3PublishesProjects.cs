@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli.Publish3.Tests
                 .CreateTestInstance(testAppName);
 
             var testProjectDirectory = testInstance.TestRoot;
-            var rid = DotnetRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
 
             new Publish3Command()
                 .WithFramework("netcoreapp1.0")

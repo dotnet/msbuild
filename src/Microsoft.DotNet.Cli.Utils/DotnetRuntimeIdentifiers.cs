@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -31,24 +30,6 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             return RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers(fallbackIdentifiers);
-        }
-
-        // Gets the identfier that is used for restore by default (this is different from the actual RID, but only on Windows)
-        public static string InferLegacyRestoreRuntimeIdentifier()
-        {
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
-            {
-                FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
-                return fxDepsFile.SupportsCurrentRuntime() ?
-                    RuntimeEnvironment.GetRuntimeIdentifier() :
-                    DotnetFiles.VersionFileObject.BuildRid;
-
-            }
-            else
-            {
-                var arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
-                return "win7-" + arch;
-            }
         }
     }
 }

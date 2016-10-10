@@ -1,7 +1,6 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
-    "keyFile": "../../tools/Key.snk",    
     "copyToOutput": {
       "include": [
         "../../artifacts/*/stage2/sdk/*/.version"
