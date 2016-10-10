@@ -43,7 +43,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     new PackageDependencyInfo
                     {
                         Name = ConstantPackageNames.CSdkPackageName,
-                        Version = migrationSettings.SdkPackageVersion
+                        Version = migrationSettings.SdkPackageVersion,
+                        PrivateAssets = "All"
                     }), migrationRuleInputs.CommonItemGroup);
             
             // Migrate Direct Deps first
@@ -141,7 +142,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     transform = PackageDependencyTransform();
                     if (packageDependency.Type == LibraryDependencyType.Build)
                     {
-                        transform = transform.WithMetadata("PrivateAssets", "all");
+                        transform = transform.WithMetadata("PrivateAssets", "All");
                     }
                     else if (packageDependency.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent)
                     {
@@ -228,7 +229,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             dep => dep.Name,
             dep => "",
             dep => true)
-            .WithMetadata("Version", r => r.Version);
+            .WithMetadata("Version", r => r.Version)
+            .WithMetadata("PrivateAssets", r => r.PrivateAssets, r => !string.IsNullOrEmpty(r.PrivateAssets));
 
         private AddItemTransform<ProjectLibraryDependency> ToolTransform => new AddItemTransform<ProjectLibraryDependency>(
             "DotNetCliToolReference",
@@ -247,6 +249,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             public string Name {get; set;}
             public string Version {get; set;}
+            public string PrivateAssets {get; set;}
         }
     }
 }

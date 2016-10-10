@@ -16,8 +16,9 @@
     <PackageReference Include="Microsoft.NETCore.App">
       <Version>1.0.1</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.NETCore.Sdk">
-      <Version>1.0.0-alpha-20161007-1</Version>
+    <PackageReference Include="Microsoft.NET.Sdk">
+      <Version>1.0.0-alpha-20161010-1</Version>
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
