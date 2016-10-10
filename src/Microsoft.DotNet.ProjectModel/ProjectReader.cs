@@ -885,7 +885,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
             else
             {
-                values = token.Value<string[]>();
+                values = token.Values<string>();
             }
             result = values
                 .SelectMany(value => value.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
