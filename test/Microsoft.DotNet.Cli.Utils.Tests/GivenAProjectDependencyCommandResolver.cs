@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -227,8 +228,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var projectContext = ProjectContext.Create(
                 testInstance.Path,
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
-
+                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers());
+            
             var depsFilePath =
                 projectContext.GetOutputPaths("Debug", outputPath: outputDir).RuntimeFiles.DepsJson;
 
@@ -267,7 +268,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var projectContext = ProjectContext.Create(
                 testInstance.Path,
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
-                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
+                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers());
 
             var depsFilePath =
                 projectContext.GetOutputPaths("Debug", buildBasePath).RuntimeFiles.DepsJson;

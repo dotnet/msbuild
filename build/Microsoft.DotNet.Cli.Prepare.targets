@@ -16,7 +16,7 @@
           DependsOnTargets="BuildDotnetCliBuildFramework" >
 
     <!-- Current Runtime Information -->
-    <GetCurrentRuntimeInformation>
+    <GetCurrentRuntimeInformation OverrideRid="$(OverrideRid)">
       <Output TaskParameter="Rid" PropertyName="Rid" />
       <Output TaskParameter="Architecture" PropertyName="Architecture" />
       <Output TaskParameter="OSName" PropertyName="OSName" />
