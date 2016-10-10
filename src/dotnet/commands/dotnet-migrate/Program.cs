@@ -40,6 +40,9 @@ namespace Microsoft.DotNet.Tools.Migrate
             CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new -t msbuild", CommandOptionType.SingleValue);
             CommandOption xprojFile = app.Option("-x|--xproj-file", "The path to the xproj file to use. Required when there is more than one xproj in a project directory.", CommandOptionType.SingleValue);
             CommandOption skipProjectReferences = app.Option("-s|--skip-project-references", "Skip migrating project references. By default project references are migrated recursively", CommandOptionType.BoolValue);
+            
+            CommandOption reportFile = app.Option("-r|--report-file", "Output migration report to a file in addition to the console.", CommandOptionType.SingleValue);
+            CommandOption structuredReportOutput = app.Option("--format-report-file-json", "Output migration report file as json rather than user messages", CommandOptionType.BoolValue); 
 
             app.OnExecute(() =>
             {
@@ -48,7 +51,9 @@ namespace Microsoft.DotNet.Tools.Migrate
                     projectArgument.Value,
                     sdkVersion.Value(),
                     xprojFile.Value(),
-                    skipProjectReferences.BoolValue.HasValue ? skipProjectReferences.BoolValue.Value : false);
+                    reportFile.Value(),
+                    skipProjectReferences.BoolValue.HasValue ? skipProjectReferences.BoolValue.Value : false,
+                    structuredReportOutput.BoolValue.HasValue ? structuredReportOutput.BoolValue.Value : false);
 
                 return migrateCommand.Execute();
             });

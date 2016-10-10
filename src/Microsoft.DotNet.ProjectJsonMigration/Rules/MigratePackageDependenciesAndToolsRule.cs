@@ -9,7 +9,6 @@ using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
@@ -142,7 +141,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     transform = PackageDependencyTransform();
                     if (packageDependency.Type == LibraryDependencyType.Build)
                     {
-                        Console.WriteLine("Build type!!!");
                         transform = transform.WithMetadata("PrivateAssets", "all");
                     }
                     else if (packageDependency.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent)

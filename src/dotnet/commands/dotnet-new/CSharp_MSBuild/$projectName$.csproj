@@ -17,7 +17,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Sdk">
-      <Version>1.0.0-alpha-20160930-1</Version>
+      <Version>1.0.0-alpha-20161007-1</Version>
     </PackageReference>
   </ItemGroup>
 

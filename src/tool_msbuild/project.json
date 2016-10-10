@@ -8,12 +8,10 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "MSBuild": "0.1.0-preview-00043-160929",
-    "Microsoft.Build.Targets": "0.1.0-preview-00043-160929",
+    "Microsoft.Build.Runtime": "15.1.298-preview5",
     "Microsoft.Net.Compilers.netcore": "2.0.0-beta6-60922-08",
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
     "Microsoft.Cci": "4.0.0-rc3-24128-00",
-    "Microsoft.NuGet.Build.Tasks": "1.0.0-alpha-000004",
     "Microsoft.Composition": "1.0.30"
   },
   "frameworks": {
