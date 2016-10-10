@@ -19,7 +19,7 @@
     "tool_nuget": "1.0.0-preview3-*",
     "tool_msbuild": "1.0.0-preview3-*",
 
-    "Microsoft.Build.Runtime": "15.1.298-preview5",
+    "Microsoft.Build.Runtime": "15.1.313-preview5",
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
     "System.Runtime.Serialization.Xml": "4.1.1",
     "NuGet.Build.Tasks": "3.6.0-rc-1954",

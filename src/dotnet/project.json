@@ -69,7 +69,7 @@
       "exclude": "compile"
     },
 
-    "Microsoft.Build": "15.1.298-preview5",
+    "Microsoft.Build": "15.1.313-preview5",
 
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
   },
