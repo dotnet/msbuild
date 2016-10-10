@@ -22,6 +22,15 @@ namespace Microsoft.Build.Shared
         private bool _resolvingHandlerHookedUp = false;
 
         private static readonly string[] _extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
+        private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
+        private static readonly HashSet<string> _wellKnownAssemblyNames = new HashSet<string>(
+            new[]
+            {
+                "Microsoft.Build",
+                "Microsoft.Build.Framework",
+                "Microsoft.Build.Tasks.Core",
+                "Microsoft.Build.Utilities.Core"
+            });
 
         public void AddDependencyLocation(string fullPath)
         {
@@ -63,11 +72,29 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        private Assembly TryGetWellKnownAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
+        {
+            if (!_wellKnownAssemblyNames.Contains(assemblyName.Name))
+            {
+                return null;
+            }
+
+            assemblyName.Version = _currentAssemblyVersion;
+
+            return AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+        }
+
         private Assembly TryResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
         {
             lock (_guard)
             {
-                Assembly assembly;
+                Assembly assembly = TryGetWellKnownAssembly(context, assemblyName);
+
+                if (assembly != null)
+                {
+                    return assembly;
+                }
+
                 if (_namesToAssemblies.TryGetValue(assemblyName.FullName, out assembly))
                 {
                     return assembly;
@@ -80,6 +107,12 @@ namespace Microsoft.Build.Shared
                         var candidatePath = Path.Combine(dependencyPath, $"{assemblyName.Name}.{extension}");
                         if (IsAssemblyAlreadyLoaded(candidatePath) ||
                             !File.Exists(candidatePath))
+                        {
+                            continue;
+                        }
+
+                        AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                        if (candidateAssemblyName.Version != assemblyName.Version)
                         {
                             continue;
                         }
