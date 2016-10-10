@@ -17,6 +17,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Sdk">
       <Version>$$buildversion$$</Version>
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
   
