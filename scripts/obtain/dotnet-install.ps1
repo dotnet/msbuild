@@ -47,7 +47,7 @@
 .PARAMETER AzureFeed
     Default: https://dotnetcli.azureedge.net/dotnet
     This parameter should not be usually changed by user. It allows to change URL for the Azure feed used by this installer.
-.PARAMETER Proxy
+.PARAMETER ProxyAddress
     If set, the installer will use the proxy when making web requests
 #>
 [cmdletbinding()]
