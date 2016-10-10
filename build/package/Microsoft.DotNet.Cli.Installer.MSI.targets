@@ -28,7 +28,7 @@
 
       <!-- Generate SDK MSI Inputs -->
       <ItemGroup>
-        <GenerateSdkMsiInputs Include="$(SdkLayoutOutputDirectory);
+        <GenerateSdkMsiInputs Include="$(SdkLayoutOutputDirectory)/**/*;
                                        $(SdkGenerateMsiPowershellScript)" />
       </ItemGroup>
 
@@ -81,7 +81,7 @@
     <Target Name="GenerateSdkMsi"
             DependsOnTargets="Init;Layout;AcquireWix;MsiTargetsSetupInputOutputs"
             Condition=" '$(OS)' == 'Windows_NT'"
-            Inputs="$(GenerateSdkMsiInputs)"
+            Inputs="@(GenerateSdkMsiInputs)"
             Outputs="$(SdkInstallerFile)">
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateMsiPowershellScript)
