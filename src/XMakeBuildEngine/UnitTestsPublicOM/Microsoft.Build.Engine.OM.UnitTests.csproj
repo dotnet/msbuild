@@ -24,9 +24,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\..\Shared\BuildEnvironmentHelper.cs">
-      <Link>BuildEnvironmentHelper.cs</Link>
-    </Compile>
     <Compile Include="..\..\Shared\Constants.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

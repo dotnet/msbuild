@@ -148,6 +148,9 @@
     <Compile Include="..\..\Shared\TaskParameterTypeVerifier.cs">
       <Link>TaskParameterTypeVerifier.cs</Link>
     </Compile>
+    <Compile Include="..\..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="..\..\Shared\XMakeAttributes.cs">
       <Link>XMakeAttributes.cs</Link>
     </Compile>
@@ -185,6 +188,7 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">

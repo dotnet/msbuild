@@ -112,6 +112,9 @@
     </Compile>
     <Compile Include="..\Shared\ReuseableStringBuilder.cs" />
     <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>SharedUtilities\VisualStudioLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
