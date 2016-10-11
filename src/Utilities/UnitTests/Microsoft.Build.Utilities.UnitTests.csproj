@@ -31,6 +31,7 @@
     <Compile Include="..\..\XMakeBuildEngine\BackEnd\Node\NativeMethods.cs">
       <Link>NativeMethods.cs</Link>
     </Compile>
+    <Compile Include="PlatformManifest_Tests.cs" />
     <Compile Include="TrackedDependencies\FileTrackerTests.cs" />
     <Compile Include="TrackedDependencies\TrackedDependenciesTests.cs" />
     <Compile Include="TrackedDependencies\MockEngine.cs" />

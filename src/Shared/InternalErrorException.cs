@@ -8,6 +8,8 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 #if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
 #endif
@@ -116,7 +118,7 @@ namespace Microsoft.Build.Shared
             }
 
 #if DEBUG
-            if (!BuildEnvironmentHelper.Instance.RunningTests && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
+            if (!RunningTests() && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
                 && Environment.GetEnvironmentVariable("_NTROOT") == null)
             {
                 LaunchDebugger(message, innerMessage);
@@ -144,5 +146,28 @@ namespace Microsoft.Build.Shared
 #endif
         }
         #endregion
+
+        private static bool RunningTests()
+        {
+            // Copied logic from BuildEnvironmentHelper. Removed reference for single use due
+            // to additional dependencies. Update both if needed.
+            string[] testRunners =
+            {
+                "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER", "VSTESTHOST", "QTAGENT32",
+                "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
+            };
+
+            // Check if our current process name is in the list of own test runners
+            return
+#if FEATURE_GET_COMMANDLINE
+                IsProcessInList(Environment.GetCommandLineArgs()[0], testRunners) ||
+#endif
+                IsProcessInList(Process.GetCurrentProcess().MainModule.FileName, testRunners);
+        }
+
+        private static bool IsProcessInList(string processName, string[] processList)
+        {
+            return processList.Any(s => Path.GetFileNameWithoutExtension(processName)?.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
     }
 }

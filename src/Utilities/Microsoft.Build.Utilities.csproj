@@ -170,6 +170,9 @@
       <Link>ToolsetElement.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="ApiContract.cs" />
     <Compile Include="AppDomainIsolatedTask.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -267,8 +270,5 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-   <!--
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
-  -->
   <Import Project="..\dir.targets"/>
 </Project>

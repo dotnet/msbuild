@@ -92,6 +92,29 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        public void GetApiContractReferencesFindsVersionedWinMDs()
+        {
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string tempVersion = "10.0.12345.0";
+            string referenceDirectory = Path.Combine(tempDirectory, @"References", tempVersion, @"Foo\Bar");
+
+            try
+            {
+                Directory.CreateDirectory(referenceDirectory);
+                File.WriteAllText(Path.Combine(referenceDirectory, "One.winmd"), "First");
+                string[] returnValue = ToolLocationHelper.GetApiContractReferences(new ApiContract[] { new ApiContract { Name = "Foo", Version = "Bar" } }, tempDirectory, tempVersion);
+                Assert.Equal(1, returnValue.Length);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDirectory))
+                {
+                    Directory.Delete(tempDirectory, true);
+                }
+            }
+        }
+
         [Trait("Category", "netcore-osx-failing")]
         public void GatherExtensionSDKsInvalidVersionDirectory()
         {

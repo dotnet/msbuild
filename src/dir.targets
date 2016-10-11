@@ -98,4 +98,13 @@
   
   <Import Project="$(RepoRoot)\targets\GenApi.targets" Condition="'$(OS)' == 'Windows_NT'" />
 
+  <!-- Taken from Microsoft.VisualStudio.SDK.EmbedInteropTypes NuGet package which tries to fix this issue
+       (but doesn't include this assembly in their list).  -->
+  <Target Name="LinkVSEmbeddableAssemblies" DependsOnTargets="ResolveReferences" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'Microsoft.VisualStudio.Setup.Configuration.Interop'">
+        <EmbedInteropTypes>true</EmbedInteropTypes>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
 </Project>

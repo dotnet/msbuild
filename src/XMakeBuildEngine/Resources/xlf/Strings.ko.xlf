@@ -811,8 +811,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
-        <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: 프로젝트의 기본 XML 네임스페이스는 MSBuild XML 네임스페이스여야 합니다. 프로젝트를 MSBuild 2003 형식으로 작성한 경우에는 &lt;Project&gt; 요소에 xmlns="{0}"을(를) 추가하고, 프로젝트를 이전 1.0 또는 1.2 형식으로 작성한 경우에는 MSBuild 2003 형식으로 변환하세요.</target>
+        <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
+        <target state="updated">MSB4041: 프로젝트의 기본 XML 네임스페이스는 MSBuild XML 네임스페이스여야 합니다. 프로젝트를 MSBuild 2003 형식으로 작성한 경우에는 &lt;Project&gt; 요소에 xmlns="{0}"을(를) 추가하고, 프로젝트를 이전 1.0 또는 1.2 형식으로 작성한 경우에는 MSBuild 2003 형식으로 변환하세요.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1741,11 +1741,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">이 부모는 해당 항목의 올바른 부모가 아닙니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeNoRemove">
-        <source>An item not parented under a Target must have a value for Include and no value for Remove.</source>
-        <target state="translated">Target의 자식이 아닌 항목에는 Remove의 값이 아니라 Include의 값이 있어야 합니다.</target>
-        <note>LOCALIZATION: Please do not localize "Target", "Include", and "Remove".</note>
-      </trans-unit>
       <trans-unit id="OM_NameInvalid">
         <source>The name "{0}" contains an invalid character "{1}".</source>
         <target state="translated">이름 "{0}"에 잘못된 문자 "{1}"이(가) 사용되었습니다.</target>
@@ -1921,6 +1916,36 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>Removing Properties for project "{0}":</source>
         <target state="translated">"{0}" 프로젝트에 대한 속성 제거:</target>
         <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeExclusive">
+        <source>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</source>
+        <target state="new">MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidAttributeDueToDuplication">
+        <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
+        <target state="new">MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</target>
+        <note>{StrBegin="MSB4227: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidMetadataAsAttribute">
+        <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
+        <target state="new">MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</target>
+        <note>{StrBegin="MSB4228: "}</note>
+      </trans-unit>
+      <trans-unit id="OM_OneOfAttributeButNotMore">
+        <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
+        <target state="new">The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
+        <source>An item not parented under a Target must have a value for Include or Update or Remove.</source>
+        <target state="new">An item not parented under a Target must have a value for Include or Update or Remove.</target>
+        <note>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</note>
+      </trans-unit>
+      <trans-unit id="OM_CannotSplitItemElementWhenSplittingIsDisabled">
+        <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
+        <target state="new">The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

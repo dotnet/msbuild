@@ -140,6 +140,43 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        [Fact]
+        public void BuildEnvironmentDetectsVisualStudioFromSetupInstance()
+        {
+            using (var env = new EmptyBuildEnviroment())
+            {
+                // This test has no context to find MSBuild other than Visual Studio root.
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, ReturnNull,
+                    () =>
+                        new List<VisualStudioInstance>
+                        {
+                            new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")),
+                            new VisualStudioInstance("VS", env.TempFolderRoot, new Version("15.0")),
+                        });
+
+                Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
+            }
+        }
+
+        [Fact]
+        public void BuildEnvironmentVisualStudioNotFoundWhenVersionMismatch()
+        {
+            using (var env = new EmptyBuildEnviroment())
+            {
+                // This test has no context to find MSBuild other than Visual Studio root.
+                Assert.Throws<InvalidOperationException>(() =>
+                {
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, ReturnNull,
+                        () =>
+                            new List<VisualStudioInstance>
+                            {
+                                new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")),
+                                new VisualStudioInstance("VS", env.TempFolderRoot, new Version("14.0")),
+                            });
+                });
+            }
+        }
+
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/669")]
 #else

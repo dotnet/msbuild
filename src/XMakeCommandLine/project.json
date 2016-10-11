@@ -1,6 +1,10 @@
 ﻿{
   "frameworks": {
-    "net46": {},
+    "net46": {
+      "dependencies": {
+        "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5"
+      }
+    },
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": "1.0.1",
