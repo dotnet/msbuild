@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             itemGroup.Condition = condition;
 
             foreach (var packageDependency in packageDependencies)
-            {    
+            {
                 MigrationTrace.Instance.WriteLine(packageDependency.Name);
                 AddItemTransform<ProjectLibraryDependency> transform;
 
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 else
                 {
                     transform = PackageDependencyTransform();
-                    if (packageDependency.Type == LibraryDependencyType.Build)
+                    if (packageDependency.Type.Equals(LibraryDependencyType.Build))
                     {
                         transform = transform.WithMetadata("PrivateAssets", "All");
                     }
@@ -163,9 +163,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private string ReadLibraryIncludeFlags(LibraryIncludeFlags includeFlags)
         {
-            if ((includeFlags & LibraryIncludeFlags.All) == LibraryIncludeFlags.All)
+            if ((includeFlags ^ LibraryIncludeFlags.All) == 0)
             {
                 return "All";
+            }
+
+            if ((includeFlags ^ LibraryIncludeFlags.None) == 0)
+            {
+                return "None";
             }
 
             var flagString = "";

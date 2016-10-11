@@ -6,6 +6,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using System;
 
@@ -26,6 +27,126 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             
             EmitsPackageReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview", ""), Tuple.Create("BPackage", "1.0.0", ""));            
         }
+
+        [Fact]
+        public void It_migrates_type_build_to_PrivateAssets()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""dependencies"": {
+                        ""APackage"" : {
+                            ""version"": ""1.0.0-preview"",
+                            ""type"": ""build""
+                        }
+                    }
+                }");
+
+
+            var packageRef = mockProj.Items.First(i => i.Include == "APackage" && i.ItemType == "PackageReference");
+
+            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
+            privateAssetsMetadata.Value.Should().NotBeNull();
+            privateAssetsMetadata.Value.Should().Be("All");
+        }
+
+        [Fact]
+        public void It_migrates_suppress_parent_array_to_PrivateAssets()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""dependencies"": {
+                        ""APackage"" : {
+                            ""version"": ""1.0.0-preview"",
+                            ""suppressParent"":[ ""runtime"", ""native"" ]
+                        }
+                    }
+                }");
+            var packageRef = mockProj.Items.First(i => i.Include == "APackage" && i.ItemType == "PackageReference");
+
+            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
+            privateAssetsMetadata.Value.Should().NotBeNull();
+            privateAssetsMetadata.Value.Should().Be("Native;Runtime");
+        }
+
+        [Fact]
+        public void It_migrates_suppress_parent_string_to_PrivateAssets()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""dependencies"": {
+                        ""APackage"" : {
+                            ""version"": ""1.0.0-preview"",
+                            ""suppressParent"":""runtime""
+                        }
+                    }
+                }");
+            var packageRef = mockProj.Items.First(i => i.Include == "APackage" && i.ItemType == "PackageReference");
+
+            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
+            privateAssetsMetadata.Value.Should().NotBeNull();
+            privateAssetsMetadata.Value.Should().Be("Runtime");
+        }
+
+        [Fact]
+        public void It_migrates_include_exclude_arrays_to_IncludeAssets()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""dependencies"": {
+                        ""APackage"" : {
+                            ""version"": ""1.0.0-preview"",
+                            ""include"": [ ""compile"", ""runtime"", ""native"" ],
+                            ""exclude"": [ ""native"" ]
+                        }
+                    }
+                }");
+            var packageRef = mockProj.Items.First(i => i.Include == "APackage" && i.ItemType == "PackageReference");
+
+            var includeAssetsMetadata = packageRef.GetMetadataWithName("IncludeAssets");
+            includeAssetsMetadata.Value.Should().NotBeNull();
+            includeAssetsMetadata.Value.Should().Be("Compile;Runtime");
+        }
+
+        [Fact]
+        public void It_migrates_include_string_to_IncludeAssets()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""dependencies"": {
+                        ""APackage"" : {
+                            ""version"": ""1.0.0-preview"",
+                            ""include"": ""compile"",
+                            ""exclude"": ""runtime""
+                        }
+                    }
+                }");
+            var packageRef = mockProj.Items.First(i => i.Include == "APackage" && i.ItemType == "PackageReference");
+
+            var includeAssetsMetadata = packageRef.GetMetadataWithName("IncludeAssets");
+            includeAssetsMetadata.Value.Should().NotBeNull();
+            includeAssetsMetadata.Value.Should().Be("Compile");
+        }
+
+        [Fact]
+        public void It_migrates_include_exclude_overlapping_strings_to_IncludeAssets()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""dependencies"": {
+                        ""APackage"" : {
+                            ""version"": ""1.0.0-preview"",
+                            ""include"": ""compile"",
+                            ""exclude"": ""compile"",
+                        }
+                    }
+                }");
+            var packageRef = mockProj.Items.First(i => i.Include == "APackage" && i.ItemType == "PackageReference");
+
+            var includeAssetsMetadata = packageRef.GetMetadataWithName("IncludeAssets");
+            includeAssetsMetadata.Value.Should().NotBeNull();
+            includeAssetsMetadata.Value.Should().Be("None");
+        }
+
 
         [Fact]
         public void It_migrates_Tools()
