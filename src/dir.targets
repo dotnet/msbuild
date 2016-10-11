@@ -61,11 +61,12 @@
 
   <!-- Debugging support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <StartAction>Program</StartAction>
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
     <TestHost Condition="'$(OsEnvironment)' == 'Windows_NT'">dotnet.exe</TestHost>
     <TestHost Condition="'$(OsEnvironment)' != 'Windows_NT'">dotnet</TestHost>
     <StartProgram Condition="'$(StartProgram)'==''">$(DeploymentDir)\$(TestHost)</StartProgram>
-    <StartArguments>msbuild.exe</StartArguments>
+    <StartArguments>$(TargetPath)</StartArguments>
   </PropertyGroup>
 
 
@@ -92,7 +93,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <NuGetTargetMoniker>.NETStandard,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
+    <NuGetTargetMoniker>$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
   </PropertyGroup>
   
   <Import Project="$(RepoRoot)\targets\GenApi.targets" Condition="'$(OS)' == 'Windows_NT'" />

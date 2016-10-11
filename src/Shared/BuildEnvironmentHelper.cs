@@ -36,6 +36,11 @@ namespace Microsoft.Build.Shared
         private static readonly string[] s_msBuildProcess = {"MSBUILD"};
 
         /// <summary>
+        /// Name of MSBuild executable files.
+        /// </summary>
+        private static readonly string[] s_msBuildExeNames = {"MSBuild.exe", "MSBuild.dll"};
+
+        /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
         public static BuildEnvironment Instance
@@ -151,11 +156,11 @@ namespace Microsoft.Build.Shared
         {
             if (string.IsNullOrEmpty(folder)) return null;
 
-            var msBuildPath = Path.Combine(folder, "MSBuild.exe");
-
-            return IsValidMSBuildPath(msBuildPath)
-                ? new BuildEnvironment(msBuildPath, runningTests, runningInVisualStudio, visualStudioPath)
-                : null;
+            return (
+                    s_msBuildExeNames.Select(msbuildFileName => Path.Combine(folder, msbuildFileName))
+                    .Where(IsValidMSBuildPath)
+                    .Select(msBuildPath => new BuildEnvironment(msBuildPath, runningTests, runningInVisualStudio, visualStudioPath))
+                   ).FirstOrDefault();
         }
 
         /// <summary>
@@ -171,7 +176,7 @@ namespace Microsoft.Build.Shared
         private static bool IsValidMSBuildPath(string path)
         {
             bool msbuildExeExists = !string.IsNullOrEmpty(path) &&
-                    Path.GetFileName(path).Equals("MSBuild.exe", StringComparison.OrdinalIgnoreCase) &&
+                s_msBuildExeNames.Any(i => i.Equals(Path.GetFileName(path), StringComparison.OrdinalIgnoreCase)) &&
                     File.Exists(path);
 #if FEATURE_SYSTEM_CONFIGURATION
             // If we can read toolsets out of msbuild.exe.config, we must

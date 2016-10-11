@@ -31,6 +31,12 @@ namespace Microsoft.Build.UnitTests
     {
         private readonly ITestOutputHelper _output;
 
+#if FEATURE_RUN_EXE_IN_TESTS
+        private const string MSBuildExeName = "MSBuild.exe";
+#else
+        private const string MSBuildExeName = "MSBuild.dll";
+#endif
+
         public ToolLocationHelper_Tests(ITestOutputHelper output)
         {
             _output = output;
@@ -614,10 +620,10 @@ namespace Microsoft.Build.UnitTests
                     ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "4.0")
                 );
 
-            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).ToolsPath, "MSBuild.exe");
+            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).ToolsPath, MSBuildExeName);
 
-            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", ObjectModelHelpers.MSBuildDefaultToolsVersion));
-            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", ToolLocationHelper.CurrentToolsVersion));
+            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile(MSBuildExeName, ObjectModelHelpers.MSBuildDefaultToolsVersion));
+            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile(MSBuildExeName, ToolLocationHelper.CurrentToolsVersion));
         }
 
 #if RUNTIME_TYPE_NETCORE
