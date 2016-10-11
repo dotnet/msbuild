@@ -117,7 +117,7 @@ if /i "%TARGET%"=="CoreCLR" (
 )
 
 if /i "%TARGET%"=="CoreCLR" (
-    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild.exe"
+    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild.dll"
 ) else (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
 )

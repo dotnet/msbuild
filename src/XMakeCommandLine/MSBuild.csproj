@@ -8,6 +8,7 @@
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
     <NoStdLib>true</NoStdLib>
     <NoWarn>$(NoWarn);1701</NoWarn>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -216,7 +217,9 @@
     <Content Include="MSBuild.rsp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-
+    <Content Include="MSBuild.runtimeconfig.json" Condition="'$(NetCoreBuild)' == 'true'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Microsoft.Build.CommonTypes.xsd">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

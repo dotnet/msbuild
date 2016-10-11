@@ -65,6 +65,6 @@
   </metadata>
   <files>
     <file src="_._" target="lib\netstandard1.3" />
-    <file src="MSBuild.exe" target="runtimes\any\native" />
+    <file src="MSBuild.dll" target="runtimes\any\native\MSBuild.exe" />
   </files>
 </package>

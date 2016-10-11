@@ -24,6 +24,12 @@ namespace Microsoft.Build.UnitTests
 {
     public class XMakeAppTests
     {
+#if FEATURE_RUN_EXE_IN_TESTS
+        private const string MSBuildExeName = "MSBuild.exe";
+#else
+        private const string MSBuildExeName = "MSBuild.dll";
+#endif
+
         [Fact]
         public void GatherCommandLineSwitchesTwoProperties()
         {
@@ -1028,7 +1034,7 @@ namespace Microsoft.Build.UnitTests
                 string rspPath = Path.Combine(directory, "msbuild.rsp");
 
                 exeDirectory = CopyMSBuild();
-                string exePath = Path.Combine(exeDirectory, "msbuild.exe");
+                string exePath = Path.Combine(exeDirectory, MSBuildExeName);
                 string mainRspPath = Path.Combine(exeDirectory, "msbuild.rsp");
 
                 Directory.CreateDirectory(exeDirectory);
@@ -1070,7 +1076,7 @@ namespace Microsoft.Build.UnitTests
                 directory = CopyMSBuild();
                 string projectPath = Path.Combine(directory, "my.proj");
                 string rspPath = Path.Combine(directory, "msbuild.rsp");
-                string exePath = Path.Combine(directory, "msbuild.exe");
+                string exePath = Path.Combine(directory, MSBuildExeName);
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);
@@ -1195,7 +1201,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        #region IgnoreProjectExtensionTests
+#region IgnoreProjectExtensionTests
 
         /// <summary>
         /// Test the case where the extension is a valid extension but is not a project
@@ -1554,9 +1560,9 @@ namespace Microsoft.Build.UnitTests
                 return fileNamesToReturn.ToArray();
             }
         }
-        #endregion
+#endregion
 
-        #region ProcessFileLoggerSwitches
+#region ProcessFileLoggerSwitches
         /// <summary>
         /// Test the case where no file logger switches are given, should be no file loggers attached
         /// </summary>
@@ -1800,9 +1806,9 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(0, distributedLoggerRecords.Count); // "Expected no distributed loggers to be attached"
             Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
         }
-        #endregion
+#endregion
 
-        #region ProcessConsoleLoggerSwitches
+#region ProcessConsoleLoggerSwitches
         [Fact]
         public void ProcessConsoleLoggerSwitches()
         {
@@ -1850,7 +1856,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(0, string.Compare(distributedLogger.CentralLogger.Parameters, "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameters passed in"
             Assert.Equal(0, string.Compare(distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters, "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
         }
-        #endregion
+#endregion
 
         private string CopyMSBuild()
         {
