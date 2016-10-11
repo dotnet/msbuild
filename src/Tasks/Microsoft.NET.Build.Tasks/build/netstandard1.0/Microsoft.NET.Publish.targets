@@ -203,7 +203,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- TODO perform any preprocess transforms on the files -->
 
     <ItemGroup>
-      <ResolvedAssembliesToPublish Include="@(ReferenceCopyLocalPaths)">
+      <ResolvedAssembliesToPublish Include="@(ReferenceCopyLocalPaths)" Exclude="@(ResolvedAssembliesToPublish)">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(Filename)%(Extension)</DestinationSubPath>
       </ResolvedAssembliesToPublish>
     </ItemGroup>

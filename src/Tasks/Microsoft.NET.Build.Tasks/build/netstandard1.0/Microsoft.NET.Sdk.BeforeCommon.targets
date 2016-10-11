@@ -52,6 +52,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core and .NETStandard projects -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">false</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+  
+  <!-- Regardless of platform, enable dependency file generation if PreserveCompilatioContext is set. -->
+  <PropertyGroup>
+    <GenerateDependencyFile Condition="'$(GenerateDependencyFile)' == ''">$(PreserveCompilationContext)</GenerateDependencyFile>
+  </PropertyGroup>
 
   <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->
   <PropertyGroup>
