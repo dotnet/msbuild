@@ -73,7 +73,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Common tokens used in preprocessed content files -->
   <ItemGroup>
-    <PreprocessorValue Include="@(NuGetPreprocessorValue)" Condition="'@(NuGetPreprocessorValue)' != ''"/>
     <PreprocessorValue Include="rootnamespace">
       <Value>$(RootNamespace)</Value>
     </PreprocessorValue>
@@ -89,6 +88,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PreprocessorValue Include="filename">
       <Value>$(MSBuildProjectFile)</Value>
     </PreprocessorValue>
+    <PreprocessorValue Include="@(NuGetPreprocessorValue)" Exclude="@(PreprocessorValue)" />
   </ItemGroup>
 
   <!--

@@ -155,8 +155,8 @@ namespace Microsoft.NET.Build.Tasks
                 foreach (var duplicatedPreprocessorKey in duplicatedPreprocessorKeys)
                 {
                     Log.LogWarning(
-                        $"The preprocessor token &apos;{duplicatedPreprocessorKey}&apos; has been given more than one value." + 
-                        $" Choosing &apos;{preprocessorValues[duplicatedPreprocessorKey]}&apos; as the value.");
+                        $"The preprocessor token '{duplicatedPreprocessorKey}' has been given more than one value." +
+                        $" Choosing '{preprocessorValues[duplicatedPreprocessorKey]}' as the value.");
                 }
 
                 AssetPreprocessor.ConfigurePreprocessor(ContentPreprocessorOutputDirectory, preprocessorValues);
