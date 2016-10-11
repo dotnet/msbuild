@@ -83,6 +83,12 @@ namespace Microsoft.Build.Utilities
             private set;
         }
 
+        public bool VersionedContent
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Flag set to true if an exception occurred while reading the manifest
         /// </summary>
@@ -165,6 +171,12 @@ namespace Microsoft.Build.Utilities
                             if (ApiContract.IsContainedApiContractsElement(childElement.Name))
                             {
                                 ApiContract.ReadContractsElement(childElement, ApiContracts);
+                            }
+                            else if(ApiContract.IsVersionedContentElement(childElement.Name))
+                            {
+                                bool versionedContent = false;
+                                bool.TryParse(childElement.InnerText, out versionedContent);
+                                this.VersionedContent = versionedContent;
                             }
                             else if (String.Equals(childElement.Name, Elements.DependentPlatform, StringComparison.Ordinal))
                             {

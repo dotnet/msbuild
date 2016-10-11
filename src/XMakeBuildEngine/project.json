@@ -3,7 +3,11 @@
     "System.Collections.Immutable": "1.2.0"
   },
   "frameworks": {
-    "net46": {},
+    "net46": {
+      "dependencies": {
+        "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5"
+      }
+    },
     "netstandard1.5": {
       "dependencies": {
         "NETStandard.Library": "1.6.0",
