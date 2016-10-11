@@ -8,7 +8,7 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "Microsoft.Build.Runtime": "15.1.313-preview5",
+    "Microsoft.Build.Runtime": "15.1.316-preview5",
     "Microsoft.Net.Compilers.netcore": "2.0.0-beta6-60922-08",
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
     "Microsoft.Cci": "4.0.0-rc3-24128-00",
