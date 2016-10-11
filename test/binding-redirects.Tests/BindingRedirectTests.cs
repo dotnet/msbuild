@@ -237,7 +237,7 @@ namespace Microsoft.DotNet.Tests
         public void Tool_Command_Runs_Executable_Dependency_For_App_With_Config()
         {
             var commandResult = new DependencyToolInvokerCommand { WorkingDirectory = _appWithConfigProjectRoot }
-                                        .Execute("desktop-binding-redirects", "net451", "");
+                                        .Execute("desktop-binding-redirects", "net46", "");
             commandResult.Should().Pass();
         }
 
@@ -246,7 +246,7 @@ namespace Microsoft.DotNet.Tests
         {
             var appDirectory = Path.GetDirectoryName(_appWithoutConfigProjectRoot);
             var commandResult = new DependencyToolInvokerCommand { WorkingDirectory = _appWithoutConfigProjectRoot }
-                                        .Execute("desktop-binding-redirects", "net451", "");
+                                        .Execute("desktop-binding-redirects", "net46", "");
             commandResult.Should().Pass();
         }
     }
