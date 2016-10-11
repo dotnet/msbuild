@@ -66,7 +66,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildDependencyFile"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
-          Inputs="$(ProjectLockFile)"
+          Inputs="$(ProjectAssetsFile)"
           Outputs="$(_ProjectDepsFilePath)">
 
     <!-- 
@@ -74,7 +74,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     should be included during 'Build'.  They are only excluded on 'Publish'.
     -->
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
-                      LockFilePath="$(ProjectLockFile)"
+                      AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(_ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
@@ -95,10 +95,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildRuntimeConfigurationFiles"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
-          Inputs="$(ProjectLockFile);$(UserRuntimeConfig)"
+          Inputs="$(ProjectAssetsFile);$(UserRuntimeConfig)"
           Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
 
-    <GenerateRuntimeConfigurationFiles LockFilePath="$(ProjectLockFile)"
+    <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
                                        RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"

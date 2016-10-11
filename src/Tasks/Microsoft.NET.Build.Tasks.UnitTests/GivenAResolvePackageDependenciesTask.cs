@@ -519,7 +519,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             LockFile lockFile = TestLockFiles.CreateLockFile(lockFileContent);
             var task = new ResolvePackageDependencies(lockFile, new MockPackageResolver())
             {
-                ProjectLockFile = lockFile.Path,
+                ProjectAssetsFile = lockFile.Path,
                 ProjectPath = null,
                 ProjectLanguage = projectLanguage // set language
             };
@@ -603,7 +603,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             LockFile lockFile = TestLockFiles.CreateLockFile(lockFileContent);
             var task = new ResolvePackageDependencies(lockFile, new MockPackageResolver())
             {
-                ProjectLockFile = lockFile.Path,
+                ProjectAssetsFile = lockFile.Path,
                 ProjectPath = null,
                 ProjectLanguage = projectLanguage // set language
             };
@@ -723,7 +723,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             var task = new ResolvePackageDependencies(lockFile, resolver)
             {
-                ProjectLockFile = lockFile.Path,
+                ProjectAssetsFile = lockFile.Path,
                 ProjectPath = null,
                 ProjectLanguage = null
             };

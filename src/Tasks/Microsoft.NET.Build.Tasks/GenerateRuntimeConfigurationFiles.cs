@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tasks
     public class GenerateRuntimeConfigurationFiles : Task
     {
         [Required]
-        public string LockFilePath { get; set; }
+        public string AssetsFilePath { get; set; }
 
         [Required]
         public string RuntimeConfigPath { get; set; }
@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public override bool Execute()
         {
-            LockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
+            LockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
 
             WriteRuntimeConfig();
 
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var rawRuntimeOptions = File.ReadAllText(UserRuntimeConfig);
-            
+
             var runtimeOptionsFromProject = JObject.Parse(rawRuntimeOptions);
             foreach (var runtimeOption in runtimeOptionsFromProject)
             {

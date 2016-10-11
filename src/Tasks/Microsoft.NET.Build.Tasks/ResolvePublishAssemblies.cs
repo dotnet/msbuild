@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks
         public string ProjectPath { get; set; }
 
         [Required]
-        public string LockFilePath { get; set; }
+        public string AssetsFilePath { get; set; }
 
         [Required]
         public string TargetFramework { get; set; }
@@ -42,7 +42,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public override bool Execute()
         {
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
+            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             NuGetFramework framework = TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework);
             NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
             IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);

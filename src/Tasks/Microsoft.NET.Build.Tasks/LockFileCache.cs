@@ -52,6 +52,11 @@ namespace Microsoft.NET.Build.Tasks
 
         private LockFile LoadLockFile(string path)
         {
+            if (!File.Exists(path))
+            {
+                throw new Exception($"Assets file '{path}' couldn't be found. Run a NuGet package restore to generate this file.");
+            }
+
             // TODO - https://github.com/dotnet/sdk/issues/18 adapt task logger to Nuget Logger
             return LockFileUtilities.GetLockFile(path, NullLogger.Instance);
         }
