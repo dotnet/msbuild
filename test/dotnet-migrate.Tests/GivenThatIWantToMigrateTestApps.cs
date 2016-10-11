@@ -268,8 +268,28 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
          }
+        
+        [Theory]
+        // https://github.com/dotnet/cli/issues/4313
+        [InlineData("TestDirWithNoProjects", true)]
+        [InlineData("TestDirWithNoProjects", false)]
+        public void It_migrates_no_projects_found(string projectDir, bool useGlobalJson)
+        {
+            // The migrate command should return 1 for failure.
+            const int ExpectedResult = 1;
 
-         private void VerifyMigration(IEnumerable<string> expectedProjects, string rootDir)
+            var projectDirectory = TestAssetsManager.CreateTestInstance(projectDir, callingMethod: "It_migrates_no_projects_found").WithLockFiles().Path;
+            if (useGlobalJson)
+            {
+                MigrateProject(new[] { Path.Combine(projectDirectory, "global.json") }, ExpectedResult);
+            }
+            else
+            {
+                MigrateProject(new[] { projectDirectory }, ExpectedResult);
+            }
+        }
+        
+        private void VerifyMigration(IEnumerable<string> expectedProjects, string rootDir)
          {
              var migratedProjects = Directory.EnumerateFiles(rootDir, "project.json", SearchOption.AllDirectories)
                                              .Where(s => Directory.EnumerateFiles(Path.GetDirectoryName(s), "*.csproj").Count() == 1)
@@ -384,12 +404,12 @@ namespace Microsoft.DotNet.Migration.Tests
             result.Should().Pass();
         }
 
-        private void MigrateProject(string[] migrateArgs)
+        private void MigrateProject(string[] migrateArgs, int expectedResult = 0)
         {
             var result =
                 MigrateCommand.Run(migrateArgs);
 
-            result.Should().Be(0);
+            result.Should().Be(expectedResult);
         }
 
         private void DotnetNew(string projectDirectory, string dotnetNewType)
