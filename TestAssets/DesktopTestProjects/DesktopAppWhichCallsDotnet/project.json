@@ -9,6 +9,15 @@
     "emitEntryPoint": true
   },
   "frameworks": {
-    "net451": {}
+    "net46": {
+      "frameworkAssemblies": {
+        "System.Runtime": {
+          "type": "build"
+        },
+        "System.IO": {
+          "type": "build"
+        }
+      }
+    }
   }
 }

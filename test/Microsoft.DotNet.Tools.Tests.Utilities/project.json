@@ -30,7 +30,7 @@
       "System.Collections.Immutable": "1.2.0-rc2-24022",
       "System.Net.NetworkInformation": "4.1.0-rc2-24022"
     },
-    "net451": {
+    "net46": {
       "frameworkAssemblies": {
         "System.Runtime": {
           "type": "build"

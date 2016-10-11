@@ -86,7 +86,7 @@
       </TestProjects>
 
       <TestProjects Condition=" '%(RelativeDir)' == 'test\binding-redirects.Tests\' ">
-        <Framework>net451</Framework>
+        <Framework>net46</Framework>
       </TestProjects>
       <TestProjects Condition=" '%(RelativeDir)' == 'test\Installer\Microsoft.DotNet.Cli.Msi.Tests\' ">
         <Framework>net46</Framework>

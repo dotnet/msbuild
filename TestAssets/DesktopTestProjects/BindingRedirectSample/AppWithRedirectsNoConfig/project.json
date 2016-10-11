@@ -15,7 +15,7 @@
     "dotnet-desktop-binding-redirects": "1.0.0-*"
   },
   "frameworks": {
-    "net451": {}
+    "net46": {}
   },
   "tools": {
     "dotnet-dependency-tool-invoker": {
