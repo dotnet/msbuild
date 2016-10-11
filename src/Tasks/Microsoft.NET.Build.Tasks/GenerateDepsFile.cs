@@ -15,7 +15,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Generates the $(project).deps.json file.
     /// </summary>
-    public class GenerateDepsFile : Task
+    public class GenerateDepsFile : TaskBase
     {
         [Required]
         public string ProjectPath { get; set; }
@@ -39,12 +39,12 @@ namespace Microsoft.NET.Build.Tasks
 
         [Required]
         public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
-        
+
         public ITaskItem CompilerOptions { get; set; }
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
@@ -65,8 +65,6 @@ namespace Microsoft.NET.Build.Tasks
             {
                 writer.Write(dependencyContext, fileStream);
             }
-
-            return true;
         }
     }
 }

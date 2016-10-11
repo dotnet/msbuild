@@ -35,6 +35,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TaskBase.cs" />
     <Compile Include="PackageReferenceConverter.cs" />
     <Compile Include="NugetContentAssetPreprocessor.cs" />
     <Compile Include="IContentAssetPreprocessor.cs" />

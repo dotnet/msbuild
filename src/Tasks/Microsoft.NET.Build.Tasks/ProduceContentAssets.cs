@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tasks
     /// other filtering on content assets, including whether they match the active 
     /// project language.
     /// </summary>
-    public sealed class ProduceContentAssets : Task
+    public sealed class ProduceContentAssets : TaskBase
     {
         private readonly Dictionary<string, string> _resolvedPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly List<ITaskItem> _contentItems = new List<ITaskItem>();
@@ -119,21 +119,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        public override bool Execute()
-        {
-            try
-            {
-                ExecuteCore();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Log.LogErrorFromException(e, showStackTrace: true);
-                return false;
-            }
-        }
-
-        private void ExecuteCore()
+        protected override void ExecuteCore()
         {
             MapContentFileDefinitions();
             ProcessContentFileInputs();

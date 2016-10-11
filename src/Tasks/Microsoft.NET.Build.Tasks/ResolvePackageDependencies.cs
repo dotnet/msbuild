@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tasks
     /// Raises Nuget LockFile representation to MSBuild items and resolves
     /// assets specified in the lock file.
     /// </summary>
-    public sealed class ResolvePackageDependencies : Task
+    public sealed class ResolvePackageDependencies : TaskBase
     {
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _projectFileDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -155,21 +155,7 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// Raise Nuget LockFile representation to MSBuild items
         /// </summary>
-        public override bool Execute()
-        {
-            try
-            {
-                ExecuteCore();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Log.LogErrorFromException(e, showStackTrace: true);
-                return false;
-            }
-        }
-
-        private void ExecuteCore()
+        protected override void ExecuteCore()
         {
             ReadProjectFileDependencies();
             RaiseLockFileTargets();

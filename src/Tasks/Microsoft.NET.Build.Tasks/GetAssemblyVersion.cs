@@ -8,12 +8,12 @@ using Newtonsoft.Json;
 using NuGet.Versioning;
 using System.Diagnostics;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
     /// Determines the assembly version to use for a given semantic version.
     /// </summary>
-    public class GetAssemblyVersion : Task
+    public class GetAssemblyVersion : TaskBase
     {
         /// <summary>
         /// The nuget version from which to get an assembly version portion.
@@ -27,18 +27,16 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         [Output]
         public string AssemblyVersion { get; set; }
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             // Using try/catch instead of TryParse so that we don't need to maintain our own error message here.
             try
             {
                 AssemblyVersion = NuGet.Versioning.NuGetVersion.Parse(NuGetVersion).Version.ToString();
-                return true;
             }
             catch (ArgumentException ex)
             {
                 Log.LogError(ex.Message);
-                return false;
             }
         }
     }
