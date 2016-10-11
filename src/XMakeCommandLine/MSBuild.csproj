@@ -254,10 +254,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="MSBuild.exe.manifest" />
-    <FilesToSign Include="$(OutDir)\$(AssemblyName)$(TargetExt)">
-      <Authenticode>Microsoft</Authenticode>
-      <StrongName>StrongName</StrongName>
-    </FilesToSign>
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="..\dir.targets" />
