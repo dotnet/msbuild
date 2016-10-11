@@ -92,10 +92,10 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         /// <summary>
-        /// The lock file to process
+        /// The assets file to process
         /// </summary>
         [Required]
-        public string ProjectLockFile
+        public string ProjectAssetsFile
         {
             get; set;
         }
@@ -145,12 +145,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_lockFile == null)
                 {
-                    if (!File.Exists(ProjectLockFile))
-                    {
-                        ReportException($"Lock file {ProjectLockFile} couldn't be found. Run a NuGet package restore to generate this file.");
-                    }
-
-                    _lockFile = new LockFileCache(BuildEngine4).GetLockFile(ProjectLockFile);
+                    _lockFile = new LockFileCache(BuildEngine4).GetLockFile(ProjectAssetsFile);
                 }
 
                 return _lockFile;
@@ -448,7 +443,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string GetAbsolutePathFromProjectRelativePath(string path)
         {
-            return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(ProjectLockFile)), path));
+            return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(ProjectAssetsFile)), path));
         }
 
         private void ReportException(string message)

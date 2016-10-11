@@ -25,22 +25,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       Condition="'$(EnableResolvePackageDependencies)' == ''">true</EnableResolvePackageDependencies>
   </PropertyGroup>
 
-  <!-- Project Lock File -->
-  <PropertyGroup Condition="'$(ProjectLockFile)' == ''">
-    <_ProjectSpecificProjectJsonFile>$(MSBuildProjectName).project.json</_ProjectSpecificProjectJsonFile>
-    <ProjectLockFile Condition="Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/$(MSBuildProjectName).project.lock.json</ProjectLockFile>
-    <ProjectLockFile Condition="!Exists('$(_ProjectSpecificProjectJsonFile)')">$(MSBuildProjectDirectory)/project.lock.json</ProjectLockFile>
-  </PropertyGroup>
-  
-  <!-- For .NET Core projects the lock file will be in the obj folder. NuGet is currently using the presence of the TargetFrameworks property to determine that.
-       This will likely change when PackageReferences for UWP lights up-->
+  <!-- Project Assets File -->
   <PropertyGroup>
-    <ProjectLockFile Condition="'$(TargetFrameworks)' != ''">$(BaseIntermediateOutputPath)/project.assets.json</ProjectLockFile>
+    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == ''">$(BaseIntermediateOutputPath)/project.assets.json</ProjectAssetsFile>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Ensure $(ProjectLockFile) is a full path -->
-    <ProjectLockFile Condition="'$([System.IO.Path]::IsPathRooted($(ProjectLockFile)))' != 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/$(ProjectLockFile)'))</ProjectLockFile>
+    <!-- Ensure $(ProjectAssetsFile) is a full path -->
+    <ProjectAssetsFile Condition="'$([System.IO.Path]::IsPathRooted($(ProjectAssetsFile)))' != 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/$(ProjectAssetsFile)'))</ProjectAssetsFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -121,7 +113,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"
-          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectLockFile)')"
+          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectAssetsFile)')"
           DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
 
   <!--
@@ -145,7 +137,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="RunResolvePackageDependencies">
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
-      ProjectLockFile="$(ProjectLockFile)"
+      ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectLanguage="$(Language)">
 
       <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />

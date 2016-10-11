@@ -221,7 +221,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="ComputePrivateAssetsPackageReferences">
 
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
-                              LockFilePath="$(ProjectLockFile)"
+                              AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)">
@@ -430,7 +430,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
-                      LockFilePath="$(ProjectLockFile)"
+                      AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(_PublishDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
@@ -480,7 +480,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_PublishRuntimeConfigFilePath Condition=" '$(_PublishRuntimeConfigFilePath)' == '' ">$(PublishDir)$(_ProjectRuntimeConfigFileName)</_PublishRuntimeConfigFilePath>
     </PropertyGroup>
 
-    <GenerateRuntimeConfigurationFiles LockFilePath="$(ProjectLockFile)"
+    <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
                                        RuntimeConfigPath="$(_PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />

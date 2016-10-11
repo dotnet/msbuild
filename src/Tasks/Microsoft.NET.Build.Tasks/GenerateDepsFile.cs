@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tasks
         public string ProjectPath { get; set; }
 
         [Required]
-        public string LockFilePath { get; set; }
+        public string AssetsFilePath { get; set; }
 
         [Required]
         public string DepsFilePath { get; set; }
@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public override bool Execute()
         {
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(LockFilePath);
+            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
             SingleProjectInfo mainProject = SingleProjectInfo.Create(ProjectPath, AssemblyName, AssemblyVersion, AssemblySatelliteAssemblies);
             IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
