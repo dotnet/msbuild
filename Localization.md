@@ -11,7 +11,7 @@
 - `Strings.shared.resx` is a shared resource and gets embedded into all msbuild dlls
 - each neutral resource has a directory named `xlf` besides it which contains its localized strings in .xlf format
 - there is one language per xlf
-- the logical name for a resource is: `<Assembly Name>.<Neutral Resx File Name>.resources`. In the ResourceManager this appears as `<Assembly Name>.<Neutral Resx File Name>` (without the trailing `.resources`).
+- the logical name for a resource is: `<Assembly Name>.<Neutral Resx File Name>.resources`. In the ResourceManager this appears as `<Assembly Name>.<Neutral Resx File Name>` (without the trailing `.resources`). For example, the `Microsoft.Build` assembly uses the `Microsoft.Build.Strings.resources` [logical resource name](https://github.com/Microsoft/msbuild/blob/master/src/XMakeBuildEngine/Microsoft.Build.csproj#L659) (the resource file is `Strings.resx`), and its corresponding [ResourceManager](https://github.com/Microsoft/msbuild/blob/master/src/XMakeBuildEngine/Resources/AssemblyResources.cs#L116) uses `Microsoft.Build.Strings`.
 
 ## How to edit a resource
 - if you need to add / remove / update a resource, only do so in the neutral resource. xlf files get automatically updated during localized builds.
