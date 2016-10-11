@@ -63,7 +63,7 @@
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
     <MicroBuildDir>$(ToolPackagesDir)\MicroBuild.Core\$(MicroBuildVersion)\build\</MicroBuildDir>
     <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning\$(GitVersioningVersion)\build\</GitVersioningDir>
-
+    
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
     <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
     <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
@@ -224,7 +224,11 @@
     <!--
       This property is re-created after importing Microsoft.Portable.CSharp.targets.  If you change the value here, also
       update it in Before.Microsoft.Common.targets -->
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
+    <TargetFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == ''">.NETStandard</TargetFrameworkIdentifier>
+    <!--
+      Backup $(TargetFrameworkIdentifier) because it will be statically set by Microsoft.CSharp.Portable.targets and reset in our Before.Microsoft.Common.targets
+    -->
+    <_TargetFrameworkIdentifierBackup Condition="'$(TargetFrameworkIdentifier)' != ''">$(TargetFrameworkIdentifier)</_TargetFrameworkIdentifierBackup>
     <NetCoreSurface>true</NetCoreSurface>
 
     <!-- Setting this to false stops the AppX targets, which aren't supported on .NET Core, from beeing imported -->
@@ -240,7 +244,7 @@
   <PropertyGroup>
     <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
     <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
-    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">.NETStandard,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true'">.NETFramework,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
   </PropertyGroup>
 

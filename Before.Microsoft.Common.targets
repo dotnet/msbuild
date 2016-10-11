@@ -5,7 +5,7 @@
     <!--
       This property is already defined in the root dir.props however importing Microsoft.Portable.CSharp.targets will
       override it.  If you change it here, update it in the root dir.props as well.  -->
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
+    <TargetFrameworkIdentifier Condition="'$(_TargetFrameworkIdentifierBackup)' != '' ">$(_TargetFrameworkIdentifierBackup)</TargetFrameworkIdentifier>
     <!-- This property needs to be cleared -->
     <TargetFrameworkMonikerDisplayName></TargetFrameworkMonikerDisplayName>
   </PropertyGroup>

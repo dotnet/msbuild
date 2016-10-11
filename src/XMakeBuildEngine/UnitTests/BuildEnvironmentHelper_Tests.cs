@@ -13,6 +13,11 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     public class BuildEnvironmentHelper_Tests
     {
+#if FEATURE_RUN_EXE_IN_TESTS
+        private const string MSBuildExeName = "MSBuild.exe";
+#else
+        private const string MSBuildExeName = "MSBuild.dll";
+#endif
         [Fact]
         public void GetExecutablePath()
         {
@@ -22,7 +27,7 @@ namespace Microsoft.Build.Engine.UnitTests
             var msbuildPath = Path.GetDirectoryName(AssemblyUtilities.GetAssemblyLocation(typeof(Project).GetTypeInfo().Assembly));
             Directory.SetCurrentDirectory(msbuildPath);
 
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "msbuild.exe").ToLowerInvariant();
+            string path = Path.Combine(Directory.GetCurrentDirectory(), MSBuildExeName).ToLowerInvariant();
             string configPath = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile.ToLowerInvariant();
             string directoryName = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.ToLowerInvariant();
             string executablePath = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath.ToLowerInvariant();
