@@ -4,7 +4,7 @@
   <PropertyGroup>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />
@@ -13,10 +13,12 @@
   <ItemGroup>
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="Microsoft.NETCore.App">
       <Version>1.0.1</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk">
       <Version>0.0</Version>
     </PackageReference>

@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ResolvedFile(string sourcePath, string destinationSubDirectory)
         {
-            SourcePath = sourcePath;
+            SourcePath = Path.GetFullPath(sourcePath);
             DestinationSubDirectory = destinationSubDirectory;
         }
 

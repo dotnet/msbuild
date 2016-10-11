@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
@@ -28,41 +29,48 @@ namespace Microsoft.NET.Publish.Tests
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
-
-            // Temporarily pass in the TFM to publish until https://github.com/dotnet/sdk/issues/175 is addressed
-            publishCommand
-                .Execute("/p:TargetFramework=netcoreapp1.0")
-                .Should()
-                .Pass();
-
-            var publishDirectory = publishCommand.GetOutputDirectory();
-
-            publishDirectory.Should().HaveFiles(new[] {
-                "TestApp.dll",
-                "TestLibrary.dll",
-                "Newtonsoft.Json.dll"});
-
-            var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
-            // Should have compilation time assemblies
-            refsDirectory.Should().HaveFile("System.IO.dll");
-            // Libraries in which lib==ref should be deduped
-            refsDirectory.Should().NotHaveFile("TestLibrary.dll");
-            refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
-
-            using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
+            foreach (var targetFramework in new[] { "net46", "netcoreapp1.0" })
             {
-                var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+                var publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
 
-                dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" });
-                dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
-                dependencyContext.CompilationOptions.Platform.Should().Be("AnyCPU");
-                dependencyContext.CompilationOptions.Optimize.Should().Be(false);
-                dependencyContext.CompilationOptions.KeyFile.Should().Be("");
-                dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
-                dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
+                if (targetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    continue;
+                }
 
-                dependencyContext.CompileLibraries.Count.Should().Be(116);
+                publishCommand
+                    .Execute($"/p:TargetFramework={targetFramework}")
+                    .Should()
+                    .Pass();
+
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
+
+                publishDirectory.Should().HaveFiles(new[] {
+                    targetFramework == "net46" ? "TestApp.exe" : "TestApp.dll",
+                    "TestLibrary.dll",
+                    "Newtonsoft.Json.dll"});
+
+                var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
+                // Should have compilation time assemblies
+                refsDirectory.Should().HaveFile("System.IO.dll");
+                // Libraries in which lib==ref should be deduped
+                refsDirectory.Should().NotHaveFile("TestLibrary.dll");
+                refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+
+                using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
+                {
+                    var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+
+                    dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" });
+                    dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
+                    dependencyContext.CompilationOptions.Platform.Should().Be("AnyCPU");
+                    dependencyContext.CompilationOptions.Optimize.Should().Be(false);
+                    dependencyContext.CompilationOptions.KeyFile.Should().Be("");
+                    dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
+                    dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
+
+                    dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 51 : 116);
+                }
             }
         }
     }
