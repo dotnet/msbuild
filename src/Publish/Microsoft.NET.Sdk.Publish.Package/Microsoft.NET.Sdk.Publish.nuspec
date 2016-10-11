@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Microsoft.NET.Sdk.Publish</id>
-    <version>1.0.0-alpha-$Date$</version>
+    <version>$WebSdkVersion$</version>
     <title>Microsoft DotNet Publish</title>
     <authors>Microsoft Corporation</authors>
     <owners>Microsoft</owners>

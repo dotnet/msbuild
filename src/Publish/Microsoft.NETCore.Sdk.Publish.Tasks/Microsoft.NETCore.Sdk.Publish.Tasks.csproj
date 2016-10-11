@@ -6,12 +6,12 @@
     <AssemblyName>Microsoft.NETCore.Sdk.Publish.Tasks</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <OutputPath>..\..\bin\Debug\</OutputPath>
-    <IntermediateOutputPath>..\..\obj\Debug\</IntermediateOutputPath>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <IntermediateOutputPath>..\..\..\obj\Debug\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <OutputPath>..\..\bin\Release\</OutputPath>
-    <IntermediateOutputPath>..\..\obj\Release\</IntermediateOutputPath>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <IntermediateOutputPath>..\..\..\obj\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />

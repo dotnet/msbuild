@@ -1,0 +1,156 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.25803.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Package", "src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj", "{800AAAB3-AE22-483C-90A8-E1056CF39D5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Web.Package", "src\Web\Microsoft.NET.Sdk.Web.Package\Microsoft.NET.Sdk.Web.Package.csproj", "{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Targets", "Microsoft.NET.Sdk.Web.ProjectSystem.Targets", "{E363A15F-DFC8-4B97-BE8B-C327C5DB5864}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netstandard1.0", "netstandard1.0", "{F996D326-1716-41E1-901D-893163FBFF85}"
+	ProjectSection(SolutionItems) = preProject
+		src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.props = src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.props
+		src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.targets = src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F2768D36-ABFD-465F-A1F1-8204CA9AFCCB}"
+	ProjectSection(SolutionItems) = preProject
+		dirs.proj = dirs.proj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1CAF6E2F-326F-4E77-B067-6CD22EAE89B6}"
+	ProjectSection(SolutionItems) = preProject
+		tools\Build.cmd = tools\Build.cmd
+		tools\EnsureWebSdkEnv.cmd = tools\EnsureWebSdkEnv.cmd
+		tools\WebSdkEnv.cmd = tools\WebSdkEnv.cmd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EFDD9FA1-29DB-44C6-87E0-399277460376}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Publish", "Publish", "{FBFFA259-5294-4B1E-A82E-A80AEF8A8D35}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{4927120B-89F5-4009-9C8E-43EEFFC566EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Package", "src\Publish\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj", "{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks", "src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj", "{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NETCore.Sdk.Publish.Tasks", "src\Publish\Microsoft.NETCore.Sdk.Publish.Tasks\Microsoft.NETCore.Sdk.Publish.Tasks.csproj", "{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.NET.Sdk.Publish.Targets", "Microsoft.NET.Sdk.Publish.Targets", "{569AAC15-FF3C-49CE-9CFF-AD1628E48057}"
+	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\Microsoft.NET.Sdk.Publish.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\Microsoft.NET.Sdk.Publish.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ComputeTargets", "ComputeTargets", "{DC41414F-10D0-472C-8896-865D2820EEB2}"
+	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Console.ComputeFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Console.ComputeFiles.targets
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Core.ComputeFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Core.ComputeFiles.targets
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.WebApp.ComputeFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.WebApp.ComputeFiles.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CopyTargets", "CopyTargets", "{0C9266F0-6556-40CB-940A-FC10E60C21AD}"
+	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishProfiles", "PublishProfiles", "{5B919156-42CD-44ED-8FA7-FA19E91CF933}"
+	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishProfiles\DefaultProfile.pubxml = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishProfiles\DefaultProfile.pubxml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishTargets", "PublishTargets", "{96277594-64EC-4B7F-B9C3-1A6A5C74D5A1}"
+	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.FileSystem.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.FileSystem.targets
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Kudu.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Kudu.targets
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeploy.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeploy.targets
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeployPackage.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeployPackage.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{3CA45E5E-50F6-40E7-A0EE-250C5E9E72F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Publish", "Publish", "{E537A967-65B7-46F5-8574-01F8C08F385F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks.Tests", "test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj", "{66964EC2-712A-451A-AB4F-33F18D8F54F1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Debug|x86.Build.0 = Debug|Any CPU
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Release|x86.ActiveCfg = Release|Any CPU
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A}.Release|x86.Build.0 = Release|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Debug|x86.Build.0 = Debug|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Release|x86.ActiveCfg = Release|Any CPU
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7}.Release|x86.Build.0 = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Debug|x86.Build.0 = Debug|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|x86.ActiveCfg = Release|Any CPU
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}.Release|x86.Build.0 = Release|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Debug|x86.Build.0 = Debug|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|x86.ActiveCfg = Release|Any CPU
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}.Release|x86.Build.0 = Release|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Debug|x86.Build.0 = Debug|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Release|x86.ActiveCfg = Release|Any CPU
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}.Release|x86.Build.0 = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Debug|x86.Build.0 = Debug|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|x86.ActiveCfg = Release|Any CPU
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{800AAAB3-AE22-483C-90A8-E1056CF39D5A} = {4927120B-89F5-4009-9C8E-43EEFFC566EC}
+		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7} = {4927120B-89F5-4009-9C8E-43EEFFC566EC}
+		{E363A15F-DFC8-4B97-BE8B-C327C5DB5864} = {4927120B-89F5-4009-9C8E-43EEFFC566EC}
+		{F996D326-1716-41E1-901D-893163FBFF85} = {E363A15F-DFC8-4B97-BE8B-C327C5DB5864}
+		{FBFFA259-5294-4B1E-A82E-A80AEF8A8D35} = {EFDD9FA1-29DB-44C6-87E0-399277460376}
+		{4927120B-89F5-4009-9C8E-43EEFFC566EC} = {EFDD9FA1-29DB-44C6-87E0-399277460376}
+		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736} = {FBFFA259-5294-4B1E-A82E-A80AEF8A8D35}
+		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60} = {FBFFA259-5294-4B1E-A82E-A80AEF8A8D35}
+		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F} = {FBFFA259-5294-4B1E-A82E-A80AEF8A8D35}
+		{569AAC15-FF3C-49CE-9CFF-AD1628E48057} = {FBFFA259-5294-4B1E-A82E-A80AEF8A8D35}
+		{DC41414F-10D0-472C-8896-865D2820EEB2} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
+		{0C9266F0-6556-40CB-940A-FC10E60C21AD} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
+		{5B919156-42CD-44ED-8FA7-FA19E91CF933} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
+		{96277594-64EC-4B7F-B9C3-1A6A5C74D5A1} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
+		{E537A967-65B7-46F5-8574-01F8C08F385F} = {3CA45E5E-50F6-40E7-A0EE-250C5E9E72F0}
+		{66964EC2-712A-451A-AB4F-33F18D8F54F1} = {E537A967-65B7-46F5-8574-01F8C08F385F}
+	EndGlobalSection
+EndGlobal
