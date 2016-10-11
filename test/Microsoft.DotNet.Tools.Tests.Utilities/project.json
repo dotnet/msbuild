@@ -2,7 +2,14 @@
   "version": "1.0.0-*",
   "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
   "buildOptions": {
-    "keyFile": "../../tools/Key.snk"
+    "keyFile": "../../tools/Key.snk",
+    "compile": {
+      "include": [
+        "**/*.cs",
+        "../../src/dotnet/DotnetFiles.cs"
+      ]
+    }
+
   },
   "dependencies": {
     "FluentAssertions": "4.0.0",
