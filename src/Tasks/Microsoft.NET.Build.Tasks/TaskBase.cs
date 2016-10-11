@@ -19,9 +19,9 @@ namespace Microsoft.NET.Build.Tasks
             {
                 ExecuteCore();
             }
-            catch (Exception e)
+            catch (ReportUserErrorException e)
             {
-                Log.LogErrorFromException(e, showStackTrace: true);
+                Log.LogErrorFromException(e);
             }
 
             return !Log.HasLoggedErrors;

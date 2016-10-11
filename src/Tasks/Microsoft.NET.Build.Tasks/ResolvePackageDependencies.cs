@@ -402,7 +402,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (string.IsNullOrEmpty(relativeMSBuildProjectPath))
                 {
-                    ReportException($"Your project is consuming assets from the project but no MSBuild project is found in the project.lock.json.");
+                    ReportException($"Your project is consuming assets from the project but no MSBuild project is found in '{ProjectAssetsFile}'");
                 }
 
                 return GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
@@ -434,7 +434,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private void ReportException(string message)
         {
-            throw new Exception(message);
+            throw new ReportUserErrorException(message);
         }
     }
 }
