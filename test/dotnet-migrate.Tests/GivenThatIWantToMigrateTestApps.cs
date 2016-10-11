@@ -271,22 +271,48 @@ namespace Microsoft.DotNet.Migration.Tests
         
         [Theory]
         // https://github.com/dotnet/cli/issues/4313
-        [InlineData("TestDirWithNoProjects", true)]
-        [InlineData("TestDirWithNoProjects", false)]
-        public void It_migrates_no_projects_found(string projectDir, bool useGlobalJson)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Migration_outputs_error_when_no_projects_found(bool useGlobalJson)
         {
-            // The migrate command should return 1 for failure.
-            const int ExpectedResult = 1;
+            var projectDirectory = TestAssetsManager.CreateTestDirectory("Migration_outputs_error_when_no_projects_found");
 
-            var projectDirectory = TestAssetsManager.CreateTestInstance(projectDir, callingMethod: "It_migrates_no_projects_found").WithLockFiles().Path;
+            string argstr = string.Empty;
+            string errorMessage = string.Empty;
+
             if (useGlobalJson)
             {
-                MigrateProject(new[] { Path.Combine(projectDirectory, "global.json") }, ExpectedResult);
+                var globalJsonPath = Path.Combine(projectDirectory.Path, "global.json");
+                using (FileStream fs = File.Create(globalJsonPath))
+                {
+                    using (StreamWriter sw = new StreamWriter(fs))
+                    {
+                        sw.WriteLine("{");
+                        sw.WriteLine("\"projects\": [ \".\" ]");
+                        sw.WriteLine("}");
+                    }
+                }
+
+                argstr = globalJsonPath;
+                errorMessage = "Unable to find any projects in global.json";
             }
             else
             {
-                MigrateProject(new[] { projectDirectory }, ExpectedResult);
+                argstr = projectDirectory.Path;
+                errorMessage = $"No project.json file found in '{projectDirectory.Path}'";
             }
+
+            var result = new TestCommand("dotnet")
+                .WithWorkingDirectory(projectDirectory.Path)
+                .ExecuteWithCapturedOutput($"migrate {argstr}");
+
+            // Expecting an error exit code.
+            result.ExitCode.Should().Be(1);
+
+            // Verify the error messages. Note that debug builds also show the call stack, so we search
+            // for the error strings that should be present (rather than an exact match).
+            result.StdErr.Should().Contain(errorMessage);
+            result.StdErr.Should().Contain("Migration failed.");
         }
         
         private void VerifyMigration(IEnumerable<string> expectedProjects, string rootDir)
@@ -404,12 +430,12 @@ namespace Microsoft.DotNet.Migration.Tests
             result.Should().Pass();
         }
 
-        private void MigrateProject(string[] migrateArgs, int expectedResult = 0)
+        private void MigrateProject(string[] migrateArgs)
         {
             var result =
                 MigrateCommand.Run(migrateArgs);
 
-            result.Should().Be(expectedResult);
+            result.Should().Be(0);
         }
 
         private void DotnetNew(string projectDirectory, string dotnetNewType)
